@@ -68,7 +68,7 @@ fun BottomNavigationBar(
                             ) { onTabSelected(tab) },
                 ) {
                     AsyncImage(
-                     //   modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(32.dp),
                         model = when (tab) {
                             is SearchTab -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
                             is FavoritesTab -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
@@ -81,6 +81,8 @@ fun BottomNavigationBar(
                         colorFilter = ColorFilter.tint(
                             if (isSelected) ColorsDriveBit.BlueRed else MaterialTheme.colorScheme.onSurfaceVariant
                         ),
+                        placeholder = painterResource("search_icon.xml"),
+                        error = painterResource("search_icon.xml"),
                     )
                     Text(
                         text = tab.options.title,
