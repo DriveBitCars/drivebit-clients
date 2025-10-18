@@ -61,7 +61,6 @@ object SearchTab : Tab {
                     ColorsDriveBit.BlueRed
                 )
                 )
-            
             Text(
                 text = "Поиск",
                 style = MaterialTheme.typography.headlineMedium,
