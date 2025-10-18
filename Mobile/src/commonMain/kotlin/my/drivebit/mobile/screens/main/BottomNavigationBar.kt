@@ -1,6 +1,5 @@
 package my.drivebit.mobile.screens.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import my.drivebit.mobile.screens.main.tabs.MoreTab
 import my.drivebit.mobile.screens.main.tabs.SearchTab
 import my.drivebit.mobile.screens.main.tabs.TripsTab
 import my.drivebit.ui.theme.ColorsDriveBit
-import my.drivebit.ui.theme.ColorsDriveBit.Black
 import my.drivebit.ui.theme.DrivebitTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -70,6 +68,7 @@ fun BottomNavigationBar(
                         modifier = Modifier.size(32.dp),
                         painter = tab.options.icon!!,
                         contentDescription = tab.options.title,
+                        tint = if (isSelected) ColorsDriveBit.BlueRed else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = tab.options.title,
