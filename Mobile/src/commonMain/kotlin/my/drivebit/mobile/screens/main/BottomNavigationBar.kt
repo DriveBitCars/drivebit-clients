@@ -16,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.Tab
@@ -28,6 +27,7 @@ import my.drivebit.mobile.screens.main.tabs.SearchTab
 import my.drivebit.mobile.screens.main.tabs.TripsTab
 import my.drivebit.ui.theme.ColorsDriveBit
 import my.drivebit.ui.theme.DrivebitTheme
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -68,7 +68,7 @@ fun BottomNavigationBar(
                             ) { onTabSelected(tab) },
                 ) {
                     AsyncImage(
-                        modifier = Modifier.size(32.dp),
+                     //   modifier = Modifier.size(32.dp),
                         model = when (tab) {
                             is SearchTab -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
                             is FavoritesTab -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
@@ -81,8 +81,6 @@ fun BottomNavigationBar(
                         colorFilter = ColorFilter.tint(
                             if (isSelected) ColorsDriveBit.BlueRed else MaterialTheme.colorScheme.onSurfaceVariant
                         ),
-                        placeholder = painterResource("search_icon.xml"),
-                        error = painterResource("search_icon.xml"),
                     )
                     Text(
                         text = tab.options.title,
