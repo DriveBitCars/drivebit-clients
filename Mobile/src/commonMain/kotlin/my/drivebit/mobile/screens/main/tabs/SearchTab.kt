@@ -1,6 +1,5 @@
 package my.drivebit.mobile.screens.main.tabs
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,13 +61,7 @@ object SearchTab : Tab {
                     ColorsDriveBit.BlueRed
                 )
                 )
-            Image(
-                imageVector = Icons.SearchIcon,
-                contentDescription = "tab.options.title",
-                colorFilter = ColorFilter.tint(
-                    ColorsDriveBit.BlueRed
-                )
-            )
+            
             Text(
                 text = "Поиск",
                 style = MaterialTheme.typography.headlineMedium,

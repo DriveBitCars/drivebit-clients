@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -20,6 +21,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.Tab
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.decode.SvgDecoder
 import my.drivebit.mobile.screens.main.tabs.FavoritesTab
 import my.drivebit.mobile.screens.main.tabs.InboxTab
 import my.drivebit.mobile.screens.main.tabs.MoreTab
@@ -69,7 +72,10 @@ fun BottomNavigationBar(
                 ) {
                     AsyncImage(
                         modifier = Modifier.size(32.dp),
-                        model = "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg",
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data("https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg")
+                            .decoderFactory(SvgDecoder.Factory())
+                            .build(),
                         contentDescription = tab.options.title,
                         colorFilter = ColorFilter.tint(
                             if (isSelected) ColorsDriveBit.BlueRed else MaterialTheme.colorScheme.onSurfaceVariant
