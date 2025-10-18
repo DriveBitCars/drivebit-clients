@@ -40,7 +40,6 @@ kotlin {
             implementation(libs.koin.core)
 
             implementation("io.coil-kt.coil3:coil-compose:3.0.3")
-            implementation("io.coil-kt.coil3:coil-svg:3.0.3")
 
             implementation(project(":Splash"))
             implementation(project(":Storage"))
