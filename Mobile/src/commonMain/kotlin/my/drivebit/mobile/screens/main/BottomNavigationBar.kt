@@ -24,8 +24,8 @@ import my.drivebit.mobile.screens.main.tabs.InboxTab
 import my.drivebit.mobile.screens.main.tabs.MoreTab
 import my.drivebit.mobile.screens.main.tabs.SearchTab
 import my.drivebit.mobile.screens.main.tabs.TripsTab
+import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.ColorsDriveBit
-import my.drivebit.ui.theme.ColorsDriveBit.Black
 import my.drivebit.ui.theme.DrivebitTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -68,8 +68,16 @@ fun BottomNavigationBar(
                 ) {
                     Icon(
                         modifier = Modifier.size(32.dp),
-                        painter = tab.options.icon!!,
+                        imageVector = when (tab) {
+                            is SearchTab -> Icons.SearchIcon
+                            is FavoritesTab -> Icons.FavoriteIcon
+                            is TripsTab -> Icons.TripIcon
+                            is InboxTab -> Icons.InboxIcon
+                            is MoreTab -> Icons.MoreIcon
+                            else -> Icons.SearchIcon
+                        },
                         contentDescription = tab.options.title,
+                        tint = if (isSelected) ColorsDriveBit.BlueRed else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = tab.options.title,
