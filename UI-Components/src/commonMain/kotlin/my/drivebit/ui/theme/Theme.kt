@@ -34,12 +34,12 @@ private val DarkColorScheme: ColorScheme =
 private val LightColorScheme: ColorScheme =
     lightColorScheme(
         primary = ColorsDriveBit.Blue,
-        onPrimary = ColorsDriveBit.White,
-        background = ColorsDriveBit.White,
-        surface = ColorsDriveBit.White,
+        onPrimary = ColorsDriveBit.Red,
+        background = ColorsDriveBit.Red,
+        surface = ColorsDriveBit.Red,
         onSurface = ColorsDriveBit.Black,
         surfaceVariant = ColorsDriveBit.Gray300,
-        surfaceContainer = ColorsDriveBit.White,
+        surfaceContainer = ColorsDriveBit.Red,
         outline = ColorsDriveBit.Blue,
     )
 
