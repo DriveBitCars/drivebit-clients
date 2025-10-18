@@ -9,15 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.Tab
@@ -26,6 +24,7 @@ import my.drivebit.mobile.screens.main.tabs.InboxTab
 import my.drivebit.mobile.screens.main.tabs.MoreTab
 import my.drivebit.mobile.screens.main.tabs.SearchTab
 import my.drivebit.mobile.screens.main.tabs.TripsTab
+import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.ColorsDriveBit
 import my.drivebit.ui.theme.DrivebitTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -67,22 +66,18 @@ fun BottomNavigationBar(
                                 indication = null,
                             ) { onTabSelected(tab) },
                 ) {
-                    Image(
+                    Icon(
                         modifier = Modifier.size(32.dp),
-                        painter = painterResource(
-                            when (tab) {
-                                is SearchTab -> "search_icon.xml"
-                                is FavoritesTab -> "favorite_icon.xml"
-                                is TripsTab -> "trip_icon.xml"
-                                is InboxTab -> "inbox_icon.xml"
-                                is MoreTab -> "more_icon.xml"
-                                else -> "search_icon.xml"
-                            }
-                        ),
+                        imageVector = when (tab) {
+                            is SearchTab -> Icons.SearchIcon
+                            is FavoritesTab -> Icons.FavoriteIcon
+                            is TripsTab -> Icons.TripIcon
+                            is InboxTab -> Icons.InboxIcon
+                            is MoreTab -> Icons.MoreIcon
+                            else -> Icons.SearchIcon
+                        },
                         contentDescription = tab.options.title,
-                        colorFilter = ColorFilter.tint(
-                            if (isSelected) ColorsDriveBit.BlueRed else MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
+                        tint = if (isSelected) ColorsDriveBit.BlueRed else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = tab.options.title,
