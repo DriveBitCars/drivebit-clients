@@ -41,6 +41,8 @@ kotlin {
 
             implementation("io.coil-kt.coil3:coil-compose:3.0.3")
             implementation("io.coil-kt.coil3:coil-svg:3.0.3")
+            implementation("io.ktor:ktor-client-core:2.3.7")
+            implementation("io.ktor:ktor-client-cio:2.3.7")
 
             implementation(project(":Splash"))
             implementation(project(":Storage"))
