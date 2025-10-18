@@ -43,10 +43,22 @@ kotlin {
             implementation(project(":Storage"))
             implementation(project(":Auth"))
             implementation(project(":UI-Components"))
+
+            implementation(libs.coil.compose)
+            implementation(libs.coil.compose.svg)
+            implementation(libs.coil.network.ktor)
         }
 
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
+
+            // Ktor client dependency required for Coil
+            implementation(libs.ktor.client.android)
+        }
+
+        appleMain.dependencies {
+            // Ktor client dependency required for iOS
+            implementation(libs.ktor.client.darwin)
         }
     }
 }

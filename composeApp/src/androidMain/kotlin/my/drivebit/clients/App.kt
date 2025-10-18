@@ -7,9 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.Navigator
-import my.drivebit.mobile.di.mobileModule
+import my.drivebit.auth.di.authModule
 import my.drivebit.mobile.screens.main.MainScreen
 import my.drivebit.shared.storage.di.storageModule
+import my.drivebit.splash.di.splashModule
 import my.drivebit.ui.theme.DrivebitTheme
 import my.drivebit.viewmodels.di.commonViewModelsModule
 import org.koin.compose.KoinApplication
@@ -25,9 +26,10 @@ actual fun App() {
                 module {
                     single<Context> { context }
                 },
+                splashModule,
                 storageModule,
                 commonViewModelsModule,
-                mobileModule,
+                authModule,
             )
         }) {
             Box(modifier = Modifier.fillMaxSize()) {

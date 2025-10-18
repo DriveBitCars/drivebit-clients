@@ -20,25 +20,26 @@ object ColorsDriveBit {
 }
 
 private val DarkColorScheme: ColorScheme =
+    darkColorScheme(
+        primary = ColorsDriveBit.Blue,
+        onPrimary = ColorsDriveBit.White,
+        background = ColorsDriveBit.Black,
+        surface = ColorsDriveBit.Black,
+        onSurface = ColorsDriveBit.White,
+        surfaceVariant = ColorsDriveBit.Gray300,
+        surfaceContainer = ColorsDriveBit.Black,
+        outline = ColorsDriveBit.Blue,
+    )
+
+private val LightColorScheme: ColorScheme =
     lightColorScheme(
-        primary = ColorsDriveBit.Black,
+        primary = ColorsDriveBit.Blue,
         onPrimary = ColorsDriveBit.White,
         background = ColorsDriveBit.White,
         surface = ColorsDriveBit.White,
         onSurface = ColorsDriveBit.Black,
         surfaceVariant = ColorsDriveBit.Gray300,
         surfaceContainer = ColorsDriveBit.White,
-        outline = ColorsDriveBit.Blue,
-    )
-
-private val LightColorScheme: ColorScheme =
-    darkColorScheme(
-        primary = ColorsDriveBit.White,
-        onPrimary = ColorsDriveBit.Black,
-        background = ColorsDriveBit.Black,
-        surface = ColorsDriveBit.Black,
-        surfaceVariant = ColorsDriveBit.Gray300,
-        surfaceContainer = ColorsDriveBit.Black,
         outline = ColorsDriveBit.Blue,
     )
 
