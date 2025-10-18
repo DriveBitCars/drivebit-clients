@@ -16,11 +16,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.Tab
-import coil3.compose.AsyncImage
-import coil3.compose.rememberAsyncImagePainter
 import my.drivebit.mobile.screens.main.tabs.FavoritesTab
 import my.drivebit.mobile.screens.main.tabs.InboxTab
 import my.drivebit.mobile.screens.main.tabs.MoreTab
@@ -69,14 +69,14 @@ fun BottomNavigationBar(
                 ) {
                     Image(
                         modifier = Modifier.size(32.dp),
-                        painter = rememberAsyncImagePainter(
-                            model = when (tab) {
-                                is SearchTab -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
-                                is FavoritesTab -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
-                                is TripsTab -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
-                                is InboxTab -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
-                                is MoreTab -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
-                                else -> "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg"
+                        painter = painterResource(
+                            when (tab) {
+                                is SearchTab -> "search_icon.xml"
+                                is FavoritesTab -> "favorite_icon.xml"
+                                is TripsTab -> "trip_icon.xml"
+                                is InboxTab -> "inbox_icon.xml"
+                                is MoreTab -> "more_icon.xml"
+                                else -> "search_icon.xml"
                             }
                         ),
                         contentDescription = tab.options.title,
