@@ -39,6 +39,8 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.core)
 
+            implementation("io.coil-kt.coil3:coil-compose:3.0.3")
+
             implementation(project(":Splash"))
             implementation(project(":Storage"))
             implementation(project(":Auth"))
