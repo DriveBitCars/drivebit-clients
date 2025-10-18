@@ -27,6 +27,7 @@ import my.drivebit.mobile.screens.main.tabs.SearchTab
 import my.drivebit.mobile.screens.main.tabs.TripsTab
 import my.drivebit.ui.theme.ColorsDriveBit
 import my.drivebit.ui.theme.DrivebitTheme
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -73,6 +74,8 @@ fun BottomNavigationBar(
                         colorFilter = ColorFilter.tint(
                             if (isSelected) ColorsDriveBit.BlueRed else MaterialTheme.colorScheme.onSurfaceVariant
                         ),
+                        placeholder = painterResource("search_icon.xml"),
+                        error = painterResource("search_icon.xml"),
                     )
                     Text(
                         text = tab.options.title,
