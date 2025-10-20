@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.ktlint) apply true
     alias(libs.plugins.kotzilla) apply true
-    id("io.gitlab.arturbosch.detekt") version "1.23.4" apply true
+    id("io.gitlab.arturbosch.detekt") version "1.23.8" apply true
 }
 
 private val ktLintConfig: org.jlleitschuh.gradle.ktlint.KtlintExtension.() -> Unit = {
