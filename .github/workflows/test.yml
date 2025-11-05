@@ -171,8 +171,8 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
 
-    - name: Upgrade yarn lock (if needed)
-      run: ./gradlew kotlinUpgradeYarnLock --no-daemon || true
+    - name: Update yarn lock
+      run: ./gradlew kotlinUpgradeYarnLock kotlinStoreYarnLock --no-daemon || true
 
     - name: Check ${{ matrix.module }}
       run: ./gradlew :${{ matrix.module }}:check --no-daemon --stacktrace

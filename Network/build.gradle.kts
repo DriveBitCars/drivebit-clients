@@ -49,6 +49,7 @@ kotlin {
         }
 
         jsMain.dependencies {
+            implementation(libs.ktor.client.js)
         }
 
         commonTest.dependencies {
