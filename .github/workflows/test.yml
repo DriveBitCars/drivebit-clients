@@ -2,9 +2,9 @@ name: Fast Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ trunk ]
   push:
-    branches: [ main ]
+    branches: [ trunk ]
 
 jobs:
   # Супер-быстрая проверка (только самое важное)
@@ -131,6 +131,7 @@ jobs:
           - Auth
           - UI-Components
           - CommonViewModels
+          - Network
           - composeApp
 
     steps:
