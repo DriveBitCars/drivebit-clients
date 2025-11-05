@@ -66,6 +66,7 @@ coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.re
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-java = { group = "io.ktor", name = "ktor-client-java", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 
 # Ktor core for REST API
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }

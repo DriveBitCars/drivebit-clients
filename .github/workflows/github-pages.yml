@@ -54,8 +54,6 @@ jobs:
         # Check if build directory exists
         if [ ! -d "composeApp/build/dist/js/productionExecutable" ]; then
           echo "❌ Build directory not found!"
-          echo "📁 Available directories:"
-          find composeApp/build -type d 2>/dev/null | head -10 || echo "No build directory found"
           exit 1
         fi
 
@@ -76,8 +74,6 @@ jobs:
         # Verify index.html exists
         if [ ! -f "dist/index.html" ]; then
           echo "❌ index.html not found in dist!"
-          echo "📁 Files in dist:"
-          ls -la dist/ || echo "Dist directory is empty"
           exit 1
         fi
 
