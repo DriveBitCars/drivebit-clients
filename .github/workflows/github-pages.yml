@@ -5,14 +5,13 @@ on:
     branches: [ trunk ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -45,18 +44,26 @@ jobs:
     - name: Build JS distribution
       run: |
         echo "🔨 Building JS distribution..."
-        ./gradlew :composeApp:jsBrowserDistribution --no-daemon
+        ./gradlew :composeApp:jsBrowserDistribution --no-daemon --stacktrace || exit 1
         echo "✅ Build completed"
 
     - name: Prepare dist directory
       run: |
         echo "📦 Preparing dist directory..."
 
+        # Check if build directory exists
+        if [ ! -d "composeApp/build/dist/js/productionExecutable" ]; then
+          echo "❌ Build directory not found!"
+          echo "📁 Available directories:"
+          find composeApp/build -type d 2>/dev/null | head -10 || echo "No build directory found"
+          exit 1
+        fi
+
         # Create dist directory
         mkdir -p dist
 
         # Copy built files
-        cp -r composeApp/build/dist/js/productionExecutable/* dist/
+        cp -r composeApp/build/dist/js/productionExecutable/* dist/ || exit 1
 
         if [ -d "images" ]; then
           cp -r images dist/
@@ -65,6 +72,14 @@ jobs:
 
         # Add .nojekyll
         touch dist/.nojekyll
+
+        # Verify index.html exists
+        if [ ! -f "dist/index.html" ]; then
+          echo "❌ index.html not found in dist!"
+          echo "📁 Files in dist:"
+          ls -la dist/ || echo "Dist directory is empty"
+          exit 1
+        fi
 
         echo "📁 Dist files:"
         ls -la dist/
