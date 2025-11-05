@@ -10,10 +10,13 @@ kotlin {
         publishLibraryVariants("release", "debug")
     }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    ).forEach { iosTarget ->
+    val iosTargets =
+        listOf(
+            iosArm64(),
+            iosSimulatorArm64(),
+        )
+
+    iosTargets.forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Network"
             isStatic = true
