@@ -6,8 +6,8 @@ import org.koin.dsl.module
 
 /**
  * Network module for Koin DI
- * API Base URL: http://82.146.43.206:5000/api
- * API Documentation: http://82.146.43.206:5000/api/docs
+ * API Base URL: https://api.drivebit.my/api
+ * API Documentation: https://api.drivebit.my:5000/swagger
  */
 val networkModule =
     module {
@@ -18,7 +18,7 @@ val networkModule =
         single {
             ApiClient(
                 httpClient = get(),
-                baseUrl = "http://82.146.43.206:5000/api",
+                baseUrl = "https://api.drivebit.my/api",
             )
         }
     }

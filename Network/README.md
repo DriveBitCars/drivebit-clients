@@ -4,8 +4,8 @@
 
 ## API Configuration
 
-- **Base URL**: `http://82.146.43.206:5000/api`
-- **API Documentation**: [http://82.146.43.206:5000/api/docs](http://82.146.43.206:5000/api/docs)
+- **Base URL**: `https://api.drivebit.my/api`
+- **API Documentation**: [https://api.drivebit.my:5000/swagger](https://api.drivebit.my:5000/swagger)
 
 ## Структура
 
