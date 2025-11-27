@@ -9,7 +9,7 @@ import org.jetbrains.compose.web.dom.Img
 @Composable
 fun Logo() {
     Img(
-        src = "https://antonbutov.github.io/drivebit-clients/images/logos/turo_logo.svg",
+        src = "images/logos/turo_logo.svg",
         alt = "Drive bit Logo",
         attrs = {
             style {

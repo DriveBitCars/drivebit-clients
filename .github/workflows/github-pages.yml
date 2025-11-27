@@ -57,13 +57,8 @@ jobs:
         # Create dist directory
         mkdir -p dist
 
-        # Copy built files
+        # Copy built files (includes resources from jsMain/resources automatically)
         cp -r composeApp/build/dist/js/productionExecutable/* dist/ || exit 1
-
-        if [ -d "images" ]; then
-          cp -r images dist/
-          echo "✅ Copied images"
-        fi
 
         # Add .nojekyll
         touch dist/.nojekyll
@@ -76,6 +71,19 @@ jobs:
 
         echo "📁 Dist files:"
         ls -la dist/
+        
+        # Verify images are included
+        if [ -d "dist/images" ]; then
+          echo "✅ Images directory found"
+          echo "📸 Images count: $(find dist/images -type f | wc -l | tr -d ' ') files"
+          if [ -f "dist/images/logos/turo_logo.svg" ]; then
+            echo "✅ turo_logo.svg found"
+          else
+            echo "⚠️  turo_logo.svg not found!"
+          fi
+        else
+          echo "⚠️  Images directory not found!"
+        fi
 
     - name: Setup Pages
       uses: actions/configure-pages@v5

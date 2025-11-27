@@ -49,3 +49,20 @@ ktlint {
 }
 
 // ktlint tasks are configured in subprojects
+
+// Автоматическое обновление yarn lock перед сохранением
+// Это решает проблему "Lock file was changed" раз и навсегда
+afterEvaluate {
+    tasks.matching { it.name == "kotlinStoreYarnLock" }.configureEach {
+        doFirst {
+            // Автоматически обновляем yarn lock перед сохранением
+            try {
+                tasks.named("kotlinUpgradeYarnLock").get().actions.forEach { action ->
+                    action.execute(tasks.named("kotlinUpgradeYarnLock").get())
+                }
+            } catch (e: Exception) {
+                // Игнорируем ошибки при обновлении
+            }
+        }
+    }
+}

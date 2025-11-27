@@ -161,7 +161,8 @@ ktlint {
     }
 }
 
-// Копирование статических ресурсов (изображений)
+// Копирование статических ресурсов (изображений) из корня проекта для обратной совместимости
+// Основные изображения теперь в composeApp/src/jsMain/resources/images
 tasks.register<Copy>("copyStaticResources") {
     from("${rootProject.projectDir}/images")
     into("$buildDir/dist/js/productionExecutable/images")
