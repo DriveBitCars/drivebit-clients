@@ -136,7 +136,8 @@ class UserTest {
                 {
                     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                     "phone": "+9876543210",
-                    "firstName": "Jane"
+                    "firstName": "Jane",
+                    "createdAt": ""
                 }
                 """.trimIndent()
 
@@ -278,7 +279,8 @@ class UserTest {
             val successResponse =
                 """
                 {
-                    "id": "test-id"
+                    "id": "test-id",
+                    "createdAt": ""
                 }
                 """.trimIndent()
 
@@ -303,6 +305,6 @@ class UserTest {
             val result = user.userGet()
 
             assertNotNull(result)
-            assertEquals(null, result.createdAt)
+            assertEquals("", result.createdAt)
         }
 }

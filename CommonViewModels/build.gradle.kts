@@ -27,6 +27,7 @@ kotlin {
         commonMain.dependencies {
             implementation(kotlin("stdlib"))
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
             implementation(project(":Storage"))
             implementation(project(":Network"))
             implementation(libs.koin.core)
