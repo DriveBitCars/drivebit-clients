@@ -77,9 +77,7 @@ fun appContent() {
         val selectedFilter = filters.find { it.title == selected }
         selectedFilter?.let { filter ->
             FilterBackgroundImage(
-                backgroundIconUrl =
-                    "https://antonbutov.github.io/drivebit-clients/" +
-                        "images/searchbackground/car${filter.backgroundIcon}.jpg",
+                backgroundIconUrl = "images/searchbackground/car${filter.backgroundIcon}.jpg",
             )
         }
 

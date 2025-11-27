@@ -100,4 +100,4 @@ jobs:
     - name: Success notification
       run: |
         echo "✅ Successfully deployed to gh-pages branch!"
-        echo "🌐 Your site will be available at: https://antonbutov.github.io/drivebit-clients/"
+        echo "🌐 Your site will be available at: https://drivebitcars.github.io/drivebit-clients/"
