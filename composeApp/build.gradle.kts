@@ -30,6 +30,15 @@ kotlin {
             commonWebpackConfig {
                 outputFileName = "composeApp.js"
             }
+            runTask {
+                val customPort = System.getenv("PORT")?.toIntOrNull()
+                if (customPort != null) {
+                    devServerProperty = org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.DevServer(
+                        port = customPort,
+                        open = false
+                    )
+                }
+            }
         }
         binaries.executable()
     }
