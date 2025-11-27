@@ -62,6 +62,9 @@ jobs:
 
         # Add .nojekyll
         touch dist/.nojekyll
+        
+        # Add CNAME file for custom domain
+        echo "dev.drivebit.my" > dist/CNAME
 
         # Verify index.html exists
         if [ ! -f "dist/index.html" ]; then
