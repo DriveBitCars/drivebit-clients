@@ -29,8 +29,14 @@ async function checkWebServer(port = 8080) {
     console.log(`\n📄 Первые 200 символов содержимого:`);
     console.log(bodyText.substring(0, 200));
     
-    // Делаем скриншот
-    const screenshotPath = 'screenshot.png';
+    // Делаем скриншот в директории screenshots
+    const fs = require('fs');
+    const screenshotsDir = 'screenshots';
+    if (!fs.existsSync(screenshotsDir)) {
+      fs.mkdirSync(screenshotsDir, { recursive: true });
+    }
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const screenshotPath = `${screenshotsDir}/screenshot-${timestamp}.png`;
     await page.screenshot({ path: screenshotPath, fullPage: true });
     console.log(`\n📸 Скриншот сохранен: ${screenshotPath}`);
     
