@@ -67,7 +67,7 @@ fun bottomNavigationBar(
                 ) {
                     AsyncImage(
                         modifier = Modifier.size(32.dp),
-                        model = "https://antonbutov.github.io/drivebit-clients/images/filter-main/car.svg",
+                        model = "images/filter-main/car.svg",
                         contentDescription = tab.options.title,
                         colorFilter =
                             ColorFilter.tint(
