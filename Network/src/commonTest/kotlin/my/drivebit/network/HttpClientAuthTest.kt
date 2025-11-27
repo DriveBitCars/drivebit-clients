@@ -13,47 +13,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
-import my.drivebit.network.services.AccessTokenDTO
-import my.drivebit.network.services.CreateNewTokensResponse
-import my.drivebit.network.services.RefreshTokenDTO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import my.drivebit.network.services.Auth as AuthService
-
-class MockAuthForHttpClientTest : AuthService {
-    var shouldThrowError = false
-    var errorMessage = "Refresh failed"
-    var refreshCallCount = 0
-
-    override suspend fun createOtp(login: String) = throw NotImplementedError()
-
-    override suspend fun verifyOtp(
-        identifier: String,
-        code: String,
-    ) = throw NotImplementedError()
-
-    override suspend fun createTokens(refreshToken: String): CreateNewTokensResponse {
-        refreshCallCount++
-        if (shouldThrowError) {
-            throw Exception(errorMessage)
-        }
-        return CreateNewTokensResponse(
-            accessToken =
-                AccessTokenDTO(
-                    token = "new-access-token-$refreshCallCount",
-                    expiresAt = "2025-12-02T16:00:00Z",
-                ),
-            refreshToken =
-                RefreshTokenDTO(
-                    token = "new-refresh-token-$refreshCallCount",
-                    userId = "user-123",
-                    expiresAt = "2025-12-09T16:00:00Z",
-                    createdAt = "2025-12-02T15:00:00Z",
-                ),
-        )
-    }
-}
 
 class HttpClientAuthTest {
     @Test
@@ -71,7 +33,7 @@ class HttpClientAuthTest {
                     )
                 }
 
-            val mockAuth = MockAuthForHttpClientTest()
+            val mockAuth = MockAuthForTest()
             var savedAccessToken: String? = null
             var savedRefreshToken: String? = null
 
@@ -134,7 +96,7 @@ class HttpClientAuthTest {
                     }
                 }
 
-            val mockAuth = MockAuthForHttpClientTest()
+            val mockAuth = MockAuthForTest()
             var savedAccessToken: String? = null
             var savedRefreshToken: String? = null
 
@@ -202,7 +164,7 @@ class HttpClientAuthTest {
                 }
 
             val mockAuth =
-                MockAuthForHttpClientTest().apply {
+                MockAuthForTest().apply {
                     shouldThrowError = true
                 }
 

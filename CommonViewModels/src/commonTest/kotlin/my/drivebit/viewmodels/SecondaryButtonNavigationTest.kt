@@ -6,6 +6,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import my.drivebit.utils.EmailInputValidator
+import my.drivebit.utils.EmailValidator
+import my.drivebit.utils.PhoneInputValidator
+import my.drivebit.utils.PhoneValidator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

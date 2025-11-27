@@ -1,4 +1,4 @@
-package my.drivebit.viewmodels
+package my.drivebit.utils
 
 class EmailValidator : Validator {
     private val emailRegex =

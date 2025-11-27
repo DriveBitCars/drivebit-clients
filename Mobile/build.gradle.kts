@@ -45,6 +45,7 @@ kotlin {
             implementation(project(":UI-Components"))
             implementation(project(":CommonViewModels"))
             implementation(project(":Network"))
+            implementation(project(":Utils"))
 
             implementation(libs.coil.compose)
             implementation(libs.coil.compose.svg)

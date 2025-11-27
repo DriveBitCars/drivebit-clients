@@ -1,11 +1,12 @@
-package my.drivebit.viewmodels
+package my.drivebit.utils
 
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.assertFailsWith
 
 class DateMappersTest {
     @Test
@@ -16,10 +17,10 @@ class DateMappersTest {
             Instant
                 .parse(iso8601String)
                 .toLocalDateTime(TimeZone.currentSystemDefault())
-        val expectedString = "${expected.dayOfMonth.toString().padStart(
+        val expectedString = "${expected.day.toString().padStart(
             2,
             '0',
-        )}.${expected.monthNumber.toString().padStart(2, '0')}.${expected.year}"
+        )}.${expected.month.number.toString().padStart(2, '0')}.${expected.year}"
         assertEquals(expectedString, result)
     }
 
@@ -31,10 +32,10 @@ class DateMappersTest {
             Instant
                 .parse(iso8601String)
                 .toLocalDateTime(TimeZone.currentSystemDefault())
-        val expectedString = "${expected.dayOfMonth.toString().padStart(
+        val expectedString = "${expected.day.toString().padStart(
             2,
             '0',
-        )}.${expected.monthNumber.toString().padStart(2, '0')}.${expected.year}"
+        )}.${expected.month.number.toString().padStart(2, '0')}.${expected.year}"
         assertEquals(expectedString, result)
     }
 
@@ -46,23 +47,18 @@ class DateMappersTest {
             Instant
                 .parse(iso8601String)
                 .toLocalDateTime(TimeZone.currentSystemDefault())
-        val expectedString = "${expected.dayOfMonth.toString().padStart(
+        val expectedString = "${expected.day.toString().padStart(
             2,
             '0',
-        )}.${expected.monthNumber.toString().padStart(2, '0')}.${expected.year}"
+        )}.${expected.month.number.toString().padStart(2, '0')}.${expected.year}"
         assertEquals(expectedString, result)
     }
 
     @Test
-    fun `mapIso8601ToDateString should return null for null input`() {
-        val result = mapIso8601ToDateString(null)
-        assertNull(result)
-    }
-
-    @Test
-    fun `mapIso8601ToDateString should return null for invalid format`() {
-        val result = mapIso8601ToDateString("invalid-date")
-        assertNull(result)
+    fun `mapIso8601ToDateString should throw exception for invalid format`() {
+        assertFailsWith<IllegalArgumentException> {
+            mapIso8601ToDateString("invalid-date")
+        }
     }
 
     @Test
@@ -111,14 +107,37 @@ class DateMappersTest {
     }
 
     @Test
-    fun `mapIso8601ToTimeString should return null for null input`() {
-        val result = mapIso8601ToTimeString(null)
-        assertNull(result)
+    fun `mapIso8601ToTimeString should throw exception for invalid format`() {
+        assertFailsWith<IllegalArgumentException> {
+            mapIso8601ToTimeString("invalid-date")
+        }
     }
 
     @Test
-    fun `mapIso8601ToTimeString should return null for invalid format`() {
-        val result = mapIso8601ToTimeString("invalid-date")
-        assertNull(result)
+    fun `mapIso8601ToMonthYearString should format date correctly`() {
+        val iso8601String = "2025-12-02T14:26:55.121463Z"
+        val result = mapIso8601ToMonthYearString(iso8601String)
+        assertEquals("декабрь 2025", result)
+    }
+
+    @Test
+    fun `mapIso8601ToMonthYearString should format date for January`() {
+        val iso8601String = "2023-01-15T10:30:00Z"
+        val result = mapIso8601ToMonthYearString(iso8601String)
+        assertEquals("январь 2023", result)
+    }
+
+    @Test
+    fun `mapIso8601ToMonthYearString should format date for September`() {
+        val iso8601String = "2023-09-21T10:00:00.000Z"
+        val result = mapIso8601ToMonthYearString(iso8601String)
+        assertEquals("сентябрь 2023", result)
+    }
+
+    @Test
+    fun `mapIso8601ToMonthYearString should throw exception for invalid format`() {
+        assertFailsWith<IllegalArgumentException> {
+            mapIso8601ToMonthYearString("invalid-date")
+        }
     }
 }

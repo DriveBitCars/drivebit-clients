@@ -26,7 +26,7 @@
 ### Шаг 2: Загрузка данных профиля
 1. `ProfileViewModel` создается через DI (Koin)
 2. В `init` блоке автоматически вызывается `loadProfile()`
-3. `ProfileViewModel` делает запрос к `/User/user-get` через `UserService`
+3. `ProfileViewModel` делает запрос к `/User/user` через `UserService`
 4. Запрос включает Bearer токен из `Storage` через `AuthInterceptorPlugin`
 
 ### Шаг 3: Состояния UI

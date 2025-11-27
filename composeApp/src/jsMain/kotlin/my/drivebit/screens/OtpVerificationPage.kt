@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.document
-import kotlinx.browser.window
 import my.drivebit.components.AppContainer
 import my.drivebit.components.Logo
 import my.drivebit.design.CSSColors
@@ -15,6 +14,7 @@ import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.Auth
 import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.OtpVerificationState
 import my.drivebit.viewmodels.OtpVerificationViewModel
 import org.jetbrains.compose.web.css.*
@@ -32,13 +32,7 @@ fun OtpVerificationPage() {
     val storage: Storage = koinInject()
     val identifier =
         remember {
-            val params =
-                window.location.search
-                    .substring(1)
-                    .split("&")
-            params.find { it.startsWith("identifier=") }?.substringAfter("identifier=")?.let {
-                js("decodeURIComponent")(it) as String
-            } ?: ""
+            getUrlParameter("identifier")
         }
 
     val viewModel =

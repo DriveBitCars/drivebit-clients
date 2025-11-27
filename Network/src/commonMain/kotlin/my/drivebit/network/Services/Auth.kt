@@ -74,14 +74,30 @@ class AuthImpl(
 ) : Auth {
     override suspend fun createOtp(login: String): CreateOtpResponse {
         val url = "${DEFAULT_BASE_URL}Auth/create-otp"
-        val response =
-            httpClient
-                .post(url) {
-                    contentType(ContentType.Application.Json)
-                    setBody(CreateOtpRequest(login = login))
-                }
+        println("📡 [AuthService] createOtp called")
+        println("   - URL: $url")
+        println("   - Login: $login")
 
-        return response.parseResponse()
+        try {
+            val response =
+                httpClient
+                    .post(url) {
+                        contentType(ContentType.Application.Json)
+                        setBody(CreateOtpRequest(login = login))
+                    }
+
+            println("📡 [AuthService] createOtp response received")
+            val result: CreateOtpResponse = response.parseResponse()
+            println("📡 [AuthService] createOtp successful")
+            println("   - Session ID: ${result.sessionId}")
+            println("   - Expires in: ${result.expiresIn}s")
+            return result
+        } catch (e: Exception) {
+            println("❌ [AuthService] createOtp failed")
+            println("   - Error: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 
     override suspend fun verifyOtp(
@@ -89,25 +105,62 @@ class AuthImpl(
         code: String,
     ): VerifyOtpResponse {
         val url = "${DEFAULT_BASE_URL}Auth/verify-otp"
-        val response =
-            httpClient
-                .post(url) {
-                    contentType(ContentType.Application.Json)
-                    setBody(VerifyOtpRequest(sessionId = identifier, otp = code))
-                }
+        println("📡 [AuthService] verifyOtp called")
+        println("   - URL: $url")
+        println("   - Session ID: $identifier")
+        println("   - OTP code length: ${code.length}")
 
-        return response.parseResponse()
+        try {
+            val response =
+                httpClient
+                    .post(url) {
+                        contentType(ContentType.Application.Json)
+                        setBody(VerifyOtpRequest(sessionId = identifier, otp = code))
+                    }
+
+            println("📡 [AuthService] verifyOtp response received")
+            val result: VerifyOtpResponse = response.parseResponse()
+            println("📡 [AuthService] verifyOtp successful")
+            println("   - Access token expires at: ${result.accessToken.expiresAt}")
+            println("   - Refresh token expires at: ${result.refreshToken.expiresAt}")
+            return result
+        } catch (e: Exception) {
+            println("❌ [AuthService] verifyOtp failed")
+            println("   - Error: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 
     override suspend fun createTokens(refreshToken: String): CreateNewTokensResponse {
         val url = "${DEFAULT_BASE_URL}Auth/create-tokens"
-        val response =
-            httpClient
-                .post(url) {
-                    contentType(ContentType.Application.Json)
-                    setBody(CreateNewTokensRequest(refreshToken = refreshToken))
-                }
+        println("📡 [AuthService] createTokens called")
+        println("   - URL: $url")
+        println("   - Refresh token length: ${refreshToken.length}")
+        println("   - Refresh token preview: ${refreshToken.take(20)}...")
 
-        return response.parseResponse()
+        try {
+            println("   - ✅ Using unauthorized HttpClient (NO Bearer token will be sent)")
+            val response =
+                httpClient
+                    .post(url) {
+                        contentType(ContentType.Application.Json)
+                        // ⚠️ ВАЖНО: НЕ добавляем заголовок Authorization - refresh token идет в теле запроса
+                        setBody(CreateNewTokensRequest(refreshToken = refreshToken))
+                    }
+
+            println("📡 [AuthService] Response received")
+            val result: CreateNewTokensResponse = response.parseResponse()
+            println("📡 [AuthService] Response parsed successfully")
+            println("   - New access token expires at: ${result.accessToken.expiresAt}")
+            println("   - New refresh token expires at: ${result.refreshToken.expiresAt}")
+            return result
+        } catch (e: Exception) {
+            println("❌ [AuthService] createTokens failed")
+            println("   - Error type: ${e::class.simpleName}")
+            println("   - Error message: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 }

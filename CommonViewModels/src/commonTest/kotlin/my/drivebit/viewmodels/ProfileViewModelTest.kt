@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-class MockUserService : User {
+class MockProfileUserService : User {
     var shouldThrowError = false
     var shouldThrowNetworkException = false
     var errorMessage = "Network error"
@@ -42,6 +42,17 @@ class MockUserService : User {
         }
         return userResponse
     }
+
+    override suspend fun updateUser(
+        firstName: String?,
+        lastName: String?,
+        middleName: String?,
+    ): UserGetResponse =
+        userResponse.copy(
+            firstName = firstName ?: userResponse.firstName,
+            lastName = lastName ?: userResponse.lastName,
+            middleName = middleName ?: userResponse.middleName,
+        )
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -50,7 +61,7 @@ class ProfileViewModelTest {
     fun `initial state should be Loading and loadProfile should be called automatically`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockUserService = MockUserService()
+            val mockUserService = MockProfileUserService()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,
@@ -66,7 +77,7 @@ class ProfileViewModelTest {
     fun `loadProfile should set state to Success with user data`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockUserService = MockUserService()
+            val mockUserService = MockProfileUserService()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,
@@ -93,7 +104,7 @@ class ProfileViewModelTest {
     fun `loadProfile should set state to Error on NetworkException`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockUserService = MockUserService()
+            val mockUserService = MockProfileUserService()
             mockUserService.shouldThrowNetworkException = true
             mockUserService.errorMessage = "Unauthorized"
             mockUserService.networkExceptionStatusCode = HttpStatusCode.Unauthorized
@@ -115,7 +126,7 @@ class ProfileViewModelTest {
     fun `loadProfile should set state to Error on generic Exception`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockUserService = MockUserService()
+            val mockUserService = MockProfileUserService()
             mockUserService.shouldThrowError = true
             mockUserService.errorMessage = "Connection failed"
             val viewModel =
@@ -136,7 +147,7 @@ class ProfileViewModelTest {
     fun `loadProfile should set state to Error with default message on Exception with empty message`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockUserService = MockUserService()
+            val mockUserService = MockProfileUserService()
             mockUserService.shouldThrowError = true
             mockUserService.errorMessage = ""
             val viewModel =
@@ -157,7 +168,7 @@ class ProfileViewModelTest {
     fun `loadProfile should handle user data with partial fields`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockUserService = MockUserService()
+            val mockUserService = MockProfileUserService()
             mockUserService.userResponse =
                 UserGetResponse(
                     id = "user-123",
@@ -190,7 +201,7 @@ class ProfileViewModelTest {
     fun `loadProfile should set Loading state before making request`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockUserService = MockUserService()
+            val mockUserService = MockProfileUserService()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,

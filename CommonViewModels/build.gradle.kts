@@ -30,6 +30,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(project(":Storage"))
             implementation(project(":Network"))
+            implementation(project(":Utils"))
             implementation(libs.koin.core)
         }
         commonTest.dependencies {

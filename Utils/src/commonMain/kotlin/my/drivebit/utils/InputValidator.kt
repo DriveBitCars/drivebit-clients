@@ -1,4 +1,4 @@
-package my.drivebit.viewmodels
+package my.drivebit.utils
 
 sealed class ValidationResult {
     object Valid : ValidationResult()
