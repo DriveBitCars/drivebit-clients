@@ -27,7 +27,6 @@ iosApp/iosApp.xcodeproj/project.xcworkspace/xcuserdata/
 
 # Node modules
 node_modules/
-kotlin-js-store/
 
 # Test results
 test-results/
