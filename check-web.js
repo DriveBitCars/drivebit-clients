@@ -29,6 +29,11 @@ async function checkWebServer(port = 8080) {
     console.log(`\n📄 Первые 200 символов содержимого:`);
     console.log(bodyText.substring(0, 200));
     
+    // Делаем скриншот
+    const screenshotPath = 'screenshot.png';
+    await page.screenshot({ path: screenshotPath, fullPage: true });
+    console.log(`\n📸 Скриншот сохранен: ${screenshotPath}`);
+    
     await browser.close();
     return true;
   } catch (error) {
