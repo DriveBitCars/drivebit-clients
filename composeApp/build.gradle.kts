@@ -161,13 +161,6 @@ ktlint {
     }
 }
 
-// Копирование статических ресурсов (изображений) из корня проекта для обратной совместимости
-// Основные изображения теперь в composeApp/src/jsMain/resources/images
-tasks.register<Copy>("copyStaticResources") {
-    from("${rootProject.projectDir}/images")
-    into("$buildDir/dist/js/productionExecutable/images")
-}
-
-tasks.named("jsBrowserDistribution") {
-    dependsOn("copyStaticResources")
-}
+// Изображения теперь в composeApp/src/commonMain/composeResources/images/
+// Compose Multiplatform автоматически копирует их для всех платформ
+// Для JS они будут доступны в productionExecutable через composeResources
