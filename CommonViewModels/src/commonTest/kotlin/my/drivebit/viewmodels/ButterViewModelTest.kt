@@ -34,4 +34,3 @@ class ButterViewModelTest {
         assertTrue(viewModel.state.isNotEmpty(), "State list should contain at least one element")
     }
 }
-
