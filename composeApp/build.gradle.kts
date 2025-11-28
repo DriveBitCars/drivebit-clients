@@ -161,6 +161,6 @@ ktlint {
     }
 }
 
-// Изображения теперь в composeApp/src/commonMain/composeResources/images/
-// Compose Multiplatform автоматически копирует их для всех платформ
-// Для JS они будут доступны в productionExecutable через composeResources
+// Изображения хранятся в composeApp/src/commonMain/resources/images/
+// Для Web (JS/WASM) они автоматически копируются в productionExecutable/images/
+// Никаких дополнительных задач не требуется
