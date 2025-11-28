@@ -161,13 +161,11 @@ ktlint {
     }
 }
 
-// Копирование статических ресурсов (изображений) из корня проекта для обратной совместимости
-// Основные изображения теперь в composeApp/src/jsMain/resources/images
-tasks.register<Copy>("copyStaticResources") {
-    from("${rootProject.projectDir}/images")
-    into("$buildDir/dist/js/productionExecutable/images")
-}
+// Изображения хранятся в composeApp/src/commonMain/resources/images/
+// Для Web (JS/WASM) они автоматически копируются в productionExecutable/images/
+// Никаких дополнительных задач не требуется
 
-tasks.named("jsBrowserDistribution") {
-    dependsOn("copyStaticResources")
+// Настройка обработки дубликатов для JS ресурсов
+tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
+    duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
 }
