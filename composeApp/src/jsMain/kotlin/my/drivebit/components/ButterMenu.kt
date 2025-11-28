@@ -1,0 +1,86 @@
+package my.drivebit.components
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import my.drivebit.design.CSSColors
+import my.drivebit.viewmodels.ButterModel
+import my.drivebit.viewmodels.ButterState
+import my.drivebit.viewmodels.ButterViewModel
+import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.top
+import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.dom.Div
+import org.koin.compose.koinInject
+
+@Composable
+@Suppress("FunctionName")
+fun ButterMenu() {
+    val butterViewModel: ButterViewModel = koinInject()
+    val state = butterViewModel.state.collectAsState()
+
+    when (val currentState = state.value) {
+        is ButterState.Idle -> {
+        }
+        is ButterState.Opened -> {
+            ButterItems(
+                modifier = Modifier,
+                items = currentState.model,
+            )
+        }
+    }
+}
+
+@Composable
+@Suppress("FunctionName")
+fun ButterItems(
+    modifier: Modifier,
+    items: List<ButterModel>,
+) {
+    Div({
+        style {
+            position(Position.Fixed)
+            top(72.px)
+            right(36.px)
+            width(280.px)
+            backgroundColor(CSSColors.White)
+            borderRadius(8.px)
+            property("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.15)")
+            property("z-index", "1000")
+            maxHeight(80.vh)
+            property("overflow-y", "auto")
+            property("overflow-x", "hidden")
+            padding(8.px)
+        }
+    }) {
+        items.forEach { item ->
+            Div({
+                onClick {
+                    item.onClick()
+                }
+                style {
+                    cursor("pointer")
+                    property("transition", "background-color 0.2s ease")
+                    borderRadius(8.px)
+                    padding(12.px, 8.px)
+                }
+                classes("butter-menu-item")
+            }) {
+                Item(
+                    icon = item.iconUrl,
+                    text = item.text,
+                    showDivider = false,
+                )
+            }
+        }
+    }
+}
