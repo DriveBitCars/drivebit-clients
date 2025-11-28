@@ -164,3 +164,8 @@ ktlint {
 // Изображения хранятся в composeApp/src/commonMain/resources/images/
 // Для Web (JS/WASM) они автоматически копируются в productionExecutable/images/
 // Никаких дополнительных задач не требуется
+
+// Настройка обработки дубликатов для JS ресурсов
+tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
+    duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
+}
