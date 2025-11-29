@@ -1,0 +1,10 @@
+appId: my.drivebit.clients
+---
+# Тест клика на кнопку меню
+- launchApp
+- assertVisible: "Menu"
+- tapOn: "Menu"
+- assertVisible: "Логин"
+- assertVisible: "Регистрация"
+- assertVisible: "Сдать авто"
+

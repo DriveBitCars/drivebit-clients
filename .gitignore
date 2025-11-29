@@ -40,3 +40,6 @@ reports/
 # Screenshots
 screenshots/
 screenshot.png
+
+# Compiled JS files
+composeApp.js

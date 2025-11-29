@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import my.drivebit.ui.theme.ColorsDriveBit
+import my.drivebit.ui.theme.DrivebitTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 private fun ArrowBackIcon(): ImageVector =
@@ -102,6 +104,27 @@ fun ApplicationTopBar(
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
             modifier = modifier,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ApplicationTopBarPreview() {
+    DrivebitTheme {
+        ApplicationTopBar(
+            title = "Заголовок",
+            onBackClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ApplicationTopBarWithoutBackPreview() {
+    DrivebitTheme {
+        ApplicationTopBar(
+            title = "Заголовок без кнопки",
         )
     }
 }

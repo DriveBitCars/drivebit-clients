@@ -3,17 +3,24 @@ package my.drivebit.components
 import androidx.compose.runtime.Composable
 import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.imageUrl
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.dom.Img
 import org.koin.compose.koinInject
 
 @Composable
+@Suppress("FunctionName")
 fun MenuUserButton(onClick: () -> Unit) {
     val iconUserViewModel: IconUserViewModel = koinInject()
 
     UniversalButton(
         isSelected = false,
-        onClick = onClick,
+        onClick = {
+            onClick()
+        },
     ) {
         Img(
             src = "$imageUrl/menu/burger.svg",

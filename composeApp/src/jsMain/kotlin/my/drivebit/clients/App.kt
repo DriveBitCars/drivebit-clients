@@ -2,11 +2,13 @@ package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import my.drivebit.components.ButterMenu
 import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.Logo
 import my.drivebit.components.MenuUserButton
 import my.drivebit.components.filterButton
 import my.drivebit.shared.storage.di.storageModule
+import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.di.commonViewModelsModule
 import org.jetbrains.compose.web.css.AlignItems
@@ -43,6 +45,8 @@ actual fun App() {
 fun appContent() {
     // DrivebitTheme {
     val filterViewModel: FiltersViewModel = koinInject()
+    val butterViewModel: ButterViewModel = koinInject()
+
     val state = filterViewModel.state.collectAsState()
     val filters = state.value.filters
     val selected = state.value.selected
@@ -69,9 +73,9 @@ fun appContent() {
         }) {
             Logo()
 
-            MenuUserButton {
-                // TODO: Implement this
-            }
+            MenuUserButton(butterViewModel::onClick)
+
+            ButterMenu()
         }
 
         val selectedFilter = filters.find { it.title == selected }

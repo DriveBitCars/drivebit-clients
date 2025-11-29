@@ -182,14 +182,14 @@ jobs:
         strip_components: 0
         overwrite: true
 
-    - name: Copy web demo files and images
+    - name: Copy web files and images
       uses: appleboy/scp-action@v1.0.0
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
-        source: "web-demo.html,images/,index.html"
+        source: "images/,index.html"
         target: "/var/www/drivebit-clients"
         strip_components: 0
         overwrite: true
@@ -237,13 +237,6 @@ jobs:
             exit 1
           fi
           
-          # Verify web-demo.html exists (backup)
-          if [ -f "/var/www/drivebit-clients/web-demo.html" ]; then
-            echo "✅ web-demo.html found in correct location"
-          else
-            echo "⚠️  web-demo.html not found (optional backup file)"
-          fi
-          
           # Verify images directory exists
           if [ -d "/var/www/drivebit-clients/images" ]; then
             echo "✅ images directory found"
@@ -252,12 +245,6 @@ jobs:
             exit 1
           fi
           
-          # Create symlink from index.html to web-demo.html for main site
-          if [ -f "/var/www/drivebit-clients/web-demo.html" ] && [ ! -f "/var/www/drivebit-clients/index.html" ]; then
-            echo "🔗 Creating symlink: index.html -> web-demo.html"
-            $SUDO_CMD ln -s web-demo.html /var/www/drivebit-clients/index.html
-            echo "✅ Symlink created"
-          fi
 
     - name: Set file permissions
       uses: appleboy/ssh-action@v1.2.2
@@ -323,12 +310,6 @@ jobs:
           test -f /var/www/drivebit-clients/index.html || (echo "❌ index.html missing after upload" && exit 1)
           echo "📄 Page title from index.html:"
           grep -o '<title>[^<]*' -m1 /var/www/drivebit-clients/index.html || true
-          echo "📄 Page title from web-demo.html (if exists):"
-          if [ -f "/var/www/drivebit-clients/web-demo.html" ]; then
-            grep -o '<title>[^<]*' -m1 /var/www/drivebit-clients/web-demo.html || true
-          else
-            echo "web-demo.html not found (optional)"
-          fi
 
     - name: Notify deployment success
       if: success()
