@@ -28,10 +28,12 @@ kotlin {
             implementation(kotlin("stdlib"))
             implementation(libs.kotlinx.coroutines.core)
             implementation(project(":Storage"))
+            implementation(project(":Network"))
             implementation(libs.koin.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinx.coroutines.get()}")
         }
     }
 }

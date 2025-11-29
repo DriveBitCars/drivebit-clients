@@ -5,9 +5,9 @@ import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.imageUrl
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.dom.Img
 import org.koin.compose.koinInject
 

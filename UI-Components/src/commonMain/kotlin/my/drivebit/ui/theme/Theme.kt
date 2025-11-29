@@ -17,6 +17,7 @@ object ColorsDriveBit {
     val White = Color(0xFFFFFFFF)
     val Black = Color(0xFF000000)
     val Gray300 = Color(0xFFE0E0E6)
+    val Gray600 = Color(0xFF4B5563)
 }
 
 private val DarkColorScheme: ColorScheme =

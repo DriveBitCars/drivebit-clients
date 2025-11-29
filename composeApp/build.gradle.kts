@@ -80,6 +80,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(project(":Storage"))
             implementation(project(":CommonViewModels"))
+            implementation(project(":Network"))
             implementation(project(":UI-Components"))
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
@@ -104,6 +105,11 @@ kotlin {
             implementation(libs.kotlin.testJunit)
             implementation(libs.junit)
             implementation(libs.androidx.testExt.junit)
+        }
+
+        jsTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.core)
         }
     }
 }

@@ -4,21 +4,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import my.drivebit.design.CSSColors
+import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.viewmodels.ButterModel
 import my.drivebit.viewmodels.ButterState
 import my.drivebit.viewmodels.ButterViewModel
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.left
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.padding
-import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.top
-import org.jetbrains.compose.web.css.right
-import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.css.vh
 import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.top
+import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 
@@ -27,15 +30,45 @@ import org.koin.compose.koinInject
 fun ButterMenu() {
     val butterViewModel: ButterViewModel = koinInject()
     val state = butterViewModel.state.collectAsState()
+    val navigationController = LocalNavigationController.current
 
     when (val currentState = state.value) {
         is ButterState.Idle -> {
         }
         is ButterState.Opened -> {
-            ButterItems(
-                modifier = Modifier,
-                items = currentState.model,
-            )
+            Div({
+                style {
+                    position(Position.Fixed)
+                    top(0.px)
+                    left(0.px)
+                    right(0.px)
+                    bottom(0.px)
+                    property("z-index", "999")
+                }
+                onClick {
+                    butterViewModel.close()
+                }
+            }) {
+                ButterItems(
+                    modifier = Modifier,
+                    items =
+                        currentState.model.map { item ->
+                            when (item.text) {
+                                "Логин" ->
+                                    item.copy(onClick = {
+                                        butterViewModel.close()
+                                        navigationController?.navigateTo("/login-by-phone")
+                                    })
+                                "Регистрация" ->
+                                    item.copy(onClick = {
+                                        butterViewModel.close()
+                                        navigationController?.navigateTo("/signup")
+                                    })
+                                else -> item
+                            }
+                        },
+                )
+            }
         }
     }
 }
@@ -61,11 +94,16 @@ fun ButterItems(
             property("overflow-x", "hidden")
             padding(8.px)
         }
+        classes("butter-menu-container")
+        onClick { event ->
+            event.stopPropagation()
+        }
     }) {
         items.forEach { item ->
             Div({
-                onClick {
+                onClick { event ->
                     item.onClick()
+                    event.stopPropagation()
                 }
                 style {
                     cursor("pointer")

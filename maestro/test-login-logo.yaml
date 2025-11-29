@@ -1,0 +1,24 @@
+appId: my.drivebit.clients
+---
+# Тест проверки логотипа на странице входа
+- launchApp
+# Ожидание загрузки приложения
+- waitForAnimationToEnd
+# Переход на страницу входа через меню
+- tapOn: "Menu"
+- assertVisible: "Логин"
+- tapOn: "Логин"
+# Ожидание загрузки страницы входа
+- waitForAnimationToEnd
+# Проверка наличия элементов на странице входа
+- assertVisible: "Войти"
+- assertVisible: "Телефон"
+- assertVisible: "Или"
+- assertVisible: "Войти по email"
+# Скриншот страницы входа для проверки логотипа
+- takeScreenshot: "login-page-with-logo.png"
+# Дополнительная проверка - скролл вверх чтобы убедиться что логотип виден
+- scroll
+    direction: UP
+- takeScreenshot: "login-page-logo-top.png"
+

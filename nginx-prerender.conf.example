@@ -1,0 +1,41 @@
+# Пример конфигурации Nginx для пререндеринга
+# Сохраните это в /etc/nginx/sites-available/drivebit-clients
+
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/drivebit-clients;
+    index index.html;
+
+    # Сжатие
+    gzip on;
+    gzip_types text/html text/css application/javascript application/json;
+
+    # Кеширование статических файлов
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Пререндеренные страницы
+    # Если файл существует - отдаем его, иначе fallback на index.html
+    
+    location = /login-by-phone {
+        try_files /login-by-phone.html /index.html;
+    }
+
+    location = /login-by-mail {
+        try_files /login-by-mail.html /index.html;
+    }
+
+    # Главная страница
+    location = / {
+        try_files /index.html =404;
+    }
+
+    # Все остальные пути - fallback на index.html (SPA роутинг)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+

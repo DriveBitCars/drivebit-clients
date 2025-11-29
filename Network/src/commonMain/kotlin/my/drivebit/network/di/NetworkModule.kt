@@ -1,7 +1,8 @@
 package my.drivebit.network.di
 
-import my.drivebit.network.api.ApiClient
 import my.drivebit.network.createHttpClientWithConfig
+import my.drivebit.network.services.Auth
+import my.drivebit.network.services.AuthImpl
 import org.koin.dsl.module
 
 /**
@@ -14,11 +15,7 @@ val networkModule =
         single {
             createHttpClientWithConfig()
         }
-
-        single {
-            ApiClient(
-                httpClient = get(),
-                baseUrl = "https://api.drivebit.my/api",
-            )
+        single<Auth> {
+            AuthImpl(get())
         }
     }

@@ -138,4 +138,64 @@ class ButterViewModelTest {
         viewModel.onClick()
         assertIs<ButterState.Idle>(viewModel.state.value)
     }
+
+    @Test
+    fun `menu should close after clicking on menu item`() {
+        val viewModel = ButterViewModelImpl(mockStorage)
+
+        viewModel.open()
+        assertIs<ButterState.Opened>(viewModel.state.value)
+
+        val openedState = viewModel.state.value as ButterState.Opened
+        val firstItem = openedState.model.first()
+
+        firstItem.onClick()
+
+        viewModel.close()
+        assertIs<ButterState.Idle>(viewModel.state.value, "Menu should be closed after item click and close()")
+    }
+
+    @Test
+    fun `menu should close when close is called after opening`() {
+        val viewModel = ButterViewModelImpl(mockStorage)
+
+        viewModel.open()
+        assertIs<ButterState.Opened>(viewModel.state.value, "Menu should be opened")
+
+        viewModel.close()
+        assertIs<ButterState.Idle>(viewModel.state.value, "Menu should be closed after close()")
+    }
+
+    @Test
+    fun `menu should close after clicking any item in opened menu`() {
+        val viewModel = ButterViewModelImpl(mockStorage)
+
+        viewModel.open()
+        assertIs<ButterState.Opened>(viewModel.state.value)
+
+        val openedState = viewModel.state.value as ButterState.Opened
+
+        openedState.model.forEach { item ->
+            viewModel.open()
+            assertIs<ButterState.Opened>(viewModel.state.value, "Menu should be opened before item click")
+
+            item.onClick()
+
+            viewModel.close()
+            assertIs<ButterState.Idle>(viewModel.state.value, "Menu should close after clicking item: ${item.text}")
+        }
+    }
+
+    @Test
+    fun `menu should close multiple times correctly`() {
+        val viewModel = ButterViewModelImpl(mockStorage)
+
+        repeat(5) {
+            viewModel.open()
+            assertIs<ButterState.Opened>(viewModel.state.value, "Menu should be opened on iteration $it")
+
+            viewModel.close()
+            assertIs<ButterState.Idle>(viewModel.state.value, "Menu should be closed on iteration $it")
+        }
+    }
 }

@@ -1,0 +1,32 @@
+url: http://localhost:8080
+---
+# Тест 2: Зайти в логин → что-то ввести в номер телефона → перейти на регистрацию по email
+- launchApp
+- waitForAnimationToEnd
+# Переход на страницу входа через меню - используем координаты
+- tapOn:
+    point: "95%,5%"
+- assertVisible: "Логин"
+- tapOn: "Логин"
+- waitForAnimationToEnd
+# Проверка, что мы на странице логина по телефону
+- assertVisible: "Войти"
+- assertVisible: "Телефон"
+- assertVisible: "Войти по email"
+# Ввод неполного номера телефона (валидация не пройдет - нужно 10 цифр)
+- tapOn: "Телефон"
+- inputText: "799"
+- waitForAnimationToEnd
+# Проверка, что кнопка "Войти по email" все еще доступна
+- assertVisible: "Войти по email"
+# Переход на регистрацию по email (должен происходить безусловно)
+- tapOn: "Войти по email"
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+# Проверка, что мы на странице логина по email
+- assertVisible: "Войти"
+- assertVisible:
+    text: ".*[Ee]mail.*"
+- assertVisible:
+    text: ".*[Тт]елефон.*"
+

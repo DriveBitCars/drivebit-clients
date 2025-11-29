@@ -1,10 +1,33 @@
 appId: my.drivebit.clients
 ---
-# Тест клика на кнопку меню
+# Тест открытия и закрытия меню
 - launchApp
 - assertVisible: "Menu"
 - tapOn: "Menu"
 - assertVisible: "Логин"
 - assertVisible: "Регистрация"
 - assertVisible: "Сдать авто"
+# Тест закрытия меню при клике на элемент
+- tapOn: "Логин"
+- assertNotVisible: "Логин"
+- assertNotVisible: "Регистрация"
+- assertNotVisible: "Сдать авто"
+# Тест повторного открытия и закрытия при клике вне меню
+- tapOn: "Menu"
+- assertVisible: "Логин"
+- assertVisible: "Регистрация"
+- assertVisible: "Сдать авто"
+# Клик вне меню (например, на логотип или другой элемент)
+- tapOn:
+    point: "50%,50%"
+- assertNotVisible: "Логин"
+- assertNotVisible: "Регистрация"
+- assertNotVisible: "Сдать авто"
+# Тест закрытия при клике на другой элемент меню
+- tapOn: "Menu"
+- assertVisible: "Сдать авто"
+- tapOn: "Сдать авто"
+- assertNotVisible: "Логин"
+- assertNotVisible: "Регистрация"
+- assertNotVisible: "Сдать авто"
 
