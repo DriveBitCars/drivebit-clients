@@ -61,10 +61,10 @@ class ButterViewModelImpl(
             ButterState.Opened(
                 buildList {
                     if (storage.isLogined().not()) {
-                        add(login)
-                        add(registr)
+                        add(login.copy(onClick = { close() }))
+                        add(registr.copy(onClick = { close() }))
                     }
-                    add(beCameAHost)
+                    add(beCameAHost.copy(onClick = { close() }))
                 },
             )
     }

@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DriveBit - Аренда автомобилей</title>
+    <meta name="description" content="Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7.">
+    <meta property="og:title" content="DriveBit - Аренда автомобилей">
+    <meta property="og:description" content="Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="/">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -55,10 +60,24 @@
             background-color: #F5F5F5 !important;
             border-radius: 8px;
         }
+
+        /* Анимация спиннера загрузки */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 <div id="root"></div>
+<noscript>
+    <div style="padding: 40px; text-align: center; font-family: system-ui, sans-serif;">
+        <h1>DriveBit - Аренда автомобилей</h1>
+        <p>Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7.</p>
+        <p><a href="/login" style="color: #2563eb; text-decoration: none;">Войти в аккаунт</a> | <a href="/signup" style="color: #2563eb; text-decoration: none;">Регистрация</a></p>
+        <p style="color: #666; font-size: 14px;">Для работы приложения необходимо включить JavaScript.</p>
+    </div>
+</noscript>
 <script src="composeApp.js"></script>
 </body>
 </html>

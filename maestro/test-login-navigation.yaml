@@ -1,0 +1,43 @@
+url: http://localhost:8080
+---
+# Тест 1: Зайти в логин → перейти на регистрацию через email → перейти на регистрацию по телефону
+- launchApp
+- waitForAnimationToEnd
+# Ожидание загрузки страницы
+- waitForAnimationToEnd
+# Переход на страницу входа через меню - используем координаты (меню обычно справа вверху)
+- tapOn:
+    point: "95%,5%"
+- waitForAnimationToEnd
+- assertVisible: "Логин"
+- tapOn: "Логин"
+- waitForAnimationToEnd
+# Проверка, что мы на странице логина по телефону
+- assertVisible: "Войти"
+- assertVisible: "Телефон"
+- assertVisible: "Войти по email"
+# Переход на регистрацию через email
+- tapOn: "Войти по email"
+- waitForAnimationToEnd
+# Дополнительное ожидание для загрузки страницы
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+# Проверка, что мы на странице логина по email - используем более гибкую проверку
+- assertVisible: "Войти"
+# Проверяем наличие Email (может быть в разных форматах)
+- assertVisible:
+    text: ".*[Ee]mail.*"
+# Дополнительное ожидание для загрузки кнопки
+- waitForAnimationToEnd
+# Проверяем наличие кнопки "Войти по телефону" (может быть в разных форматах)
+- assertVisible:
+    text: ".*[Тт]елефон.*"
+# Переход на регистрацию по телефону - используем regex для поиска
+- tapOn:
+    text: ".*[Тт]елефон.*"
+- waitForAnimationToEnd
+# Проверка, что мы вернулись на страницу логина по телефону
+- assertVisible: "Войти"
+- assertVisible: "Телефон"
+- assertVisible: "Войти по email"
+

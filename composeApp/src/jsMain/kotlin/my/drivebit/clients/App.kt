@@ -2,15 +2,20 @@ package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import my.drivebit.components.AppContainer
 import my.drivebit.components.ButterMenu
 import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.Logo
 import my.drivebit.components.MenuUserButton
 import my.drivebit.components.filterButton
+import my.drivebit.navigation.Navigation
+import my.drivebit.screens.LoginPage
+import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.di.commonViewModelsModule
+import my.drivebit.web.di.webModule
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexWrap
@@ -18,15 +23,14 @@ import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexWrap
-import org.jetbrains.compose.web.css.fontFamily
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
 
 @Composable
 @Suppress("FunctionName")
@@ -34,16 +38,31 @@ actual fun App() {
     KoinApplication(application = {
         modules(
             storageModule,
+            webModule,
             commonViewModelsModule,
         )
     }) {
-        appContent()
+        Navigation { currentPath ->
+            when {
+                currentPath.startsWith("/verify-otp") -> {
+                    OtpVerificationPage()
+                }
+                currentPath == "/login-by-phone" -> {
+                    LoginPage(viewModelQualifier = named("phone"))
+                }
+                currentPath == "/login-by-mail" -> {
+                    LoginPage(viewModelQualifier = named("email"))
+                }
+                else -> {
+                    HomePage()
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun appContent() {
-    // DrivebitTheme {
+fun HomePage() {
     val filterViewModel: FiltersViewModel = koinInject()
     val butterViewModel: ButterViewModel = koinInject()
 
@@ -51,18 +70,7 @@ fun appContent() {
     val filters = state.value.filters
     val selected = state.value.selected
 
-    Div({
-        style {
-            padding(20.px, 40.px)
-            fontFamily("system-ui, -apple-system, sans-serif")
-            property("min-width", "320px")
-            property("max-width", "1200px")
-            property("margin", "0 auto")
-            property("box-sizing", "border-box")
-        }
-        classes("app-container")
-    }) {
-        // Header with logo and menu button
+    AppContainer {
         Div({
             style {
                 display(DisplayStyle.Flex)
@@ -104,5 +112,4 @@ fun appContent() {
             }
         }
     }
-    // }
 }

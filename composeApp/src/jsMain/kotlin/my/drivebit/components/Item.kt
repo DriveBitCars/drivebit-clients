@@ -12,9 +12,9 @@ import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
@@ -51,7 +51,7 @@ fun Item(
         Span({
             style {
                 applyTypography(CSSTypography.Styles.body)
-                color(CSSColors.Black)
+                color(CSSColors.Gray600)
             }
         }) {
             Text(text)

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /api/
+
+Sitemap: https://drivebit.my/sitemap.xml
+

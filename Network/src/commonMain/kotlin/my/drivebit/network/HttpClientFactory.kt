@@ -10,6 +10,8 @@ import kotlinx.serialization.json.Json
 
 expect fun createPlatformHttpClientEngine(): HttpClientEngine
 
+const val DEFAULT_BASE_URL = "http://api.drivebit.my:5000/"
+
 fun createHttpClientWithConfig(
     json: Json =
         Json {
