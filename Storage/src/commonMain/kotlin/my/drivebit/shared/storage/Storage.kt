@@ -18,4 +18,19 @@ interface Storage {
      * Получает токен
      */
     fun getToken(): String?
+
+    /**
+     * Сохраняет refresh токен
+     */
+    fun saveRefreshToken(refreshToken: String)
+
+    /**
+     * Получает refresh токен
+     */
+    fun getRefreshToken(): String?
+
+    /**
+     * Выполняет выход из системы - очищает все данные пользователя
+     */
+    fun logout()
 }

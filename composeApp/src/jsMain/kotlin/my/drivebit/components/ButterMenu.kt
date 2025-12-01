@@ -62,7 +62,7 @@ fun ButterMenu() {
                                 "Регистрация" ->
                                     item.copy(onClick = {
                                         butterViewModel.close()
-                                        navigationController?.navigateTo("/signup")
+                                        navigationController?.navigateTo("/login-by-phone")
                                     })
                                 else -> item
                             }

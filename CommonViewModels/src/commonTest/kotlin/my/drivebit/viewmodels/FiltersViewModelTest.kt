@@ -11,6 +11,14 @@ class MockStorage : Storage {
     }
 
     override fun getToken(): String? = null
+
+    override fun saveRefreshToken(refreshToken: String) {
+    }
+
+    override fun getRefreshToken(): String? = null
+
+    override fun logout() {
+    }
 }
 
 class FiltersViewModelTest {

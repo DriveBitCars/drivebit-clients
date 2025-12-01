@@ -3,6 +3,7 @@ package my.drivebit.viewmodels
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import my.drivebit.resources.ImagePaths
 import my.drivebit.shared.storage.Storage
 
 sealed interface ButterState {
@@ -41,11 +42,25 @@ private val registr =
         onClick = {},
     )
 
+private val profile =
+    ButterModel(
+        iconUrl = ImagePaths.MENU_USER_SVG, // TODO profile.userIconUrl
+        text = "Мой профиль",
+        onClick = {}
+    )
+
 private val beCameAHost =
     ButterModel(
-        iconUrl = "images/butter/car-icon.svg",
+        iconUrl = ImagePaths.BUTTER_CAR_ICON_SVG,
         text = "Сдать авто",
         onClick = {},
+    )
+
+private val logout =
+    ButterModel(
+        iconUrl = ImagePaths.BUTTER_LOGOUT_SVG,
+        text = "Выйти",
+        onClick = {}
     )
 
 class ButterViewModelImpl(
@@ -60,13 +75,25 @@ class ButterViewModelImpl(
         _state.value =
             ButterState.Opened(
                 buildList {
-                    if (storage.isLogined().not()) {
+                    if (storage.isLogined()) {
+                        add(profile)
+                    } else {
                         add(login.copy(onClick = { close() }))
                         add(registr.copy(onClick = { close() }))
                     }
                     add(beCameAHost.copy(onClick = { close() }))
+                    if (storage.isLogined()) {
+                        add(logout.copy(onClick = {
+                            logout()
+                            close()
+                        }))
+                    }
                 },
             )
+    }
+
+    private fun logout() {
+        storage.logout()
     }
 
     override fun close() {

@@ -1,6 +1,7 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
+import my.drivebit.resources.ImagePaths
 import my.drivebit.navigation.LocalNavigationController
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.height
@@ -22,7 +23,7 @@ fun Logo() {
         }
     }) {
         Img(
-            src = "images/logos/turo_logo.svg",
+            src = ImagePaths.LOGOS_TURO_LOGO_SVG,
             alt = "Drive bit Logo",
             attrs = {
                 style {

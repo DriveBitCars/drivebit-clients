@@ -1,7 +1,6 @@
 package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -15,6 +14,7 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.Auth
+import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.OtpVerificationState
 import my.drivebit.viewmodels.OtpVerificationViewModel
 import org.jetbrains.compose.web.css.*
@@ -29,6 +29,7 @@ import org.koin.compose.koinInject
 fun OtpVerificationPage() {
     val navigationController = LocalNavigationController.current
     val auth: Auth = koinInject()
+    val storage: Storage = koinInject()
     val identifier =
         remember {
             val params =
@@ -44,6 +45,7 @@ fun OtpVerificationPage() {
         remember(identifier) {
             OtpVerificationViewModel(
                 auth = auth,
+                storage = storage,
                 identifier = identifier,
             )
         }
@@ -51,10 +53,8 @@ fun OtpVerificationPage() {
     val code by viewModel.code.collectAsState()
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(state) {
-        if (state is OtpVerificationState.Success) {
-            navigationController?.navigateTo("/")
-        }
+    if (state is OtpVerificationState.Success) {
+        navigationController?.navigateTo("/")
     }
 
     AppContainer {
@@ -148,6 +148,7 @@ fun OtpVerificationPage() {
                                 property("text-align", "center")
                                 property("outline", "none")
                                 property("transition", "border-color 0.2s ease")
+                                property("box-sizing", "border-box")
                             }
                             onFocus {
                                 val borderColor =
@@ -186,60 +187,58 @@ fun OtpVerificationPage() {
                             }
                         }
                     }
-                }
 
-                Button({
-                    onClick {
-                        if (state !is OtpVerificationState.Loading) {
-                            viewModel.verifyOtp()
-                        }
-                    }
-                    style {
-                        width(100.percent)
-                        marginTop(24.px)
-                        padding(14.px, 24.px)
-                        borderRadius(8.px)
-                        backgroundColor(CSSColors.Blue)
-                        color(CSSColors.White)
-                        border(0.px)
-                        val isLoading = state is OtpVerificationState.Loading
-                        cursor(if (isLoading) "not-allowed" else "pointer")
-                        applyTypography(CSSTypography.Styles.button)
-                        fontSize(CSSTypography.FontSize.base)
-                        fontWeight(CSSTypography.FontWeight.semibold)
-                        property("transition", "background-color 0.2s ease, opacity 0.2s ease")
-                        property("opacity", if (isLoading) "0.6" else "1")
-                    }
-                    onMouseEnter {
-                        if (state !is OtpVerificationState.Loading) {
-                            (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
-                                "background-color",
-                                CSSColors.BlueRedString,
-                            )
-                        }
-                    }
-                    onMouseLeave {
-                        if (state !is OtpVerificationState.Loading) {
-                            (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
-                                "background-color",
-                                CSSColors.BlueString,
-                            )
-                        }
-                    }
-                }) {
-                    Text(if (state is OtpVerificationState.Loading) "Проверка..." else "Подтвердить")
-                }
-
-                LaunchedEffect(state) {
-                    document.getElementsByTagName("button").let { buttons ->
-                        for (i in 0 until buttons.length) {
-                            val button = buttons.item(i) as? org.w3c.dom.HTMLButtonElement
-                            button?.let {
-                                val isLoading = state is OtpVerificationState.Loading
-                                it.disabled = isLoading
-                                it.style.setProperty("opacity", if (isLoading) "0.6" else "1")
-                                it.style.setProperty("cursor", if (isLoading) "not-allowed" else "pointer")
+                    Button({
+                        onClick {
+                            if (state !is OtpVerificationState.Loading) {
+                                viewModel.verifyOtp()
                             }
+                        }
+                        style {
+                            width(100.percent)
+                            padding(14.px, 24.px)
+                            borderRadius(8.px)
+                            backgroundColor(CSSColors.Blue)
+                            color(CSSColors.White)
+                            border(0.px)
+                            val isLoading = state is OtpVerificationState.Loading
+                            cursor(if (isLoading) "not-allowed" else "pointer")
+                            applyTypography(CSSTypography.Styles.button)
+                            fontSize(CSSTypography.FontSize.base)
+                            fontWeight(CSSTypography.FontWeight.semibold)
+                            property("transition", "background-color 0.2s ease, opacity 0.2s ease")
+                            property("opacity", if (isLoading) "0.6" else "1")
+                            property("box-sizing", "border-box")
+                        }
+                        onMouseEnter {
+                            if (state !is OtpVerificationState.Loading) {
+                                (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
+                                    "background-color",
+                                    CSSColors.BlueRedString,
+                                )
+                            }
+                        }
+                        onMouseLeave {
+                            if (state !is OtpVerificationState.Loading) {
+                                (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
+                                    "background-color",
+                                    CSSColors.BlueString,
+                                )
+                            }
+                        }
+                    }) {
+                        Text(if (state is OtpVerificationState.Loading) "Проверка..." else "Подтвердить")
+                    }
+                }
+
+                document.getElementsByTagName("button").let { buttons ->
+                    for (i in 0 until buttons.length) {
+                        val button = buttons.item(i) as? org.w3c.dom.HTMLButtonElement
+                        button?.let {
+                            val isLoading = state is OtpVerificationState.Loading
+                            it.disabled = isLoading
+                            it.style.setProperty("opacity", if (isLoading) "0.6" else "1")
+                            it.style.setProperty("cursor", if (isLoading) "not-allowed" else "pointer")
                         }
                     }
                 }
