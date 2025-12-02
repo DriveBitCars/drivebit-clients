@@ -3,13 +3,13 @@ package my.drivebit.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import kotlinx.browser.document
 import my.drivebit.components.AppContainer
 import my.drivebit.components.Logo
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
-import my.drivebit.ui.components.Loader
 import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
 import org.jetbrains.compose.web.css.*
@@ -23,6 +23,10 @@ import org.koin.compose.koinInject
 fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
     val navigationController = LocalNavigationController.current
     val state by viewModel.state.collectAsState()
+
+    val style = document.createElement("style") as org.w3c.dom.HTMLStyleElement
+    style.textContent = "@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }"
+    document.head?.appendChild(style)
 
     AppContainer {
         Div({
@@ -61,7 +65,25 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
         }) {
             when (val currentState = state) {
                 is ProfileState.Loading -> {
-                    Loader()
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            justifyContent(JustifyContent.Center)
+                            alignItems(AlignItems.Center)
+                            padding(48.px)
+                        }
+                    }) {
+                        Div({
+                            style {
+                                width(48.px)
+                                height(48.px)
+                                border(3.px, LineStyle.Solid, CSSColors.Gray300)
+                                property("border-top-color", CSSColors.BlueRedString)
+                                borderRadius(50.percent)
+                                property("animation", "spin 1s linear infinite")
+                            }
+                        }) {}
+                    }
                 }
 
                 is ProfileState.Error -> {
