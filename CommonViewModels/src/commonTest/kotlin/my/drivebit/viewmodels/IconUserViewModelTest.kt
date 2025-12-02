@@ -8,6 +8,7 @@ import kotlin.test.assertTrue
 class MockStorageForIconUser : Storage {
     private var isLoggedIn = false
     private var token: String? = null
+    private var refreshToken: String? = null
 
     override fun isLogined(): Boolean = isLoggedIn
 
@@ -17,6 +18,18 @@ class MockStorageForIconUser : Storage {
     }
 
     override fun getToken(): String? = token
+
+    override fun saveRefreshToken(refreshToken: String) {
+        this.refreshToken = refreshToken
+    }
+
+    override fun getRefreshToken(): String? = refreshToken
+
+    override fun logout() {
+        token = null
+        refreshToken = null
+        isLoggedIn = false
+    }
 
     fun setLoggedIn(loggedIn: Boolean) {
         this.isLoggedIn = loggedIn

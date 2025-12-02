@@ -9,15 +9,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Auth
+import my.drivebit.shared.storage.Storage
 
 sealed class OtpVerificationState {
     object Idle : OtpVerificationState()
 
     object Loading : OtpVerificationState()
 
-    data class Success(
-        val token: String?,
-    ) : OtpVerificationState()
+    object Success : OtpVerificationState()
 
     data class Error(
         val message: String,
@@ -26,6 +25,7 @@ sealed class OtpVerificationState {
 
 class OtpVerificationViewModel(
     private val auth: Auth,
+    private val storage: Storage,
     private val identifier: String,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
@@ -53,10 +53,13 @@ class OtpVerificationViewModel(
 
         viewModelScope.launch {
             _state.update { OtpVerificationState.Loading }
-            try {
-                val response = auth.verifyOtp(identifier, _code.value)
-                _state.update { OtpVerificationState.Success(response.token) }
-            } catch (e: Exception) {
+            runCatching {
+                auth.verifyOtp(identifier, _code.value)
+            }.onSuccess { response ->
+                response.accessToken.token?.let { storage.saveToken(it) }
+                response.refreshToken.token?.let { storage.saveRefreshToken(it) }
+                _state.update { OtpVerificationState.Success }
+            }.onFailure { e ->
                 _state.update {
                     OtpVerificationState.Error(
                         e.message?.takeIf { it.isNotBlank() } ?: "Произошла ошибка",

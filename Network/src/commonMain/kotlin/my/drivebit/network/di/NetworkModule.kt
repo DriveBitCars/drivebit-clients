@@ -8,7 +8,7 @@ import org.koin.dsl.module
 /**
  * Network module for Koin DI
  * API Base URL: https://api.drivebit.my/api
- * API Documentation: https://api.drivebit.my:5000/swagger
+ * API Documentation: http://213.171.27.185:5000/swagger/index.html
  */
 val networkModule =
     module {

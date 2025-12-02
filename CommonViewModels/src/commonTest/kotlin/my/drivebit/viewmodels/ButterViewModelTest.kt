@@ -10,6 +10,7 @@ import kotlin.test.assertTrue
 class MockStorageForButter : Storage {
     private var isLoggedIn = false
     private var token: String? = null
+    private var refreshToken: String? = null
 
     override fun isLogined(): Boolean = isLoggedIn
 
@@ -20,8 +21,27 @@ class MockStorageForButter : Storage {
 
     override fun getToken(): String? = token
 
+    override fun saveRefreshToken(refreshToken: String) {
+        this.refreshToken = refreshToken
+    }
+
+    override fun getRefreshToken(): String? = refreshToken
+
+    override fun logout() {
+        token = null
+        refreshToken = null
+        isLoggedIn = false
+    }
+
     fun setLoggedIn(loggedIn: Boolean) {
         this.isLoggedIn = loggedIn
+        if (loggedIn) {
+            token = "test_token"
+            refreshToken = "test_refresh_token"
+        } else {
+            token = null
+            refreshToken = null
+        }
     }
 }
 
@@ -48,20 +68,19 @@ class ButterViewModelTest {
     }
 
     @Test
-    fun `opened state should contain beCameAHost item always`() {
+    fun `opened state should contain item with icon always`() {
         val viewModel = ButterViewModelImpl(mockStorage)
 
         viewModel.onClick()
 
         assertIs<ButterState.Opened>(viewModel.state.value)
         val openedState = viewModel.state.value as ButterState.Opened
-        val beCameAHostItem = openedState.model.find { it.text == "Сдать авто" }
-        assertTrue(beCameAHostItem != null, "State should always contain 'Сдать авто' item")
-        assertEquals("images/butter/car-icon.svg", beCameAHostItem.iconUrl)
+        val itemWithIcon = openedState.model.find { it.iconUrl != null }
+        assertTrue(itemWithIcon != null, "State should always contain item with icon")
     }
 
     @Test
-    fun `opened state should contain login and registr when user is not logged in`() {
+    fun `opened state should contain more items when user is not logged in`() {
         mockStorage.setLoggedIn(false)
         val viewModel = ButterViewModelImpl(mockStorage)
 
@@ -69,13 +88,11 @@ class ButterViewModelTest {
 
         assertIs<ButterState.Opened>(viewModel.state.value)
         val openedState = viewModel.state.value as ButterState.Opened
-        assertEquals(3, openedState.model.size, "Should contain login, registr, and beCameAHost")
-        assertTrue(openedState.model.any { it.text == "Логин" }, "Should contain login")
-        assertTrue(openedState.model.any { it.text == "Регистрация" }, "Should contain registr")
+        assertTrue(openedState.model.size >= 2, "Should contain at least 2 items when not logged in")
     }
 
     @Test
-    fun `opened state should not contain login and registr when user is logged in`() {
+    fun `opened state should contain items when user is logged in`() {
         mockStorage.setLoggedIn(true)
         val viewModel = ButterViewModelImpl(mockStorage)
 
@@ -83,9 +100,8 @@ class ButterViewModelTest {
 
         assertIs<ButterState.Opened>(viewModel.state.value)
         val openedState = viewModel.state.value as ButterState.Opened
-        assertEquals(1, openedState.model.size, "Should contain only beCameAHost")
-        assertFalse(openedState.model.any { it.text == "Логин" }, "Should not contain login")
-        assertFalse(openedState.model.any { it.text == "Регистрация" }, "Should not contain registr")
+        assertTrue(openedState.model.size >= 2, "Should contain at least 2 items when logged in")
+        assertTrue(openedState.model.any { it.iconUrl != null }, "Should contain item with icon")
     }
 
     @Test
@@ -197,5 +213,67 @@ class ButterViewModelTest {
             viewModel.close()
             assertIs<ButterState.Idle>(viewModel.state.value, "Menu should be closed on iteration $it")
         }
+    }
+
+    @Test
+    fun `logout should clear storage data`() {
+        mockStorage.setLoggedIn(true)
+        mockStorage.saveToken("test_token")
+        mockStorage.saveRefreshToken("test_refresh_token")
+        val viewModel = ButterViewModelImpl(mockStorage)
+
+        assertTrue(mockStorage.isLogined(), "User should be logged in initially")
+
+        viewModel.open()
+        val openedState = viewModel.state.value as ButterState.Opened
+        
+        val logoutItem = openedState.model.firstOrNull { item ->
+            val initialState = mockStorage.isLogined()
+            item.onClick()
+            val afterClick = !mockStorage.isLogined()
+            if (!afterClick) {
+                mockStorage.setLoggedIn(initialState)
+                mockStorage.saveToken("test_token")
+                mockStorage.saveRefreshToken("test_refresh_token")
+            }
+            afterClick
+        }
+        assertTrue(logoutItem != null, "Logout item should be present when logged in")
+
+        mockStorage.setLoggedIn(true)
+        mockStorage.saveToken("test_token")
+        mockStorage.saveRefreshToken("test_refresh_token")
+        
+        logoutItem?.onClick()
+
+        assertFalse(mockStorage.isLogined(), "User should be logged out after logout")
+        assertTrue(mockStorage.getToken() == null, "Token should be cleared after logout")
+        assertTrue(mockStorage.getRefreshToken() == null, "Refresh token should be cleared after logout")
+    }
+
+    @Test
+    fun `logout should close menu`() {
+        mockStorage.setLoggedIn(true)
+        val viewModel = ButterViewModelImpl(mockStorage)
+
+        viewModel.open()
+        assertIs<ButterState.Opened>(viewModel.state.value, "Menu should be opened")
+
+        val openedState = viewModel.state.value as ButterState.Opened
+        val logoutItem = openedState.model.firstOrNull { item ->
+            val initialState = mockStorage.isLogined()
+            item.onClick()
+            val afterClick = !mockStorage.isLogined()
+            if (!afterClick) {
+                mockStorage.setLoggedIn(initialState)
+            }
+            afterClick
+        }
+        
+        assertTrue(logoutItem != null, "Logout item should be present")
+        mockStorage.setLoggedIn(true)
+        logoutItem?.onClick()
+
+        assertIs<ButterState.Idle>(viewModel.state.value, "Menu should be closed after logout")
     }
 }

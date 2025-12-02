@@ -18,9 +18,9 @@ class PhoneLoginViewModel(
 ) : AuthFormViewModel {
     private val viewModelScope = coroutineScope
 
-    override val pageTitle: String = "Войти"
+    override val pageTitle: String = "Войти или создать аккаунт"
     override val fieldLabel: String = "Телефон"
-    override val primaryButtonText: String = "Войти"
+    override val primaryButtonText: String = "Продолжиь"
     override val secondaryButtonText: String = "Войти по email"
     override val secondaryButtonNavigationPath: String = "/login-by-mail"
 
@@ -61,8 +61,8 @@ class PhoneLoginViewModel(
                 }
 
             result.fold(
-                onSuccess = {
-                    _state.update { AuthFormState.Success(input) }
+                onSuccess = { response ->
+                    _state.update { AuthFormState.Success(response.sessionId) }
                 },
                 onFailure = { throwable ->
                     val errorMessage = throwable.message?.takeIf { it.isNotBlank() } ?: "Произошла ошибка"

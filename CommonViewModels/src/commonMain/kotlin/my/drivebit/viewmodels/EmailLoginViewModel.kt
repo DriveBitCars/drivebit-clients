@@ -18,9 +18,9 @@ class EmailLoginViewModel(
 ) : AuthFormViewModel {
     private val viewModelScope = coroutineScope
 
-    override val pageTitle: String = "Войти"
+    override val pageTitle: String = "Войти или создать аккаунт"
     override val fieldLabel: String = "Email"
-    override val primaryButtonText: String = "Войти"
+    override val primaryButtonText: String = "Продолжить"
     override val secondaryButtonText: String = "Войти по телефону"
     override val secondaryButtonNavigationPath: String = "/login-by-phone"
 
@@ -61,8 +61,8 @@ class EmailLoginViewModel(
                 }
 
             result.fold(
-                onSuccess = {
-                    _state.update { AuthFormState.Success(input) }
+                onSuccess = { response ->
+                    _state.update { AuthFormState.Success(response.sessionId) }
                 },
                 onFailure = { throwable ->
                     val errorMessage = throwable.message?.takeIf { it.isNotBlank() } ?: "Произошла ошибка"

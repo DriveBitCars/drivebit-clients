@@ -84,8 +84,7 @@ kotlin {
             implementation(project(":UI-Components"))
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
-            // ViewModel поддержка для веб-таргета
-            implementation("io.insert-koin:koin-compose-viewmodel-js:4.1.1")
+            implementation(libs.koinComposeViewmodelJs)
         }
 
         commonMain.dependencies {
@@ -166,6 +165,7 @@ ktlint {
         exclude("**/build/**")
     }
 }
+
 
 // Изображения хранятся в composeApp/src/commonMain/resources/images/
 // Для Web (JS/WASM) они автоматически копируются в productionExecutable/images/

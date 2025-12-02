@@ -1,0 +1,26 @@
+package my.drivebit.resources
+
+object ImagePaths {
+    const val BACKGROUNDS_HERO_BG_JPG = "images/backgrounds/hero-bg.jpg"
+    const val BUTTER_CAR_ICON_SVG = "images/butter/car-icon.svg"
+    const val BUTTER_LOGOUT_SVG = "images/butter/logout.svg"
+    const val FILTER_MAIN_AIRPLANE_SVG = "images/filter-main/airplane.svg"
+    const val FILTER_MAIN_CALENDAR_SVG = "images/filter-main/calendar.svg"
+    const val FILTER_MAIN_CAR_SVG = "images/filter-main/car.svg"
+    const val FILTER_MAIN_CITIGROUP_SVG = "images/filter-main/citigroup.svg"
+    const val FILTER_MAIN_DIRECTION_SVG = "images/filter-main/direction.svg"
+    const val FILTER_MAIN_POINT_SVG = "images/filter-main/point.svg"
+    const val LOGIN_LETTER_SVG = "images/login/letter.svg"
+    const val LOGOS_LOGO_PNG = "images/logos/logo.png"
+    const val LOGOS_TURO_LOGO_SVG = "images/logos/turo_logo.svg"
+    const val MENU_BURGER_SVG = "images/menu/burger.svg"
+    const val MENU_BUTER_SVG = "images/menu/buter.svg"
+    const val MENU_USER_SVG = "images/menu/user.svg"
+    const val SEARCHBACKGROUND_CAR0_JPG = "images/searchbackground/car0.jpg"
+    const val SEARCHBACKGROUND_CAR1_JPG = "images/searchbackground/car1.jpg"
+    const val SEARCHBACKGROUND_CAR2_JPG = "images/searchbackground/car2.jpg"
+    const val SEARCHBACKGROUND_CAR3_JPG = "images/searchbackground/car3.jpg"
+    const val SEARCHBACKGROUND_CAR4_JPG = "images/searchbackground/car4.jpg"
+    const val SEARCHBACKGROUND_CAR5_JPG = "images/searchbackground/car5.jpg"
+    const val SEARCHBACKGROUND_CAR6_JPG = "images/searchbackground/car6.jpg"
+}

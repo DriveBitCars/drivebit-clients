@@ -37,7 +37,8 @@ class StorageTest {
         storage.saveToken("")
 
         // Пустой токен означает, что пользователь не авторизован
-        assertEquals("", storage.getToken())
+        // Реальная Storage возвращает null для пустой строки
+        assertNull(storage.getToken())
         assertFalse(storage.isLogined())
     }
 
@@ -86,7 +87,7 @@ class StorageTest {
 
         storage.saveToken("")
         assertFalse(storage.isLogined())
-        assertEquals("", storage.getToken())
+        assertNull(storage.getToken())
     }
 
     @Test
@@ -107,10 +108,73 @@ class StorageTest {
         assertEquals(testToken, secondStorage.getToken())
     }
 
+    @Test
+    fun testLogout() {
+        val storage = createTestStorage()
+
+        // Сохраняем токены
+        storage.saveToken("test_token")
+        storage.saveRefreshToken("test_refresh_token")
+        assertTrue(storage.isLogined())
+        assertEquals("test_token", storage.getToken())
+        assertEquals("test_refresh_token", storage.getRefreshToken())
+
+        // Выполняем logout
+        storage.logout()
+
+        // Проверяем, что все данные очищены
+        assertFalse(storage.isLogined())
+        assertNull(storage.getToken())
+        assertNull(storage.getRefreshToken())
+    }
+
+    @Test
+    fun testLogoutWhenNotLoggedIn() {
+        val storage = createTestStorage()
+
+        // Изначально не авторизован
+        assertFalse(storage.isLogined())
+        assertNull(storage.getToken())
+        assertNull(storage.getRefreshToken())
+
+        // Выполняем logout (не должно быть ошибок)
+        storage.logout()
+
+        // Проверяем, что состояние не изменилось
+        assertFalse(storage.isLogined())
+        assertNull(storage.getToken())
+        assertNull(storage.getRefreshToken())
+    }
+
+    @Test
+    fun testLogoutClearsAllData() {
+        val storage = createTestStorage()
+
+        // Сохраняем данные
+        storage.saveToken("token1")
+        storage.saveRefreshToken("refresh1")
+        assertTrue(storage.isLogined())
+
+        // Заменяем данные
+        storage.saveToken("token2")
+        storage.saveRefreshToken("refresh2")
+        assertEquals("token2", storage.getToken())
+        assertEquals("refresh2", storage.getRefreshToken())
+
+        // Выполняем logout
+        storage.logout()
+
+        // Проверяем, что все очищено
+        assertFalse(storage.isLogined())
+        assertNull(storage.getToken())
+        assertNull(storage.getRefreshToken())
+    }
+
     // Фабричный метод для создания тестового хранилища
     private fun createTestStorage(): Storage {
-        // Используем тестовую реализацию для unit-тестов
-        return TestStorage()
+        // Используем реальную StorageImpl с in-memory Settings
+        val settings = InMemorySettings()
+        return StorageImpl(settings)
     }
 
     // Фабричный метод для создания тестового контекста
@@ -131,6 +195,7 @@ class StorageTest {
  */
 private class TestStorage : Storage {
     private var token: String? = null
+    private var refreshToken: String? = null
 
     override fun isLogined(): Boolean = !token.isNullOrEmpty()
 
@@ -139,6 +204,17 @@ private class TestStorage : Storage {
     }
 
     override fun getToken(): String? = token
+
+    override fun saveRefreshToken(refreshToken: String) {
+        this.refreshToken = refreshToken
+    }
+
+    override fun getRefreshToken(): String? = refreshToken
+
+    override fun logout() {
+        token = null
+        refreshToken = null
+    }
 }
 
 /**
@@ -156,6 +232,7 @@ private class PersistentTestStorage : Storage {
     companion object {
         // Статическое хранилище для симуляции персистентности между экземплярами
         private var persistentToken: String? = null
+        private var persistentRefreshToken: String? = null
     }
 
     override fun isLogined(): Boolean = !persistentToken.isNullOrEmpty()
@@ -165,4 +242,15 @@ private class PersistentTestStorage : Storage {
     }
 
     override fun getToken(): String? = persistentToken
+
+    override fun saveRefreshToken(refreshToken: String) {
+        persistentRefreshToken = refreshToken
+    }
+
+    override fun getRefreshToken(): String? = persistentRefreshToken
+
+    override fun logout() {
+        persistentToken = null
+        persistentRefreshToken = null
+    }
 }

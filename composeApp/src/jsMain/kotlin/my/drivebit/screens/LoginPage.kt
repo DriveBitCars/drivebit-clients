@@ -1,7 +1,6 @@
 package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,9 +13,9 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.resources.ImagePaths
 import my.drivebit.viewmodels.AuthFormState
 import my.drivebit.viewmodels.AuthFormViewModel
-import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -38,10 +37,11 @@ fun LoginPage(
     val loginState by viewModel.state.collectAsState()
     val validationState by viewModel.validationState.collectAsState()
     val isValid = validationState is my.drivebit.viewmodels.ValidationState.Valid
-    val validationError = when (val state = validationState) {
-        is my.drivebit.viewmodels.ValidationState.Error -> state.message
-        else -> null
-    }
+    val validationError =
+        when (val state = validationState) {
+            is my.drivebit.viewmodels.ValidationState.Error -> state.message
+            else -> null
+        }
     val isLoading = loginState is AuthFormState.Loading
     val isButtonDisabled = isLoading || !isValid
 
@@ -331,7 +331,7 @@ fun LoginPage(
                 }) {
                     if (viewModel.fieldLabel == "Телефон") {
                         Img(
-                            src = "images/login/letter.svg",
+                            src = ImagePaths.LOGIN_LETTER_SVG,
                             alt = "Email icon",
                             attrs = {
                                 style {

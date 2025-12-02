@@ -25,7 +25,11 @@ class MockAuth : Auth {
         if (shouldThrowError) {
             throw Exception(errorMessage)
         }
-        return CreateOtpResponse(success = true)
+        return CreateOtpResponse(
+            message = "OTP sent",
+            sessionId = "test-session-id-guid",
+            expiresIn = 300,
+        )
     }
 
     override suspend fun verifyOtp(
@@ -37,7 +41,20 @@ class MockAuth : Auth {
         if (shouldThrowError) {
             throw Exception(errorMessage)
         }
-        return VerifyOtpResponse(success = true, token = "test-token")
+        return VerifyOtpResponse(
+            accessToken =
+                my.drivebit.network.services.AccessTokenDTO(
+                    token = "test-token",
+                    expiresAt = null,
+                ),
+            refreshToken =
+                my.drivebit.network.services.RefreshTokenDTO(
+                    token = "test-refresh-token",
+                    userId = null,
+                    expiresAt = null,
+                    createdAt = null,
+                ),
+        )
     }
 }
 
@@ -91,7 +108,7 @@ class LoginViewModelTest {
 
             assertTrue(viewModel.state.value is AuthFormState.Success)
             val successState = viewModel.state.value as AuthFormState.Success
-            assertEquals("+79991234567", successState.identifier)
+            assertEquals("test-session-id-guid", successState.identifier)
         }
 
     @Test

@@ -56,6 +56,49 @@ android {
     }
 }
 
+// Генерация констант для путей к изображениям
+tasks.register("generateImageConstants") {
+    val resourcesDir = file("../composeApp/src/commonMain/resources/images")
+    val outputDir = file("src/commonMain/kotlin/my/drivebit/resources")
+    val outputFile = File(outputDir, "ImagePaths.kt")
+
+    inputs.dir(resourcesDir)
+    outputs.file(outputFile)
+
+    doLast {
+        outputDir.mkdirs()
+        val constants =
+            buildString {
+                appendLine("package my.drivebit.resources")
+                appendLine()
+                appendLine("object ImagePaths {")
+                resourcesDir
+                    .walkTopDown()
+                    .filter { it.isFile && it.extension in listOf("svg", "jpg", "png", "webp", "jpeg") }
+                    .sortedBy { it.path }
+                    .forEach { file ->
+                        val relativePath = file.relativeTo(resourcesDir)
+                        val constantName =
+                            relativePath
+                                .toString()
+                                .replace("/", "_")
+                                .replace("-", "_")
+                                .replace(".", "_")
+                                .uppercase()
+                        val path = "images/$relativePath"
+                        appendLine("    const val $constantName = \"$path\"")
+                    }
+                appendLine("}")
+            }
+        outputFile.writeText(constants)
+    }
+}
+
+// Автоматически генерировать константы перед компиляцией
+tasks.named("compileKotlinMetadata").configure {
+    dependsOn("generateImageConstants")
+}
+
 ktlint {
     android.set(true)
     ignoreFailures.set(true)

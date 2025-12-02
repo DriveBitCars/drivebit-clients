@@ -44,3 +44,9 @@ screenshot.png
 
 # Compiled JS files
 composeApp.js
+
+# SSH keys
+id_rsa_api_drivebit
+id_rsa_*
+*.pem
+*.key
