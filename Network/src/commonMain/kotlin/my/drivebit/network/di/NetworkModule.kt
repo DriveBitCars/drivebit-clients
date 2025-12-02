@@ -5,6 +5,7 @@ import my.drivebit.network.services.Auth
 import my.drivebit.network.services.AuthImpl
 import my.drivebit.network.services.User
 import my.drivebit.network.services.UserImpl
+import my.drivebit.shared.storage.Storage
 import org.koin.dsl.module
 
 /**
@@ -15,7 +16,9 @@ import org.koin.dsl.module
 val networkModule =
     module {
         single {
-            createHttpClientWithConfig()
+            createHttpClientWithConfig(
+                getToken = { get<Storage>().getToken() },
+            )
         }
         single<Auth> {
             AuthImpl(get())

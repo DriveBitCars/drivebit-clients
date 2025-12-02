@@ -166,7 +166,6 @@ ktlint {
     }
 }
 
-
 // Изображения хранятся в composeApp/src/commonMain/resources/images/
 // Для Web (JS/WASM) они автоматически копируются в productionExecutable/images/
 // Никаких дополнительных задач не требуется

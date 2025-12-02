@@ -11,6 +11,7 @@ import my.drivebit.components.filterButton
 import my.drivebit.navigation.Navigation
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.OtpVerificationPage
+import my.drivebit.screens.ProfilePage
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.FiltersViewModel
@@ -52,6 +53,9 @@ actual fun App() {
                 }
                 currentPath == "/login-by-mail" -> {
                     LoginPage(viewModelQualifier = named("email"))
+                }
+                currentPath == "/profile" -> {
+                    ProfilePage()
                 }
                 else -> {
                     HomePage()

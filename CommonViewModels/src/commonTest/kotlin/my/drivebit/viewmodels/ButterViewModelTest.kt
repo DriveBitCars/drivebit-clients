@@ -2,7 +2,6 @@ package my.drivebit.viewmodels
 
 import my.drivebit.shared.storage.Storage
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
@@ -226,24 +225,25 @@ class ButterViewModelTest {
 
         viewModel.open()
         val openedState = viewModel.state.value as ButterState.Opened
-        
-        val logoutItem = openedState.model.firstOrNull { item ->
-            val initialState = mockStorage.isLogined()
-            item.onClick()
-            val afterClick = !mockStorage.isLogined()
-            if (!afterClick) {
-                mockStorage.setLoggedIn(initialState)
-                mockStorage.saveToken("test_token")
-                mockStorage.saveRefreshToken("test_refresh_token")
+
+        val logoutItem =
+            openedState.model.firstOrNull { item ->
+                val initialState = mockStorage.isLogined()
+                item.onClick()
+                val afterClick = !mockStorage.isLogined()
+                if (!afterClick) {
+                    mockStorage.setLoggedIn(initialState)
+                    mockStorage.saveToken("test_token")
+                    mockStorage.saveRefreshToken("test_refresh_token")
+                }
+                afterClick
             }
-            afterClick
-        }
         assertTrue(logoutItem != null, "Logout item should be present when logged in")
 
         mockStorage.setLoggedIn(true)
         mockStorage.saveToken("test_token")
         mockStorage.saveRefreshToken("test_refresh_token")
-        
+
         logoutItem?.onClick()
 
         assertFalse(mockStorage.isLogined(), "User should be logged out after logout")
@@ -260,16 +260,17 @@ class ButterViewModelTest {
         assertIs<ButterState.Opened>(viewModel.state.value, "Menu should be opened")
 
         val openedState = viewModel.state.value as ButterState.Opened
-        val logoutItem = openedState.model.firstOrNull { item ->
-            val initialState = mockStorage.isLogined()
-            item.onClick()
-            val afterClick = !mockStorage.isLogined()
-            if (!afterClick) {
-                mockStorage.setLoggedIn(initialState)
+        val logoutItem =
+            openedState.model.firstOrNull { item ->
+                val initialState = mockStorage.isLogined()
+                item.onClick()
+                val afterClick = !mockStorage.isLogined()
+                if (!afterClick) {
+                    mockStorage.setLoggedIn(initialState)
+                }
+                afterClick
             }
-            afterClick
-        }
-        
+
         assertTrue(logoutItem != null, "Logout item should be present")
         mockStorage.setLoggedIn(true)
         logoutItem?.onClick()
