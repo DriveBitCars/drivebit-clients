@@ -3,15 +3,11 @@ package my.drivebit.network.services
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.parseResponse
 
 interface Auth {
     suspend fun createOtp(login: String): CreateOtpResponse
@@ -62,12 +58,6 @@ data class VerifyOtpResponse(
 
 class AuthImpl(
     private val httpClient: HttpClient,
-    private val json: Json =
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            encodeDefaults = false
-        },
 ) : Auth {
     override suspend fun createOtp(login: String): CreateOtpResponse {
         val url = "${DEFAULT_BASE_URL}Auth/create-otp"
@@ -78,7 +68,7 @@ class AuthImpl(
                     setBody(CreateOtpRequest(login = login))
                 }
 
-        return parseResponse<CreateOtpResponse>(response)
+        return response.parseResponse()
     }
 
     override suspend fun verifyOtp(
@@ -93,22 +83,6 @@ class AuthImpl(
                     setBody(VerifyOtpRequest(sessionId = identifier, otp = code))
                 }
 
-        return parseResponse<VerifyOtpResponse>(response)
-    }
-
-    private suspend inline fun <reified T> parseResponse(response: HttpResponse): T {
-        val bodyString = response.bodyAsText()
-
-        if (!response.status.isSuccess()) {
-            val errorMessage = bodyString.trim('"').trim()
-            throw NetworkException(response.status, errorMessage)
-        }
-
-        return json.decodeFromString<T>(bodyString)
+        return response.parseResponse()
     }
 }
-
-class NetworkException(
-    val statusCode: HttpStatusCode,
-    override val message: String,
-) : Exception(message)

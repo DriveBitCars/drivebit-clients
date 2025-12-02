@@ -15,12 +15,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
-class AuthTest {
+class UserTest {
     @Test
-    fun `verifyOtp should throw NetworkException with error message on 500 status`() =
+    fun `userGet should throw NetworkException with error message on 500 status`() =
         runTest {
-            val errorMessage =
-                "IDX12401: Expires: '12/02/2025 14:39:53' must be after NotBefore: '12/02/2025 14:39:53'."
+            val errorMessage = "Internal server error"
             val mockEngine =
                 MockEngine { request ->
                     respond(
@@ -37,11 +36,11 @@ class AuthTest {
                     }
                 }
 
-            val auth = AuthImpl(httpClient)
+            val user = UserImpl(httpClient)
 
             val exception =
                 assertFailsWith<NetworkException> {
-                    auth.verifyOtp("session-id", "123456")
+                    user.userGet()
                 }
 
             assertEquals(HttpStatusCode.InternalServerError, exception.statusCode)
@@ -49,14 +48,14 @@ class AuthTest {
         }
 
     @Test
-    fun `verifyOtp should throw NetworkException with error message on 400 status`() =
+    fun `userGet should throw NetworkException with error message on 401 status`() =
         runTest {
-            val errorMessage = "Invalid OTP code"
+            val errorMessage = "Unauthorized"
             val mockEngine =
                 MockEngine { request ->
                     respond(
                         content = "\"$errorMessage\"",
-                        status = HttpStatusCode.BadRequest,
+                        status = HttpStatusCode.Unauthorized,
                         headers = headersOf(HttpHeaders.ContentType, "application/json"),
                     )
                 }
@@ -68,33 +67,31 @@ class AuthTest {
                     }
                 }
 
-            val auth = AuthImpl(httpClient)
+            val user = UserImpl(httpClient)
 
             val exception =
                 assertFailsWith<NetworkException> {
-                    auth.verifyOtp("session-id", "wrong")
+                    user.userGet()
                 }
 
-            assertEquals(HttpStatusCode.BadRequest, exception.statusCode)
+            assertEquals(HttpStatusCode.Unauthorized, exception.statusCode)
             assertEquals(errorMessage, exception.message)
         }
 
     @Test
-    fun `verifyOtp should return VerifyOtpResponse on success`() =
+    fun `userGet should return UserGetResponse on success`() =
         runTest {
             val successResponse =
                 """
                 {
-                    "accessToken": {
-                        "token": "access-token-123",
-                        "expiresAt": "2025-12-02T15:00:00Z"
-                    },
-                    "refreshToken": {
-                        "token": "refresh-token-456",
-                        "userId": "user-123",
-                        "expiresAt": "2025-12-09T15:00:00Z",
-                        "createdAt": "2025-12-02T14:00:00Z"
-                    }
+                    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "phone": "+1234567890",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "middleName": "Middle",
+                    "email": "user@example.com",
+                    "createdAt": "2025-12-02T19:14:47.914Z",
+                    "photos": ["photo1.jpg", "photo2.jpg"]
                 }
                 """.trimIndent()
 
@@ -114,55 +111,32 @@ class AuthTest {
                     }
                 }
 
-            val auth = AuthImpl(httpClient)
+            val user = UserImpl(httpClient)
 
-            val result = auth.verifyOtp("session-id", "123456")
+            val result = user.userGet()
 
             assertNotNull(result)
-            assertEquals("access-token-123", result.accessToken.token)
-            assertEquals("refresh-token-456", result.refreshToken.token)
+            assertEquals("3fa85f64-5717-4562-b3fc-2c963f66afa6", result.id)
+            assertEquals("+1234567890", result.phone)
+            assertEquals("John", result.firstName)
+            assertEquals("Doe", result.lastName)
+            assertEquals("Middle", result.middleName)
+            assertEquals("user@example.com", result.email)
+            assertEquals("2025-12-02T19:14:47.914Z", result.createdAt)
+            assertEquals(2, result.photos.size)
+            assertEquals("photo1.jpg", result.photos[0])
+            assertEquals("photo2.jpg", result.photos[1])
         }
 
     @Test
-    fun `createOtp should throw NetworkException on error status`() =
-        runTest {
-            val errorMessage = "Invalid phone number"
-            val mockEngine =
-                MockEngine { request ->
-                    respond(
-                        content = "\"$errorMessage\"",
-                        status = HttpStatusCode.BadRequest,
-                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                    )
-                }
-
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json()
-                    }
-                }
-
-            val auth = AuthImpl(httpClient)
-
-            val exception =
-                assertFailsWith<NetworkException> {
-                    auth.createOtp("invalid")
-                }
-
-            assertEquals(HttpStatusCode.BadRequest, exception.statusCode)
-            assertEquals(errorMessage, exception.message)
-        }
-
-    @Test
-    fun `createOtp should return CreateOtpResponse on success`() =
+    fun `userGet should return UserGetResponse with partial data on success`() =
         runTest {
             val successResponse =
                 """
                 {
-                    "message": "OTP sent successfully",
-                    "sessionId": "session-123",
-                    "expiresIn": 300
+                    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "phone": "+9876543210",
+                    "firstName": "Jane"
                 }
                 """.trimIndent()
 
@@ -182,13 +156,14 @@ class AuthTest {
                     }
                 }
 
-            val auth = AuthImpl(httpClient)
+            val user = UserImpl(httpClient)
 
-            val result = auth.createOtp("+1234567890")
+            val result = user.userGet()
 
             assertNotNull(result)
-            assertEquals("session-123", result.sessionId)
-            assertEquals(300, result.expiresIn)
-            assertEquals("OTP sent successfully", result.message)
+            assertEquals("3fa85f64-5717-4562-b3fc-2c963f66afa6", result.id)
+            assertEquals("+9876543210", result.phone)
+            assertEquals("Jane", result.firstName)
+            assertEquals(emptyList<String>(), result.photos)
         }
 }

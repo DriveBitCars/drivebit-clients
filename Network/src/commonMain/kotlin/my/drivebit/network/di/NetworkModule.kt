@@ -3,6 +3,8 @@ package my.drivebit.network.di
 import my.drivebit.network.createHttpClientWithConfig
 import my.drivebit.network.services.Auth
 import my.drivebit.network.services.AuthImpl
+import my.drivebit.network.services.User
+import my.drivebit.network.services.UserImpl
 import org.koin.dsl.module
 
 /**
@@ -17,5 +19,8 @@ val networkModule =
         }
         single<Auth> {
             AuthImpl(get())
+        }
+        single<User> {
+            UserImpl(get())
         }
     }
