@@ -3,15 +3,11 @@ package my.drivebit.network.services
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.parseResponse
 
 interface Auth {
     suspend fun createOtp(login: String): CreateOtpResponse
@@ -20,6 +16,8 @@ interface Auth {
         identifier: String,
         code: String,
     ): VerifyOtpResponse
+
+    suspend fun createTokens(refreshToken: String): CreateNewTokensResponse
 }
 
 @Serializable
@@ -42,16 +40,16 @@ data class VerifyOtpRequest(
 
 @Serializable
 data class AccessTokenDTO(
-    val token: String?,
-    val expiresAt: String? = null,
+    val token: String,
+    val expiresAt: String,
 )
 
 @Serializable
 data class RefreshTokenDTO(
-    val token: String?,
-    val userId: String? = null,
-    val expiresAt: String? = null,
-    val createdAt: String? = null,
+    val token: String,
+    val userId: String,
+    val expiresAt: String,
+    val createdAt: String,
 )
 
 @Serializable
@@ -60,14 +58,19 @@ data class VerifyOtpResponse(
     val refreshToken: RefreshTokenDTO,
 )
 
+@Serializable
+data class CreateNewTokensRequest(
+    val refreshToken: String,
+)
+
+@Serializable
+data class CreateNewTokensResponse(
+    val refreshToken: RefreshTokenDTO,
+    val accessToken: AccessTokenDTO,
+)
+
 class AuthImpl(
     private val httpClient: HttpClient,
-    private val json: Json =
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            encodeDefaults = false
-        },
 ) : Auth {
     override suspend fun createOtp(login: String): CreateOtpResponse {
         val url = "${DEFAULT_BASE_URL}Auth/create-otp"
@@ -78,7 +81,7 @@ class AuthImpl(
                     setBody(CreateOtpRequest(login = login))
                 }
 
-        return parseResponse<CreateOtpResponse>(response)
+        return response.parseResponse()
     }
 
     override suspend fun verifyOtp(
@@ -93,22 +96,18 @@ class AuthImpl(
                     setBody(VerifyOtpRequest(sessionId = identifier, otp = code))
                 }
 
-        return parseResponse<VerifyOtpResponse>(response)
+        return response.parseResponse()
     }
 
-    private suspend inline fun <reified T> parseResponse(response: HttpResponse): T {
-        val bodyString = response.bodyAsText()
+    override suspend fun createTokens(refreshToken: String): CreateNewTokensResponse {
+        val url = "${DEFAULT_BASE_URL}Auth/create-tokens"
+        val response =
+            httpClient
+                .post(url) {
+                    contentType(ContentType.Application.Json)
+                    setBody(CreateNewTokensRequest(refreshToken = refreshToken))
+                }
 
-        if (!response.status.isSuccess()) {
-            val errorMessage = bodyString.trim('"').trim()
-            throw NetworkException(response.status, errorMessage)
-        }
-
-        return json.decodeFromString<T>(bodyString)
+        return response.parseResponse()
     }
 }
-
-class NetworkException(
-    val statusCode: HttpStatusCode,
-    override val message: String,
-) : Exception(message)

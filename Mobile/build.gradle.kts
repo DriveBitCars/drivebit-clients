@@ -43,6 +43,8 @@ kotlin {
             implementation(project(":Storage"))
             implementation(project(":Auth"))
             implementation(project(":UI-Components"))
+            implementation(project(":CommonViewModels"))
+            implementation(project(":Network"))
 
             implementation(libs.coil.compose)
             implementation(libs.coil.compose.svg)

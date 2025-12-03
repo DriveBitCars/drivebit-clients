@@ -46,7 +46,7 @@ private val profile =
     ButterModel(
         iconUrl = ImagePaths.MENU_USER_SVG, // TODO profile.userIconUrl
         text = "Мой профиль",
-        onClick = {}
+        onClick = {},
     )
 
 private val beCameAHost =
@@ -60,7 +60,7 @@ private val logout =
     ButterModel(
         iconUrl = ImagePaths.BUTTER_LOGOUT_SVG,
         text = "Выйти",
-        onClick = {}
+        onClick = {},
     )
 
 class ButterViewModelImpl(
@@ -76,17 +76,19 @@ class ButterViewModelImpl(
             ButterState.Opened(
                 buildList {
                     if (storage.isLogined()) {
-                        add(profile)
+                        add(profile.copy(onClick = { close() }))
                     } else {
                         add(login.copy(onClick = { close() }))
                         add(registr.copy(onClick = { close() }))
                     }
                     add(beCameAHost.copy(onClick = { close() }))
                     if (storage.isLogined()) {
-                        add(logout.copy(onClick = {
-                            logout()
-                            close()
-                        }))
+                        add(
+                            logout.copy(onClick = {
+                                logout()
+                                close()
+                            }),
+                        )
                     }
                 },
             )

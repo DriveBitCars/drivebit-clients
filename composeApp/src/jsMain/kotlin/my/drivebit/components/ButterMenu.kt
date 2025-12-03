@@ -64,6 +64,11 @@ fun ButterMenu() {
                                         butterViewModel.close()
                                         navigationController?.navigateTo("/login-by-phone")
                                     })
+                                "Мой профиль" ->
+                                    item.copy(onClick = {
+                                        butterViewModel.close()
+                                        navigationController?.navigateTo("/profile")
+                                    })
                                 else -> item
                             }
                         },

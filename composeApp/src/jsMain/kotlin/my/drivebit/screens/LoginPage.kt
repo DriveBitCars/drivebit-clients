@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.browser.document
 import my.drivebit.components.AppContainer
 import my.drivebit.components.Logo
 import my.drivebit.design.CSSColors
@@ -50,10 +49,6 @@ fun LoginPage(
         val encodedIdentifier = js("encodeURIComponent")(identifier) as String
         navigationController.navigateTo("/verify-otp?identifier=$encodedIdentifier")
     }
-
-    val style = document.createElement("style") as org.w3c.dom.HTMLStyleElement
-    style.textContent = "@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }"
-    document.head?.appendChild(style)
 
     AppContainer {
         Div({

@@ -12,6 +12,8 @@ import my.drivebit.viewmodels.InputValidator
 import my.drivebit.viewmodels.PhoneInputValidator
 import my.drivebit.viewmodels.PhoneLoginViewModel
 import my.drivebit.viewmodels.PhoneValidator
+import my.drivebit.viewmodels.ProfileViewModel
+import my.drivebit.viewmodels.ProfileViewModelImpl
 import my.drivebit.viewmodels.Validator
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -67,6 +69,12 @@ val commonViewModelsModule: Module =
         single<ButterViewModel> {
             ButterViewModelImpl(
                 storage = get(),
+            )
+        }
+
+        factory<ProfileViewModel> {
+            ProfileViewModelImpl(
+                userService = get(),
             )
         }
     }

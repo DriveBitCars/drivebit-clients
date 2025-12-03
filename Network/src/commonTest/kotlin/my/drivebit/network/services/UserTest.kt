@@ -15,12 +15,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
-class AuthTest {
+class UserTest {
     @Test
-    fun `verifyOtp should throw NetworkException with error message on 500 status`() =
+    fun `userGet should throw NetworkException with error message on 500 status`() =
         runTest {
-            val errorMessage =
-                "IDX12401: Expires: '12/02/2025 14:39:53' must be after NotBefore: '12/02/2025 14:39:53'."
+            val errorMessage = "Internal server error"
             val mockEngine =
                 MockEngine { request ->
                     respond(
@@ -37,11 +36,11 @@ class AuthTest {
                     }
                 }
 
-            val auth = AuthImpl(httpClient)
+            val user = UserImpl(httpClient)
 
             val exception =
                 assertFailsWith<NetworkException> {
-                    auth.verifyOtp("session-id", "123456")
+                    user.userGet()
                 }
 
             assertEquals(HttpStatusCode.InternalServerError, exception.statusCode)
@@ -49,184 +48,9 @@ class AuthTest {
         }
 
     @Test
-    fun `verifyOtp should throw NetworkException with error message on 400 status`() =
+    fun `userGet should throw NetworkException with error message on 401 status`() =
         runTest {
-            val errorMessage = "Invalid OTP code"
-            val mockEngine =
-                MockEngine { request ->
-                    respond(
-                        content = "\"$errorMessage\"",
-                        status = HttpStatusCode.BadRequest,
-                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                    )
-                }
-
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json()
-                    }
-                }
-
-            val auth = AuthImpl(httpClient)
-
-            val exception =
-                assertFailsWith<NetworkException> {
-                    auth.verifyOtp("session-id", "wrong")
-                }
-
-            assertEquals(HttpStatusCode.BadRequest, exception.statusCode)
-            assertEquals(errorMessage, exception.message)
-        }
-
-    @Test
-    fun `verifyOtp should return VerifyOtpResponse on success`() =
-        runTest {
-            val successResponse =
-                """
-                {
-                    "accessToken": {
-                        "token": "access-token-123",
-                        "expiresAt": "2025-12-02T15:00:00Z"
-                    },
-                    "refreshToken": {
-                        "token": "refresh-token-456",
-                        "userId": "user-123",
-                        "expiresAt": "2025-12-09T15:00:00Z",
-                        "createdAt": "2025-12-02T14:00:00Z"
-                    }
-                }
-                """.trimIndent()
-
-            val mockEngine =
-                MockEngine { request ->
-                    respond(
-                        content = successResponse,
-                        status = HttpStatusCode.OK,
-                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                    )
-                }
-
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json()
-                    }
-                }
-
-            val auth = AuthImpl(httpClient)
-
-            val result = auth.verifyOtp("session-id", "123456")
-
-            assertNotNull(result)
-            assertEquals("access-token-123", result.accessToken.token)
-            assertEquals("refresh-token-456", result.refreshToken.token)
-        }
-
-    @Test
-    fun `createOtp should throw NetworkException on error status`() =
-        runTest {
-            val errorMessage = "Invalid phone number"
-            val mockEngine =
-                MockEngine { request ->
-                    respond(
-                        content = "\"$errorMessage\"",
-                        status = HttpStatusCode.BadRequest,
-                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                    )
-                }
-
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json()
-                    }
-                }
-
-            val auth = AuthImpl(httpClient)
-
-            val exception =
-                assertFailsWith<NetworkException> {
-                    auth.createOtp("invalid")
-                }
-
-            assertEquals(HttpStatusCode.BadRequest, exception.statusCode)
-            assertEquals(errorMessage, exception.message)
-        }
-
-    @Test
-    fun `createOtp should return CreateOtpResponse on success`() =
-        runTest {
-            val successResponse =
-                """
-                {
-                    "message": "OTP sent successfully",
-                    "sessionId": "session-123",
-                    "expiresIn": 300
-                }
-                """.trimIndent()
-
-            val mockEngine =
-                MockEngine { request ->
-                    respond(
-                        content = successResponse,
-                        status = HttpStatusCode.OK,
-                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                    )
-                }
-
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json()
-                    }
-                }
-
-            val auth = AuthImpl(httpClient)
-
-            val result = auth.createOtp("+1234567890")
-
-            assertNotNull(result)
-            assertEquals("session-123", result.sessionId)
-            assertEquals(300, result.expiresIn)
-            assertEquals("OTP sent successfully", result.message)
-        }
-
-    @Test
-    fun `createTokens should throw NetworkException with error message on 400 status`() =
-        runTest {
-            val errorMessage = "Invalid refresh token"
-            val mockEngine =
-                MockEngine { request ->
-                    respond(
-                        content = "\"$errorMessage\"",
-                        status = HttpStatusCode.BadRequest,
-                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                    )
-                }
-
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json()
-                    }
-                }
-
-            val auth = AuthImpl(httpClient)
-
-            val exception =
-                assertFailsWith<NetworkException> {
-                    auth.createTokens("invalid-refresh-token")
-                }
-
-            assertEquals(HttpStatusCode.BadRequest, exception.statusCode)
-            assertEquals(errorMessage, exception.message)
-        }
-
-    @Test
-    fun `createTokens should throw NetworkException with error message on 401 status`() =
-        runTest {
-            val errorMessage = "Refresh token expired"
+            val errorMessage = "Unauthorized"
             val mockEngine =
                 MockEngine { request ->
                     respond(
@@ -243,11 +67,11 @@ class AuthTest {
                     }
                 }
 
-            val auth = AuthImpl(httpClient)
+            val user = UserImpl(httpClient)
 
             val exception =
                 assertFailsWith<NetworkException> {
-                    auth.createTokens("expired-refresh-token")
+                    user.userGet()
                 }
 
             assertEquals(HttpStatusCode.Unauthorized, exception.statusCode)
@@ -255,21 +79,19 @@ class AuthTest {
         }
 
     @Test
-    fun `createTokens should return CreateNewTokensResponse on success`() =
+    fun `userGet should return UserGetResponse on success`() =
         runTest {
             val successResponse =
                 """
                 {
-                    "accessToken": {
-                        "token": "new-access-token-789",
-                        "expiresAt": "2025-12-02T16:00:00Z"
-                    },
-                    "refreshToken": {
-                        "token": "new-refresh-token-789",
-                        "userId": "user-123",
-                        "expiresAt": "2025-12-09T16:00:00Z",
-                        "createdAt": "2025-12-02T15:00:00Z"
-                    }
+                    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "phone": "+1234567890",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "middleName": "Middle",
+                    "email": "user@example.com",
+                    "createdAt": "2025-12-02T19:14:47.914Z",
+                    "photos": ["photo1.jpg", "photo2.jpg"]
                 }
                 """.trimIndent()
 
@@ -289,13 +111,198 @@ class AuthTest {
                     }
                 }
 
-            val auth = AuthImpl(httpClient)
+            val user = UserImpl(httpClient)
 
-            val result = auth.createTokens("old-refresh-token-456")
+            val result = user.userGet()
 
             assertNotNull(result)
-            assertEquals("new-access-token-789", result.accessToken.token)
-            assertEquals("new-refresh-token-789", result.refreshToken.token)
-            assertEquals("user-123", result.refreshToken.userId)
+            assertEquals("3fa85f64-5717-4562-b3fc-2c963f66afa6", result.id)
+            assertEquals("+1234567890", result.phone)
+            assertEquals("John", result.firstName)
+            assertEquals("Doe", result.lastName)
+            assertEquals("Middle", result.middleName)
+            assertEquals("user@example.com", result.email)
+            assertEquals("2025-12-02T19:14:47.914Z", result.createdAt)
+            assertEquals(2, result.photos.size)
+            assertEquals("photo1.jpg", result.photos[0])
+            assertEquals("photo2.jpg", result.photos[1])
+        }
+
+    @Test
+    fun `userGet should return UserGetResponse with partial data on success`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "phone": "+9876543210",
+                    "firstName": "Jane"
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val user = UserImpl(httpClient)
+
+            val result = user.userGet()
+
+            assertNotNull(result)
+            assertEquals("3fa85f64-5717-4562-b3fc-2c963f66afa6", result.id)
+            assertEquals("+9876543210", result.phone)
+            assertEquals("Jane", result.firstName)
+            assertEquals(emptyList<String>(), result.photos)
+        }
+
+    @Test
+    fun `userGet should parse createdAt with microseconds correctly`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "test-id",
+                    "createdAt": "2025-12-02T14:26:55.121463Z"
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val user = UserImpl(httpClient)
+
+            val result = user.userGet()
+
+            assertNotNull(result)
+            assertEquals("2025-12-02T14:26:55.121463Z", result.createdAt)
+        }
+
+    @Test
+    fun `userGet should parse createdAt without microseconds correctly`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "test-id",
+                    "createdAt": "2025-12-02T14:26:55Z"
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val user = UserImpl(httpClient)
+
+            val result = user.userGet()
+
+            assertNotNull(result)
+            assertEquals("2025-12-02T14:26:55Z", result.createdAt)
+        }
+
+    @Test
+    fun `userGet should parse createdAt with milliseconds correctly`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "test-id",
+                    "createdAt": "2025-12-02T19:14:47.914Z"
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val user = UserImpl(httpClient)
+
+            val result = user.userGet()
+
+            assertNotNull(result)
+            assertEquals("2025-12-02T19:14:47.914Z", result.createdAt)
+        }
+
+    @Test
+    fun `userGet should handle null createdAt`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "test-id"
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val user = UserImpl(httpClient)
+
+            val result = user.userGet()
+
+            assertNotNull(result)
+            assertEquals(null, result.createdAt)
         }
 }

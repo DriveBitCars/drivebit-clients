@@ -15,9 +15,12 @@ kotlin {
         }
     }
 
+    val iosArm64Target = iosArm64()
+    val iosSimulatorArm64Target = iosSimulatorArm64()
+
     listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
+        iosArm64Target,
+        iosSimulatorArm64Target,
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
@@ -35,6 +38,25 @@ kotlin {
     }
 
     sourceSets {
+        val androidMaestro by creating {
+            dependsOn(androidMain.get())
+        }
+
+        androidMaestro.kotlin.srcDir("src/androidMaestro/kotlin")
+        androidMaestro.resources.srcDir("src/androidMaestro/res")
+
+        androidMaestro.dependencies {
+            implementation(project(":Mobile"))
+            implementation(project(":Network"))
+            implementation(project(":UI-Components"))
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(libs.voyager.navigator)
+            implementation(libs.androidx.activity.compose)
+        }
+
         androidMain.dependencies {
             implementation(project(":Splash"))
             implementation(project(":Mobile"))
@@ -56,7 +78,20 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
 
-        iosMain.dependencies {
+        val appleMain by creating {
+            dependsOn(commonMain.get())
+        }
+
+        iosArm64Target.compilations
+            .getByName("main")
+            .defaultSourceSet
+            .dependsOn(appleMain)
+        iosSimulatorArm64Target.compilations
+            .getByName("main")
+            .defaultSourceSet
+            .dependsOn(appleMain)
+
+        appleMain.dependencies {
             implementation(project(":Splash"))
             implementation(project(":Mobile"))
             implementation(project(":Auth"))
@@ -120,6 +155,10 @@ android {
             .get()
             .toInt()
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "my.drivebit.clients"
         minSdk =
@@ -141,6 +180,10 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+        }
+        create("maestro") {
+            initWith(getByName("debug"))
+            matchingFallbacks += listOf("debug", "release")
         }
     }
     compileOptions {
@@ -165,7 +208,6 @@ ktlint {
         exclude("**/build/**")
     }
 }
-
 
 // Изображения хранятся в composeApp/src/commonMain/resources/images/
 // Для Web (JS/WASM) они автоматически копируются в productionExecutable/images/
