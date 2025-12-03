@@ -69,7 +69,7 @@ private fun ProfileScreenContent(
                 .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        when (state) {
+        when (val currentState = state) {
             is ProfileState.Loading -> {
                 Loader()
             }
@@ -81,7 +81,7 @@ private fun ProfileScreenContent(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Text(
-                        text = "Ошибка: ${state.message}",
+                        text = "Ошибка: ${currentState.message}",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center,
@@ -93,7 +93,7 @@ private fun ProfileScreenContent(
             }
 
             is ProfileState.Success -> {
-                val user = state.user
+                val user = currentState.user
 
                 if (user.firstName != null || user.lastName != null) {
                     Text(
@@ -196,19 +196,20 @@ fun ProfileScreenPreview() {
             viewModel =
                 object : ProfileViewModel {
                     override val state: kotlinx.coroutines.flow.StateFlow<ProfileState> =
-                        kotlinx.coroutines.flow.MutableStateFlow(
-                            ProfileState.Success(
-                                UserGetResponse(
-                                    id = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                                    phone = "+7(912)742-88-27",
-                                    firstName = "Anton",
-                                    lastName = "B.",
-                                    email = "user@example.com",
-                                    createdAt = "2025-09-01T00:00:00Z",
-                                    photos = emptyList(),
+                        kotlinx.coroutines.flow
+                            .MutableStateFlow(
+                                ProfileState.Success(
+                                    UserGetResponse(
+                                        id = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        phone = "+7(912)742-88-27",
+                                        firstName = "Anton",
+                                        lastName = "B.",
+                                        email = "user@example.com",
+                                        createdAt = "2025-09-01T00:00:00Z",
+                                        photos = emptyList(),
+                                    ),
                                 ),
-                            ),
-                        ).asStateFlow()
+                            ).asStateFlow()
 
                     override fun loadProfile() {}
                 },

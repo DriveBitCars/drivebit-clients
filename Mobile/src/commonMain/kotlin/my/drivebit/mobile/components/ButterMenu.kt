@@ -13,18 +13,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import my.drivebit.mobile.screens.profile.ProfileScreen
 import my.drivebit.viewmodels.ButterState
 import my.drivebit.viewmodels.ButterViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import org.koin.compose.koinInject
 
 @Composable
 fun ButterMenu() {
-    val butterViewModel: ButterViewModel = koinScreenModel()
+    val butterViewModel: ButterViewModel = koinInject()
     val state by butterViewModel.state.collectAsState()
     val navigator = LocalNavigator.currentOrThrow
 

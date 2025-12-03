@@ -1,6 +1,7 @@
 package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.browser.document
@@ -24,9 +25,15 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
     val navigationController = LocalNavigationController.current
     val state by viewModel.state.collectAsState()
 
-    val style = document.createElement("style") as org.w3c.dom.HTMLStyleElement
-    style.textContent = "@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }"
-    document.head?.appendChild(style)
+    SideEffect {
+        val existingStyle = document.getElementById("profile-spinner-style")
+        if (existingStyle == null) {
+            val style = document.createElement("style") as org.w3c.dom.HTMLStyleElement
+            style.id = "profile-spinner-style"
+            style.textContent = "@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }"
+            document.head?.appendChild(style)
+        }
+    }
 
     AppContainer {
         Div({
