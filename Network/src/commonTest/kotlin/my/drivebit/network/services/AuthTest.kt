@@ -191,4 +191,111 @@ class AuthTest {
             assertEquals(300, result.expiresIn)
             assertEquals("OTP sent successfully", result.message)
         }
+
+    @Test
+    fun `createTokens should throw NetworkException with error message on 400 status`() =
+        runTest {
+            val errorMessage = "Invalid refresh token"
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = "\"$errorMessage\"",
+                        status = HttpStatusCode.BadRequest,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val auth = AuthImpl(httpClient)
+
+            val exception =
+                assertFailsWith<NetworkException> {
+                    auth.createTokens("invalid-refresh-token")
+                }
+
+            assertEquals(HttpStatusCode.BadRequest, exception.statusCode)
+            assertEquals(errorMessage, exception.message)
+        }
+
+    @Test
+    fun `createTokens should throw NetworkException with error message on 401 status`() =
+        runTest {
+            val errorMessage = "Refresh token expired"
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = "\"$errorMessage\"",
+                        status = HttpStatusCode.Unauthorized,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val auth = AuthImpl(httpClient)
+
+            val exception =
+                assertFailsWith<NetworkException> {
+                    auth.createTokens("expired-refresh-token")
+                }
+
+            assertEquals(HttpStatusCode.Unauthorized, exception.statusCode)
+            assertEquals(errorMessage, exception.message)
+        }
+
+    @Test
+    fun `createTokens should return CreateNewTokensResponse on success`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "accessToken": {
+                        "token": "new-access-token-789",
+                        "expiresAt": "2025-12-02T16:00:00Z"
+                    },
+                    "refreshToken": {
+                        "token": "new-refresh-token-789",
+                        "userId": "user-123",
+                        "expiresAt": "2025-12-09T16:00:00Z",
+                        "createdAt": "2025-12-02T15:00:00Z"
+                    }
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val auth = AuthImpl(httpClient)
+
+            val result = auth.createTokens("old-refresh-token-456")
+
+            assertNotNull(result)
+            assertEquals("new-access-token-789", result.accessToken.token)
+            assertEquals("new-refresh-token-789", result.refreshToken.token)
+            assertEquals("user-123", result.refreshToken.userId)
+        }
 }

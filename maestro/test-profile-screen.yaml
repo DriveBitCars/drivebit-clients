@@ -1,0 +1,22 @@
+appId: my.drivebit.clients
+---
+# Тест экрана профиля с моковыми данными
+- launchApp
+# Демо-приложение сразу открывает экран профиля
+# Проверяем заголовок экрана профиля
+- assertVisible: "Мой профиль"
+# Проверяем наличие основных элементов профиля
+- assertVisible: "Редактировать профиль"
+- assertVisible: "ПРОВЕРЕННАЯ ИНФОРМАЦИЯ"
+- assertVisible: "ОТЗЫВЫ ОТ ХОСТОВ"
+# Проверяем наличие моковых данных пользователя
+- assertVisible: "Иван"
+- assertVisible: "Петрович"
+- assertVisible: "Иванов"
+- assertVisible: "Номер телефона"
+- assertVisible: "+7(912)742-88-27"
+- assertVisible: "Email адрес"
+- assertVisible: "ivan.ivanov@example.com"
+- assertVisible: "Присоединился: 2024-01-15T10:30:00Z"
+# Делаем скриншот для анализа
+- takeScreenshot: "profile-screen-test.png"

@@ -35,6 +35,25 @@ kotlin {
     }
 
     sourceSets {
+        val androidMaestro by creating {
+            dependsOn(androidMain.get())
+        }
+
+        androidMaestro.kotlin.srcDir("src/androidMaestro/kotlin")
+        androidMaestro.resources.srcDir("src/androidMaestro/res")
+
+        androidMaestro.dependencies {
+            implementation(project(":Mobile"))
+            implementation(project(":Network"))
+            implementation(project(":UI-Components"))
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(libs.voyager.navigator)
+            implementation(libs.androidx.activity.compose)
+        }
+
         androidMain.dependencies {
             implementation(project(":Splash"))
             implementation(project(":Mobile"))
@@ -120,6 +139,10 @@ android {
             .get()
             .toInt()
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "my.drivebit.clients"
         minSdk =
@@ -141,6 +164,10 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+        }
+        create("maestro") {
+            initWith(getByName("debug"))
+            matchingFallbacks += listOf("debug", "release")
         }
     }
     compileOptions {

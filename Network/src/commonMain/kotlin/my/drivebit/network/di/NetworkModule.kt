@@ -1,11 +1,14 @@
 package my.drivebit.network.di
 
+import io.ktor.client.HttpClient
 import my.drivebit.network.createHttpClientWithConfig
+import my.drivebit.network.createPlatformHttpClientEngine
 import my.drivebit.network.services.Auth
 import my.drivebit.network.services.AuthImpl
 import my.drivebit.network.services.User
 import my.drivebit.network.services.UserImpl
 import my.drivebit.shared.storage.Storage
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /**
@@ -15,15 +18,26 @@ import org.koin.dsl.module
  */
 val networkModule =
     module {
-        single {
-            createHttpClientWithConfig(
-                getToken = { get<Storage>().getToken() },
-            )
+        single<HttpClient>(named("unauthorized")) {
+            HttpClient(createPlatformHttpClientEngine())
         }
         single<Auth> {
-            AuthImpl(get())
+            AuthImpl(get(named("unauthorized")))
+        }
+        single<HttpClient>(named("authorized")) {
+            val storage = get<Storage>()
+            val authService = get<Auth>()
+            createHttpClientWithConfig(
+                getToken = { storage.getToken()!! },
+                getRefreshToken = { storage.getRefreshToken()!! },
+                saveTokens = { accessToken, refreshToken ->
+                    accessToken?.let { storage.saveToken(it) }
+                    refreshToken.let { storage.saveRefreshToken(it) }
+                },
+                authService = authService,
+            )
         }
         single<User> {
-            UserImpl(get())
+            UserImpl(get(named("authorized")))
         }
     }

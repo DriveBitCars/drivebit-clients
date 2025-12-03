@@ -21,8 +21,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import my.drivebit.network.services.UserGetResponse
 import my.drivebit.ui.components.ApplicationTopBar
@@ -55,7 +53,7 @@ class ProfileScreen : Screen {
 }
 
 @Composable
-private fun ProfileScreenContent(
+fun ProfileScreenContent(
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel,
 ) {

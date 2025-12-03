@@ -45,14 +45,34 @@ class MockAuth : Auth {
             accessToken =
                 my.drivebit.network.services.AccessTokenDTO(
                     token = "test-token",
-                    expiresAt = null,
+                    expiresAt = "",
                 ),
             refreshToken =
                 my.drivebit.network.services.RefreshTokenDTO(
                     token = "test-refresh-token",
-                    userId = null,
-                    expiresAt = null,
-                    createdAt = null,
+                    userId = "",
+                    expiresAt = "",
+                    createdAt = "",
+                ),
+        )
+    }
+
+    override suspend fun createTokens(refreshToken: String): my.drivebit.network.services.CreateNewTokensResponse {
+        if (shouldThrowError) {
+            throw Exception(errorMessage)
+        }
+        return my.drivebit.network.services.CreateNewTokensResponse(
+            accessToken =
+                my.drivebit.network.services.AccessTokenDTO(
+                    token = "new-test-token",
+                    expiresAt = "",
+                ),
+            refreshToken =
+                my.drivebit.network.services.RefreshTokenDTO(
+                    token = "new-test-refresh-token",
+                    userId = "",
+                    expiresAt = "",
+                    createdAt = "",
                 ),
         )
     }

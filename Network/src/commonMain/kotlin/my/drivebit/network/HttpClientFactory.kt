@@ -2,32 +2,18 @@ package my.drivebit.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
-import io.ktor.client.plugins.api.createClientPlugin
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import my.drivebit.network.services.Auth
 
 expect fun createPlatformHttpClientEngine(): HttpClientEngine
 
 const val DEFAULT_BASE_URL = "http://api.drivebit.my:5000/"
-
-class AuthInterceptorConfig {
-    var tokenProvider: (() -> String?)? = null
-}
-
-val AuthInterceptorPlugin =
-    createClientPlugin("AuthInterceptor", ::AuthInterceptorConfig) {
-        val tokenProvider = pluginConfig.tokenProvider
-
-        onRequest { request, _ ->
-            tokenProvider?.invoke()?.let { token ->
-                request.headers.append(HttpHeaders.Authorization, "Bearer $token")
-            }
-        }
-    }
 
 fun createHttpClientWithConfig(
     json: Json =
@@ -36,7 +22,10 @@ fun createHttpClientWithConfig(
             isLenient = true
             encodeDefaults = false
         },
-    getToken: (() -> String?)? = null,
+    getToken: (() -> String),
+    getRefreshToken: (() -> String),
+    saveTokens: ((String?, String) -> Unit),
+    authService: Auth,
 ): HttpClient =
     HttpClient(createPlatformHttpClientEngine()) {
         install(ContentNegotiation) {
@@ -46,9 +35,36 @@ fun createHttpClientWithConfig(
             level = LogLevel.INFO
         }
 
-        if (getToken != null) {
-            install(AuthInterceptorPlugin) {
-                tokenProvider = getToken
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    val accessToken = getToken.invoke()
+                    val refreshToken = getRefreshToken.invoke()
+                    BearerTokens(
+                        accessToken = accessToken,
+                        refreshToken = refreshToken,
+                    )
+                }
+                refreshTokens {
+                    val refreshTokenValue = oldTokens?.refreshToken
+                    if (refreshTokenValue != null) {
+                        try {
+                            val newTokens = authService.createTokens(refreshTokenValue)
+                            val newAccessToken = newTokens.accessToken.token
+                            val newRefreshToken = newTokens.refreshToken.token
+
+                            saveTokens.invoke(newAccessToken, newRefreshToken)
+                            BearerTokens(
+                                accessToken = newAccessToken,
+                                refreshToken = newRefreshToken,
+                            )
+                        } catch (e: Exception) {
+                            null
+                        }
+                    } else {
+                        null
+                    }
+                }
             }
         }
     }

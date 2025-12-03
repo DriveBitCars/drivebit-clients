@@ -16,6 +16,8 @@ interface Auth {
         identifier: String,
         code: String,
     ): VerifyOtpResponse
+
+    suspend fun createTokens(refreshToken: String): CreateNewTokensResponse
 }
 
 @Serializable
@@ -38,22 +40,33 @@ data class VerifyOtpRequest(
 
 @Serializable
 data class AccessTokenDTO(
-    val token: String?,
-    val expiresAt: String? = null,
+    val token: String,
+    val expiresAt: String,
 )
 
 @Serializable
 data class RefreshTokenDTO(
-    val token: String?,
-    val userId: String? = null,
-    val expiresAt: String? = null,
-    val createdAt: String? = null,
+    val token: String,
+    val userId: String,
+    val expiresAt: String,
+    val createdAt: String,
 )
 
 @Serializable
 data class VerifyOtpResponse(
     val accessToken: AccessTokenDTO,
     val refreshToken: RefreshTokenDTO,
+)
+
+@Serializable
+data class CreateNewTokensRequest(
+    val refreshToken: String,
+)
+
+@Serializable
+data class CreateNewTokensResponse(
+    val refreshToken: RefreshTokenDTO,
+    val accessToken: AccessTokenDTO,
 )
 
 class AuthImpl(
@@ -81,6 +94,18 @@ class AuthImpl(
                 .post(url) {
                     contentType(ContentType.Application.Json)
                     setBody(VerifyOtpRequest(sessionId = identifier, otp = code))
+                }
+
+        return response.parseResponse()
+    }
+
+    override suspend fun createTokens(refreshToken: String): CreateNewTokensResponse {
+        val url = "${DEFAULT_BASE_URL}Auth/create-tokens"
+        val response =
+            httpClient
+                .post(url) {
+                    contentType(ContentType.Application.Json)
+                    setBody(CreateNewTokensRequest(refreshToken = refreshToken))
                 }
 
         return response.parseResponse()
