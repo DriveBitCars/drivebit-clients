@@ -166,4 +166,143 @@ class UserTest {
             assertEquals("Jane", result.firstName)
             assertEquals(emptyList<String>(), result.photos)
         }
+
+    @Test
+    fun `userGet should parse createdAt with microseconds correctly`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "test-id",
+                    "createdAt": "2025-12-02T14:26:55.121463Z"
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val user = UserImpl(httpClient)
+
+            val result = user.userGet()
+
+            assertNotNull(result)
+            assertEquals("2025-12-02T14:26:55.121463Z", result.createdAt)
+        }
+
+    @Test
+    fun `userGet should parse createdAt without microseconds correctly`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "test-id",
+                    "createdAt": "2025-12-02T14:26:55Z"
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val user = UserImpl(httpClient)
+
+            val result = user.userGet()
+
+            assertNotNull(result)
+            assertEquals("2025-12-02T14:26:55Z", result.createdAt)
+        }
+
+    @Test
+    fun `userGet should parse createdAt with milliseconds correctly`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "test-id",
+                    "createdAt": "2025-12-02T19:14:47.914Z"
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val user = UserImpl(httpClient)
+
+            val result = user.userGet()
+
+            assertNotNull(result)
+            assertEquals("2025-12-02T19:14:47.914Z", result.createdAt)
+        }
+
+    @Test
+    fun `userGet should handle null createdAt`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "test-id"
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val user = UserImpl(httpClient)
+
+            val result = user.userGet()
+
+            assertNotNull(result)
+            assertEquals(null, result.createdAt)
+        }
 }
