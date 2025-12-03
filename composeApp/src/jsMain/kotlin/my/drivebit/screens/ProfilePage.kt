@@ -25,17 +25,6 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
     val navigationController = LocalNavigationController.current
     val state by viewModel.state.collectAsState()
 
-    SideEffect {
-        val existingStyle = document.getElementById("profile-spinner-style")
-        if (existingStyle == null) {
-            val style = document.createElement("style") as org.w3c.dom.HTMLStyleElement
-            style.id = "profile-spinner-style"
-            style.textContent =
-                "@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }"
-            document.head?.appendChild(style)
-        }
-    }
-
     AppContainer {
         Div({
             style {
@@ -47,19 +36,6 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
         }) {
             Logo()
 
-            Button({
-                onClick { navigationController?.navigateTo("/") }
-                style {
-                    applyTypography(CSSTypography.Styles.button)
-                    fontSize(CSSTypography.FontSize.base)
-                    backgroundColor(Color.transparent)
-                    border(0.px, LineStyle.None, Color.transparent)
-                    cursor("pointer")
-                    color(CSSColors.BlueRed)
-                }
-            }) {
-                Text("Назад")
-            }
         }
 
         Div({
@@ -109,24 +85,6 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                             }
                         }) {
                             Text("Ошибка: ${currentState.message}")
-                        }
-
-                        Button({
-                            onClick { viewModel.loadProfile() }
-                            style {
-                                marginTop(16.px)
-                                applyTypography(CSSTypography.Styles.button)
-                                fontSize(CSSTypography.FontSize.base)
-                                fontWeight(CSSTypography.FontWeight.semibold)
-                                backgroundColor(CSSColors.BlueRed)
-                                color(CSSColors.White)
-                                border(0.px, LineStyle.None, Color.transparent)
-                                borderRadius(8.px)
-                                padding(12.px, 24.px)
-                                cursor("pointer")
-                            }
-                        }) {
-                            Text("Повторить")
                         }
                     }
                 }
