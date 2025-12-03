@@ -15,9 +15,12 @@ kotlin {
         }
     }
 
+    val iosArm64Target = iosArm64()
+    val iosSimulatorArm64Target = iosSimulatorArm64()
+
     listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
+        iosArm64Target,
+        iosSimulatorArm64Target,
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
@@ -75,7 +78,20 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
 
-        iosMain.dependencies {
+        val appleMain by creating {
+            dependsOn(commonMain.get())
+        }
+
+        iosArm64Target.compilations
+            .getByName("main")
+            .defaultSourceSet
+            .dependsOn(appleMain)
+        iosSimulatorArm64Target.compilations
+            .getByName("main")
+            .defaultSourceSet
+            .dependsOn(appleMain)
+
+        appleMain.dependencies {
             implementation(project(":Splash"))
             implementation(project(":Mobile"))
             implementation(project(":Auth"))

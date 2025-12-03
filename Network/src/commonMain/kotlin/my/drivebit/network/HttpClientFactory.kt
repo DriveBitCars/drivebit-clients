@@ -46,8 +46,7 @@ fun createHttpClientWithConfig(
                     )
                 }
                 refreshTokens {
-                    val refreshTokenValue = oldTokens?.refreshToken
-                    if (refreshTokenValue != null) {
+                    val refreshTokenValue = oldTokens?.refreshToken!!
                         try {
                             val newTokens = authService.createTokens(refreshTokenValue)
                             val newAccessToken = newTokens.accessToken.token
@@ -61,9 +60,6 @@ fun createHttpClientWithConfig(
                         } catch (e: Exception) {
                             null
                         }
-                    } else {
-                        null
-                    }
                 }
             }
         }

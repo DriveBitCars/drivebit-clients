@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.browser.document
 import my.drivebit.components.AppContainer
 import my.drivebit.components.Logo
 import my.drivebit.design.CSSColors
