@@ -56,8 +56,8 @@ class OtpVerificationViewModel(
             runCatching {
                 auth.verifyOtp(identifier, _code.value)
             }.onSuccess { response ->
-                response.accessToken.token?.let { storage.saveToken(it) }
-                response.refreshToken.token?.let { storage.saveRefreshToken(it) }
+                response.accessToken.token.let { storage.saveToken(it) }
+                response.refreshToken.token.let { storage.saveRefreshToken(it) }
                 _state.update { OtpVerificationState.Success }
             }.onFailure { e ->
                 _state.update {

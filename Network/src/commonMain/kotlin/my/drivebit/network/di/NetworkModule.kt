@@ -1,6 +1,9 @@
 package my.drivebit.network.di
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import my.drivebit.network.createHttpClientWithConfig
 import my.drivebit.network.createPlatformHttpClientEngine
 import my.drivebit.network.services.Auth
@@ -19,7 +22,17 @@ import org.koin.dsl.module
 val networkModule =
     module {
         single<HttpClient>(named("unauthorized")) {
-            HttpClient(createPlatformHttpClientEngine())
+            HttpClient(createPlatformHttpClientEngine()) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                            isLenient = true
+                            encodeDefaults = false
+                        },
+                    )
+                }
+            }
         }
         single<Auth> {
             AuthImpl(get(named("unauthorized")))

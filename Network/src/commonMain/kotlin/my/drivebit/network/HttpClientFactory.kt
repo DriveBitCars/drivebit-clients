@@ -47,19 +47,19 @@ fun createHttpClientWithConfig(
                 }
                 refreshTokens {
                     val refreshTokenValue = oldTokens?.refreshToken!!
-                        try {
-                            val newTokens = authService.createTokens(refreshTokenValue)
-                            val newAccessToken = newTokens.accessToken.token
-                            val newRefreshToken = newTokens.refreshToken.token
+                    try {
+                        val newTokens = authService.createTokens(refreshTokenValue)
+                        val newAccessToken = newTokens.accessToken.token
+                        val newRefreshToken = newTokens.refreshToken.token
 
-                            saveTokens.invoke(newAccessToken, newRefreshToken)
-                            BearerTokens(
-                                accessToken = newAccessToken,
-                                refreshToken = newRefreshToken,
-                            )
-                        } catch (e: Exception) {
-                            null
-                        }
+                        saveTokens.invoke(newAccessToken, newRefreshToken)
+                        BearerTokens(
+                            accessToken = newAccessToken,
+                            refreshToken = newRefreshToken,
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
                 }
             }
         }
