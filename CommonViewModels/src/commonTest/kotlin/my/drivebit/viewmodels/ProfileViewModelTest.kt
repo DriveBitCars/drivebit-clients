@@ -163,6 +163,7 @@ class ProfileViewModelTest {
                     id = "user-123",
                     phone = "+9876543210",
                     firstName = "Jane",
+                    createdAt = "",
                 )
             val viewModel =
                 ProfileViewModelImpl(
@@ -181,7 +182,7 @@ class ProfileViewModelTest {
             assertEquals(null, successState.user.lastName)
             assertEquals(null, successState.user.middleName)
             assertEquals(null, successState.user.email)
-            assertEquals(null, successState.user.createdAt)
+            assertEquals("", successState.user.createdAt)
             assertTrue(successState.user.photos.isEmpty())
         }
 

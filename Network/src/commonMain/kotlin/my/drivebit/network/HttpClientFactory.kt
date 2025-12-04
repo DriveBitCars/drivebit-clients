@@ -13,7 +13,9 @@ import my.drivebit.network.services.Auth
 
 expect fun createPlatformHttpClientEngine(): HttpClientEngine
 
-const val DEFAULT_BASE_URL = "http://api.drivebit.my:5000/"
+expect fun getBaseUrl(): String
+
+const val DEFAULT_BASE_URL = "https://drivebit.my/api/"
 
 fun createHttpClientWithConfig(
     json: Json =
