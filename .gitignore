@@ -42,6 +42,9 @@ reports/
 screenshots/
 screenshot.png
 
+# Assets (temporary files)
+assets/
+
 # Compiled JS files
 composeApp.js
 
