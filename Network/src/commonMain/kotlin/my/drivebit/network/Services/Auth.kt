@@ -6,7 +6,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
-import my.drivebit.network.getBaseUrl
+import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
 
 interface Auth {
@@ -73,7 +73,7 @@ class AuthImpl(
     private val httpClient: HttpClient,
 ) : Auth {
     override suspend fun createOtp(login: String): CreateOtpResponse {
-        val url = "${getBaseUrl()}Auth/create-otp"
+        val url = "${DEFAULT_BASE_URL}Auth/create-otp"
         val response =
             httpClient
                 .post(url) {
@@ -88,7 +88,7 @@ class AuthImpl(
         identifier: String,
         code: String,
     ): VerifyOtpResponse {
-        val url = "${getBaseUrl()}Auth/verify-otp"
+        val url = "${DEFAULT_BASE_URL}Auth/verify-otp"
         val response =
             httpClient
                 .post(url) {
@@ -100,7 +100,7 @@ class AuthImpl(
     }
 
     override suspend fun createTokens(refreshToken: String): CreateNewTokensResponse {
-        val url = "${getBaseUrl()}Auth/create-tokens"
+        val url = "${DEFAULT_BASE_URL}Auth/create-tokens"
         val response =
             httpClient
                 .post(url) {

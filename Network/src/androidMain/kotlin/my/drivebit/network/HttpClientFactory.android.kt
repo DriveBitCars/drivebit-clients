@@ -8,5 +8,3 @@ actual fun createPlatformHttpClientEngine(): HttpClientEngine =
         connectTimeout = 10_000
         socketTimeout = 10_000
     }
-
-actual fun getBaseUrl(): String = DEFAULT_BASE_URL
