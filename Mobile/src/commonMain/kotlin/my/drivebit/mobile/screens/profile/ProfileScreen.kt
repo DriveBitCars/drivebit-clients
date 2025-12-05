@@ -26,6 +26,7 @@ import my.drivebit.network.services.UserGetResponse
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
 import my.drivebit.ui.theme.DrivebitTheme
+import my.drivebit.utils.mapIso8601ToMonthYearString
 import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -106,8 +107,14 @@ fun ProfileScreenContent(
                 }
 
                 user.createdAt?.let { createdAt ->
+                    val formattedDate =
+                        try {
+                            mapIso8601ToMonthYearString(createdAt)
+                        } catch (e: Exception) {
+                            createdAt
+                        }
                     Text(
-                        text = "Присоединился: $createdAt",
+                        text = "Присоединился: $formattedDate",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

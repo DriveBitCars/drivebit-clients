@@ -1,4 +1,4 @@
-package my.drivebit.viewmodels
+package my.drivebit.utils
 
 class PhoneInputValidator : InputValidator {
     override fun isValid(input: String): ValidationResult {

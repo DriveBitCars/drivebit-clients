@@ -9,6 +9,7 @@ import my.drivebit.components.Logo
 import my.drivebit.components.MenuUserButton
 import my.drivebit.components.filterButton
 import my.drivebit.navigation.Navigation
+import my.drivebit.screens.EditNamePage
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.ProfilePage
@@ -56,6 +57,9 @@ actual fun App() {
                 }
                 currentPath == "/profile" -> {
                     ProfilePage()
+                }
+                currentPath.startsWith("/edit-name") -> {
+                    EditNamePage(currentPath)
                 }
                 else -> {
                     HomePage()

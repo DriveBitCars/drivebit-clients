@@ -13,6 +13,7 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.resources.ImagePaths
+import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.viewmodels.AuthFormState
 import my.drivebit.viewmodels.AuthFormViewModel
 import org.jetbrains.compose.web.css.*
@@ -46,7 +47,7 @@ fun LoginPage(
 
     if (loginState is AuthFormState.Success) {
         val identifier = (loginState as AuthFormState.Success).identifier
-        val encodedIdentifier = js("encodeURIComponent")(identifier) as String
+        val encodedIdentifier = identifier.encodeUrlParameter()
         navigationController.navigateTo("/verify-otp?identifier=$encodedIdentifier")
     }
 
@@ -126,67 +127,70 @@ fun LoginPage(
                                 } else {
                                     org.jetbrains.compose.web.attributes.InputType.Email
                                 },
-                        ) {
-                            value(inputValue)
-                            onInput { event ->
-                                val newValue = (event.target as org.w3c.dom.HTMLInputElement).value
-                                inputValue = viewModel.formatInput(newValue)
-                                viewModel.validateInput(inputValue)
-                            }
-                            style {
-                                width(100.percent)
-                                padding(12.px, 16.px)
-                                borderRadius(8.px)
-                                property("box-sizing", "border-box")
-                                val hasError = loginState is AuthFormState.Error || validationError != null
-                                val borderColor =
-                                    if (hasError) {
-                                        CSSColors.RedString
-                                    } else {
-                                        CSSColors.Gray300String
-                                    }
-                                property("border", "1px solid $borderColor")
-                                property("font-size", "16px")
-                                property("outline", "none")
-                                property("transition", "border-color 0.2s ease")
-                            }
-                            onFocus {
-                                val hasError = loginState is AuthFormState.Error || validationError != null
-                                val borderColor =
-                                    if (hasError) {
-                                        CSSColors.RedString
-                                    } else {
-                                        CSSColors.BlueString
-                                    }
-                                (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
-                                    "border-color",
-                                    borderColor,
-                                )
-                            }
-                            onBlur {
-                                viewModel.validateInput(inputValue)
-                                val hasError = loginState is AuthFormState.Error || validationError != null
-                                val borderColor =
-                                    if (hasError) {
-                                        CSSColors.RedString
-                                    } else {
-                                        CSSColors.Gray300String
-                                    }
-                                (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
-                                    "border-color",
-                                    borderColor,
-                                )
-                            }
-                            onKeyDown { event ->
-                                val inputElement = event.target as org.w3c.dom.HTMLInputElement
-                                if (event.key == "Backspace" &&
-                                    inputElement.selectionStart == 0 &&
-                                    inputElement.selectionEnd == 0
-                                ) {
-                                    event.preventDefault()
+                            attrs = {
+                                attr("autocomplete", if (viewModel.fieldLabel == "Телефон") "tel" else "email")
+                                attr("name", if (viewModel.fieldLabel == "Телефон") "tel" else "email")
+                                value(inputValue)
+                                onInput { event ->
+                                    val newValue = (event.target as org.w3c.dom.HTMLInputElement).value
+                                    inputValue = viewModel.formatInput(newValue)
+                                    viewModel.validateInput(inputValue)
                                 }
-                            }
-                        }
+                                style {
+                                    width(100.percent)
+                                    padding(12.px, 16.px)
+                                    borderRadius(8.px)
+                                    property("box-sizing", "border-box")
+                                    val hasError = loginState is AuthFormState.Error || validationError != null
+                                    val borderColor =
+                                        if (hasError) {
+                                            CSSColors.RedString
+                                        } else {
+                                            CSSColors.Gray300String
+                                        }
+                                    property("border", "1px solid $borderColor")
+                                    property("font-size", "16px")
+                                    property("outline", "none")
+                                    property("transition", "border-color 0.2s ease")
+                                }
+                                onFocus {
+                                    val hasError = loginState is AuthFormState.Error || validationError != null
+                                    val borderColor =
+                                        if (hasError) {
+                                            CSSColors.RedString
+                                        } else {
+                                            CSSColors.BlueString
+                                        }
+                                    (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
+                                        "border-color",
+                                        borderColor,
+                                    )
+                                }
+                                onBlur {
+                                    viewModel.validateInput(inputValue)
+                                    val hasError = loginState is AuthFormState.Error || validationError != null
+                                    val borderColor =
+                                        if (hasError) {
+                                            CSSColors.RedString
+                                        } else {
+                                            CSSColors.Gray300String
+                                        }
+                                    (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
+                                        "border-color",
+                                        borderColor,
+                                    )
+                                }
+                                onKeyDown { event ->
+                                    val inputElement = event.target as org.w3c.dom.HTMLInputElement
+                                    if (event.key == "Backspace" &&
+                                        inputElement.selectionStart == 0 &&
+                                        inputElement.selectionEnd == 0
+                                    ) {
+                                        event.preventDefault()
+                                    }
+                                }
+                            },
+                        )
                         if (validationError != null) {
                             Span({
                                 style {

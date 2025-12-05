@@ -1,20 +1,22 @@
 package my.drivebit.viewmodels.di
 
+import my.drivebit.utils.EmailInputValidator
+import my.drivebit.utils.EmailValidator
+import my.drivebit.utils.InputValidator
+import my.drivebit.utils.PhoneInputValidator
+import my.drivebit.utils.PhoneValidator
+import my.drivebit.utils.Validator
 import my.drivebit.viewmodels.AuthFormViewModel
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
-import my.drivebit.viewmodels.EmailInputValidator
+import my.drivebit.viewmodels.EditProfileViewModel
+import my.drivebit.viewmodels.EditProfileViewModelImpl
 import my.drivebit.viewmodels.EmailLoginViewModel
-import my.drivebit.viewmodels.EmailValidator
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.IconUserViewModel
-import my.drivebit.viewmodels.InputValidator
-import my.drivebit.viewmodels.PhoneInputValidator
 import my.drivebit.viewmodels.PhoneLoginViewModel
-import my.drivebit.viewmodels.PhoneValidator
 import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
-import my.drivebit.viewmodels.Validator
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -75,6 +77,15 @@ val commonViewModelsModule: Module =
         factory<ProfileViewModel> {
             ProfileViewModelImpl(
                 userService = get(),
+            )
+        }
+
+        factory<EditProfileViewModel> {
+            EditProfileViewModelImpl(
+                userService = get(),
+                initialFirstName = "",
+                initialLastName = "",
+                initialMiddleName = "",
             )
         }
     }

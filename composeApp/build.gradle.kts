@@ -117,6 +117,7 @@ kotlin {
             implementation(project(":CommonViewModels"))
             implementation(project(":Network"))
             implementation(project(":UI-Components"))
+            implementation(project(":Utils"))
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koinComposeViewmodelJs)
@@ -125,6 +126,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":Storage"))
             implementation(project(":CommonViewModels"))
+            implementation(project(":Utils"))
             implementation(compose.runtime)
             implementation(libs.koin.core)
             implementation(libs.kotlinx.datetime)

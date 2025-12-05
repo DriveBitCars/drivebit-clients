@@ -59,6 +59,15 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinx.coroutines.get()}")
             implementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
         }
+
+        val iosArm64Test by getting
+        val iosSimulatorArm64Test by getting
+        iosArm64Test.dependencies {
+            implementation(libs.kotlin.test)
+        }
+        iosSimulatorArm64Test.dependencies {
+            implementation(libs.kotlin.test)
+        }
     }
 }
 

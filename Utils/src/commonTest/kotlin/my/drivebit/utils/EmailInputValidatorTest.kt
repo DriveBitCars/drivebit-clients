@@ -1,4 +1,4 @@
-package my.drivebit.viewmodels
+package my.drivebit.utils
 
 import kotlin.test.Test
 import kotlin.test.assertTrue
