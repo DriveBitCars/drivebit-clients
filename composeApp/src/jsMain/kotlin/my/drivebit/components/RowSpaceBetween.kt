@@ -11,6 +11,7 @@ fun RowSpaceBetween(content: @Composable () -> Unit) {
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Row)
             justifyContent(JustifyContent.SpaceBetween)
+            alignItems(AlignItems.Center)
         }
     }) {
         content()

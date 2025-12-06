@@ -24,6 +24,7 @@ fun createHttpClientWithConfig(
             ignoreUnknownKeys = true
             isLenient = true
             encodeDefaults = false
+            explicitNulls = true
         },
     getToken: (() -> String),
     getRefreshToken: (() -> String),

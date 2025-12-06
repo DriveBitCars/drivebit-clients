@@ -8,13 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import my.drivebit.network.services.Auth
 import my.drivebit.utils.InputValidator
 import my.drivebit.utils.ValidationResult
 import my.drivebit.utils.Validator
 
 class EmailLoginViewModel(
-    private val auth: Auth,
+    private val createOtpRepository: CreateOtpRepository,
     private val emailValidator: Validator,
     private val emailInputValidator: InputValidator,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
@@ -23,6 +22,10 @@ class EmailLoginViewModel(
 
     override val pageTitle: String = "Войти или создать аккаунт"
     override val fieldLabel: String = "Email"
+    override val inputType: InputFieldType = InputFieldType.Email
+    override val autocomplete: String = "email"
+    override val inputName: String = "email"
+    override val initialInputValue: String = ""
     override val primaryButtonText: String = "Продолжить"
     override val secondaryButtonText: String = "Войти по телефону"
     override val secondaryButtonNavigationPath: String = "/login-by-phone"
@@ -58,20 +61,14 @@ class EmailLoginViewModel(
         viewModelScope.launch {
             _state.update { AuthFormState.Loading }
 
-            val result =
-                runCatching {
-                    auth.createOtp(input)
+            when (val result = createOtpRepository.createOtp(input)) {
+                is ResultOtp.Success -> {
+                    _state.update { AuthFormState.Success(result.sessionId) }
                 }
-
-            result.fold(
-                onSuccess = { response ->
-                    _state.update { AuthFormState.Success(response.sessionId) }
-                },
-                onFailure = { throwable ->
-                    val errorMessage = throwable.message?.takeIf { it.isNotBlank() } ?: "Произошла ошибка"
-                    _state.update { AuthFormState.Error(errorMessage) }
-                },
-            )
+                is ResultOtp.Error -> {
+                    _state.update { AuthFormState.Error(result.message) }
+                }
+            }
         }
     }
 

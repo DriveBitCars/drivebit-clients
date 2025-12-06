@@ -71,10 +71,11 @@ class EditProfileViewModelTest {
                     coroutineScope = scope,
                 )
 
-            assertEquals("John", viewModel.firstName.value)
-            assertEquals("Doe", viewModel.lastName.value)
-            assertEquals("Middle", viewModel.middleName.value)
             assertTrue(viewModel.state.value is EditProfileState.Initial)
+            val initialState = viewModel.state.value as EditProfileState.Initial
+            assertEquals("John", initialState.firstName)
+            assertEquals("Doe", initialState.lastName)
+            assertEquals("Middle", initialState.middleName)
         }
 
     @Test
@@ -95,7 +96,9 @@ class EditProfileViewModelTest {
             viewModel.updateFirstName("Jane")
             advanceUntilIdle()
 
-            assertEquals("Jane", viewModel.firstName.value)
+            assertTrue(viewModel.state.value is EditProfileState.Initial)
+            val initialState = viewModel.state.value as EditProfileState.Initial
+            assertEquals("Jane", initialState.firstName)
         }
 
     @Test
@@ -116,7 +119,9 @@ class EditProfileViewModelTest {
             viewModel.updateLastName("Smith")
             advanceUntilIdle()
 
-            assertEquals("Smith", viewModel.lastName.value)
+            assertTrue(viewModel.state.value is EditProfileState.Initial)
+            val initialState = viewModel.state.value as EditProfileState.Initial
+            assertEquals("Smith", initialState.lastName)
         }
 
     @Test
@@ -137,7 +142,9 @@ class EditProfileViewModelTest {
             viewModel.updateMiddleName("Petrovich")
             advanceUntilIdle()
 
-            assertEquals("Petrovich", viewModel.middleName.value)
+            assertTrue(viewModel.state.value is EditProfileState.Initial)
+            val initialState = viewModel.state.value as EditProfileState.Initial
+            assertEquals("Petrovich", initialState.middleName)
         }
 
     @Test

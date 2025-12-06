@@ -9,11 +9,11 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
-fun SmartHeader(text: String) {
+fun TextSmartHeader(text: String) {
     Span({
         style {
             applyTypography(CSSTypography.Styles.body)
-            fontSize(CSSTypography.FontSize.xxl)
+            fontSize(CSSTypography.FontSize.xxxl)
             fontWeight(CSSTypography.FontWeight.bold)
             color(CSSColors.Black)
             letterSpacing(0.5.px)

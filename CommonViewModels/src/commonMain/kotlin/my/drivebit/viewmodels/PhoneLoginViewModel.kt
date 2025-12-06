@@ -8,13 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import my.drivebit.network.services.Auth
 import my.drivebit.utils.InputValidator
 import my.drivebit.utils.ValidationResult
 import my.drivebit.utils.Validator
 
 class PhoneLoginViewModel(
-    private val auth: Auth,
+    private val createOtpRepository: CreateOtpRepository,
     private val phoneValidator: Validator,
     private val phoneInputValidator: InputValidator,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
@@ -23,7 +22,11 @@ class PhoneLoginViewModel(
 
     override val pageTitle: String = "Войти или создать аккаунт"
     override val fieldLabel: String = "Телефон"
-    override val primaryButtonText: String = "Продолжиь"
+    override val inputType: InputFieldType = InputFieldType.Phone
+    override val autocomplete: String = "tel"
+    override val inputName: String = "tel"
+    override val initialInputValue: String = "+7"
+    override val primaryButtonText: String = "Продолжить"
     override val secondaryButtonText: String = "Войти по email"
     override val secondaryButtonNavigationPath: String = "/login-by-mail"
 
@@ -58,20 +61,14 @@ class PhoneLoginViewModel(
         viewModelScope.launch {
             _state.update { AuthFormState.Loading }
 
-            val result =
-                runCatching {
-                    auth.createOtp(input)
+            when (val result = createOtpRepository.createOtp(input)) {
+                is ResultOtp.Success -> {
+                    _state.update { AuthFormState.Success(result.sessionId) }
                 }
-
-            result.fold(
-                onSuccess = { response ->
-                    _state.update { AuthFormState.Success(response.sessionId) }
-                },
-                onFailure = { throwable ->
-                    val errorMessage = throwable.message?.takeIf { it.isNotBlank() } ?: "Произошла ошибка"
-                    _state.update { AuthFormState.Error(errorMessage) }
-                },
-            )
+                is ResultOtp.Error -> {
+                    _state.update { AuthFormState.Error(result.message) }
+                }
+            }
         }
     }
 

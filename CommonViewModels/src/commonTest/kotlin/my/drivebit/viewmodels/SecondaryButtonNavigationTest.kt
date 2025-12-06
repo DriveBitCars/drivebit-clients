@@ -25,8 +25,8 @@ class SecondaryButtonNavigationTest {
     fun `secondaryButtonNavigationPath should be accessible even when primary button has validation error`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
-            val phoneViewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator, testScope)
+            val repo = MockCreateOtpRepository()
+            val phoneViewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator, testScope)
 
             phoneViewModel.validateInput("799")
             advanceUntilIdle()
@@ -42,10 +42,10 @@ class SecondaryButtonNavigationTest {
     fun `secondaryButtonNavigationPath should be accessible even when primary button has API error`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
-            mockAuth.shouldThrowError = true
-            mockAuth.errorMessage = "Network error"
-            val phoneViewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator, testScope)
+            val repo = MockCreateOtpRepository()
+            repo.shouldThrowError = true
+            repo.errorMessage = "Network error"
+            val phoneViewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator, testScope)
 
             phoneViewModel.submit("+79991234567")
             advanceUntilIdle()
@@ -62,13 +62,12 @@ class SecondaryButtonNavigationTest {
         }
 
     @Test
-    @Suppress("MaxLineLength")
-    fun `email viewModel secondaryButtonNavigationPath should be accessible even when primary button has validation error`() =
+    fun `email viewModel secondary path should be accessible on validation error`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
+            val repo = MockCreateOtpRepository()
             val emailViewModel =
-                EmailLoginViewModel(mockAuth, emailValidator, emailInputValidator, testScope)
+                EmailLoginViewModel(repo, emailValidator, emailInputValidator, testScope)
 
             emailViewModel.validateInput("test@")
             advanceUntilIdle()
@@ -84,11 +83,11 @@ class SecondaryButtonNavigationTest {
     fun `email viewModel secondaryButtonNavigationPath should be accessible even when primary button has API error`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
-            mockAuth.shouldThrowError = true
-            mockAuth.errorMessage = "Network error"
+            val repo = MockCreateOtpRepository()
+            repo.shouldThrowError = true
+            repo.errorMessage = "Network error"
             val emailViewModel =
-                EmailLoginViewModel(mockAuth, emailValidator, emailInputValidator, testScope)
+                EmailLoginViewModel(repo, emailValidator, emailInputValidator, testScope)
 
             emailViewModel.submit("test@example.com")
             advanceUntilIdle()
@@ -108,8 +107,8 @@ class SecondaryButtonNavigationTest {
     fun `secondaryButtonNavigationPath should be accessible during loading state`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
-            val phoneViewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator, testScope)
+            val repo = MockCreateOtpRepository()
+            val phoneViewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator, testScope)
 
             phoneViewModel.submit("+79991234567")
 

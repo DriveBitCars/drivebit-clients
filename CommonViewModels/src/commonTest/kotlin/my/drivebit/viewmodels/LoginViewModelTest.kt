@@ -6,77 +6,24 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import my.drivebit.network.services.Auth
-import my.drivebit.network.services.CreateOtpResponse
-import my.drivebit.network.services.VerifyOtpResponse
 import my.drivebit.utils.PhoneInputValidator
 import my.drivebit.utils.PhoneValidator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class MockAuth : Auth {
+class MockCreateOtpRepository : CreateOtpRepository {
     var shouldThrowError = false
     var errorMessage = "Network error"
-    var lastPhoneCalled: String? = null
-    var lastVerifyIdentifier: String? = null
-    var lastVerifyCode: String? = null
+    var lastLoginCalled: String? = null
 
-    override suspend fun createOtp(login: String): CreateOtpResponse {
-        lastPhoneCalled = login
+    override suspend fun createOtp(login: String): ResultOtp {
+        lastLoginCalled = login
         if (shouldThrowError) {
-            throw Exception(errorMessage)
+            val message = errorMessage.takeIf { it.isNotBlank() } ?: "Произошла ошибка"
+            return ResultOtp.Error(message)
         }
-        return CreateOtpResponse(
-            message = "OTP sent",
-            sessionId = "test-session-id-guid",
-            expiresIn = 300,
-        )
-    }
-
-    override suspend fun verifyOtp(
-        identifier: String,
-        code: String,
-    ): VerifyOtpResponse {
-        lastVerifyIdentifier = identifier
-        lastVerifyCode = code
-        if (shouldThrowError) {
-            throw Exception(errorMessage)
-        }
-        return VerifyOtpResponse(
-            accessToken =
-                my.drivebit.network.services.AccessTokenDTO(
-                    token = "test-token",
-                    expiresAt = "",
-                ),
-            refreshToken =
-                my.drivebit.network.services.RefreshTokenDTO(
-                    token = "test-refresh-token",
-                    userId = "",
-                    expiresAt = "",
-                    createdAt = "",
-                ),
-        )
-    }
-
-    override suspend fun createTokens(refreshToken: String): my.drivebit.network.services.CreateNewTokensResponse {
-        if (shouldThrowError) {
-            throw Exception(errorMessage)
-        }
-        return my.drivebit.network.services.CreateNewTokensResponse(
-            accessToken =
-                my.drivebit.network.services.AccessTokenDTO(
-                    token = "new-test-token",
-                    expiresAt = "",
-                ),
-            refreshToken =
-                my.drivebit.network.services.RefreshTokenDTO(
-                    token = "new-test-refresh-token",
-                    userId = "",
-                    expiresAt = "",
-                    createdAt = "",
-                ),
-        )
+        return ResultOtp.Success("test-session-id-guid")
     }
 }
 
@@ -88,8 +35,8 @@ class LoginViewModelTest {
     @Test
     fun `initial state should be Idle`() =
         runTest {
-            val mockAuth = MockAuth()
-            val viewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator)
+            val repo = MockCreateOtpRepository()
+            val viewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator)
 
             assertTrue(viewModel.state.value is AuthFormState.Idle)
         }
@@ -97,8 +44,8 @@ class LoginViewModelTest {
     @Test
     fun `formatInput should format phone correctly`() =
         runTest {
-            val mockAuth = MockAuth()
-            val viewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator)
+            val repo = MockCreateOtpRepository()
+            val viewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator)
 
             val formatted = viewModel.formatInput("79991234567")
             assertEquals("+79991234567", formatted)
@@ -108,22 +55,22 @@ class LoginViewModelTest {
     fun `submit should call auth service with phone number`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
-            val viewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator, testScope)
+            val repo = MockCreateOtpRepository()
+            val viewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator, testScope)
             val testPhone = "+79991234567"
 
             viewModel.submit(testPhone)
             advanceUntilIdle()
 
-            assertEquals(testPhone, mockAuth.lastPhoneCalled)
+            assertEquals(testPhone, repo.lastLoginCalled)
         }
 
     @Test
     fun `submit should set state to Success on success`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
-            val viewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator, testScope)
+            val repo = MockCreateOtpRepository()
+            val viewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator, testScope)
 
             viewModel.submit("+79991234567")
             advanceUntilIdle()
@@ -137,10 +84,10 @@ class LoginViewModelTest {
     fun `submit should set state to Error on failure`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
-            mockAuth.shouldThrowError = true
-            mockAuth.errorMessage = "Invalid phone number"
-            val viewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator, testScope)
+            val repo = MockCreateOtpRepository()
+            repo.shouldThrowError = true
+            repo.errorMessage = "Invalid phone number"
+            val viewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator, testScope)
 
             viewModel.submit("+79991234567")
             advanceUntilIdle()
@@ -154,10 +101,10 @@ class LoginViewModelTest {
     fun `submit should handle exception with null message`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
-            mockAuth.shouldThrowError = true
-            mockAuth.errorMessage = ""
-            val viewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator, testScope)
+            val repo = MockCreateOtpRepository()
+            repo.shouldThrowError = true
+            repo.errorMessage = ""
+            val viewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator, testScope)
 
             viewModel.submit("+79991234567")
             advanceUntilIdle()
@@ -171,9 +118,9 @@ class LoginViewModelTest {
     fun `clearError should reset state to Idle`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val mockAuth = MockAuth()
-            mockAuth.shouldThrowError = true
-            val viewModel = PhoneLoginViewModel(mockAuth, phoneValidator, phoneInputValidator, testScope)
+            val repo = MockCreateOtpRepository()
+            repo.shouldThrowError = true
+            val viewModel = PhoneLoginViewModel(repo, phoneValidator, phoneInputValidator, testScope)
 
             viewModel.submit("+79991234567")
             advanceUntilIdle()

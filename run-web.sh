@@ -37,5 +37,5 @@ echo ""
 # yarn lock теперь обновляется автоматически в build.gradle.kts
 # Порт настраивается в build.gradle.kts через переменную PORT
 export PORT=$PORT
-./gradlew :composeApp:jsBrowserDevelopmentRun --no-daemon
+./gradlew :composeApp:jsBrowserDevelopmentRun
 

@@ -1,15 +1,30 @@
 #!/bin/bash
 
-SSH_KEY="$(dirname "$0")/id_rsa_api_drivebit"
 SSH_USER="user1"
 SSH_HOST="api.drivebit.my"
 CONTAINER_NAME="drivebit-drivebitbackend-1"
 
-if [ ! -f "$SSH_KEY" ]; then
-    echo "Error: SSH key not found at $SSH_KEY"
+if [ -n "$SSH_KEY" ]; then
+    SSH_KEY="$SSH_KEY"
+elif [ -f "$(dirname "$0")/id_rsa_api_drivebit" ]; then
+    SSH_KEY="$(dirname "$0")/id_rsa_api_drivebit"
+elif [ -f "$(dirname "$0")/id_rsa" ]; then
+    SSH_KEY="$(dirname "$0")/id_rsa"
+elif [ -f "$HOME/.ssh/id_rsa_api_drivebit" ]; then
+    SSH_KEY="$HOME/.ssh/id_rsa_api_drivebit"
+elif [ -f "$HOME/.ssh/id_rsa" ]; then
+    SSH_KEY="$HOME/.ssh/id_rsa"
+else
+    echo "Error: SSH key not found. Checked:"
+    echo "  - $(dirname "$0")/id_rsa_api_drivebit"
+    echo "  - $(dirname "$0")/id_rsa"
+    echo "  - $HOME/.ssh/id_rsa_api_drivebit"
+    echo "  - $HOME/.ssh/id_rsa"
+    echo "  - SSH_KEY environment variable"
     exit 1
 fi
 
+echo "Using SSH key: $SSH_KEY" >&2
 chmod 600 "$SSH_KEY"
 
 if [ "$1" == "-f" ] || [ "$1" == "--follow" ]; then

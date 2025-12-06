@@ -34,9 +34,9 @@ data class UserGetResponse(
 
 @Serializable
 data class UserEditRequest(
-    val firstName: String? = null,
-    val lastName: String? = null,
-    val middleName: String? = null,
+    val firstName: String?,
+    val lastName: String?,
+    val middleName: String?,
 )
 
 class UserImpl(

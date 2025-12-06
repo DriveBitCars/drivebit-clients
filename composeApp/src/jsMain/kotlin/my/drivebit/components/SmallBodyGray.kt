@@ -9,7 +9,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
-fun SmallBodyGray(text: String) {
+fun TextSmallBodyGray(text: String) {
     Span({
         style {
             applyTypography(CSSTypography.Styles.body)
@@ -25,7 +25,7 @@ fun SmallBodyGray(text: String) {
 }
 
 @Composable
-fun SmallBodyBlack(text: String) {
+fun TextSmallBodyBlack(text: String) {
     Span({
         style {
             applyTypography(CSSTypography.Styles.body)
