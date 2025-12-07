@@ -9,7 +9,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
-fun TextLinkButton(
+fun LinkButton(
     text: String,
     onClick: () -> Unit,
 ) {
@@ -33,6 +33,7 @@ fun TextLinkButton(
             fontWeight(CSSTypography.FontWeight.medium)
             color(CSSColors.BlueRed)
             alignSelf(AlignSelf.Center)
+            marginTop(4.px)
             cursor("pointer")
         }
     }) {

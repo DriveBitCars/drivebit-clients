@@ -3,17 +3,15 @@ package my.drivebit.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import my.drivebit.components.AppContainer
 import my.drivebit.components.Column
 import my.drivebit.components.ErrorText
+import my.drivebit.components.LinkButton
 import my.drivebit.components.Loader
-import my.drivebit.components.Logo
+import my.drivebit.components.PageWithLogo
 import my.drivebit.components.RowSpaceBetween
-import my.drivebit.components.SmallBodyBlack
-import my.drivebit.components.SmallBodyGray
-import my.drivebit.components.SmartHeader
 import my.drivebit.components.Spacer
-import my.drivebit.components.TextLinkButton
+import my.drivebit.components.TextSmallBodyBlack
+import my.drivebit.components.TextSmartHeader
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.mapIso8601ToMonthYearString
@@ -51,18 +49,7 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
     val state by viewModel.state.collectAsState()
     val navigationController = LocalNavigationController.current
 
-    AppContainer {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                justifyContent(JustifyContent.SpaceBetween)
-                alignItems(AlignItems.Center)
-                marginBottom(20.px)
-            }
-        }) {
-            Logo()
-        }
-
+    PageWithLogo {
         Div({
             style {
                 padding(24.px)
@@ -99,7 +86,7 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                     }) {
                         Column(gap = 8.px, marginBottom = 8.px) {
                             RowSpaceBetween {
-                                SmartHeader(
+                                TextSmartHeader(
                                     buildString {
                                         val hasName = user.firstName != null || user.lastName != null
                                         if (hasName) {
@@ -121,7 +108,7 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                 )
 
                                 if (user.firstName != null || user.lastName != null) {
-                                    TextLinkButton(
+                                    LinkButton(
                                         text = "Изменить",
                                         onClick = {
                                             val params =
@@ -138,7 +125,7 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                         }
                         user.createdAt.let { createdAt ->
                             val formattedDate = mapIso8601ToMonthYearString(createdAt)
-                            SmallBodyGray("Присоединился $formattedDate")
+                            TextSmallBodyBlack("Присоединился $formattedDate")
                         }
 
                         Spacer(16.px)
@@ -151,11 +138,11 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                 justifyContent(JustifyContent.SpaceBetween)
                             }
                         }) {
-                            SmallBodyGray("Номер телефона")
+                            TextSmallBodyBlack("Номер телефона")
                             if (phone != null && phone.isNotBlank()) {
-                                SmallBodyBlack(phone)
+                                TextSmallBodyBlack(phone)
                             } else {
-                                TextLinkButton(
+                                LinkButton(
                                     text = "Подтвердить",
                                     onClick = {},
                                 )
@@ -164,7 +151,13 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
 
                         Spacer(16.px)
 
-                        user.email?.let { email ->
+                        RowSpaceBetween {
+                            TextSmallBodyBlack("E-mail")
+                            user.email?.let { email ->
+                                TextSmallBodyBlack(email)
+                            } ?: LinkButton("Подтвердить") {
+                                // /User/user/change-email
+                            }
                         }
                     }
                 }

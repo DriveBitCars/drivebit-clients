@@ -4,67 +4,56 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import my.drivebit.components.AppContainer
+import androidx.compose.runtime.remember
+import my.drivebit.components.ActionButton
 import my.drivebit.components.ErrorText
-import my.drivebit.components.Loader
-import my.drivebit.components.Logo
+import my.drivebit.components.PageWithLogo
+import my.drivebit.components.TextInputField
+import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
-import my.drivebit.design.CSSTypography
-import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
-import my.drivebit.utils.getUrlParameterFromPath
+import my.drivebit.network.services.User
+import my.drivebit.utils.getUrlParameter
+import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.EditProfileState
 import my.drivebit.viewmodels.EditProfileViewModel
-import org.jetbrains.compose.web.attributes.InputType
+import my.drivebit.viewmodels.EditProfileViewModelImpl
+import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Input
-import org.jetbrains.compose.web.dom.Span
-import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 
 @Composable
-fun EditNamePage(
-    currentPath: String = "/edit-name",
-    viewModel: EditProfileViewModel = koinInject(),
-) {
+fun EditNamePage(currentPath: String = "/edit-name") {
+    val userService: User = koinInject()
+    val initialFirstName = remember { getUrlParameter("firstName") }
+    val initialLastName = remember { getUrlParameter("lastName") }
+    val initialMiddleName = remember { getUrlParameter("middleName") }
+
+    val viewModel: EditProfileViewModel =
+        remember(initialFirstName, initialLastName, initialMiddleName, userService) {
+            EditProfileViewModelImpl(
+                userService = userService,
+                initialFirstName = initialFirstName,
+                initialLastName = initialLastName,
+                initialMiddleName = initialMiddleName,
+            )
+        }
+
+    EditNamePageContent(
+        viewModel = viewModel,
+    )
+}
+
+@Composable
+private fun EditNamePageContent(viewModel: EditProfileViewModel) {
     val state by viewModel.state.collectAsState()
-    val firstName by viewModel.firstName.collectAsState()
-    val lastName by viewModel.lastName.collectAsState()
-    val middleName by viewModel.middleName.collectAsState()
     val navigationController = LocalNavigationController.current
 
-    LaunchedEffect(currentPath) {
-        val initialFirstName = getUrlParameterFromPath(currentPath, "firstName")
-        val initialLastName = getUrlParameterFromPath(currentPath, "lastName")
-        val initialMiddleName = getUrlParameterFromPath(currentPath, "middleName")
+    val cancelButtonViewModel = createButtonViewModel()
+    val saveButtonViewModel = createButtonViewModel()
 
-        if (firstName.isEmpty() && lastName.isEmpty() && middleName.isEmpty()) {
-            if (initialFirstName.isNotEmpty()) {
-                viewModel.updateFirstName(initialFirstName)
-            }
-            if (initialLastName.isNotEmpty()) {
-                viewModel.updateLastName(initialLastName)
-            }
-            if (initialMiddleName.isNotEmpty()) {
-                viewModel.updateMiddleName(initialMiddleName)
-            }
-        }
-    }
-
-    AppContainer {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                justifyContent(JustifyContent.SpaceBetween)
-                alignItems(AlignItems.Center)
-                marginBottom(20.px)
-            }
-        }) {
-            Logo()
-        }
-
+    PageWithLogo {
         Div({
             style {
                 padding(24.px)
@@ -75,10 +64,6 @@ fun EditNamePage(
             }
         }) {
             when (val currentState = state) {
-                is EditProfileState.Loading -> {
-                    Loader()
-                }
-
                 is EditProfileState.Error -> {
                     Div({
                         style {
@@ -91,10 +76,18 @@ fun EditNamePage(
                 }
 
                 is EditProfileState.Success -> {
-                    navigationController?.navigateTo("/profile")
+                    LaunchedEffect(Unit) {
+                        navigationController?.navigateTo("/profile")
+                    }
                 }
 
                 is EditProfileState.Initial -> {
+                    when {
+                        currentState.isLoading -> saveButtonViewModel.setState(ButtonState.Loading)
+                        currentState.isButtonEnabled -> saveButtonViewModel.setState(ButtonState.Enabled)
+                        else -> saveButtonViewModel.setState(ButtonState.Disabled)
+                    }
+
                     Div({
                         style {
                             display(DisplayStyle.Flex)
@@ -103,178 +96,64 @@ fun EditNamePage(
                             maxWidth(400.px)
                         }
                     }) {
-                        Span({
-                            style {
-                                applyTypography(CSSTypography.Styles.body)
-                                fontSize(CSSTypography.FontSize.xxl)
-                                fontWeight(CSSTypography.FontWeight.bold)
-                                color(CSSColors.Black)
-                            }
-                        }) {
-                            Text("Редактирование профиля")
-                        }
+                        TextSmartHeader("Редактирование профиля")
 
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Column)
-                                gap(12.px)
-                            }
-                        }) {
-                            Span({
-                                style {
-                                    applyTypography(CSSTypography.Styles.body)
-                                    fontSize(CSSTypography.FontSize.sm)
-                                    fontWeight(CSSTypography.FontWeight.medium)
-                                    color(CSSColors.Black)
-                                }
-                            }) {
-                                Text("Имя")
-                            }
+                        TextInputField(
+                            label = "Имя",
+                            value = currentState.firstName,
+                            onValueChange = { viewModel.updateFirstName(it) },
+                        )
 
-                            Input(
-                                type = InputType.Text,
-                                attrs = {
-                                    value(firstName)
-                                    onInput { event ->
-                                        viewModel.updateFirstName((event.target as org.w3c.dom.HTMLInputElement).value)
-                                    }
-                                    style {
-                                        applyTypography(CSSTypography.Styles.body)
-                                        fontSize(CSSTypography.FontSize.base)
-                                        color(CSSColors.Black)
-                                        border(1.px, LineStyle.Solid, CSSColors.Gray600)
-                                        borderRadius(8.px)
-                                        padding(12.px, 16.px)
-                                        width(100.percent)
-                                    }
-                                },
-                            )
-                        }
+                        TextInputField(
+                            label = "Фамилия",
+                            value = currentState.lastName,
+                            onValueChange = { viewModel.updateLastName(it) },
+                        )
 
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Column)
-                                gap(12.px)
-                            }
-                        }) {
-                            Span({
-                                style {
-                                    applyTypography(CSSTypography.Styles.body)
-                                    fontSize(CSSTypography.FontSize.sm)
-                                    fontWeight(CSSTypography.FontWeight.medium)
-                                    color(CSSColors.Black)
-                                }
-                            }) {
-                                Text("Фамилия")
-                            }
-
-                            Input(
-                                type = InputType.Text,
-                                attrs = {
-                                    value(lastName)
-                                    onInput { event ->
-                                        viewModel.updateLastName((event.target as org.w3c.dom.HTMLInputElement).value)
-                                    }
-                                    style {
-                                        applyTypography(CSSTypography.Styles.body)
-                                        fontSize(CSSTypography.FontSize.base)
-                                        color(CSSColors.Black)
-                                        border(1.px, LineStyle.Solid, CSSColors.Gray600)
-                                        borderRadius(8.px)
-                                        padding(12.px, 16.px)
-                                        width(100.percent)
-                                    }
-                                },
-                            )
-                        }
-
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Column)
-                                gap(12.px)
-                            }
-                        }) {
-                            Span({
-                                style {
-                                    applyTypography(CSSTypography.Styles.body)
-                                    fontSize(CSSTypography.FontSize.sm)
-                                    fontWeight(CSSTypography.FontWeight.medium)
-                                    color(CSSColors.Black)
-                                }
-                            }) {
-                                Text("Отчество")
-                            }
-
-                            Input(
-                                type = InputType.Text,
-                                attrs = {
-                                    value(middleName)
-                                    onInput { event ->
-                                        viewModel.updateMiddleName((event.target as org.w3c.dom.HTMLInputElement).value)
-                                    }
-                                    style {
-                                        applyTypography(CSSTypography.Styles.body)
-                                        fontSize(CSSTypography.FontSize.base)
-                                        color(CSSColors.Black)
-                                        border(1.px, LineStyle.Solid, CSSColors.Gray600)
-                                        borderRadius(8.px)
-                                        padding(12.px, 16.px)
-                                        width(100.percent)
-                                    }
-                                },
-                            )
-                        }
+                        TextInputField(
+                            label = "Отчество",
+                            value = currentState.middleName,
+                            onValueChange = { viewModel.updateMiddleName(it) },
+                        )
 
                         Div({
                             style {
                                 display(DisplayStyle.Flex)
                                 flexDirection(FlexDirection.Row)
                                 gap(12.px)
+                                justifyContent(JustifyContent.Center)
                             }
                         }) {
-                            Button({
-                                onClick {
-                                    navigationController?.navigateTo("/profile")
-                                }
+                            Div({
                                 style {
-                                    applyTypography(CSSTypography.Styles.button)
-                                    fontSize(CSSTypography.FontSize.base)
-                                    fontWeight(CSSTypography.FontWeight.medium)
-                                    backgroundColor(Color.transparent)
-                                    color(CSSColors.Black)
-                                    border(1.px, LineStyle.Solid, CSSColors.Gray600)
-                                    borderRadius(8.px)
-                                    padding(12.px, 24.px)
-                                    cursor("pointer")
-                                    flexGrow(1)
-                                    property("box-sizing", "border-box")
+                                    flex(1)
+                                    maxWidth(200.px)
                                 }
                             }) {
-                                Text("Отмена")
+                                ActionButton(
+                                    viewModel = cancelButtonViewModel,
+                                    enabledColor = CSSColors.Gray300,
+                                    text = "Отмена",
+                                    onClick = {
+                                        navigationController?.navigateTo("/profile")
+                                    },
+                                )
                             }
 
-                            Button({
-                                onClick {
-                                    viewModel.save()
-                                }
+                            Div({
                                 style {
-                                    applyTypography(CSSTypography.Styles.button)
-                                    fontSize(CSSTypography.FontSize.base)
-                                    fontWeight(CSSTypography.FontWeight.semibold)
-                                    backgroundColor(CSSColors.BlueRed)
-                                    color(CSSColors.White)
-                                    border(0.px, LineStyle.None, Color.transparent)
-                                    borderRadius(8.px)
-                                    padding(12.px, 24.px)
-                                    cursor("pointer")
-                                    flexGrow(1)
-                                    property("box-sizing", "border-box")
+                                    flex(1)
+                                    maxWidth(200.px)
                                 }
                             }) {
-                                Text("Сохранить")
+                                ActionButton(
+                                    viewModel = saveButtonViewModel,
+                                    enabledColor = CSSColors.BlueRed,
+                                    text = "Сохранить",
+                                    onClick = {
+                                        viewModel.save()
+                                    },
+                                )
                             }
                         }
                     }

@@ -12,8 +12,6 @@ import my.drivebit.network.NetworkException
 import my.drivebit.network.services.User
 
 sealed interface EditProfileState {
-    data object Loading : EditProfileState
-
     data class Error(
         val message: String,
     ) : EditProfileState
@@ -24,14 +22,15 @@ sealed interface EditProfileState {
         val firstName: String,
         val lastName: String,
         val middleName: String,
-    ) : EditProfileState
+        val isLoading: Boolean,
+    ) : EditProfileState {
+        val isButtonEnabled: Boolean
+            get() = firstName.isNotBlank()
+    }
 }
 
 interface EditProfileViewModel {
     val state: StateFlow<EditProfileState>
-    val firstName: StateFlow<String>
-    val lastName: StateFlow<String>
-    val middleName: StateFlow<String>
 
     fun updateFirstName(value: String)
 
@@ -44,63 +43,75 @@ interface EditProfileViewModel {
 
 class EditProfileViewModelImpl(
     private val userService: User,
-    initialFirstName: String = "",
-    initialLastName: String = "",
-    initialMiddleName: String = "",
+    initialFirstName: String,
+    initialLastName: String,
+    initialMiddleName: String,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : EditProfileViewModel {
     private val viewModelScope = coroutineScope
 
-    private val _firstName = MutableStateFlow(initialFirstName)
-    override val firstName: StateFlow<String>
-        get() = _firstName.asStateFlow()
-
-    private val _lastName = MutableStateFlow(initialLastName)
-    override val lastName: StateFlow<String>
-        get() = _lastName.asStateFlow()
-
-    private val _middleName = MutableStateFlow(initialMiddleName)
-    override val middleName: StateFlow<String>
-        get() = _middleName.asStateFlow()
-
     private val _state =
         MutableStateFlow<EditProfileState>(
-            EditProfileState.Initial(initialFirstName, initialLastName, initialMiddleName),
+            EditProfileState.Initial(initialFirstName, initialLastName, initialMiddleName, isLoading = false),
         )
 
     override val state: StateFlow<EditProfileState>
         get() = _state.asStateFlow()
 
     override fun updateFirstName(value: String) {
-        _firstName.update { value }
+        _state.update { currentState ->
+            when (currentState) {
+                is EditProfileState.Initial -> {
+                    currentState.copy(firstName = value)
+                }
+                else -> currentState
+            }
+        }
     }
 
     override fun updateLastName(value: String) {
-        _lastName.update { value }
+        _state.update { currentState ->
+            when (currentState) {
+                is EditProfileState.Initial -> {
+                    currentState.copy(lastName = value)
+                }
+                else -> currentState
+            }
+        }
     }
 
     override fun updateMiddleName(value: String) {
-        _middleName.update { value }
+        _state.update { currentState ->
+            when (currentState) {
+                is EditProfileState.Initial -> {
+                    currentState.copy(middleName = value)
+                }
+                else -> currentState
+            }
+        }
     }
 
     override fun save() {
         viewModelScope.launch {
-            _state.update { EditProfileState.Loading }
-            runCatching {
-                userService.updateUser(
-                    firstName = _firstName.value.takeIf { it.isNotBlank() },
-                    lastName = _lastName.value.takeIf { it.isNotBlank() },
-                    middleName = _middleName.value.takeIf { it.isNotBlank() },
-                )
-            }.onSuccess {
-                _state.update { EditProfileState.Success }
-            }.onFailure { e ->
-                val errorMessage =
-                    when (e) {
-                        is NetworkException -> e.message
-                        else -> e.message?.takeIf { it.isNotBlank() } ?: "Unknown error"
-                    }
-                _state.update { EditProfileState.Error(errorMessage) }
+            val currentState = _state.value
+            if (currentState is EditProfileState.Initial) {
+                _state.update { currentState.copy(isLoading = true) }
+                runCatching {
+                    userService.updateUser(
+                        firstName = currentState.firstName.ifBlank { null },
+                        lastName = currentState.lastName.ifBlank { null },
+                        middleName = currentState.middleName.ifBlank { null },
+                    )
+                }.onSuccess {
+                    _state.update { EditProfileState.Success }
+                }.onFailure { e ->
+                    val errorMessage =
+                        when (e) {
+                            is NetworkException -> e.message
+                            else -> e.message?.takeIf { it.isNotBlank() } ?: "Unknown error"
+                        }
+                    _state.update { EditProfileState.Error(errorMessage) }
+                }
             }
         }
     }

@@ -9,6 +9,8 @@ import my.drivebit.utils.Validator
 import my.drivebit.viewmodels.AuthFormViewModel
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
+import my.drivebit.viewmodels.CreateOtpRepository
+import my.drivebit.viewmodels.CreateOtpRepositoryImpl
 import my.drivebit.viewmodels.EditProfileViewModel
 import my.drivebit.viewmodels.EditProfileViewModelImpl
 import my.drivebit.viewmodels.EmailLoginViewModel
@@ -17,6 +19,7 @@ import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.PhoneLoginViewModel
 import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
+import my.drivebit.viewmodels.ValidatorViewModel
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -52,9 +55,15 @@ val commonViewModelsModule: Module =
             )
         }
 
+        single<CreateOtpRepository> {
+            CreateOtpRepositoryImpl(
+                auth = get(),
+            )
+        }
+
         factory<AuthFormViewModel>(named("phone")) {
             PhoneLoginViewModel(
-                auth = get(),
+                createOtpRepository = get(),
                 phoneValidator = get(named("phone")),
                 phoneInputValidator = get(named("phoneInput")),
             )
@@ -62,7 +71,7 @@ val commonViewModelsModule: Module =
 
         factory<AuthFormViewModel>(named("email")) {
             EmailLoginViewModel(
-                auth = get(),
+                createOtpRepository = get(),
                 emailValidator = get(named("email")),
                 emailInputValidator = get(named("emailInput")),
             )
@@ -80,12 +89,28 @@ val commonViewModelsModule: Module =
             )
         }
 
-        factory<EditProfileViewModel> {
+        factory<EditProfileViewModel> { (firstName: String, lastName: String, middleName: String) ->
             EditProfileViewModelImpl(
                 userService = get(),
-                initialFirstName = "",
-                initialLastName = "",
-                initialMiddleName = "",
+                initialFirstName = firstName,
+                initialLastName = lastName,
+                initialMiddleName = middleName,
+            )
+        }
+
+        factory<ValidatorViewModel>(named("phoneInputField")) {
+            ValidatorViewModel(
+                validator = get(named("phone")),
+                inputValidator = get(named("phoneInput")),
+                initialErrorMessage = "Введите номер телефона",
+            )
+        }
+
+        factory<ValidatorViewModel>(named("emailInputField")) {
+            ValidatorViewModel(
+                validator = get(named("email")),
+                inputValidator = get(named("emailInput")),
+                initialErrorMessage = "Введите email",
             )
         }
     }

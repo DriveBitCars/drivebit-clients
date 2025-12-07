@@ -10,9 +10,18 @@ sealed interface ValidationState {
     ) : ValidationState
 }
 
+enum class InputFieldType {
+    Phone,
+    Email,
+}
+
 sealed interface AuthFormViewModel {
     val pageTitle: String
     val fieldLabel: String
+    val inputType: InputFieldType
+    val autocomplete: String
+    val inputName: String
+    val initialInputValue: String
     val primaryButtonText: String
     val secondaryButtonText: String
     val secondaryButtonNavigationPath: String

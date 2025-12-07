@@ -30,6 +30,7 @@ val networkModule =
                             ignoreUnknownKeys = true
                             isLenient = true
                             encodeDefaults = false
+                            explicitNulls = true
                         },
                     )
                 }

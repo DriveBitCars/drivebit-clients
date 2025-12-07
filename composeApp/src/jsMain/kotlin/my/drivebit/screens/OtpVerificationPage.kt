@@ -1,13 +1,13 @@
 package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.browser.document
-import my.drivebit.components.AppContainer
-import my.drivebit.components.Logo
+import my.drivebit.components.ActionButton
+import my.drivebit.components.PageWithLogo
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
@@ -15,10 +15,11 @@ import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.Auth
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.getUrlParameter
+import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.OtpVerificationState
 import my.drivebit.viewmodels.OtpVerificationViewModel
+import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Span
@@ -46,23 +47,18 @@ fun OtpVerificationPage() {
 
     val code by viewModel.code.collectAsState()
     val state by viewModel.state.collectAsState()
+    val isLoading = state is OtpVerificationState.Loading
+    val buttonViewModel = createButtonViewModel()
+
+    LaunchedEffect(isLoading) {
+        buttonViewModel.setState(if (isLoading) ButtonState.Loading else ButtonState.Enabled)
+    }
 
     if (state is OtpVerificationState.Success) {
         navigationController?.navigateTo("/")
     }
 
-    AppContainer {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                justifyContent(JustifyContent.SpaceBetween)
-                alignItems(AlignItems.Center)
-                marginBottom(20.px)
-            }
-        }) {
-            Logo()
-        }
-
+    PageWithLogo {
         Div({
             style {
                 display(DisplayStyle.Flex)
@@ -182,59 +178,14 @@ fun OtpVerificationPage() {
                         }
                     }
 
-                    Button({
-                        onClick {
-                            if (state !is OtpVerificationState.Loading) {
-                                viewModel.verifyOtp()
-                            }
-                        }
-                        style {
-                            width(100.percent)
-                            padding(14.px, 24.px)
-                            borderRadius(8.px)
-                            backgroundColor(CSSColors.Blue)
-                            color(CSSColors.White)
-                            border(0.px)
-                            val isLoading = state is OtpVerificationState.Loading
-                            cursor(if (isLoading) "not-allowed" else "pointer")
-                            applyTypography(CSSTypography.Styles.button)
-                            fontSize(CSSTypography.FontSize.base)
-                            fontWeight(CSSTypography.FontWeight.semibold)
-                            property("transition", "background-color 0.2s ease, opacity 0.2s ease")
-                            property("opacity", if (isLoading) "0.6" else "1")
-                            property("box-sizing", "border-box")
-                        }
-                        onMouseEnter {
-                            if (state !is OtpVerificationState.Loading) {
-                                (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
-                                    "background-color",
-                                    CSSColors.BlueRedString,
-                                )
-                            }
-                        }
-                        onMouseLeave {
-                            if (state !is OtpVerificationState.Loading) {
-                                (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
-                                    "background-color",
-                                    CSSColors.BlueString,
-                                )
-                            }
-                        }
-                    }) {
-                        Text(if (state is OtpVerificationState.Loading) "Проверка..." else "Подтвердить")
-                    }
-                }
-
-                document.getElementsByTagName("button").let { buttons ->
-                    for (i in 0 until buttons.length) {
-                        val button = buttons.item(i) as? org.w3c.dom.HTMLButtonElement
-                        button?.let {
-                            val isLoading = state is OtpVerificationState.Loading
-                            it.disabled = isLoading
-                            it.style.setProperty("opacity", if (isLoading) "0.6" else "1")
-                            it.style.setProperty("cursor", if (isLoading) "not-allowed" else "pointer")
-                        }
-                    }
+                    ActionButton(
+                        viewModel = buttonViewModel,
+                        enabledColor = CSSColors.Blue,
+                        text = "Подтвердить",
+                        onClick = {
+                            viewModel.verifyOtp()
+                        },
+                    )
                 }
             }
         }
