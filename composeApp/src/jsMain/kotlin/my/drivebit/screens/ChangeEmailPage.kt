@@ -8,23 +8,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import my.drivebit.components.ActionButton
 import my.drivebit.components.InputField
 import my.drivebit.components.PageWithLogo
-import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
-import my.drivebit.resources.ImagePaths
 import my.drivebit.utils.IDENTIFIER
+import my.drivebit.utils.NEW_LOGIN
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
 import my.drivebit.utils.encodeUrlParameter
-import my.drivebit.viewmodels.AuthFormState
 import my.drivebit.viewmodels.AuthFormViewModel
 import my.drivebit.viewmodels.ButtonState
-import my.drivebit.viewmodels.InputFieldType
+import my.drivebit.viewmodels.CreateOtpRepository
+import my.drivebit.viewmodels.ResultOtp
 import my.drivebit.viewmodels.ValidationState
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.createButtonViewModel
@@ -33,43 +36,37 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
-import org.koin.core.qualifier.Qualifier
 import org.koin.core.qualifier.named
 
 @Composable
-fun LoginPage(viewModelQualifier: Qualifier) {
-    val viewModel: AuthFormViewModel = koinInject(viewModelQualifier)
-    val validatorViewModel: ValidatorViewModel =
-        koinInject(
-            if (viewModel.inputType == InputFieldType.Phone) {
-                named("phoneInputField")
-            } else {
-                named("emailInputField")
-            },
-        )
+fun ChangeEmailPage() {
+    val createOtpRepository: CreateOtpRepository = koinInject()
+    val validatorViewModel: ValidatorViewModel = koinInject(named("emailInputField"))
+    val authFormViewModel: AuthFormViewModel = koinInject(named("email"))
 
-    LoginPageContent(
-        viewModel = viewModel,
+    ChangeEmailPageContent(
+        createOtpRepository = createOtpRepository,
         validatorViewModel = validatorViewModel,
+        authFormViewModel = authFormViewModel,
     )
 }
 
 @Composable
-private fun LoginPageContent(
-    viewModel: AuthFormViewModel,
+private fun ChangeEmailPageContent(
+    createOtpRepository: CreateOtpRepository,
     validatorViewModel: ValidatorViewModel,
+    authFormViewModel: AuthFormViewModel,
 ) {
     val inputValueState =
         remember {
-            mutableStateOf(viewModel.initialInputValue)
+            mutableStateOf(authFormViewModel.initialInputValue)
         }
     var inputValue by inputValueState
     val navigationController = LocalNavigationController.current!!
-    val loginState by viewModel.state.collectAsState()
     val validationState by validatorViewModel.validationState.collectAsState()
 
     val isValid = derivedStateOf { validationState is ValidationState.Valid }
-    val isLoading = derivedStateOf { loginState is AuthFormState.Loading }
+    val isLoading = remember { mutableStateOf(false) }
 
     val primaryButtonViewModel = createButtonViewModel()
 
@@ -81,16 +78,20 @@ private fun LoginPageContent(
         }
     }
 
-    if (loginState is AuthFormState.Error) {
-        val errorMessage = (loginState as AuthFormState.Error).message
-        validatorViewModel.setError(errorMessage)
-    }
+    val createOtpState = remember { mutableStateOf<ResultOtp?>(null) }
 
-    if (loginState is AuthFormState.Success) {
-        val identifier = (loginState as AuthFormState.Success).identifier
-        val encodedIdentifier = identifier.encodeUrlParameter()
-        val otpResult = OTPRESULT.VerifyOtp.name
-        navigationController.navigateTo("/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult")
+    LaunchedEffect(createOtpState.value) {
+        val result = createOtpState.value
+        if (result is ResultOtp.Success) {
+            val identifier = result.sessionId
+            val encodedIdentifier = identifier.encodeUrlParameter()
+            val encodedEmail = inputValue.encodeUrlParameter()
+            val otpResult = OTPRESULT.ChangeEmail.name
+            navigationController.navigateTo("/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult&$NEW_LOGIN=$encodedEmail")
+        } else if (result is ResultOtp.Error) {
+            validatorViewModel.setError(result.message)
+            isLoading.value = false
+        }
     }
 
     PageWithLogo {
@@ -122,7 +123,7 @@ private fun LoginPageContent(
                             color(CSSColors.Black)
                         }
                     }) {
-                        Text(viewModel.pageTitle)
+                        Text("Смена email")
                     }
                 }
 
@@ -135,7 +136,7 @@ private fun LoginPageContent(
                     }
                 }) {
                     InputField(
-                        authFormViewModel = viewModel,
+                        authFormViewModel = authFormViewModel,
                         validatorViewModel = validatorViewModel,
                         inputValue = inputValueState,
                     )
@@ -143,41 +144,22 @@ private fun LoginPageContent(
 
                 Div({
                     style {
-                        property("id", "primary-login-button")
+                        property("id", "primary-change-email-button")
                         marginTop(24.px)
                     }
                 }) {
                     ActionButton(
                         viewModel = primaryButtonViewModel,
                         enabledColor = CSSColors.Blue,
-                        text = viewModel.primaryButtonText,
+                        text = "Отправить код",
                         onClick = {
-                            viewModel.submit(inputValue)
-                        },
-                    )
-                }
-
-                Div({
-                    style {
-                        marginTop(16.px)
-                        textAlign("center")
-                    }
-                }) {
-                    TextSmallBodyBlack("Или")
-                }
-
-                Div({
-                    style {
-                        marginTop(16.px)
-                    }
-                }) {
-                    ActionButton(
-                        image = if (viewModel.inputType == InputFieldType.Phone) ImagePaths.LOGIN_LETTER_SVG else null,
-                        enabledColor = CSSColors.Gray300,
-                        text = viewModel.secondaryButtonText,
-                        onClick = {
-                            val path = viewModel.secondaryButtonNavigationPath
-                            navigationController.navigateTo(path)
+                            validatorViewModel.validateInput(inputValue)
+                            if (isValid.value) {
+                                isLoading.value = true
+                                CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+                                    createOtpState.value = createOtpRepository.createOtp(inputValue)
+                                }
+                            }
                         },
                     )
                 }

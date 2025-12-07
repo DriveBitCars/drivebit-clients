@@ -6,8 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.ActionButton
-import my.drivebit.components.ErrorText
 import my.drivebit.components.PageWithLogo
+import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
@@ -71,7 +71,7 @@ private fun EditNamePageContent(viewModel: EditProfileViewModel) {
                             padding(24.px)
                         }
                     }) {
-                        ErrorText("Ошибка: ${currentState.message}")
+                        TextError("Ошибка: ${currentState.message}")
                     }
                 }
 

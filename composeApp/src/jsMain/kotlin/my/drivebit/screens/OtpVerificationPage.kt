@@ -5,43 +5,67 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import my.drivebit.components.ActionButton
 import my.drivebit.components.PageWithLogo
+import my.drivebit.components.TextError
+import my.drivebit.components.TextSmallBodyBlack
+import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
-import my.drivebit.design.CSSTypography
-import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
-import my.drivebit.network.services.Auth
-import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.IDENTIFIER
+import my.drivebit.utils.NEW_LOGIN
+import my.drivebit.utils.OTPRESULT
+import my.drivebit.utils.OTP_RESULT_PARAM
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.ButtonState
+import my.drivebit.viewmodels.OtpResultRepository
 import my.drivebit.viewmodels.OtpVerificationState
 import my.drivebit.viewmodels.OtpVerificationViewModel
 import my.drivebit.viewmodels.createButtonViewModel
+import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Input
-import org.jetbrains.compose.web.dom.Span
-import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
+import org.w3c.dom.HTMLInputElement
 
 @Composable
 fun OtpVerificationPage() {
     val navigationController = LocalNavigationController.current
-    val auth: Auth = koinInject()
-    val storage: Storage = koinInject()
+    val otpResultParam =
+        remember {
+            getUrlParameter(OTP_RESULT_PARAM)
+        }
+    val otpResultType =
+        remember(otpResultParam) {
+            OTPRESULT.fromString(otpResultParam)!!
+        }
+    val otpResultRepository: OtpResultRepository =
+        koinInject(named(otpResultType.name))
     val identifier =
         remember {
-            getUrlParameter("identifier")
+            getUrlParameter(IDENTIFIER)
+        }
+    val newLogin =
+        remember {
+            getUrlParameter(NEW_LOGIN)
+        }
+    val additionalParams =
+        remember(newLogin) {
+            if (newLogin.isNotEmpty()) {
+                mapOf("newLogin" to newLogin)
+            } else {
+                emptyMap()
+            }
         }
 
     val viewModel =
-        remember(identifier) {
+        remember(identifier, otpResultRepository, additionalParams) {
             OtpVerificationViewModel(
-                auth = auth,
-                storage = storage,
+                otpResultRepository = otpResultRepository,
                 identifier = identifier,
+                additionalParams = additionalParams,
             )
         }
 
@@ -55,7 +79,12 @@ fun OtpVerificationPage() {
     }
 
     if (state is OtpVerificationState.Success) {
-        navigationController?.navigateTo("/")
+        LaunchedEffect(Unit) {
+            when (otpResultType) {
+                OTPRESULT.VerifyOtp -> navigationController?.navigateTo("/")
+                OTPRESULT.ChangeEmail -> navigationController?.navigateTo("/profile")
+            }
+        }
     }
 
     PageWithLogo {
@@ -79,16 +108,7 @@ fun OtpVerificationPage() {
                         marginTop(0.px)
                     }
                 }) {
-                    Span({
-                        style {
-                            applyTypography(CSSTypography.Styles.body)
-                            fontSize(CSSTypography.FontSize.xxl)
-                            fontWeight(CSSTypography.FontWeight.bold)
-                            color(CSSColors.Black)
-                        }
-                    }) {
-                        Text("Введите код")
-                    }
+                    TextSmartHeader("Введите код")
                 }
 
                 Div({
@@ -106,20 +126,12 @@ fun OtpVerificationPage() {
                             gap(8.px)
                         }
                     }) {
-                        Span({
-                            style {
-                                applyTypography(CSSTypography.Styles.body)
-                                fontSize(CSSTypography.FontSize.sm)
-                                fontWeight(CSSTypography.FontWeight.medium)
-                                color(CSSColors.Gray600)
-                            }
-                        }) {
-                            Text("Код подтверждения")
-                        }
-                        Input(type = org.jetbrains.compose.web.attributes.InputType.Text) {
+                        TextSmallBodyBlack("Код подтверждения")
+
+                        Input(type = InputType.Text) {
                             value(code)
                             onInput { event ->
-                                val inputValue = (event.target as org.w3c.dom.HTMLInputElement).value
+                                val inputValue = (event.target as HTMLInputElement).value
                                 viewModel.updateCode(inputValue)
                             }
                             style {
@@ -159,22 +171,14 @@ fun OtpVerificationPage() {
                                     } else {
                                         CSSColors.Gray300String
                                     }
-                                (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
+                                (it.target as HTMLInputElement).style.setProperty(
                                     "border-color",
                                     borderColor,
                                 )
                             }
                         }
                         if (state is OtpVerificationState.Error) {
-                            Span({
-                                style {
-                                    applyTypography(CSSTypography.Styles.body)
-                                    fontSize(CSSTypography.FontSize.sm)
-                                    color(CSSColors.Red)
-                                }
-                            }) {
-                                Text((state as OtpVerificationState.Error).message)
-                            }
+                            TextError((state as OtpVerificationState.Error).message)
                         }
                     }
 

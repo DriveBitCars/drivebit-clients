@@ -2,6 +2,21 @@ package my.drivebit.utils
 
 import kotlinx.browser.window
 
+const val IDENTIFIER = "identifier"
+const val NEW_LOGIN = "newLogin"
+
+enum class OTPRESULT {
+    VerifyOtp,
+    ChangeEmail,
+    ;
+
+    companion object {
+        fun fromString(value: String): OTPRESULT? = entries.find { it.name.equals(value, ignoreCase = true) }
+    }
+}
+
+const val OTP_RESULT_PARAM = "otpResult"
+
 fun getUrlParameter(name: String): String {
     val queryString = window.location.search
     return getUrlParameterFromQueryString(queryString, name)

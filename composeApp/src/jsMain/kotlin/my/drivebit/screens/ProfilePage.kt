@@ -4,12 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import my.drivebit.components.Column
-import my.drivebit.components.ErrorText
 import my.drivebit.components.LinkButton
 import my.drivebit.components.Loader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.RowSpaceBetween
 import my.drivebit.components.Spacer
+import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.navigation.LocalNavigationController
@@ -71,7 +71,7 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                             padding(24.px)
                         }
                     }) {
-                        ErrorText("Ошибка: ${currentState.message}")
+                        TextError("Ошибка: ${currentState.message}")
                     }
                 }
 
@@ -155,8 +155,8 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                             TextSmallBodyBlack("E-mail")
                             user.email?.let { email ->
                                 TextSmallBodyBlack(email)
-                            } ?: LinkButton("Подтвердить") {
-                                // /User/user/change-email
+                            } ?: LinkButton("Изменить") {
+                                navigationController?.navigateTo("/change-email")
                             }
                         }
                     }

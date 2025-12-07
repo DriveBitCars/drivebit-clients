@@ -53,6 +53,20 @@ class MockProfileUserService : User {
             lastName = lastName ?: userResponse.lastName,
             middleName = middleName ?: userResponse.middleName,
         )
+
+    override suspend fun changeEmail(
+        identifier: String,
+        code: String,
+        newLogin: String,
+    ): UserGetResponse {
+        if (shouldThrowNetworkException) {
+            throw NetworkException(networkExceptionStatusCode, errorMessage)
+        }
+        if (shouldThrowError) {
+            throw Exception(errorMessage)
+        }
+        return userResponse
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
