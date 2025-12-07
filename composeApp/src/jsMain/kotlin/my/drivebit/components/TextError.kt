@@ -9,7 +9,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
-fun ErrorText(text: String) {
+fun TextError(text: String) {
     Span({
         style {
             applyTypography(CSSTypography.Styles.body)
