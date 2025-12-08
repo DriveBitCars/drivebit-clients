@@ -19,7 +19,7 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.IDENTIFIER
-import my.drivebit.utils.NEW_LOGIN
+import my.drivebit.utils.NEW_PHONE
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
 import my.drivebit.utils.encodeUrlParameter
@@ -36,12 +36,12 @@ import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
 @Composable
-fun ChangeEmailPage() {
+fun ChangePhonePage() {
     val createOtpRepository: CreateOtpRepository = koinInject()
-    val validatorViewModel: ValidatorViewModel = koinInject(named("emailInputField"))
-    val authFormViewModel: AuthFormViewModel = koinInject(named("email"))
+    val validatorViewModel: ValidatorViewModel = koinInject(named("phoneInputField"))
+    val authFormViewModel: AuthFormViewModel = koinInject(named("phone"))
 
-    ChangeEmailPageContent(
+    ChangePhonePageContent(
         createOtpRepository = createOtpRepository,
         validatorViewModel = validatorViewModel,
         authFormViewModel = authFormViewModel,
@@ -49,7 +49,7 @@ fun ChangeEmailPage() {
 }
 
 @Composable
-private fun ChangeEmailPageContent(
+private fun ChangePhonePageContent(
     createOtpRepository: CreateOtpRepository,
     validatorViewModel: ValidatorViewModel,
     authFormViewModel: AuthFormViewModel,
@@ -82,10 +82,10 @@ private fun ChangeEmailPageContent(
         if (result is ResultOtp.Success) {
             val identifier = result.sessionId
             val encodedIdentifier = identifier.encodeUrlParameter()
-            val encodedEmail = inputValue.encodeUrlParameter()
-            val otpResult = OTPRESULT.ChangeEmail.name
+            val encodedPhone = inputValue.encodeUrlParameter()
+            val otpResult = OTPRESULT.ChangePhone.name
             navigationController.navigateTo(
-                "/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult&$NEW_LOGIN=$encodedEmail",
+                "/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult&$NEW_PHONE=$encodedPhone",
             )
         } else if (result is ResultOtp.Error) {
             validatorViewModel.setError(result.message)
@@ -114,7 +114,7 @@ private fun ChangeEmailPageContent(
                         marginTop(0.px)
                     }
                 }) {
-                    TextSmartHeader("Смена email")
+                    TextSmartHeader("Смена номера телефона")
                 }
 
                 Div({
@@ -134,7 +134,7 @@ private fun ChangeEmailPageContent(
 
                 Div({
                     style {
-                        property("id", "primary-change-email-button")
+                        property("id", "primary-change-phone-button")
                         marginTop(24.px)
                     }
                 }) {

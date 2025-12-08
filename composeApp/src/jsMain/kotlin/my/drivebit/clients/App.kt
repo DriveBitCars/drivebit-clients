@@ -10,6 +10,7 @@ import my.drivebit.components.MenuUserButton
 import my.drivebit.components.filterButton
 import my.drivebit.navigation.Navigation
 import my.drivebit.screens.ChangeEmailPage
+import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.EditNamePage
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.OtpVerificationPage
@@ -64,6 +65,9 @@ actual fun App() {
                 }
                 currentPath == "/change-email" -> {
                     ChangeEmailPage()
+                }
+                currentPath == "/change-phone" -> {
+                    ChangePhonePage()
                 }
                 else -> {
                     HomePage()

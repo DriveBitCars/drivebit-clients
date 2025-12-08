@@ -14,6 +14,7 @@ import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.NEW_LOGIN
+import my.drivebit.utils.NEW_PHONE
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
 import my.drivebit.utils.getUrlParameter
@@ -51,12 +52,16 @@ fun OtpVerificationPage() {
         remember {
             getUrlParameter(NEW_LOGIN)
         }
+    val newPhone =
+        remember {
+            getUrlParameter(NEW_PHONE)
+        }
     val additionalParams =
-        remember(newLogin) {
-            if (newLogin.isNotEmpty()) {
-                mapOf("newLogin" to newLogin)
-            } else {
-                emptyMap()
+        remember(newLogin, newPhone) {
+            when {
+                newLogin.isNotEmpty() -> mapOf("newLogin" to newLogin)
+                newPhone.isNotEmpty() -> mapOf("newPhone" to newPhone)
+                else -> emptyMap()
             }
         }
 
@@ -83,6 +88,7 @@ fun OtpVerificationPage() {
             when (otpResultType) {
                 OTPRESULT.VerifyOtp -> navigationController?.navigateTo("/")
                 OTPRESULT.ChangeEmail -> navigationController?.navigateTo("/profile")
+                OTPRESULT.ChangePhone -> navigationController?.navigateTo("/profile")
             }
         }
     }

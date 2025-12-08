@@ -73,3 +73,29 @@ class ChangeEmailRepositoryImpl(
         )
     }
 }
+
+class ChangePhoneRepositoryImpl(
+    private val user: User,
+) : OtpResultRepository {
+    override suspend fun otpResult(
+        identifier: String,
+        code: String,
+        additionalParams: Map<String, String>,
+    ): OtpResult {
+        val newPhone = additionalParams["newPhone"]!!
+        val result =
+            runCatching {
+                user.changePhone(identifier, code, newPhone)
+            }
+
+        return result.fold(
+            onSuccess = {
+                OtpResult.Success
+            },
+            onFailure = { throwable ->
+                val message = throwable.message?.takeIf { it.isNotBlank() } ?: "Произошла ошибка"
+                OtpResult.Error(message)
+            },
+        )
+    }
+}

@@ -24,6 +24,12 @@ interface User {
         code: String,
         newLogin: String,
     ): UserGetResponse
+
+    suspend fun changePhone(
+        identifier: String,
+        code: String,
+        newPhone: String,
+    ): UserGetResponse
 }
 
 @Serializable
@@ -50,6 +56,13 @@ data class ChangeEmailRequest(
     val sessionId: String,
     val otp: String,
     val newLogin: String,
+)
+
+@Serializable
+data class ChangePhoneRequest(
+    val sessionId: String,
+    val otp: String,
+    val newPhone: String,
 )
 
 class UserImpl(
@@ -85,6 +98,22 @@ class UserImpl(
     ): UserGetResponse {
         val url = "${DEFAULT_BASE_URL}User/change-email"
         val request = ChangeEmailRequest(sessionId = identifier, otp = code, newLogin = newLogin)
+        val response =
+            httpClient.post(url) {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+
+        return response.parseResponse()
+    }
+
+    override suspend fun changePhone(
+        identifier: String,
+        code: String,
+        newPhone: String,
+    ): UserGetResponse {
+        val url = "${DEFAULT_BASE_URL}User/user/change-phone"
+        val request = ChangePhoneRequest(sessionId = identifier, otp = code, newPhone = newPhone)
         val response =
             httpClient.post(url) {
                 contentType(ContentType.Application.Json)

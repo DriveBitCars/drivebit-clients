@@ -12,9 +12,8 @@ import my.drivebit.components.ActionButton
 import my.drivebit.components.InputField
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextSmallBodyBlack
+import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
-import my.drivebit.design.CSSTypography
-import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.resources.ImagePaths
 import my.drivebit.utils.IDENTIFIER
@@ -30,8 +29,6 @@ import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Span
-import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.Qualifier
 import org.koin.core.qualifier.named
@@ -114,16 +111,7 @@ private fun LoginPageContent(
                         marginTop(0.px)
                     }
                 }) {
-                    Span({
-                        style {
-                            applyTypography(CSSTypography.Styles.body)
-                            fontSize(CSSTypography.FontSize.xxl)
-                            fontWeight(CSSTypography.FontWeight.bold)
-                            color(CSSColors.Black)
-                        }
-                    }) {
-                        Text(viewModel.pageTitle)
-                    }
+                    TextSmartHeader(viewModel.pageTitle)
                 }
 
                 Div({
