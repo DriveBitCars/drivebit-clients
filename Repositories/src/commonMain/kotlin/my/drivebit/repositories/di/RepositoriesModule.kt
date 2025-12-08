@@ -1,5 +1,7 @@
 package my.drivebit.repositories.di
 
+import my.drivebit.repositories.AvatarRepository
+import my.drivebit.repositories.AvatarRepositoryImpl
 import my.drivebit.repositories.ChangeEmailRepositoryImpl
 import my.drivebit.repositories.ChangePhoneRepositoryImpl
 import my.drivebit.repositories.CreateOtpRepository
@@ -22,6 +24,7 @@ val repositoriesModule: Module =
             VerifyOtpRepositoryImpl(
                 auth = get(),
                 storage = get(),
+                avatarRepository = get<AvatarRepository>(),
             )
         }
 
@@ -34,6 +37,13 @@ val repositoriesModule: Module =
         single<OtpResultRepository>(named("ChangePhone")) {
             ChangePhoneRepositoryImpl(
                 user = get(),
+            )
+        }
+
+        single<AvatarRepository> {
+            AvatarRepositoryImpl(
+                photo = get(),
+                storage = get(),
             )
         }
     }

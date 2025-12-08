@@ -13,6 +13,7 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.utils.UserNameFormatter
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.mapIso8601ToMonthYearString
 import my.drivebit.viewmodels.ProfileState
@@ -87,27 +88,13 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                         Column(gap = 8.px, marginBottom = 8.px) {
                             RowSpaceBetween {
                                 TextSmartHeader(
-                                    buildString {
-                                        val hasName = user.firstName != null || user.lastName != null
-                                        if (hasName) {
-                                            user.firstName?.let { append(it) }
-                                            user.middleName?.let {
-                                                if (it.isNotEmpty()) {
-                                                    append(" $it")
-                                                }
-                                            }
-                                            user.lastName?.let {
-                                                if (it.isNotEmpty()) {
-                                                    append(" ${it.first()}.")
-                                                }
-                                            }
-                                        } else {
-                                            append("Имя")
-                                        }
-                                    }.trim(),
+                                    UserNameFormatter.formatDisplayName(
+                                        firstName = user.firstName,
+                                        middleName = user.middleName,
+                                        lastName = user.lastName,
+                                    ),
                                 )
 
-                                if (user.firstName != null || user.lastName != null) {
                                     LinkButton(
                                         text = "Изменить",
                                         onClick = {
@@ -120,7 +107,6 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                             navigationController?.navigateTo("/edit-name$params")
                                         },
                                     )
-                                }
                             }
                         }
                         user.createdAt.let { createdAt ->

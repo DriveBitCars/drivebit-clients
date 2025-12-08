@@ -8,6 +8,8 @@ import my.drivebit.network.createHttpClientWithConfig
 import my.drivebit.network.createPlatformHttpClientEngine
 import my.drivebit.network.services.Auth
 import my.drivebit.network.services.AuthImpl
+import my.drivebit.network.services.Photo
+import my.drivebit.network.services.PhotoImpl
 import my.drivebit.network.services.User
 import my.drivebit.network.services.UserImpl
 import my.drivebit.shared.storage.Storage
@@ -101,5 +103,8 @@ val networkModule =
         }
         single<User> {
             UserImpl(get(named("authorized")))
+        }
+        single<Photo> {
+            PhotoImpl(get(named("authorized")))
         }
     }

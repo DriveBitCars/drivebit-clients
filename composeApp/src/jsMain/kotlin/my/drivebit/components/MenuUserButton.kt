@@ -1,6 +1,8 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.imageUrl
 import org.jetbrains.compose.web.css.borderRadius
@@ -15,6 +17,7 @@ import org.koin.compose.koinInject
 @Suppress("FunctionName")
 fun MenuUserButton(onClick: () -> Unit) {
     val iconUserViewModel: IconUserViewModel = koinInject()
+    val avatarUrl by iconUserViewModel.avatarUrl.collectAsState()
 
     UniversalButton(
         isSelected = false,
@@ -34,7 +37,7 @@ fun MenuUserButton(onClick: () -> Unit) {
         )
 
         Img(
-            src = iconUserViewModel.userIconUrl,
+            src = avatarUrl,
             alt = "User",
             attrs = {
                 style {

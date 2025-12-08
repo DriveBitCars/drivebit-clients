@@ -49,7 +49,7 @@ val commonViewModelsModule: Module =
 
         factory {
             IconUserViewModel(
-                storage = get(),
+                avatarRepository = get(),
             )
         }
 
