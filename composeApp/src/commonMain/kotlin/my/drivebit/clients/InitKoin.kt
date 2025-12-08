@@ -1,5 +1,6 @@
 package my.drivebit.clients
 
+import my.drivebit.repositories.di.repositoriesModule
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.di.commonViewModelsModule
 import org.koin.core.context.startKoin
@@ -9,6 +10,7 @@ fun initKoin() {
     startKoin {
         modules(
             storageModule,
+            repositoriesModule,
             commonViewModelsModule,
             commonAppModule,
         )

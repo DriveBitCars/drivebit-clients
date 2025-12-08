@@ -1,4 +1,4 @@
-package my.drivebit.viewmodels
+package my.drivebit.repositories
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

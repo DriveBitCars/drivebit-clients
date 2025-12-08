@@ -1,4 +1,4 @@
-package my.drivebit.viewmodels
+package my.drivebit.repositories
 
 import my.drivebit.network.services.Auth
 import my.drivebit.network.services.User
@@ -20,7 +20,7 @@ sealed interface OtpResult {
     ) : OtpResult
 }
 
-class VerifyOtpRepositoryImpl(
+internal class VerifyOtpRepositoryImpl(
     private val auth: Auth,
     private val storage: Storage,
 ) : OtpResultRepository {
@@ -48,7 +48,7 @@ class VerifyOtpRepositoryImpl(
     }
 }
 
-class ChangeEmailRepositoryImpl(
+internal class ChangeEmailRepositoryImpl(
     private val user: User,
 ) : OtpResultRepository {
     override suspend fun otpResult(
@@ -74,7 +74,7 @@ class ChangeEmailRepositoryImpl(
     }
 }
 
-class ChangePhoneRepositoryImpl(
+internal class ChangePhoneRepositoryImpl(
     private val user: User,
 ) : OtpResultRepository {
     override suspend fun otpResult(

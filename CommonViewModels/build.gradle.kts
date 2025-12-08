@@ -31,6 +31,7 @@ kotlin {
             implementation(project(":Storage"))
             implementation(project(":Network"))
             implementation(project(":Utils"))
+            implementation(project(":Repositories"))
             implementation(libs.koin.core)
         }
         commonTest.dependencies {

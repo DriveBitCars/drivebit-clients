@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.Navigator
 import my.drivebit.auth.di.authModule
 import my.drivebit.mobile.screens.main.MainScreen
+import my.drivebit.repositories.di.repositoriesModule
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.splash.di.splashModule
 import my.drivebit.ui.theme.DrivebitTheme
@@ -28,6 +29,7 @@ actual fun App() {
                 },
                 splashModule,
                 storageModule,
+                repositoriesModule,
                 commonViewModelsModule,
                 authModule,
             )
