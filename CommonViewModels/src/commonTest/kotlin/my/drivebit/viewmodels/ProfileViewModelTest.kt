@@ -71,7 +71,7 @@ class MockProfileUserService : User {
     override suspend fun changePhone(
         identifier: String,
         code: String,
-        newPhone: String,
+        newLogin: String,
     ): UserGetResponse {
         if (shouldThrowNetworkException) {
             throw NetworkException(networkExceptionStatusCode, errorMessage)

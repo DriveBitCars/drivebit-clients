@@ -82,10 +82,10 @@ class ChangePhoneRepositoryImpl(
         code: String,
         additionalParams: Map<String, String>,
     ): OtpResult {
-        val newPhone = additionalParams["newPhone"]!!
+        val newLogin = additionalParams["newLogin"]!!
         val result =
             runCatching {
-                user.changePhone(identifier, code, newPhone)
+                user.changePhone(identifier, code, newLogin)
             }
 
         return result.fold(

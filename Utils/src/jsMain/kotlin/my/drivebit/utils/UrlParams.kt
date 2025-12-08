@@ -4,7 +4,6 @@ import kotlinx.browser.window
 
 const val IDENTIFIER = "identifier"
 const val NEW_LOGIN = "newLogin"
-const val NEW_PHONE = "newPhone"
 
 enum class OTPRESULT {
     VerifyOtp,

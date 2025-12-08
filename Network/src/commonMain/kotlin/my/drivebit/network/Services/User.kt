@@ -28,7 +28,7 @@ interface User {
     suspend fun changePhone(
         identifier: String,
         code: String,
-        newPhone: String,
+        newLogin: String,
     ): UserGetResponse
 }
 
@@ -62,7 +62,7 @@ data class ChangeEmailRequest(
 data class ChangePhoneRequest(
     val sessionId: String,
     val otp: String,
-    val newPhone: String,
+    val newLogin: String,
 )
 
 class UserImpl(
@@ -110,10 +110,10 @@ class UserImpl(
     override suspend fun changePhone(
         identifier: String,
         code: String,
-        newPhone: String,
+        newLogin: String,
     ): UserGetResponse {
-        val url = "${DEFAULT_BASE_URL}User/user/change-phone"
-        val request = ChangePhoneRequest(sessionId = identifier, otp = code, newPhone = newPhone)
+        val url = "${DEFAULT_BASE_URL}User/change-phone"
+        val request = ChangePhoneRequest(sessionId = identifier, otp = code, newLogin = newLogin)
         val response =
             httpClient.post(url) {
                 contentType(ContentType.Application.Json)

@@ -72,7 +72,7 @@ class MockEditProfileUserService : User {
     override suspend fun changePhone(
         identifier: String,
         code: String,
-        newPhone: String,
+        newLogin: String,
     ): UserGetResponse {
         if (shouldThrowError) {
             throw NetworkException(HttpStatusCode.InternalServerError, errorMessage)

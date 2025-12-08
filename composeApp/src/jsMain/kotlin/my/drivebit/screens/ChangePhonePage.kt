@@ -19,7 +19,7 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.IDENTIFIER
-import my.drivebit.utils.NEW_PHONE
+import my.drivebit.utils.NEW_LOGIN
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
 import my.drivebit.utils.encodeUrlParameter
@@ -85,7 +85,7 @@ private fun ChangePhonePageContent(
             val encodedPhone = inputValue.encodeUrlParameter()
             val otpResult = OTPRESULT.ChangePhone.name
             navigationController.navigateTo(
-                "/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult&$NEW_PHONE=$encodedPhone",
+                "/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult&$NEW_LOGIN=$encodedPhone",
             )
         } else if (result is ResultOtp.Error) {
             validatorViewModel.setError(result.message)
