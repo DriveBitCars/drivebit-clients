@@ -1,4 +1,4 @@
-package my.drivebit.viewmodels
+package my.drivebit.repositories
 
 import my.drivebit.network.services.Auth
 import my.drivebit.network.services.User
@@ -20,9 +20,10 @@ sealed interface OtpResult {
     ) : OtpResult
 }
 
-class VerifyOtpRepositoryImpl(
+internal class VerifyOtpRepositoryImpl(
     private val auth: Auth,
     private val storage: Storage,
+    private val avatarRepository: AvatarRepository? = null,
 ) : OtpResultRepository {
     override suspend fun otpResult(
         identifier: String,
@@ -38,6 +39,7 @@ class VerifyOtpRepositoryImpl(
             onSuccess = { response ->
                 storage.saveToken(response.accessToken.token)
                 storage.saveRefreshToken(response.refreshToken.token)
+                avatarRepository?.refresh()
                 OtpResult.Success
             },
             onFailure = { throwable ->
@@ -48,7 +50,7 @@ class VerifyOtpRepositoryImpl(
     }
 }
 
-class ChangeEmailRepositoryImpl(
+internal class ChangeEmailRepositoryImpl(
     private val user: User,
 ) : OtpResultRepository {
     override suspend fun otpResult(
@@ -74,7 +76,7 @@ class ChangeEmailRepositoryImpl(
     }
 }
 
-class ChangePhoneRepositoryImpl(
+internal class ChangePhoneRepositoryImpl(
     private val user: User,
 ) : OtpResultRepository {
     override suspend fun otpResult(

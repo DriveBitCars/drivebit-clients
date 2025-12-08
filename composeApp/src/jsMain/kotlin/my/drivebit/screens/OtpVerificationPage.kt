@@ -12,13 +12,13 @@ import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.NEW_LOGIN
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.ButtonState
-import my.drivebit.viewmodels.OtpResultRepository
 import my.drivebit.viewmodels.OtpVerificationState
 import my.drivebit.viewmodels.OtpVerificationViewModel
 import my.drivebit.viewmodels.createButtonViewModel

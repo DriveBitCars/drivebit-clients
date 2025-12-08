@@ -9,6 +9,7 @@ import my.drivebit.components.Logo
 import my.drivebit.components.MenuUserButton
 import my.drivebit.components.filterButton
 import my.drivebit.navigation.Navigation
+import my.drivebit.repositories.di.repositoriesModule
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.EditNamePage
@@ -42,6 +43,7 @@ actual fun App() {
     KoinApplication(application = {
         modules(
             storageModule,
+            repositoriesModule,
             webModule,
             commonViewModelsModule,
         )

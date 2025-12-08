@@ -1,15 +1,26 @@
 package my.drivebit.viewmodels
 
-import my.drivebit.shared.storage.Storage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import my.drivebit.repositories.AvatarRepository
+import my.drivebit.utils.DEFAULT_AVATAR_PATH
 
 class IconUserViewModel(
-    private val storage: Storage,
+    private val avatarRepository: AvatarRepository,
+    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
-    val userIconUrl: String
-        get() =
-            if (storage.isLogined()) {
-                "$imageUrl/menu/user.svg"
-            } else {
-                "$imageUrl/menu/user.svg"
-            }
+    val avatarUrl: StateFlow<String> =
+        avatarRepository.avatarUrl.stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Lazily,
+            initialValue = DEFAULT_AVATAR_PATH,
+        )
+
+    fun refresh() {
+        avatarRepository.refresh()
+    }
 }
