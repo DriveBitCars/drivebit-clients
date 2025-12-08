@@ -153,9 +153,9 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
 
                         RowSpaceBetween {
                             TextSmallBodyBlack("E-mail")
-                            user.email?.let { email ->
-                                TextSmallBodyBlack(email)
-                            } ?: LinkButton("Изменить") {
+
+                            val emailString = user.email ?: "Изменить"
+                            LinkButton(emailString) {
                                 navigationController?.navigateTo("/change-email")
                             }
                         }
