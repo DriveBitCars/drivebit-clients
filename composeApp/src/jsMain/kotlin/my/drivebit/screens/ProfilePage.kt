@@ -131,21 +131,11 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                         Spacer(16.px)
 
                         val phone = user.phone
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Row)
-                                justifyContent(JustifyContent.SpaceBetween)
-                            }
-                        }) {
+                        RowSpaceBetween {
                             TextSmallBodyBlack("Номер телефона")
-                            if (phone != null && phone.isNotBlank()) {
-                                TextSmallBodyBlack(phone)
-                            } else {
-                                LinkButton(
-                                    text = "Подтвердить",
-                                    onClick = {},
-                                )
+                            val phoneString = phone ?: "Подтвердить"
+                            LinkButton(phoneString) {
+                                navigationController?.navigateTo("/change-phone")
                             }
                         }
 
@@ -153,9 +143,9 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
 
                         RowSpaceBetween {
                             TextSmallBodyBlack("E-mail")
-                            user.email?.let { email ->
-                                TextSmallBodyBlack(email)
-                            } ?: LinkButton("Изменить") {
+
+                            val emailString = user.email ?: "Изменить"
+                            LinkButton(emailString) {
                                 navigationController?.navigateTo("/change-email")
                             }
                         }

@@ -8,6 +8,7 @@ const val NEW_LOGIN = "newLogin"
 enum class OTPRESULT {
     VerifyOtp,
     ChangeEmail,
+    ChangePhone,
     ;
 
     companion object {

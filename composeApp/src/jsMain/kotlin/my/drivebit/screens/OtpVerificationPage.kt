@@ -83,6 +83,7 @@ fun OtpVerificationPage() {
             when (otpResultType) {
                 OTPRESULT.VerifyOtp -> navigationController?.navigateTo("/")
                 OTPRESULT.ChangeEmail -> navigationController?.navigateTo("/profile")
+                OTPRESULT.ChangePhone -> navigationController?.navigateTo("/profile")
             }
         }
     }

@@ -10,6 +10,7 @@ import my.drivebit.viewmodels.AuthFormViewModel
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
 import my.drivebit.viewmodels.ChangeEmailRepositoryImpl
+import my.drivebit.viewmodels.ChangePhoneRepositoryImpl
 import my.drivebit.viewmodels.CreateOtpRepository
 import my.drivebit.viewmodels.CreateOtpRepositoryImpl
 import my.drivebit.viewmodels.EditProfileViewModel
@@ -73,6 +74,12 @@ val commonViewModelsModule: Module =
 
         single<OtpResultRepository>(named("ChangeEmail")) {
             ChangeEmailRepositoryImpl(
+                user = get(),
+            )
+        }
+
+        single<OtpResultRepository>(named("ChangePhone")) {
+            ChangePhoneRepositoryImpl(
                 user = get(),
             )
         }

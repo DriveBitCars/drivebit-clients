@@ -28,12 +28,12 @@ echo "Using SSH key: $SSH_KEY" >&2
 chmod 600 "$SSH_KEY"
 
 if [ "$1" == "-f" ] || [ "$1" == "--follow" ]; then
-    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "docker logs -f $CONTAINER_NAME"
+    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "docker logs -f $CONTAINER_NAME" | grep "Sent"
 elif [ "$1" == "-n" ] || [ "$1" == "--lines" ]; then
     LINES=${2:-100}
-    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "docker logs --tail $LINES $CONTAINER_NAME"
+    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "docker logs --tail $LINES $CONTAINER_NAME" | grep "Sent"
 else
-    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "docker logs --tail 100 $CONTAINER_NAME"
+    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "docker logs --tail 100 $CONTAINER_NAME" | grep "Sent"
 fi
 
 

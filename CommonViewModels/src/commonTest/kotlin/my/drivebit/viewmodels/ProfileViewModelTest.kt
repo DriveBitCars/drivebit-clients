@@ -67,6 +67,20 @@ class MockProfileUserService : User {
         }
         return userResponse
     }
+
+    override suspend fun changePhone(
+        identifier: String,
+        code: String,
+        newLogin: String,
+    ): UserGetResponse {
+        if (shouldThrowNetworkException) {
+            throw NetworkException(networkExceptionStatusCode, errorMessage)
+        }
+        if (shouldThrowError) {
+            throw Exception(errorMessage)
+        }
+        return userResponse
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

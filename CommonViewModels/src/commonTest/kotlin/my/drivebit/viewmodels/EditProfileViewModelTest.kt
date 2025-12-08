@@ -68,6 +68,22 @@ class MockEditProfileUserService : User {
             createdAt = "2025-01-01T00:00:00Z",
         )
     }
+
+    override suspend fun changePhone(
+        identifier: String,
+        code: String,
+        newLogin: String,
+    ): UserGetResponse {
+        if (shouldThrowError) {
+            throw NetworkException(HttpStatusCode.InternalServerError, errorMessage)
+        }
+        return UserGetResponse(
+            id = "test-id",
+            firstName = "Test",
+            lastName = "User",
+            createdAt = "2025-01-01T00:00:00Z",
+        )
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
