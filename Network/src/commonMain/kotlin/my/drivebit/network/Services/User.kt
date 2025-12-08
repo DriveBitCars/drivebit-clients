@@ -56,7 +56,7 @@ class UserImpl(
     private val httpClient: HttpClient,
 ) : User {
     override suspend fun userGet(): UserGetResponse {
-        val url = "${DEFAULT_BASE_URL}User/user"
+        val url = "${DEFAULT_BASE_URL}User"
         val response = httpClient.get(url)
 
         return response.parseResponse()
@@ -67,7 +67,7 @@ class UserImpl(
         lastName: String?,
         middleName: String?,
     ): UserGetResponse {
-        val url = "${DEFAULT_BASE_URL}User/user"
+        val url = "${DEFAULT_BASE_URL}User"
         val request = UserEditRequest(firstName = firstName, lastName = lastName, middleName = middleName)
         val response =
             httpClient.post(url) {
@@ -83,7 +83,7 @@ class UserImpl(
         code: String,
         newLogin: String,
     ): UserGetResponse {
-        val url = "${DEFAULT_BASE_URL}User/user/change-email"
+        val url = "${DEFAULT_BASE_URL}User/change-email"
         val request = ChangeEmailRequest(sessionId = identifier, otp = code, newLogin = newLogin)
         val response =
             httpClient.post(url) {
