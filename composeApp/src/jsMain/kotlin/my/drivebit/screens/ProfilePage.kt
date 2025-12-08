@@ -94,19 +94,18 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                         lastName = user.lastName,
                                     ),
                                 )
-
-                                    LinkButton(
-                                        text = "Изменить",
-                                        onClick = {
-                                            val params =
-                                                buildEditNameUrlParams(
-                                                    currentState.user.firstName,
-                                                    currentState.user.lastName,
-                                                    currentState.user.middleName,
-                                                )
-                                            navigationController?.navigateTo("/edit-name$params")
-                                        },
-                                    )
+                                LinkButton(
+                                    text = "Изменить",
+                                    onClick = {
+                                        val params =
+                                            buildEditNameUrlParams(
+                                                currentState.user.firstName,
+                                                currentState.user.lastName,
+                                                currentState.user.middleName,
+                                            )
+                                        navigationController?.navigateTo("/edit-name$params")
+                                    },
+                                )
                             }
                         }
                         user.createdAt.let { createdAt ->
