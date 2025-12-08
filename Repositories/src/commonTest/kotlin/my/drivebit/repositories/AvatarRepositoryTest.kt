@@ -11,6 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 private const val IMAGE_URL = "images"
+private const val DEFAULT_AVATAR_PATH = "$IMAGE_URL/menu/user.svg"
 
 private class FakePhoto : Photo {
     var shouldThrow = false
@@ -61,22 +62,9 @@ private class FakeStorage : Storage {
 @OptIn(ExperimentalCoroutinesApi::class)
 class AvatarRepositoryTest {
     @Test
-    fun `avatarUrl should return default image when user is logged in`() =
+    fun `avatarUrl should return photo service URL when user is logged in`() =
         runTest {
             val storage = FakeStorage().apply { setLoggedIn(true) }
-            val photo = FakePhoto()
-            val repository = AvatarRepositoryImpl(photo, storage, this)
-
-            advanceUntilIdle()
-            val url = repository.avatarUrl.first()
-
-            assertEquals("$IMAGE_URL/menu/burger.svg", url)
-        }
-
-    @Test
-    fun `avatarUrl should return photo service URL when user is not logged in`() =
-        runTest {
-            val storage = FakeStorage().apply { setLoggedIn(false) }
             val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar.jpg" }
             val repository = AvatarRepositoryImpl(photo, storage, this)
 
@@ -84,6 +72,19 @@ class AvatarRepositoryTest {
             val url = repository.avatarUrl.first()
 
             assertEquals("https://api.example.com/avatar.jpg", url)
+        }
+
+    @Test
+    fun `avatarUrl should return default image when user is not logged in`() =
+        runTest {
+            val storage = FakeStorage().apply { setLoggedIn(false) }
+            val photo = FakePhoto()
+            val repository = AvatarRepositoryImpl(photo, storage, this)
+
+            advanceUntilIdle()
+            val url = repository.avatarUrl.first()
+
+            assertEquals(DEFAULT_AVATAR_PATH, url)
         }
 
     @Test
@@ -95,14 +96,14 @@ class AvatarRepositoryTest {
 
             advanceUntilIdle()
             val initialUrl = repository.avatarUrl.first()
-            assertEquals("https://api.example.com/avatar.jpg", initialUrl)
+            assertEquals(DEFAULT_AVATAR_PATH, initialUrl)
 
             storage.setLoggedIn(true)
             repository.refresh()
             advanceUntilIdle()
 
             val updatedUrl = repository.avatarUrl.first()
-            assertEquals("$IMAGE_URL/menu/burger.svg", updatedUrl)
+            assertEquals("https://api.example.com/avatar.jpg", updatedUrl)
         }
 
     @Test
@@ -114,20 +115,20 @@ class AvatarRepositoryTest {
 
             advanceUntilIdle()
             val initialUrl = repository.avatarUrl.first()
-            assertEquals("$IMAGE_URL/menu/burger.svg", initialUrl)
+            assertEquals("https://api.example.com/avatar.jpg", initialUrl)
 
             storage.setLoggedIn(false)
             repository.refresh()
             advanceUntilIdle()
 
             val updatedUrl = repository.avatarUrl.first()
-            assertEquals("https://api.example.com/avatar.jpg", updatedUrl)
+            assertEquals(DEFAULT_AVATAR_PATH, updatedUrl)
         }
 
     @Test
     fun `refresh should update avatarUrl when photo service URL changes`() =
         runTest {
-            val storage = FakeStorage().apply { setLoggedIn(false) }
+            val storage = FakeStorage().apply { setLoggedIn(true) }
             val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar1.jpg" }
             val repository = AvatarRepositoryImpl(photo, storage, this)
 
@@ -146,7 +147,7 @@ class AvatarRepositoryTest {
     @Test
     fun `refresh should handle photo service errors gracefully`() =
         runTest {
-            val storage = FakeStorage().apply { setLoggedIn(false) }
+            val storage = FakeStorage().apply { setLoggedIn(true) }
             val photo =
                 FakePhoto().apply {
                     shouldThrow = true
@@ -156,7 +157,7 @@ class AvatarRepositoryTest {
 
             advanceUntilIdle()
             val initialUrl = repository.avatarUrl.first()
-            assertEquals("$IMAGE_URL/menu/burger.svg", initialUrl)
+            assertEquals(DEFAULT_AVATAR_PATH, initialUrl)
 
             photo.shouldThrow = false
             photo.avatarUrl = "https://api.example.com/new-avatar.jpg"

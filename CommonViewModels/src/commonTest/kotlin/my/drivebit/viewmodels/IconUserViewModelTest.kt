@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 private class FakeAvatarRepository : AvatarRepository {
-    private val _avatarUrl = kotlinx.coroutines.flow.MutableStateFlow("images/menu/burger.svg")
+    private val _avatarUrl = kotlinx.coroutines.flow.MutableStateFlow("images/menu/user.svg")
     override val avatarUrl: kotlinx.coroutines.flow.Flow<String> = _avatarUrl
 
     fun setAvatarUrl(url: String) {
@@ -46,7 +46,7 @@ class IconUserViewModelTest {
 
             advanceUntilIdle()
             val initialUrl = viewModel.avatarUrl.first()
-            assertEquals("images/menu/burger.svg", initialUrl)
+            assertEquals("images/menu/user.svg", initialUrl)
 
             fakeRepository.setAvatarUrl("https://example.com/new-avatar.jpg")
             advanceUntilIdle()
@@ -61,7 +61,7 @@ class IconUserViewModelTest {
             var refreshCalled = false
             val fakeRepository =
                 object : AvatarRepository {
-                    private val _avatarUrl = kotlinx.coroutines.flow.MutableStateFlow("images/menu/burger.svg")
+                    private val _avatarUrl = kotlinx.coroutines.flow.MutableStateFlow("images/menu/user.svg")
                     override val avatarUrl: kotlinx.coroutines.flow.Flow<String> = _avatarUrl
 
                     override fun refresh() {

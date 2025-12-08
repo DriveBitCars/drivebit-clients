@@ -16,7 +16,7 @@ class IconUserViewModel(
         avatarRepository.avatarUrl.stateIn(
             scope = coroutineScope,
             started = SharingStarted.Lazily,
-            initialValue = "$imageUrl/menu/burger.svg",
+            initialValue = "$imageUrl/menu/user.svg",
         )
 
     fun refresh() {
