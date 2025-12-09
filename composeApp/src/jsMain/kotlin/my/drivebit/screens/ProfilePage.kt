@@ -2,11 +2,10 @@ package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import kotlinx.browser.document
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,11 +22,11 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.navigation.LocalNavigationController
-import my.drivebit.network.services.Photo
-import my.drivebit.repositories.AvatarRepository
 import my.drivebit.utils.UserNameFormatter
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.mapIso8601ToMonthYearString
+import my.drivebit.viewmodels.AvatarUploadState
+import my.drivebit.viewmodels.AvatarUploadViewModel
 import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
@@ -41,11 +40,12 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 private const val MAX_FILE_SIZE = 2 * 1024 * 1024
+private const val AVATAR_SIZE = 800
 
 @Suppress("UNCHECKED_CAST")
-private suspend fun org.w3c.files.File.readAsBytes(): ByteArray =
+private suspend fun org.w3c.files.File.cropFromBottom(): ByteArray =
     suspendCancellableCoroutine { continuation ->
-        val file = this@readAsBytes
+        val file = this@cropFromBottom
         val fileSize: Number = js("file.size") as Number
         if (fileSize.toDouble() > MAX_FILE_SIZE) {
             continuation.resumeWithException(
@@ -53,25 +53,76 @@ private suspend fun org.w3c.files.File.readAsBytes(): ByteArray =
             )
             return@suspendCancellableCoroutine
         }
+
         val reader = org.w3c.files.FileReader()
         reader.onload = {
-            val arrayBuffer = reader.result
-            if (arrayBuffer != null) {
-                val uint8Array: dynamic = js("new Uint8Array(arrayBuffer)")
-                val length = uint8Array.length as Int
-                val bytes = ByteArray(length)
-                for (i in 0 until length) {
-                    bytes[i] = (uint8Array[i] as Number).toInt().toByte()
+            val dataUrl = reader.result as String
+            val img = js("new Image()") as org.w3c.dom.HTMLImageElement
+            val onLoadHandler: dynamic = {
+                val canvas = js("document.createElement('canvas')") as org.w3c.dom.HTMLCanvasElement
+                val ctx = canvas.getContext("2d") as? org.w3c.dom.CanvasRenderingContext2D
+                if (ctx != null) {
+                    val originalWidth = img.width.toInt()
+                    val originalHeight = img.height.toInt()
+                    val size = minOf(originalWidth, originalHeight, AVATAR_SIZE)
+                    val cropY = maxOf(0, originalHeight - size)
+
+                    canvas.width = size
+                    canvas.height = size
+                    ctx.drawImage(
+                        img,
+                        0.0,
+                        cropY.toDouble(),
+                        originalWidth.toDouble(),
+                        size.toDouble(),
+                        0.0,
+                        0.0,
+                        size.toDouble(),
+                        size.toDouble(),
+                    )
+
+                    val toBlobCallback: dynamic = { blob: org.w3c.files.Blob? ->
+                        if (blob != null) {
+                            val fileReader = org.w3c.files.FileReader()
+                            fileReader.onload = {
+                                val result = fileReader.result
+                                if (result != null) {
+                                    val uint8Array: dynamic = js("new Uint8Array(result)")
+                                    val length = uint8Array.length as Int
+                                    val bytes = ByteArray(length)
+                                    for (i in 0 until length) {
+                                        bytes[i] = (uint8Array[i] as Number).toInt().toByte()
+                                    }
+                                    continuation.resume(bytes)
+                                } else {
+                                    continuation.resumeWithException(Exception("Failed to crop image"))
+                                }
+                            }
+                            fileReader.onerror = {
+                                continuation.resumeWithException(Exception("Failed to read cropped image"))
+                            }
+                            fileReader.readAsArrayBuffer(blob)
+                        } else {
+                            continuation.resumeWithException(Exception("Failed to crop image"))
+                        }
+                    }
+
+                    canvas.toBlob(toBlobCallback, "image/jpeg", 0.9)
+                } else {
+                    continuation.resumeWithException(Exception("Failed to get canvas context"))
                 }
-                continuation.resume(bytes)
-            } else {
-                continuation.resumeWithException(Exception("Failed to read file"))
             }
+            val onErrorHandler: dynamic = {
+                continuation.resumeWithException(Exception("Failed to load image"))
+            }
+            img.onload = onLoadHandler
+            img.onerror = onErrorHandler
+            img.src = dataUrl
         }
         reader.onerror = {
             continuation.resumeWithException(Exception("File read error"))
         }
-        reader.readAsArrayBuffer(file)
+        reader.readAsDataURL(file)
     }
 
 private fun buildEditNameUrlParams(
@@ -132,11 +183,9 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                     val user = currentState.user
                     val iconUserViewModel: IconUserViewModel = koinInject()
                     val avatarUrl by iconUserViewModel.avatarUrl.collectAsState()
-                    val photo: Photo = koinInject()
-                    val avatarRepository: AvatarRepository = koinInject()
+                    val avatarUploadViewModel: AvatarUploadViewModel = koinInject()
+                    val uploadState by avatarUploadViewModel.state.collectAsState()
                     val coroutineScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
-                    var uploadError by remember { mutableStateOf<String?>(null) }
-                    var isUploading by remember { mutableStateOf(false) }
 
                     val fileInputId = remember { "avatar-file-input-${kotlin.random.Random.nextInt()}" }
 
@@ -150,19 +199,13 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                             val fileList = input?.files
                             val file = fileList?.item(0) as? org.w3c.files.File
                             if (file != null) {
-                                isUploading = true
-                                uploadError = null
                                 coroutineScope.launch {
                                     try {
-                                        val fileBytes = file.readAsBytes()
-                                        val fileName = file.name
-                                        val contentType = file.type.ifBlank { "image/jpeg" }
-                                        photo.uploadAvatar(fileBytes, fileName, contentType)
-                                        avatarRepository.refresh()
-                                        isUploading = false
+                                        val fileBytes = file.cropFromBottom()
+                                        val fileName = "avatar.jpg"
+                                        val contentType = "image/jpeg"
+                                        avatarUploadViewModel.uploadAvatar(fileBytes, fileName, contentType)
                                     } catch (e: Exception) {
-                                        uploadError = e.message ?: "Ошибка при загрузке файла"
-                                        isUploading = false
                                     }
                                 }
                             }
@@ -170,6 +213,11 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                         inputElement?.addEventListener("change", changeHandler)
                         onDispose {
                             inputElement?.removeEventListener("change", changeHandler)
+                        }
+                    }
+
+                    LaunchedEffect(uploadState) {
+                        if (uploadState is AvatarUploadState.Success) {
                         }
                     }
 
@@ -200,7 +248,11 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                     }
                                 }) {
                                     LinkButton(
-                                        text = if (isUploading) "Загрузка..." else "Изменить",
+                                        text =
+                                            when (uploadState) {
+                                                is AvatarUploadState.Uploading -> "Загрузка..."
+                                                else -> "Изменить"
+                                            },
                                         onClick = {
                                             val inputElement =
                                                 document.getElementById(
@@ -209,8 +261,11 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                             inputElement?.click()
                                         },
                                     )
-                                    uploadError?.let { error ->
-                                        TextError(error)
+                                    when (val state = uploadState) {
+                                        is AvatarUploadState.Error -> {
+                                            TextError(state.message)
+                                        }
+                                        else -> {}
                                     }
                                 }
                             }

@@ -7,6 +7,8 @@ import my.drivebit.utils.PhoneInputValidator
 import my.drivebit.utils.PhoneValidator
 import my.drivebit.utils.Validator
 import my.drivebit.viewmodels.AuthFormViewModel
+import my.drivebit.viewmodels.AvatarUploadViewModel
+import my.drivebit.viewmodels.AvatarUploadViewModelImpl
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
 import my.drivebit.viewmodels.EditProfileViewModel
@@ -49,6 +51,13 @@ val commonViewModelsModule: Module =
 
         factory {
             IconUserViewModel(
+                avatarRepository = get(),
+            )
+        }
+
+        factory<AvatarUploadViewModel> {
+            AvatarUploadViewModelImpl(
+                photo = get(),
                 avatarRepository = get(),
             )
         }
