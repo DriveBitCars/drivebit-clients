@@ -1,7 +1,13 @@
 package my.drivebit.viewmodels
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.drivebit.repositories.AvatarRepository
@@ -25,24 +31,31 @@ private class FakeAvatarRepository : AvatarRepository {
 class IconUserViewModelTest {
     @Test
     fun `avatarUrl should return value from repository`() =
-        runTest {
+        runTest(StandardTestDispatcher()) {
             val fakeRepository =
                 FakeAvatarRepository().apply {
                     setAvatarUrl("https://example.com/avatar.jpg")
                 }
-            val viewModel = IconUserViewModel(fakeRepository, this)
+            val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
+            val viewModel = IconUserViewModel(fakeRepository, testScope)
 
             advanceUntilIdle()
-            val url = viewModel.avatarUrl.first()
+            val url =
+                viewModel.avatarUrl
+                    .take(2)
+                    .toList()
+                    .last()
 
             assertEquals("https://example.com/avatar.jpg", url)
+            testScope.coroutineContext.cancelChildren()
         }
 
     @Test
     fun `avatarUrl should update when repository updates`() =
-        runTest {
+        runTest(StandardTestDispatcher()) {
             val fakeRepository = FakeAvatarRepository()
-            val viewModel = IconUserViewModel(fakeRepository, this)
+            val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
+            val viewModel = IconUserViewModel(fakeRepository, testScope)
 
             advanceUntilIdle()
             val initialUrl = viewModel.avatarUrl.first()
@@ -53,11 +66,12 @@ class IconUserViewModelTest {
 
             val updatedUrl = viewModel.avatarUrl.first()
             assertEquals("https://example.com/new-avatar.jpg", updatedUrl)
+            testScope.coroutineContext.cancelChildren()
         }
 
     @Test
     fun `refresh should call repository refresh`() =
-        runTest {
+        runTest(StandardTestDispatcher()) {
             var refreshCalled = false
             val fakeRepository =
                 object : AvatarRepository {
@@ -68,10 +82,12 @@ class IconUserViewModelTest {
                         refreshCalled = true
                     }
                 }
-            val viewModel = IconUserViewModel(fakeRepository, this)
+            val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
+            val viewModel = IconUserViewModel(fakeRepository, testScope)
 
             viewModel.refresh()
 
             assertTrue(refreshCalled)
+            testScope.coroutineContext.cancelChildren()
         }
 }

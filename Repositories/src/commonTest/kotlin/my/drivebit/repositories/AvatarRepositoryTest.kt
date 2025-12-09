@@ -7,17 +7,26 @@ import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.AvatarResponse
 import my.drivebit.network.services.Photo
 import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.DEFAULT_AVATAR_PATH
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-private const val IMAGE_URL = "images"
-private const val DEFAULT_AVATAR_PATH = "$IMAGE_URL/menu/user.svg"
 
 private class FakePhoto : Photo {
     var shouldThrow = false
     var avatarUrl: String = "https://example.com/avatar.jpg"
 
     override suspend fun getAvatar(): AvatarResponse {
+        if (shouldThrow) {
+            throw Exception("Network error")
+        }
+        return AvatarResponse(url = avatarUrl)
+    }
+
+    override suspend fun uploadAvatar(
+        fileBytes: ByteArray,
+        fileName: String,
+        contentType: String,
+    ): AvatarResponse {
         if (shouldThrow) {
             throw Exception("Network error")
         }

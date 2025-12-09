@@ -10,9 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Photo
 import my.drivebit.shared.storage.Storage
-
-private const val IMAGE_URL = "images"
-private const val DEFAULT_AVATAR_PATH = "$IMAGE_URL/menu/user.svg"
+import my.drivebit.utils.DEFAULT_AVATAR_PATH
 
 interface AvatarRepository {
     val avatarUrl: Flow<String>
