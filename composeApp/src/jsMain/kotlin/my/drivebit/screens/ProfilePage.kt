@@ -40,12 +40,11 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 private const val MAX_FILE_SIZE = 2 * 1024 * 1024
-private const val AVATAR_SIZE = 800
 
 @Suppress("UNCHECKED_CAST")
-private suspend fun org.w3c.files.File.cropFromBottom(): ByteArray =
+private suspend fun org.w3c.files.File.readAsBytes(): ByteArray =
     suspendCancellableCoroutine { continuation ->
-        val file = this@cropFromBottom
+        val file = this@readAsBytes
         val fileSize: Number = js("file.size") as Number
         if (fileSize.toDouble() > MAX_FILE_SIZE) {
             continuation.resumeWithException(
@@ -53,76 +52,25 @@ private suspend fun org.w3c.files.File.cropFromBottom(): ByteArray =
             )
             return@suspendCancellableCoroutine
         }
-
         val reader = org.w3c.files.FileReader()
         reader.onload = {
-            val dataUrl = reader.result as String
-            val img = js("new Image()") as org.w3c.dom.HTMLImageElement
-            val onLoadHandler: dynamic = {
-                val canvas = js("document.createElement('canvas')") as org.w3c.dom.HTMLCanvasElement
-                val ctx = canvas.getContext("2d") as? org.w3c.dom.CanvasRenderingContext2D
-                if (ctx != null) {
-                    val originalWidth = img.width.toInt()
-                    val originalHeight = img.height.toInt()
-                    val size = minOf(originalWidth, originalHeight, AVATAR_SIZE)
-                    val cropY = maxOf(0, originalHeight - size)
-
-                    canvas.width = size
-                    canvas.height = size
-                    ctx.drawImage(
-                        img,
-                        0.0,
-                        cropY.toDouble(),
-                        originalWidth.toDouble(),
-                        size.toDouble(),
-                        0.0,
-                        0.0,
-                        size.toDouble(),
-                        size.toDouble(),
-                    )
-
-                    val toBlobCallback: dynamic = { blob: org.w3c.files.Blob? ->
-                        if (blob != null) {
-                            val fileReader = org.w3c.files.FileReader()
-                            fileReader.onload = {
-                                val result = fileReader.result
-                                if (result != null) {
-                                    val uint8Array: dynamic = js("new Uint8Array(result)")
-                                    val length = uint8Array.length as Int
-                                    val bytes = ByteArray(length)
-                                    for (i in 0 until length) {
-                                        bytes[i] = (uint8Array[i] as Number).toInt().toByte()
-                                    }
-                                    continuation.resume(bytes)
-                                } else {
-                                    continuation.resumeWithException(Exception("Failed to crop image"))
-                                }
-                            }
-                            fileReader.onerror = {
-                                continuation.resumeWithException(Exception("Failed to read cropped image"))
-                            }
-                            fileReader.readAsArrayBuffer(blob)
-                        } else {
-                            continuation.resumeWithException(Exception("Failed to crop image"))
-                        }
-                    }
-
-                    canvas.toBlob(toBlobCallback, "image/jpeg", 0.9)
-                } else {
-                    continuation.resumeWithException(Exception("Failed to get canvas context"))
+            val arrayBuffer = reader.result
+            if (arrayBuffer != null) {
+                val uint8Array: dynamic = js("new Uint8Array(arrayBuffer)")
+                val length = uint8Array.length as Int
+                val bytes = ByteArray(length)
+                for (i in 0 until length) {
+                    bytes[i] = (uint8Array[i] as Number).toInt().toByte()
                 }
+                continuation.resume(bytes)
+            } else {
+                continuation.resumeWithException(Exception("Failed to read file"))
             }
-            val onErrorHandler: dynamic = {
-                continuation.resumeWithException(Exception("Failed to load image"))
-            }
-            img.onload = onLoadHandler
-            img.onerror = onErrorHandler
-            img.src = dataUrl
         }
         reader.onerror = {
             continuation.resumeWithException(Exception("File read error"))
         }
-        reader.readAsDataURL(file)
+        reader.readAsArrayBuffer(file)
     }
 
 private fun buildEditNameUrlParams(
@@ -201,9 +149,9 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                             if (file != null) {
                                 coroutineScope.launch {
                                     try {
-                                        val fileBytes = file.cropFromBottom()
-                                        val fileName = "avatar.jpg"
-                                        val contentType = "image/jpeg"
+                                        val fileBytes = file.readAsBytes()
+                                        val fileName = file.name
+                                        val contentType = file.type.ifBlank { "image/jpeg" }
                                         avatarUploadViewModel.uploadAvatar(fileBytes, fileName, contentType)
                                     } catch (e: Exception) {
                                     }
@@ -237,6 +185,8 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                             width(200.px)
                                             height(200.px)
                                             borderRadius(50.percent)
+                                            property("object-fit", "cover")
+                                            property("object-position", "top")
                                         }
                                     },
                                 )
