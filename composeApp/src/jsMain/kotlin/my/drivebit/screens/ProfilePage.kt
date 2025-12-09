@@ -16,10 +16,12 @@ import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.UserNameFormatter
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.mapIso8601ToMonthYearString
+import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Img
 import org.koin.compose.koinInject
 
 private fun buildEditNameUrlParams(
@@ -78,6 +80,8 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
 
                 is ProfileState.Success -> {
                     val user = currentState.user
+                    val iconUserViewModel: IconUserViewModel = koinInject()
+                    val avatarUrl by iconUserViewModel.avatarUrl.collectAsState()
 
                     Div({
                         style {
@@ -85,6 +89,28 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                             flexDirection(FlexDirection.Column)
                         }
                     }) {
+                        Column(gap = 8.px, marginBottom = 24.px) {
+                            RowSpaceBetween {
+                                Img(
+                                    src = avatarUrl,
+                                    alt = "User",
+                                    attrs = {
+                                        style {
+                                            width(80.px)
+                                            height(80.px)
+                                            borderRadius(50.percent)
+                                        }
+                                    },
+                                )
+                                LinkButton(
+                                    text = "Изменить",
+                                    onClick = {
+                                        navigationController?.navigateTo("/edit-avatar")
+                                    },
+                                )
+                            }
+                        }
+
                         Column(gap = 8.px, marginBottom = 8.px) {
                             RowSpaceBetween {
                                 TextSmartHeader(
