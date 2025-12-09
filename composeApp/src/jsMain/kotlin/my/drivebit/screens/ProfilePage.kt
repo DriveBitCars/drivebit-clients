@@ -96,8 +96,8 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                     alt = "User",
                                     attrs = {
                                         style {
-                                            width(80.px)
-                                            height(80.px)
+                                            width(200.px)
+                                            height(200.px)
                                             borderRadius(50.percent)
                                         }
                                     },
