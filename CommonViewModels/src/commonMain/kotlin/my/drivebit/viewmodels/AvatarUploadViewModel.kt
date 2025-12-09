@@ -24,6 +24,8 @@ sealed interface AvatarUploadState {
     data object Success : AvatarUploadState
 }
 
+expect class FileReader
+
 interface AvatarUploadViewModel {
     val state: StateFlow<AvatarUploadState>
 
@@ -32,6 +34,8 @@ interface AvatarUploadViewModel {
         fileName: String,
         contentType: String,
     )
+
+    fun uploadAvatarFile(file: FileReader)
 }
 
 class AvatarUploadViewModelImpl(
@@ -68,4 +72,12 @@ class AvatarUploadViewModelImpl(
             }
         }
     }
+
+    override fun uploadAvatarFile(file: FileReader) {
+        viewModelScope.launch {
+            uploadAvatarFileImpl(file)
+        }
+    }
 }
+
+expect suspend fun AvatarUploadViewModelImpl.uploadAvatarFileImpl(file: FileReader)

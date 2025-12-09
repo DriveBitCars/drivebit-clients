@@ -7,11 +7,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.browser.document
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import my.drivebit.components.Column
 import my.drivebit.components.LinkButton
 import my.drivebit.components.Loader
@@ -27,6 +22,7 @@ import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.mapIso8601ToMonthYearString
 import my.drivebit.viewmodels.AvatarUploadState
 import my.drivebit.viewmodels.AvatarUploadViewModel
+import my.drivebit.viewmodels.FileReader
 import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
@@ -36,42 +32,6 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Input
 import org.koin.compose.koinInject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-
-private const val MAX_FILE_SIZE = 2 * 1024 * 1024
-
-@Suppress("UNCHECKED_CAST")
-private suspend fun org.w3c.files.File.readAsBytes(): ByteArray =
-    suspendCancellableCoroutine { continuation ->
-        val file = this@readAsBytes
-        val fileSize: Number = js("file.size") as Number
-        if (fileSize.toDouble() > MAX_FILE_SIZE) {
-            continuation.resumeWithException(
-                Exception("Файл слишком большой. Максимальный размер: ${MAX_FILE_SIZE / 1024 / 1024}MB"),
-            )
-            return@suspendCancellableCoroutine
-        }
-        val reader = org.w3c.files.FileReader()
-        reader.onload = {
-            val arrayBuffer = reader.result
-            if (arrayBuffer != null) {
-                val uint8Array: dynamic = js("new Uint8Array(arrayBuffer)")
-                val length = uint8Array.length as Int
-                val bytes = ByteArray(length)
-                for (i in 0 until length) {
-                    bytes[i] = (uint8Array[i] as Number).toInt().toByte()
-                }
-                continuation.resume(bytes)
-            } else {
-                continuation.resumeWithException(Exception("Failed to read file"))
-            }
-        }
-        reader.onerror = {
-            continuation.resumeWithException(Exception("File read error"))
-        }
-        reader.readAsArrayBuffer(file)
-    }
 
 private fun buildEditNameUrlParams(
     firstName: String?,
@@ -133,7 +93,6 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                     val avatarUrl by iconUserViewModel.avatarUrl.collectAsState()
                     val avatarUploadViewModel: AvatarUploadViewModel = koinInject()
                     val uploadState by avatarUploadViewModel.state.collectAsState()
-                    val coroutineScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 
                     val fileInputId = remember { "avatar-file-input-${kotlin.random.Random.nextInt()}" }
 
@@ -145,17 +104,9 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                         val changeHandler: (org.w3c.dom.events.Event) -> Unit = { event ->
                             val input = event.target as? org.w3c.dom.HTMLInputElement
                             val fileList = input?.files
-                            val file = fileList?.item(0) as? org.w3c.files.File
+                            val file = fileList?.item(0) as? FileReader
                             if (file != null) {
-                                coroutineScope.launch {
-                                    try {
-                                        val fileBytes = file.readAsBytes()
-                                        val fileName = file.name
-                                        val contentType = file.type.ifBlank { "image/jpeg" }
-                                        avatarUploadViewModel.uploadAvatar(fileBytes, fileName, contentType)
-                                    } catch (e: Exception) {
-                                    }
-                                }
+                                avatarUploadViewModel.uploadAvatarFile(file)
                             }
                         }
                         inputElement?.addEventListener("change", changeHandler)
