@@ -34,7 +34,6 @@ fun LinkButton(
             color(CSSColors.BlueRed)
             alignSelf(AlignSelf.Center)
             marginTop(4.px)
-            cursor("pointer")
         }
     }) {
         Text(text)

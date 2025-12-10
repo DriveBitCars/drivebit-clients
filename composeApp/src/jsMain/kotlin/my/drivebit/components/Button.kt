@@ -52,7 +52,6 @@ fun ActionButton(
             )
             color(CSSColors.White)
             border(0.px)
-            cursor(if (isEnabled) "pointer" else "not-allowed")
             applyTypography(CSSTypography.Styles.button)
             fontSize(CSSTypography.FontSize.base)
             fontWeight(CSSTypography.FontWeight.semibold)

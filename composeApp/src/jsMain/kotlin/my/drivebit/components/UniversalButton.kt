@@ -8,7 +8,6 @@ import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
-import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.padding
@@ -28,7 +27,6 @@ fun UniversalButton(
             gap(8.px)
             padding(12.px, 16.px)
             borderRadius(8.px)
-            cursor("pointer")
             backgroundColor(if (isSelected) CSSColors.Black else CSSColors.White)
             color(if (isSelected) CSSColors.White else CSSColors.Black)
             property("transition", "all 0.2s ease")

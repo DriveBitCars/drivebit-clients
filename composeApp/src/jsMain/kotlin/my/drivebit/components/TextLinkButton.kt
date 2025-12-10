@@ -33,7 +33,6 @@ fun TextLinkButton(
             fontWeight(CSSTypography.FontWeight.medium)
             color(CSSColors.BlueRed)
             alignSelf(AlignSelf.Center)
-            cursor("pointer")
         }
     }) {
         Text(text)

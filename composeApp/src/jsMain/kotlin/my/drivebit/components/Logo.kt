@@ -3,7 +3,6 @@ package my.drivebit.components
 import androidx.compose.runtime.Composable
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.resources.ImagePaths
-import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
@@ -19,7 +18,6 @@ fun Logo() {
             navigationController.navigateTo("/")
         }
         style {
-            cursor("pointer")
         }
     }) {
         Img(

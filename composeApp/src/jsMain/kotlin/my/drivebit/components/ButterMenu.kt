@@ -12,7 +12,6 @@ import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.bottom
-import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.left
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.padding
@@ -111,7 +110,6 @@ fun ButterItems(
                     event.stopPropagation()
                 }
                 style {
-                    cursor("pointer")
                     property("transition", "background-color 0.2s ease")
                     borderRadius(8.px)
                     padding(12.px, 8.px)
