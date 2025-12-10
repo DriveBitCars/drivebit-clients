@@ -8,8 +8,6 @@ import kotlin.coroutines.resumeWithException
 
 actual typealias FileReader = File
 
-private const val MAX_FILE_SIZE = 2 * 1024 * 1024
-
 actual suspend fun AvatarUploadViewModelImpl.uploadAvatarFileImpl(file: FileReader) {
     val fileBytes = file.readAsBytes()
     val fileName = file.name
@@ -21,13 +19,6 @@ actual suspend fun AvatarUploadViewModelImpl.uploadAvatarFileImpl(file: FileRead
 private suspend fun File.readAsBytes(): ByteArray =
     suspendCancellableCoroutine { continuation ->
         val file = this@readAsBytes
-        val fileSize: Number = js("file.size") as Number
-        if (fileSize.toDouble() > MAX_FILE_SIZE) {
-            continuation.resumeWithException(
-                Exception("Файл слишком большой. Максимальный размер: ${MAX_FILE_SIZE / 1024 / 1024}MB"),
-            )
-            return@suspendCancellableCoroutine
-        }
         val reader = W3CFileReader()
         reader.onload = {
             val arrayBuffer = reader.result

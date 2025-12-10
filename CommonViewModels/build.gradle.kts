@@ -40,6 +40,10 @@ kotlin {
             implementation(project(":Network"))
             implementation("io.ktor:ktor-http:${libs.versions.ktor.get()}")
         }
+        jsTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinx.coroutines.get()}")
+        }
     }
 }
 
