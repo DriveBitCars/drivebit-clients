@@ -6,6 +6,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Photo
@@ -30,8 +32,8 @@ internal class AvatarRepositoryImpl(
     private val storage: Storage,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : AvatarRepository {
-    private val _avatarUrl = MutableStateFlow(DEFAULT_AVATAR_PATH)
-    override val avatarUrl: Flow<String> = _avatarUrl.asStateFlow()
+    private val _avatarUrl = MutableStateFlow<String?>(null)
+    override val avatarUrl: Flow<String> = _avatarUrl.asStateFlow().filterNotNull()
 
     init {
         refresh()
@@ -50,10 +52,7 @@ internal class AvatarRepositoryImpl(
 
     override fun refresh() {
         coroutineScope.launch {
-            val newUrl = calculateAvatarUrl()
-            if (_avatarUrl.value != newUrl) {
-                _avatarUrl.update { newUrl }
-            }
+                _avatarUrl.update { calculateAvatarUrl() }
         }
     }
 }
