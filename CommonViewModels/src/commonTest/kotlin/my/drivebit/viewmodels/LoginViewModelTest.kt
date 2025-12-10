@@ -12,21 +12,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class MockCreateOtpRepository : CreateOtpRepository {
-    var shouldThrowError = false
-    var errorMessage = "Network error"
-    var lastLoginCalled: String? = null
-
-    override suspend fun createOtp(login: String): ResultOtp {
-        lastLoginCalled = login
-        if (shouldThrowError) {
-            val message = errorMessage.takeIf { it.isNotBlank() } ?: "Произошла ошибка"
-            return ResultOtp.Error(message)
-        }
-        return ResultOtp.Success("test-session-id-guid")
-    }
-}
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginViewModelTest {
     private val phoneValidator = PhoneValidator()

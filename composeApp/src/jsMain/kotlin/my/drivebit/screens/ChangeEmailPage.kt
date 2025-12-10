@@ -18,6 +18,8 @@ import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.repositories.CreateOtpRepository
+import my.drivebit.repositories.ResultOtp
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.NEW_LOGIN
 import my.drivebit.utils.OTPRESULT
@@ -25,8 +27,6 @@ import my.drivebit.utils.OTP_RESULT_PARAM
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.viewmodels.AuthFormViewModel
 import my.drivebit.viewmodels.ButtonState
-import my.drivebit.viewmodels.CreateOtpRepository
-import my.drivebit.viewmodels.ResultOtp
 import my.drivebit.viewmodels.ValidationState
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.createButtonViewModel

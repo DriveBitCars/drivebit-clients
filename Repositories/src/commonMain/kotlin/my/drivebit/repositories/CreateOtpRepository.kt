@@ -1,4 +1,4 @@
-package my.drivebit.viewmodels
+package my.drivebit.repositories
 
 import my.drivebit.network.services.Auth
 
@@ -16,7 +16,7 @@ sealed interface ResultOtp {
     ) : ResultOtp
 }
 
-class CreateOtpRepositoryImpl(
+internal class CreateOtpRepositoryImpl(
     private val auth: Auth,
 ) : CreateOtpRepository {
     override suspend fun createOtp(login: String): ResultOtp {

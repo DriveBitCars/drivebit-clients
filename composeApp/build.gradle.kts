@@ -116,6 +116,7 @@ kotlin {
             implementation(project(":Storage"))
             implementation(project(":CommonViewModels"))
             implementation(project(":Network"))
+            implementation(project(":Repositories"))
             implementation(project(":UI-Components"))
             implementation(project(":Utils"))
             implementation(libs.koin.core)
@@ -126,6 +127,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":Storage"))
             implementation(project(":CommonViewModels"))
+            implementation(project(":Repositories"))
             implementation(project(":Utils"))
             implementation(compose.runtime)
             implementation(libs.koin.core)
