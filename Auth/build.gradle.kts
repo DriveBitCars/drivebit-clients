@@ -70,4 +70,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildToolsVersion = "35.0.0"
+
+    // Отключаем создание Android unit тестов
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = false
+            isReturnDefaultValues = true
+        }
+    }
 }

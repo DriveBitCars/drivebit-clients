@@ -1,10 +1,10 @@
 package my.drivebit.viewmodels
 
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.w3c.files.File
 import org.w3c.files.FileReader as W3CFileReader
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 actual typealias FileReader = File
 

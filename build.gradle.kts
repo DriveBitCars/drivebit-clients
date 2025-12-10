@@ -44,6 +44,35 @@ subprojects {
     }
 }
 
+// Отключаем Android unit тесты для всех модулей с Android target, если SDK не установлен
+// Это позволяет запускать check без Android SDK в KMP проектах
+afterEvaluate {
+    val hasAndroidSdk = 
+        project.hasProperty("android.sdk.dir") || 
+        System.getenv("ANDROID_HOME") != null ||
+        (file("local.properties").exists() && 
+         file("local.properties").readText().contains("sdk.dir=") &&
+         !file("local.properties").readText().contains("# sdk.dir="))
+
+    if (!hasAndroidSdk) {
+        subprojects.forEach { subproject ->
+            try {
+                // Отключаем Android unit тесты
+                subproject.tasks.matching { 
+                    it.name.contains("test", ignoreCase = true) && 
+                    (it.name.contains("Android", ignoreCase = true) || 
+                     it.name.contains("UnitTest", ignoreCase = true) ||
+                     it.name.contains("DebugUnitTest", ignoreCase = true))
+                }.configureEach {
+                    enabled = false
+                }
+            } catch (e: Exception) {
+                // Игнорируем ошибки для модулей без Android плагина
+            }
+        }
+    }
+}
+
 ktlint {
     ktLintConfig()
 }
