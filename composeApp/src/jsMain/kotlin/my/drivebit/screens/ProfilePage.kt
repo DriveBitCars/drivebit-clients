@@ -39,19 +39,10 @@ import org.koin.compose.koinInject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-private const val MAX_FILE_SIZE = 2 * 1024 * 1024
-
 @Suppress("UNCHECKED_CAST")
 private suspend fun org.w3c.files.File.readAsBytes(): ByteArray =
     suspendCancellableCoroutine { continuation ->
         val file = this@readAsBytes
-        val fileSize: Number = js("file.size") as Number
-        if (fileSize.toDouble() > MAX_FILE_SIZE) {
-            continuation.resumeWithException(
-                Exception("Файл слишком большой. Максимальный размер: ${MAX_FILE_SIZE / 1024 / 1024}MB"),
-            )
-            return@suspendCancellableCoroutine
-        }
         val reader = org.w3c.files.FileReader()
         reader.onload = {
             val arrayBuffer = reader.result
