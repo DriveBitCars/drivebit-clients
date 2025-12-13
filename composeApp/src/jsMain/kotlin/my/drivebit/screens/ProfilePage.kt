@@ -21,6 +21,7 @@ import my.drivebit.components.Spacer
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.UserAvatar
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.UserNameFormatter
 import my.drivebit.utils.encodeUrlParameter
@@ -164,18 +165,9 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                         Column(gap = 8.px, marginBottom = 24.px) {
                             RowSpaceBetween {
                                 avatarUrl?.let {
-                                    Img(
+                                    UserAvatar(
                                         src = it,
-                                        alt = "User",
-                                        attrs = {
-                                            style {
-                                                width(200.px)
-                                                height(200.px)
-                                                borderRadius(50.percent)
-                                                property("object-fit", "cover")
-                                                property("object-position", "top")
-                                            }
-                                        },
+                                        size = 200.px,
                                     )
                                 }
                                 Div({
