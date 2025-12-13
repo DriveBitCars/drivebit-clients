@@ -22,5 +22,4 @@ object ImagePaths {
     const val SEARCHBACKGROUND_CAR3_JPG = "images/searchbackground/car3.jpg"
     const val SEARCHBACKGROUND_CAR4_JPG = "images/searchbackground/car4.jpg"
     const val SEARCHBACKGROUND_CAR5_JPG = "images/searchbackground/car5.jpg"
-    const val SEARCHBACKGROUND_CAR6_JPG = "images/searchbackground/car6.jpg"
 }

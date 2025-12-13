@@ -107,7 +107,7 @@ fun HomePage() {
         val selectedFilter = filters.find { it.title == selected }
         selectedFilter?.let { filter ->
             FilterBackgroundImage(
-                backgroundIconUrl = "images/searchbackground/car${filter.backgroundIcon}.jpg",
+                backgroundIconUrl = filter.backgroundIcon,
             )
         }
 
