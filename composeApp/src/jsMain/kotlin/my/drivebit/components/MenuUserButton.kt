@@ -17,7 +17,7 @@ import org.koin.compose.koinInject
 @Suppress("FunctionName")
 fun MenuUserButton(onClick: () -> Unit) {
     val iconUserViewModel: IconUserViewModel = koinInject()
-    val avatarUrl by iconUserViewModel.avatarUrl.collectAsState()
+    val avatarUrl by iconUserViewModel.avatarUrl.collectAsState(null)
 
     UniversalButton(
         isSelected = false,
@@ -35,9 +35,9 @@ fun MenuUserButton(onClick: () -> Unit) {
                 }
             },
         )
-
+        val avtUrl = avatarUrl ?: return@UniversalButton
         Img(
-            src = avatarUrl,
+            src = avtUrl,
             alt = "User",
             attrs = {
                 style {
