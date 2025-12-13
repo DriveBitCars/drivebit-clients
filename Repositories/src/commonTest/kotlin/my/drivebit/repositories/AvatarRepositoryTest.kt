@@ -80,7 +80,7 @@ class AvatarRepositoryTest {
             advanceUntilIdle()
             val url = repository.avatarUrl.first()
 
-            assertEquals("https://api.example.com/avatar.jpg", url)
+            assertEquals("/avatar.jpg", url)
         }
 
     @Test
@@ -112,7 +112,7 @@ class AvatarRepositoryTest {
             advanceUntilIdle()
 
             val updatedUrl = repository.avatarUrl.first()
-            assertEquals("https://api.example.com/avatar.jpg", updatedUrl)
+            assertEquals("/avatar.jpg", updatedUrl)
         }
 
     @Test
@@ -124,7 +124,7 @@ class AvatarRepositoryTest {
 
             advanceUntilIdle()
             val initialUrl = repository.avatarUrl.first()
-            assertEquals("https://api.example.com/avatar.jpg", initialUrl)
+            assertEquals("/avatar.jpg", initialUrl)
 
             storage.setLoggedIn(false)
             repository.refresh()
@@ -143,14 +143,14 @@ class AvatarRepositoryTest {
 
             advanceUntilIdle()
             val initialUrl = repository.avatarUrl.first()
-            assertEquals("https://api.example.com/avatar1.jpg", initialUrl)
+            assertEquals("/avatar1.jpg", initialUrl)
 
             photo.avatarUrl = "https://api.example.com/avatar2.jpg"
             repository.refresh()
             advanceUntilIdle()
 
             val updatedUrl = repository.avatarUrl.first()
-            assertEquals("https://api.example.com/avatar2.jpg", updatedUrl)
+            assertEquals("/avatar2.jpg", updatedUrl)
         }
 
     @Test
@@ -174,6 +174,6 @@ class AvatarRepositoryTest {
             advanceUntilIdle()
 
             val updatedUrl = repository.avatarUrl.first()
-            assertEquals("https://api.example.com/new-avatar.jpg", updatedUrl)
+            assertEquals("/new-avatar.jpg", updatedUrl)
         }
 }

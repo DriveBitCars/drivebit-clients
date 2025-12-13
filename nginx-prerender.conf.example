@@ -17,6 +17,20 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
+    # Проксирование аватаров на внешний сервер
+    # /publicbct/avatars/... -> http://213.171.27.185:9000/publicbct/avatars/...
+    location /publicbct/avatars/ {
+        proxy_pass http://213.171.27.185:9000/publicbct/avatars/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Кеширование изображений
+        proxy_cache_valid 200 1d;
+        add_header Cache-Control "public, max-age=86400";
+    }
+
     # Пререндеренные страницы
     # Если файл существует - отдаем его, иначе fallback на index.html
     
