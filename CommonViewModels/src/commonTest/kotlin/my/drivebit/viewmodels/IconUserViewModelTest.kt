@@ -1,12 +1,7 @@
 package my.drivebit.viewmodels
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -36,26 +31,19 @@ class IconUserViewModelTest {
                 FakeAvatarRepository().apply {
                     setAvatarUrl("https://example.com/avatar.jpg")
                 }
-            val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val viewModel = IconUserViewModel(fakeRepository, testScope)
+            val viewModel = IconUserViewModel(fakeRepository)
 
             advanceUntilIdle()
-            val url =
-                viewModel.avatarUrl
-                    .take(2)
-                    .toList()
-                    .last()
+            val url = viewModel.avatarUrl.first()
 
             assertEquals("https://example.com/avatar.jpg", url)
-            testScope.coroutineContext.cancelChildren()
         }
 
     @Test
     fun `avatarUrl should update when repository updates`() =
         runTest(StandardTestDispatcher()) {
             val fakeRepository = FakeAvatarRepository()
-            val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val viewModel = IconUserViewModel(fakeRepository, testScope)
+            val viewModel = IconUserViewModel(fakeRepository)
 
             advanceUntilIdle()
             val initialUrl = viewModel.avatarUrl.first()
@@ -66,7 +54,6 @@ class IconUserViewModelTest {
 
             val updatedUrl = viewModel.avatarUrl.first()
             assertEquals("https://example.com/new-avatar.jpg", updatedUrl)
-            testScope.coroutineContext.cancelChildren()
         }
 
     @Test
@@ -82,12 +69,10 @@ class IconUserViewModelTest {
                         refreshCalled = true
                     }
                 }
-            val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
-            val viewModel = IconUserViewModel(fakeRepository, testScope)
+            val viewModel = IconUserViewModel(fakeRepository)
 
             viewModel.refresh()
 
             assertTrue(refreshCalled)
-            testScope.coroutineContext.cancelChildren()
         }
 }
