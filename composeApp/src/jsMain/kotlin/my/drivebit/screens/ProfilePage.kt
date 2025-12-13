@@ -121,7 +121,7 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                 is ProfileState.Success -> {
                     val user = currentState.user
                     val iconUserViewModel: IconUserViewModel = koinInject()
-                    val avatarUrl by iconUserViewModel.avatarUrl.collectAsState()
+                    val avatarUrl by iconUserViewModel.avatarUrl.collectAsState(null)
                     val avatarUploadViewModel: AvatarUploadViewModel = koinInject()
                     val uploadState by avatarUploadViewModel.state.collectAsState()
                     val coroutineScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
@@ -155,11 +155,6 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                         }
                     }
 
-                    LaunchedEffect(uploadState) {
-                        if (uploadState is AvatarUploadState.Success) {
-                        }
-                    }
-
                     Div({
                         style {
                             display(DisplayStyle.Flex)
@@ -168,19 +163,21 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                     }) {
                         Column(gap = 8.px, marginBottom = 24.px) {
                             RowSpaceBetween {
-                                Img(
-                                    src = avatarUrl,
-                                    alt = "User",
-                                    attrs = {
-                                        style {
-                                            width(200.px)
-                                            height(200.px)
-                                            borderRadius(50.percent)
-                                            property("object-fit", "cover")
-                                            property("object-position", "top")
-                                        }
-                                    },
-                                )
+                                avatarUrl?.let {
+                                    Img(
+                                        src = it,
+                                        alt = "User",
+                                        attrs = {
+                                            style {
+                                                width(200.px)
+                                                height(200.px)
+                                                borderRadius(50.percent)
+                                                property("object-fit", "cover")
+                                                property("object-position", "top")
+                                            }
+                                        },
+                                    )
+                                }
                                 Div({
                                     style {
                                         display(DisplayStyle.Flex)

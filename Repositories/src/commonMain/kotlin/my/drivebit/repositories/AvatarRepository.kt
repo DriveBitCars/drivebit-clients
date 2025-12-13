@@ -43,38 +43,36 @@ internal class AvatarRepositoryImpl(
             runCatching {
                 val apiUrl = photo.getAvatar().url
 
-                // Для всех платформ преобразуем HTTP/HTTPS URL в относительный путь
-                // http://213.171.27.185:9000/publicbct/avatars/... -> /publicbct/avatars/...
-                // https://213.171.27.185:9000/publicbct/avatars/... -> /publicbct/avatars/...
-                val relativePath =
-                    when {
-                        apiUrl.startsWith("http://213.171.27.185:9000") -> {
-                            apiUrl.removePrefix("http://213.171.27.185:9000")
-                        }
-                        apiUrl.startsWith("https://213.171.27.185:9000") -> {
-                            apiUrl.removePrefix("https://213.171.27.185:9000")
-                        }
-                        apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
-                            // Extract path from any HTTP/HTTPS URL
-                            // Remove protocol and domain, keep path and query
-                            val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
-                            val pathStart = withoutProtocol.indexOf('/')
+                // Преобразуем URL в формат для nginx проксирования через drivebit.my
+                // http://213.171.27.185:9000/publicbct/avatars/... -> https://drivebit.my/publicbct/avatars/...
+                // https://213.171.27.185:9000/publicbct/avatars/... -> https://drivebit.my/publicbct/avatars/...
+                // Это работает как для dev.drivebit.my, так и для drivebit.my (как и API запросы)
+                when {
+                    apiUrl.startsWith("http://213.171.27.185:9000") -> {
+                        val path = apiUrl.removePrefix("http://213.171.27.185:9000")
+                        "https://drivebit.my$path"
+                    }
+                    apiUrl.startsWith("https://213.171.27.185:9000") -> {
+                        val path = apiUrl.removePrefix("https://213.171.27.185:9000")
+                        "https://drivebit.my$path"
+                    }
+                    apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
+                        // Extract path from any HTTP/HTTPS URL and use drivebit.my domain
+                        val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
+                        val pathStart = withoutProtocol.indexOf('/')
+                        val path =
                             if (pathStart >= 0) {
                                 withoutProtocol.substring(pathStart)
                             } else {
                                 "/"
                             }
-                        }
-                        else -> {
-                            // Already a relative path or unknown format
-                            apiUrl
-                        }
+                        "https://drivebit.my$path"
                     }
-                // Ensure path starts with /
-                if (relativePath.isNotEmpty() && !relativePath.startsWith("/")) {
-                    "/$relativePath"
-                } else {
-                    relativePath
+                    else -> {
+                        // Already a relative path - convert to full URL
+                        val path = if (apiUrl.startsWith("/")) apiUrl else "/$apiUrl"
+                        "https://drivebit.my$path"
+                    }
                 }
             }.getOrElse {
                 DEFAULT_AVATAR_PATH
