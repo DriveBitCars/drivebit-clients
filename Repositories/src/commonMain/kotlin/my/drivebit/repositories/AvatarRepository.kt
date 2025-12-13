@@ -43,10 +43,38 @@ internal class AvatarRepositoryImpl(
         if (storage.isLogined()) {
             runCatching {
                 val apiUrl = photo.getAvatar().url
-                // Convert HTTP URL to relative path for nginx proxy
+                // Convert HTTP/HTTPS URL to relative path for nginx proxy
                 // http://213.171.27.185:9000/publicbct/avatars/... -> /publicbct/avatars/...
-                apiUrl.replaceFirst("http://213.171.27.185:9000", "")
-                    .replaceFirst("https://213.171.27.185:9000", "")
+                // https://213.171.27.185:9000/publicbct/avatars/... -> /publicbct/avatars/...
+                val relativePath = when {
+                    apiUrl.startsWith("http://213.171.27.185:9000") -> {
+                        apiUrl.removePrefix("http://213.171.27.185:9000")
+                    }
+                    apiUrl.startsWith("https://213.171.27.185:9000") -> {
+                        apiUrl.removePrefix("https://213.171.27.185:9000")
+                    }
+                    apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
+                        // Extract path from any HTTP/HTTPS URL
+                        // Remove protocol and domain, keep path and query
+                        val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
+                        val pathStart = withoutProtocol.indexOf('/')
+                        if (pathStart >= 0) {
+                            withoutProtocol.substring(pathStart)
+                        } else {
+                            "/"
+                        }
+                    }
+                    else -> {
+                        // Already a relative path or unknown format
+                        apiUrl
+                    }
+                }
+                // Ensure path starts with /
+                if (relativePath.isNotEmpty() && !relativePath.startsWith("/")) {
+                    "/$relativePath"
+                } else {
+                    relativePath
+                }
             }.getOrElse {
                 DEFAULT_AVATAR_PATH
             }
