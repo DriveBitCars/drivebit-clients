@@ -42,7 +42,11 @@ internal class AvatarRepositoryImpl(
     private suspend fun calculateAvatarUrl(): String =
         if (storage.isLogined()) {
             runCatching {
-                photo.getAvatar().url
+                val apiUrl = photo.getAvatar().url
+                // Convert HTTP URL to relative path for nginx proxy
+                // http://213.171.27.185:9000/publicbct/avatars/... -> /publicbct/avatars/...
+                apiUrl.replaceFirst("http://213.171.27.185:9000", "")
+                    .replaceFirst("https://213.171.27.185:9000", "")
             }.getOrElse {
                 DEFAULT_AVATAR_PATH
             }
