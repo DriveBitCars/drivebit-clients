@@ -6,7 +6,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,36 +42,37 @@ internal class AvatarRepositoryImpl(
         if (storage.isLogined()) {
             runCatching {
                 val apiUrl = photo.getAvatar().url
-                
+
                 // Для dev.drivebit.my и drivebit.my используем относительный путь (как для /api/)
                 // Это позволяет nginx проксировать запросы через тот же домен
                 if (shouldUseRelativeAvatarPath()) {
                     // Convert HTTP/HTTPS URL to relative path for nginx proxy
                     // http://213.171.27.185:9000/publicbct/avatars/... -> /publicbct/avatars/...
                     // https://213.171.27.185:9000/publicbct/avatars/... -> /publicbct/avatars/...
-                    val relativePath = when {
-                        apiUrl.startsWith("http://213.171.27.185:9000") -> {
-                            apiUrl.removePrefix("http://213.171.27.185:9000")
-                        }
-                        apiUrl.startsWith("https://213.171.27.185:9000") -> {
-                            apiUrl.removePrefix("https://213.171.27.185:9000")
-                        }
-                        apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
-                            // Extract path from any HTTP/HTTPS URL
-                            // Remove protocol and domain, keep path and query
-                            val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
-                            val pathStart = withoutProtocol.indexOf('/')
-                            if (pathStart >= 0) {
-                                withoutProtocol.substring(pathStart)
-                            } else {
-                                "/"
+                    val relativePath =
+                        when {
+                            apiUrl.startsWith("http://213.171.27.185:9000") -> {
+                                apiUrl.removePrefix("http://213.171.27.185:9000")
+                            }
+                            apiUrl.startsWith("https://213.171.27.185:9000") -> {
+                                apiUrl.removePrefix("https://213.171.27.185:9000")
+                            }
+                            apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
+                                // Extract path from any HTTP/HTTPS URL
+                                // Remove protocol and domain, keep path and query
+                                val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
+                                val pathStart = withoutProtocol.indexOf('/')
+                                if (pathStart >= 0) {
+                                    withoutProtocol.substring(pathStart)
+                                } else {
+                                    "/"
+                                }
+                            }
+                            else -> {
+                                // Already a relative path or unknown format
+                                apiUrl
                             }
                         }
-                        else -> {
-                            // Already a relative path or unknown format
-                            apiUrl
-                        }
-                    }
                     // Ensure path starts with /
                     if (relativePath.isNotEmpty() && !relativePath.startsWith("/")) {
                         "/$relativePath"
@@ -92,7 +92,7 @@ internal class AvatarRepositoryImpl(
 
     override fun refresh() {
         coroutineScope.launch {
-                _avatarUrl.update { calculateAvatarUrl() }
+            _avatarUrl.update { calculateAvatarUrl() }
         }
     }
 }
