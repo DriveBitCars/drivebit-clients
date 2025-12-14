@@ -106,39 +106,39 @@ private fun EditNamePageContent(viewModel: EditProfileViewModel) {
                             onValueChange = { viewModel.updateMiddleName(it) },
                         )
 
-                    RowButtons {
-                        Div({
-                            style {
-                                flex(1)
-                                maxWidth(200.px)
+                        RowButtons {
+                            Div({
+                                style {
+                                    flex(1)
+                                    maxWidth(200.px)
+                                }
+                            }) {
+                                ActionButton(
+                                    viewModel = cancelButtonViewModel,
+                                    enabledColor = CSSColors.Gray300,
+                                    text = "Отмена",
+                                    onClick = {
+                                        navigationController?.navigateTo("/profile")
+                                    },
+                                )
                             }
-                        }) {
-                            ActionButton(
-                                viewModel = cancelButtonViewModel,
-                                enabledColor = CSSColors.Gray300,
-                                text = "Отмена",
-                                onClick = {
-                                    navigationController?.navigateTo("/profile")
-                                },
-                            )
-                        }
 
-                        Div({
-                            style {
-                                flex(1)
-                                maxWidth(200.px)
+                            Div({
+                                style {
+                                    flex(1)
+                                    maxWidth(200.px)
+                                }
+                            }) {
+                                ActionButton(
+                                    viewModel = saveButtonViewModel,
+                                    enabledColor = CSSColors.BlueRed,
+                                    text = "Сохранить",
+                                    onClick = {
+                                        viewModel.save()
+                                    },
+                                )
                             }
-                        }) {
-                            ActionButton(
-                                viewModel = saveButtonViewModel,
-                                enabledColor = CSSColors.BlueRed,
-                                text = "Сохранить",
-                                onClick = {
-                                    viewModel.save()
-                                },
-                            )
                         }
-                    }
                     }
                 }
             }

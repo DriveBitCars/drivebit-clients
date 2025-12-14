@@ -32,7 +32,7 @@ class FiltersViewModelTest {
         assertEquals("Все", initialState.selected)
         assertEquals(2, initialState.filters.size)
         assertEquals("Все", initialState.filters[0].title)
-        assertEquals("Airports", initialState.filters[1].title)
+        assertEquals("По близости", initialState.filters[1].title)
     }
 
     @Test
@@ -45,12 +45,12 @@ class FiltersViewModelTest {
     }
 
     @Test
-    fun `onSelect should update selected filter when selecting Airports`() {
+    fun `onSelect should update selected filter when selecting По близости`() {
         val viewModel = FiltersViewModel(mockStorage)
 
-        viewModel.onSelect("Airports")
+        viewModel.onSelect("По близости")
 
-        assertEquals("Airports", viewModel.state.value.selected)
+        assertEquals("По близости", viewModel.state.value.selected)
     }
 
     @Test
@@ -60,8 +60,8 @@ class FiltersViewModelTest {
         viewModel.onSelect("Все")
         assertEquals("Все", viewModel.state.value.selected)
 
-        viewModel.onSelect("Airports")
-        assertEquals("Airports", viewModel.state.value.selected)
+        viewModel.onSelect("По близости")
+        assertEquals("По близости", viewModel.state.value.selected)
 
         viewModel.onSelect("Все")
         assertEquals("Все", viewModel.state.value.selected)
@@ -72,7 +72,7 @@ class FiltersViewModelTest {
         val viewModel = FiltersViewModel(mockStorage)
         val initialFilters = viewModel.state.value.filters
 
-        viewModel.onSelect("Airports")
+        viewModel.onSelect("По близости")
 
         assertEquals(initialFilters.size, viewModel.state.value.filters.size)
         assertEquals(initialFilters, viewModel.state.value.filters)

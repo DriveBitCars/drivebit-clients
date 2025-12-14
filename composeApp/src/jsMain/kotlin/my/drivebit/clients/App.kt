@@ -12,14 +12,13 @@ import my.drivebit.components.Logo
 import my.drivebit.components.MenuUserButton
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.components.filterButton
-import my.drivebit.resources.ImagePaths
-import org.jetbrains.compose.web.css.textAlign
-import org.jetbrains.compose.web.dom.Img
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
+import my.drivebit.resources.ImagePaths
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.EditNamePage
+import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.ProfilePage
@@ -29,7 +28,7 @@ import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.di.commonViewModelsModule
 import my.drivebit.web.di.webModule
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Img
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
@@ -47,6 +46,9 @@ actual fun App() {
     }) {
         Navigation { currentPath ->
             when {
+                currentPath == "/list-your-car" -> {
+                    ListYourCarPage()
+                }
                 currentPath.startsWith("/verify-otp") -> {
                     OtpVerificationPage()
                 }

@@ -98,68 +98,68 @@ fun OtpVerificationPage() {
             }
 
             FormSection {
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                            gap(8.px)
-                        }
-                    }) {
-                        TextSmallBodyBlack("Код подтверждения")
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        gap(8.px)
+                    }
+                }) {
+                    TextSmallBodyBlack("Код подтверждения")
 
-                        Input(type = InputType.Text) {
-                            value(code)
-                            onInput { event ->
-                                val inputValue = (event.target as HTMLInputElement).value
-                                viewModel.updateCode(inputValue)
-                            }
-                            style {
-                                width(100.percent)
-                                padding(12.px, 16.px)
-                                borderRadius(8.px)
-                                val borderColor =
-                                    if (state is OtpVerificationState.Error) {
-                                        CSSColors.RedString
-                                    } else {
-                                        CSSColors.Gray300String
-                                    }
-                                property("border", "1px solid $borderColor")
-                                property("font-size", "20px")
-                                property("letter-spacing", "8px")
-                                property("text-align", "center")
-                                property("outline", "none")
-                                property("transition", "border-color 0.2s ease")
-                                property("box-sizing", "border-box")
-                            }
-                            onFocus {
-                                val borderColor =
-                                    if (state is OtpVerificationState.Error) {
-                                        CSSColors.RedString
-                                    } else {
-                                        CSSColors.BlueString
-                                    }
-                                (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
-                                    "border-color",
-                                    borderColor,
-                                )
-                            }
-                            onBlur {
-                                val borderColor =
-                                    if (state is OtpVerificationState.Error) {
-                                        CSSColors.RedString
-                                    } else {
-                                        CSSColors.Gray300String
-                                    }
-                                (it.target as HTMLInputElement).style.setProperty(
-                                    "border-color",
-                                    borderColor,
-                                )
-                            }
+                    Input(type = InputType.Text) {
+                        value(code)
+                        onInput { event ->
+                            val inputValue = (event.target as HTMLInputElement).value
+                            viewModel.updateCode(inputValue)
                         }
-                        if (state is OtpVerificationState.Error) {
-                            TextError((state as OtpVerificationState.Error).message)
+                        style {
+                            width(100.percent)
+                            padding(12.px, 16.px)
+                            borderRadius(8.px)
+                            val borderColor =
+                                if (state is OtpVerificationState.Error) {
+                                    CSSColors.RedString
+                                } else {
+                                    CSSColors.Gray300String
+                                }
+                            property("border", "1px solid $borderColor")
+                            property("font-size", "20px")
+                            property("letter-spacing", "8px")
+                            property("text-align", "center")
+                            property("outline", "none")
+                            property("transition", "border-color 0.2s ease")
+                            property("box-sizing", "border-box")
+                        }
+                        onFocus {
+                            val borderColor =
+                                if (state is OtpVerificationState.Error) {
+                                    CSSColors.RedString
+                                } else {
+                                    CSSColors.BlueString
+                                }
+                            (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
+                                "border-color",
+                                borderColor,
+                            )
+                        }
+                        onBlur {
+                            val borderColor =
+                                if (state is OtpVerificationState.Error) {
+                                    CSSColors.RedString
+                                } else {
+                                    CSSColors.Gray300String
+                                }
+                            (it.target as HTMLInputElement).style.setProperty(
+                                "border-color",
+                                borderColor,
+                            )
                         }
                     }
+                    if (state is OtpVerificationState.Error) {
+                        TextError((state as OtpVerificationState.Error).message)
+                    }
+                }
 
                 ActionButton(
                     viewModel = buttonViewModel,

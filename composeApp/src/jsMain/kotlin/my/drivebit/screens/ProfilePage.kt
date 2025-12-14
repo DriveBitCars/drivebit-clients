@@ -2,7 +2,6 @@ package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -36,7 +35,6 @@ import my.drivebit.viewmodels.ProfileViewModel
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Input
 import org.koin.compose.koinInject
 import kotlin.coroutines.resume
