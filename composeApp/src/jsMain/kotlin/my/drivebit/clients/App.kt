@@ -4,7 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import my.drivebit.components.AppContainer
 import my.drivebit.components.ButterMenu
+import my.drivebit.components.CenteredContent
 import my.drivebit.components.FilterBackgroundImage
+import my.drivebit.components.FilterButtonsRow
+import my.drivebit.components.HeaderRow
 import my.drivebit.components.Logo
 import my.drivebit.components.MenuUserButton
 import my.drivebit.components.TextSmartHeader
@@ -25,11 +28,6 @@ import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.di.commonViewModelsModule
 import my.drivebit.web.di.webModule
-import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.FlexWrap
-import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.KoinApplication
@@ -88,14 +86,7 @@ fun HomePage() {
     val selected = state.value.selected
 
     AppContainer {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                justifyContent(JustifyContent.SpaceBetween)
-                alignItems(AlignItems.Center)
-                marginBottom(20.px)
-            }
-        }) {
+        HeaderRow {
             Logo()
 
             MenuUserButton(butterViewModel::onClick)
@@ -110,16 +101,7 @@ fun HomePage() {
             )
         }
 
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                gap(12.px)
-                alignItems(AlignItems.Center)
-                justifyContent(JustifyContent.Center)
-                marginBottom(20.px)
-                flexWrap(FlexWrap.Wrap)
-            }
-        }) {
+        FilterButtonsRow {
             filters.forEach { filter ->
                 filterButton(
                     filter = filter,
@@ -129,16 +111,7 @@ fun HomePage() {
             }
         }
 
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Column)
-                alignItems(AlignItems.Center)
-                justifyContent(JustifyContent.Center)
-                textAlign("center")
-                padding(40.px)
-            }
-        }) {
+        CenteredContent {
             Img(
                 src = ImagePaths.FIX_SVG,
                 alt = "Coming soon",

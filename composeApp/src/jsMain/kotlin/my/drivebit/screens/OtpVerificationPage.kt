@@ -6,6 +6,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.ActionButton
+import my.drivebit.components.CenteredFormContainer
+import my.drivebit.components.FormSection
+import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
@@ -89,37 +92,12 @@ fun OtpVerificationPage() {
     }
 
     PageWithLogo {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Column)
-                alignItems(AlignItems.Center)
-                justifyContent(JustifyContent.Center)
-                minHeight(80.vh)
+        CenteredFormContainer {
+            PageHeader {
+                TextSmartHeader("Введите код")
             }
-        }) {
-            Div({
-                style {
-                    width(100.percent)
-                    maxWidth(400.px)
-                }
-            }) {
-                Div({
-                    style {
-                        marginTop(0.px)
-                    }
-                }) {
-                    TextSmartHeader("Введите код")
-                }
 
-                Div({
-                    style {
-                        marginTop(32.px)
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Column)
-                        gap(16.px)
-                    }
-                }) {
+            FormSection {
                     Div({
                         style {
                             display(DisplayStyle.Flex)
@@ -183,15 +161,14 @@ fun OtpVerificationPage() {
                         }
                     }
 
-                    ActionButton(
-                        viewModel = buttonViewModel,
-                        enabledColor = CSSColors.Blue,
-                        text = "Подтвердить",
-                        onClick = {
-                            viewModel.verifyOtp()
-                        },
-                    )
-                }
+                ActionButton(
+                    viewModel = buttonViewModel,
+                    enabledColor = CSSColors.Blue,
+                    text = "Подтвердить",
+                    onClick = {
+                        viewModel.verifyOtp()
+                    },
+                )
             }
         }
     }
