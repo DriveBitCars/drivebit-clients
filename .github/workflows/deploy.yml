@@ -189,7 +189,7 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
-        source: "images/,index.html"
+        source: "images/,index.html,list-your-car.html"
         target: "/var/www/drivebit-clients"
         strip_components: 0
         overwrite: true

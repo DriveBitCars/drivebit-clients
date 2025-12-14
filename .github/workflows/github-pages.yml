@@ -66,10 +66,19 @@ jobs:
         # Add CNAME file for custom domain
         echo "dev.drivebit.my" > dist/CNAME
 
+        # Copy list-your-car.html if it exists
+        if [ -f "list-your-car.html" ]; then
+            echo "📄 Copying list-your-car.html..."
+            cp list-your-car.html dist/
+            echo "✅ list-your-car.html copied"
+        else
+            echo "⚠️  list-your-car.html not found in root"
+        fi
+
         # Verify index.html exists
         if [ ! -f "dist/index.html" ]; then
-          echo "❌ index.html not found in dist!"
-          exit 1
+            echo "❌ index.html not found in dist!"
+            exit 1
         fi
 
         echo "📁 Dist files:"
