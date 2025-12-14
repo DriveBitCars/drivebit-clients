@@ -36,7 +36,7 @@ class FiltersViewModel(
                         ),
                         FilterItem(
                             icon = FILTER_MAIN_POINT_SVG,
-                            title = "Airports",
+                            title = "По близости",
                             backgroundIcon = SEARCHBACKGROUND_CAR1_JPG,
                         ),
                     ),

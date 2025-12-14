@@ -7,7 +7,11 @@ import my.drivebit.components.ButterMenu
 import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.Logo
 import my.drivebit.components.MenuUserButton
+import my.drivebit.components.TextSmartHeader
 import my.drivebit.components.filterButton
+import my.drivebit.resources.ImagePaths
+import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.dom.Img
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
 import my.drivebit.screens.ChangeEmailPage
@@ -23,15 +27,10 @@ import my.drivebit.viewmodels.di.commonViewModelsModule
 import my.drivebit.web.di.webModule
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.JustifyContent
-import org.jetbrains.compose.web.css.alignItems
-import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flexWrap
-import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.justifyContent
-import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
@@ -128,6 +127,31 @@ fun HomePage() {
                     onClick = { filterViewModel.onSelect(filter.title) },
                 )
             }
+        }
+
+        Div({
+            style {
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
+                alignItems(AlignItems.Center)
+                justifyContent(JustifyContent.Center)
+                textAlign("center")
+                padding(40.px)
+            }
+        }) {
+            Img(
+                src = ImagePaths.FIX_SVG,
+                alt = "Coming soon",
+                attrs = {
+                    style {
+                        property("max-width", "600px")
+                        width(100.percent)
+                        property("height", "auto")
+                        marginBottom(20.px)
+                    }
+                },
+            )
+            TextSmartHeader("скоро...")
         }
     }
 }

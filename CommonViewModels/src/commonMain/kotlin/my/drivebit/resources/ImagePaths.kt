@@ -10,6 +10,7 @@ object ImagePaths {
     const val FILTER_MAIN_CITIGROUP_SVG = "images/filter-main/citigroup.svg"
     const val FILTER_MAIN_DIRECTION_SVG = "images/filter-main/direction.svg"
     const val FILTER_MAIN_POINT_SVG = "images/filter-main/point.svg"
+    const val FIX_SVG = "images/fix.svg"
     const val LOGIN_LETTER_SVG = "images/login/letter.svg"
     const val LOGOS_LOGO_PNG = "images/logos/logo.png"
     const val LOGOS_TURO_LOGO_SVG = "images/logos/turo_logo.svg"
