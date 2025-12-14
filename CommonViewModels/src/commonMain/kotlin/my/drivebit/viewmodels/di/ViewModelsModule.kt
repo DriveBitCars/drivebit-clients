@@ -81,6 +81,7 @@ val commonViewModelsModule: Module =
         single<ButterViewModel> {
             ButterViewModelImpl(
                 storage = get(),
+                avatarRepository = get(),
             )
         }
 

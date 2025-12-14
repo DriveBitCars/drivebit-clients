@@ -3,6 +3,7 @@ package my.drivebit.viewmodels
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import my.drivebit.repositories.AvatarRepository
 import my.drivebit.resources.ImagePaths
 import my.drivebit.shared.storage.Storage
 
@@ -65,6 +66,7 @@ private val logout =
 
 class ButterViewModelImpl(
     private val storage: Storage,
+    private val avatarRepository: AvatarRepository,
 ) : ButterViewModel {
     private val _state = MutableStateFlow<ButterState>(ButterState.Idle)
 
@@ -96,6 +98,7 @@ class ButterViewModelImpl(
 
     private fun logout() {
         storage.logout()
+        avatarRepository.refresh()
     }
 
     override fun close() {
