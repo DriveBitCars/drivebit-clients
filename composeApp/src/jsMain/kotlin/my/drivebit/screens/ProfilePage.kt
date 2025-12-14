@@ -2,7 +2,6 @@ package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -13,14 +12,17 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import my.drivebit.components.Column
+import my.drivebit.components.ErrorContainer
 import my.drivebit.components.LinkButton
 import my.drivebit.components.Loader
+import my.drivebit.components.PageContainer
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.RowSpaceBetween
 import my.drivebit.components.Spacer
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.UserAvatar
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.UserNameFormatter
 import my.drivebit.utils.encodeUrlParameter
@@ -33,7 +35,6 @@ import my.drivebit.viewmodels.ProfileViewModel
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Input
 import org.koin.compose.koinInject
 import kotlin.coroutines.resume
@@ -93,27 +94,14 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
     val navigationController = LocalNavigationController.current
 
     PageWithLogo {
-        Div({
-            style {
-                padding(24.px)
-                maxWidth(800.px)
-                margin(0.px)
-                property("margin-left", "auto")
-                property("margin-right", "auto")
-            }
-        }) {
+        PageContainer {
             when (val currentState = state) {
                 is ProfileState.Loading -> {
                     Loader()
                 }
 
                 is ProfileState.Error -> {
-                    Div({
-                        style {
-                            textAlign("center")
-                            padding(24.px)
-                        }
-                    }) {
+                    ErrorContainer {
                         TextError("Ошибка: ${currentState.message}")
                     }
                 }
@@ -164,18 +152,9 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                         Column(gap = 8.px, marginBottom = 24.px) {
                             RowSpaceBetween {
                                 avatarUrl?.let {
-                                    Img(
+                                    UserAvatar(
                                         src = it,
-                                        alt = "User",
-                                        attrs = {
-                                            style {
-                                                width(200.px)
-                                                height(200.px)
-                                                borderRadius(50.percent)
-                                                property("object-fit", "cover")
-                                                property("object-position", "top")
-                                            }
-                                        },
+                                        size = 200.px,
                                     )
                                 }
                                 Div({

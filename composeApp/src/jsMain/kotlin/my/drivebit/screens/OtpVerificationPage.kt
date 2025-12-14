@@ -6,6 +6,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.ActionButton
+import my.drivebit.components.CenteredFormContainer
+import my.drivebit.components.FormSection
+import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
@@ -89,109 +92,83 @@ fun OtpVerificationPage() {
     }
 
     PageWithLogo {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Column)
-                alignItems(AlignItems.Center)
-                justifyContent(JustifyContent.Center)
-                minHeight(80.vh)
+        CenteredFormContainer {
+            PageHeader {
+                TextSmartHeader("Введите код")
             }
-        }) {
-            Div({
-                style {
-                    width(100.percent)
-                    maxWidth(400.px)
-                }
-            }) {
-                Div({
-                    style {
-                        marginTop(0.px)
-                    }
-                }) {
-                    TextSmartHeader("Введите код")
-                }
 
+            FormSection {
                 Div({
                     style {
-                        marginTop(32.px)
                         display(DisplayStyle.Flex)
                         flexDirection(FlexDirection.Column)
-                        gap(16.px)
+                        gap(8.px)
                     }
                 }) {
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                            gap(8.px)
-                        }
-                    }) {
-                        TextSmallBodyBlack("Код подтверждения")
+                    TextSmallBodyBlack("Код подтверждения")
 
-                        Input(type = InputType.Text) {
-                            value(code)
-                            onInput { event ->
-                                val inputValue = (event.target as HTMLInputElement).value
-                                viewModel.updateCode(inputValue)
-                            }
-                            style {
-                                width(100.percent)
-                                padding(12.px, 16.px)
-                                borderRadius(8.px)
-                                val borderColor =
-                                    if (state is OtpVerificationState.Error) {
-                                        CSSColors.RedString
-                                    } else {
-                                        CSSColors.Gray300String
-                                    }
-                                property("border", "1px solid $borderColor")
-                                property("font-size", "20px")
-                                property("letter-spacing", "8px")
-                                property("text-align", "center")
-                                property("outline", "none")
-                                property("transition", "border-color 0.2s ease")
-                                property("box-sizing", "border-box")
-                            }
-                            onFocus {
-                                val borderColor =
-                                    if (state is OtpVerificationState.Error) {
-                                        CSSColors.RedString
-                                    } else {
-                                        CSSColors.BlueString
-                                    }
-                                (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
-                                    "border-color",
-                                    borderColor,
-                                )
-                            }
-                            onBlur {
-                                val borderColor =
-                                    if (state is OtpVerificationState.Error) {
-                                        CSSColors.RedString
-                                    } else {
-                                        CSSColors.Gray300String
-                                    }
-                                (it.target as HTMLInputElement).style.setProperty(
-                                    "border-color",
-                                    borderColor,
-                                )
-                            }
+                    Input(type = InputType.Text) {
+                        value(code)
+                        onInput { event ->
+                            val inputValue = (event.target as HTMLInputElement).value
+                            viewModel.updateCode(inputValue)
                         }
-                        if (state is OtpVerificationState.Error) {
-                            TextError((state as OtpVerificationState.Error).message)
+                        style {
+                            width(100.percent)
+                            padding(12.px, 16.px)
+                            borderRadius(8.px)
+                            val borderColor =
+                                if (state is OtpVerificationState.Error) {
+                                    CSSColors.RedString
+                                } else {
+                                    CSSColors.Gray300String
+                                }
+                            property("border", "1px solid $borderColor")
+                            property("font-size", "20px")
+                            property("letter-spacing", "8px")
+                            property("text-align", "center")
+                            property("outline", "none")
+                            property("transition", "border-color 0.2s ease")
+                            property("box-sizing", "border-box")
+                        }
+                        onFocus {
+                            val borderColor =
+                                if (state is OtpVerificationState.Error) {
+                                    CSSColors.RedString
+                                } else {
+                                    CSSColors.BlueString
+                                }
+                            (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
+                                "border-color",
+                                borderColor,
+                            )
+                        }
+                        onBlur {
+                            val borderColor =
+                                if (state is OtpVerificationState.Error) {
+                                    CSSColors.RedString
+                                } else {
+                                    CSSColors.Gray300String
+                                }
+                            (it.target as HTMLInputElement).style.setProperty(
+                                "border-color",
+                                borderColor,
+                            )
                         }
                     }
-
-                    ActionButton(
-                        viewModel = buttonViewModel,
-                        enabledColor = CSSColors.Blue,
-                        text = "Подтвердить",
-                        onClick = {
-                            viewModel.verifyOtp()
-                        },
-                    )
+                    if (state is OtpVerificationState.Error) {
+                        TextError((state as OtpVerificationState.Error).message)
+                    }
                 }
+
+                ActionButton(
+                    viewModel = buttonViewModel,
+                    enabledColor = CSSColors.Blue,
+                    text = "Подтвердить",
+                    onClick = {
+                        viewModel.verifyOtp()
+                    },
+                )
             }
         }
     }

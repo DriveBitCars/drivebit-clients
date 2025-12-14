@@ -4,15 +4,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import my.drivebit.components.AppContainer
 import my.drivebit.components.ButterMenu
+import my.drivebit.components.CenteredContent
 import my.drivebit.components.FilterBackgroundImage
+import my.drivebit.components.FilterButtonsRow
+import my.drivebit.components.HeaderRow
 import my.drivebit.components.Logo
 import my.drivebit.components.MenuUserButton
+import my.drivebit.components.TextSmartHeader
 import my.drivebit.components.filterButton
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
+import my.drivebit.resources.ImagePaths
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.EditNamePage
+import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.ProfilePage
@@ -21,18 +27,8 @@ import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.di.commonViewModelsModule
 import my.drivebit.web.di.webModule
-import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexWrap
-import org.jetbrains.compose.web.css.JustifyContent
-import org.jetbrains.compose.web.css.alignItems
-import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flexWrap
-import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.justifyContent
-import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Img
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
@@ -50,6 +46,9 @@ actual fun App() {
     }) {
         Navigation { currentPath ->
             when {
+                currentPath == "/list-your-car" -> {
+                    ListYourCarPage()
+                }
                 currentPath.startsWith("/verify-otp") -> {
                     OtpVerificationPage()
                 }
@@ -89,14 +88,7 @@ fun HomePage() {
     val selected = state.value.selected
 
     AppContainer {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                justifyContent(JustifyContent.SpaceBetween)
-                alignItems(AlignItems.Center)
-                marginBottom(20.px)
-            }
-        }) {
+        HeaderRow {
             Logo()
 
             MenuUserButton(butterViewModel::onClick)
@@ -107,20 +99,11 @@ fun HomePage() {
         val selectedFilter = filters.find { it.title == selected }
         selectedFilter?.let { filter ->
             FilterBackgroundImage(
-                backgroundIconUrl = "images/searchbackground/car${filter.backgroundIcon}.jpg",
+                backgroundIconUrl = filter.backgroundIcon,
             )
         }
 
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                gap(12.px)
-                alignItems(AlignItems.Center)
-                justifyContent(JustifyContent.Center)
-                marginBottom(20.px)
-                flexWrap(FlexWrap.Wrap)
-            }
-        }) {
+        FilterButtonsRow {
             filters.forEach { filter ->
                 filterButton(
                     filter = filter,
@@ -128,6 +111,22 @@ fun HomePage() {
                     onClick = { filterViewModel.onSelect(filter.title) },
                 )
             }
+        }
+
+        CenteredContent {
+            Img(
+                src = ImagePaths.FIX_SVG,
+                alt = "Coming soon",
+                attrs = {
+                    style {
+                        property("max-width", "600px")
+                        width(100.percent)
+                        property("height", "auto")
+                        marginBottom(20.px)
+                    }
+                },
+            )
+            TextSmartHeader("скоро...")
         }
     }
 }

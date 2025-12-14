@@ -5,9 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.imageUrl
-import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Img
@@ -35,17 +33,11 @@ fun MenuUserButton(onClick: () -> Unit) {
                 }
             },
         )
-        val avtUrl = avatarUrl ?: return@UniversalButton
-        Img(
-            src = avtUrl,
-            alt = "User",
-            attrs = {
-                style {
-                    width(26.px)
-                    height(26.px)
-                    borderRadius(50.percent)
-                }
-            },
-        )
+        avatarUrl?.let {
+            UserAvatar(
+                src = it,
+                size = 26.px,
+            )
+        }
     }
 }

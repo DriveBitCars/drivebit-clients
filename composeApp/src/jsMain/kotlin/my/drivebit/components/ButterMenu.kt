@@ -69,6 +69,11 @@ fun ButterMenu() {
                                         butterViewModel.close()
                                         navigationController?.navigateTo("/profile")
                                     })
+                                "Сдать авто" ->
+                                    item.copy(onClick = {
+                                        butterViewModel.close()
+                                        navigationController?.navigateTo("/list-your-car")
+                                    })
                                 else -> item
                             }
                         },

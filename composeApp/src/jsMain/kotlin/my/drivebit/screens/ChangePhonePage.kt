@@ -13,7 +13,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import my.drivebit.components.ActionButton
+import my.drivebit.components.ButtonContainer
+import my.drivebit.components.CenteredFormContainer
+import my.drivebit.components.FormSection
 import my.drivebit.components.InputField
+import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
@@ -31,7 +35,6 @@ import my.drivebit.viewmodels.ValidationState
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
@@ -94,65 +97,34 @@ private fun ChangePhonePageContent(
     }
 
     PageWithLogo {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Column)
-                alignItems(AlignItems.Center)
-                justifyContent(JustifyContent.Center)
-                minHeight(80.vh)
+        CenteredFormContainer {
+            PageHeader {
+                TextSmartHeader("Смена номера телефона")
             }
-        }) {
-            Div({
-                style {
-                    width(100.percent)
-                    maxWidth(400.px)
-                }
-            }) {
-                Div({
-                    style {
-                        marginTop(0.px)
-                    }
-                }) {
-                    TextSmartHeader("Смена номера телефона")
-                }
 
-                Div({
-                    style {
-                        marginTop(32.px)
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Column)
-                        gap(16.px)
-                    }
-                }) {
-                    InputField(
-                        authFormViewModel = authFormViewModel,
-                        validatorViewModel = validatorViewModel,
-                        inputValue = inputValueState,
-                    )
-                }
+            FormSection {
+                InputField(
+                    authFormViewModel = authFormViewModel,
+                    validatorViewModel = validatorViewModel,
+                    inputValue = inputValueState,
+                )
+            }
 
-                Div({
-                    style {
-                        property("id", "primary-change-phone-button")
-                        marginTop(24.px)
-                    }
-                }) {
-                    ActionButton(
-                        viewModel = primaryButtonViewModel,
-                        enabledColor = CSSColors.Blue,
-                        text = "Отправить код",
-                        onClick = {
-                            validatorViewModel.validateInput(inputValue)
-                            if (isValid.value) {
-                                isLoading.value = true
-                                CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-                                    createOtpState.value = createOtpRepository.createOtp(inputValue)
-                                }
+            ButtonContainer(id = "primary-change-phone-button") {
+                ActionButton(
+                    viewModel = primaryButtonViewModel,
+                    enabledColor = CSSColors.Blue,
+                    text = "Отправить код",
+                    onClick = {
+                        validatorViewModel.validateInput(inputValue)
+                        if (isValid.value) {
+                            isLoading.value = true
+                            CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+                                createOtpState.value = createOtpRepository.createOtp(inputValue)
                             }
-                        },
-                    )
-                }
+                        }
+                    },
+                )
             }
         }
     }

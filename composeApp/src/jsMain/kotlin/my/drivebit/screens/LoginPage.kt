@@ -9,7 +9,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import my.drivebit.components.ActionButton
+import my.drivebit.components.ButtonContainer
+import my.drivebit.components.CenteredFormContainer
+import my.drivebit.components.FormSection
 import my.drivebit.components.InputField
+import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
@@ -91,84 +95,49 @@ private fun LoginPageContent(
     }
 
     PageWithLogo {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Column)
-                alignItems(AlignItems.Center)
-                justifyContent(JustifyContent.Center)
-                minHeight(80.vh)
+        CenteredFormContainer {
+            PageHeader {
+                TextSmartHeader(viewModel.pageTitle)
             }
-        }) {
+
+            FormSection {
+                InputField(
+                    authFormViewModel = viewModel,
+                    validatorViewModel = validatorViewModel,
+                    inputValue = inputValueState,
+                )
+            }
+
+            ButtonContainer(id = "primary-login-button") {
+                ActionButton(
+                    viewModel = primaryButtonViewModel,
+                    enabledColor = CSSColors.Blue,
+                    text = viewModel.primaryButtonText,
+                    onClick = {
+                        viewModel.submit(inputValue)
+                    },
+                )
+            }
+
             Div({
                 style {
-                    width(100.percent)
-                    maxWidth(400.px)
+                    marginTop(16.px)
+                    textAlign("center")
                 }
             }) {
-                Div({
-                    style {
-                        marginTop(0.px)
-                    }
-                }) {
-                    TextSmartHeader(viewModel.pageTitle)
-                }
+                TextSmallBodyBlack("Или")
+            }
 
-                Div({
-                    style {
-                        marginTop(32.px)
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Column)
-                        gap(16.px)
-                    }
-                }) {
-                    InputField(
-                        authFormViewModel = viewModel,
-                        validatorViewModel = validatorViewModel,
-                        inputValue = inputValueState,
-                    )
-                }
-
-                Div({
-                    style {
-                        property("id", "primary-login-button")
-                        marginTop(24.px)
-                    }
-                }) {
-                    ActionButton(
-                        viewModel = primaryButtonViewModel,
-                        enabledColor = CSSColors.Blue,
-                        text = viewModel.primaryButtonText,
-                        onClick = {
-                            viewModel.submit(inputValue)
-                        },
-                    )
-                }
-
-                Div({
-                    style {
-                        marginTop(16.px)
-                        textAlign("center")
-                    }
-                }) {
-                    TextSmallBodyBlack("Или")
-                }
-
-                Div({
-                    style {
-                        marginTop(16.px)
-                    }
-                }) {
-                    ActionButton(
-                        image = if (viewModel.inputType == InputFieldType.Phone) ImagePaths.LOGIN_LETTER_SVG else null,
-                        enabledColor = CSSColors.Gray300,
-                        text = viewModel.secondaryButtonText,
-                        onClick = {
-                            val path = viewModel.secondaryButtonNavigationPath
-                            navigationController.navigateTo(path)
-                        },
-                    )
-                }
+            ButtonContainer(marginTop = 16.px) {
+                ActionButton(
+                    image = if (viewModel.inputType == InputFieldType.Phone) ImagePaths.LOGIN_LETTER_SVG else null,
+                    enabledColor = CSSColors.Gray300,
+                    text = viewModel.secondaryButtonText,
+                    onClick = {
+                        val path = viewModel.secondaryButtonNavigationPath
+                        navigationController.navigateTo(path)
+                    },
+                )
             }
         }
     }

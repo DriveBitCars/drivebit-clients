@@ -6,7 +6,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.ActionButton
+import my.drivebit.components.ErrorContainer
+import my.drivebit.components.PageContainer
 import my.drivebit.components.PageWithLogo
+import my.drivebit.components.RowButtons
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
@@ -54,23 +57,10 @@ private fun EditNamePageContent(viewModel: EditProfileViewModel) {
     val saveButtonViewModel = createButtonViewModel()
 
     PageWithLogo {
-        Div({
-            style {
-                padding(24.px)
-                maxWidth(800.px)
-                margin(0.px)
-                property("margin-left", "auto")
-                property("margin-right", "auto")
-            }
-        }) {
+        PageContainer {
             when (val currentState = state) {
                 is EditProfileState.Error -> {
-                    Div({
-                        style {
-                            textAlign("center")
-                            padding(24.px)
-                        }
-                    }) {
+                    ErrorContainer {
                         TextError("Ошибка: ${currentState.message}")
                     }
                 }
@@ -116,14 +106,7 @@ private fun EditNamePageContent(viewModel: EditProfileViewModel) {
                             onValueChange = { viewModel.updateMiddleName(it) },
                         )
 
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Row)
-                                gap(12.px)
-                                justifyContent(JustifyContent.Center)
-                            }
-                        }) {
+                        RowButtons {
                             Div({
                                 style {
                                     flex(1)
