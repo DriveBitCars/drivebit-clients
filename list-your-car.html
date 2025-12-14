@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сдавайте машину в аренду на DriveBit - Зарабатывайте до 40% больше</title>
+    <meta name="description" content="Сдавайте свой автомобиль в аренду и зарабатывайте до 40% больше, чем в прокате. Полная страховка, поддержка 24/7, безопасные сделки.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, system-ui, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background-color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 40px;
+            box-sizing: border-box;
+            min-width: 320px;
+        }
+
+        /* Header */
+        header {
+            background-color: #ffffff;
+            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logo img {
+            width: 120px;
+            height: 40px;
+            object-fit: contain;
+            max-width: 120px;
+            max-height: 40px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #4B5563;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #2962FF;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #2962FF 0%, #6B46C1 100%);
+            color: white;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('hero-cars.jpg') center/cover;
+            opacity: 0.2;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .hero .subtitle {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 16px;
+            opacity: 0.95;
+        }
+
+        .hero .highlight {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 32px 0;
+            color: #ffd700;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #2962FF;
+            color: #ffffff;
+            padding: 18px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(41, 98, 255, 0.3);
+            margin-top: 24px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            background-color: #1e4dd4;
+        }
+
+
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background-color: #ffffff;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-top: 48px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid #E0E0E6;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: #2962FF;
+            box-shadow: 0 8px 24px rgba(41, 98, 255, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .feature-card p {
+            color: #4B5563;
+            line-height: 1.6;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 60px 0;
+            background: linear-gradient(135deg, #2962FF 0%, #6B46C1 100%);
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-item h2 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .stat-item p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 18px;
+            color: #4B5563;
+            margin-bottom: 48px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #2962FF 0%, #6B46C1 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 60px;
+            margin-bottom: 16px;
+        }
+
+        .step h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .step p {
+            color: #4B5563;
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 0;
+            background-color: #ffffff;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: #4B5563;
+            margin-bottom: 32px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .footer-copyright {
+            color: #4B5563;
+            font-size: 14px;
+        }
+
+        /* Dialog */
+        .dialog-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dialog-overlay.show {
+            display: flex;
+        }
+
+        .dialog {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .dialog h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+        }
+
+        .dialog p {
+            font-size: 18px;
+            color: #4B5563;
+            margin-bottom: 24px;
+        }
+
+        .dialog-button {
+            background-color: #2962FF;
+            color: #ffffff;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .dialog-button:hover {
+            background-color: #1e4dd4;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            header {
+                padding: 20px 10px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero .subtitle {
+                font-size: 18px;
+            }
+
+            .hero .highlight {
+                font-size: 24px;
+            }
+
+            .nav-links {
+                gap: 16px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .features-grid,
+            .steps {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 5px;
+            }
+
+            header {
+                padding: 20px 5px;
+            }
+
+            .hero {
+                padding: 60px 0;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .cta-button {
+                padding: 14px 32px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <img src="images/logos/turo_logo.svg" alt="DriveBit Logo">
+                </a>
+                <nav class="nav-links">
+                    <a href="/">Главная</a>
+                    <a href="#how-it-works">Как это работает</a>
+                    <a href="#features">Преимущества</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-image"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1>Сдавайте машину в аренду и зарабатывайте</h1>
+                <p class="subtitle">Тысячи водителей ищут автомобили для аренды</p>
+                <p class="highlight">Зарабатывайте до 40% больше, чем в прокате</p>
+                <a href="/login-by-phone" class="cta-button" id="heroCtaButton">Начать зарабатывать</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h2>40%</h2>
+                    <p>Больше дохода, чем в прокате</p>
+                </div>
+                <div class="stat-item">
+                    <h2>24/7</h2>
+                    <p>Поддержка и страховка</p>
+                </div>
+                <div class="stat-item">
+                    <h2>100%</h2>
+                    <p>Защита вашего автомобиля</p>
+                </div>
+                <div class="stat-item">
+                    <h2>1000+</h2>
+                    <p>Довольных владельцев</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Почему выбирают DriveBit</h2>
+            <p class="section-subtitle">Все, что нужно для успешной сдачи автомобиля в аренду</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Максимальный доход</h3>
+                    <p>Устанавливайте свои цены и зарабатывайте больше, чем в традиционных прокатах. Средний доход владельцев - 40% выше.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Полная страховка</h3>
+                    <p>Ваш автомобиль защищен на 100%. Мы покрываем все риски, включая повреждения и угон. Спите спокойно.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Удобное управление</h3>
+                    <p>Простое приложение для управления бронированиями, общения с арендаторами и отслеживания доходов.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Проверенные арендаторы</h3>
+                    <p>Все арендаторы проходят верификацию. Система рейтингов и отзывов обеспечивает безопасность сделок.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🚗</div>
+                    <h3>Гибкий график</h3>
+                    <p>Вы сами решаете, когда сдавать машину. Устанавливайте доступность по дням и часам, блокируйте даты.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Поддержка 24/7</h3>
+                    <p>Наша команда поддержки работает круглосуточно. Помогаем решить любые вопросы быстро и профессионально.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Как это работает</h2>
+            <p class="section-subtitle">Начните зарабатывать всего за 3 простых шага</p>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Зарегистрируйтесь</h3>
+                    <p>Создайте аккаунт и добавьте информацию о вашем автомобиле. Это займет всего несколько минут.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Установите цену</h3>
+                    <p>Выберите подходящую цену за день аренды. Мы поможем определить оптимальную стоимость.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Начните зарабатывать</h3>
+                    <p>Получайте бронирования и зарабатывайте деньги. Мы обрабатываем все платежи безопасно.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Готовы начать зарабатывать?</h2>
+            <p>Присоединяйтесь к тысячам владельцев, которые уже зарабатывают на DriveBit</p>
+            <a href="/login-by-phone" class="cta-button">Начать зарабатывать</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="/">Главная</a>
+                <a href="#features">Преимущества</a>
+                <a href="#how-it-works">Как это работает</a>
+                <a href="/login-by-phone">Войти</a>
+            </div>
+            <p class="footer-copyright">© 2024 DriveBit. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <!-- Dialog -->
+    <div id="soonDialog" class="dialog-overlay">
+        <div class="dialog">
+            <h3>Скоро</h3>
+            <p>Функция будет доступна в ближайшее время</p>
+            <button class="dialog-button" onclick="closeDialog()">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        function isAuthenticated() {
+            try {
+                const token = localStorage.getItem('auth_token');
+                if (token && token.trim() !== '') {
+                    return true;
+                }
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.includes('auth_token')) {
+                        const value = localStorage.getItem(key);
+                        if (value && value.trim() !== '') {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function showDialog() {
+            const dialog = document.getElementById('soonDialog');
+            if (dialog) {
+                dialog.classList.add('show');
+            }
+        }
+
+        function closeDialog() {
+            const dialog = document.getElementById('soonDialog');
+            if (dialog) {
+                dialog.classList.remove('show');
+            }
+        }
+
+        function handleCtaClick(event) {
+            if (isAuthenticated()) {
+                event.preventDefault();
+                showDialog();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctaButtons = document.querySelectorAll('.cta-button');
+            ctaButtons.forEach(button => {
+                button.addEventListener('click', handleCtaClick);
+            });
+
+            const dialogOverlay = document.getElementById('soonDialog');
+            if (dialogOverlay) {
+                dialogOverlay.addEventListener('click', function(event) {
+                    if (event.target === dialogOverlay) {
+                        closeDialog();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
