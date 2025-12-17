@@ -33,6 +33,7 @@ kotlin {
             implementation(project(":Network"))
             implementation(project(":Utils"))
             implementation(libs.koin.core)
+            implementation(libs.multiplatform.settings)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

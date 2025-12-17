@@ -15,13 +15,17 @@ import my.drivebit.components.filterButton
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
 import my.drivebit.resources.ImagePaths
+import my.drivebit.screens.AddressInputPage
+import my.drivebit.screens.CarBrandSelectionPage
 import my.drivebit.screens.ChangeEmailPage
+import my.drivebit.screens.CitySelectionPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.EditNamePage
 import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.ProfilePage
+import my.drivebit.screens.WinCodeInputPage
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.FiltersViewModel
@@ -32,6 +36,7 @@ import org.jetbrains.compose.web.dom.Img
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
+import kotlinx.browser.window
 
 @Composable
 @Suppress("FunctionName")
@@ -46,6 +51,13 @@ actual fun App() {
     }) {
         Navigation { currentPath ->
             when {
+                currentPath == "/city-selection" -> {
+                    CitySelectionPage(
+                        onCitySelected = {
+                            window.location.href = "/address-input"
+                        },
+                    )
+                }
                 currentPath == "/list-your-car" -> {
                     ListYourCarPage()
                 }
@@ -69,6 +81,27 @@ actual fun App() {
                 }
                 currentPath == "/change-phone" -> {
                     ChangePhonePage()
+                }
+                currentPath == "/address-input" -> {
+                    AddressInputPage(
+                        onNavigateToWinCode = {
+                            window.location.href = "/win-code-input"
+                        },
+                    )
+                }
+                currentPath == "/win-code-input" -> {
+                    WinCodeInputPage(
+                        onWinCodeEntered = {
+                            window.location.href = "/car-brand-selection"
+                        },
+                    )
+                }
+                currentPath == "/car-brand-selection" -> {
+                    CarBrandSelectionPage(
+                        onBrandSelected = {
+                            window.location.href = "/"
+                        },
+                    )
                 }
                 else -> {
                     HomePage()

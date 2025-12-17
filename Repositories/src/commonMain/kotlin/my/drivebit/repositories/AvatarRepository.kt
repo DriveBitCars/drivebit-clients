@@ -44,39 +44,41 @@ internal class AvatarRepositoryImpl(
                 val apiUrl = photo.getAvatar().url
 
                 // Извлекаем путь из URL API и преобразуем в /avatar/...
-                val path = when {
-                    apiUrl.startsWith("http://155.212.170.94:9000") -> {
-                        apiUrl.removePrefix("http://155.212.170.94:9000")
-                    }
-                    apiUrl.startsWith("https://155.212.170.94:9000") -> {
-                        apiUrl.removePrefix("https://155.212.170.94:9000")
-                    }
-                    apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
-                        // Extract path from any HTTP/HTTPS URL
-                        val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
-                        val pathStart = withoutProtocol.indexOf('/')
+                val path =
+                    when {
+                        apiUrl.startsWith("http://155.212.170.94:9000") -> {
+                            apiUrl.removePrefix("http://155.212.170.94:9000")
+                        }
+                        apiUrl.startsWith("https://155.212.170.94:9000") -> {
+                            apiUrl.removePrefix("https://155.212.170.94:9000")
+                        }
+                        apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
+                            // Extract path from any HTTP/HTTPS URL
+                            val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
+                            val pathStart = withoutProtocol.indexOf('/')
                             if (pathStart >= 0) {
                                 withoutProtocol.substring(pathStart)
                             } else {
                                 "/"
                             }
+                        }
+                        else -> {
+                            // Already a relative path
+                            if (apiUrl.startsWith("/")) apiUrl else "/$apiUrl"
+                        }
                     }
-                    else -> {
-                        // Already a relative path
-                        if (apiUrl.startsWith("/")) apiUrl else "/$apiUrl"
-                    }
-                }
-                
+
                 // Преобразуем /publicbct/avatars/... в /avatar/...
-                val avatarPath = if (path.startsWith("/publicbct/avatars/")) {
-                    path.removePrefix("/publicbct/avatars/")
-                } else if (path.startsWith("/publicbct/avatars")) {
-                    path.removePrefix("/publicbct/avatars")
-                } else {
-                    // Если путь не начинается с /publicbct/avatars/, извлекаем только имя файла
-                    path.substringAfterLast('/')
-                }
-                
+                val avatarPath =
+                    if (path.startsWith("/publicbct/avatars/")) {
+                        path.removePrefix("/publicbct/avatars/")
+                    } else if (path.startsWith("/publicbct/avatars")) {
+                        path.removePrefix("/publicbct/avatars")
+                    } else {
+                        // Если путь не начинается с /publicbct/avatars/, извлекаем только имя файла
+                        path.substringAfterLast('/')
+                    }
+
                 // Используем абсолютный URL как для API, чтобы работать на любом домене
                 "https://drivebit.my/avatar/$avatarPath"
             }.getOrElse {

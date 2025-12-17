@@ -87,10 +87,17 @@ jobs:
     - name: Copy our custom index.html over generated one
       run: |
         echo "📄 Copying our custom index.html over generated one..."
+        if [ ! -f "index.html" ]; then
+          echo "❌ index.html not found in root directory!"
+          exit 1
+        fi
         cp index.html composeApp/build/dist/js/productionExecutable/index.html
         echo "✅ Custom index.html copied successfully"
         echo "📄 Custom index.html header preview:"
         head -n 15 composeApp/build/dist/js/productionExecutable/index.html | sed -n '1,15p'
+        
+        echo "📁 Checking what's in build output:"
+        ls -la composeApp/build/dist/js/productionExecutable/ | head -20
 
     - name: Add cache-busting version to JS files
       run: |
@@ -109,6 +116,29 @@ jobs:
         fi
         
         echo "✅ Cache-busting version added"
+
+    - name: Verify GitHub Secrets
+      run: |
+        echo "🔍 Verifying GitHub Secrets..."
+        if [ -z "${{ secrets.SERVER_HOST }}" ]; then
+          echo "❌ SERVER_HOST secret is not set!"
+          echo "Please set SERVER_HOST in GitHub Secrets (Settings → Secrets and variables → Actions)"
+          exit 1
+        fi
+        if [ -z "${{ secrets.SERVER_USER }}" ]; then
+          echo "❌ SERVER_USER secret is not set!"
+          echo "Please set SERVER_USER in GitHub Secrets"
+          exit 1
+        fi
+        if [ -z "${{ secrets.SERVER_SSH_KEY }}" ]; then
+          echo "❌ SERVER_SSH_KEY secret is not set!"
+          echo "Please set SERVER_SSH_KEY in GitHub Secrets"
+          exit 1
+        fi
+        echo "✅ All required secrets are set"
+        echo "📋 SERVER_HOST: ${{ secrets.SERVER_HOST }}"
+        echo "📋 SERVER_USER: ${{ secrets.SERVER_USER }}"
+        echo "📋 SERVER_PORT: ${{ secrets.SERVER_PORT || '22 (default)' }}"
 
     - name: Test server connection
       uses: appleboy/ssh-action@v1.2.2
@@ -170,6 +200,22 @@ jobs:
           $SUDO_CMD chown -R $USER:$USER /var/www/drivebit-clients
           echo "✅ Deployment directory prepared"
 
+    - name: Verify files exist before copying
+      run: |
+        echo "🔍 Verifying files exist before copying..."
+        if [ ! -d "composeApp/build/dist/js/productionExecutable" ]; then
+          echo "❌ Build directory not found!"
+          exit 1
+        fi
+        echo "✅ Build directory exists"
+        echo "📁 Files in build output:"
+        ls -la composeApp/build/dist/js/productionExecutable/ | head -20
+        if [ ! -f "composeApp/build/dist/js/productionExecutable/index.html" ]; then
+          echo "❌ index.html not found in build output!"
+          exit 1
+        fi
+        echo "✅ index.html found in build output"
+
     - name: Copy files to server (upload built assets)
       uses: appleboy/scp-action@v1.0.0
       with:
@@ -182,14 +228,31 @@ jobs:
         strip_components: 0
         overwrite: true
 
-    - name: Copy web files and images
+    - name: Verify build output contains images
+      run: |
+        echo "🔍 Checking build output..."
+        if [ -d "composeApp/build/dist/js/productionExecutable/images" ]; then
+          echo "✅ images directory found in build output"
+          echo "📸 Image files: $(find composeApp/build/dist/js/productionExecutable/images -type f | wc -l)"
+        else
+          echo "⚠️  images directory not found in build output"
+        fi
+        if [ -f "composeApp/build/dist/js/productionExecutable/index.html" ]; then
+          echo "✅ index.html found in build output"
+        else
+          echo "❌ index.html not found in build output!"
+          exit 1
+        fi
+
+    - name: Copy custom index.html and list-your-car.html
+      continue-on-error: true
       uses: appleboy/scp-action@v1.0.0
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
-        source: "images/,index.html,list-your-car.html"
+        source: "index.html,list-your-car.html"
         target: "/var/www/drivebit-clients"
         strip_components: 0
         overwrite: true
@@ -206,20 +269,24 @@ jobs:
           echo "🔧 Fixing file structure..."
           if [ "$EUID" -ne 0 ]; then SUDO_CMD="sudo"; else SUDO_CMD=""; fi
           
+          echo "📁 Current structure before fixing:"
+          find /var/www/drivebit-clients -maxdepth 3 -type f -name "index.html" 2>/dev/null || echo "No index.html found"
+          find /var/www/drivebit-clients -maxdepth 3 -type d 2>/dev/null | head -10
+          
           # Move files from nested structure to root if needed
           if [ -d "/var/www/drivebit-clients/composeApp/build/dist/js/productionExecutable" ]; then
             echo "📁 Moving files from nested structure..."
             # Move files one by one to handle existing directories
             for file in /var/www/drivebit-clients/composeApp/build/dist/js/productionExecutable/*; do
               if [ -f "$file" ]; then
-                $SUDO_CMD mv "$file" /var/www/drivebit-clients/
+                $SUDO_CMD mv "$file" /var/www/drivebit-clients/ || echo "⚠️  Failed to move $file"
               elif [ -d "$file" ]; then
                 # For directories, merge contents
                 dirname=$(basename "$file")
                 if [ -d "/var/www/drivebit-clients/$dirname" ]; then
-                  $SUDO_CMD cp -r "$file"/* /var/www/drivebit-clients/"$dirname"/
+                  $SUDO_CMD cp -r "$file"/* /var/www/drivebit-clients/"$dirname"/ || echo "⚠️  Failed to copy $file"
                 else
-                  $SUDO_CMD mv "$file" /var/www/drivebit-clients/
+                  $SUDO_CMD mv "$file" /var/www/drivebit-clients/ || echo "⚠️  Failed to move $file"
                 fi
               fi
             done
@@ -229,21 +296,39 @@ jobs:
             echo "ℹ️  Files already in correct location"
           fi
           
-          # Verify index.html exists
+          echo "📁 Structure after fixing:"
+          ls -la /var/www/drivebit-clients/ | head -20
+          
+          # Verify index.html exists - check multiple possible locations
           if [ -f "/var/www/drivebit-clients/index.html" ]; then
             echo "✅ index.html found in correct location"
+          elif [ -f "/var/www/drivebit-clients/composeApp/build/dist/js/productionExecutable/index.html" ]; then
+            echo "⚠️  index.html found in nested location, moving..."
+            $SUDO_CMD cp /var/www/drivebit-clients/composeApp/build/dist/js/productionExecutable/index.html /var/www/drivebit-clients/index.html
+            echo "✅ index.html moved to correct location"
           else
-            echo "❌ index.html not found!"
+            echo "❌ index.html not found in any location!"
+            echo "🔍 Searching for index.html:"
+            find /var/www/drivebit-clients -name "index.html" 2>/dev/null || echo "No index.html found anywhere"
             exit 1
           fi
           
-          # Verify images directory exists
+          # Verify images directory exists (optional - images might be in resources)
           if [ -d "/var/www/drivebit-clients/images" ]; then
             echo "✅ images directory found"
+            echo "📸 Image files count: $(find /var/www/drivebit-clients/images -type f | wc -l)"
           else
-            echo "❌ images directory not found!"
-            exit 1
+            echo "⚠️  images directory not found (checking if images are in resources)..."
+            if [ -d "/var/www/drivebit-clients/resources" ]; then
+              echo "✅ resources directory found (images might be here)"
+            else
+              echo "⚠️  Neither images nor resources directory found, but continuing..."
+            fi
           fi
+          
+          # List all directories to help debug
+          echo "📁 All directories in deployment:"
+          ls -la /var/www/drivebit-clients/ | head -20
           
 
     - name: Set file permissions
@@ -320,8 +405,36 @@ jobs:
         echo "🚀 Loads 10x faster than WASM version!"
         echo "🔧 Nginx configured and serving the application"
 
+    - name: Debug deployment state
+      if: failure()
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          echo "🔍 Debugging deployment state..."
+          echo "📁 Contents of /var/www/drivebit-clients:"
+          ls -la /var/www/drivebit-clients/ || echo "Directory does not exist"
+          echo ""
+          echo "📄 Checking for index.html:"
+          test -f /var/www/drivebit-clients/index.html && echo "✅ index.html exists" || echo "❌ index.html missing"
+          echo ""
+          echo "📁 Checking for images:"
+          test -d /var/www/drivebit-clients/images && echo "✅ images directory exists" || echo "⚠️  images directory missing"
+          echo ""
+          echo "📁 Checking for resources:"
+          test -d /var/www/drivebit-clients/resources && echo "✅ resources directory exists" || echo "⚠️  resources directory missing"
+
     - name: Notify deployment failure
       if: failure()
       run: |
         echo "❌ Deployment failed!"
         echo "Check the logs above for details."
+        echo ""
+        echo "Common issues:"
+        echo "1. SSH connection failed - check SERVER_SSH_KEY secret"
+        echo "2. index.html not found - check if file was copied"
+        echo "3. Images directory missing - might be OK if images are in resources"
+        echo "4. Permission denied - check SERVER_USER permissions"

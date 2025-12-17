@@ -10,8 +10,10 @@ import platform.Foundation.NSUserDefaults
 
 actual val storageModule: Module =
     module {
+        single<Settings> {
+            NSUserDefaultsSettings(NSUserDefaults.standardUserDefaults)
+        }
         single<Storage> {
-            val settings: Settings = NSUserDefaultsSettings(NSUserDefaults.standardUserDefaults)
-            StorageImpl(settings)
+            StorageImpl(get())
         }
     }

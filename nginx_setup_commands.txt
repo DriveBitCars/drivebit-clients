@@ -1,0 +1,40 @@
+# Команды для настройки nginx - скопируйте и выполните на сервере
+
+# 1. Найти конфигурацию nginx
+NGINX_CONFIG=""
+if [ -f "/etc/nginx/sites-available/drivebit.my" ]; then
+    NGINX_CONFIG="/etc/nginx/sites-available/drivebit.my"
+elif [ -f "/etc/nginx/sites-available/drivebit-clients" ]; then
+    NGINX_CONFIG="/etc/nginx/sites-available/drivebit-clients"
+elif [ -f "/etc/nginx/conf.d/drivebit.conf" ]; then
+    NGINX_CONFIG="/etc/nginx/conf.d/drivebit.conf"
+fi
+
+echo "Конфигурация: $NGINX_CONFIG"
+
+# 2. Создать резервную копию
+cp "$NGINX_CONFIG" "${NGINX_CONFIG}.backup.$(date +%Y%m%d_%H%M%S)"
+
+# 3. Удалить старый блок /api/ если есть
+sed -i '/location \/api\//,/^[[:space:]]*}/d' "$NGINX_CONFIG"
+
+# 4. Добавить новый блок /api/ перед location /
+sed -i '/^[[:space:]]*location \/[[:space:]]*{/i\
+    # Проксирование API на новый бэкенд\
+    location /api/ {\
+        proxy_pass http://155.212.170.94:5000/api/;\
+        proxy_set_header Host $host;\
+        proxy_set_header X-Real-IP $remote_addr;\
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
+        proxy_set_header X-Forwarded-Proto $scheme;\
+    }\
+' "$NGINX_CONFIG"
+
+# 5. Проверить и перезагрузить
+nginx -t && systemctl reload nginx && echo "✅ Готово!"
+
+
+
+
+
+
