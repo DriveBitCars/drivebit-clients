@@ -43,9 +43,7 @@ internal class AvatarRepositoryImpl(
             runCatching {
                 val apiUrl = photo.getAvatar().url
 
-                // Преобразуем URL в формат для проксирования
-                // Для localhost используем относительный путь (webpack dev server проксирует)
-                // Для production используем полный URL через drivebit.my
+                // Извлекаем путь из URL API и преобразуем в /avatar/...
                 val path = when {
                     apiUrl.startsWith("http://155.212.170.94:9000") -> {
                         apiUrl.removePrefix("http://155.212.170.94:9000")
@@ -69,10 +67,17 @@ internal class AvatarRepositoryImpl(
                     }
                 }
                 
-                // Используем относительный путь для локальной разработки
-                // webpack dev server проксирует /publicbct/avatars/ на внешний сервер
-                // В production nginx также проксирует относительные пути
-                path
+                // Преобразуем /publicbct/avatars/... в /avatar/...
+                val avatarPath = if (path.startsWith("/publicbct/avatars/")) {
+                    path.removePrefix("/publicbct/avatars/")
+                } else if (path.startsWith("/publicbct/avatars")) {
+                    path.removePrefix("/publicbct/avatars")
+                } else {
+                    // Если путь не начинается с /publicbct/avatars/, извлекаем только имя файла
+                    path.substringAfterLast('/')
+                }
+                
+                "/avatar/$avatarPath"
             }.getOrElse {
                 DEFAULT_AVATAR_PATH
             }

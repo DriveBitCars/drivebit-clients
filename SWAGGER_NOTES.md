@@ -2,8 +2,9 @@
 
 ## Важно: Всегда проверяй Swagger перед реализацией API
 
-### Ссылка на Swagger
-https://drivebit.my/api/swagger/index.html
+### Ссылки на Swagger
+- **Backend Server (прямой доступ)**: http://155.212.170.94:5000/swagger/index.html
+- **Production (через nginx)**: https://drivebit.my/api/swagger/index.html
 
 ### Ключевые моменты:
 
