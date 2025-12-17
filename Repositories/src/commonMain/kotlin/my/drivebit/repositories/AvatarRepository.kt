@@ -55,11 +55,11 @@ internal class AvatarRepositoryImpl(
                         // Extract path from any HTTP/HTTPS URL
                         val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
                         val pathStart = withoutProtocol.indexOf('/')
-                        if (pathStart >= 0) {
-                            withoutProtocol.substring(pathStart)
-                        } else {
-                            "/"
-                        }
+                            if (pathStart >= 0) {
+                                withoutProtocol.substring(pathStart)
+                            } else {
+                                "/"
+                            }
                     }
                     else -> {
                         // Already a relative path

@@ -11,9 +11,9 @@ config.devServer.proxy = [
         pathRewrite: {
             '^/avatar': '/publicbct/avatars',
         },
-        changeOrigin: true,
-        secure: false,
-        logLevel: 'debug',
+                changeOrigin: true,
+                secure: false,
+                logLevel: 'debug',
     },
 ];
 
