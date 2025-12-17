@@ -44,7 +44,6 @@ fun createHttpClientWithConfig(
             filter { request ->
                 request.url.host.contains("drivebit.my") || request.url.host.contains("api.drivebit.my")
             }
-            sanitizeHeader { name -> name == "Authorization" }
         }
 
         install(Auth) {
@@ -77,10 +76,13 @@ fun createHttpClientWithConfig(
                     if (refreshToken.isNotEmpty() && refreshToken.isBlank()) {
                         println("   ⚠️ WARNING: Refresh token contains only whitespace!")
                     }
-                    BearerTokens(
-                        accessToken = accessToken,
-                        refreshToken = refreshToken,
-                    )
+                    val tokens =
+                        BearerTokens(
+                            accessToken = accessToken,
+                            refreshToken = refreshToken,
+                        )
+                    println("   - ✅ Returning BearerTokens (accessToken isBlank: ${accessToken.isBlank()})")
+                    tokens
                 }
                 refreshTokens {
                     println("🔄 [Auth] refreshTokens called")

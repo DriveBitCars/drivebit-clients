@@ -43,37 +43,36 @@ internal class AvatarRepositoryImpl(
             runCatching {
                 val apiUrl = photo.getAvatar().url
 
-                // Преобразуем URL в формат для nginx проксирования через drivebit.my
-                // http://213.171.27.185:9000/publicbct/avatars/... -> https://drivebit.my/publicbct/avatars/...
-                // https://213.171.27.185:9000/publicbct/avatars/... -> https://drivebit.my/publicbct/avatars/...
-                // Это работает как для dev.drivebit.my, так и для drivebit.my (как и API запросы)
-                when {
-                    apiUrl.startsWith("http://213.171.27.185:9000") -> {
-                        val path = apiUrl.removePrefix("http://213.171.27.185:9000")
-                        "https://drivebit.my$path"
+                // Преобразуем URL в формат для проксирования
+                // Для localhost используем относительный путь (webpack dev server проксирует)
+                // Для production используем полный URL через drivebit.my
+                val path = when {
+                    apiUrl.startsWith("http://155.212.170.94:9000") -> {
+                        apiUrl.removePrefix("http://155.212.170.94:9000")
                     }
-                    apiUrl.startsWith("https://213.171.27.185:9000") -> {
-                        val path = apiUrl.removePrefix("https://213.171.27.185:9000")
-                        "https://drivebit.my$path"
+                    apiUrl.startsWith("https://155.212.170.94:9000") -> {
+                        apiUrl.removePrefix("https://155.212.170.94:9000")
                     }
                     apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
-                        // Extract path from any HTTP/HTTPS URL and use drivebit.my domain
+                        // Extract path from any HTTP/HTTPS URL
                         val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
                         val pathStart = withoutProtocol.indexOf('/')
-                        val path =
-                            if (pathStart >= 0) {
-                                withoutProtocol.substring(pathStart)
-                            } else {
-                                "/"
-                            }
-                        "https://drivebit.my$path"
+                        if (pathStart >= 0) {
+                            withoutProtocol.substring(pathStart)
+                        } else {
+                            "/"
+                        }
                     }
                     else -> {
-                        // Already a relative path - convert to full URL
-                        val path = if (apiUrl.startsWith("/")) apiUrl else "/$apiUrl"
-                        "https://drivebit.my$path"
+                        // Already a relative path
+                        if (apiUrl.startsWith("/")) apiUrl else "/$apiUrl"
                     }
                 }
+                
+                // Используем относительный путь для локальной разработки
+                // webpack dev server проксирует /publicbct/avatars/ на внешний сервер
+                // В production nginx также проксирует относительные пути
+                path
             }.getOrElse {
                 DEFAULT_AVATAR_PATH
             }
