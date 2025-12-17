@@ -5,7 +5,8 @@
 ## API Configuration
 
 - **Base URL**: `https://api.drivebit.my`
-- **API Documentation**: [http://213.171.27.185:5000/swagger/index.html](http://213.171.27.185:5000/swagger/index.html)
+- **Backend Server**: `155.212.170.94:5000`
+- **API Documentation**: [http://155.212.170.94:5000/swagger/index.html](http://155.212.170.94:5000/swagger/index.html)
 
 ## Структура
 
