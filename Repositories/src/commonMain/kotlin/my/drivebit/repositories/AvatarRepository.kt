@@ -77,7 +77,8 @@ internal class AvatarRepositoryImpl(
                     path.substringAfterLast('/')
                 }
                 
-                "/avatar/$avatarPath"
+                // Используем абсолютный URL как для API, чтобы работать на любом домене
+                "https://drivebit.my/avatar/$avatarPath"
             }.getOrElse {
                 DEFAULT_AVATAR_PATH
             }
