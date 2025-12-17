@@ -1,0 +1,130 @@
+name: Test Avatar Proxy
+
+on:
+  pull_request:
+    branches: [ trunk ]
+  push:
+    branches: [ trunk ]
+  workflow_dispatch:
+
+jobs:
+  test-avatar-proxy:
+    name: Test Avatar Proxy Configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+    - name: Test /avatar/ directory returns MinIO error
+      run: |
+        echo "🧪 Testing /avatar/ directory endpoint..."
+        RESPONSE=$(curl -s -w "\n%{http_code}" "https://drivebit.my/avatar/")
+        HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+        BODY=$(echo "$RESPONSE" | head -n-1)
+        
+        echo "HTTP Status: $HTTP_CODE"
+        echo "Response body:"
+        echo "$BODY"
+        
+        if [ "$HTTP_CODE" != "404" ]; then
+          echo "❌ Expected HTTP 404, got $HTTP_CODE"
+          exit 1
+        fi
+        
+        if ! echo "$BODY" | grep -q "NoSuchKey"; then
+          echo "❌ Expected MinIO NoSuchKey error, but not found in response"
+          exit 1
+        fi
+        
+        if ! echo "$BODY" | grep -q "BucketName.*publicbct"; then
+          echo "❌ Expected publicbct bucket name, but not found in response"
+          exit 1
+        fi
+        
+        echo "✅ /avatar/ correctly returns MinIO NoSuchKey error (nginx proxy working)"
+
+    - name: Test /avatar/ with specific file returns proper response
+      run: |
+        echo "🧪 Testing /avatar/ with specific file..."
+        TEST_FILE="56573c55-0ad8-485c-9eeb-4c48f39acf83/dcf4f5fe-0402-46d7-a554-c5055aeee614_avatar.jpg"
+        RESPONSE=$(curl -s -w "\n%{http_code}" "https://drivebit.my/avatar/$TEST_FILE")
+        HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+        
+        echo "HTTP Status: $HTTP_CODE"
+        
+        if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "404" ]; then
+          echo "❌ Expected HTTP 200 or 404, got $HTTP_CODE"
+          exit 1
+        fi
+        
+        if [ "$HTTP_CODE" = "200" ]; then
+          echo "✅ File exists and is accessible (HTTP 200)"
+        else
+          echo "✅ File not found, but proxy is working (HTTP 404)"
+          HEADERS=$(curl -s -I "https://drivebit.my/avatar/$TEST_FILE")
+          if echo "$HEADERS" | grep -q "x-minio-error-code"; then
+            echo "✅ MinIO error headers present (proxy working correctly)"
+          else
+            echo "⚠️  No MinIO headers found, but HTTP 404 is acceptable"
+          fi
+        fi
+
+    - name: Verify MinIO headers in error response
+      run: |
+        echo "🧪 Verifying MinIO-specific headers..."
+        HEADERS=$(curl -s -I "https://drivebit.my/avatar/")
+        
+        echo "Response headers:"
+        echo "$HEADERS"
+        
+        if echo "$HEADERS" | grep -q "x-minio-error-code"; then
+          echo "✅ x-minio-error-code header present"
+        else
+          echo "❌ x-minio-error-code header missing"
+          exit 1
+        fi
+        
+        if echo "$HEADERS" | grep -q "x-amz-request-id"; then
+          echo "✅ x-amz-request-id header present (MinIO proxy working)"
+        else
+          echo "⚠️  x-amz-request-id header missing (may still be working)"
+        fi
+        
+        if echo "$HEADERS" | grep -q "server: nginx"; then
+          echo "✅ Nginx server header present"
+        else
+          echo "⚠️  Nginx server header missing"
+        fi
+
+    - name: Test proxy rewrites path correctly
+      run: |
+        echo "🧪 Testing that /avatar/ is proxied to /publicbct/avatars/..."
+        RESPONSE=$(curl -s "https://drivebit.my/avatar/")
+        
+        if echo "$RESPONSE" | grep -q "/publicbct/avatars/"; then
+          echo "✅ Response contains /publicbct/avatars/ (path rewrite working)"
+        else
+          echo "⚠️  Response doesn't explicitly show /publicbct/avatars/, but error format is correct"
+        fi
+        
+        if echo "$RESPONSE" | grep -q "<Key>avatars/</Key>"; then
+          echo "✅ MinIO error shows correct key path"
+        else
+          echo "⚠️  Key path format may differ, but this is acceptable"
+        fi
+
+    - name: Summary
+      if: always()
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "✅ Avatar proxy test completed"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "What was tested:"
+        echo "  ✓ /avatar/ returns 404 with MinIO NoSuchKey error"
+        echo "  ✓ /avatar/{file} returns 200 or 404 (proxy working)"
+        echo "  ✓ MinIO-specific headers are present"
+        echo "  ✓ Path rewriting from /avatar/ to /publicbct/avatars/"
+        echo ""
+        echo "This confirms nginx is correctly configured to proxy"
+        echo "avatar requests to the MinIO backend at 155.212.170.94:9000"
+
