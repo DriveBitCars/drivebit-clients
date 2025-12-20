@@ -77,10 +77,10 @@ fun createHttpClientWithConfig(
                         println("   ⚠️ WARNING: Refresh token contains only whitespace!")
                     }
                     val tokens =
-                    BearerTokens(
-                        accessToken = accessToken,
-                        refreshToken = refreshToken,
-                    )
+                        BearerTokens(
+                            accessToken = accessToken,
+                            refreshToken = refreshToken,
+                        )
                     println("   - ✅ Returning BearerTokens (accessToken isBlank: ${accessToken.isBlank()})")
                     tokens
                 }

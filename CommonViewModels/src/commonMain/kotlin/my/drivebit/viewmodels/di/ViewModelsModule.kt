@@ -6,11 +6,15 @@ import my.drivebit.utils.InputValidator
 import my.drivebit.utils.PhoneInputValidator
 import my.drivebit.utils.PhoneValidator
 import my.drivebit.utils.Validator
+import my.drivebit.utils.WinCodeValidator
+import my.drivebit.viewmodels.AddressSuggestViewModel
 import my.drivebit.viewmodels.AuthFormViewModel
 import my.drivebit.viewmodels.AvatarUploadViewModel
 import my.drivebit.viewmodels.AvatarUploadViewModelImpl
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
+import my.drivebit.viewmodels.CarBrandViewModel
+import my.drivebit.viewmodels.CityViewModel
 import my.drivebit.viewmodels.EditProfileViewModel
 import my.drivebit.viewmodels.EditProfileViewModelImpl
 import my.drivebit.viewmodels.EmailLoginViewModel
@@ -20,6 +24,7 @@ import my.drivebit.viewmodels.PhoneLoginViewModel
 import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
 import my.drivebit.viewmodels.ValidatorViewModel
+import my.drivebit.viewmodels.WinCodeInputViewModel
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -41,6 +46,10 @@ val commonViewModelsModule: Module =
 
         single<InputValidator>(named("emailInput")) {
             EmailInputValidator()
+        }
+
+        single<InputValidator>(named("winCode")) {
+            WinCodeValidator()
         }
 
         factory {
@@ -113,6 +122,31 @@ val commonViewModelsModule: Module =
                 validator = get(named("email")),
                 inputValidator = get(named("emailInput")),
                 initialErrorMessage = "Введите email",
+            )
+        }
+
+        factory {
+            AddressSuggestViewModel(
+                addressSuggestRepository = get(),
+                selectedCityRepository = get(),
+            )
+        }
+
+        factory {
+            WinCodeInputViewModel(
+                winCodeValidator = get(named("winCode")),
+            )
+        }
+
+        factory {
+            CarBrandViewModel(
+                carBrandRepository = get(),
+            )
+        }
+
+        factory {
+            CityViewModel(
+                cityRepository = get(),
             )
         }
     }

@@ -1,8 +1,44 @@
 User-agent: *
 Allow: /
-Disallow: /login
+Disallow: /login-by-phone
+Disallow: /login-by-mail
 Disallow: /signup
+Disallow: /verify-otp
 Disallow: /api/
+Disallow: /profile
+Disallow: /edit-name
+Disallow: /change-email
+Disallow: /change-phone
+Disallow: /address-input
+Disallow: /win-code-input
+Disallow: /car-brand-selection
+Disallow: /city-selection
+
+User-agent: Googlebot
+Allow: /
+Disallow: /login-by-phone
+Disallow: /login-by-mail
+Disallow: /signup
+Disallow: /verify-otp
+Disallow: /api/
+Disallow: /profile
+Disallow: /edit-name
+Disallow: /change-email
+Disallow: /change-phone
+
+User-agent: Bingbot
+Allow: /
+Disallow: /login-by-phone
+Disallow: /login-by-mail
+Disallow: /signup
+Disallow: /verify-otp
+Disallow: /api/
+Disallow: /profile
+Disallow: /edit-name
+Disallow: /change-email
+Disallow: /change-phone
+
+Crawl-delay: 1
 
 Sitemap: https://drivebit.my/sitemap.xml
 

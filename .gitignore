@@ -48,10 +48,11 @@ assets/
 # Compiled JS files
 composeApp.js
 
-# SSH keys
+# SSH keys and sensitive files
 id_rsa
 id_rsa_api_drivebit
 id_rsa_*
 id_rda
 *.pem
 *.key
+*.pub
