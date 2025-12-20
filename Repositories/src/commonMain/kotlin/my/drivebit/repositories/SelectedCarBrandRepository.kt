@@ -1,9 +1,15 @@
 package my.drivebit.repositories
 
 interface SelectedCarBrandRepository {
-    fun saveBrand(brandId: Int, brandName: String)
+    fun saveBrand(
+        brandId: Int,
+        brandName: String,
+    )
+
     fun getBrandId(): Int?
+
     fun getBrandName(): String?
+
     fun clearBrand()
 }
 
@@ -11,7 +17,10 @@ class SelectedCarBrandRepositoryImpl : SelectedCarBrandRepository {
     private var brandId: Int? = null
     private var brandName: String? = null
 
-    override fun saveBrand(brandId: Int, brandName: String) {
+    override fun saveBrand(
+        brandId: Int,
+        brandName: String,
+    ) {
         this.brandId = brandId
         this.brandName = brandName
     }
@@ -25,4 +34,3 @@ class SelectedCarBrandRepositoryImpl : SelectedCarBrandRepository {
         brandName = null
     }
 }
-

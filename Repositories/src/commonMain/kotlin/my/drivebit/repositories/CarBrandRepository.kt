@@ -8,15 +8,20 @@ interface CarBrandRepository {
 }
 
 sealed interface ResultCarBrands {
-    data class Success(val brands: List<CarBrand>) : ResultCarBrands
-    data class Error(val message: String) : ResultCarBrands
+    data class Success(
+        val brands: List<CarBrand>,
+    ) : ResultCarBrands
+
+    data class Error(
+        val message: String,
+    ) : ResultCarBrands
 }
 
 class CarBrandRepositoryImpl(
     private val dictionary: Dictionary,
 ) : CarBrandRepository {
-    override suspend fun getBrands(): ResultCarBrands {
-        return runCatching {
+    override suspend fun getBrands(): ResultCarBrands =
+        runCatching {
             dictionary.getCarBrands()
         }.fold(
             onSuccess = { brands -> ResultCarBrands.Success(brands) },
@@ -24,6 +29,4 @@ class CarBrandRepositoryImpl(
                 ResultCarBrands.Error(exception.message ?: "Unknown error")
             },
         )
-    }
 }
-

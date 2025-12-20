@@ -13,13 +13,12 @@ private class FakeWinCodeValidator : InputValidator {
     var shouldReturnValid = false
     var errorMessage: String = "Введите WIN код"
 
-    override fun isValid(input: String): ValidationResult {
-        return if (shouldReturnValid) {
+    override fun isValid(input: String): ValidationResult =
+        if (shouldReturnValid) {
             ValidationResult.Valid
         } else {
             ValidationResult.Invalid(errorMessage)
         }
-    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -113,4 +112,3 @@ class WinCodeInputViewModelTest {
             assertTrue(viewModel.isValid)
         }
 }
-

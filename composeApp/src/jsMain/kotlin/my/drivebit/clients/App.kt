@@ -2,6 +2,7 @@ package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import kotlinx.browser.window
 import my.drivebit.components.AppContainer
 import my.drivebit.components.ButterMenu
 import my.drivebit.components.CenteredContent
@@ -18,8 +19,8 @@ import my.drivebit.resources.ImagePaths
 import my.drivebit.screens.AddressInputPage
 import my.drivebit.screens.CarBrandSelectionPage
 import my.drivebit.screens.ChangeEmailPage
-import my.drivebit.screens.CitySelectionPage
 import my.drivebit.screens.ChangePhonePage
+import my.drivebit.screens.CitySelectionPage
 import my.drivebit.screens.EditNamePage
 import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
@@ -36,7 +37,6 @@ import org.jetbrains.compose.web.dom.Img
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
-import kotlinx.browser.window
 
 @Composable
 @Suppress("FunctionName")

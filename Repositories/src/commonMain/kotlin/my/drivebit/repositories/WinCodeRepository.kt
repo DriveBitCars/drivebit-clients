@@ -2,7 +2,9 @@ package my.drivebit.repositories
 
 interface WinCodeRepository {
     fun saveWinCode(winCode: String)
+
     fun getWinCode(): String?
+
     fun clearWinCode()
 }
 
@@ -19,4 +21,3 @@ internal class WinCodeRepositoryImpl : WinCodeRepository {
         winCode = null
     }
 }
-

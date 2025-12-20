@@ -3,7 +3,10 @@ package my.drivebit.repositories
 import my.drivebit.network.services.Dadata
 
 interface AddressSuggestRepository {
-    suspend fun suggest(query: String, city: String): ResultAddressSuggest
+    suspend fun suggest(
+        query: String,
+        city: String,
+    ): ResultAddressSuggest
 }
 
 sealed interface ResultAddressSuggest {
@@ -19,7 +22,10 @@ sealed interface ResultAddressSuggest {
 internal class AddressSuggestRepositoryImpl(
     private val dadata: Dadata,
 ) : AddressSuggestRepository {
-    override suspend fun suggest(query: String, city: String): ResultAddressSuggest {
+    override suspend fun suggest(
+        query: String,
+        city: String,
+    ): ResultAddressSuggest {
         val result =
             runCatching {
                 dadata.suggest(query, city)
@@ -27,14 +33,14 @@ internal class AddressSuggestRepositoryImpl(
 
         return result.fold(
             onSuccess = { response ->
-                val suggestions = response
-                    .filter { suggestion ->
-                        suggestion.data?.geoLat != null &&
-                            suggestion.data?.geoLon != null &&
-                            suggestion.data?.geoLat?.isNotBlank() == true &&
-                            suggestion.data?.geoLon?.isNotBlank() == true
-                    }
-                    .mapNotNull { it.value }
+                val suggestions =
+                    response
+                        .filter { suggestion ->
+                            suggestion.data?.geoLat != null &&
+                                suggestion.data?.geoLon != null &&
+                                suggestion.data?.geoLat?.isNotBlank() == true &&
+                                suggestion.data?.geoLon?.isNotBlank() == true
+                        }.mapNotNull { it.value }
                 ResultAddressSuggest.Success(suggestions)
             },
             onFailure = { throwable ->

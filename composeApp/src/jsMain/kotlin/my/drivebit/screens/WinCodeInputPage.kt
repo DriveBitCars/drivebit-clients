@@ -13,19 +13,17 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
 import my.drivebit.repositories.WinCodeRepository
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.ValidationState
 import my.drivebit.viewmodels.WinCodeInputViewModel
 import my.drivebit.viewmodels.createButtonViewModel
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 
 @Composable
-fun WinCodeInputPage(
-    onWinCodeEntered: (String) -> Unit = {},
-) {
+fun WinCodeInputPage(onWinCodeEntered: (String) -> Unit = {}) {
     val viewModel: WinCodeInputViewModel = koinInject()
     val winCodeRepository: WinCodeRepository = koinInject()
     val winCode by viewModel.winCode.collectAsState()
@@ -91,4 +89,3 @@ fun WinCodeInputPage(
         }
     }
 }
-

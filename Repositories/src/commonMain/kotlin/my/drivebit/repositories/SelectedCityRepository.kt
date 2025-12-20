@@ -3,9 +3,15 @@ package my.drivebit.repositories
 import com.russhwolf.settings.Settings
 
 interface SelectedCityRepository {
-    fun saveCity(cityId: Int, cityName: String)
+    fun saveCity(
+        cityId: Int,
+        cityName: String,
+    )
+
     fun getCityId(): Int?
+
     fun getCityName(): String?
+
     fun clearCity()
 }
 
@@ -17,7 +23,10 @@ internal class SelectedCityRepositoryImpl(
         private const val CITY_NAME_KEY = "selected_city_name"
     }
 
-    override fun saveCity(cityId: Int, cityName: String) {
+    override fun saveCity(
+        cityId: Int,
+        cityName: String,
+    ) {
         settings.putInt(CITY_ID_KEY, cityId)
         settings.putString(CITY_NAME_KEY, cityName)
     }
@@ -37,4 +46,3 @@ internal class SelectedCityRepositoryImpl(
         settings.remove(CITY_NAME_KEY)
     }
 }
-

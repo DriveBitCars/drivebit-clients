@@ -60,4 +60,3 @@ class WinCodeRepositoryTest {
         assertEquals("", repo.getWinCode())
     }
 }
-

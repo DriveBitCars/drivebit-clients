@@ -9,12 +9,12 @@ import my.drivebit.utils.Validator
 import my.drivebit.utils.WinCodeValidator
 import my.drivebit.viewmodels.AddressSuggestViewModel
 import my.drivebit.viewmodels.AuthFormViewModel
-import my.drivebit.viewmodels.CarBrandViewModel
-import my.drivebit.viewmodels.CityViewModel
 import my.drivebit.viewmodels.AvatarUploadViewModel
 import my.drivebit.viewmodels.AvatarUploadViewModelImpl
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
+import my.drivebit.viewmodels.CarBrandViewModel
+import my.drivebit.viewmodels.CityViewModel
 import my.drivebit.viewmodels.EditProfileViewModel
 import my.drivebit.viewmodels.EditProfileViewModelImpl
 import my.drivebit.viewmodels.EmailLoginViewModel

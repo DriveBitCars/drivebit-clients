@@ -9,6 +9,7 @@ import my.drivebit.network.parseResponse
 
 interface Dictionary {
     suspend fun getCarBrands(): List<CarBrand>
+
     suspend fun searchCities(query: String): List<City>
 }
 
@@ -38,10 +39,10 @@ class DictionaryImpl(
 
     override suspend fun searchCities(query: String): List<City> {
         val url = "${DEFAULT_BASE_URL}Dictionary/cities/search"
-        val response = httpClient.get(url) {
-            parameter("query", query)
-        }
+        val response =
+            httpClient.get(url) {
+                parameter("query", query)
+            }
         return response.parseResponse()
     }
 }
-

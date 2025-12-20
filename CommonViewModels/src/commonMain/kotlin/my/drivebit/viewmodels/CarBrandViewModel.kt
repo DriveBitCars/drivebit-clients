@@ -50,10 +50,11 @@ class CarBrandViewModel(
             _brands.value = _allBrands.value
         } else {
             val lowerQuery = query.lowercase()
-            _brands.value = _allBrands.value.filter {
-                it.name.lowercase().contains(lowerQuery) ||
-                    it.cyrillicName?.lowercase()?.contains(lowerQuery) == true
-            }
+            _brands.value =
+                _allBrands.value.filter {
+                    it.name.lowercase().contains(lowerQuery) ||
+                        it.cyrillicName?.lowercase()?.contains(lowerQuery) == true
+                }
         }
     }
 
@@ -62,4 +63,3 @@ class CarBrandViewModel(
         _brands.value = _allBrands.value
     }
 }
-

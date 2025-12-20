@@ -12,9 +12,10 @@ class WinCodeValidator : InputValidator {
             return ValidationResult.Invalid("WIN код должен содержать 17 символов")
         }
 
-        val invalidChars = trimmed.filter { char ->
-            !char.isLetterOrDigit() || char == 'I' || char == 'O' || char == 'Q'
-        }
+        val invalidChars =
+            trimmed.filter { char ->
+                !char.isLetterOrDigit() || char == 'I' || char == 'O' || char == 'Q'
+            }
 
         if (invalidChars.isNotEmpty()) {
             return ValidationResult.Invalid("WIN код содержит недопустимые символы (I, O, Q не допускаются)")
@@ -23,4 +24,3 @@ class WinCodeValidator : InputValidator {
         return ValidationResult.Valid
     }
 }
-

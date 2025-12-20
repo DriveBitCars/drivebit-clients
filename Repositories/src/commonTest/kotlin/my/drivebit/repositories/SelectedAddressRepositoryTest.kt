@@ -60,4 +60,3 @@ class SelectedAddressRepositoryTest {
         assertEquals("", repo.getAddress())
     }
 }
-

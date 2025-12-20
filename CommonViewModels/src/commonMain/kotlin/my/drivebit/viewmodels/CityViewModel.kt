@@ -54,4 +54,3 @@ class CityViewModel(
         _error.value = null
     }
 }
-

@@ -2,7 +2,9 @@ package my.drivebit.repositories
 
 interface SelectedAddressRepository {
     fun saveAddress(address: String)
+
     fun getAddress(): String?
+
     fun clearAddress()
 }
 
@@ -19,4 +21,3 @@ internal class SelectedAddressRepositoryImpl : SelectedAddressRepository {
         address = null
     }
 }
-

@@ -19,9 +19,7 @@ import my.drivebit.viewmodels.CityViewModel
 import org.koin.compose.koinInject
 
 @Composable
-fun CitySelectionPage(
-    onCitySelected: () -> Unit = {},
-) {
+fun CitySelectionPage(onCitySelected: () -> Unit = {}) {
     val viewModel: CityViewModel = koinInject()
     val selectedCityRepository: SelectedCityRepository = koinInject()
     val cities by viewModel.cities.collectAsState()
@@ -66,4 +64,3 @@ fun CitySelectionPage(
         }
     }
 }
-

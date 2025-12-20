@@ -2,6 +2,7 @@ package my.drivebit.repositories
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import my.drivebit.network.services.AddressData
 import my.drivebit.network.services.AddressSuggestion
 import my.drivebit.network.services.Dadata
 import kotlin.test.Test
@@ -14,7 +15,10 @@ private class FakeDadata : Dadata {
     var lastQuery: String? = null
     var lastCity: String? = null
 
-    override suspend fun suggest(query: String, city: String): List<AddressSuggestion> {
+    override suspend fun suggest(
+        query: String,
+        city: String,
+    ): List<AddressSuggestion> {
         lastQuery = query
         lastCity = city
         if (shouldThrow) {
@@ -24,12 +28,12 @@ private class FakeDadata : Dadata {
             AddressSuggestion(
                 value = "Москва, ул. Ленина, д. 1",
                 unrestrictedValue = "Москва, ул. Ленина, д. 1",
-                data = null,
+                data = AddressData(geoLat = "55.7558", geoLon = "37.6173"),
             ),
             AddressSuggestion(
                 value = "Москва, ул. Пушкина, д. 2",
                 unrestrictedValue = "Москва, ул. Пушкина, д. 2",
-                data = null,
+                data = AddressData(geoLat = "55.7559", geoLon = "37.6174"),
             ),
         )
     }
@@ -90,22 +94,25 @@ class AddressSuggestRepositoryTest {
         runTest {
             val fakeDadata =
                 object : Dadata {
-                    override suspend fun suggest(query: String, city: String): List<AddressSuggestion> =
+                    override suspend fun suggest(
+                        query: String,
+                        city: String,
+                    ): List<AddressSuggestion> =
                         listOf(
                             AddressSuggestion(
                                 value = "Москва, ул. Ленина",
                                 unrestrictedValue = null,
-                                data = null,
+                                data = AddressData(geoLat = "55.7558", geoLon = "37.6173"),
                             ),
                             AddressSuggestion(
                                 value = null,
                                 unrestrictedValue = "Москва, ул. Пушкина",
-                                data = null,
+                                data = AddressData(geoLat = "55.7559", geoLon = "37.6174"),
                             ),
                             AddressSuggestion(
                                 value = "Москва, ул. Гагарина",
                                 unrestrictedValue = null,
-                                data = null,
+                                data = AddressData(geoLat = "55.7560", geoLon = "37.6175"),
                             ),
                         )
                 }

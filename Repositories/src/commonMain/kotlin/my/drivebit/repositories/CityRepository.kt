@@ -8,15 +8,20 @@ interface CityRepository {
 }
 
 sealed interface ResultCities {
-    data class Success(val cities: List<City>) : ResultCities
-    data class Error(val message: String) : ResultCities
+    data class Success(
+        val cities: List<City>,
+    ) : ResultCities
+
+    data class Error(
+        val message: String,
+    ) : ResultCities
 }
 
 class CityRepositoryImpl(
     private val dictionary: Dictionary,
 ) : CityRepository {
-    override suspend fun searchCities(query: String): ResultCities {
-        return runCatching {
+    override suspend fun searchCities(query: String): ResultCities =
+        runCatching {
             dictionary.searchCities(query)
         }.fold(
             onSuccess = { cities -> ResultCities.Success(cities) },
@@ -24,6 +29,4 @@ class CityRepositoryImpl(
                 ResultCities.Error(exception.message ?: "Unknown error")
             },
         )
-    }
 }
-

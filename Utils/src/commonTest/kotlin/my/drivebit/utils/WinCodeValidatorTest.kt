@@ -99,4 +99,3 @@ class WinCodeValidatorTest {
         assertIs<ValidationResult.Valid>(result)
     }
 }
-

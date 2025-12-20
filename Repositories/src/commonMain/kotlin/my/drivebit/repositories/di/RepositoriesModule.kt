@@ -6,10 +6,10 @@ import my.drivebit.repositories.AvatarRepository
 import my.drivebit.repositories.AvatarRepositoryImpl
 import my.drivebit.repositories.CarBrandRepository
 import my.drivebit.repositories.CarBrandRepositoryImpl
-import my.drivebit.repositories.CityRepository
-import my.drivebit.repositories.CityRepositoryImpl
 import my.drivebit.repositories.ChangeEmailRepositoryImpl
 import my.drivebit.repositories.ChangePhoneRepositoryImpl
+import my.drivebit.repositories.CityRepository
+import my.drivebit.repositories.CityRepositoryImpl
 import my.drivebit.repositories.CreateOtpRepository
 import my.drivebit.repositories.CreateOtpRepositoryImpl
 import my.drivebit.repositories.OtpResultRepository
@@ -22,7 +22,6 @@ import my.drivebit.repositories.SelectedCityRepositoryImpl
 import my.drivebit.repositories.VerifyOtpRepositoryImpl
 import my.drivebit.repositories.WinCodeRepository
 import my.drivebit.repositories.WinCodeRepositoryImpl
-import com.russhwolf.settings.Settings
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module

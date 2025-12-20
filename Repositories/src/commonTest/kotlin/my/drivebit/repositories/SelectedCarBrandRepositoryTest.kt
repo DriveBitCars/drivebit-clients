@@ -45,4 +45,3 @@ class SelectedCarBrandRepositoryTest {
         assertEquals("BMW", repository.getBrandName())
     }
 }
-
