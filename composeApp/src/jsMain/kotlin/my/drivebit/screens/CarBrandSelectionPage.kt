@@ -20,7 +20,7 @@ import my.drivebit.viewmodels.CarBrandViewModel
 import org.koin.compose.koinInject
 
 @Composable
-fun CarBrandSelectionPage(onBrandSelected: () -> Unit = {}) {
+fun CarBrandSelectionPage(onBrandSelected: (brandId: Int) -> Unit = {}) {
     val viewModel: CarBrandViewModel = koinInject()
     val selectedCarBrandRepository: SelectedCarBrandRepository = koinInject()
     val brands by viewModel.brands.collectAsState()
@@ -59,7 +59,7 @@ fun CarBrandSelectionPage(onBrandSelected: () -> Unit = {}) {
                                 inputValue = brandName
                                 viewModel.clearQuery()
                                 selectedCarBrandRepository.saveBrand(it.id, it.name)
-                                onBrandSelected()
+                                onBrandSelected(it.id)
                             }
                         },
                     )

@@ -32,6 +32,7 @@ kotlin {
             implementation(project(":Network"))
             implementation(project(":Utils"))
             implementation(project(":Repositories"))
+            implementation(project(":Maps"))
             implementation(libs.koin.core)
         }
         commonTest.dependencies {

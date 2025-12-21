@@ -84,8 +84,8 @@
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #2962FF 0%, #6B46C1 100%);
-            color: white;
+            background: transparent;
+            color: #ffffff;
             padding: 80px 0;
             position: relative;
             overflow: hidden;
@@ -98,7 +98,7 @@
             right: 0;
             bottom: 0;
             background: url('images/hero-cars.jpg') center/cover;
-            opacity: 0.2;
+            opacity: 1;
             z-index: 1;
         }
 
@@ -126,7 +126,7 @@
             font-size: 32px;
             font-weight: 700;
             margin: 32px 0;
-            color: #ffd700;
+            color: #ffffff;
         }
 
         .cta-button {
@@ -642,8 +642,8 @@
         function handleCtaClick(event) {
             if (isAuthenticated()) {
                 event.preventDefault();
-                 showDialog();
-              //  window.location.href = '/city-selection';
+              //   showDialog();
+                window.location.href = '/city-selection';
             }
         }
 

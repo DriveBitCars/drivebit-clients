@@ -130,7 +130,7 @@ fun createHttpClientWithConfig(
                         println("   - refreshTokenValue.isBlank(): ${refreshTokenValue?.isBlank() ?: "N/A"}")
                         null
                     } else {
-                        try {
+                        runCatching {
                             println("🔄 [Auth] Attempting to refresh tokens...")
                             println("   - Using refresh token: ${refreshTokenValue.take(20)}...")
 
@@ -149,7 +149,7 @@ fun createHttpClientWithConfig(
                                 accessToken = newAccessToken,
                                 refreshToken = newRefreshToken,
                             )
-                        } catch (e: Exception) {
+                        }.getOrElse { e ->
                             println("❌ [Auth] Failed to refresh tokens")
                             println("   - Error type: ${e::class.simpleName}")
                             println("   - Error message: ${e.message}")

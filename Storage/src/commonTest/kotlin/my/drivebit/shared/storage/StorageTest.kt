@@ -196,6 +196,7 @@ class StorageTest {
 private class TestStorage : Storage {
     private var token: String? = null
     private var refreshToken: String? = null
+    private val storage = mutableMapOf<String, String>()
 
     override fun isLogined(): Boolean = !token.isNullOrEmpty()
 
@@ -214,6 +215,25 @@ private class TestStorage : Storage {
     override fun logout() {
         token = null
         refreshToken = null
+        storage.clear()
+    }
+
+    override fun putString(
+        key: String,
+        value: String,
+    ) {
+        storage[key] = value
+    }
+
+    override fun getString(
+        key: String,
+        defaultValue: String,
+    ): String = storage[key] ?: defaultValue
+
+    override fun contains(key: String): Boolean = storage.containsKey(key)
+
+    override fun remove(key: String) {
+        storage.remove(key)
     }
 }
 
@@ -233,6 +253,7 @@ private class PersistentTestStorage : Storage {
         // Статическое хранилище для симуляции персистентности между экземплярами
         private var persistentToken: String? = null
         private var persistentRefreshToken: String? = null
+        private val persistentStorage = mutableMapOf<String, String>()
     }
 
     override fun isLogined(): Boolean = !persistentToken.isNullOrEmpty()
@@ -252,5 +273,24 @@ private class PersistentTestStorage : Storage {
     override fun logout() {
         persistentToken = null
         persistentRefreshToken = null
+        persistentStorage.clear()
+    }
+
+    override fun putString(
+        key: String,
+        value: String,
+    ) {
+        persistentStorage[key] = value
+    }
+
+    override fun getString(
+        key: String,
+        defaultValue: String,
+    ): String = persistentStorage[key] ?: defaultValue
+
+    override fun contains(key: String): Boolean = persistentStorage.containsKey(key)
+
+    override fun remove(key: String) {
+        persistentStorage.remove(key)
     }
 }

@@ -5,6 +5,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MockStorage : Storage {
+    private val storage = mutableMapOf<String, String>()
+
     override fun isLogined(): Boolean = false
 
     override fun saveToken(token: String) {
@@ -18,6 +20,25 @@ class MockStorage : Storage {
     override fun getRefreshToken(): String? = null
 
     override fun logout() {
+        storage.clear()
+    }
+
+    override fun putString(
+        key: String,
+        value: String,
+    ) {
+        storage[key] = value
+    }
+
+    override fun getString(
+        key: String,
+        defaultValue: String,
+    ): String = storage[key] ?: defaultValue
+
+    override fun contains(key: String): Boolean = storage.containsKey(key)
+
+    override fun remove(key: String) {
+        storage.remove(key)
     }
 }
 

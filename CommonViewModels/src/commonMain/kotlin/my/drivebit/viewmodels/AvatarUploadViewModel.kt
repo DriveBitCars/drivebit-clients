@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import my.drivebit.network.NetworkException
 import my.drivebit.network.services.Photo
 import my.drivebit.repositories.AvatarRepository
 
@@ -56,14 +55,15 @@ class AvatarUploadViewModelImpl(
             runCatching {
                 photo.uploadAvatar(fileBytes, fileName, contentType)
             }.onSuccess {
-                avatarRepository.refresh()
+                avatarRepository.clearCache()
                 _state.update { AvatarUploadState.Success }
             }.onFailure { e ->
                 val errorMessage =
-                    when (e) {
-                        is NetworkException -> e.message
-                        else -> e.message?.takeIf { it.isNotBlank() } ?: "Ошибка при загрузке файла"
-                    }
+                    ErrorHandler.extractErrorMessage(
+                        exception = e,
+                        defaultNetworkError = "Ошибка сети",
+                        defaultGenericError = "Ошибка при загрузке файла",
+                    )
                 _state.update { AvatarUploadState.Error(errorMessage) }
             }
         }

@@ -1,9 +1,14 @@
 package my.drivebit.viewmodels
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import my.drivebit.repositories.AvatarRepository
 import my.drivebit.shared.storage.Storage
+import my.drivebit.viewmodels.CarMenuOption
+import my.drivebit.viewmodels.CarMenuViewModel
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
@@ -13,6 +18,7 @@ class MockStorageForButter : Storage {
     private var isLoggedIn = false
     private var token: String? = null
     private var refreshToken: String? = null
+    private val storage = mutableMapOf<String, String>()
 
     override fun isLogined(): Boolean = isLoggedIn
 
@@ -33,6 +39,25 @@ class MockStorageForButter : Storage {
         token = null
         refreshToken = null
         isLoggedIn = false
+        storage.clear()
+    }
+
+    override fun putString(
+        key: String,
+        value: String,
+    ) {
+        storage[key] = value
+    }
+
+    override fun getString(
+        key: String,
+        defaultValue: String,
+    ): String = storage[key] ?: defaultValue
+
+    override fun contains(key: String): Boolean = storage.containsKey(key)
+
+    override fun remove(key: String) {
+        storage.remove(key)
     }
 
     fun setLoggedIn(loggedIn: Boolean) {
@@ -50,24 +75,48 @@ class MockStorageForButter : Storage {
 class MockAvatarRepositoryForButter : AvatarRepository {
     override val avatarUrl: Flow<String> = flowOf("default-avatar.svg")
 
-    override fun refresh() {
+    override fun clearCache() {
+    }
+
+    override suspend fun refresh() {
+        // No-op for testing
+    }
+}
+
+class MockCarMenuViewModelForButter : CarMenuViewModel {
+    private val _menuOption = MutableStateFlow(CarMenuOption.ListYourCar)
+    override val menuOption: StateFlow<CarMenuOption> = _menuOption.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    fun setMenuOption(option: CarMenuOption) {
+        _menuOption.value = option
+    }
+
+    fun setIsLoading(value: Boolean) {
+        _isLoading.value = value
+    }
+
+    override fun load() {
     }
 }
 
 class ButterViewModelTest {
     private val mockStorage = MockStorageForButter()
     private val mockAvatarRepository = MockAvatarRepositoryForButter()
+    private val mockCarMenuViewModel = MockCarMenuViewModelForButter()
 
     @Test
     fun `initial state should be Idle`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         assertIs<ButterState.Idle>(viewModel.state.value, "Initial state should be Idle")
     }
 
     @Test
     fun `open should change state to Opened with non-empty list`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.onClick()
 
@@ -79,7 +128,8 @@ class ButterViewModelTest {
 
     @Test
     fun `opened state should contain item with icon always`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        mockStorage.setLoggedIn(true)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.onClick()
 
@@ -92,7 +142,7 @@ class ButterViewModelTest {
     @Test
     fun `opened state should contain more items when user is not logged in`() {
         mockStorage.setLoggedIn(false)
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.onClick()
 
@@ -104,7 +154,7 @@ class ButterViewModelTest {
     @Test
     fun `opened state should contain items when user is logged in`() {
         mockStorage.setLoggedIn(true)
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.open()
 
@@ -116,7 +166,7 @@ class ButterViewModelTest {
 
     @Test
     fun `close should change state from Opened to Idle`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.open()
         assertIs<ButterState.Opened>(viewModel.state.value, "State should be Opened after open()")
@@ -127,7 +177,7 @@ class ButterViewModelTest {
 
     @Test
     fun `onClick should toggle state from Idle to Opened`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         assertIs<ButterState.Idle>(viewModel.state.value, "Initial state should be Idle")
 
@@ -137,7 +187,7 @@ class ButterViewModelTest {
 
     @Test
     fun `onClick should toggle state from Opened to Idle`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.open()
         assertIs<ButterState.Opened>(viewModel.state.value, "State should be Opened after open()")
@@ -148,7 +198,7 @@ class ButterViewModelTest {
 
     @Test
     fun `onClick should toggle state multiple times`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         assertIs<ButterState.Idle>(viewModel.state.value)
 
@@ -167,7 +217,7 @@ class ButterViewModelTest {
 
     @Test
     fun `menu should close after clicking on menu item`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.open()
         assertIs<ButterState.Opened>(viewModel.state.value)
@@ -183,7 +233,7 @@ class ButterViewModelTest {
 
     @Test
     fun `menu should close when close is called after opening`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.open()
         assertIs<ButterState.Opened>(viewModel.state.value, "Menu should be opened")
@@ -194,7 +244,7 @@ class ButterViewModelTest {
 
     @Test
     fun `menu should close after clicking any item in opened menu`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.open()
         assertIs<ButterState.Opened>(viewModel.state.value)
@@ -214,7 +264,7 @@ class ButterViewModelTest {
 
     @Test
     fun `menu should close multiple times correctly`() {
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         repeat(5) {
             viewModel.open()
@@ -230,7 +280,7 @@ class ButterViewModelTest {
         mockStorage.setLoggedIn(true)
         mockStorage.saveToken("test_token")
         mockStorage.saveRefreshToken("test_refresh_token")
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         assertTrue(mockStorage.isLogined(), "User should be logged in initially")
 
@@ -265,7 +315,7 @@ class ButterViewModelTest {
     @Test
     fun `logout should close menu`() {
         mockStorage.setLoggedIn(true)
-        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
 
         viewModel.open()
         assertIs<ButterState.Opened>(viewModel.state.value, "Menu should be opened")

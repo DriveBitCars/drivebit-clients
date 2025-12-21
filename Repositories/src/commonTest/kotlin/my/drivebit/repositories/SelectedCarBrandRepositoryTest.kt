@@ -1,5 +1,6 @@
 package my.drivebit.repositories
 
+import my.drivebit.shared.storage.InMemorySettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -7,7 +8,7 @@ import kotlin.test.assertNull
 class SelectedCarBrandRepositoryTest {
     @Test
     fun `should save and retrieve brand`() {
-        val repository = SelectedCarBrandRepositoryImpl()
+        val repository = SelectedCarBrandRepositoryImpl(InMemorySettings())
 
         repository.saveBrand(1, "Toyota")
 
@@ -17,7 +18,7 @@ class SelectedCarBrandRepositoryTest {
 
     @Test
     fun `should return null when no brand is saved`() {
-        val repository = SelectedCarBrandRepositoryImpl()
+        val repository = SelectedCarBrandRepositoryImpl(InMemorySettings())
 
         assertNull(repository.getBrandId())
         assertNull(repository.getBrandName())
@@ -25,7 +26,7 @@ class SelectedCarBrandRepositoryTest {
 
     @Test
     fun `should clear brand`() {
-        val repository = SelectedCarBrandRepositoryImpl()
+        val repository = SelectedCarBrandRepositoryImpl(InMemorySettings())
 
         repository.saveBrand(1, "Toyota")
         repository.clearBrand()
@@ -36,7 +37,7 @@ class SelectedCarBrandRepositoryTest {
 
     @Test
     fun `should overwrite existing brand`() {
-        val repository = SelectedCarBrandRepositoryImpl()
+        val repository = SelectedCarBrandRepositoryImpl(InMemorySettings())
 
         repository.saveBrand(1, "Toyota")
         repository.saveBrand(2, "BMW")

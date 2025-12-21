@@ -132,6 +132,7 @@ jobs:
           - UI-Components
           - CommonViewModels
           - Network
+          - Maps
           - composeApp
 
     steps:

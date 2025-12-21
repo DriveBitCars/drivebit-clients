@@ -9,6 +9,6 @@ class IconUserViewModel(
         get() = avatarRepository.avatarUrl
 
     fun refresh() {
-        avatarRepository.refresh()
+        avatarRepository.clearCache()
     }
 }

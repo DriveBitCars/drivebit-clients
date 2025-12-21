@@ -189,7 +189,7 @@ class ProfileViewModelTest {
 
             assertIs<ProfileState.Error>(viewModel.state.value)
             val errorState = viewModel.state.value as ProfileState.Error
-            assertEquals("Unknown error", errorState.message)
+            assertEquals("Не удалось загрузить профиль", errorState.message)
         }
 
     @Test

@@ -1,5 +1,7 @@
 package my.drivebit.repositories
 
+import com.russhwolf.settings.Settings
+
 interface WinCodeRepository {
     fun saveWinCode(winCode: String)
 
@@ -8,16 +10,23 @@ interface WinCodeRepository {
     fun clearWinCode()
 }
 
-internal class WinCodeRepositoryImpl : WinCodeRepository {
-    private var winCode: String? = null
-
-    override fun saveWinCode(winCode: String) {
-        this.winCode = winCode
+internal class WinCodeRepositoryImpl(
+    private val settings: Settings,
+) : WinCodeRepository {
+    companion object {
+        private const val WIN_CODE_KEY = "win_code"
     }
 
-    override fun getWinCode(): String? = winCode
+    override fun saveWinCode(winCode: String) {
+        settings.putString(WIN_CODE_KEY, winCode)
+    }
+
+    override fun getWinCode(): String? {
+        val winCode = settings.getString(WIN_CODE_KEY, "")
+        return if (winCode.isEmpty()) null else winCode
+    }
 
     override fun clearWinCode() {
-        winCode = null
+        settings.remove(WIN_CODE_KEY)
     }
 }

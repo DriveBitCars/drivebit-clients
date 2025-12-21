@@ -53,6 +53,7 @@ fun WinCodeInputPage(onWinCodeEntered: (String) -> Unit = {}) {
                     onValueChange = { newValue ->
                         viewModel.updateWinCode(newValue)
                     },
+                    maxLength = 17,
                 )
 
                 if (validationState is ValidationState.Error) {

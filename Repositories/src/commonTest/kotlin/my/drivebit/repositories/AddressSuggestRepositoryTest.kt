@@ -13,14 +13,9 @@ private class FakeDadata : Dadata {
     var shouldThrow = false
     var errorMessage: String? = "Network error"
     var lastQuery: String? = null
-    var lastCity: String? = null
 
-    override suspend fun suggest(
-        query: String,
-        city: String,
-    ): List<AddressSuggestion> {
+    override suspend fun suggest(query: String): List<AddressSuggestion> {
         lastQuery = query
-        lastCity = city
         if (shouldThrow) {
             throw if (errorMessage != null) Exception(errorMessage) else Exception()
         }
@@ -51,10 +46,9 @@ class AddressSuggestRepositoryTest {
 
             assertTrue(result is ResultAddressSuggest.Success)
             assertEquals(2, result.suggestions.size)
-            assertEquals("Москва, ул. Ленина, д. 1", result.suggestions[0])
-            assertEquals("Москва, ул. Пушкина, д. 2", result.suggestions[1])
-            assertEquals("Ленина", fakeDadata.lastQuery)
-            assertEquals("Москва", fakeDadata.lastCity)
+            assertEquals("Москва, ул. Ленина, д. 1", result.suggestions[0].value)
+            assertEquals("Москва, ул. Пушкина, д. 2", result.suggestions[1].value)
+            assertEquals("Москва Ленина", fakeDadata.lastQuery)
         }
 
     @Test
@@ -90,14 +84,11 @@ class AddressSuggestRepositoryTest {
         }
 
     @Test
-    fun `suggest should filter out null values from suggestions`() =
+    fun `suggest should filter out suggestions without coordinates`() =
         runTest {
             val fakeDadata =
                 object : Dadata {
-                    override suspend fun suggest(
-                        query: String,
-                        city: String,
-                    ): List<AddressSuggestion> =
+                    override suspend fun suggest(query: String): List<AddressSuggestion> =
                         listOf(
                             AddressSuggestion(
                                 value = "Москва, ул. Ленина",
@@ -114,6 +105,11 @@ class AddressSuggestRepositoryTest {
                                 unrestrictedValue = null,
                                 data = AddressData(geoLat = "55.7560", geoLon = "37.6175"),
                             ),
+                            AddressSuggestion(
+                                value = "Москва, ул. Без координат",
+                                unrestrictedValue = null,
+                                data = AddressData(geoLat = null, geoLon = null),
+                            ),
                         )
                 }
             val repo = AddressSuggestRepositoryImpl(fakeDadata)
@@ -121,8 +117,9 @@ class AddressSuggestRepositoryTest {
             val result = repo.suggest("Ленина", "Москва")
 
             assertTrue(result is ResultAddressSuggest.Success)
-            assertEquals(2, result.suggestions.size)
-            assertEquals("Москва, ул. Ленина", result.suggestions[0])
-            assertEquals("Москва, ул. Гагарина", result.suggestions[1])
+            assertEquals(3, result.suggestions.size)
+            assertEquals("Москва, ул. Ленина", result.suggestions[0].value)
+            assertEquals(null, result.suggestions[1].value)
+            assertEquals("Москва, ул. Гагарина", result.suggestions[2].value)
         }
 }

@@ -23,7 +23,7 @@ sealed interface OtpResult {
 internal class VerifyOtpRepositoryImpl(
     private val auth: Auth,
     private val storage: Storage,
-    private val avatarRepository: AvatarRepository? = null,
+    private val avatarRepository: AvatarRepository,
 ) : OtpResultRepository {
     override suspend fun otpResult(
         identifier: String,
@@ -39,7 +39,7 @@ internal class VerifyOtpRepositoryImpl(
             onSuccess = { response ->
                 storage.saveToken(response.accessToken.token)
                 storage.saveRefreshToken(response.refreshToken.token)
-                avatarRepository?.refresh()
+                avatarRepository.clearCache()
                 OtpResult.Success
             },
             onFailure = { throwable ->

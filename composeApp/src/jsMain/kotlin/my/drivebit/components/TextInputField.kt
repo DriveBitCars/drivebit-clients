@@ -17,6 +17,10 @@ fun TextInputField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
+    maxLength: Int? = null,
+    onFocus: (() -> Unit)? = null,
+    onBlur: (() -> Unit)? = null,
+    numeric: Boolean = false,
 ) {
     Div({
         style {
@@ -40,8 +44,25 @@ fun TextInputField(
             type = InputType.Text,
             attrs = {
                 value(value)
+                maxLength?.let { attr("maxlength", it.toString()) }
+                if (numeric) {
+                    attr("inputmode", "numeric")
+                    attr("pattern", "[0-9]*")
+                }
                 onInput { event ->
-                    onValueChange((event.target as HTMLInputElement).value)
+                    val newValue = (event.target as HTMLInputElement).value
+                    if (numeric) {
+                        val digitsOnly = newValue.filter { it.isDigit() }
+                        onValueChange(digitsOnly)
+                    } else {
+                        onValueChange(newValue)
+                    }
+                }
+                onFocus?.let { handler ->
+                    onFocus { handler() }
+                }
+                onBlur?.let { handler ->
+                    onBlur { handler() }
                 }
                 style {
                     applyTypography(CSSTypography.Styles.body)

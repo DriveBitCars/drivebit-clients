@@ -1,6 +1,7 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import my.drivebit.design.CSSColors
@@ -8,6 +9,7 @@ import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.viewmodels.ButterModel
 import my.drivebit.viewmodels.ButterState
 import my.drivebit.viewmodels.ButterViewModel
+import my.drivebit.viewmodels.CarMenuViewModel
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
@@ -29,8 +31,13 @@ import org.koin.compose.koinInject
 @Suppress("FunctionName")
 fun ButterMenu() {
     val butterViewModel: ButterViewModel = koinInject()
+    val carMenuViewModel: CarMenuViewModel = koinInject()
     val state = butterViewModel.state.collectAsState()
     val navigationController = LocalNavigationController.current
+
+    LaunchedEffect(Unit) {
+        carMenuViewModel.load()
+    }
 
     when (val currentState = state.value) {
         is ButterState.Idle -> {
@@ -73,6 +80,11 @@ fun ButterMenu() {
                                     item.copy(onClick = {
                                         butterViewModel.close()
                                         navigationController?.navigateTo("/list-your-car")
+                                    })
+                                "Мои авто" ->
+                                    item.copy(onClick = {
+                                        butterViewModel.close()
+                                        navigationController?.navigateTo("/my-cars")
                                     })
                                 else -> item
                             }

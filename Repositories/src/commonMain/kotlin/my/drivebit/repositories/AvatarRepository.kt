@@ -1,14 +1,6 @@
 package my.drivebit.repositories
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import my.drivebit.network.services.Photo
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.DEFAULT_AVATAR_PATH
@@ -16,34 +8,37 @@ import my.drivebit.utils.DEFAULT_AVATAR_PATH
 interface AvatarRepository {
     val avatarUrl: Flow<String>
 
-    /**
-     * Обновляет URL аватара.
-     * Если пользователь авторизован, получает URL из сервиса Photo.
-     * Если пользователь не авторизован, возвращает дефолтный аватар (user.svg).
-     * При ошибке получения URL из сервиса также возвращает дефолтный аватар.
-     * Метод автоматически проверяет, изменился ли URL, и обновляет Flow только при необходимости.
-     */
-    fun refresh()
+    fun clearCache()
+
+    suspend fun refresh()
 }
 
 internal class AvatarRepositoryImpl(
     private val photo: Photo,
     private val storage: Storage,
-    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
-) : AvatarRepository {
-    private val _avatarUrl = MutableStateFlow<String?>(null)
-    override val avatarUrl: Flow<String> = _avatarUrl.asStateFlow().filterNotNull()
+    private val cachedRepository: CachedRepository<String>,
+) : AvatarRepository,
+    CachedRepository<String> by cachedRepository {
+    override val avatarUrl: Flow<String> = cachedRepository.get()
 
     init {
-        refresh()
+        println("🏗️ [AvatarRepository] Instance created (hashCode: ${hashCode()})")
     }
 
-    private suspend fun calculateAvatarUrl(): String =
+    override fun clearCache() {
+        cachedRepository.clearCache()
+    }
+
+    override suspend fun refresh() {
+        clearCache()
+        calculateAvatarUrl()
+    }
+
+    internal suspend fun calculateAvatarUrl(): String =
         if (storage.isLogined()) {
             runCatching {
                 val apiUrl = photo.getAvatar().url
 
-                // Извлекаем путь из URL API и преобразуем в /avatar/...
                 val path =
                     when {
                         apiUrl.startsWith("http://155.212.170.94:9000") -> {
@@ -53,7 +48,6 @@ internal class AvatarRepositoryImpl(
                             apiUrl.removePrefix("https://155.212.170.94:9000")
                         }
                         apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
-                            // Extract path from any HTTP/HTTPS URL
                             val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
                             val pathStart = withoutProtocol.indexOf('/')
                             if (pathStart >= 0) {
@@ -63,23 +57,19 @@ internal class AvatarRepositoryImpl(
                             }
                         }
                         else -> {
-                            // Already a relative path
                             if (apiUrl.startsWith("/")) apiUrl else "/$apiUrl"
                         }
                     }
 
-                // Преобразуем /publicbct/avatars/... в /avatar/...
                 val avatarPath =
                     if (path.startsWith("/publicbct/avatars/")) {
                         path.removePrefix("/publicbct/avatars/")
                     } else if (path.startsWith("/publicbct/avatars")) {
                         path.removePrefix("/publicbct/avatars")
                     } else {
-                        // Если путь не начинается с /publicbct/avatars/, извлекаем только имя файла
                         path.substringAfterLast('/')
                     }
 
-                // Используем абсолютный URL как для API, чтобы работать на любом домене
                 "https://drivebit.my/avatar/$avatarPath"
             }.getOrElse {
                 DEFAULT_AVATAR_PATH
@@ -87,10 +77,4 @@ internal class AvatarRepositoryImpl(
         } else {
             DEFAULT_AVATAR_PATH
         }
-
-    override fun refresh() {
-        coroutineScope.launch {
-            _avatarUrl.update { calculateAvatarUrl() }
-        }
-    }
 }

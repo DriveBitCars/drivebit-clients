@@ -2,6 +2,8 @@ config.devServer = config.devServer || {};
 config.devServer.historyApiFallback = true;
 config.devServer.open = false;
 config.devServer.port = 8080;
+config.devServer.hot = true;
+config.devServer.liveReload = true;
 
 // Proxy для аватаров - проксируем запросы к /avatar/ на внешний сервер
 config.devServer.proxy = [

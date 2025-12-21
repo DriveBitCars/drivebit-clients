@@ -1,5 +1,6 @@
 package my.drivebit.repositories
 
+import my.drivebit.network.services.AddressSuggestion
 import my.drivebit.network.services.Dadata
 
 interface AddressSuggestRepository {
@@ -11,7 +12,7 @@ interface AddressSuggestRepository {
 
 sealed interface ResultAddressSuggest {
     data class Success(
-        val suggestions: List<String>,
+        val suggestions: List<AddressSuggestion>,
     ) : ResultAddressSuggest
 
     data class Error(
@@ -26,9 +27,10 @@ internal class AddressSuggestRepositoryImpl(
         query: String,
         city: String,
     ): ResultAddressSuggest {
+        val queryWithCity = "$city $query".trim()
         val result =
             runCatching {
-                dadata.suggest(query, city)
+                dadata.suggest(queryWithCity)
             }
 
         return result.fold(
@@ -40,7 +42,7 @@ internal class AddressSuggestRepositoryImpl(
                                 suggestion.data?.geoLon != null &&
                                 suggestion.data?.geoLat?.isNotBlank() == true &&
                                 suggestion.data?.geoLon?.isNotBlank() == true
-                        }.mapNotNull { it.value }
+                        }
                 ResultAddressSuggest.Success(suggestions)
             },
             onFailure = { throwable ->

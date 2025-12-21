@@ -2,6 +2,8 @@ package my.drivebit.repositories
 
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.CarBrand
+import my.drivebit.network.services.CarEnumsResponse
+import my.drivebit.network.services.CarModel
 import my.drivebit.network.services.City
 import my.drivebit.network.services.Dictionary
 import kotlin.test.Test
@@ -21,6 +23,10 @@ class CarBrandRepositoryTest {
                 object : Dictionary {
                     override suspend fun getCarBrands(): List<CarBrand> = expectedBrands
 
+                    override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
+
+                    override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
+
                     override suspend fun searchCities(query: String): List<City> = emptyList()
                 }
             val repository = CarBrandRepositoryImpl(fakeDictionary)
@@ -38,6 +44,10 @@ class CarBrandRepositoryTest {
                 object : Dictionary {
                     override suspend fun getCarBrands(): List<CarBrand> = throw Exception("Network error")
 
+                    override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
+
+                    override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
+
                     override suspend fun searchCities(query: String): List<City> = emptyList()
                 }
             val repository = CarBrandRepositoryImpl(fakeDictionary)
@@ -54,6 +64,10 @@ class CarBrandRepositoryTest {
             val fakeDictionary =
                 object : Dictionary {
                     override suspend fun getCarBrands(): List<CarBrand> = throw Exception()
+
+                    override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
+
+                    override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
 
                     override suspend fun searchCities(query: String): List<City> = emptyList()
                 }

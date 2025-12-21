@@ -33,4 +33,30 @@ interface Storage {
      * Выполняет выход из системы - очищает все данные пользователя
      */
     fun logout()
+
+    /**
+     * Сохраняет значение по ключу
+     */
+    fun putString(
+        key: String,
+        value: String,
+    )
+
+    /**
+     * Получает значение по ключу
+     */
+    fun getString(
+        key: String,
+        defaultValue: String = "",
+    ): String
+
+    /**
+     * Проверяет наличие ключа
+     */
+    fun contains(key: String): Boolean
+
+    /**
+     * Удаляет значение по ключу
+     */
+    fun remove(key: String)
 }

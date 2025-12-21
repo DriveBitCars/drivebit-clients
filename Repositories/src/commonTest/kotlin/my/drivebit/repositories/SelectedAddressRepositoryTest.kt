@@ -1,5 +1,6 @@
 package my.drivebit.repositories
 
+import my.drivebit.shared.storage.InMemorySettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -7,7 +8,7 @@ import kotlin.test.assertNull
 class SelectedAddressRepositoryTest {
     @Test
     fun `saveAddress should save address in memory`() {
-        val repo = SelectedAddressRepositoryImpl()
+        val repo = SelectedAddressRepositoryImpl(InMemorySettings())
 
         repo.saveAddress("Москва, ул. Ленина, д. 1")
 
@@ -16,14 +17,14 @@ class SelectedAddressRepositoryTest {
 
     @Test
     fun `getAddress should return null when no address is saved`() {
-        val repo = SelectedAddressRepositoryImpl()
+        val repo = SelectedAddressRepositoryImpl(InMemorySettings())
 
         assertNull(repo.getAddress())
     }
 
     @Test
     fun `getAddress should return saved address`() {
-        val repo = SelectedAddressRepositoryImpl()
+        val repo = SelectedAddressRepositoryImpl(InMemorySettings())
 
         repo.saveAddress("Санкт-Петербург, Невский проспект, д. 10")
         val address = repo.getAddress()
@@ -33,7 +34,7 @@ class SelectedAddressRepositoryTest {
 
     @Test
     fun `clearAddress should remove saved address`() {
-        val repo = SelectedAddressRepositoryImpl()
+        val repo = SelectedAddressRepositoryImpl(InMemorySettings())
 
         repo.saveAddress("Москва, ул. Пушкина, д. 5")
         repo.clearAddress()
@@ -43,7 +44,7 @@ class SelectedAddressRepositoryTest {
 
     @Test
     fun `saveAddress should overwrite previous address`() {
-        val repo = SelectedAddressRepositoryImpl()
+        val repo = SelectedAddressRepositoryImpl(InMemorySettings())
 
         repo.saveAddress("Москва, ул. Ленина, д. 1")
         repo.saveAddress("Санкт-Петербург, Невский проспект, д. 10")
@@ -53,7 +54,7 @@ class SelectedAddressRepositoryTest {
 
     @Test
     fun `saveAddress should save empty string`() {
-        val repo = SelectedAddressRepositoryImpl()
+        val repo = SelectedAddressRepositoryImpl(InMemorySettings())
 
         repo.saveAddress("")
 

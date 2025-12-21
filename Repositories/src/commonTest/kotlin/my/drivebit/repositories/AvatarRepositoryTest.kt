@@ -1,10 +1,13 @@
 package my.drivebit.repositories
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.AvatarResponse
+import my.drivebit.network.services.CarPhotoResponse
 import my.drivebit.network.services.Photo
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.DEFAULT_AVATAR_PATH
@@ -32,6 +35,19 @@ private class FakePhoto : Photo {
         }
         return AvatarResponse(url = avatarUrl)
     }
+
+    override suspend fun getCarPhotos(carId: String): List<CarPhotoResponse> = emptyList()
+
+    override suspend fun uploadCarPhotos(
+        carId: String,
+        fileBytesList: List<ByteArray>,
+        fileNames: List<String>,
+        contentTypes: List<String>,
+    ): List<CarPhotoResponse> = emptyList()
+
+    override suspend fun deleteCarPhoto(photoId: Int) {
+        // No-op for testing
+    }
 }
 
 private class FakeStorage : Storage {
@@ -57,6 +73,20 @@ private class FakeStorage : Storage {
 
     override fun isLogined(): Boolean = token != null
 
+    override fun putString(
+        key: String,
+        value: String,
+    ) {}
+
+    override fun getString(
+        key: String,
+        defaultValue: String,
+    ): String = defaultValue
+
+    override fun contains(key: String): Boolean = false
+
+    override fun remove(key: String) {}
+
     fun setLoggedIn(loggedIn: Boolean) {
         if (loggedIn) {
             token = "test-token"
@@ -68,6 +98,35 @@ private class FakeStorage : Storage {
     }
 }
 
+private class TestCachedRepository(
+    private val photo: Photo,
+    private val storage: Storage,
+) : CachedRepository<String> {
+    private var cachedValue: String? = null
+
+    override fun get(): Flow<String> =
+        flow {
+            if (cachedValue == null) {
+                val tempRepository =
+                    AvatarRepositoryImpl(
+                        photo,
+                        storage,
+                        object : CachedRepository<String> {
+                            override fun get(): Flow<String> = flow { emit("") }
+
+                            override fun clearCache() {}
+                        },
+                    )
+                cachedValue = tempRepository.calculateAvatarUrl()
+            }
+            emit(cachedValue!!)
+        }
+
+    override fun clearCache() {
+        cachedValue = null
+    }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class AvatarRepositoryTest {
     @Test
@@ -75,7 +134,8 @@ class AvatarRepositoryTest {
         runTest {
             val storage = FakeStorage().apply { setLoggedIn(true) }
             val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar.jpg" }
-            val repository = AvatarRepositoryImpl(photo, storage, this)
+            val cachedRepository = TestCachedRepository(photo, storage)
+            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
 
             advanceUntilIdle()
             val url = repository.avatarUrl.first()
@@ -88,7 +148,8 @@ class AvatarRepositoryTest {
         runTest {
             val storage = FakeStorage().apply { setLoggedIn(false) }
             val photo = FakePhoto()
-            val repository = AvatarRepositoryImpl(photo, storage, this)
+            val cachedRepository = TestCachedRepository(photo, storage)
+            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
 
             advanceUntilIdle()
             val url = repository.avatarUrl.first()
@@ -101,7 +162,8 @@ class AvatarRepositoryTest {
         runTest {
             val storage = FakeStorage().apply { setLoggedIn(false) }
             val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar.jpg" }
-            val repository = AvatarRepositoryImpl(photo, storage, this)
+            val cachedRepository = TestCachedRepository(photo, storage)
+            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
 
             advanceUntilIdle()
             val initialUrl = repository.avatarUrl.first()
@@ -120,7 +182,8 @@ class AvatarRepositoryTest {
         runTest {
             val storage = FakeStorage().apply { setLoggedIn(true) }
             val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar.jpg" }
-            val repository = AvatarRepositoryImpl(photo, storage, this)
+            val cachedRepository = TestCachedRepository(photo, storage)
+            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
 
             advanceUntilIdle()
             val initialUrl = repository.avatarUrl.first()
@@ -139,7 +202,8 @@ class AvatarRepositoryTest {
         runTest {
             val storage = FakeStorage().apply { setLoggedIn(true) }
             val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar1.jpg" }
-            val repository = AvatarRepositoryImpl(photo, storage, this)
+            val cachedRepository = TestCachedRepository(photo, storage)
+            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
 
             advanceUntilIdle()
             val initialUrl = repository.avatarUrl.first()
@@ -162,7 +226,8 @@ class AvatarRepositoryTest {
                     shouldThrow = true
                     avatarUrl = "https://api.example.com/avatar.jpg"
                 }
-            val repository = AvatarRepositoryImpl(photo, storage, this)
+            val cachedRepository = TestCachedRepository(photo, storage)
+            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
 
             advanceUntilIdle()
             val initialUrl = repository.avatarUrl.first()

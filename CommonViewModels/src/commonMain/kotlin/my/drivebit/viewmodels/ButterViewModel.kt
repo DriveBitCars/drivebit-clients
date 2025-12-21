@@ -1,8 +1,13 @@
 package my.drivebit.viewmodels
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import my.drivebit.repositories.AvatarRepository
 import my.drivebit.resources.ImagePaths
 import my.drivebit.shared.storage.Storage
@@ -57,6 +62,13 @@ private val beCameAHost =
         onClick = {},
     )
 
+private val myCars =
+    ButterModel(
+        iconUrl = ImagePaths.BUTTER_CAR_ICON_SVG,
+        text = "Мои авто",
+        onClick = {},
+    )
+
 private val logout =
     ButterModel(
         iconUrl = ImagePaths.BUTTER_LOGOUT_SVG,
@@ -67,13 +79,41 @@ private val logout =
 class ButterViewModelImpl(
     private val storage: Storage,
     private val avatarRepository: AvatarRepository,
+    private val carMenuViewModel: CarMenuViewModel,
+    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : ButterViewModel {
     private val _state = MutableStateFlow<ButterState>(ButterState.Idle)
+    private var isMenuOpened = false
 
     override val state: StateFlow<ButterState>
         get() = _state.asStateFlow()
 
+    init {
+        carMenuViewModel.load()
+        coroutineScope.launch {
+            combine(
+                carMenuViewModel.menuOption,
+                carMenuViewModel.isLoading,
+            ) { menuOption, isLoading ->
+                if (isMenuOpened) {
+                    updateMenu(menuOption, isLoading)
+                }
+            }.collect {}
+        }
+    }
+
     override fun open() {
+        isMenuOpened = true
+        if (carMenuViewModel.isLoading.value) {
+            carMenuViewModel.load()
+        }
+        updateMenu(carMenuViewModel.menuOption.value, carMenuViewModel.isLoading.value)
+    }
+
+    private fun updateMenu(
+        menuOption: CarMenuOption,
+        isLoading: Boolean,
+    ) {
         _state.value =
             ButterState.Opened(
                 buildList {
@@ -83,7 +123,15 @@ class ButterViewModelImpl(
                         add(login.copy(onClick = { close() }))
                         add(registr.copy(onClick = { close() }))
                     }
-                    add(beCameAHost.copy(onClick = { close() }))
+
+                    if (storage.isLogined() && !isLoading) {
+                        if (menuOption == CarMenuOption.MyCars) {
+                            add(myCars.copy(onClick = { close() }))
+                        } else {
+                            add(beCameAHost.copy(onClick = { close() }))
+                        }
+                    }
+
                     if (storage.isLogined()) {
                         add(
                             logout.copy(onClick = {
@@ -98,10 +146,11 @@ class ButterViewModelImpl(
 
     private fun logout() {
         storage.logout()
-        avatarRepository.refresh()
+        avatarRepository.clearCache()
     }
 
     override fun close() {
+        isMenuOpened = false
         _state.value = ButterState.Idle
     }
 

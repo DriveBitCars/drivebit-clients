@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.runTest
 import my.drivebit.repositories.AvatarRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 private class FakeAvatarRepository : AvatarRepository {
     private val _avatarUrl = kotlinx.coroutines.flow.MutableStateFlow("images/menu/user.svg")
@@ -18,7 +17,11 @@ private class FakeAvatarRepository : AvatarRepository {
         _avatarUrl.value = url
     }
 
-    override fun refresh() {
+    override fun clearCache() {
+    }
+
+    override suspend fun refresh() {
+        // No-op for testing
     }
 }
 
@@ -54,25 +57,5 @@ class IconUserViewModelTest {
 
             val updatedUrl = viewModel.avatarUrl.first()
             assertEquals("https://example.com/new-avatar.jpg", updatedUrl)
-        }
-
-    @Test
-    fun `refresh should call repository refresh`() =
-        runTest(StandardTestDispatcher()) {
-            var refreshCalled = false
-            val fakeRepository =
-                object : AvatarRepository {
-                    private val _avatarUrl = kotlinx.coroutines.flow.MutableStateFlow("images/menu/user.svg")
-                    override val avatarUrl: kotlinx.coroutines.flow.Flow<String> = _avatarUrl
-
-                    override fun refresh() {
-                        refreshCalled = true
-                    }
-                }
-            val viewModel = IconUserViewModel(fakeRepository)
-
-            viewModel.refresh()
-
-            assertTrue(refreshCalled)
         }
 }

@@ -3,6 +3,8 @@ package my.drivebit.viewmodels
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.test.runTest
+import my.drivebit.network.services.AddressData
+import my.drivebit.network.services.AddressSuggestion
 import my.drivebit.repositories.AddressSuggestRepository
 import my.drivebit.repositories.ResultAddressSuggest
 import my.drivebit.repositories.SelectedCityRepository
@@ -29,8 +31,26 @@ private class FakeAddressSuggestRepository : AddressSuggestRepository {
         }
         return ResultAddressSuggest.Success(
             listOf(
-                "Москва, ул. Ленина, д. 1",
-                "Москва, ул. Пушкина, д. 2",
+                AddressSuggestion(
+                    value = "Москва, ул. Ленина, д. 1",
+                    data =
+                        AddressData(
+                            street = "Ленина",
+                            house = "1",
+                            geoLat = "55.7558",
+                            geoLon = "37.6173",
+                        ),
+                ),
+                AddressSuggestion(
+                    value = "Москва, ул. Пушкина, д. 2",
+                    data =
+                        AddressData(
+                            street = "Пушкина",
+                            house = "2",
+                            geoLat = "55.7558",
+                            geoLon = "37.6173",
+                        ),
+                ),
             ),
         )
     }
@@ -111,8 +131,8 @@ class AddressSuggestViewModelTest {
             kotlinx.coroutines.delay(3100)
 
             assertEquals(2, viewModel.suggestions.value.size)
-            assertEquals("Москва, ул. Ленина, д. 1", viewModel.suggestions.value[0])
-            assertEquals("Москва, ул. Пушкина, д. 2", viewModel.suggestions.value[1])
+            assertEquals("Москва, ул. Ленина, д. 1", viewModel.suggestions.value[0].value)
+            assertEquals("Москва, ул. Пушкина, д. 2", viewModel.suggestions.value[1].value)
             assertEquals("Москва", fakeRepo.lastQuery)
         }
 
