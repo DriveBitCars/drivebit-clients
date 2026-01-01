@@ -1,5 +1,6 @@
 package my.drivebit.repositories
 
+import my.drivebit.shared.storage.InMemorySettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -7,7 +8,7 @@ import kotlin.test.assertNull
 class WinCodeRepositoryTest {
     @Test
     fun `saveWinCode should save win code in memory`() {
-        val repo = WinCodeRepositoryImpl()
+        val repo = WinCodeRepositoryImpl(InMemorySettings())
 
         repo.saveWinCode("1HGBH41JXMN109186")
 
@@ -16,14 +17,14 @@ class WinCodeRepositoryTest {
 
     @Test
     fun `getWinCode should return null when no win code is saved`() {
-        val repo = WinCodeRepositoryImpl()
+        val repo = WinCodeRepositoryImpl(InMemorySettings())
 
         assertNull(repo.getWinCode())
     }
 
     @Test
     fun `getWinCode should return saved win code`() {
-        val repo = WinCodeRepositoryImpl()
+        val repo = WinCodeRepositoryImpl(InMemorySettings())
 
         repo.saveWinCode("ABCD1234EFGH56789")
         val winCode = repo.getWinCode()
@@ -33,7 +34,7 @@ class WinCodeRepositoryTest {
 
     @Test
     fun `clearWinCode should remove saved win code`() {
-        val repo = WinCodeRepositoryImpl()
+        val repo = WinCodeRepositoryImpl(InMemorySettings())
 
         repo.saveWinCode("1HGBH41JXMN109186")
         repo.clearWinCode()
@@ -43,7 +44,7 @@ class WinCodeRepositoryTest {
 
     @Test
     fun `saveWinCode should overwrite previous win code`() {
-        val repo = WinCodeRepositoryImpl()
+        val repo = WinCodeRepositoryImpl(InMemorySettings())
 
         repo.saveWinCode("1HGBH41JXMN109186")
         repo.saveWinCode("ABCD1234EFGH56789")
@@ -53,10 +54,10 @@ class WinCodeRepositoryTest {
 
     @Test
     fun `saveWinCode should save empty string`() {
-        val repo = WinCodeRepositoryImpl()
+        val repo = WinCodeRepositoryImpl(InMemorySettings())
 
         repo.saveWinCode("")
 
-        assertEquals("", repo.getWinCode())
+        assertNull(repo.getWinCode())
     }
 }

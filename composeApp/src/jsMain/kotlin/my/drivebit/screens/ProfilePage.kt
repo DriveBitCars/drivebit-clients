@@ -127,12 +127,11 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                             val file = fileList?.item(0) as? org.w3c.files.File
                             if (file != null) {
                                 coroutineScope.launch {
-                                    try {
+                                    runCatching {
                                         val fileBytes = file.readAsBytes()
                                         val fileName = file.name
                                         val contentType = file.type.ifBlank { "image/jpeg" }
                                         avatarUploadViewModel.uploadAvatar(fileBytes, fileName, contentType)
-                                    } catch (e: Exception) {
                                     }
                                 }
                             }

@@ -24,15 +24,20 @@ suspend inline fun <reified T> HttpResponse.parseResponse(json: Json = defaultJs
 
     if (!status.isSuccess()) {
         val errorMessage =
-            try {
-                val errorResponse = json.decodeFromString<ValidationErrorResponse>(bodyString)
-                val errorMessages = errorResponse.errors?.flatMap { (_, messages) -> messages } ?: emptyList()
-                if (errorMessages.isNotEmpty()) {
-                    errorMessages.joinToString(". ")
+            runCatching {
+                val trimmedBody = bodyString.trim()
+                if (trimmedBody.startsWith("{") && trimmedBody.endsWith("}")) {
+                    val errorResponse = json.decodeFromString<ValidationErrorResponse>(trimmedBody)
+                    val errorMessages = errorResponse.errors?.flatMap { (_, messages) -> messages } ?: emptyList()
+                    if (errorMessages.isNotEmpty()) {
+                        errorMessages.joinToString(". ")
+                    } else {
+                        errorResponse.title ?: trimmedBody.trim('"').trim()
+                    }
                 } else {
-                    errorResponse.title ?: bodyString.trim('"').trim()
+                    trimmedBody.trim('"').trim()
                 }
-            } catch (e: Exception) {
+            }.getOrElse {
                 bodyString.trim('"').trim()
             }
         throw NetworkException(status, errorMessage)
@@ -44,4 +49,7 @@ suspend inline fun <reified T> HttpResponse.parseResponse(json: Json = defaultJs
 class NetworkException(
     val statusCode: HttpStatusCode,
     override val message: String,
-) : Exception(message)
+) : Exception(message) {
+    val statusCodeValue: Int
+        get() = statusCode.value
+}

@@ -25,7 +25,13 @@ fun StringList(
     }) {
         strings.forEachIndexed { index, suggestion ->
             Div({
+                onMouseDown {
+                    it.preventDefault()
+                    it.stopPropagation()
+                }
                 onClick {
+                    it.preventDefault()
+                    it.stopPropagation()
                     onSelected(suggestion)
                 }
                 style {

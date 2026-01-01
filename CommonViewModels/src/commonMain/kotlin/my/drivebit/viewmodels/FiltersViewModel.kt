@@ -46,9 +46,15 @@ class FiltersViewModel(
     val state
         get() = _state.asStateFlow()
 
+    var onNearbyFilterSelected: (() -> Unit)? = null
+
     fun onSelect(title: String) {
         _state.update { it.copy(selected = title) }
         saveSelectedFilter(title)
+
+        if (title == "По близости") {
+            onNearbyFilterSelected?.invoke()
+        }
     }
 
     private fun getSelectedFilter(): String = "Все"

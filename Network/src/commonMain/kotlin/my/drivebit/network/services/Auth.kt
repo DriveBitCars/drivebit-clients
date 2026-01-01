@@ -7,6 +7,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.handleServiceError
 import my.drivebit.network.parseResponse
 
 interface Auth {
@@ -78,7 +79,7 @@ class AuthImpl(
         println("   - URL: $url")
         println("   - Login: $login")
 
-        try {
+        return runCatching {
             val response =
                 httpClient
                     .post(url) {
@@ -91,13 +92,8 @@ class AuthImpl(
             println("📡 [AuthService] createOtp successful")
             println("   - Session ID: ${result.sessionId}")
             println("   - Expires in: ${result.expiresIn}s")
-            return result
-        } catch (e: Exception) {
-            println("❌ [AuthService] createOtp failed")
-            println("   - Error: ${e.message}")
-            e.printStackTrace()
-            throw e
-        }
+            result
+        }.handleServiceError("AuthService", "createOtp")
     }
 
     override suspend fun verifyOtp(
@@ -110,7 +106,7 @@ class AuthImpl(
         println("   - Session ID: $identifier")
         println("   - OTP code length: ${code.length}")
 
-        try {
+        return runCatching {
             val response =
                 httpClient
                     .post(url) {
@@ -123,13 +119,8 @@ class AuthImpl(
             println("📡 [AuthService] verifyOtp successful")
             println("   - Access token expires at: ${result.accessToken.expiresAt}")
             println("   - Refresh token expires at: ${result.refreshToken.expiresAt}")
-            return result
-        } catch (e: Exception) {
-            println("❌ [AuthService] verifyOtp failed")
-            println("   - Error: ${e.message}")
-            e.printStackTrace()
-            throw e
-        }
+            result
+        }.handleServiceError("AuthService", "verifyOtp")
     }
 
     override suspend fun createTokens(refreshToken: String): CreateNewTokensResponse {
@@ -139,7 +130,7 @@ class AuthImpl(
         println("   - Refresh token length: ${refreshToken.length}")
         println("   - Refresh token preview: ${refreshToken.take(20)}...")
 
-        try {
+        return runCatching {
             println("   - ✅ Using unauthorized HttpClient (NO Bearer token will be sent)")
             val response =
                 httpClient
@@ -154,8 +145,8 @@ class AuthImpl(
             println("📡 [AuthService] Response parsed successfully")
             println("   - New access token expires at: ${result.accessToken.expiresAt}")
             println("   - New refresh token expires at: ${result.refreshToken.expiresAt}")
-            return result
-        } catch (e: Exception) {
+            result
+        }.getOrElse { e ->
             println("❌ [AuthService] createTokens failed")
             println("   - Error type: ${e::class.simpleName}")
             println("   - Error message: ${e.message}")

@@ -11,6 +11,7 @@ This is a Kotlin Multiplatform project for Drivebit mobile clients targeting And
 - Prefer immutable data structures
 - Use meaningful variable and function names
 - Do NOT write comments unless explicitly requested
+- **ALWAYS extract business logic from UI into ViewModels** - UI components should only handle presentation, all business logic, data loading, error handling, and state management must be in ViewModels
 
 ## File Structure
 - `composeApp/src/commonMain/` - Shared code across all platforms
@@ -33,6 +34,15 @@ This is a Kotlin Multiplatform project for Drivebit mobile clients targeting And
 - For quick local verification (optional): `./gradlew :ModuleName:check`
 - NEVER run `./gradlew clean` without explicit user permission
 - Cache cleaning should only be done when user specifically requests it
+
+## Architecture Rules - MVVM/MVI Pattern
+- **ALWAYS extract ALL business logic from UI into ViewModels** - UI components should ONLY handle presentation
+- **UI should ONLY display what comes from ViewModel state** - no business logic, data processing, or state management in UI
+- **All state management must be in ViewModel** - use StateFlow/State to expose state to UI
+- **All user actions should be sent as Intent to ViewModel** - UI sends Intent, ViewModel processes it and updates state
+- **UI should be reactive** - observe ViewModel state and reactively update when state changes
+- **No local state in UI** - avoid `remember { mutableStateOf() }` for business logic, use ViewModel state instead
+- **Follow MVI pattern** - Model (State), View (UI), Intent (User Actions) - all handled through ViewModel
 
 ## Git Workflow Rules
 - **NEVER push directly to `trunk` branch**

@@ -52,12 +52,16 @@ fun AddressInputPage(
                 )
 
                 StringList(
-                    strings = suggestions,
-                    onSelected = { suggestion ->
-                        inputValue = suggestion
+                    strings = suggestions.mapNotNull { it.value },
+                    onSelected = { suggestionString ->
+                        val suggestion = suggestions.firstOrNull { it.value == suggestionString }
+                        inputValue = suggestionString
                         viewModel.clearSuggestions()
-                        selectedAddressRepository.saveAddress(suggestion)
-                        onAddressSelected(suggestion)
+                        selectedAddressRepository.saveAddress(suggestionString)
+                        suggestion?.data?.let { addressData ->
+                            selectedAddressRepository.saveAddressData(addressData)
+                        }
+                        onAddressSelected(suggestionString)
                         onNavigateToWinCode()
                     },
                 )

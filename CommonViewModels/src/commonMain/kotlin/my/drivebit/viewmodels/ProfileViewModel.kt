@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import my.drivebit.network.NetworkException
 import my.drivebit.network.services.User
 import my.drivebit.network.services.UserGetResponse
 
@@ -54,10 +53,11 @@ class ProfileViewModelImpl(
                 _state.update { ProfileState.Success(userData) }
             }.onFailure { e ->
                 val errorMessage =
-                    when (e) {
-                        is NetworkException -> e.message
-                        else -> e.message?.takeIf { it.isNotBlank() } ?: "Unknown error"
-                    }
+                    ErrorHandler.extractErrorMessage(
+                        exception = e,
+                        defaultNetworkError = "Ошибка сети",
+                        defaultGenericError = "Не удалось загрузить профиль",
+                    )
                 _state.update { ProfileState.Error(errorMessage) }
             }
         }

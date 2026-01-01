@@ -36,10 +36,7 @@ internal class SelectedCityRepositoryImpl(
         return if (cityId == -1) null else cityId
     }
 
-    override fun getCityName(): String? {
-        val cityName = settings.getString(CITY_NAME_KEY, "")
-        return if (cityName.isEmpty()) null else cityName
-    }
+    override fun getCityName(): String? = settings.getStringOrNullIfEmpty(CITY_NAME_KEY)
 
     override fun clearCity() {
         settings.remove(CITY_ID_KEY)

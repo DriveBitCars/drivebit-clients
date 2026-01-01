@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.kotlinxSerialization)
 }
 
 kotlin {
@@ -29,6 +30,7 @@ kotlin {
         commonMain.dependencies {
             implementation(kotlin("stdlib"))
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
             implementation(project(":Storage"))
             implementation(project(":Network"))
             implementation(project(":Utils"))
@@ -37,9 +39,16 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinx.coroutines.get()}")
+            implementation(
+                "org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinx.coroutines.get()}",
+            )
             implementation(project(":Network"))
             implementation(project(":Utils"))
+            implementation(project(":Storage"))
+            implementation(libs.multiplatform.settings)
+        }
+        androidUnitTest.dependencies {
+            implementation(libs.multiplatform.settings)
         }
     }
 }

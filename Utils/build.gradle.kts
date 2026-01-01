@@ -27,6 +27,7 @@ kotlin {
         commonMain.dependencies {
             implementation(kotlin("stdlib"))
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.coroutines.core)
         }
         jsMain.dependencies {
             implementation(kotlin("stdlib-js"))

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import my.drivebit.network.services.AddressSuggestion
 import my.drivebit.repositories.AddressSuggestRepository
 import my.drivebit.repositories.ResultAddressSuggest
 import my.drivebit.repositories.SelectedCityRepository
@@ -29,17 +30,17 @@ class AddressSuggestViewModel(
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
 
-    private val _suggestions = MutableStateFlow<List<String>>(emptyList())
-    val suggestions: StateFlow<List<String>> = _suggestions.asStateFlow()
+    private val _suggestions = MutableStateFlow<List<AddressSuggestion>>(emptyList())
+    val suggestions: StateFlow<List<AddressSuggestion>> = _suggestions.asStateFlow()
 
     init {
         _query
-            .debounce(3000)
+            .debounce(300)
             .distinctUntilChanged()
             .flatMapLatest { query ->
                 flow {
                     val city = selectedCityRepository.getCityName()
-                    if (city != null) {
+                    if (city != null && query.isNotBlank()) {
                         when (val result = addressSuggestRepository.suggest(query, city)) {
                             is ResultAddressSuggest.Success -> {
                                 emit(result.suggestions)

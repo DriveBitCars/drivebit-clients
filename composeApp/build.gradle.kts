@@ -119,6 +119,7 @@ kotlin {
             implementation(project(":Repositories"))
             implementation(project(":UI-Components"))
             implementation(project(":Utils"))
+            implementation(project(":Maps"))
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koinComposeViewmodelJs)

@@ -2,7 +2,7 @@ package my.drivebit.shared.storage
 
 import com.russhwolf.settings.Settings
 
-internal class InMemorySettings : Settings {
+class InMemorySettings : Settings {
     private val map = mutableMapOf<String, Any?>()
 
     override val size: Int

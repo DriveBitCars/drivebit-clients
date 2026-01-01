@@ -24,7 +24,7 @@ class WinCodeInputViewModel(
         get() = _validationState.value is ValidationState.Valid
 
     fun updateWinCode(newWinCode: String) {
-        val uppercased = newWinCode.uppercase()
+        val uppercased = newWinCode.uppercase().take(17)
         _winCode.value = uppercased
         validateWinCode(uppercased)
     }

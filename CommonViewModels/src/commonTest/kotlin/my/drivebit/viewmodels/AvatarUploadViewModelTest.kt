@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.NetworkException
 import my.drivebit.network.services.AvatarResponse
+import my.drivebit.network.services.CarPhotoResponse
 import my.drivebit.network.services.Photo
 import my.drivebit.repositories.AvatarRepository
 import kotlin.test.Test
@@ -52,15 +53,32 @@ private class MockPhoto : Photo {
         }
         return AvatarResponse(url = "https://example.com/avatar.jpg")
     }
+
+    override suspend fun getCarPhotos(carId: String): List<CarPhotoResponse> = emptyList()
+
+    override suspend fun uploadCarPhotos(
+        carId: String,
+        fileBytesList: List<ByteArray>,
+        fileNames: List<String>,
+        contentTypes: List<String>,
+    ): List<CarPhotoResponse> = emptyList()
+
+    override suspend fun deleteCarPhoto(photoId: Int) {
+        // Mock implementation
+    }
 }
 
 private class MockAvatarRepository : AvatarRepository {
     private val _avatarUrl = kotlinx.coroutines.flow.MutableStateFlow("images/menu/user.svg")
     override val avatarUrl: kotlinx.coroutines.flow.Flow<String> = _avatarUrl
-    var refreshCalled = false
+    var clearCacheCalled = false
 
-    override fun refresh() {
-        refreshCalled = true
+    override fun clearCache() {
+        clearCacheCalled = true
+    }
+
+    override suspend fun refresh() {
+        // No-op for testing
     }
 }
 
@@ -108,7 +126,7 @@ class AvatarUploadViewModelTest {
             assertEquals(fileBytes, mockPhoto.lastFileBytes)
             assertEquals(fileName, mockPhoto.lastFileName)
             assertEquals(contentType, mockPhoto.lastContentType)
-            assertTrue(mockRepository.refreshCalled)
+            assertTrue(mockRepository.clearCacheCalled)
             testScope.coroutineContext.cancelChildren()
         }
 
@@ -137,7 +155,7 @@ class AvatarUploadViewModelTest {
             val state = viewModel.state.value
             assertIs<AvatarUploadState.Error>(state)
             assertEquals("File too large", state.message)
-            assertTrue(!mockRepository.refreshCalled)
+            assertTrue(!mockRepository.clearCacheCalled)
             testScope.coroutineContext.cancelChildren()
         }
 
@@ -166,7 +184,7 @@ class AvatarUploadViewModelTest {
             val state = viewModel.state.value
             assertIs<AvatarUploadState.Error>(state)
             assertEquals("Upload failed", state.message)
-            assertTrue(!mockRepository.refreshCalled)
+            assertTrue(!mockRepository.clearCacheCalled)
             testScope.coroutineContext.cancelChildren()
         }
 

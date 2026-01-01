@@ -39,4 +39,22 @@ internal class StorageImpl(
     override fun logout() {
         settings.clear()
     }
+
+    override fun putString(
+        key: String,
+        value: String,
+    ) {
+        settings.putString(key, value)
+    }
+
+    override fun getString(
+        key: String,
+        defaultValue: String,
+    ): String = settings.getString(key, defaultValue)
+
+    override fun contains(key: String): Boolean = settings.hasKey(key)
+
+    override fun remove(key: String) {
+        settings.remove(key)
+    }
 }

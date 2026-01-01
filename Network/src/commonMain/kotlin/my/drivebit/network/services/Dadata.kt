@@ -10,17 +10,13 @@ import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
 
 interface Dadata {
-    suspend fun suggest(
-        query: String,
-        city: String,
-    ): List<AddressSuggestion>
+    suspend fun suggest(query: String): List<AddressSuggestion>
 }
 
 @Serializable
 data class AddressSuggestRequest(
     val query: String,
     val count: Int = 10,
-    val city: String,
 )
 
 @Serializable
@@ -45,12 +41,9 @@ data class AddressData(
 class DadataImpl(
     private val httpClient: HttpClient,
 ) : Dadata {
-    override suspend fun suggest(
-        query: String,
-        city: String,
-    ): List<AddressSuggestion> {
+    override suspend fun suggest(query: String): List<AddressSuggestion> {
         val url = "${DEFAULT_BASE_URL}api/Dadata/suggest"
-        val request = AddressSuggestRequest(query = query, city = city)
+        val request = AddressSuggestRequest(query = query)
         val response =
             httpClient.post(url) {
                 contentType(ContentType.Application.Json)
