@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>DriveBit</title>
+    <script>
+      (function () {
+        // GitHub Pages doesn't support SPA history routing by default.
+        // Redirect unknown paths to index.html preserving the original route.
+        // Compatible with the "spa redirect" script in index.html.
+        var l = window.location;
+        var path = l.pathname.replace(/^\//, "");
+        var query = l.search ? l.search.substring(1) : "";
+        var hash = l.hash || "";
+        var redirect =
+          l.protocol +
+          "//" +
+          l.host +
+          "/?/" +
+          path +
+          (query ? "&" + query : "") +
+          hash;
+        l.replace(redirect);
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
+
+

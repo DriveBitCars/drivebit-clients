@@ -22,6 +22,12 @@ object MetaTags {
                     description = "Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7.",
                     path = "/",
                 ),
+            "/list-your-car" to
+                PageMeta(
+                    title = "Сдать авто в аренду - DriveBit",
+                    description = "Сдавайте свой автомобиль в аренду и зарабатывайте до 40% больше, чем в прокате. Полная страховка, поддержка 24/7.",
+                    path = "/list-your-car",
+                ),
             "/login-by-phone" to
                 PageMeta(
                     title = "Вход по телефону - DriveBit",
