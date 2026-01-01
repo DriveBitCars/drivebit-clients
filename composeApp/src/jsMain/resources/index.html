@@ -174,6 +174,18 @@
 </head>
 <body>
 <div id="root"></div>
+<script>
+    (function () {
+        // GitHub Pages SPA fallback:
+        // 404.html redirects unknown routes to "/?/<path>".
+        // This script restores the original path for history routing.
+        var l = window.location;
+        if (l.search && l.search.length > 2 && l.search[1] === "/") {
+            var decoded = l.search.substring(2).split("&").join("?");
+            window.history.replaceState(null, "", "/" + decoded + l.hash);
+        }
+    })();
+</script>
 <noscript>
     <div style="padding: 40px; text-align: center; font-family: system-ui, sans-serif;">
         <h1>DriveBit - Аренда автомобилей</h1>
