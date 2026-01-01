@@ -35,12 +35,12 @@ class AddressSuggestViewModel(
 
     init {
         _query
-            .debounce(300)
+            .debounce(1000)
             .distinctUntilChanged()
             .flatMapLatest { query ->
                 flow {
                     val city = selectedCityRepository.getCityName()
-                    if (city != null && query.isNotBlank()) {
+                    if (city != null && query.isNotBlank() && query.length >= 3) {
                         when (val result = addressSuggestRepository.suggest(query, city)) {
                             is ResultAddressSuggest.Success -> {
                                 emit(result.suggestions)
