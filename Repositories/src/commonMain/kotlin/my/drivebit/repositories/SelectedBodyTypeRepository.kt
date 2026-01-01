@@ -31,15 +31,9 @@ internal class SelectedBodyTypeRepositoryImpl(
         settings.putString(BODY_TYPE_TRANSLATE_KEY, translate)
     }
 
-    override fun getBodyTypeName(): String? {
-        val name = settings.getString(BODY_TYPE_NAME_KEY, "")
-        return if (name.isEmpty()) null else name
-    }
+    override fun getBodyTypeName(): String? = settings.getStringOrNullIfEmpty(BODY_TYPE_NAME_KEY)
 
-    override fun getBodyTypeTranslate(): String? {
-        val translate = settings.getString(BODY_TYPE_TRANSLATE_KEY, "")
-        return if (translate.isEmpty()) null else translate
-    }
+    override fun getBodyTypeTranslate(): String? = settings.getStringOrNullIfEmpty(BODY_TYPE_TRANSLATE_KEY)
 
     override fun clearBodyType() {
         settings.remove(BODY_TYPE_NAME_KEY)

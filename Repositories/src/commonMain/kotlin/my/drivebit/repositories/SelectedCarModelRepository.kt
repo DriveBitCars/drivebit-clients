@@ -36,10 +36,7 @@ internal class SelectedCarModelRepositoryImpl(
         return if (modelId == -1) null else modelId
     }
 
-    override fun getModelName(): String? {
-        val modelName = settings.getString(MODEL_NAME_KEY, "")
-        return if (modelName.isEmpty()) null else modelName
-    }
+    override fun getModelName(): String? = settings.getStringOrNullIfEmpty(MODEL_NAME_KEY)
 
     override fun clearModel() {
         settings.remove(MODEL_ID_KEY)

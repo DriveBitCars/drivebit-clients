@@ -78,10 +78,7 @@ internal class CarDataRepositoryImpl(
         settings.putString(CAR_ID_KEY, carId)
     }
 
-    override fun getCarId(): String? {
-        val carId = settings.getString(CAR_ID_KEY, "")
-        return if (carId.isEmpty()) null else carId
-    }
+    override fun getCarId(): String? = settings.getStringOrNullIfEmpty(CAR_ID_KEY)
 
     override fun saveHourlyRate(rate: Double) {
         settings.putDouble(HOURLY_RATE_KEY, rate)

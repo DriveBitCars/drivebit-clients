@@ -21,10 +21,7 @@ internal class LicensePlateRepositoryImpl(
         settings.putString(LICENSE_PLATE_KEY, licensePlate)
     }
 
-    override fun getLicensePlate(): String? {
-        val licensePlate = settings.getString(LICENSE_PLATE_KEY, "")
-        return if (licensePlate.isEmpty()) null else licensePlate
-    }
+    override fun getLicensePlate(): String? = settings.getStringOrNullIfEmpty(LICENSE_PLATE_KEY)
 
     override fun clearLicensePlate() {
         settings.remove(LICENSE_PLATE_KEY)

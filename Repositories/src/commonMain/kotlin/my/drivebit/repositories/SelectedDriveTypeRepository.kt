@@ -31,15 +31,9 @@ internal class SelectedDriveTypeRepositoryImpl(
         settings.putString(DRIVE_TYPE_TRANSLATE_KEY, translate)
     }
 
-    override fun getDriveTypeName(): String? {
-        val name = settings.getString(DRIVE_TYPE_NAME_KEY, "")
-        return if (name.isEmpty()) null else name
-    }
+    override fun getDriveTypeName(): String? = settings.getStringOrNullIfEmpty(DRIVE_TYPE_NAME_KEY)
 
-    override fun getDriveTypeTranslate(): String? {
-        val translate = settings.getString(DRIVE_TYPE_TRANSLATE_KEY, "")
-        return if (translate.isEmpty()) null else translate
-    }
+    override fun getDriveTypeTranslate(): String? = settings.getStringOrNullIfEmpty(DRIVE_TYPE_TRANSLATE_KEY)
 
     override fun clearDriveType() {
         settings.remove(DRIVE_TYPE_NAME_KEY)

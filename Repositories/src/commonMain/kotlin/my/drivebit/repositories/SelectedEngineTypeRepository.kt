@@ -31,15 +31,9 @@ internal class SelectedEngineTypeRepositoryImpl(
         settings.putString(ENGINE_TYPE_TRANSLATE_KEY, translate)
     }
 
-    override fun getEngineTypeName(): String? {
-        val name = settings.getString(ENGINE_TYPE_NAME_KEY, "")
-        return if (name.isEmpty()) null else name
-    }
+    override fun getEngineTypeName(): String? = settings.getStringOrNullIfEmpty(ENGINE_TYPE_NAME_KEY)
 
-    override fun getEngineTypeTranslate(): String? {
-        val translate = settings.getString(ENGINE_TYPE_TRANSLATE_KEY, "")
-        return if (translate.isEmpty()) null else translate
-    }
+    override fun getEngineTypeTranslate(): String? = settings.getStringOrNullIfEmpty(ENGINE_TYPE_TRANSLATE_KEY)
 
     override fun clearEngineType() {
         settings.remove(ENGINE_TYPE_NAME_KEY)

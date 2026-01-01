@@ -36,10 +36,7 @@ internal class SelectedCarBrandRepositoryImpl(
         return if (brandId == -1) null else brandId
     }
 
-    override fun getBrandName(): String? {
-        val brandName = settings.getString(BRAND_NAME_KEY, "")
-        return if (brandName.isEmpty()) null else brandName
-    }
+    override fun getBrandName(): String? = settings.getStringOrNullIfEmpty(BRAND_NAME_KEY)
 
     override fun clearBrand() {
         settings.remove(BRAND_ID_KEY)
