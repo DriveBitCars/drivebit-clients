@@ -35,7 +35,7 @@ class AddressSuggestViewModel(
 
     init {
         _query
-            .debounce(500)
+            .debounce(1000)
             .distinctUntilChanged()
             .flatMapLatest { query ->
                 flow {
