@@ -3,11 +3,11 @@ package my.drivebit.viewmodels
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
-import my.drivebit.network.services.BodyProps
+import my.drivebit.network.services.CarBody
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarPhotoItem
-import my.drivebit.network.services.ChassisProps
-import my.drivebit.network.services.GeneralProps
+import my.drivebit.network.services.CarChassis
+import my.drivebit.network.services.CarGeneral
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -81,7 +81,7 @@ class CarEditViewModelMappingTest {
                 CarDetailResponse(
                     id = "ef4d16a2-aeeb-457e-abbe-b72473634690",
                     general =
-                        GeneralProps(
+                        CarGeneral(
                             brandName = "Acura",
                             modelName = "CL",
                             year = 2020,
@@ -89,7 +89,7 @@ class CarEditViewModelMappingTest {
                             seats = 5,
                         ),
                     chassis =
-                        ChassisProps(
+                        CarChassis(
                             engineVolume = 3.0,
                             engineType = "Diesel",
                             engineTypeTranslate = "Дизель",
@@ -97,7 +97,7 @@ class CarEditViewModelMappingTest {
                             driveTypeTranslate = "Задний",
                         ),
                     body =
-                        BodyProps(
+                        CarBody(
                             bodyType = "SUV",
                             bodyTypeTranslate = "Внедорожник",
                         ),

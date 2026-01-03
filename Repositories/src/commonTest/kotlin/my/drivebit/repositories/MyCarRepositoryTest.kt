@@ -2,8 +2,8 @@ package my.drivebit.repositories
 
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.Car
-import my.drivebit.network.services.CarListItemResponse
-import my.drivebit.network.services.GeneralProps
+import my.drivebit.network.services.CarItem
+import my.drivebit.network.services.CarGeneral
 import my.drivebit.shared.storage.InMemorySettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,23 +14,31 @@ class MyCarRepositoryTest {
         runTest {
             val expectedCars =
                 listOf(
-                    CarListItemResponse(
+                    CarItem(
                         id = "car1",
-                        general = GeneralProps(),
+                        general = CarGeneral(),
                     ),
-                    CarListItemResponse(
+                    CarItem(
                         id = "car2",
-                        general = GeneralProps(),
+                        general = CarGeneral(),
                     ),
                 )
 
             var callCount = 0
             val fakeCarService =
                 object : Car {
-                    override suspend fun getMyCars(): List<CarListItemResponse> {
+                    override suspend fun search(
+                        cityId: String,
+                        dateFrom: String?,
+                        dateTo: String?,
+                    ) = throw NotImplementedError()
+
+                    override suspend fun getMyCars(): List<CarItem> {
                         callCount++
                         return expectedCars
                     }
+
+                    override suspend fun getCar(carId: String) = throw NotImplementedError()
 
                     override suspend fun createCar(request: my.drivebit.network.services.CarCreateRequest) =
                         throw NotImplementedError()
@@ -39,8 +47,6 @@ class MyCarRepositoryTest {
                         request: my.drivebit.network.services.CarCreateRequest,
                         carId: String?,
                     ) = throw NotImplementedError()
-
-                    override suspend fun getCar(carId: String) = throw NotImplementedError()
 
                     override suspend fun deleteCar(carId: String) = throw NotImplementedError()
                 }
@@ -58,19 +64,27 @@ class MyCarRepositoryTest {
         runTest {
             val firstCars =
                 listOf(
-                    CarListItemResponse(
+                    CarItem(
                         id = "car1",
-                        general = GeneralProps(),
+                        general = CarGeneral(),
                     ),
                 )
 
             var callCount = 0
             val fakeCarService =
                 object : Car {
-                    override suspend fun getMyCars(): List<CarListItemResponse> {
+                    override suspend fun search(
+                        cityId: String,
+                        dateFrom: String?,
+                        dateTo: String?,
+                    ) = throw NotImplementedError()
+
+                    override suspend fun getMyCars(): List<CarItem> {
                         callCount++
                         return firstCars
                     }
+
+                    override suspend fun getCar(carId: String) = throw NotImplementedError()
 
                     override suspend fun createCar(request: my.drivebit.network.services.CarCreateRequest) =
                         throw NotImplementedError()
@@ -79,8 +93,6 @@ class MyCarRepositoryTest {
                         request: my.drivebit.network.services.CarCreateRequest,
                         carId: String?,
                     ) = throw NotImplementedError()
-
-                    override suspend fun getCar(carId: String) = throw NotImplementedError()
 
                     override suspend fun deleteCar(carId: String) = throw NotImplementedError()
                 }
@@ -102,27 +114,35 @@ class MyCarRepositoryTest {
         runTest {
             val firstCars =
                 listOf(
-                    CarListItemResponse(
+                    CarItem(
                         id = "car1",
-                        general = GeneralProps(),
+                        general = CarGeneral(),
                     ),
                 )
 
             val secondCars =
                 listOf(
-                    CarListItemResponse(
+                    CarItem(
                         id = "car2",
-                        general = GeneralProps(),
+                        general = CarGeneral(),
                     ),
                 )
 
             var callCount = 0
             val fakeCarService =
                 object : Car {
-                    override suspend fun getMyCars(): List<CarListItemResponse> {
+                    override suspend fun search(
+                        cityId: String,
+                        dateFrom: String?,
+                        dateTo: String?,
+                    ) = throw NotImplementedError()
+
+                    override suspend fun getMyCars(): List<CarItem> {
                         callCount++
                         return if (callCount == 1) firstCars else secondCars
                     }
+
+                    override suspend fun getCar(carId: String) = throw NotImplementedError()
 
                     override suspend fun createCar(request: my.drivebit.network.services.CarCreateRequest) =
                         throw NotImplementedError()
@@ -131,8 +151,6 @@ class MyCarRepositoryTest {
                         request: my.drivebit.network.services.CarCreateRequest,
                         carId: String?,
                     ) = throw NotImplementedError()
-
-                    override suspend fun getCar(carId: String) = throw NotImplementedError()
 
                     override suspend fun deleteCar(carId: String) = throw NotImplementedError()
                 }
@@ -153,19 +171,27 @@ class MyCarRepositoryTest {
         runTest {
             val cars =
                 listOf(
-                    CarListItemResponse(
+                    CarItem(
                         id = "car1",
-                        general = GeneralProps(),
+                        general = CarGeneral(),
                     ),
                 )
 
             var callCount = 0
             val fakeCarService =
                 object : Car {
-                    override suspend fun getMyCars(): List<CarListItemResponse> {
+                    override suspend fun search(
+                        cityId: String,
+                        dateFrom: String?,
+                        dateTo: String?,
+                    ) = throw NotImplementedError()
+
+                    override suspend fun getMyCars(): List<CarItem> {
                         callCount++
                         return cars
                     }
+
+                    override suspend fun getCar(carId: String) = throw NotImplementedError()
 
                     override suspend fun createCar(request: my.drivebit.network.services.CarCreateRequest) =
                         throw NotImplementedError()
@@ -174,8 +200,6 @@ class MyCarRepositoryTest {
                         request: my.drivebit.network.services.CarCreateRequest,
                         carId: String?,
                     ) = throw NotImplementedError()
-
-                    override suspend fun getCar(carId: String) = throw NotImplementedError()
 
                     override suspend fun deleteCar(carId: String) = throw NotImplementedError()
                 }

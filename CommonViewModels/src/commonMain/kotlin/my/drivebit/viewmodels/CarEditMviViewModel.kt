@@ -602,6 +602,6 @@ class CarEditMviViewModelImpl(
             address = car.ValidAddressString ?: "",
             hourlyRate = NumberFormatter.formatDouble(car.resolvedHourlyRate()),
             dailyRate = NumberFormatter.formatDouble(car.resolvedDailyRate()),
-            photos = car.photos.ifEmpty { car.general?.photos ?: emptyList() },
+            photos = car.photos,
         )
 }

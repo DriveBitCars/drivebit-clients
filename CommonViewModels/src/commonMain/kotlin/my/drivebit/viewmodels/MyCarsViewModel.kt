@@ -6,12 +6,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import my.drivebit.network.services.CarListItemResponse
+import my.drivebit.network.services.CarItem
 import my.drivebit.repositories.MyCarRepository
 import my.drivebit.utils.safeLaunchWithErrorHandler
 
 interface MyCarsViewModel {
-    val cars: StateFlow<List<CarListItemResponse>>
+    val cars: StateFlow<List<CarItem>>
     val isLoading: StateFlow<Boolean>
     val error: StateFlow<String?>
 
@@ -22,8 +22,8 @@ class MyCarsViewModelImpl(
     private val myCarRepository: MyCarRepository,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : MyCarsViewModel {
-    private val _cars = MutableStateFlow<List<CarListItemResponse>>(emptyList())
-    override val cars: StateFlow<List<CarListItemResponse>> = _cars.asStateFlow()
+    private val _cars = MutableStateFlow<List<CarItem>>(emptyList())
+    override val cars: StateFlow<List<CarItem>> = _cars.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()

@@ -6,7 +6,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import my.drivebit.network.services.CarListItemResponse
+import my.drivebit.network.services.CarItem
 import my.drivebit.repositories.MyCarRepository
 import my.drivebit.shared.storage.Storage
 import kotlin.test.BeforeTest
@@ -14,13 +14,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MockMyCarRepositoryForMenu : MyCarRepository {
-    private var cars: List<CarListItemResponse> = emptyList()
+    private var cars: List<CarItem> = emptyList()
 
-    fun setCars(carsList: List<CarListItemResponse>) {
+    fun setCars(carsList: List<CarItem>) {
         this.cars = carsList
     }
 
-    override suspend fun getMyCar(): List<CarListItemResponse> = cars
+    override suspend fun getMyCar(): List<CarItem> = cars
 
     override fun refresh() {}
 }
@@ -113,7 +113,7 @@ class CarMenuViewModelTest {
                 MockMyCarRepositoryForMenu().apply {
                     setCars(
                         listOf(
-                            CarListItemResponse(
+                            CarItem(
                                 id = "1",
                                 general = null,
                                 photos = emptyList(),
@@ -148,12 +148,12 @@ class CarMenuViewModelTest {
                 MockMyCarRepositoryForMenu().apply {
                     setCars(
                         listOf(
-                            CarListItemResponse(
+                            CarItem(
                                 id = "1",
                                 general = null,
                                 photos = emptyList(),
                             ),
-                            CarListItemResponse(
+                            CarItem(
                                 id = "2",
                                 general = null,
                                 photos = emptyList(),
@@ -174,7 +174,7 @@ class CarMenuViewModelTest {
             mockStorage.setLoggedIn(true)
             val failingMyCarRepository =
                 object : MyCarRepository {
-                    override suspend fun getMyCar(): List<CarListItemResponse> = throw Exception("Network error")
+                    override suspend fun getMyCar(): List<CarItem> = throw Exception("Network error")
 
                     override fun refresh() {}
                 }
@@ -199,7 +199,7 @@ class CarMenuViewModelTest {
 
             mockMyCarRepository.setCars(
                 listOf(
-                    CarListItemResponse(
+                    CarItem(
                         id = "1",
                         general = null,
                         photos = emptyList(),
@@ -220,7 +220,7 @@ class CarMenuViewModelTest {
                 MockMyCarRepositoryForMenu().apply {
                     setCars(
                         listOf(
-                            CarListItemResponse(
+                            CarItem(
                                 id = "1",
                                 general = null,
                                 photos = emptyList(),
