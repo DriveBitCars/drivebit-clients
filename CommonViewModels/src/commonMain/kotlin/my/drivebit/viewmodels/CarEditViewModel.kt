@@ -148,31 +148,39 @@ class CarEditViewModelImpl(
         }
     }
 
-    internal fun mapToFormData(car: CarDetailResponse): CarEditFormData =
-        CarEditFormData(
+    internal fun mapToFormData(car: CarDetailResponse): CarEditFormData {
+        val resolvedBodyType = car.resolvedBodyType()
+        val resolvedDriveType = car.resolvedDriveType()
+        val resolvedEngineType = car.resolvedEngineType()
+        val resolvedEngineVolume = car.resolvedEngineVolume()
+        val resolvedProductionYear = car.resolvedProductionYear()
+        val resolvedSeatsCount = car.resolvedSeatsCount()
+
+        return CarEditFormData(
             carId = car.id,
-            licensePlate = car.resolvedLicensePlate() ?: "",
+            licensePlate = car.resolvedLicensePlate(),
             brandId = car.resolvedBrandId(),
-            brandName = car.resolvedBrandName() ?: "",
-            brandSearch = car.resolvedBrandName() ?: "",
+            brandName = car.resolvedBrandName(),
+            brandSearch = car.resolvedBrandName(),
             modelId = car.resolvedModelId(),
-            modelName = car.resolvedModelName() ?: "",
-            modelSearch = car.resolvedModelName() ?: "",
-            bodyType = car.resolvedBodyType(),
-            bodyTypeTranslate = car.resolvedBodyTypeTranslate() ?: "",
-            bodyTypeSearch = car.resolvedBodyTypeTranslate() ?: "",
-            driveType = car.resolvedDriveType(),
-            driveTypeTranslate = car.resolvedDriveTypeTranslate() ?: "",
-            driveTypeSearch = car.resolvedDriveTypeTranslate() ?: "",
-            engineType = car.resolvedEngineType(),
-            engineTypeTranslate = car.resolvedEngineTypeTranslate() ?: "",
-            engineTypeSearch = car.resolvedEngineTypeTranslate() ?: "",
-            engineVolume = NumberFormatter.formatDouble(car.resolvedEngineVolume()),
-            productionYear = NumberFormatter.formatInt(car.resolvedProductionYear()),
-            seatsCount = NumberFormatter.formatInt(car.resolvedSeatsCount()),
+            modelName = car.resolvedModelName(),
+            modelSearch = car.resolvedModelName(),
+            bodyType = resolvedBodyType.takeIf { it.isNotEmpty() },
+            bodyTypeTranslate = car.resolvedBodyTypeTranslate(),
+            bodyTypeSearch = car.resolvedBodyTypeTranslate(),
+            driveType = resolvedDriveType.takeIf { it.isNotEmpty() },
+            driveTypeTranslate = car.resolvedDriveTypeTranslate(),
+            driveTypeSearch = car.resolvedDriveTypeTranslate(),
+            engineType = resolvedEngineType.takeIf { it.isNotEmpty() },
+            engineTypeTranslate = car.resolvedEngineTypeTranslate(),
+            engineTypeSearch = car.resolvedEngineTypeTranslate(),
+            engineVolume = if (resolvedEngineVolume > 0.0) NumberFormatter.formatDouble(resolvedEngineVolume) else "",
+            productionYear = if (resolvedProductionYear > 0) NumberFormatter.formatInt(resolvedProductionYear) else "",
+            seatsCount = if (resolvedSeatsCount > 0) NumberFormatter.formatInt(resolvedSeatsCount) else "",
             address = car.ValidAddressString ?: "",
             photos = car.photos,
         )
+    }
 
     override fun updateLicensePlate(value: String) {
         updateFormData { it.copy(licensePlate = value) }

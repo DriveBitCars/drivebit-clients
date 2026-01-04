@@ -50,8 +50,7 @@ class MockCarServiceForEdit : Car {
             photos = emptyList(),
         )
 
-    override suspend fun getMyCars(): List<my.drivebit.network.services.CarItem> =
-        throw NotImplementedError()
+    override suspend fun getMyCars(): List<my.drivebit.network.services.CarItem> = throw NotImplementedError()
 
     override suspend fun getCar(carId: String): CarDetailResponse {
         if (shouldThrowNetworkException) {

@@ -112,16 +112,16 @@ val networkModule =
         single<User> {
             UserImpl(get(named("authorized")))
         }
+        single<Car> {
+            CarImpl(get(named("authorized")))
+        }
         single<Photo> {
-            PhotoImpl(get(named("authorized")))
+            PhotoImpl(get(named("authorized")), get<Car>())
         }
         single<Dadata> {
             DadataImpl(get(named("unauthorized")))
         }
         single<Dictionary> {
             DictionaryImpl(get(named("unauthorized")))
-        }
-        single<Car> {
-            CarImpl(get(named("authorized")))
         }
     }

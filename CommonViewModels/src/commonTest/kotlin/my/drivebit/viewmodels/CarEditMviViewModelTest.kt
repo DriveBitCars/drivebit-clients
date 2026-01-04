@@ -64,8 +64,7 @@ class MockCarServiceForMvi : Car {
         carResponse = carResponse.copy(productionYear = 0)
     }
 
-    override suspend fun getMyCars(): List<my.drivebit.network.services.CarItem> =
-        throw NotImplementedError()
+    override suspend fun getMyCars(): List<my.drivebit.network.services.CarItem> = throw NotImplementedError()
 
     override suspend fun getCar(carId: String): CarDetailResponse {
         if (shouldThrowNetworkException) {

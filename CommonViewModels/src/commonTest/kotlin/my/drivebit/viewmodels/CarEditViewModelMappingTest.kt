@@ -4,10 +4,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.CarBody
-import my.drivebit.network.services.CarDetailResponse
-import my.drivebit.network.services.CarPhotoItem
 import my.drivebit.network.services.CarChassis
+import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarGeneral
+import my.drivebit.network.services.CarPhotoItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
