@@ -56,6 +56,7 @@ class AvatarUploadViewModelImpl(
                 photo.uploadAvatar(fileBytes, fileName, contentType)
             }.onSuccess {
                 avatarRepository.clearCache()
+                avatarRepository.refresh()
                 _state.update { AvatarUploadState.Success }
             }.onFailure { e ->
                 val errorMessage =
