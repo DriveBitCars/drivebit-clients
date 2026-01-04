@@ -182,6 +182,52 @@ data class CarResponse(
 class CarImpl(
     private val httpClient: HttpClient,
 ) : Car {
+    private fun ensureHttpsUrl(url: String): String {
+        val sanitizedUrl = url.replace(" ", "%20")
+
+        val isHttp = sanitizedUrl.startsWith("http://")
+        val isHttps = sanitizedUrl.startsWith("https://")
+        if (!isHttp && !isHttps) {
+            return sanitizedUrl
+        }
+
+        val withoutScheme = sanitizedUrl.substringAfter("://")
+        val host = withoutScheme.substringBefore("/").substringBefore(":")
+
+        val isLocalAddress =
+            host == "localhost" ||
+                host == "127.0.0.1" ||
+                host.startsWith("10.") ||
+                host.startsWith("192.168.") ||
+                (host.startsWith("172.") && host.split(".").getOrNull(1)?.toIntOrNull()?.let { it in 16..31 } == true)
+
+        val isProductionMinIO = host == "155.212.170.94" && sanitizedUrl.contains(":9000")
+        if (isProductionMinIO) {
+            val path = sanitizedUrl.substringAfter(":9000")
+            return if (path.startsWith("/")) path else "/$path"
+        }
+
+        if (isLocalAddress) {
+            return sanitizedUrl
+        }
+
+        return if (isHttp) sanitizedUrl.replaceFirst("http://", "https://") else sanitizedUrl
+    }
+
+    private fun sanitizeCarItems(items: List<CarItem>): List<CarItem> =
+        items.map { car ->
+            car.copy(
+                photos = car.photos.map { ensureHttpsUrl(it) },
+            )
+        }
+
+    private fun sanitizeCarDetail(result: CarDetailResponse): CarDetailResponse =
+        result.copy(
+            photos = result.photos.map { photo ->
+                photo.copy(url = ensureHttpsUrl(photo.url))
+            },
+        )
+
     override suspend fun search(
         cityId: String,
         dateFrom: String?,
@@ -204,9 +250,10 @@ class CarImpl(
 
             println("📡 [CarService] search response received")
             val result: CarSearchResponse = response.parseResponse()
+            val sanitized = result.copy(cars = sanitizeCarItems(result.cars))
             println("📡 [CarService] search successful")
             println("   - Found ${result.cars.size} cars")
-            return result
+            return sanitized
         } catch (e: Exception) {
             println("❌ [CarService] search failed")
             println("   - Error: ${e.message}")
@@ -224,9 +271,10 @@ class CarImpl(
             val response = httpClient.get(url)
             println("📡 [CarService] getMyCars response received")
             val result: List<CarItem> = response.parseResponse()
+            val sanitized = sanitizeCarItems(result)
             println("📡 [CarService] getMyCars successful")
             println("   - Found ${result.size} cars")
-            return result
+            return sanitized
         } catch (e: Exception) {
             println("❌ [CarService] getMyCars failed")
             println("   - Error: ${e.message}")
@@ -245,8 +293,9 @@ class CarImpl(
             val response = httpClient.get(url)
             println("📡 [CarService] getCar response received")
             val result: CarDetailResponse = response.parseResponse()
+            val sanitized = sanitizeCarDetail(result)
             println("📡 [CarService] getCar successful")
-            return result
+            return sanitized
         } catch (e: Exception) {
             println("❌ [CarService] getCar failed")
             println("   - Error: ${e.message}")

@@ -1,7 +1,14 @@
 package my.drivebit.repositories
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import my.drivebit.network.services.Photo
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.DEFAULT_AVATAR_PATH
@@ -18,9 +25,28 @@ internal class AvatarRepositoryImpl(
     private val photo: Photo,
     private val storage: Storage,
     private val cachedRepository: CachedRepository<String>,
+    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : AvatarRepository,
     CachedRepository<String> by cachedRepository {
-    override val avatarUrl: Flow<String> = cachedRepository.get()
+    private val _avatarUrlState = MutableStateFlow<String?>(null)
+    
+    init {
+        coroutineScope.launch {
+            cachedRepository.get().collect { url ->
+                _avatarUrlState.value = url
+            }
+        }
+    }
+
+    override val avatarUrl: Flow<String> = kotlinx.coroutines.flow.flow {
+        if (_avatarUrlState.value == null) {
+            val initialValue = cachedRepository.get().first()
+            _avatarUrlState.value = initialValue
+        }
+        _avatarUrlState.collect { value ->
+            value?.let { emit(it) }
+        }
+    }
 
     override fun clearCache() {
         cachedRepository.clearCache()
@@ -28,7 +54,8 @@ internal class AvatarRepositoryImpl(
 
     override suspend fun refresh() {
         clearCache()
-        cachedRepository.get().first()
+        val newUrl = cachedRepository.get().first()
+        _avatarUrlState.value = newUrl
     }
 
     internal suspend fun calculateAvatarUrl(): String =
