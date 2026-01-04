@@ -101,10 +101,9 @@ fun MyCarsPage() {
                                         backgroundColor(CSSColors.White)
                                     }
                                 }) {
-                                    val carPhotos = car.resolvedPhotos()
-                                    if (carPhotos.isNotEmpty()) {
+                                    if (car.photos.isNotEmpty()) {
                                         Img(
-                                            src = carPhotos.first().url,
+                                            src = car.photos.first(),
                                             attrs = {
                                                 style {
                                                     width(100.percent)

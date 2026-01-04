@@ -20,7 +20,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class MockMyCarRepository : MyCarRepository {
-    override suspend fun getMyCar(): List<my.drivebit.network.services.CarListItemResponse> = emptyList()
+    override suspend fun getMyCar(): List<my.drivebit.network.services.CarItem> = emptyList()
 
     override fun refresh() {}
 }
@@ -32,6 +32,12 @@ class MockCarServiceForMvi : Car {
     var shouldThrowErrorOnDelete = false
     var errorMessage = "Network error"
     var networkExceptionStatusCode: HttpStatusCode = HttpStatusCode.InternalServerError
+
+    override suspend fun search(
+        cityId: String,
+        dateFrom: String?,
+        dateTo: String?,
+    ) = throw NotImplementedError()
 
     var carResponse: CarDetailResponse =
         CarDetailResponse(
@@ -58,8 +64,7 @@ class MockCarServiceForMvi : Car {
         carResponse = carResponse.copy(productionYear = 0)
     }
 
-    override suspend fun getMyCars(): List<my.drivebit.network.services.CarListItemResponse> =
-        throw NotImplementedError()
+    override suspend fun getMyCars(): List<my.drivebit.network.services.CarItem> = throw NotImplementedError()
 
     override suspend fun getCar(carId: String): CarDetailResponse {
         if (shouldThrowNetworkException) {
@@ -87,14 +92,6 @@ class MockCarServiceForMvi : Car {
         }
         return my.drivebit.network.services.CarResponse(
             id = carId ?: "new-car-id",
-            brandId = request.brandId,
-            modelId = request.modelId,
-            bodyType = request.bodyType,
-            driveType = request.driveType,
-            engineType = request.engineType,
-            engineVolume = request.engineVolume,
-            productionYear = request.productionYear,
-            seatsCount = request.seatsCount,
         )
     }
 

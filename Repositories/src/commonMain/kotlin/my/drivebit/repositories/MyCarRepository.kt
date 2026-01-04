@@ -2,10 +2,10 @@ package my.drivebit.repositories
 
 import com.russhwolf.settings.Settings
 import kotlinx.serialization.builtins.ListSerializer
-import my.drivebit.network.services.CarListItemResponse
+import my.drivebit.network.services.CarItem
 
 interface MyCarRepository {
-    suspend fun getMyCar(): List<CarListItemResponse>
+    suspend fun getMyCar(): List<CarItem>
 
     fun refresh()
 }
@@ -21,11 +21,11 @@ internal class MyCarRepositoryImpl(
     private val cache =
         SettingsJsonCache(
             key = CACHED_CARS_KEY,
-            serializer = ListSerializer(CarListItemResponse.serializer()),
+            serializer = ListSerializer(CarItem.serializer()),
             settings = settings,
         )
 
-    override suspend fun getMyCar(): List<CarListItemResponse> {
+    override suspend fun getMyCar(): List<CarItem> {
         cache.loadOrNull()?.let { return it }
         val cars = carService.getMyCars()
         cache.save(cars)

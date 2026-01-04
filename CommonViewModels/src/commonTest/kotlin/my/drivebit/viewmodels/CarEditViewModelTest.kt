@@ -23,6 +23,12 @@ class MockCarServiceForEdit : Car {
     var errorMessage = "Network error"
     var networkExceptionStatusCode: HttpStatusCode = HttpStatusCode.InternalServerError
 
+    override suspend fun search(
+        cityId: String,
+        dateFrom: String?,
+        dateTo: String?,
+    ) = throw NotImplementedError()
+
     var carResponse: CarDetailResponse =
         CarDetailResponse(
             id = "ef4d16a2-aeeb-457e-abbe-b72473634690",
@@ -44,8 +50,7 @@ class MockCarServiceForEdit : Car {
             photos = emptyList(),
         )
 
-    override suspend fun getMyCars(): List<my.drivebit.network.services.CarListItemResponse> =
-        throw NotImplementedError()
+    override suspend fun getMyCars(): List<my.drivebit.network.services.CarItem> = throw NotImplementedError()
 
     override suspend fun getCar(carId: String): CarDetailResponse {
         if (shouldThrowNetworkException) {

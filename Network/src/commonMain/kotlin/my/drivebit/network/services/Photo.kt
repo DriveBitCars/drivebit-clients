@@ -12,6 +12,7 @@ import io.ktor.http.HttpHeaders
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
+import my.drivebit.network.services.Car
 
 interface Photo {
     suspend fun getAvatar(): AvatarResponse
@@ -48,6 +49,7 @@ data class CarPhotoResponse(
 
 class PhotoImpl(
     private val httpClient: HttpClient,
+    private val carService: Car? = null,
 ) : Photo {
     override suspend fun getAvatar(): AvatarResponse {
         val url = "${DEFAULT_BASE_URL}Photo/avatar/my"
@@ -82,9 +84,24 @@ class PhotoImpl(
     }
 
     override suspend fun getCarPhotos(carId: String): List<CarPhotoResponse> {
-        val url = "${DEFAULT_BASE_URL}Photo/car/$carId"
-        val response = httpClient.get(url)
-        return response.parseResponse()
+        return try {
+            val url = "${DEFAULT_BASE_URL}Photo/car/$carId"
+            val response = httpClient.get(url)
+            response.parseResponse()
+        } catch (e: Exception) {
+            if (carService != null) {
+                val car = carService.getCar(carId)
+                car.photos.map { photo ->
+                    CarPhotoResponse(
+                        id = photo.id,
+                        url = photo.url,
+                        uploadDate = photo.uploadDate,
+                    )
+                }
+            } else {
+                throw e
+            }
+        }
     }
 
     override suspend fun uploadCarPhotos(
