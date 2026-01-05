@@ -12,7 +12,8 @@ import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
-import my.drivebit.network.utils.UrlSanitizer
+
+expect fun getCurrentHostnameImplForCar(): String
 
 interface Car {
     suspend fun search(
@@ -48,7 +49,7 @@ data class CarItem(
     val year: Int? = null,
     val price: Double? = null,
     val cityId: String? = null,
-    val photos: List<String> = emptyList(),
+    val photos: List<CarPhotoItem> = emptyList(),
     val general: CarGeneral? = null,
 )
 
@@ -120,6 +121,7 @@ data class CarGeneral(
     val seats: Int? = null,
     val mileage: Int? = null,
     val description: String? = null,
+    val photos: List<CarPhotoItem> = emptyList(),
 )
 
 @Serializable
@@ -152,6 +154,7 @@ data class CarPhotoItem(
     val id: Int,
     val url: String,
     val uploadDate: String,
+    val carId: String? = null,
 )
 
 @Serializable
@@ -184,13 +187,71 @@ class CarImpl(
     private val httpClient: HttpClient,
 ) : Car {
     private fun ensureHttpsUrl(url: String): String {
-        return UrlSanitizer.ensureHttpsUrl(url)
+        val sanitizedUrl = url.replace(" ", "%20")
+
+        val isHttp = sanitizedUrl.startsWith("http://")
+        val isHttps = sanitizedUrl.startsWith("https://")
+        
+        if (!isHttp && !isHttps) {
+            val isRelativePublicbct = sanitizedUrl.startsWith("/publicbct/")
+            if (isRelativePublicbct) {
+                val currentHost = getCurrentHostname()
+                if (currentHost == "dev.drivebit.my") {
+                    val absoluteUrl = "https://drivebit.my$sanitizedUrl"
+                    return absoluteUrl
+                }
+            }
+            return sanitizedUrl
+        }
+
+        val withoutScheme = sanitizedUrl.substringAfter("://")
+        val host = withoutScheme.substringBefore("/").substringBefore(":")
+
+        val isLocalAddress =
+            host == "localhost" ||
+                host == "127.0.0.1" ||
+                host.startsWith("10.") ||
+                host.startsWith("192.168.") ||
+                (host.startsWith("172.") && host.split(".").getOrNull(1)?.toIntOrNull()?.let { it in 16..31 } == true)
+
+        val isProductionMinIO = host == "155.212.170.94" && sanitizedUrl.contains(":9000")
+        if (isProductionMinIO) {
+            val path = sanitizedUrl.substringAfter(":9000")
+            val normalizedPath = if (path.startsWith("/")) path else "/$path"
+            
+            val currentHost = getCurrentHostname()
+            if (currentHost == "dev.drivebit.my") {
+                val absoluteUrl = "https://drivebit.my$normalizedPath"
+                return absoluteUrl
+            }
+            
+            return normalizedPath
+        }
+
+        if (isLocalAddress) {
+            return sanitizedUrl
+        }
+
+        return if (isHttp) sanitizedUrl.replaceFirst("http://", "https://") else sanitizedUrl
     }
+    
+    private fun getCurrentHostname(): String = getCurrentHostnameImplForCar()
 
     private fun sanitizeCarItems(items: List<CarItem>): List<CarItem> =
         items.map { car ->
+            val photosFromGeneral = car.general?.photos ?: emptyList()
+            val photosFromTopLevel = car.photos
+            val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
+            
             car.copy(
-                photos = car.photos.map { ensureHttpsUrl(it) },
+                photos = allPhotos.map { photo ->
+                    photo.copy(url = ensureHttpsUrl(photo.url))
+                },
+                general = car.general?.copy(
+                    photos = photosFromGeneral.map { photo ->
+                        photo.copy(url = ensureHttpsUrl(photo.url))
+                    },
+                ),
             )
         }
 
@@ -207,99 +268,38 @@ class CarImpl(
         dateTo: String?,
     ): CarSearchResponse {
         val url = "${DEFAULT_BASE_URL}Car/search"
-        println("📡 [CarService] search called")
-        println("   - URL: $url")
-        println("   - City ID: $cityId")
-        println("   - Date from: ${dateFrom ?: "not specified"}")
-        println("   - Date to: ${dateTo ?: "not specified"}")
-
-        try {
-            val response =
-                httpClient.get(url) {
-                    parameter("cityId", cityId)
-                    dateFrom?.let { parameter("dateFrom", it) }
-                    dateTo?.let { parameter("dateTo", it) }
-                }
-
-            println("📡 [CarService] search response received")
-            val result: CarSearchResponse = response.parseResponse()
-            val sanitized = result.copy(cars = sanitizeCarItems(result.cars))
-            println("📡 [CarService] search successful")
-            println("   - Found ${result.cars.size} cars")
-            return sanitized
-        } catch (e: Exception) {
-            println("❌ [CarService] search failed")
-            println("   - Error: ${e.message}")
-            e.printStackTrace()
-            throw e
-        }
+        val response =
+            httpClient.get(url) {
+                parameter("cityId", cityId)
+                dateFrom?.let { parameter("dateFrom", it) }
+                dateTo?.let { parameter("dateTo", it) }
+            }
+        val result: CarSearchResponse = response.parseResponse()
+        return result.copy(cars = sanitizeCarItems(result.cars))
     }
 
     override suspend fun getMyCars(): List<CarItem> {
         val url = "${DEFAULT_BASE_URL}Car/my"
-        println("📡 [CarService] getMyCars called")
-        println("   - URL: $url")
-
-        try {
-            val response = httpClient.get(url)
-            println("📡 [CarService] getMyCars response received")
-            val result: List<CarItem> = response.parseResponse()
-            val sanitized = sanitizeCarItems(result)
-            println("📡 [CarService] getMyCars successful")
-            println("   - Found ${result.size} cars")
-            return sanitized
-        } catch (e: Exception) {
-            println("❌ [CarService] getMyCars failed")
-            println("   - Error: ${e.message}")
-            e.printStackTrace()
-            throw e
-        }
+        val response = httpClient.get(url)
+        val result: List<CarItem> = response.parseResponse()
+        return sanitizeCarItems(result)
     }
 
     override suspend fun getCar(id: String): CarDetailResponse {
         val url = "${DEFAULT_BASE_URL}Car/$id"
-        println("📡 [CarService] getCar called")
-        println("   - URL: $url")
-        println("   - Car ID: $id")
-
-        try {
-            val response = httpClient.get(url)
-            println("📡 [CarService] getCar response received")
-            val result: CarDetailResponse = response.parseResponse()
-            val sanitized = sanitizeCarDetail(result)
-            println("📡 [CarService] getCar successful")
-            return sanitized
-        } catch (e: Exception) {
-            println("❌ [CarService] getCar failed")
-            println("   - Error: ${e.message}")
-            e.printStackTrace()
-            throw e
-        }
+        val response = httpClient.get(url)
+        val result: CarDetailResponse = response.parseResponse()
+        return sanitizeCarDetail(result)
     }
 
     override suspend fun createCar(request: CarCreateRequest): CarResponse {
         val url = "${DEFAULT_BASE_URL}Car"
-        println("📡 [CarService] createCar called")
-        println("   - URL: $url")
-
-        try {
-            val response =
-                httpClient.post(url) {
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
-                }
-
-            println("📡 [CarService] createCar response received")
-            val result: CarResponse = response.parseResponse()
-            println("📡 [CarService] createCar successful")
-            println("   - Created car ID: ${result.id}")
-            return result
-        } catch (e: Exception) {
-            println("❌ [CarService] createCar failed")
-            println("   - Error: ${e.message}")
-            e.printStackTrace()
-            throw e
-        }
+        val response =
+            httpClient.post(url) {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+        return response.parseResponse()
     }
 
     override suspend fun createOrUpdateCar(
@@ -312,51 +312,23 @@ class CarImpl(
             } else {
                 "${DEFAULT_BASE_URL}Car"
             }
-        println("📡 [CarService] createOrUpdateCar called")
-        println("   - URL: $url")
-        println("   - Car ID: ${carId ?: "new"}")
-
-        try {
-            val response =
-                if (carId != null) {
-                    httpClient.put(url) {
-                        contentType(ContentType.Application.Json)
-                        setBody(request)
-                    }
-                } else {
-                    httpClient.post(url) {
-                        contentType(ContentType.Application.Json)
-                        setBody(request)
-                    }
+        val response =
+            if (carId != null) {
+                httpClient.put(url) {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
                 }
-
-            println("📡 [CarService] createOrUpdateCar response received")
-            val result: CarResponse = response.parseResponse()
-            println("📡 [CarService] createOrUpdateCar successful")
-            println("   - Car ID: ${result.id}")
-            return result
-        } catch (e: Exception) {
-            println("❌ [CarService] createOrUpdateCar failed")
-            println("   - Error: ${e.message}")
-            e.printStackTrace()
-            throw e
-        }
+            } else {
+                httpClient.post(url) {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }
+            }
+        return response.parseResponse()
     }
 
     override suspend fun deleteCar(carId: String) {
         val url = "${DEFAULT_BASE_URL}Car/$carId"
-        println("📡 [CarService] deleteCar called")
-        println("   - URL: $url")
-        println("   - Car ID: $carId")
-
-        try {
-            httpClient.delete(url)
-            println("📡 [CarService] deleteCar successful")
-        } catch (e: Exception) {
-            println("❌ [CarService] deleteCar failed")
-            println("   - Error: ${e.message}")
-            e.printStackTrace()
-            throw e
-        }
+        httpClient.delete(url)
     }
 }

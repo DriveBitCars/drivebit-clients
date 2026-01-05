@@ -94,10 +94,7 @@ class PhotoImpl(
             val response = httpClient.get(url)
             val photos: List<CarPhotoResponse> = response.parseResponse()
             photos.map { photo ->
-                val originalUrl = photo.url
-                val convertedUrl = ensureHttpsUrl(originalUrl)
-                println("🖼️ [Photo] getCarPhotos: $originalUrl -> $convertedUrl")
-                photo.copy(url = convertedUrl)
+                photo.copy(url = ensureHttpsUrl(photo.url))
             }
         } catch (e: Exception) {
             if (carService != null) {
