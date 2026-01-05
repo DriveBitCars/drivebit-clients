@@ -54,6 +54,7 @@ class MyCarsViewModelImpl(
                 )
             },
         ) {
+            myCarRepository.refresh()
             _cars.value = myCarRepository.getMyCar()
         }
     }

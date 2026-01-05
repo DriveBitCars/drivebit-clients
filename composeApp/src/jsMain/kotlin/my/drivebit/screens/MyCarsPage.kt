@@ -101,9 +101,13 @@ fun MyCarsPage() {
                                         backgroundColor(CSSColors.White)
                                     }
                                 }) {
-                                    if (car.photos.isNotEmpty()) {
+                                    val photosFromGeneral = car.general?.photos ?: emptyList()
+                                    val photosFromTopLevel = car.photos
+                                    val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
+                                    val firstPhotoUrl = allPhotos.firstOrNull()?.url
+                                    if (!firstPhotoUrl.isNullOrEmpty()) {
                                         Img(
-                                            src = car.photos.first(),
+                                            src = firstPhotoUrl,
                                             attrs = {
                                                 style {
                                                     width(100.percent)
