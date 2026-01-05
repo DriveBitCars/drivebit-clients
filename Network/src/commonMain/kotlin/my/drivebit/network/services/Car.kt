@@ -13,8 +13,6 @@ import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
 
-expect fun getCurrentHostnameImplForCar(): String
-
 interface Car {
     suspend fun search(
         cityId: String,
@@ -195,11 +193,7 @@ class CarImpl(
         if (!isHttp && !isHttps) {
             val isRelativePublicbct = sanitizedUrl.startsWith("/publicbct/")
             if (isRelativePublicbct) {
-                val currentHost = getCurrentHostname()
-                if (currentHost == "dev.drivebit.my") {
-                    val absoluteUrl = "https://drivebit.my$sanitizedUrl"
-                    return absoluteUrl
-                }
+                return "https://drivebit.my$sanitizedUrl"
             }
             return sanitizedUrl
         }
@@ -218,14 +212,7 @@ class CarImpl(
         if (isProductionMinIO) {
             val path = sanitizedUrl.substringAfter(":9000")
             val normalizedPath = if (path.startsWith("/")) path else "/$path"
-            
-            val currentHost = getCurrentHostname()
-            if (currentHost == "dev.drivebit.my") {
-                val absoluteUrl = "https://drivebit.my$normalizedPath"
-                return absoluteUrl
-            }
-            
-            return normalizedPath
+            return "https://drivebit.my$normalizedPath"
         }
 
         if (isLocalAddress) {
@@ -234,8 +221,6 @@ class CarImpl(
 
         return if (isHttp) sanitizedUrl.replaceFirst("http://", "https://") else sanitizedUrl
     }
-    
-    private fun getCurrentHostname(): String = getCurrentHostnameImplForCar()
 
     private fun sanitizeCarItems(items: List<CarItem>): List<CarItem> =
         items.map { car ->
