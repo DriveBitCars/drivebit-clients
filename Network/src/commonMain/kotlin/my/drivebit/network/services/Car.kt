@@ -12,6 +12,7 @@ import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
+import my.drivebit.network.utils.UrlSanitizer
 
 interface Car {
     suspend fun search(
@@ -183,35 +184,7 @@ class CarImpl(
     private val httpClient: HttpClient,
 ) : Car {
     private fun ensureHttpsUrl(url: String): String {
-        val sanitizedUrl = url.replace(" ", "%20")
-
-        val isHttp = sanitizedUrl.startsWith("http://")
-        val isHttps = sanitizedUrl.startsWith("https://")
-        if (!isHttp && !isHttps) {
-            return sanitizedUrl
-        }
-
-        val withoutScheme = sanitizedUrl.substringAfter("://")
-        val host = withoutScheme.substringBefore("/").substringBefore(":")
-
-        val isLocalAddress =
-            host == "localhost" ||
-                host == "127.0.0.1" ||
-                host.startsWith("10.") ||
-                host.startsWith("192.168.") ||
-                (host.startsWith("172.") && host.split(".").getOrNull(1)?.toIntOrNull()?.let { it in 16..31 } == true)
-
-        val isProductionMinIO = host == "155.212.170.94" && sanitizedUrl.contains(":9000")
-        if (isProductionMinIO) {
-            val path = sanitizedUrl.substringAfter(":9000")
-            return if (path.startsWith("/")) path else "/$path"
-        }
-
-        if (isLocalAddress) {
-            return sanitizedUrl
-        }
-
-        return if (isHttp) sanitizedUrl.replaceFirst("http://", "https://") else sanitizedUrl
+        return UrlSanitizer.ensureHttpsUrl(url)
     }
 
     private fun sanitizeCarItems(items: List<CarItem>): List<CarItem> =

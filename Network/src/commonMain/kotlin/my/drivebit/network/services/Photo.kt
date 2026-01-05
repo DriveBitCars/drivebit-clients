@@ -13,6 +13,7 @@ import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
 import my.drivebit.network.services.Car
+import my.drivebit.network.utils.UrlSanitizer
 
 interface Photo {
     suspend fun getAvatar(): AvatarResponse
@@ -52,42 +53,13 @@ class PhotoImpl(
     private val carService: Car? = null,
 ) : Photo {
     private fun ensureHttpsUrl(url: String): String {
-        val sanitizedUrl = url.replace(" ", "%20")
-
-        val isHttp = sanitizedUrl.startsWith("http://")
-        val isHttps = sanitizedUrl.startsWith("https://")
-        if (!isHttp && !isHttps) {
-            return sanitizedUrl
-        }
-
-        val withoutScheme = sanitizedUrl.substringAfter("://")
-        val host = withoutScheme.substringBefore("/").substringBefore(":")
-
-        val isLocalAddress =
-            host == "localhost" ||
-                host == "127.0.0.1" ||
-                host.startsWith("10.") ||
-                host.startsWith("192.168.") ||
-                (host.startsWith("172.") && host.split(".").getOrNull(1)?.toIntOrNull()?.let { it in 16..31 } == true)
-
-        val isProductionMinIO = host == "155.212.170.94" && sanitizedUrl.contains(":9000")
-        if (isProductionMinIO) {
-            val path = sanitizedUrl.substringAfter(":9000")
-            val normalizedPath = if (path.startsWith("/")) path else "/$path"
-            println("🖼️ [Photo] Преобразование URL: $sanitizedUrl -> $normalizedPath")
-            return normalizedPath
-        }
-
-        if (isLocalAddress) {
-            return sanitizedUrl
-        }
-
-        return if (isHttp) sanitizedUrl.replaceFirst("http://", "https://") else sanitizedUrl
+        return UrlSanitizer.ensureHttpsUrl(url)
     }
     override suspend fun getAvatar(): AvatarResponse {
         val url = "${DEFAULT_BASE_URL}Photo/avatar/my"
         val response = httpClient.get(url)
-        return response.parseResponse()
+        val avatarResponse: AvatarResponse = response.parseResponse()
+        return avatarResponse.copy(url = ensureHttpsUrl(avatarResponse.url))
     }
 
     override suspend fun uploadAvatar(
