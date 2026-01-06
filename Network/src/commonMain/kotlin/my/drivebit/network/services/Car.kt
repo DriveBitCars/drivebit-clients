@@ -278,7 +278,7 @@ class CarImpl(
     }
 
     override suspend fun createCar(request: CarCreateRequest): CarResponse {
-        val url = "${DEFAULT_BASE_URL}Car"
+        val url = "${DEFAULT_BASE_URL}Car/my"
         val response =
             httpClient.post(url) {
                 contentType(ContentType.Application.Json)
@@ -291,15 +291,11 @@ class CarImpl(
         request: CarCreateRequest,
         carId: String?,
     ): CarResponse {
-        val url =
-            if (carId != null) {
-                "${DEFAULT_BASE_URL}Car/$carId"
-            } else {
-                "${DEFAULT_BASE_URL}Car"
-            }
+        val url = "${DEFAULT_BASE_URL}Car/my"
         val response =
             if (carId != null) {
                 httpClient.put(url) {
+                    parameter("carId", carId)
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
@@ -313,7 +309,9 @@ class CarImpl(
     }
 
     override suspend fun deleteCar(carId: String) {
-        val url = "${DEFAULT_BASE_URL}Car/$carId"
-        httpClient.delete(url)
+        val url = "${DEFAULT_BASE_URL}Car/my"
+        httpClient.delete(url) {
+            parameter("carId", carId)
+        }
     }
 }
