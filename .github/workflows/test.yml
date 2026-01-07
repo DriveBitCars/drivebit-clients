@@ -157,6 +157,20 @@ jobs:
           check-gradle-${{ matrix.module }}-
           gradle-
 
+    - name: Cache Kotlin/JS (Node/Yarn) tools
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/nodejs
+          ~/.gradle/yarn
+          ~/.gradle/kotlin-js-store
+          ~/.cache/yarn
+          kotlin-js-store/
+        key: check-kotlin-js-${{ matrix.module }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/package.json', '**/yarn.lock', 'kotlin-js-store/yarn.lock', 'kotlin-js-store/wasm/yarn.lock') }}
+        restore-keys: |
+          check-kotlin-js-${{ matrix.module }}-
+          check-kotlin-js-
+
     - name: Cache build outputs
       uses: actions/cache@v4
       with:
@@ -176,7 +190,24 @@ jobs:
       run: ./gradlew kotlinUpgradeYarnLock kotlinStoreYarnLock --no-daemon || true
 
     - name: Check ${{ matrix.module }}
-      run: ./gradlew :${{ matrix.module }}:check -x kotlinStoreYarnLock --no-daemon --stacktrace
+      run: |
+        set -euo pipefail
+        for attempt in 1 2 3; do
+          echo "Attempt $attempt/3: ./gradlew :${{ matrix.module }}:check"
+          ./gradlew :${{ matrix.module }}:check -x kotlinStoreYarnLock --no-daemon --stacktrace && exit 0
+          echo "Gradle failed (attempt $attempt). Retrying in 10s..." >&2
+          sleep 10
+        done
+        exit 1
+
+    - name: Upload Yarn error log (if any)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: yarn-error-${{ matrix.module }}
+        path: build/js/yarn-error.log
+        if-no-files-found: ignore
+        retention-days: 7
 
   # Тест видимости изображений на веб-приложении
   test-images-visibility:

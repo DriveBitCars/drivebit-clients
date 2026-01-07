@@ -7,10 +7,12 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
 
 interface Car {
@@ -278,7 +280,7 @@ class CarImpl(
     }
 
     override suspend fun createCar(request: CarCreateRequest): CarResponse {
-        val url = "${DEFAULT_BASE_URL}Car"
+        val url = "${DEFAULT_BASE_URL}Car/my"
         val response =
             httpClient.post(url) {
                 contentType(ContentType.Application.Json)
@@ -291,15 +293,11 @@ class CarImpl(
         request: CarCreateRequest,
         carId: String?,
     ): CarResponse {
-        val url =
-            if (carId != null) {
-                "${DEFAULT_BASE_URL}Car/$carId"
-            } else {
-                "${DEFAULT_BASE_URL}Car"
-            }
+        val url = "${DEFAULT_BASE_URL}Car/my"
         val response =
             if (carId != null) {
                 httpClient.put(url) {
+                    parameter("carId", carId)
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
@@ -309,11 +307,18 @@ class CarImpl(
                     setBody(request)
                 }
             }
-        return response.parseResponse()
+        val bodyString = response.bodyAsText()
+        return if (bodyString.isBlank()) {
+            CarResponse(id = carId ?: request.id)
+        } else {
+            defaultJson.decodeFromString<CarResponse>(bodyString)
+        }
     }
 
     override suspend fun deleteCar(carId: String) {
-        val url = "${DEFAULT_BASE_URL}Car/$carId"
-        httpClient.delete(url)
+        val url = "${DEFAULT_BASE_URL}Car/my"
+        httpClient.delete(url) {
+            parameter("carId", carId)
+        }
     }
 }
