@@ -15,6 +15,8 @@ interface Dictionary {
     suspend fun searchCities(query: String): List<City>
 
     suspend fun getCarEnums(): CarEnumsResponse
+
+    suspend fun getDocumentEnums(): DocumentEnumsResponse
 }
 
 @Serializable
@@ -59,6 +61,7 @@ data class CarEnumsResponse(
     val CarRoofTypeEnum: List<EnumItem>,
     val MultimediaSystemOptionsEnum: List<EnumItem>,
     val ParkingAssistancesEnum: List<EnumItem>,
+    val DocumentTypeEnum: List<EnumItem>? = null,
 )
 
 @Serializable
@@ -66,6 +69,12 @@ data class EnumItem(
     val number: Int,
     val name: String,
     val translate: String,
+)
+
+@Serializable
+data class DocumentEnumsResponse(
+    val DocumentTypeEnum: List<EnumItem>,
+    val DocumentStatusEnum: List<EnumItem>,
 )
 
 class DictionaryImpl(
@@ -97,6 +106,12 @@ class DictionaryImpl(
 
     override suspend fun getCarEnums(): CarEnumsResponse {
         val url = "${DEFAULT_BASE_URL}Dictionary/enums/car"
+        val response = httpClient.get(url)
+        return response.parseResponse()
+    }
+
+    override suspend fun getDocumentEnums(): DocumentEnumsResponse {
+        val url = "${DEFAULT_BASE_URL}Dictionary/enums/document"
         val response = httpClient.get(url)
         return response.parseResponse()
     }

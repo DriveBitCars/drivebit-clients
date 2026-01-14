@@ -207,6 +207,7 @@ val repositoriesModule: Module =
         single<HasPassportRepo> {
             HasPassportRepoImpl(
                 documents = get(),
+                carEnumsRepository = get(),
             )
         }
     }

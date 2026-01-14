@@ -18,12 +18,50 @@ private class FakeDocuments : Documents {
         }
         return documents
     }
+
+    override suspend fun uploadDocument(
+        fileBytes: ByteArray,
+        fileName: String,
+        contentType: String,
+    ): Document = throw NotImplementedError()
+}
+
+private class FakeCarEnumsRepository : CarEnumsRepository {
+    var documentTypes: List<EnumItem> = listOf(EnumItem(number = 1, name = "Passport", translate = "Паспорт"))
+
+    override suspend fun getAllDocumentTypes(): List<EnumItem> = documentTypes
+
+    override suspend fun getEnums(): my.drivebit.network.services.CarEnumsResponse = throw NotImplementedError()
+
+    override suspend fun getColorByName(name: String): EnumItem = throw NotImplementedError()
+
+    override suspend fun getBodyTypeByName(name: String): EnumItem = throw NotImplementedError()
+
+    override suspend fun getStatusByName(name: String): EnumItem = throw NotImplementedError()
+
+    override suspend fun getEngineTypeByName(name: String): EnumItem = throw NotImplementedError()
+
+    override suspend fun getTransmissionTypeByName(name: String): EnumItem = throw NotImplementedError()
+
+    override suspend fun getDriveTypeByName(name: String): EnumItem = throw NotImplementedError()
+
+    override suspend fun getAllColors(): List<EnumItem> = throw NotImplementedError()
+
+    override suspend fun getAllBodyTypes(): List<EnumItem> = throw NotImplementedError()
+
+    override suspend fun getAllStatuses(): List<EnumItem> = throw NotImplementedError()
+
+    override suspend fun getAllEngineTypes(): List<EnumItem> = throw NotImplementedError()
+
+    override suspend fun getAllTransmissionTypes(): List<EnumItem> = throw NotImplementedError()
+
+    override suspend fun getAllDriveTypes(): List<EnumItem> = throw NotImplementedError()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HasPassportRepoTest {
     @Test
-    fun `hasPasport should return true when passport document exists by type`() =
+    fun `hasPasport should return true when passport document exists by type Passport`() =
         runTest {
             val fakeDocuments =
                 FakeDocuments().apply {
@@ -32,11 +70,11 @@ class HasPassportRepoTest {
                             Document(
                                 id = "1",
                                 name = "Driver License",
-                                type = "passport",
+                                type = "Passport",
                             ),
                         )
                 }
-            val repo = HasPassportRepoImpl(fakeDocuments)
+            val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
 
             val result = repo.hasPasport()
 
@@ -44,7 +82,7 @@ class HasPassportRepoTest {
         }
 
     @Test
-    fun `hasPasport should return true when passport document exists by name`() =
+    fun `hasPasport should return false when document type does not match Passport enum`() =
         runTest {
             val fakeDocuments =
                 FakeDocuments().apply {
@@ -57,15 +95,15 @@ class HasPassportRepoTest {
                             ),
                         )
                 }
-            val repo = HasPassportRepoImpl(fakeDocuments)
+            val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
 
             val result = repo.hasPasport()
 
-            assertTrue(result)
+            assertFalse(result)
         }
 
     @Test
-    fun `hasPasport should return true when passport document exists in Russian`() =
+    fun `hasPasport should return false when Passport enum is not found`() =
         runTest {
             val fakeDocuments =
                 FakeDocuments().apply {
@@ -73,20 +111,24 @@ class HasPassportRepoTest {
                         listOf(
                             Document(
                                 id = "1",
-                                name = "Паспорт",
-                                type = "document",
+                                name = "Passport",
+                                type = "Passport",
                             ),
                         )
                 }
-            val repo = HasPassportRepoImpl(fakeDocuments)
+            val fakeCarEnumsRepository =
+                FakeCarEnumsRepository().apply {
+                    documentTypes = emptyList()
+                }
+            val repo = HasPassportRepoImpl(fakeDocuments, fakeCarEnumsRepository)
 
             val result = repo.hasPasport()
 
-            assertTrue(result)
+            assertFalse(result)
         }
 
     @Test
-    fun `hasPasport should return true when passport type is in Russian`() =
+    fun `hasPasport should return true when passport type is Passport case insensitive`() =
         runTest {
             val fakeDocuments =
                 FakeDocuments().apply {
@@ -95,11 +137,11 @@ class HasPassportRepoTest {
                             Document(
                                 id = "1",
                                 name = "Document",
-                                type = "паспорт",
+                                type = "passport",
                             ),
                         )
                 }
-            val repo = HasPassportRepoImpl(fakeDocuments)
+            val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
 
             val result = repo.hasPasport()
 
@@ -125,7 +167,7 @@ class HasPassportRepoTest {
                             ),
                         )
                 }
-            val repo = HasPassportRepoImpl(fakeDocuments)
+            val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
 
             val result = repo.hasPasport()
 
@@ -139,7 +181,7 @@ class HasPassportRepoTest {
                 FakeDocuments().apply {
                     documents = emptyList()
                 }
-            val repo = HasPassportRepoImpl(fakeDocuments)
+            val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
 
             val result = repo.hasPasport()
 
@@ -153,7 +195,7 @@ class HasPassportRepoTest {
                 FakeDocuments().apply {
                     shouldThrow = true
                 }
-            val repo = HasPassportRepoImpl(fakeDocuments)
+            val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
 
             val result = repo.hasPasport()
 
@@ -161,7 +203,7 @@ class HasPassportRepoTest {
         }
 
     @Test
-    fun `hasPasport should be case insensitive`() =
+    fun `hasPasport should be case insensitive for type Passport`() =
         runTest {
             val fakeDocuments =
                 FakeDocuments().apply {
@@ -169,12 +211,12 @@ class HasPassportRepoTest {
                         listOf(
                             Document(
                                 id = "1",
-                                name = "PASSPORT",
-                                type = "DOCUMENT",
+                                name = "Document",
+                                type = "PASSPORT",
                             ),
                         )
                 }
-            val repo = HasPassportRepoImpl(fakeDocuments)
+            val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
 
             val result = repo.hasPasport()
 
@@ -196,7 +238,7 @@ class HasPassportRepoTest {
                             Document(
                                 id = "2",
                                 name = "Passport",
-                                type = "document",
+                                type = "Passport",
                             ),
                             Document(
                                 id = "3",
@@ -205,7 +247,7 @@ class HasPassportRepoTest {
                             ),
                         )
                 }
-            val repo = HasPassportRepoImpl(fakeDocuments)
+            val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
 
             val result = repo.hasPasport()
 

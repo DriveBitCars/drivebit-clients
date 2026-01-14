@@ -8,15 +8,18 @@ interface HasPassportRepo {
 
 internal class HasPassportRepoImpl(
     private val documents: Documents,
+    private val carEnumsRepository: CarEnumsRepository,
 ) : HasPassportRepo {
     override suspend fun hasPasport(): Boolean =
         try {
+            val documentTypes = carEnumsRepository.getAllDocumentTypes()
+            val passportEnum =
+                documentTypes.find { it.name.equals("Passport", ignoreCase = true) }
+                    ?: return false
+
             val docs = documents.getDocuments()
             docs.any { doc ->
-                doc.type?.lowercase()?.contains("passport", ignoreCase = true) == true ||
-                    doc.name?.lowercase()?.contains("passport", ignoreCase = true) == true ||
-                    doc.type?.lowercase()?.contains("паспорт", ignoreCase = true) == true ||
-                    doc.name?.lowercase()?.contains("паспорт", ignoreCase = true) == true
+                doc.type?.equals(passportEnum.name, ignoreCase = true) == true
             }
         } catch (e: Exception) {
             false
