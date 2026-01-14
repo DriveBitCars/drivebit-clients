@@ -210,7 +210,7 @@ fun MyCarsPage() {
                     enabledColor = CSSColors.Blue,
                     text = "Добавить авто",
                     onClick = {
-                        window.location.href = "http://192.168.0.100:8080/city-selection"
+                        window.location.href = "/city-selection"
                     },
                 )
             }
