@@ -14,6 +14,8 @@ import my.drivebit.network.services.Dadata
 import my.drivebit.network.services.DadataImpl
 import my.drivebit.network.services.Dictionary
 import my.drivebit.network.services.DictionaryImpl
+import my.drivebit.network.services.Documents
+import my.drivebit.network.services.DocumentsImpl
 import my.drivebit.network.services.Photo
 import my.drivebit.network.services.PhotoImpl
 import my.drivebit.network.services.User
@@ -123,5 +125,8 @@ val networkModule =
         }
         single<Dictionary> {
             DictionaryImpl(get(named("unauthorized")))
+        }
+        single<Documents> {
+            DocumentsImpl(get(named("authorized")))
         }
     }

@@ -21,6 +21,8 @@ import my.drivebit.repositories.CityRepository
 import my.drivebit.repositories.CityRepositoryImpl
 import my.drivebit.repositories.CreateOtpRepository
 import my.drivebit.repositories.CreateOtpRepositoryImpl
+import my.drivebit.repositories.HasPassportRepo
+import my.drivebit.repositories.HasPassportRepoImpl
 import my.drivebit.repositories.LicensePlateRepository
 import my.drivebit.repositories.LicensePlateRepositoryImpl
 import my.drivebit.repositories.MyCarRepository
@@ -199,6 +201,12 @@ val repositoriesModule: Module =
             MyCarRepositoryImpl(
                 carService = get(),
                 settings = get(),
+            )
+        }
+
+        single<HasPassportRepo> {
+            HasPassportRepoImpl(
+                documents = get(),
             )
         }
     }
