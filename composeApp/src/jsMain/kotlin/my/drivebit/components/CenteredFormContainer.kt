@@ -14,8 +14,9 @@ fun CenteredFormContainer(
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Column)
             alignItems(AlignItems.Center)
-            justifyContent(JustifyContent.Center)
+            justifyContent(JustifyContent.FlexStart)
             minHeight(80.vh)
+            paddingTop(40.px)
         }
     }) {
         Div({
