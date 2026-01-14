@@ -309,12 +309,12 @@ class CarItemPhotosTest {
 
             val car = result.first()
             assertEquals("a575c0b1-3736-475f-a4a8-5a87cfbdb18a", car.id)
-            
+
             val photosFromGeneral = car.general?.photos ?: emptyList()
             val photosFromTopLevel = car.photos
             assertEquals(1, photosFromTopLevel.size, "Should have 1 photo from top level")
             assertEquals(2, photosFromGeneral.size, "Should have 2 photos from general")
-            
+
             assertEquals(1, photosFromTopLevel[0].id, "Top level photo should have id=1")
             assertEquals(2, photosFromGeneral[0].id, "First general photo should have id=2")
             assertEquals(3, photosFromGeneral[1].id, "Second general photo should have id=3")
@@ -383,11 +383,10 @@ class CarItemPhotosTest {
             val car = result.first()
             val photosFromGeneral = car.general?.photos ?: emptyList()
             val photosFromTopLevel = car.photos
-            
+
             assertEquals(1, photosFromTopLevel.size, "Should have 1 photo from top level")
             assertEquals(1, photosFromGeneral.size, "Should have 1 photo from general with same id")
             assertEquals(1, photosFromTopLevel[0].id, "Top level photo should have id=1")
             assertEquals(1, photosFromGeneral[0].id, "General photo should have id=1 (duplicate)")
         }
 }
-

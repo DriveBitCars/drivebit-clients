@@ -2,8 +2,8 @@ package my.drivebit.repositories
 
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.Car
-import my.drivebit.network.services.CarItem
 import my.drivebit.network.services.CarGeneral
+import my.drivebit.network.services.CarItem
 import my.drivebit.shared.storage.InMemorySettings
 import kotlin.test.Test
 import kotlin.test.assertEquals

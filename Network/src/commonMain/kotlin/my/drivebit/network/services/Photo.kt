@@ -52,9 +52,8 @@ class PhotoImpl(
     private val httpClient: HttpClient,
     private val carService: Car? = null,
 ) : Photo {
-    private fun ensureHttpsUrl(url: String): String {
-        return UrlSanitizer.ensureHttpsUrl(url)
-    }
+    private fun ensureHttpsUrl(url: String): String = UrlSanitizer.ensureHttpsUrl(url)
+
     override suspend fun getAvatar(): AvatarResponse {
         val url = "${DEFAULT_BASE_URL}Photo/avatar/my"
         val response = httpClient.get(url)
@@ -88,8 +87,8 @@ class PhotoImpl(
         return response.parseResponse()
     }
 
-    override suspend fun getCarPhotos(carId: String): List<CarPhotoResponse> {
-        return try {
+    override suspend fun getCarPhotos(carId: String): List<CarPhotoResponse> =
+        try {
             val url = "${DEFAULT_BASE_URL}Photo/car/$carId"
             val response = httpClient.get(url)
             val photos: List<CarPhotoResponse> = response.parseResponse()
@@ -110,7 +109,6 @@ class PhotoImpl(
                 throw e
             }
         }
-    }
 
     override suspend fun uploadCarPhotos(
         carId: String,
