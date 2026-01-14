@@ -292,17 +292,17 @@ fun CarEditPage() {
                                 },
                             )
 
-                            TextInputField(
-                                label = "Оплата за час (₽)",
-                                value = formData.hourlyRate,
-                                onValueChange = { newValue ->
-                                    val cleanValue = newValue.replace(",", ".")
-                                    if (cleanValue.isEmpty() || cleanValue.toDoubleOrNull() != null) {
-                                        viewModel.handleIntent(CarEditIntent.UpdateHourlyRate(cleanValue))
-                                    }
-                                },
-                                numeric = true,
-                            )
+                            // TextInputField(
+                            //     label = "Оплата за час (₽)",
+                            //     value = formData.hourlyRate,
+                            //     onValueChange = { newValue ->
+                            //         val cleanValue = newValue.replace(",", ".")
+                            //         if (cleanValue.isEmpty() || cleanValue.toDoubleOrNull() != null) {
+                            //             viewModel.handleIntent(CarEditIntent.UpdateHourlyRate(cleanValue))
+                            //         }
+                            //     },
+                            //     numeric = true,
+                            // )
 
                             TextInputField(
                                 label = "Оплата за день (₽)",

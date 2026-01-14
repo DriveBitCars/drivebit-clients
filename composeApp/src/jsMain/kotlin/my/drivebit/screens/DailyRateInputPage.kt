@@ -81,7 +81,7 @@ fun DailyRateInputPage(onDailyRateEntered: () -> Unit = {}) {
         val address = selectedAddressRepository.getAddress()
         val addressData = selectedAddressRepository.getAddressData()
         val cityId = selectedCityRepository.getCityId()
-        val hourlyRate = carDataRepository.getHourlyRate()
+        // val hourlyRate = carDataRepository.getHourlyRate()
         val dailyRateValue = dailyRate.toDoubleOrNull() ?: 0.0
 
         println("🚗 [DailyRateInputPage] Creating car with data:")
@@ -97,7 +97,7 @@ fun DailyRateInputPage(onDailyRateEntered: () -> Unit = {}) {
         println("   - address: $address")
         println("   - cityId: $cityId")
         println("   - addressData: $addressData")
-        println("   - hourlyRate: $hourlyRate")
+        // println("   - hourlyRate: $hourlyRate")
         println("   - dailyRate: $dailyRateValue")
 
         val request =
@@ -114,7 +114,7 @@ fun DailyRateInputPage(onDailyRateEntered: () -> Unit = {}) {
                 ValidAddressString = address ?: "",
                 cityId = cityId?.toString(),
                 addr = null,
-                hourlyRate = hourlyRate ?: 0.0,
+                hourlyRate = 0.0, // hourlyRate ?: 0.0,
                 dailyRate = dailyRateValue,
                 ParkingAssistances = emptyList(),
                 MultimediaSystemOptions = emptyList(),

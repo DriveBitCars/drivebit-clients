@@ -28,7 +28,7 @@ import my.drivebit.screens.DriveTypeSelectionPage
 import my.drivebit.screens.EditNamePage
 import my.drivebit.screens.EngineTypeSelectionPage
 import my.drivebit.screens.EngineVolumeInputPage
-import my.drivebit.screens.HourlyRateInputPage
+// import my.drivebit.screens.HourlyRateInputPage
 import my.drivebit.screens.LicensePlateInputPage
 import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
@@ -175,17 +175,18 @@ actual fun App() {
                 currentPath == "/seats-count-input" -> {
                     SeatsCountInputPage(
                         onSeatsCountEntered = {
-                            window.location.href = "/hourly-rate-input"
-                        },
-                    )
-                }
-                currentPath == "/hourly-rate-input" -> {
-                    HourlyRateInputPage(
-                        onHourlyRateEntered = {
+                            // window.location.href = "/hourly-rate-input"
                             window.location.href = "/daily-rate-input"
                         },
                     )
                 }
+                // currentPath == "/hourly-rate-input" -> {
+                //     HourlyRateInputPage(
+                //         onHourlyRateEntered = {
+                //             window.location.href = "/daily-rate-input"
+                //         },
+                //     )
+                // }
                 currentPath == "/daily-rate-input" -> {
                     DailyRateInputPage(
                         onDailyRateEntered = {
