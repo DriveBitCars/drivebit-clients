@@ -93,16 +93,6 @@ fun PassportUploadPage() {
             }
 
             FormSection {
-                Div({
-                    style {
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Column)
-                        gap(12.px)
-                    }
-                }) {
-                    Text("Чтобы создать автомобиль, сначала загрузите паспорт.")
-                    Text("Поддерживаются изображения и PDF.")
-                }
 
                 Input(
                     type = InputType.File,
