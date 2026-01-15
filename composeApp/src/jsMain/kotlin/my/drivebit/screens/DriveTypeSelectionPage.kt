@@ -44,22 +44,22 @@ fun DriveTypeSelectionPage(onDriveTypeSelected: () -> Unit = {}) {
 
             FormSection(
                 listingContent = {
-                    if (error != null) {
-                        TextError(error ?: "Произошла ошибка")
-                    } else {
-                        StringList(
-                            strings = driveTypes.map { it.translate },
-                            onSelected = { translate ->
-                                val driveType = driveTypes.find { it.translate == translate }
-                                driveType?.let {
-                                    inputValue = translate
-                                    viewModel.clearQuery()
-                                    selectedDriveTypeRepository.saveDriveType(it.name, it.translate)
-                                    onDriveTypeSelected()
-                                }
-                            },
-                        )
-                    }
+                if (error != null) {
+                    TextError(error ?: "Произошла ошибка")
+                } else {
+                    StringList(
+                        strings = driveTypes.map { it.translate },
+                        onSelected = { translate ->
+                            val driveType = driveTypes.find { it.translate == translate }
+                            driveType?.let {
+                                inputValue = translate
+                                viewModel.clearQuery()
+                                selectedDriveTypeRepository.saveDriveType(it.name, it.translate)
+                                onDriveTypeSelected()
+                            }
+                        },
+                    )
+                }
                 },
             ) {
                 TextInputField(

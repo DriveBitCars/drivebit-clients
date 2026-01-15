@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
@@ -22,6 +21,7 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.Photo
 import my.drivebit.utils.getUrlParameter
+import my.drivebit.utils.readAsBytes
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.attributes.InputType
@@ -31,27 +31,6 @@ import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-
-private suspend fun org.w3c.files.File.readAsBytes(): ByteArray =
-    suspendCancellableCoroutine { continuation ->
-        val file = this@readAsBytes
-        val reader = org.w3c.files.FileReader()
-        reader.onload = {
-            val arrayBuffer = reader.result
-            val uint8Array = js("Uint8Array").constructor(arrayBuffer)
-            val byteArray = ByteArray(uint8Array.length as Int)
-            for (i in 0 until uint8Array.length) {
-                byteArray[i] = (uint8Array[i] as Number).toInt().toByte()
-            }
-            continuation.resume(byteArray)
-        }
-        reader.onerror = {
-            continuation.resumeWithException(Exception("Failed to read file"))
-        }
-        reader.readAsArrayBuffer(file)
-    }
 
 @Composable
 fun CarPhotosUploadPage(onPhotosUploaded: () -> Unit = {}) {

@@ -24,6 +24,7 @@ import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.CitySelectionPage
 import my.drivebit.screens.DailyRateInputPage
+import my.drivebit.screens.PassportUploadPage
 import my.drivebit.screens.DriveTypeSelectionPage
 import my.drivebit.screens.EditNamePage
 import my.drivebit.screens.EngineTypeSelectionPage
@@ -34,6 +35,7 @@ import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.MyCarsPage
 import my.drivebit.screens.OtpVerificationPage
+import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.ProductionYearInputPage
 import my.drivebit.screens.ProfilePage
 import my.drivebit.screens.SeatsCountInputPage
@@ -86,6 +88,9 @@ actual fun App() {
                 }
                 currentPath == "/my-cars" -> {
                     MyCarsPage()
+                }
+                currentPath == "/documents" -> {
+                    DocumentsPage()
                 }
                 currentPath.startsWith("/car-edit") -> {
                     CarEditPage()
@@ -193,6 +198,9 @@ actual fun App() {
                             kotlinx.browser.window.location.href = "/my-cars"
                         },
                     )
+                }
+                currentPath == "/passport-upload" -> {
+                    PassportUploadPage()
                 }
                 currentPath.startsWith("/car-photos-upload") -> {
                     CarPhotosUploadPage(

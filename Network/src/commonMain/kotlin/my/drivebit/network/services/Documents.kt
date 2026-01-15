@@ -1,9 +1,9 @@
 package my.drivebit.network.services
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
@@ -20,6 +20,8 @@ interface Documents {
         fileName: String,
         contentType: String,
     ): Document
+
+    suspend fun getDocumentUrl(documentId: String): String
 }
 
 @Serializable
@@ -66,4 +68,16 @@ class DocumentsImpl(
             }
         return response.parseResponse()
     }
+
+    override suspend fun getDocumentUrl(documentId: String): String {
+        val url = "${DEFAULT_BASE_URL}Documents/$documentId/temporary-link"
+        val response = httpClient.get(url)
+        val urlResponse: DocumentUrlResponse = response.parseResponse()
+        return urlResponse.url
+    }
 }
+
+@Serializable
+data class DocumentUrlResponse(
+    val url: String,
+)

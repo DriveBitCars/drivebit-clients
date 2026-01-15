@@ -949,6 +949,8 @@ fun createMockCarEnumsRepository(): my.drivebit.repositories.CarEnumsRepository 
         override suspend fun getAllTransmissionTypes(): List<my.drivebit.repositories.EnumItem> = emptyList()
 
         override suspend fun getAllDriveTypes(): List<my.drivebit.repositories.EnumItem> = emptyList()
+
+        override suspend fun getAllDocumentTypes(): List<my.drivebit.repositories.EnumItem> = emptyList()
     }
 
 fun createMockBodyTypeViewModel(

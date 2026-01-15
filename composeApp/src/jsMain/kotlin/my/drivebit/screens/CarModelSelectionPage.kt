@@ -51,22 +51,22 @@ fun CarModelSelectionPage(onModelSelected: () -> Unit = {}) {
 
             FormSection(
                 listingContent = {
-                    if (error != null) {
-                        TextError(error ?: "Произошла ошибка")
-                    } else {
-                        StringList(
-                            strings = models.map { it.name },
-                            onSelected = { modelName ->
-                                val model = models.find { it.name == modelName }
-                                model?.let {
-                                    inputValue = modelName
-                                    viewModel.clearQuery()
-                                    selectedCarModelRepository.saveModel(it.id, it.name)
-                                    onModelSelected()
-                                }
-                            },
-                        )
-                    }
+                if (error != null) {
+                    TextError(error ?: "Произошла ошибка")
+                } else {
+                    StringList(
+                        strings = models.map { it.name },
+                        onSelected = { modelName ->
+                            val model = models.find { it.name == modelName }
+                            model?.let {
+                                inputValue = modelName
+                                viewModel.clearQuery()
+                                selectedCarModelRepository.saveModel(it.id, it.name)
+                                onModelSelected()
+                            }
+                        },
+                    )
+                }
                 },
             ) {
                 TextInputField(

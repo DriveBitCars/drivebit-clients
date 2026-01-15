@@ -105,6 +105,12 @@ tasks.named("compileKotlinMetadata").configure {
     dependsOn("generateImageConstants")
 }
 
+// Gradle task validation: other compile tasks (e.g. compileKotlinJs) also read the generated file,
+// so make the dependency explicit to avoid nondeterministic task ordering.
+tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
+    dependsOn("generateImageConstants")
+}
+
 ktlint {
     android.set(true)
     ignoreFailures.set(true)
