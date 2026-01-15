@@ -98,7 +98,7 @@ fun PassportUploadPage() {
                     type = InputType.File,
                     attrs = {
                         id(fileInputId)
-                        attr("accept", "image/*,application/pdf")
+                        attr("accept", "image/*")
                     },
                 )
 
