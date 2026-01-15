@@ -10,8 +10,10 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.NetworkException
 import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
 
@@ -297,7 +299,18 @@ class CarImpl(
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }
-        return response.parseResponse()
+        if (!response.status.isSuccess()) {
+            throw my.drivebit.network.NetworkException(
+                response.status,
+                response.bodyAsText().takeIf { it.isNotBlank() } ?: "Ошибка создания автомобиля",
+            )
+        }
+        val bodyString = response.bodyAsText()
+        return if (bodyString.isBlank()) {
+            CarResponse(id = "")
+        } else {
+            defaultJson.decodeFromString<CarResponse>(bodyString)
+        }
     }
 
     override suspend fun createOrUpdateCar(
