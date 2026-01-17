@@ -200,7 +200,11 @@ actual fun App() {
                     )
                 }
                 currentPath == "/passport-upload" -> {
-                    PassportUploadPage()
+                    PassportUploadPage(
+                        onPassportUploaded = {
+                            window.location.href = "/my-cars"
+                        },
+                    )
                 }
                 currentPath.startsWith("/car-photos-upload") -> {
                     CarPhotosUploadPage(

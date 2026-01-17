@@ -105,10 +105,18 @@ tasks.named("compileKotlinMetadata").configure {
     dependsOn("generateImageConstants")
 }
 
-// Gradle task validation: other compile tasks (e.g. compileKotlinJs) also read the generated file,
+// Gradle task validation: other compile tasks and ktlint tasks also read the generated file,
 // so make the dependency explicit to avoid nondeterministic task ordering.
-tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
-    dependsOn("generateImageConstants")
+afterEvaluate {
+    tasks
+        .matching {
+            (it.name.contains("compile") && it.name.contains("Kotlin")) ||
+                it.name.startsWith("runKtlintCheckOver") ||
+                it.name.startsWith("runKtlintFormatOver") ||
+                (it.name.startsWith("ktlint") && it.name != "ktlintFormat" && it.name != "ktlintCheck")
+        }.configureEach {
+            dependsOn("generateImageConstants")
+        }
 }
 
 ktlint {

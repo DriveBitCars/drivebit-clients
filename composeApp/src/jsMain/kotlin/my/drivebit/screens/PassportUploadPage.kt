@@ -38,7 +38,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 
 @Composable
-fun PassportUploadPage() {
+fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
     val viewModel: PassportUploadViewModel = koinInject()
     val state by viewModel.state.collectAsState()
     val createCarViewModel: CreateCarFromDailyRateViewModel = koinInject()
@@ -92,7 +92,7 @@ fun PassportUploadPage() {
         when (createCarState) {
             is CreateCarFromDailyRateState.Success -> {
                 createCarViewModel.reset()
-                navigationController?.navigateTo("/my-cars")
+                onPassportUploaded()
             }
             is CreateCarFromDailyRateState.Error -> {
                 createCarViewModel.reset()
