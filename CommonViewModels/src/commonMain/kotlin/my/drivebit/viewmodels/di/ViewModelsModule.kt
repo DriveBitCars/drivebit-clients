@@ -39,6 +39,10 @@ import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.MapViewModel
 import my.drivebit.viewmodels.MyCarsViewModel
 import my.drivebit.viewmodels.MyCarsViewModelImpl
+import my.drivebit.viewmodels.MyCitySelectionViewModel
+import my.drivebit.viewmodels.MyCitySelectionViewModelImpl
+import my.drivebit.viewmodels.MyCityViewModel
+import my.drivebit.viewmodels.MyCityViewModelImpl
 import my.drivebit.viewmodels.PassportUploadViewModel
 import my.drivebit.viewmodels.PassportUploadViewModelImpl
 import my.drivebit.viewmodels.PhoneLoginViewModel
@@ -88,6 +92,18 @@ val commonViewModelsModule: Module =
         single {
             IconUserViewModel(
                 avatarRepository = get(),
+            )
+        }
+
+        single<MyCityViewModel> {
+            MyCityViewModelImpl(
+                myCityRepository = get(),
+            )
+        }
+
+        factory<MyCitySelectionViewModel> {
+            MyCitySelectionViewModelImpl(
+                myCityRepository = get(),
             )
         }
 

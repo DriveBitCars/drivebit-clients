@@ -22,7 +22,9 @@ import my.drivebit.screens.CarPhotosPage
 import my.drivebit.screens.CarPhotosUploadPage
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePhonePage
+import my.drivebit.screens.CitySelectionMode
 import my.drivebit.screens.CitySelectionPage
+import my.drivebit.screens.MyCitySelectionPage
 import my.drivebit.screens.DailyRateInputPage
 import my.drivebit.screens.PassportUploadPage
 import my.drivebit.screens.DriveTypeSelectionPage
@@ -66,10 +68,16 @@ actual fun App() {
             when {
                 currentPath.startsWith("/city-selection") -> {
                     CitySelectionPage(
-                        onCitySelected = {
-                            window.location.href = "/address-input"
-                        },
+                        mode =
+                            CitySelectionMode.ForCarCreation(
+                                onCitySelected = {
+                                    window.location.href = "/address-input"
+                                },
+                            ),
                     )
+                }
+                currentPath.startsWith("/my-city-selection") -> {
+                    MyCitySelectionPage()
                 }
                 currentPath.startsWith("/list-your-car") -> {
                     ListYourCarPage()

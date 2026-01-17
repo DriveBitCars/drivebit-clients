@@ -40,6 +40,8 @@ class CarEnumsRepositoryTest {
 
                     override suspend fun searchCities(query: String): List<City> = emptyList()
 
+                    override suspend fun getAllCities(): List<City> = emptyList()
+
                     override suspend fun getDocumentEnums(): DocumentEnumsResponse = throw NotImplementedError()
                 }
             val repository = CarEnumsRepositoryImpl(fakeDictionary)
@@ -122,6 +124,8 @@ class CarEnumsRepositoryTest {
             override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
 
             override suspend fun searchCities(query: String): List<City> = emptyList()
+
+            override suspend fun getAllCities(): List<City> = emptyList()
 
             override suspend fun getDocumentEnums(): DocumentEnumsResponse = throw NotImplementedError()
         }
