@@ -49,7 +49,26 @@ fun CarModelSelectionPage(onModelSelected: () -> Unit = {}) {
                 TextSmartHeader("Выберите модель")
             }
 
-            FormSection {
+            FormSection(
+                listingContent = {
+                    if (error != null) {
+                        TextError(error ?: "Произошла ошибка")
+                    } else {
+                        StringList(
+                            strings = models.map { it.name },
+                            onSelected = { modelName ->
+                                val model = models.find { it.name == modelName }
+                                model?.let {
+                                    inputValue = modelName
+                                    viewModel.clearQuery()
+                                    selectedCarModelRepository.saveModel(it.id, it.name)
+                                    onModelSelected()
+                                }
+                            },
+                        )
+                    }
+                },
+            ) {
                 TextInputField(
                     label = "Модель",
                     value = inputValue,
@@ -58,23 +77,6 @@ fun CarModelSelectionPage(onModelSelected: () -> Unit = {}) {
                         viewModel.updateQuery(newValue)
                     },
                 )
-
-                if (error != null) {
-                    TextError(error ?: "Произошла ошибка")
-                } else {
-                    StringList(
-                        strings = models.map { it.name },
-                        onSelected = { modelName ->
-                            val model = models.find { it.name == modelName }
-                            model?.let {
-                                inputValue = modelName
-                                viewModel.clearQuery()
-                                selectedCarModelRepository.saveModel(it.id, it.name)
-                                onModelSelected()
-                            }
-                        },
-                    )
-                }
             }
         }
     }

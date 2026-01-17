@@ -42,7 +42,26 @@ fun BodyTypeSelectionPage(onBodyTypeSelected: () -> Unit = {}) {
                 TextSmartHeader("Выберите тип кузова")
             }
 
-            FormSection {
+            FormSection(
+                listingContent = {
+                    if (error != null) {
+                        TextError(error ?: "Произошла ошибка")
+                    } else {
+                        StringList(
+                            strings = bodyTypes.map { it.translate },
+                            onSelected = { translate ->
+                                val bodyType = bodyTypes.find { it.translate == translate }
+                                bodyType?.let {
+                                    inputValue = translate
+                                    viewModel.clearQuery()
+                                    selectedBodyTypeRepository.saveBodyType(it.name, it.translate)
+                                    onBodyTypeSelected()
+                                }
+                            },
+                        )
+                    }
+                },
+            ) {
                 TextInputField(
                     label = "Тип кузова",
                     value = inputValue,
@@ -51,23 +70,6 @@ fun BodyTypeSelectionPage(onBodyTypeSelected: () -> Unit = {}) {
                         viewModel.updateQuery(newValue)
                     },
                 )
-
-                if (error != null) {
-                    TextError(error ?: "Произошла ошибка")
-                } else {
-                    StringList(
-                        strings = bodyTypes.map { it.translate },
-                        onSelected = { translate ->
-                            val bodyType = bodyTypes.find { it.translate == translate }
-                            bodyType?.let {
-                                inputValue = translate
-                                viewModel.clearQuery()
-                                selectedBodyTypeRepository.saveBodyType(it.name, it.translate)
-                                onBodyTypeSelected()
-                            }
-                        },
-                    )
-                }
             }
         }
     }

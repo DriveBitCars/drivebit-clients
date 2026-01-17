@@ -10,8 +10,10 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.NetworkException
 import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
 
@@ -191,7 +193,7 @@ class CarImpl(
 
         val isHttp = sanitizedUrl.startsWith("http://")
         val isHttps = sanitizedUrl.startsWith("https://")
-        
+
         if (!isHttp && !isHttps) {
             val isRelativePublicbct = sanitizedUrl.startsWith("/publicbct/")
             if (isRelativePublicbct) {
@@ -208,7 +210,14 @@ class CarImpl(
                 host == "127.0.0.1" ||
                 host.startsWith("10.") ||
                 host.startsWith("192.168.") ||
-                (host.startsWith("172.") && host.split(".").getOrNull(1)?.toIntOrNull()?.let { it in 16..31 } == true)
+                (
+                    host.startsWith("172.") &&
+                        host
+                            .split(".")
+                            .getOrNull(1)
+                            ?.toIntOrNull()
+                            ?.let { it in 16..31 } == true
+                )
 
         val isProductionMinIO = host == "155.212.170.94" && sanitizedUrl.contains(":9000")
         if (isProductionMinIO) {
@@ -229,24 +238,28 @@ class CarImpl(
             val photosFromGeneral = car.general?.photos ?: emptyList()
             val photosFromTopLevel = car.photos
             val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
-            
+
             car.copy(
-                photos = allPhotos.map { photo ->
-                    photo.copy(url = ensureHttpsUrl(photo.url))
-                },
-                general = car.general?.copy(
-                    photos = photosFromGeneral.map { photo ->
+                photos =
+                    allPhotos.map { photo ->
                         photo.copy(url = ensureHttpsUrl(photo.url))
                     },
-                ),
+                general =
+                    car.general?.copy(
+                        photos =
+                            photosFromGeneral.map { photo ->
+                                photo.copy(url = ensureHttpsUrl(photo.url))
+                            },
+                    ),
             )
         }
 
     private fun sanitizeCarDetail(result: CarDetailResponse): CarDetailResponse =
         result.copy(
-            photos = result.photos.map { photo ->
-                photo.copy(url = ensureHttpsUrl(photo.url))
-            },
+            photos =
+                result.photos.map { photo ->
+                    photo.copy(url = ensureHttpsUrl(photo.url))
+                },
         )
 
     override suspend fun search(
@@ -286,7 +299,18 @@ class CarImpl(
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }
-        return response.parseResponse()
+        if (!response.status.isSuccess()) {
+            throw my.drivebit.network.NetworkException(
+                response.status,
+                response.bodyAsText().takeIf { it.isNotBlank() } ?: "Ошибка создания автомобиля",
+            )
+        }
+        val bodyString = response.bodyAsText()
+        return if (bodyString.isBlank()) {
+            CarResponse(id = "")
+        } else {
+            defaultJson.decodeFromString<CarResponse>(bodyString)
+        }
     }
 
     override suspend fun createOrUpdateCar(

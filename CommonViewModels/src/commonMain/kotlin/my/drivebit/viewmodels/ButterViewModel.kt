@@ -69,6 +69,13 @@ private val myCars =
         onClick = {},
     )
 
+private val myDocuments =
+    ButterModel(
+        iconUrl = ImagePaths.BUTTER_CAR_ICON_SVG,
+        text = "Мои документы",
+        onClick = {},
+    )
+
 private val logout =
     ButterModel(
         iconUrl = ImagePaths.BUTTER_LOGOUT_SVG,
@@ -119,6 +126,7 @@ class ButterViewModelImpl(
                 buildList {
                     if (storage.isLogined()) {
                         add(profile.copy(onClick = { close() }))
+                        add(myDocuments.copy(onClick = { close() }))
                     } else {
                         add(login.copy(onClick = { close() }))
                         add(registr.copy(onClick = { close() }))

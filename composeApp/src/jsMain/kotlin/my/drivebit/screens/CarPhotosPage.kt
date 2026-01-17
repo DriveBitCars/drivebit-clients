@@ -313,7 +313,7 @@ fun CarPhotosPage() {
                                                             )
 
                                                             val maxFileSize = 2 * 1024 * 1024
-                                                            try {
+                                                            runCatching {
                                                                 val processedBytes: ByteArray
                                                                 val processedFileName: String
 
@@ -352,7 +352,7 @@ fun CarPhotosPage() {
                                                                 fileBytesList.add(processedBytes)
                                                                 fileNamesList.add(processedFileName)
                                                                 contentTypesList.add("image/jpeg")
-                                                            } catch (e: Exception) {
+                                                            }.onFailure { e ->
                                                                 println(
                                                                     "❌ [CarPhotosPage] Error processing file ${file.name}: ${e.message}",
                                                                 )

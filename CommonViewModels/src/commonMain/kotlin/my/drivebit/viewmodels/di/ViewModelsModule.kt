@@ -25,6 +25,10 @@ import my.drivebit.viewmodels.CarModelViewModel
 import my.drivebit.viewmodels.CarPhotosViewModel
 import my.drivebit.viewmodels.CarPhotosViewModelImpl
 import my.drivebit.viewmodels.CityViewModel
+import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
+import my.drivebit.viewmodels.CreateCarFromDailyRateViewModelImpl
+import my.drivebit.viewmodels.DocumentsViewModel
+import my.drivebit.viewmodels.DocumentsViewModelImpl
 import my.drivebit.viewmodels.DriveTypeViewModel
 import my.drivebit.viewmodels.EditProfileViewModel
 import my.drivebit.viewmodels.EditProfileViewModelImpl
@@ -35,6 +39,8 @@ import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.MapViewModel
 import my.drivebit.viewmodels.MyCarsViewModel
 import my.drivebit.viewmodels.MyCarsViewModelImpl
+import my.drivebit.viewmodels.PassportUploadViewModel
+import my.drivebit.viewmodels.PassportUploadViewModelImpl
 import my.drivebit.viewmodels.PhoneLoginViewModel
 import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
@@ -231,6 +237,28 @@ val commonViewModelsModule: Module =
         factory<CarPhotosViewModel> {
             CarPhotosViewModelImpl(
                 photoService = get(),
+            )
+        }
+
+        factory<CreateCarFromDailyRateViewModel> {
+            CreateCarFromDailyRateViewModelImpl(
+                carDataRepository = get(),
+                createCarRepository = get(),
+                hasPassportRepo = get(),
+            )
+        }
+
+        factory<PassportUploadViewModel> {
+            PassportUploadViewModelImpl(
+                documents = get(),
+                createCarRepository = get(),
+                carDataRepository = get(),
+            )
+        }
+
+        factory<DocumentsViewModel> {
+            DocumentsViewModelImpl(
+                documents = get(),
             )
         }
     }

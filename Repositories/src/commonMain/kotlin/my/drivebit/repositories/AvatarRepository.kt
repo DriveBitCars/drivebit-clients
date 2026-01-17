@@ -5,8 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Photo
@@ -29,7 +27,7 @@ internal class AvatarRepositoryImpl(
 ) : AvatarRepository,
     CachedRepository<String> by cachedRepository {
     private val _avatarUrlState = MutableStateFlow<String?>(null)
-    
+
     init {
         coroutineScope.launch {
             cachedRepository.get().collect { url ->
@@ -38,15 +36,16 @@ internal class AvatarRepositoryImpl(
         }
     }
 
-    override val avatarUrl: Flow<String> = kotlinx.coroutines.flow.flow {
-        if (_avatarUrlState.value == null) {
-            val initialValue = cachedRepository.get().first()
-            _avatarUrlState.value = initialValue
+    override val avatarUrl: Flow<String> =
+        kotlinx.coroutines.flow.flow {
+            if (_avatarUrlState.value == null) {
+                val initialValue = cachedRepository.get().first()
+                _avatarUrlState.value = initialValue
+            }
+            _avatarUrlState.collect { value ->
+                value?.let { emit(it) }
+            }
         }
-        _avatarUrlState.collect { value ->
-            value?.let { emit(it) }
-        }
-    }
 
     override fun clearCache() {
         cachedRepository.clearCache()

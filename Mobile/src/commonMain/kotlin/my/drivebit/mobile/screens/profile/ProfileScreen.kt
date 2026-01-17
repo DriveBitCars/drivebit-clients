@@ -108,11 +108,9 @@ fun ProfileScreenContent(
 
                 user.createdAt?.let { createdAt ->
                     val formattedDate =
-                        try {
+                        runCatching {
                             mapIso8601ToMonthYearString(createdAt)
-                        } catch (e: Exception) {
-                            createdAt
-                        }
+                        }.getOrDefault(createdAt)
                     Text(
                         text = "Присоединился: $formattedDate",
                         style = MaterialTheme.typography.bodyMedium,

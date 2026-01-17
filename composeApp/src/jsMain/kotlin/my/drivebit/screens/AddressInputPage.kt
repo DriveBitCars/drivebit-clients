@@ -39,7 +39,24 @@ fun AddressInputPage(
                 TextSmartHeader("Введите адрес")
             }
 
-            FormSection {
+            FormSection(
+                listingContent = {
+                    StringList(
+                        strings = suggestions.mapNotNull { it.value },
+                        onSelected = { suggestionString ->
+                            val suggestion = suggestions.firstOrNull { it.value == suggestionString }
+                            inputValue = suggestionString
+                            viewModel.clearSuggestions()
+                            selectedAddressRepository.saveAddress(suggestionString)
+                            suggestion?.data?.let { addressData ->
+                                selectedAddressRepository.saveAddressData(addressData)
+                            }
+                            onAddressSelected(suggestionString)
+                            onNavigateToWinCode()
+                        },
+                    )
+                },
+            ) {
                 TextInputField(
                     label = "Адрес",
                     value = inputValue,
@@ -48,21 +65,6 @@ fun AddressInputPage(
                         if (newValue.isNotBlank() && newValue.isNotEmpty()) {
                             viewModel.updateQuery(newValue)
                         }
-                    },
-                )
-
-                StringList(
-                    strings = suggestions.mapNotNull { it.value },
-                    onSelected = { suggestionString ->
-                        val suggestion = suggestions.firstOrNull { it.value == suggestionString }
-                        inputValue = suggestionString
-                        viewModel.clearSuggestions()
-                        selectedAddressRepository.saveAddress(suggestionString)
-                        suggestion?.data?.let { addressData ->
-                            selectedAddressRepository.saveAddressData(addressData)
-                        }
-                        onAddressSelected(suggestionString)
-                        onNavigateToWinCode()
                     },
                 )
             }

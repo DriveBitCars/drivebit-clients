@@ -34,7 +34,26 @@ fun CitySelectionPage(onCitySelected: () -> Unit = {}) {
                 TextSmartHeader("Выберите город")
             }
 
-            FormSection {
+            FormSection(
+                listingContent = {
+                    if (error != null) {
+                        TextError(error ?: "Произошла ошибка")
+                    } else {
+                        StringList(
+                            strings = cities.map { it.name },
+                            onSelected = { cityName ->
+                                val city = cities.find { it.name == cityName }
+                                city?.let {
+                                    inputValue = cityName
+                                    viewModel.clearQuery()
+                                    selectedCityRepository.saveCity(it.id, it.name)
+                                    onCitySelected()
+                                }
+                            },
+                        )
+                    }
+                },
+            ) {
                 TextInputField(
                     label = "Город",
                     value = inputValue,
@@ -43,23 +62,6 @@ fun CitySelectionPage(onCitySelected: () -> Unit = {}) {
                         viewModel.updateQuery(newValue)
                     },
                 )
-
-                if (error != null) {
-                    TextError(error ?: "Произошла ошибка")
-                } else {
-                    StringList(
-                        strings = cities.map { it.name },
-                        onSelected = { cityName ->
-                            val city = cities.find { it.name == cityName }
-                            city?.let {
-                                inputValue = cityName
-                                viewModel.clearQuery()
-                                selectedCityRepository.saveCity(it.id, it.name)
-                                onCitySelected()
-                            }
-                        },
-                    )
-                }
             }
         }
     }

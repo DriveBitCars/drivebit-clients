@@ -42,7 +42,26 @@ fun EngineTypeSelectionPage(onEngineTypeSelected: () -> Unit = {}) {
                 TextSmartHeader("Выберите тип двигателя")
             }
 
-            FormSection {
+            FormSection(
+                listingContent = {
+                    if (error != null) {
+                        TextError(error ?: "Произошла ошибка")
+                    } else {
+                        StringList(
+                            strings = engineTypes.map { it.translate },
+                            onSelected = { translate ->
+                                val engineType = engineTypes.find { it.translate == translate }
+                                engineType?.let {
+                                    inputValue = translate
+                                    viewModel.clearQuery()
+                                    selectedEngineTypeRepository.saveEngineType(it.name, it.translate)
+                                    onEngineTypeSelected()
+                                }
+                            },
+                        )
+                    }
+                },
+            ) {
                 TextInputField(
                     label = "Тип двигателя",
                     value = inputValue,
@@ -51,23 +70,6 @@ fun EngineTypeSelectionPage(onEngineTypeSelected: () -> Unit = {}) {
                         viewModel.updateQuery(newValue)
                     },
                 )
-
-                if (error != null) {
-                    TextError(error ?: "Произошла ошибка")
-                } else {
-                    StringList(
-                        strings = engineTypes.map { it.translate },
-                        onSelected = { translate ->
-                            val engineType = engineTypes.find { it.translate == translate }
-                            engineType?.let {
-                                inputValue = translate
-                                viewModel.clearQuery()
-                                selectedEngineTypeRepository.saveEngineType(it.name, it.translate)
-                                onEngineTypeSelected()
-                            }
-                        },
-                    )
-                }
             }
         }
     }

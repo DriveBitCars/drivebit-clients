@@ -36,6 +36,8 @@ interface CarEnumsRepository {
     suspend fun getAllTransmissionTypes(): List<EnumItem>
 
     suspend fun getAllDriveTypes(): List<EnumItem>
+
+    suspend fun getAllDocumentTypes(): List<EnumItem>
 }
 
 data class EnumItem(
@@ -138,6 +140,19 @@ class CarEnumsRepositoryImpl(
         val enums = getEnums()
         return enums.DriveTypeEnum.map { it.toEnumItem() }
     }
+
+    override suspend fun getAllDocumentTypes(): List<EnumItem> =
+        withContext(Dispatchers.Default) {
+            runCatching {
+                val documentEnums = dictionary.getDocumentEnums()
+                documentEnums.DocumentTypeEnum.map { it.toEnumItem() }
+            }.getOrElse { e ->
+                throw CarEnumsLoadException(
+                    "Failed to load document enums from server: ${e.message}",
+                    e,
+                )
+            }
+        }
 
     private fun validateEnums(enums: CarEnumsResponse) {
         if (enums.CarColorEnum.isEmpty()) {
