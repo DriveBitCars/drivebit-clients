@@ -46,15 +46,14 @@ internal class MyCityRepositoryImpl(
         }
 
         val selectedCityId = selectedCityIdString.toIntOrNull()
-        if (selectedCityId != null) {
-            if (selectedCityName.isNotEmpty()) {
-                val searchResults = searchCities(selectedCityName)
-                val selectedCity = searchResults.firstOrNull { it.id == selectedCityId && it.name == selectedCityName }
-                if (selectedCity != null) {
-                    return selectedCity
-                }
-            }
+        if (selectedCityId != null && selectedCityName.isNotEmpty()) {
+            return City(
+                id = selectedCityId,
+                name = selectedCityName,
+            )
+        }
 
+        if (selectedCityId != null) {
             val moscowResults = searchCities(MOSCOW_NAME)
             val selectedCity = moscowResults.firstOrNull { it.id == selectedCityId }
             if (selectedCity != null) {

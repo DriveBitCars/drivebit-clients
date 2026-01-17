@@ -30,10 +30,6 @@ class CarMenuViewModelImpl(
     private val _menuOption = MutableStateFlow<CarMenuOption>(CarMenuOption.ListYourCar)
     private val _isLoading = MutableStateFlow<Boolean>(false)
 
-    init {
-        println("🏗️ [CarMenuViewModel] Instance created (hashCode: ${hashCode()})")
-    }
-
     override val menuOption: StateFlow<CarMenuOption>
         get() = _menuOption.asStateFlow()
 
@@ -48,11 +44,9 @@ class CarMenuViewModelImpl(
         }
 
         if (_isLoading.value) {
-            println("⏸️ [CarMenuViewModel] load() skipped - already loading")
             return
         }
 
-        println("🔄 [CarMenuViewModel] load() called")
         _isLoading.value = true
         coroutineScope.launch {
             runCatching {

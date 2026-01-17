@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.browser.window
 import my.drivebit.components.ActionButton
+import my.drivebit.components.CarItemSmall
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
 import my.drivebit.components.Loader
@@ -13,13 +14,10 @@ import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
-import my.drivebit.components.UniversalButton
 import my.drivebit.design.CSSColors
 import my.drivebit.viewmodels.MyCarsViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
-import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 
@@ -84,8 +82,8 @@ fun MyCarsPage() {
                     else -> {
                         Div({
                             style {
-                                display(DisplayStyle.Grid)
-                                gridTemplateColumns("repeat(auto-fill, minmax(200px, 1fr))")
+                                display(DisplayStyle.Flex)
+                                flexDirection(FlexDirection.Column)
                                 gap(16.px)
                             }
                         }) {
@@ -94,103 +92,28 @@ fun MyCarsPage() {
                                     style {
                                         display(DisplayStyle.Flex)
                                         flexDirection(FlexDirection.Column)
-                                        borderRadius(8.px)
-                                        property("border", "1px solid ${CSSColors.Gray300String}")
-                                        property("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)")
-                                        overflow("hidden")
-                                        backgroundColor(CSSColors.White)
+                                        gap(12.px)
                                     }
                                 }) {
-                                    val photosFromGeneral = car.general?.photos ?: emptyList()
-                                    val photosFromTopLevel = car.photos
-                                    val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
-                                    val firstPhotoUrl = allPhotos.firstOrNull()?.url
-                                    if (!firstPhotoUrl.isNullOrEmpty()) {
-                                        Img(
-                                            src = firstPhotoUrl,
-                                            attrs = {
-                                                style {
-                                                    width(100.percent)
-                                                    height(150.px)
-                                                    property("object-fit", "cover")
-                                                }
-                                            },
-                                        )
-                                    } else {
-                                        Div({
-                                            style {
-                                                width(100.percent)
-                                                height(150.px)
-                                                backgroundColor(CSSColors.Gray300)
-                                                display(DisplayStyle.Flex)
-                                                alignItems(AlignItems.Center)
-                                                justifyContent(JustifyContent.Center)
-                                                color(CSSColors.Gray600)
-                                                fontSize(14.px)
-                                            }
-                                        }) {
-                                            Text("Нет фото")
-                                        }
-                                    }
+                                    CarItemSmall(
+                                        car = car,
+                                        onClick = {
+                                            window.location.href = "/car-detail?id=${car.id}"
+                                        },
+                                    )
                                     Div({
                                         style {
-                                            padding(12.px)
                                             display(DisplayStyle.Flex)
-                                            flexDirection(FlexDirection.Column)
-                                            gap(4.px)
+                                            justifyContent(JustifyContent.Center)
                                         }
                                     }) {
-                                        val carName =
-                                            "${car.general?.brandName ?: ""} ${car.general?.modelName ?: ""}"
-                                                .trim()
-                                                .ifBlank { "Автомобиль #${car.id.take(8)}" }
-
-                                        if (carName.isNotEmpty()) {
-                                            Div({
-                                                style {
-                                                    fontSize(16.px)
-                                                    fontWeight("600")
-                                                    color(CSSColors.Black)
-                                                }
-                                            }) {
-                                                Text(carName)
-                                            }
-                                        }
-
-                                        car.general?.year?.let { year ->
-                                            if (year > 0) {
-                                                Div({
-                                                    style {
-                                                        fontSize(14.px)
-                                                        color(CSSColors.Gray600)
-                                                    }
-                                                }) {
-                                                    Text("$year год")
-                                                }
-                                            }
-                                        }
-
-                                        Div({
-                                            style {
-                                                marginTop(8.px)
-                                            }
-                                        }) {
-                                            UniversalButton(
-                                                isSelected = false,
-                                                onClick = {
-                                                    window.location.href = "/car-edit?carId=${car.id}"
-                                                },
-                                            ) {
-                                                Span({
-                                                    style {
-                                                        fontSize(14.px)
-                                                        fontWeight("500")
-                                                    }
-                                                }) {
-                                                    Text("Управлять")
-                                                }
-                                            }
-                                        }
+                                        ActionButton(
+                                            enabledColor = CSSColors.Blue,
+                                            text = "Управлять",
+                                            onClick = {
+                                                window.location.href = "/car-edit?id=${car.id}"
+                                            },
+                                        )
                                     }
                                 }
                             }

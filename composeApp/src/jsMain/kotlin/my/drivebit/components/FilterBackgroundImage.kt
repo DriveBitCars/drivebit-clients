@@ -6,11 +6,14 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 
 @Composable
-fun FilterBackgroundImage(backgroundIconUrl: String) {
+fun FilterBackgroundImage(
+    backgroundIconUrl: String,
+    searchContent: (@Composable () -> Unit)? = null,
+) {
     Div({
         style {
             width(100.percent)
-            height(200.px)
+            height(250.px)
             borderRadius(12.px)
             overflow("hidden")
             position(Position.Relative)
@@ -45,5 +48,24 @@ fun FilterBackgroundImage(backgroundIconUrl: String) {
                 background("linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3))")
             }
         })
+
+        // Контент поиска по центру и сверху
+        searchContent?.let {
+            Div({
+                style {
+                    position(Position.Absolute)
+                    top(80.px)
+                    left(50.percent)
+                    property("transform", "translateX(-50%)")
+                    width(80.percent)
+                    property("max-width", "600px")
+                    property("z-index", "10")
+                    display(DisplayStyle.Flex)
+                    justifyContent(JustifyContent.Center)
+                }
+            }) {
+                it()
+            }
+        }
     }
 }

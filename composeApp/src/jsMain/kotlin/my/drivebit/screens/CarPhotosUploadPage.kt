@@ -44,8 +44,8 @@ fun CarPhotosUploadPage(onPhotosUploaded: () -> Unit = {}) {
     var selectedFilesCount by remember { mutableStateOf(0) }
 
     val fileInputId = remember { "car-photos-input-${kotlin.random.Random.nextInt()}" }
-    val carIdParam = remember { getUrlParameter("carId") }
-    val carId = carIdParam?.toIntOrNull()
+    val carIdParam = getUrlParameter("carId")
+    val carId = carIdParam.toIntOrNull()
 
     DisposableEffect(fileInputId) {
         val inputElement =

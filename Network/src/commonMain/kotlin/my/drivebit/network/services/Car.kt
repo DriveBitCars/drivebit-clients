@@ -22,6 +22,16 @@ interface Car {
         cityId: String,
         dateFrom: String? = null,
         dateTo: String? = null,
+        availableMileagePerDayKmMin: Int? = null,
+        dailyPriceMin: Int? = null,
+        dailyPriceMax: Int? = null,
+        yearMin: Int? = null,
+        yearMax: Int? = null,
+        seatsMin: Int? = null,
+        seatsMax: Int? = null,
+        bodyTypes: List<String>? = null,
+        engineTypes: List<String>? = null,
+        colors: List<String>? = null,
     ): CarSearchResponse
 
     suspend fun getMyCars(): List<CarItem>
@@ -41,6 +51,15 @@ interface Car {
 @Serializable
 data class CarSearchResponse(
     val cars: List<CarItem> = emptyList(),
+)
+
+@Serializable
+data class CarDTOPagedResult(
+    val items: List<CarItem> = emptyList(),
+    val page: Int = 0,
+    val pageSize: Int = 0,
+    val totalCount: Int = 0,
+    val totalPages: Int = 0,
 )
 
 @Serializable
@@ -266,16 +285,37 @@ class CarImpl(
         cityId: String,
         dateFrom: String?,
         dateTo: String?,
+        availableMileagePerDayKmMin: Int?,
+        dailyPriceMin: Int?,
+        dailyPriceMax: Int?,
+        yearMin: Int?,
+        yearMax: Int?,
+        seatsMin: Int?,
+        seatsMax: Int?,
+        bodyTypes: List<String>?,
+        engineTypes: List<String>?,
+        colors: List<String>?,
     ): CarSearchResponse {
-        val url = "${DEFAULT_BASE_URL}Car/search"
+        val url = "${DEFAULT_BASE_URL}Car/list/city/$cityId"
         val response =
             httpClient.get(url) {
-                parameter("cityId", cityId)
+                parameter("page", 1)
+                parameter("pageSize", 100)
                 dateFrom?.let { parameter("dateFrom", it) }
                 dateTo?.let { parameter("dateTo", it) }
+                availableMileagePerDayKmMin?.let { parameter("availableMileagePerDayKmMin", it) }
+                dailyPriceMin?.let { parameter("dailyPriceMin", it) }
+                dailyPriceMax?.let { parameter("dailyPriceMax", it) }
+                yearMin?.let { parameter("yearMin", it) }
+                yearMax?.let { parameter("yearMax", it) }
+                seatsMin?.let { parameter("seatsMin", it) }
+                seatsMax?.let { parameter("seatsMax", it) }
+                bodyTypes?.forEach { parameter("bodyTypes", it) }
+                engineTypes?.forEach { parameter("engineTypes", it) }
+                colors?.forEach { parameter("colors", it) }
             }
-        val result: CarSearchResponse = response.parseResponse()
-        return result.copy(cars = sanitizeCarItems(result.cars))
+        val result: CarDTOPagedResult = response.parseResponse()
+        return CarSearchResponse(cars = sanitizeCarItems(result.items))
     }
 
     override suspend fun getMyCars(): List<CarItem> {
@@ -286,6 +326,9 @@ class CarImpl(
     }
 
     override suspend fun getCar(id: String): CarDetailResponse {
+        if (id.isBlank()) {
+            throw IllegalArgumentException("Car ID cannot be empty")
+        }
         val url = "${DEFAULT_BASE_URL}Car/$id"
         val response = httpClient.get(url)
         val result: CarDetailResponse = response.parseResponse()

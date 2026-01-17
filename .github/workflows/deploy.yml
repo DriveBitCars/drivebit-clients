@@ -362,6 +362,72 @@ jobs:
           ls -la /var/www/drivebit-clients/
           echo "✅ Deployment completed successfully!"
 
+    - name: Configure nginx API proxy
+      continue-on-error: true
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          set -e
+          if [ "$EUID" -ne 0 ]; then SUDO_CMD="sudo"; else SUDO_CMD=""; fi
+          
+          echo "🔍 Finding nginx configuration file..."
+          NGINX_CONFIG=""
+          if [ -f "/etc/nginx/sites-available/drivebit.my" ]; then
+            NGINX_CONFIG="/etc/nginx/sites-available/drivebit.my"
+          elif [ -f "/etc/nginx/sites-available/drivebit-clients" ]; then
+            NGINX_CONFIG="/etc/nginx/sites-available/drivebit-clients"
+          elif [ -f "/etc/nginx/conf.d/drivebit.conf" ]; then
+            NGINX_CONFIG="/etc/nginx/conf.d/drivebit.conf"
+          else
+            echo "⚠️  Nginx config not found in common locations, checking all..."
+            $SUDO_CMD find /etc/nginx -name "*drivebit*" -o -name "*default*" 2>/dev/null | head -5
+            exit 1
+          fi
+          
+          echo "📝 Using nginx config: $NGINX_CONFIG"
+          
+          # Backup config
+          $SUDO_CMD cp "$NGINX_CONFIG" "${NGINX_CONFIG}.backup.$(date +%Y%m%d_%H%M%S)"
+          
+          # Check if API proxy already exists
+          if grep -q "location /api/" "$NGINX_CONFIG"; then
+            echo "✅ API proxy configuration already exists"
+          else
+            echo "⚙️  Adding API proxy configuration..."
+            # Find the server block and add API proxy before location /
+            $SUDO_CMD sed -i '/server {/,/location \// {
+              /location \// i\
+    # API proxy to backend\
+    location /api/ {\
+        proxy_pass http://155.212.170.94:5000/api/;\
+        proxy_set_header Host $host;\
+        proxy_set_header X-Real-IP $remote_addr;\
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
+        proxy_set_header X-Forwarded-Proto $scheme;\
+        add_header Access-Control-Allow-Origin * always;\
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;\
+        add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;\
+        if ($request_method = OPTIONS) {\
+            return 204;\
+        }\
+    }
+            }' "$NGINX_CONFIG"
+            echo "✅ API proxy configuration added"
+          fi
+          
+          # Test nginx config
+          echo "🧪 Testing nginx configuration..."
+          $SUDO_CMD nginx -t || (echo "❌ Nginx config test failed!" && exit 1)
+          
+          # Reload nginx
+          echo "🔄 Reloading nginx..."
+          $SUDO_CMD systemctl reload nginx || $SUDO_CMD systemctl restart nginx
+          echo "✅ Nginx reloaded with API proxy configuration"
+
     - name: Enable nginx static compression (gzip_static, wasm type)
       continue-on-error: true
       uses: appleboy/ssh-action@v1.2.2

@@ -15,6 +15,8 @@ import my.drivebit.repositories.CarEnumsRepository
 import my.drivebit.repositories.CarEnumsRepositoryImpl
 import my.drivebit.repositories.CarModelRepository
 import my.drivebit.repositories.CarModelRepositoryImpl
+import my.drivebit.repositories.CarSearchRepository
+import my.drivebit.repositories.CarSearchRepositoryImpl
 import my.drivebit.repositories.ChangeEmailRepositoryImpl
 import my.drivebit.repositories.ChangePhoneRepositoryImpl
 import my.drivebit.repositories.CityRepository
@@ -212,6 +214,13 @@ val repositoriesModule: Module =
             MyCityRepositoryImpl(
                 dictionary = get(),
                 storage = get(),
+            )
+        }
+
+        single<CarSearchRepository> {
+            CarSearchRepositoryImpl(
+                carService = get(),
+                myCityRepository = get(),
             )
         }
 

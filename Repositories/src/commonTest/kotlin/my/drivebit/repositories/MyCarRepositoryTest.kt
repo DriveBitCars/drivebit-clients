@@ -31,6 +31,16 @@ class MyCarRepositoryTest {
                         cityId: String,
                         dateFrom: String?,
                         dateTo: String?,
+                        availableMileagePerDayKmMin: Int?,
+                        dailyPriceMin: Int?,
+                        dailyPriceMax: Int?,
+                        yearMin: Int?,
+                        yearMax: Int?,
+                        seatsMin: Int?,
+                        seatsMax: Int?,
+                        bodyTypes: List<String>?,
+                        engineTypes: List<String>?,
+                        colors: List<String>?,
                     ) = throw NotImplementedError()
 
                     override suspend fun getMyCars(): List<CarItem> {
@@ -77,6 +87,16 @@ class MyCarRepositoryTest {
                         cityId: String,
                         dateFrom: String?,
                         dateTo: String?,
+                        availableMileagePerDayKmMin: Int?,
+                        dailyPriceMin: Int?,
+                        dailyPriceMax: Int?,
+                        yearMin: Int?,
+                        yearMax: Int?,
+                        seatsMin: Int?,
+                        seatsMax: Int?,
+                        bodyTypes: List<String>?,
+                        engineTypes: List<String>?,
+                        colors: List<String>?,
                     ) = throw NotImplementedError()
 
                     override suspend fun getMyCars(): List<CarItem> {
@@ -135,6 +155,16 @@ class MyCarRepositoryTest {
                         cityId: String,
                         dateFrom: String?,
                         dateTo: String?,
+                        availableMileagePerDayKmMin: Int?,
+                        dailyPriceMin: Int?,
+                        dailyPriceMax: Int?,
+                        yearMin: Int?,
+                        yearMax: Int?,
+                        seatsMin: Int?,
+                        seatsMax: Int?,
+                        bodyTypes: List<String>?,
+                        engineTypes: List<String>?,
+                        colors: List<String>?,
                     ) = throw NotImplementedError()
 
                     override suspend fun getMyCars(): List<CarItem> {
@@ -184,6 +214,16 @@ class MyCarRepositoryTest {
                         cityId: String,
                         dateFrom: String?,
                         dateTo: String?,
+                        availableMileagePerDayKmMin: Int?,
+                        dailyPriceMin: Int?,
+                        dailyPriceMax: Int?,
+                        yearMin: Int?,
+                        yearMax: Int?,
+                        seatsMin: Int?,
+                        seatsMax: Int?,
+                        bodyTypes: List<String>?,
+                        engineTypes: List<String>?,
+                        colors: List<String>?,
                     ) = throw NotImplementedError()
 
                     override suspend fun getMyCars(): List<CarItem> {

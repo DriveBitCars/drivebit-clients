@@ -29,9 +29,9 @@ import org.koin.compose.koinInject
 @Composable
 fun EditNamePage(currentPath: String = "/edit-name") {
     val userService: User = koinInject()
-    val initialFirstName = remember { getUrlParameter("firstName") }
-    val initialLastName = remember { getUrlParameter("lastName") }
-    val initialMiddleName = remember { getUrlParameter("middleName") }
+    val initialFirstName = getUrlParameter("firstName")
+    val initialLastName = getUrlParameter("lastName")
+    val initialMiddleName = getUrlParameter("middleName")
 
     val viewModel: EditProfileViewModel =
         remember(initialFirstName, initialLastName, initialMiddleName, userService) {

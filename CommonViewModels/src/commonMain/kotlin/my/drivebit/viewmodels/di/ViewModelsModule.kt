@@ -15,6 +15,8 @@ import my.drivebit.viewmodels.BodyTypeViewModel
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
 import my.drivebit.viewmodels.CarBrandViewModel
+import my.drivebit.viewmodels.CarDetailViewModel
+import my.drivebit.viewmodels.CarDetailViewModelImpl
 import my.drivebit.viewmodels.CarEditMviViewModel
 import my.drivebit.viewmodels.CarEditMviViewModelImpl
 import my.drivebit.viewmodels.CarEditViewModel
@@ -24,6 +26,8 @@ import my.drivebit.viewmodels.CarMenuViewModelImpl
 import my.drivebit.viewmodels.CarModelViewModel
 import my.drivebit.viewmodels.CarPhotosViewModel
 import my.drivebit.viewmodels.CarPhotosViewModelImpl
+import my.drivebit.viewmodels.CarSearchViewModel
+import my.drivebit.viewmodels.CarSearchViewModelImpl
 import my.drivebit.viewmodels.CityViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModelImpl
@@ -36,6 +40,8 @@ import my.drivebit.viewmodels.EmailLoginViewModel
 import my.drivebit.viewmodels.EngineTypeViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.IconUserViewModel
+import my.drivebit.viewmodels.MainContentViewModel
+import my.drivebit.viewmodels.MainContentViewModelImpl
 import my.drivebit.viewmodels.MapViewModel
 import my.drivebit.viewmodels.MyCarsViewModel
 import my.drivebit.viewmodels.MyCarsViewModelImpl
@@ -48,6 +54,8 @@ import my.drivebit.viewmodels.PassportUploadViewModelImpl
 import my.drivebit.viewmodels.PhoneLoginViewModel
 import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
+import my.drivebit.viewmodels.SearchViewModel
+import my.drivebit.viewmodels.SearchViewModelImpl
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.WinCodeInputViewModel
 import org.koin.core.module.Module
@@ -104,6 +112,18 @@ val commonViewModelsModule: Module =
         factory<MyCitySelectionViewModel> {
             MyCitySelectionViewModelImpl(
                 myCityRepository = get(),
+            )
+        }
+
+        factory<CarSearchViewModel> {
+            CarSearchViewModelImpl(
+                carSearchRepository = get(),
+            )
+        }
+
+        single<MainContentViewModel> {
+            MainContentViewModelImpl(
+                carSearchRepository = get(),
             )
         }
 
@@ -275,6 +295,22 @@ val commonViewModelsModule: Module =
         factory<DocumentsViewModel> {
             DocumentsViewModelImpl(
                 documents = get(),
+            )
+        }
+
+        factory<SearchViewModel> {
+            SearchViewModelImpl(
+                dictionary = get(),
+                carService = get(),
+                myCityRepository = get(),
+                carSearchRepository = get(),
+            )
+        }
+
+        factory<CarDetailViewModel> { (carId: String) ->
+            CarDetailViewModelImpl(
+                carService = get(),
+                carId = carId,
             )
         }
     }

@@ -7,6 +7,7 @@ import my.drivebit.network.services.CarModel
 import my.drivebit.network.services.City
 import my.drivebit.network.services.Dictionary
 import my.drivebit.network.services.DocumentEnumsResponse
+import my.drivebit.network.services.FilterSuggestion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -43,6 +44,8 @@ class CarEnumsRepositoryTest {
                     override suspend fun getAllCities(): List<City> = emptyList()
 
                     override suspend fun getDocumentEnums(): DocumentEnumsResponse = throw NotImplementedError()
+
+                    override suspend fun getFiltersSuggested(): List<FilterSuggestion> = emptyList()
                 }
             val repository = CarEnumsRepositoryImpl(fakeDictionary)
 
@@ -128,6 +131,8 @@ class CarEnumsRepositoryTest {
             override suspend fun getAllCities(): List<City> = emptyList()
 
             override suspend fun getDocumentEnums(): DocumentEnumsResponse = throw NotImplementedError()
+
+            override suspend fun getFiltersSuggested(): List<FilterSuggestion> = emptyList()
         }
 
     private fun createValidEnums(): CarEnumsResponse =

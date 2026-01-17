@@ -2,17 +2,26 @@ package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
-import my.drivebit.components.CenteredContent
+import my.drivebit.components.CarItemSmall
 import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.FilterButtonsRow
-import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.TextInputField
 import my.drivebit.components.filterButton
+import my.drivebit.viewmodels.CarSearchViewModel
+import my.drivebit.viewmodels.MainContentViewModel
+import my.drivebit.network.services.CarItem
+import my.drivebit.design.CSSColors
 import my.drivebit.maps.MapView
+import my.drivebit.maps.models.MapCameraPosition
+import my.drivebit.maps.models.MapMarker
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
-import my.drivebit.resources.ImagePaths
 import my.drivebit.screens.AddressInputPage
 import my.drivebit.screens.BodyTypeSelectionPage
 import my.drivebit.screens.CarBrandSelectionPage
@@ -20,6 +29,8 @@ import my.drivebit.screens.CarEditPage
 import my.drivebit.screens.CarModelSelectionPage
 import my.drivebit.screens.CarPhotosPage
 import my.drivebit.screens.CarPhotosUploadPage
+import my.drivebit.screens.CarDetailPage
+import my.drivebit.screens.CarPhotosGalleryPage
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.CitySelectionMode
@@ -40,6 +51,7 @@ import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.ProductionYearInputPage
 import my.drivebit.screens.ProfilePage
+import my.drivebit.screens.SearchPage
 import my.drivebit.screens.SeatsCountInputPage
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.FiltersViewModel
@@ -48,7 +60,8 @@ import my.drivebit.viewmodels.di.commonViewModelsModule
 import my.drivebit.web.di.webModule
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
@@ -102,6 +115,16 @@ actual fun App() {
                 }
                 currentPath.startsWith("/car-edit") -> {
                     CarEditPage()
+                }
+                currentPath.startsWith("/car-photos-gallery") -> {
+                    CarPhotosGalleryPage()
+                }
+                currentPath.startsWith("/car-photos-upload") -> {
+                    CarPhotosUploadPage(
+                        onPhotosUploaded = {
+                            window.location.href = "/"
+                        },
+                    )
                 }
                 currentPath.startsWith("/car-photos") -> {
                     CarPhotosPage()
@@ -217,12 +240,11 @@ actual fun App() {
                         },
                     )
                 }
-                currentPath.startsWith("/car-photos-upload") -> {
-                    CarPhotosUploadPage(
-                        onPhotosUploaded = {
-                            window.location.href = "/"
-                        },
-                    )
+                currentPath.startsWith("/search") -> {
+                    SearchPage()
+                }
+                currentPath.startsWith("/car-detail") -> {
+                    CarDetailPage()
                 }
                 else -> {
                     HomePage()
@@ -236,17 +258,41 @@ actual fun App() {
 fun HomePage() {
     val filterViewModel: FiltersViewModel = koinInject()
     val mapViewModel: MapViewModel = koinInject()
+    val carSearchViewModel: CarSearchViewModel = koinInject()
+    val mainContentViewModel: MainContentViewModel = koinInject()
 
     val state = filterViewModel.state.collectAsState()
     val mapState = mapViewModel.state.collectAsState()
+    val carSearchState = carSearchViewModel.state.collectAsState()
+    val cars by mainContentViewModel.firstList.collectAsState()
     val filters = state.value.filters
     val selected = state.value.selected
+
+    var searchQuery by remember { mutableStateOf("") }
 
     AppWithHeader {
         val selectedFilter = filters.find { it.title == selected }
         selectedFilter?.let { filter ->
             FilterBackgroundImage(
                 backgroundIconUrl = filter.backgroundIcon,
+                searchContent = {
+                    Div({
+                        style {
+                            width(100.percent)
+                        }
+                    }) {
+                        TextInputField(
+                            label = "",
+                            value = searchQuery,
+                            onValueChange = { newValue ->
+                                searchQuery = newValue
+                            },
+                            onFocus = {
+                                window.location.href = "/search"
+                            },
+                        )
+                    }
+                },
             )
         }
 
@@ -265,20 +311,10 @@ fun HomePage() {
             }
         }
 
-        if (selected == "По близости") {
-            Div({
-                style {
-                    width(100.percent)
-                    height(600.px)
-                    marginTop(20.px)
-                    borderRadius(8.px)
-                    property("overflow", "hidden")
-                    property("box-shadow", "0 2px 8px rgba(0,0,0,0.1)")
-                }
-            }) {
-                MapView(
+        when (selected) {
+            "По близости" -> {
+                NearbyMapView(
                     cameraPosition = mapState.value.cameraPosition,
-                    markers = emptyList(),
                     onMarkerClick = { marker ->
                         println("Clicked marker: ${marker.title}")
                     },
@@ -287,22 +323,170 @@ fun HomePage() {
                     },
                 )
             }
-        } else {
-            CenteredContent {
-                Img(
-                    src = ImagePaths.FIX_SVG,
-                    alt = "Coming soon",
-                    attrs = {
-                        style {
-                            property("max-width", "600px")
-                            width(100.percent)
-                            property("height", "auto")
-                            marginBottom(20.px)
-                        }
+            else -> {
+                CarsListView(cars = cars)
+            }
+        }
+    }
+}
+
+@Composable
+private fun NearbyMapView(
+    cameraPosition: MapCameraPosition,
+    onMarkerClick: (MapMarker) -> Unit,
+    onCameraMove: (MapCameraPosition) -> Unit,
+) {
+    Div({
+        style {
+            width(100.percent)
+            height(600.px)
+            marginTop(20.px)
+            borderRadius(8.px)
+            property("overflow", "hidden")
+            property("box-shadow", "0 2px 8px rgba(0,0,0,0.1)")
+        }
+    }) {
+        MapView(
+            cameraPosition = cameraPosition,
+            markers = emptyList(),
+            onMarkerClick = onMarkerClick,
+            onCameraMove = onCameraMove,
+        )
+    }
+}
+
+@Composable
+private fun CarsListView(cars: List<CarItem>) {
+    val scrollContainerId = "cars-scroll-container"
+
+    Div({
+        style {
+            width(100.percent)
+            marginTop(20.px)
+        }
+    }) {
+        Div({
+            style {
+                width(100.percent)
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Row)
+                justifyContent(JustifyContent.SpaceBetween)
+                alignItems(AlignItems.Center)
+                marginBottom(16.px)
+            }
+        }) {
+            Div()
+
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Row)
+                    gap(8.px)
+                }
+            }) {
+                ScrollButton(
+                    direction = "left",
+                    onClick = {
+                        val container =
+                            kotlinx.browser.document.getElementById(
+                                scrollContainerId,
+                            ) as? org.w3c.dom.HTMLElement
+                        container?.scrollBy(-296.0, 0.0)
                     },
                 )
-                TextSmartHeader("скоро...")
+
+                ScrollButton(
+                    direction = "right",
+                    onClick = {
+                        val container =
+                            kotlinx.browser.document.getElementById(
+                                scrollContainerId,
+                            ) as? org.w3c.dom.HTMLElement
+                        container?.scrollBy(296.0, 0.0)
+                    },
+                )
             }
+        }
+
+        Div({
+            id(scrollContainerId)
+            style {
+                width(100.percent)
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Row)
+                gap(16.px)
+                overflowX("hidden")
+                property("scroll-behavior", "smooth")
+            }
+        }) {
+            cars.forEach { car ->
+                Div({
+                    style {
+                        property("flex-shrink", "0")
+                        width(280.px)
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        gap(8.px)
+                    }
+                }) {
+                    CarItemSmall(
+                        car = car,
+                        onClick = {
+                            window.location.href = "/car-detail?id=${car.id}"
+                        },
+                    )
+                    Div({
+                        style {
+                            paddingLeft(12.px)
+                            paddingRight(12.px)
+                        }
+                    })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScrollButton(
+    direction: String,
+    onClick: () -> Unit,
+) {
+    Div({
+        style {
+            width(40.px)
+            height(40.px)
+            borderRadius(50.percent)
+            backgroundColor(CSSColors.White)
+            property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.15)")
+            display(DisplayStyle.Flex)
+            alignItems(AlignItems.Center)
+            justifyContent(JustifyContent.Center)
+            cursor("pointer")
+            property("transition", "background-color 0.2s ease")
+        }
+        onClick { onClick() }
+        onMouseEnter {
+            (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                "background-color",
+                "#f5f5f5",
+            )
+        }
+        onMouseLeave {
+            (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                "background-color",
+                CSSColors.WhiteString,
+            )
+        }
+    }) {
+        Span({
+            style {
+                fontSize(20.px)
+                fontWeight("bold")
+                color(CSSColors.Black)
+            }
+        }) {
+            Text(if (direction == "left") "‹" else "›")
         }
     }
 }
