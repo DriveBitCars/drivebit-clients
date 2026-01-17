@@ -16,7 +16,6 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
-import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.repositories.CarDataRepository
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.CreateCarFromDailyRateState
@@ -27,11 +26,13 @@ import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 
 @Composable
-fun DailyRateInputPage(onDailyRateEntered: () -> Unit = {}) {
+fun DailyRateInputPage(
+    onDailyRateEntered: () -> Unit,
+    onMissingPassport: () -> Unit = {},
+) {
     val carDataRepository: CarDataRepository = koinInject()
     val createCarViewModel: CreateCarFromDailyRateViewModel = koinInject()
     val createCarState by createCarViewModel.state.collectAsState()
-    val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
 
     var dailyRate by remember {
@@ -52,8 +53,8 @@ fun DailyRateInputPage(onDailyRateEntered: () -> Unit = {}) {
     LaunchedEffect(createCarState) {
         when (createCarState) {
             CreateCarFromDailyRateState.MissingPassport -> {
-                navigationController?.navigateTo("/passport-upload?autoCreate=1")
                 createCarViewModel.reset()
+                onMissingPassport()
             }
             is CreateCarFromDailyRateState.Success -> {
                 createCarViewModel.reset()

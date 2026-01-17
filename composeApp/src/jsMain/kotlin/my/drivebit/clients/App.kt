@@ -64,32 +64,32 @@ actual fun App() {
     }) {
         Navigation { currentPath ->
             when {
-                currentPath == "/city-selection" -> {
+                currentPath.startsWith("/city-selection") -> {
                     CitySelectionPage(
                         onCitySelected = {
                             window.location.href = "/address-input"
                         },
                     )
                 }
-                currentPath == "/list-your-car" -> {
+                currentPath.startsWith("/list-your-car") -> {
                     ListYourCarPage()
                 }
                 currentPath.startsWith("/verify-otp") -> {
                     OtpVerificationPage()
                 }
-                currentPath == "/login-by-phone" -> {
+                currentPath.startsWith("/login-by-phone") -> {
                     LoginPage(viewModelQualifier = named("phone"))
                 }
-                currentPath == "/login-by-mail" -> {
+                currentPath.startsWith("/login-by-mail") -> {
                     LoginPage(viewModelQualifier = named("email"))
                 }
-                currentPath == "/profile" -> {
+                currentPath.startsWith("/profile") -> {
                     ProfilePage()
                 }
-                currentPath == "/my-cars" -> {
+                currentPath.startsWith("/my-cars") -> {
                     MyCarsPage()
                 }
-                currentPath == "/documents" -> {
+                currentPath.startsWith("/documents") -> {
                     DocumentsPage()
                 }
                 currentPath.startsWith("/car-edit") -> {
@@ -101,20 +101,20 @@ actual fun App() {
                 currentPath.startsWith("/edit-name") -> {
                     EditNamePage(currentPath)
                 }
-                currentPath == "/change-email" -> {
+                currentPath.startsWith("/change-email") -> {
                     ChangeEmailPage()
                 }
-                currentPath == "/change-phone" -> {
+                currentPath.startsWith("/change-phone") -> {
                     ChangePhonePage()
                 }
-                currentPath == "/address-input" -> {
+                currentPath.startsWith("/address-input") -> {
                     AddressInputPage(
                         onNavigateToWinCode = {
                             window.location.href = "/license-plate-input"
                         },
                     )
                 }
-                currentPath == "/license-plate-input" -> {
+                currentPath.startsWith("/license-plate-input") -> {
                     LicensePlateInputPage(
                         onLicensePlateEntered = {
                             window.location.href = "/car-brand-selection"
@@ -128,56 +128,56 @@ actual fun App() {
                 //         },
                 //     )
                 // }
-                currentPath == "/car-brand-selection" -> {
+                currentPath.startsWith("/car-brand-selection") -> {
                     CarBrandSelectionPage(
                         onBrandSelected = { brandId ->
                             window.location.href = "/car-model-selection?brandId=$brandId"
                         },
                     )
                 }
-                currentPath == "/car-model-selection" -> {
+                currentPath.startsWith("/car-model-selection") -> {
                     CarModelSelectionPage(
                         onModelSelected = {
                             window.location.href = "/body-type-selection"
                         },
                     )
                 }
-                currentPath == "/body-type-selection" -> {
+                currentPath.startsWith("/body-type-selection") -> {
                     BodyTypeSelectionPage(
                         onBodyTypeSelected = {
                             window.location.href = "/drive-type-selection"
                         },
                     )
                 }
-                currentPath == "/drive-type-selection" -> {
+                currentPath.startsWith("/drive-type-selection") -> {
                     DriveTypeSelectionPage(
                         onDriveTypeSelected = {
                             window.location.href = "/engine-type-selection"
                         },
                     )
                 }
-                currentPath == "/engine-type-selection" -> {
+                currentPath.startsWith("/engine-type-selection") -> {
                     EngineTypeSelectionPage(
                         onEngineTypeSelected = {
                             window.location.href = "/engine-volume-input"
                         },
                     )
                 }
-                currentPath == "/engine-volume-input" -> {
+                currentPath.startsWith("/engine-volume-input") -> {
                     EngineVolumeInputPage(
                         onVolumeEntered = {
                             window.location.href = "/production-year-input"
                         },
                     )
                 }
-                currentPath == "/production-year-input" -> {
+                currentPath.startsWith("/production-year-input") -> {
                     ProductionYearInputPage(
                         onYearEntered = {
                             window.location.href = "/seats-count-input"
                         },
                     )
                 }
-                currentPath == "/seats-count-input" -> {
+                currentPath.startsWith("/seats-count-input") -> {
                     SeatsCountInputPage(
                         onSeatsCountEntered = {
                             // window.location.href = "/hourly-rate-input"
@@ -192,14 +192,17 @@ actual fun App() {
                 //         },
                 //     )
                 // }
-                currentPath == "/daily-rate-input" -> {
+                currentPath.startsWith("/daily-rate-input") -> {
                     DailyRateInputPage(
                         onDailyRateEntered = {
                             kotlinx.browser.window.location.href = "/my-cars"
                         },
+                        onMissingPassport = {
+                            kotlinx.browser.window.location.href = "/passport-upload?autoCreate=1"
+                        },
                     )
                 }
-                currentPath == "/passport-upload" -> {
+                currentPath.startsWith("/passport-upload") -> {
                     PassportUploadPage(
                         onPassportUploaded = {
                             window.location.href = "/my-cars"
