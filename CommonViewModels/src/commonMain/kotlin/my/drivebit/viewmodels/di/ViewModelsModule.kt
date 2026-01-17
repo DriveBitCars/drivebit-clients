@@ -243,16 +243,7 @@ val commonViewModelsModule: Module =
         factory<CreateCarFromDailyRateViewModel> {
             CreateCarFromDailyRateViewModelImpl(
                 carDataRepository = get(),
-                selectedCarBrandRepository = get(),
-                selectedCarModelRepository = get(),
-                selectedBodyTypeRepository = get(),
-                selectedDriveTypeRepository = get(),
-                selectedEngineTypeRepository = get(),
-                licensePlateRepository = get(),
-                selectedAddressRepository = get(),
-                selectedCityRepository = get(),
-                myCarRepository = get(),
-                carService = get(),
+                createCarRepository = get(),
                 hasPassportRepo = get(),
             )
         }
@@ -260,6 +251,7 @@ val commonViewModelsModule: Module =
         factory<PassportUploadViewModel> {
             PassportUploadViewModelImpl(
                 documents = get(),
+                createCarRepository = get(),
             )
         }
 

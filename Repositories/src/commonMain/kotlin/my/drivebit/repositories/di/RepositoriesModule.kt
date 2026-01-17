@@ -19,6 +19,8 @@ import my.drivebit.repositories.ChangeEmailRepositoryImpl
 import my.drivebit.repositories.ChangePhoneRepositoryImpl
 import my.drivebit.repositories.CityRepository
 import my.drivebit.repositories.CityRepositoryImpl
+import my.drivebit.repositories.CreateCarRepository
+import my.drivebit.repositories.CreateCarRepositoryImpl
 import my.drivebit.repositories.CreateOtpRepository
 import my.drivebit.repositories.CreateOtpRepositoryImpl
 import my.drivebit.repositories.HasPassportRepo
@@ -208,6 +210,22 @@ val repositoriesModule: Module =
             HasPassportRepoImpl(
                 documents = get(),
                 carEnumsRepository = get(),
+            )
+        }
+
+        single<CreateCarRepository> {
+            CreateCarRepositoryImpl(
+                carDataRepository = get(),
+                selectedCarBrandRepository = get(),
+                selectedCarModelRepository = get(),
+                selectedBodyTypeRepository = get(),
+                selectedDriveTypeRepository = get(),
+                selectedEngineTypeRepository = get(),
+                licensePlateRepository = get(),
+                selectedAddressRepository = get(),
+                selectedCityRepository = get(),
+                myCarRepository = get(),
+                carService = get(),
             )
         }
     }

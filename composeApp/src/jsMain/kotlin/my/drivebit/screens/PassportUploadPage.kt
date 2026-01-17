@@ -21,7 +21,6 @@ import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
-import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.readAsBytes
 import my.drivebit.viewmodels.ButtonState
@@ -43,7 +42,6 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
     val state by viewModel.state.collectAsState()
     val createCarViewModel: CreateCarFromDailyRateViewModel = koinInject()
     val createCarState by createCarViewModel.state.collectAsState()
-    val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
     val coroutineScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 
@@ -78,12 +76,11 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
 
     LaunchedEffect(state) {
         if (state is PassportUploadState.Success && autoCreate == "1") {
-            viewModel.reset()
             createCarViewModel.createFromSavedDailyRate()
         } else if (state is PassportUploadState.Success) {
-            viewModel.reset()
-            navigationController?.navigateTo("/daily-rate-input")
+            onPassportUploaded()
         }
+        viewModel.reset()
     }
 
     LaunchedEffect(createCarState) {

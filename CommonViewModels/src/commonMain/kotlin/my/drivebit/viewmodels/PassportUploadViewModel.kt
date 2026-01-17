@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Document
 import my.drivebit.network.services.Documents
+import my.drivebit.repositories.CreateCarRepository
 
 sealed interface PassportUploadState {
     data object Idle : PassportUploadState
@@ -27,6 +28,7 @@ sealed interface PassportUploadState {
 
 interface PassportUploadViewModel {
     val state: StateFlow<PassportUploadState>
+    val createCarRepository: CreateCarRepository
 
     fun upload(
         fileBytes: ByteArray,
@@ -39,6 +41,7 @@ interface PassportUploadViewModel {
 
 class PassportUploadViewModelImpl(
     private val documents: Documents,
+    override val createCarRepository: CreateCarRepository,
     coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : PassportUploadViewModel {
     private val viewModelScope = coroutineScope
