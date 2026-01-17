@@ -252,6 +252,7 @@ val commonViewModelsModule: Module =
             PassportUploadViewModelImpl(
                 documents = get(),
                 createCarRepository = get(),
+                carDataRepository = get(),
             )
         }
 

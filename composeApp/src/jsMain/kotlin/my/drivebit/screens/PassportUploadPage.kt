@@ -24,8 +24,6 @@ import my.drivebit.design.CSSColors
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.readAsBytes
 import my.drivebit.viewmodels.ButtonState
-import my.drivebit.viewmodels.CreateCarFromDailyRateState
-import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
 import my.drivebit.viewmodels.PassportUploadState
 import my.drivebit.viewmodels.PassportUploadViewModel
 import my.drivebit.viewmodels.createButtonViewModel
@@ -40,8 +38,6 @@ import org.koin.compose.koinInject
 fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
     val viewModel: PassportUploadViewModel = koinInject()
     val state by viewModel.state.collectAsState()
-    val createCarViewModel: CreateCarFromDailyRateViewModel = koinInject()
-    val createCarState by createCarViewModel.state.collectAsState()
     val buttonViewModel = createButtonViewModel()
     val coroutineScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 
@@ -52,7 +48,7 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
 
     val fileInputId = remember { "passport-upload-input-${kotlin.random.Random.nextInt()}" }
 
-    val isUploading = state is PassportUploadState.Uploading
+    val isUploading = state is PassportUploadState.Uploading || state is PassportUploadState.CreatingCar
     val canUpload = selectedFile != null && !isUploading
 
     buttonViewModel.setState(
@@ -75,22 +71,18 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
     }
 
     LaunchedEffect(state) {
-        if (state is PassportUploadState.Success && autoCreate == "1") {
-            createCarViewModel.createFromSavedDailyRate()
-        } else if (state is PassportUploadState.Success) {
-            onPassportUploaded()
-        }
-        viewModel.reset()
-    }
-
-    LaunchedEffect(createCarState) {
-        when (createCarState) {
-            is CreateCarFromDailyRateState.Success -> {
-                createCarViewModel.reset()
-                onPassportUploaded()
+        when (state) {
+            is PassportUploadState.Success -> {
+                if (autoCreate == "1") {
+                    viewModel.createCar()
+                } else {
+                    viewModel.reset()
+                    onPassportUploaded()
+                }
             }
-            is CreateCarFromDailyRateState.Error -> {
-                createCarViewModel.reset()
+            is PassportUploadState.CarCreated -> {
+                viewModel.reset()
+                onPassportUploaded()
             }
             else -> Unit
         }
@@ -137,7 +129,11 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
                         ActionButton(
                             viewModel = buttonViewModel,
                             enabledColor = CSSColors.Blue,
-                            text = if (isUploading) "Загрузка..." else "Загрузить",
+                            text = when {
+                                state is PassportUploadState.CreatingCar -> "Создание..."
+                                isUploading -> "Загрузка..."
+                                else -> "Загрузить"
+                            },
                             onClick = {
                                 val file = selectedFile ?: return@ActionButton
                                 coroutineScope.launch {

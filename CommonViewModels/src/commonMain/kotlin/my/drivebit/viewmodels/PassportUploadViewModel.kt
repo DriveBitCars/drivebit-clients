@@ -10,12 +10,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Document
 import my.drivebit.network.services.Documents
+import my.drivebit.repositories.CarDataRepository
 import my.drivebit.repositories.CreateCarRepository
 
 sealed interface PassportUploadState {
     data object Idle : PassportUploadState
 
     data object Uploading : PassportUploadState
+
+    data object CreatingCar : PassportUploadState
 
     data class Error(
         val message: String,
@@ -24,11 +27,14 @@ sealed interface PassportUploadState {
     data class Success(
         val document: Document,
     ) : PassportUploadState
+
+    data class CarCreated(
+        val carId: String,
+    ) : PassportUploadState
 }
 
 interface PassportUploadViewModel {
     val state: StateFlow<PassportUploadState>
-    val createCarRepository: CreateCarRepository
 
     fun upload(
         fileBytes: ByteArray,
@@ -36,12 +42,15 @@ interface PassportUploadViewModel {
         contentType: String,
     )
 
+    fun createCar()
+
     fun reset()
 }
 
 class PassportUploadViewModelImpl(
     private val documents: Documents,
-    override val createCarRepository: CreateCarRepository,
+    private val createCarRepository: CreateCarRepository,
+    private val carDataRepository: CarDataRepository,
     coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : PassportUploadViewModel {
     private val viewModelScope = coroutineScope
@@ -80,6 +89,29 @@ class PassportUploadViewModelImpl(
                     )
                 _state.update { PassportUploadState.Error(message) }
             }
+        }
+    }
+
+    override fun createCar() {
+        viewModelScope.launch {
+            val dailyRate = carDataRepository.getDailyRate() ?: return@launch
+
+            _state.update { PassportUploadState.CreatingCar }
+
+            createCarRepository
+                .createCar(dailyRate)
+                .onSuccess { response ->
+                    _state.update { PassportUploadState.CarCreated(response.id) }
+                }
+                .onFailure { e ->
+                    val message =
+                        ErrorHandler.extractErrorMessage(
+                            exception = e,
+                            defaultNetworkError = "Ошибка сети",
+                            defaultGenericError = "Не удалось создать автомобиль",
+                        )
+                    _state.update { PassportUploadState.Error(message) }
+                }
         }
     }
 }
