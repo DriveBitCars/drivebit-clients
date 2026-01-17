@@ -88,14 +88,14 @@ class PhotoImpl(
     }
 
     override suspend fun getCarPhotos(carId: String): List<CarPhotoResponse> =
-        try {
+        runCatching {
             val url = "${DEFAULT_BASE_URL}Photo/car/$carId"
             val response = httpClient.get(url)
             val photos: List<CarPhotoResponse> = response.parseResponse()
             photos.map { photo ->
                 photo.copy(url = ensureHttpsUrl(photo.url))
             }
-        } catch (e: Exception) {
+        }.getOrElse { e ->
             if (carService != null) {
                 val car = carService.getCar(carId)
                 car.photos.map { photo ->

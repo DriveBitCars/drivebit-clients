@@ -129,11 +129,12 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
                         ActionButton(
                             viewModel = buttonViewModel,
                             enabledColor = CSSColors.Blue,
-                            text = when {
-                                state is PassportUploadState.CreatingCar -> "Создание..."
-                                isUploading -> "Загрузка..."
-                                else -> "Загрузить"
-                            },
+                            text =
+                                when {
+                                    state is PassportUploadState.CreatingCar -> "Создание..."
+                                    isUploading -> "Загрузка..."
+                                    else -> "Загрузить"
+                                },
                             onClick = {
                                 val file = selectedFile ?: return@ActionButton
                                 coroutineScope.launch {

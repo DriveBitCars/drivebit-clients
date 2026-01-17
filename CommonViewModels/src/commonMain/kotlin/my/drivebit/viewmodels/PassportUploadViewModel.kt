@@ -102,8 +102,7 @@ class PassportUploadViewModelImpl(
                 .createCar(dailyRate)
                 .onSuccess { response ->
                     _state.update { PassportUploadState.CarCreated(response.id) }
-                }
-                .onFailure { e ->
+                }.onFailure { e ->
                     val message =
                         ErrorHandler.extractErrorMessage(
                             exception = e,

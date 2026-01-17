@@ -23,11 +23,10 @@ internal class CachedRepositoryImpl<T>(
         flow {
             val cachedJson = settings.getString(key, "")
             if (cachedJson.isNotEmpty()) {
-                try {
+                runCatching {
                     val cached = json.decodeFromString(serializer, cachedJson)
                     emit(cached)
                     return@flow
-                } catch (e: Exception) {
                 }
             }
 

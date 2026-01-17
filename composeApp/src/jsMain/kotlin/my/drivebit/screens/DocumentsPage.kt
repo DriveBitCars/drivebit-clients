@@ -178,8 +178,6 @@ private fun DocumentItem(document: Document) {
 }
 
 private fun formatDate(dateString: String): String =
-    try {
+    runCatching {
         mapIso8601ToDateString(dateString)
-    } catch (e: Exception) {
-        dateString
-    }
+    }.getOrDefault(dateString)

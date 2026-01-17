@@ -116,7 +116,7 @@ class HttpClientAuthTest {
                             refreshTokens {
                                 val refreshTokenValue = oldTokens?.refreshToken
                                 if (refreshTokenValue != null) {
-                                    try {
+                                    runCatching {
                                         val newTokens = mockAuth.createTokens(refreshTokenValue)
                                         val newAccessToken = newTokens.accessToken.token
                                         val newRefreshToken = newTokens.refreshToken.token
@@ -127,9 +127,7 @@ class HttpClientAuthTest {
                                             accessToken = newAccessToken,
                                             refreshToken = newRefreshToken,
                                         )
-                                    } catch (e: Exception) {
-                                        null
-                                    }
+                                    }.getOrNull()
                                 } else {
                                     null
                                 }
@@ -184,7 +182,7 @@ class HttpClientAuthTest {
                             refreshTokens {
                                 val refreshTokenValue = oldTokens?.refreshToken
                                 if (refreshTokenValue != null) {
-                                    try {
+                                    runCatching {
                                         val newTokens = mockAuth.createTokens(refreshTokenValue)
                                         val newAccessToken = newTokens.accessToken.token
                                         val newRefreshToken = newTokens.refreshToken.token
@@ -192,9 +190,7 @@ class HttpClientAuthTest {
                                             accessToken = newAccessToken,
                                             refreshToken = newRefreshToken,
                                         )
-                                    } catch (e: Exception) {
-                                        null
-                                    }
+                                    }.getOrNull()
                                 } else {
                                     null
                                 }
@@ -203,9 +199,8 @@ class HttpClientAuthTest {
                     }
                 }
 
-            try {
+            runCatching {
                 httpClient.get("https://example.com/api/test")
-            } catch (e: Exception) {
             }
 
             assertEquals(1, requestCount)
