@@ -82,9 +82,8 @@ class CreateCarFromDailyRateViewModelImpl(
 
     override fun submitDailyRate(rate: Double) {
         viewModelScope.launch {
-            _state.update { CreateCarFromDailyRateState.Loading }
-
             carDataRepository.saveDailyRate(rate)
+            _state.update { CreateCarFromDailyRateState.Loading }
 
             val hasPassport =
                 runCatching { hasPassportRepo.hasPasport() }

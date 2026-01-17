@@ -24,6 +24,8 @@ private class FakeDocuments : Documents {
         fileName: String,
         contentType: String,
     ): Document = throw NotImplementedError()
+
+    override suspend fun getDocumentUrl(documentId: String): String = throw NotImplementedError()
 }
 
 private class FakeCarEnumsRepository : CarEnumsRepository {

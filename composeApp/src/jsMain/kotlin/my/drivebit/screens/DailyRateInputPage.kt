@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.browser.window
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
@@ -17,9 +16,8 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
+import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.repositories.CarDataRepository
-import my.drivebit.utils.encodeUrlParameter
-import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.CreateCarFromDailyRateState
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
@@ -33,6 +31,7 @@ fun DailyRateInputPage(onDailyRateEntered: () -> Unit = {}) {
     val carDataRepository: CarDataRepository = koinInject()
     val createCarViewModel: CreateCarFromDailyRateViewModel = koinInject()
     val createCarState by createCarViewModel.state.collectAsState()
+    val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
 
     var dailyRate by remember {
@@ -40,7 +39,6 @@ fun DailyRateInputPage(onDailyRateEntered: () -> Unit = {}) {
         mutableStateOf(savedRate?.toString() ?: "")
     }
     var localError by remember { mutableStateOf<String?>(null) }
-    val autoCreateProcessed = remember { mutableStateOf(false) }
 
     val isLoading = createCarState is CreateCarFromDailyRateState.Loading
     val error = localError ?: (createCarState as? CreateCarFromDailyRateState.Error)?.message
@@ -54,8 +52,7 @@ fun DailyRateInputPage(onDailyRateEntered: () -> Unit = {}) {
     LaunchedEffect(createCarState) {
         when (createCarState) {
             CreateCarFromDailyRateState.MissingPassport -> {
-                val after = "/daily-rate-input".encodeUrlParameter()
-                window.location.href = "/passport-upload?after=$after&autoCreate=1"
+                navigationController?.navigateTo("/passport-upload?autoCreate=1")
                 createCarViewModel.reset()
             }
             is CreateCarFromDailyRateState.Success -> {
@@ -63,17 +60,6 @@ fun DailyRateInputPage(onDailyRateEntered: () -> Unit = {}) {
                 onDailyRateEntered()
             }
             else -> Unit
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        if (autoCreateProcessed.value) return@LaunchedEffect
-
-        val autoCreate = getUrlParameter("autoCreate")
-        if (autoCreate == "1") {
-            autoCreateProcessed.value = true
-            window.history.replaceState(null, "", "/daily-rate-input")
-            createCarViewModel.createFromSavedDailyRate()
         }
     }
 

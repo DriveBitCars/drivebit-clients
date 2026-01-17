@@ -21,10 +21,12 @@ import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
-import my.drivebit.utils.encodeUrlParameter
+import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.readAsBytes
 import my.drivebit.viewmodels.ButtonState
+import my.drivebit.viewmodels.CreateCarFromDailyRateState
+import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
 import my.drivebit.viewmodels.PassportUploadState
 import my.drivebit.viewmodels.PassportUploadViewModel
 import my.drivebit.viewmodels.createButtonViewModel
@@ -39,6 +41,9 @@ import org.koin.compose.koinInject
 fun PassportUploadPage() {
     val viewModel: PassportUploadViewModel = koinInject()
     val state by viewModel.state.collectAsState()
+    val createCarViewModel: CreateCarFromDailyRateViewModel = koinInject()
+    val createCarState by createCarViewModel.state.collectAsState()
+    val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
     val coroutineScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 
@@ -46,7 +51,6 @@ fun PassportUploadPage() {
     var selectedFileName by remember { mutableStateOf("") }
     var errorOverride by remember { mutableStateOf<String?>(null) }
 
-    val after = getUrlParameter("after").takeIf { it.isNotBlank() } ?: "/daily-rate-input"
     val autoCreate = getUrlParameter("autoCreate").takeIf { it.isNotBlank() } ?: "1"
 
     val fileInputId = remember { "passport-upload-input-${kotlin.random.Random.nextInt()}" }
@@ -75,10 +79,25 @@ fun PassportUploadPage() {
     }
 
     LaunchedEffect(state) {
-        if (state is PassportUploadState.Success) {
-            val delimiter = if (after.contains("?")) "&" else "?"
-            val url = "${after}${delimiter}autoCreate=${autoCreate.encodeUrlParameter()}"
-            kotlinx.browser.window.location.href = url
+        if (state is PassportUploadState.Success && autoCreate == "1") {
+            viewModel.reset()
+            createCarViewModel.createFromSavedDailyRate()
+        } else if (state is PassportUploadState.Success) {
+            viewModel.reset()
+            navigationController?.navigateTo("/daily-rate-input")
+        }
+    }
+
+    LaunchedEffect(createCarState) {
+        when (createCarState) {
+            is CreateCarFromDailyRateState.Success -> {
+                createCarViewModel.reset()
+                navigationController?.navigateTo("/my-cars")
+            }
+            is CreateCarFromDailyRateState.Error -> {
+                createCarViewModel.reset()
+            }
+            else -> Unit
         }
     }
 
@@ -93,7 +112,6 @@ fun PassportUploadPage() {
             }
 
             FormSection {
-
                 Input(
                     type = InputType.File,
                     attrs = {
