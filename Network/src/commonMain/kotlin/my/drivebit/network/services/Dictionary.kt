@@ -14,6 +14,8 @@ interface Dictionary {
 
     suspend fun searchCities(query: String): List<City>
 
+    suspend fun getAllCities(): List<City>
+
     suspend fun getCarEnums(): CarEnumsResponse
 
     suspend fun getDocumentEnums(): DocumentEnumsResponse
@@ -40,6 +42,9 @@ data class CarModel(
 data class City(
     val id: Int,
     val name: String,
+    val regionName: String? = null,
+    val municipalDistrict: String? = null,
+    val cityTypeCode: String? = null,
 )
 
 @Serializable
@@ -101,6 +106,12 @@ class DictionaryImpl(
             httpClient.get(url) {
                 parameter("query", query)
             }
+        return response.parseResponse()
+    }
+
+    override suspend fun getAllCities(): List<City> {
+        val url = "${DEFAULT_BASE_URL}Dictionary/cities/all"
+        val response = httpClient.get(url)
         return response.parseResponse()
     }
 

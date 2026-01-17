@@ -14,14 +14,38 @@ import my.drivebit.components.StringList
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
+import my.drivebit.repositories.MyCityRepository
 import my.drivebit.repositories.SelectedCityRepository
 import my.drivebit.viewmodels.CityViewModel
+import my.drivebit.viewmodels.SavedCityViewModel
+import my.drivebit.viewmodels.SavedCityViewModelForCarCreation
+import my.drivebit.viewmodels.SavedCityViewModelForMyCity
 import org.koin.compose.koinInject
 
+sealed interface CitySelectionMode {
+    data class ForCarCreation(
+        val onCitySelected: () -> Unit,
+    ) : CitySelectionMode
+
+    data class ForMyCity(
+        val onCitySelected: () -> Unit,
+    ) : CitySelectionMode
+}
+
 @Composable
-fun CitySelectionPage(onCitySelected: () -> Unit = {}) {
+fun CitySelectionPage(mode: CitySelectionMode) {
     val viewModel: CityViewModel = koinInject()
     val selectedCityRepository: SelectedCityRepository = koinInject()
+    val myCityRepository: MyCityRepository = koinInject()
+
+    val savedCityViewModel: SavedCityViewModel =
+        remember(mode) {
+            when (mode) {
+                is CitySelectionMode.ForCarCreation -> SavedCityViewModelForCarCreation(selectedCityRepository)
+                is CitySelectionMode.ForMyCity -> SavedCityViewModelForMyCity(myCityRepository)
+            }
+        }
+
     val cities by viewModel.cities.collectAsState()
     val error by viewModel.error.collectAsState()
     val query by viewModel.query.collectAsState()
@@ -46,8 +70,11 @@ fun CitySelectionPage(onCitySelected: () -> Unit = {}) {
                                 city?.let {
                                     inputValue = cityName
                                     viewModel.clearQuery()
-                                    selectedCityRepository.saveCity(it.id, it.name)
-                                    onCitySelected()
+                                    savedCityViewModel.saveCity(it)
+                                    when (mode) {
+                                        is CitySelectionMode.ForCarCreation -> mode.onCitySelected()
+                                        is CitySelectionMode.ForMyCity -> mode.onCitySelected()
+                                    }
                                 }
                             },
                         )

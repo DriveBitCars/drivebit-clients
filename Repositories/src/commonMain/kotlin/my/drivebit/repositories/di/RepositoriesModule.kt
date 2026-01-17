@@ -29,6 +29,8 @@ import my.drivebit.repositories.LicensePlateRepository
 import my.drivebit.repositories.LicensePlateRepositoryImpl
 import my.drivebit.repositories.MyCarRepository
 import my.drivebit.repositories.MyCarRepositoryImpl
+import my.drivebit.repositories.MyCityRepository
+import my.drivebit.repositories.MyCityRepositoryImpl
 import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.repositories.SelectedAddressRepository
 import my.drivebit.repositories.SelectedAddressRepositoryImpl
@@ -203,6 +205,13 @@ val repositoriesModule: Module =
             MyCarRepositoryImpl(
                 carService = get(),
                 settings = get(),
+            )
+        }
+
+        single<MyCityRepository> {
+            MyCityRepositoryImpl(
+                dictionary = get(),
+                storage = get(),
             )
         }
 
