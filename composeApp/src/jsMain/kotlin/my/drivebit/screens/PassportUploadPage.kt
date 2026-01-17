@@ -49,7 +49,6 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
 
     var selectedFile: org.w3c.files.File? by remember { mutableStateOf(null) }
     var selectedFileName by remember { mutableStateOf("") }
-    var errorOverride by remember { mutableStateOf<String?>(null) }
 
     val autoCreate = getUrlParameter("autoCreate").takeIf { it.isNotBlank() } ?: "1"
 
@@ -70,7 +69,6 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
             val file = input?.files?.item(0) as? org.w3c.files.File
             selectedFile = file
             selectedFileName = file?.name.orEmpty()
-            errorOverride = null
         }
         inputElement?.addEventListener("change", changeHandler)
         onDispose {
@@ -101,9 +99,7 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
         }
     }
 
-    val errorText =
-        errorOverride
-            ?: (state as? PassportUploadState.Error)?.message
+    val errorText = (state as? PassportUploadState.Error)?.message
 
     PageWithLogo {
         CenteredFormContainer {
@@ -146,12 +142,7 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
                             enabledColor = CSSColors.Blue,
                             text = if (isUploading) "Загрузка..." else "Загрузить",
                             onClick = {
-                                val file = selectedFile
-                                if (file == null) {
-                                    errorOverride = "Выберите файл"
-                                    return@ActionButton
-                                }
-                                errorOverride = null
+                                val file = selectedFile ?: return@ActionButton
                                 coroutineScope.launch {
                                     val bytes = file.readAsBytes()
                                     viewModel.upload(
