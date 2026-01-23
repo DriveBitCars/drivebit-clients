@@ -371,24 +371,12 @@ jobs:
             echo "✅ API proxy configuration already exists"
           else
             echo "⚙️  Adding API proxy configuration..."
-            # Find the server block and add API proxy before location /
-            $SUDO_CMD sed -i '/server {/,/location \// {
-              /location \// i\
-    # API proxy to backend\
-    location /api/ {\
-        proxy_pass http://155.212.170.94:5000/;\
-        proxy_set_header Host $host;\
-        proxy_set_header X-Real-IP $remote_addr;\
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
-        proxy_set_header X-Forwarded-Proto $scheme;\
-        add_header Access-Control-Allow-Origin * always;\
-        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;\
-        add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;\
-        if ($request_method = OPTIONS) {\
-            return 204;\
-        }\
-    }
-            }' "$NGINX_CONFIG"
+            # Create temporary file with API proxy config using printf
+            TEMP_CONFIG=$(mktemp)
+            printf '    # API proxy to backend\n    location /api/ {\n        proxy_pass http://155.212.170.94:5000/;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n        add_header Access-Control-Allow-Origin * always;\n        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;\n        add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;\n        if ($request_method = OPTIONS) {\n            return 204;\n        }\n    }\n' > "$TEMP_CONFIG"
+            # Insert before location / using sed with file read
+            $SUDO_CMD sed -i "/^[[:space:]]*location \/[[:space:]]*{/r $TEMP_CONFIG" "$NGINX_CONFIG"
+            rm -f "$TEMP_CONFIG"
             echo "✅ API proxy configuration added"
           fi
           
