@@ -7,6 +7,7 @@ import my.drivebit.network.services.CarModel
 import my.drivebit.network.services.City
 import my.drivebit.network.services.Dictionary
 import my.drivebit.network.services.DocumentEnumsResponse
+import my.drivebit.network.services.FilterSuggestion
 import my.drivebit.shared.storage.Storage
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -67,7 +68,9 @@ class MyCityRepositoryTest {
 
             override suspend fun getDocumentEnums(): DocumentEnumsResponse = throw NotImplementedError()
 
-            override suspend fun getAllCities(): List<City> = throw NotImplementedError()
+            override suspend fun getAllCities(): List<City> = emptyList()
+
+            override suspend fun getFiltersSuggested(): List<FilterSuggestion> = emptyList()
         }
 
     @Test
@@ -262,6 +265,8 @@ class MyCityRepositoryTest {
                     override suspend fun getDocumentEnums(): DocumentEnumsResponse = throw NotImplementedError()
 
                     override suspend fun getAllCities(): List<City> = throw NotImplementedError()
+
+                    override suspend fun getFiltersSuggested(): List<FilterSuggestion> = emptyList()
                 }
             val storage = createTestStorage()
             val repository = MyCityRepositoryImpl(dictionary, storage)
@@ -300,6 +305,8 @@ class MyCityRepositoryTest {
                     override suspend fun getDocumentEnums(): DocumentEnumsResponse = throw NotImplementedError()
 
                     override suspend fun getAllCities(): List<City> = throw NotImplementedError()
+
+                    override suspend fun getFiltersSuggested(): List<FilterSuggestion> = emptyList()
                 }
             val storage = createTestStorage()
             storage.putString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY, "999")

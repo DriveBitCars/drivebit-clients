@@ -87,8 +87,11 @@ class PhotoImpl(
         return response.parseResponse()
     }
 
-    override suspend fun getCarPhotos(carId: String): List<CarPhotoResponse> =
-        runCatching {
+    override suspend fun getCarPhotos(carId: String): List<CarPhotoResponse> {
+        if (carId.isBlank()) {
+            throw IllegalArgumentException("Car ID cannot be empty")
+        }
+        return runCatching {
             val url = "${DEFAULT_BASE_URL}Photo/car/$carId"
             val response = httpClient.get(url)
             val photos: List<CarPhotoResponse> = response.parseResponse()
@@ -109,6 +112,7 @@ class PhotoImpl(
                 throw e
             }
         }
+    }
 
     override suspend fun uploadCarPhotos(
         carId: String,

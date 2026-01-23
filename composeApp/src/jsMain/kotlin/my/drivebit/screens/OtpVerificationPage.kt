@@ -36,24 +36,15 @@ import org.w3c.dom.HTMLInputElement
 @Composable
 fun OtpVerificationPage() {
     val navigationController = LocalNavigationController.current
-    val otpResultParam =
-        remember {
-            getUrlParameter(OTP_RESULT_PARAM)
-        }
+    val otpResultParam = getUrlParameter(OTP_RESULT_PARAM)
     val otpResultType =
         remember(otpResultParam) {
             OTPRESULT.fromString(otpResultParam)!!
         }
     val otpResultRepository: OtpResultRepository =
         koinInject(named(otpResultType.name))
-    val identifier =
-        remember {
-            getUrlParameter(IDENTIFIER)
-        }
-    val newLogin =
-        remember {
-            getUrlParameter(NEW_LOGIN)
-        }
+    val identifier = getUrlParameter(IDENTIFIER)
+    val newLogin = getUrlParameter(NEW_LOGIN)
     val additionalParams =
         remember(newLogin) {
             if (newLogin.isNotEmpty()) {

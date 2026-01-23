@@ -27,13 +27,17 @@ internal class SelectedCityRepositoryImpl(
         cityId: Int,
         cityName: String,
     ) {
+        println("🏙️ [SelectedCityRepository] Сохранение города: cityId=$cityId, cityName=$cityName")
         settings.putInt(CITY_ID_KEY, cityId)
         settings.putString(CITY_NAME_KEY, cityName)
+        println("🏙️ [SelectedCityRepository] Город успешно сохранен")
     }
 
     override fun getCityId(): Int? {
         val cityId = settings.getInt(CITY_ID_KEY, -1)
-        return if (cityId == -1) null else cityId
+        val result = if (cityId == -1) null else cityId
+        println("🏙️ [SelectedCityRepository] Получение cityId: raw=$cityId, result=$result")
+        return result
     }
 
     override fun getCityName(): String? = settings.getStringOrNullIfEmpty(CITY_NAME_KEY)

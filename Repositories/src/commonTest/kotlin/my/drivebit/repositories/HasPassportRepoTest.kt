@@ -25,7 +25,7 @@ private class FakeDocuments : Documents {
         contentType: String,
     ): Document = throw NotImplementedError()
 
-    override suspend fun getDocumentUrl(documentId: String): String = throw NotImplementedError()
+    override suspend fun getDocumentUrl(documentId: Int): String = throw NotImplementedError()
 }
 
 private class FakeCarEnumsRepository : CarEnumsRepository {
@@ -70,8 +70,8 @@ class HasPassportRepoTest {
                     documents =
                         listOf(
                             Document(
-                                id = "1",
-                                name = "Driver License",
+                                id = 1,
+                                fileName = "Driver License",
                                 type = "Passport",
                             ),
                         )
@@ -84,45 +84,20 @@ class HasPassportRepoTest {
         }
 
     @Test
-    fun `hasPasport should return false when document type does not match Passport enum`() =
+    fun `hasPasport should return false when document type does not contain Passport`() =
         runTest {
             val fakeDocuments =
                 FakeDocuments().apply {
                     documents =
                         listOf(
                             Document(
-                                id = "1",
-                                name = "Passport",
-                                type = "document",
+                                id = 1,
+                                fileName = "License",
+                                type = "DriverLicense",
                             ),
                         )
                 }
             val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
-
-            val result = repo.hasPasport()
-
-            assertFalse(result)
-        }
-
-    @Test
-    fun `hasPasport should return false when Passport enum is not found`() =
-        runTest {
-            val fakeDocuments =
-                FakeDocuments().apply {
-                    documents =
-                        listOf(
-                            Document(
-                                id = "1",
-                                name = "Passport",
-                                type = "Passport",
-                            ),
-                        )
-                }
-            val fakeCarEnumsRepository =
-                FakeCarEnumsRepository().apply {
-                    documentTypes = emptyList()
-                }
-            val repo = HasPassportRepoImpl(fakeDocuments, fakeCarEnumsRepository)
 
             val result = repo.hasPasport()
 
@@ -137,8 +112,8 @@ class HasPassportRepoTest {
                     documents =
                         listOf(
                             Document(
-                                id = "1",
-                                name = "Document",
+                                id = 1,
+                                fileName = "Document",
                                 type = "passport",
                             ),
                         )
@@ -158,13 +133,13 @@ class HasPassportRepoTest {
                     documents =
                         listOf(
                             Document(
-                                id = "1",
-                                name = "Driver License",
+                                id = 1,
+                                fileName = "Driver License",
                                 type = "license",
                             ),
                             Document(
-                                id = "2",
-                                name = "Insurance",
+                                id = 2,
+                                fileName = "Insurance",
                                 type = "insurance",
                             ),
                         )
@@ -212,8 +187,8 @@ class HasPassportRepoTest {
                     documents =
                         listOf(
                             Document(
-                                id = "1",
-                                name = "Document",
+                                id = 1,
+                                fileName = "Document",
                                 type = "PASSPORT",
                             ),
                         )
@@ -233,19 +208,40 @@ class HasPassportRepoTest {
                     documents =
                         listOf(
                             Document(
-                                id = "1",
-                                name = "Driver License",
+                                id = 1,
+                                fileName = "Driver License",
                                 type = "license",
                             ),
                             Document(
-                                id = "2",
-                                name = "Passport",
+                                id = 2,
+                                fileName = "Passport",
                                 type = "Passport",
                             ),
                             Document(
-                                id = "3",
-                                name = "Insurance",
+                                id = 3,
+                                fileName = "Insurance",
                                 type = "insurance",
+                            ),
+                        )
+                }
+            val repo = HasPassportRepoImpl(fakeDocuments, FakeCarEnumsRepository())
+
+            val result = repo.hasPasport()
+
+            assertTrue(result)
+        }
+
+    @Test
+    fun `hasPasport should return true when document type contains Passport like PassportMainPageRus`() =
+        runTest {
+            val fakeDocuments =
+                FakeDocuments().apply {
+                    documents =
+                        listOf(
+                            Document(
+                                id = 1,
+                                fileName = "AntonButovPh.jpg",
+                                type = "PassportMainPageRus",
                             ),
                         )
                 }

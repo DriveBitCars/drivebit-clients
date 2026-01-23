@@ -1,8 +1,10 @@
 package my.drivebit.resources
 
 object ImagePaths {
+    const val BACK_WHEEL_DRIVE_SVG = "images/back-wheel-drive.svg"
     const val BACKGROUNDS_HERO_BG_JPG = "images/backgrounds/hero-bg.jpg"
     const val BUTTER_CAR_ICON_SVG = "images/butter/car-icon.svg"
+    const val BUTTER_DOCS_SVG = "images/butter/docs.svg"
     const val BUTTER_LOGOUT_SVG = "images/butter/logout.svg"
     const val FILTER_MAIN_AIRPLANE_SVG = "images/filter-main/airplane.svg"
     const val FILTER_MAIN_CALENDAR_SVG = "images/filter-main/calendar.svg"
@@ -11,10 +13,13 @@ object ImagePaths {
     const val FILTER_MAIN_DIRECTION_SVG = "images/filter-main/direction.svg"
     const val FILTER_MAIN_POINT_SVG = "images/filter-main/point.svg"
     const val FIX_SVG = "images/fix.svg"
+    const val FUEL_PUMP_SVG = "images/fuel-pump.svg"
+    const val FUEL_SVG = "images/fuel.svg"
     const val HERO_CARS_JPG = "images/hero-cars.jpg"
     const val LOGIN_LETTER_SVG = "images/login/letter.svg"
     const val LOGOS_LOGO_PNG = "images/logos/logo.png"
     const val LOGOS_TURO_LOGO_SVG = "images/logos/turo_logo.svg"
+    const val MANUAL_GEAR_SVG = "images/manual-gear.svg"
     const val MENU_BURGER_SVG = "images/menu/burger.svg"
     const val MENU_BUTER_SVG = "images/menu/buter.svg"
     const val MENU_USER_SVG = "images/menu/user.svg"

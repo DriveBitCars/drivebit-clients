@@ -106,7 +106,7 @@ private fun DocumentItem(document: Document) {
                 color(CSSColors.Black)
             }
         }) {
-            Text(document.name ?: "Документ без названия")
+            Text(document.fileName ?: "Документ без названия")
         }
 
         if (document.type != null) {
@@ -162,8 +162,8 @@ private fun DocumentItem(document: Document) {
             Text(if (isLoadingUrl) "Загрузка..." else "Открыть документ")
         }
 
-        val createdAt = document.createdAt
-        if (createdAt != null) {
+        val uploadDate = document.uploadDate
+        if (uploadDate != null) {
             Div({
                 style {
                     marginTop(8.px)
@@ -171,7 +171,7 @@ private fun DocumentItem(document: Document) {
                     color(CSSColors.Gray600)
                 }
             }) {
-                Text("Загружено: ${formatDate(createdAt)}")
+                Text("Загружено: ${formatDate(uploadDate)}")
             }
         }
     }

@@ -19,6 +19,8 @@ interface Dictionary {
     suspend fun getCarEnums(): CarEnumsResponse
 
     suspend fun getDocumentEnums(): DocumentEnumsResponse
+
+    suspend fun getFiltersSuggested(): List<FilterSuggestion>
 }
 
 @Serializable
@@ -82,6 +84,33 @@ data class DocumentEnumsResponse(
     val DocumentStatusEnum: List<EnumItem>,
 )
 
+@Serializable
+data class FilterSuggestion(
+    val id: String? = null,
+    val name: String,
+    val type: String? = null,
+    val icon: String? = null,
+    val availableMileagePerDayKmMin: Int? = null,
+    val dailyPriceMin: Int? = null,
+    val dailyPriceMax: Int? = null,
+    val yearMin: Int? = null,
+    val yearMax: Int? = null,
+    val seatsMin: Int? = null,
+    val seatsMax: Int? = null,
+    val bodyTypes: List<EnumItem>? = null,
+    val engineTypes: List<EnumItem>? = null,
+    val colors: List<EnumItem>? = null,
+) {
+    val title: String
+        get() = name
+
+    fun getBodyTypeNames(): List<String>? = bodyTypes?.map { it.name }
+
+    fun getEngineTypeNames(): List<String>? = engineTypes?.map { it.name }
+
+    fun getColorNames(): List<String>? = colors?.map { it.name }
+}
+
 class DictionaryImpl(
     private val httpClient: HttpClient,
 ) : Dictionary {
@@ -123,6 +152,12 @@ class DictionaryImpl(
 
     override suspend fun getDocumentEnums(): DocumentEnumsResponse {
         val url = "${DEFAULT_BASE_URL}Dictionary/enums/document"
+        val response = httpClient.get(url)
+        return response.parseResponse()
+    }
+
+    override suspend fun getFiltersSuggested(): List<FilterSuggestion> {
+        val url = "${DEFAULT_BASE_URL}Dictionary/cars/filters/suggested"
         val response = httpClient.get(url)
         return response.parseResponse()
     }

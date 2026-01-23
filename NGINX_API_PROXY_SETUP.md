@@ -42,9 +42,9 @@ cp "$NGINX_CONFIG" "${NGINX_CONFIG}.backup.$(date +%Y%m%d_%H%M%S)"
 
 ```nginx
 # Проксирование API на новый бэкенд
-# /api/... -> http://155.212.170.94:5000/api/...
+# /api/... -> http://155.212.170.94:5000/...
 location /api/ {
-    proxy_pass http://155.212.170.94:5000/api/;
+    proxy_pass http://155.212.170.94:5000/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -89,7 +89,7 @@ server {
     
     # Проксирование API на новый бэкенд
     location /api/ {
-        proxy_pass http://155.212.170.94:5000/api/;
+        proxy_pass http://155.212.170.94:5000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

@@ -21,17 +21,21 @@ interface Documents {
         contentType: String,
     ): Document
 
-    suspend fun getDocumentUrl(documentId: String): String
+    suspend fun getDocumentUrl(documentId: Int): String
 }
 
 @Serializable
 data class Document(
-    val id: String,
-    val name: String? = null,
+    val id: Int,
+    val fileName: String? = null,
     val type: String? = null,
+    val status: String? = null,
+    val validationResults: String? = null,
+    val uploadDate: String? = null,
+    val validatedAt: String? = null,
     val url: String? = null,
-    val createdAt: String? = null,
-    val updatedAt: String? = null,
+    val urlExpires: String? = null,
+    val confidenceScore: Int = 0,
 )
 
 class DocumentsImpl(
@@ -69,7 +73,7 @@ class DocumentsImpl(
         return response.parseResponse()
     }
 
-    override suspend fun getDocumentUrl(documentId: String): String {
+    override suspend fun getDocumentUrl(documentId: Int): String {
         val url = "${DEFAULT_BASE_URL}Documents/$documentId/temporary-link"
         val response = httpClient.get(url)
         val urlResponse: DocumentUrlResponse = response.parseResponse()

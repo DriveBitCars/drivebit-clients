@@ -145,14 +145,14 @@ fun CarPhotosPage() {
     val viewModel: CarPhotosViewModel = koinInject()
     val coroutineScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 
-    val carIdParam = remember { getUrlParameter("carId") }
+    val carIdParam = getUrlParameter("carId")
     val state by viewModel.state.collectAsState()
 
     val fileInputId = remember { "car-photos-input-${kotlin.random.Random.nextInt()}" }
 
     LaunchedEffect(carIdParam) {
-        carIdParam?.let { carId ->
-            viewModel.loadPhotos(carId)
+        if (carIdParam.isNotBlank()) {
+            viewModel.loadPhotos(carIdParam)
         }
     }
 
@@ -297,7 +297,7 @@ fun CarPhotosPage() {
                                             println(
                                                 "📸 [CarPhotosPage] File input changed via onChange. Files: ${fileList?.length ?: 0}, carId: $carId",
                                             )
-                                            if (fileList != null && carId != null && fileList.length > 0) {
+                                            if (fileList != null && carId.isNotBlank() && fileList.length > 0) {
                                                 coroutineScope.launch {
                                                     println("📸 [CarPhotosPage] Starting file processing...")
                                                     val fileBytesList = mutableListOf<ByteArray>()

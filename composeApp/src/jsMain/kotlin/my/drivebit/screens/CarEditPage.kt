@@ -30,7 +30,7 @@ import org.koin.core.parameter.parametersOf
 
 @Composable
 fun CarEditPage() {
-    val carIdParam = remember { getUrlParameter("carId") }
+    val carIdParam = getUrlParameter("id")
 
     if (carIdParam.isBlank()) {
         PageWithLogo {
