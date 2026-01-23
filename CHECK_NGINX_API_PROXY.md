@@ -29,7 +29,7 @@ grep -A 10 "location /api/" /etc/nginx/sites-available/drivebit.my
 Должен быть блок:
 ```nginx
 location /api/ {
-    proxy_pass http://155.212.170.94:5000/api/;
+    proxy_pass http://155.212.170.94:5000/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
