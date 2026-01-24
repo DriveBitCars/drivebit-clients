@@ -1,5 +1,6 @@
 package my.drivebit.viewmodels
 
+import kotlinx.coroutines.flow.Flow
 import my.drivebit.network.services.City
 import my.drivebit.repositories.MyCityRepository
 import my.drivebit.repositories.SelectedCityRepository
@@ -34,7 +35,8 @@ class MockMyCityRepositoryForSavedCity : MyCityRepository {
 
     override suspend fun searchCities(query: String): List<City> = throw NotImplementedError()
 
-    override suspend fun getSelectedCity(): City = throw NotImplementedError()
+    override val getSelectedCity: Flow<City> =
+        kotlinx.coroutines.flow.flow { throw NotImplementedError() }
 
     override fun selectCity(
         cityId: Int,

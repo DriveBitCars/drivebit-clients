@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import kotlinx.browser.window
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
@@ -75,7 +76,9 @@ fun OtpVerificationPage() {
     if (state is OtpVerificationState.Success) {
         LaunchedEffect(Unit) {
             when (otpResultType) {
-                OTPRESULT.VerifyOtp -> navigationController?.navigateTo("/")
+                OTPRESULT.VerifyOtp -> {
+                    window.location.href = "/"
+                }
                 OTPRESULT.ChangeEmail -> navigationController?.navigateTo("/profile")
                 OTPRESULT.ChangePhone -> navigationController?.navigateTo("/profile")
             }

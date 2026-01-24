@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,6 +24,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.flow.asStateFlow
 import my.drivebit.network.services.UserGetResponse
+import my.drivebit.shared.storage.Storage
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
 import my.drivebit.ui.theme.DrivebitTheme
@@ -30,12 +32,24 @@ import my.drivebit.utils.mapIso8601ToMonthYearString
 import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
 
 class ProfileScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel: ProfileViewModel = koinScreenModel()
+        val storage: Storage = koinInject()
+
+        LaunchedEffect(Unit) {
+            if (!storage.isLogined()) {
+                navigator.pop()
+            }
+        }
+
+        if (!storage.isLogined()) {
+            return
+        }
 
         Scaffold(
             topBar = {
@@ -215,6 +229,8 @@ fun ProfileScreenPreview() {
                             ).asStateFlow()
 
                     override fun loadProfile() {}
+
+                    override fun refresh() {}
                 },
         )
     }

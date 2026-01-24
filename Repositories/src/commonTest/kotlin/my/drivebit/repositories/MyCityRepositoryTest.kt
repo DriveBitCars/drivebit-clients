@@ -1,5 +1,11 @@
 package my.drivebit.repositories
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.CarBrand
 import my.drivebit.network.services.CarEnumsResponse
@@ -129,7 +135,7 @@ class MyCityRepositoryTest {
             val storage = createTestStorage()
             val repository = MyCityRepositoryImpl(dictionary, storage)
 
-            val selectedCity = repository.getSelectedCity()
+            val selectedCity = repository.getSelectedCity.first()
 
             assertNotNull(selectedCity)
             assertEquals(158830, selectedCity.id)
@@ -159,7 +165,7 @@ class MyCityRepositoryTest {
             storage.putString(MyCityRepositoryImpl.SELECTED_CITY_NAME_KEY, "Калининград")
             val repository = MyCityRepositoryImpl(dictionary, storage)
 
-            val selectedCity = repository.getSelectedCity()
+            val selectedCity = repository.getSelectedCity.first()
 
             assertNotNull(selectedCity)
             assertEquals(3, selectedCity.id)
@@ -183,7 +189,7 @@ class MyCityRepositoryTest {
             val selectedCityBefore = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY)
             assertEquals("", selectedCityBefore)
 
-            val selectedCity = repository.getSelectedCity()
+            val selectedCity = repository.getSelectedCity.first()
 
             val selectedCityIdAfter = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY)
             val selectedCityNameAfter = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_NAME_KEY)
@@ -210,10 +216,10 @@ class MyCityRepositoryTest {
             val repository = MyCityRepositoryImpl(dictionary, storage)
 
             repository.selectCity(158830, "Москва")
-            assertEquals(158830, repository.getSelectedCity().id)
+            assertEquals(158830, repository.getSelectedCity.first().id)
 
             repository.selectCity(158831, "Санкт-Петербург")
-            val selectedCity = repository.getSelectedCity()
+            val selectedCity = repository.getSelectedCity.first()
 
             assertEquals(158831, selectedCity.id)
             assertEquals("Санкт-Петербург", selectedCity.name)
@@ -239,7 +245,7 @@ class MyCityRepositoryTest {
             storage.putString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY, "999")
             val repository = MyCityRepositoryImpl(dictionary, storage)
 
-            val selectedCity = repository.getSelectedCity()
+            val selectedCity = repository.getSelectedCity.first()
 
             assertEquals(158830, selectedCity.id)
             assertEquals("Москва", selectedCity.name)
@@ -313,10 +319,121 @@ class MyCityRepositoryTest {
             storage.putString(MyCityRepositoryImpl.SELECTED_CITY_NAME_KEY, "")
             val repository = MyCityRepositoryImpl(dictionary, storage)
 
-            val selectedCity = repository.getSelectedCity()
+            val selectedCity = repository.getSelectedCity.first()
 
             assertEquals(0, emptyQueryCallCount, "Should not call searchCities with empty query")
             assertEquals(158830, selectedCity.id)
             assertEquals("Москва", selectedCity.name)
+        }
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `getSelectedCity Flow should emit initial city`() =
+        runTest {
+            val moscowCity = City(id = 158830, name = "Москва")
+            val dictionary =
+                createMockDictionary(
+                    searchResults =
+                        mapOf(
+                            "Москва" to listOf(moscowCity),
+                        ),
+                )
+            val storage = createTestStorage()
+            val repository = MyCityRepositoryImpl(dictionary, storage)
+
+            val flow = repository.getSelectedCity
+            val firstCity = flow.first()
+
+            assertEquals(158830, firstCity.id)
+            assertEquals("Москва", firstCity.name)
+        }
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `getSelectedCity Flow should emit new city when selectCity is called`() =
+        runTest {
+            val moscowCity = City(id = 158830, name = "Москва")
+            val spbCity = City(id = 158831, name = "Санкт-Петербург")
+            val dictionary =
+                createMockDictionary(
+                    searchResults =
+                        mapOf(
+                            "Москва" to listOf(moscowCity),
+                            "Санкт-Петербург" to listOf(spbCity),
+                        ),
+                )
+            val storage = createTestStorage()
+            val repository = MyCityRepositoryImpl(dictionary, storage)
+
+            val flow = repository.getSelectedCity
+            val cities = mutableListOf<City>()
+
+            coroutineScope {
+                val job =
+                    launch {
+                        flow.take(2).toList(cities)
+                    }
+
+                advanceUntilIdle()
+                assertEquals(1, cities.size)
+                assertEquals(158830, cities[0].id)
+
+                repository.selectCity(158831, "Санкт-Петербург")
+                advanceUntilIdle()
+
+                job.cancel()
+            }
+
+            assertEquals(2, cities.size)
+            assertEquals(158830, cities[0].id)
+            assertEquals(158831, cities[1].id)
+            assertEquals("Санкт-Петербург", cities[1].name)
+        }
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `getSelectedCity Flow should emit multiple cities when selectCity is called multiple times`() =
+        runTest {
+            val moscowCity = City(id = 158830, name = "Москва")
+            val spbCity = City(id = 158831, name = "Санкт-Петербург")
+            val kaliningradCity = City(id = 3, name = "Калининград")
+            val dictionary =
+                createMockDictionary(
+                    searchResults =
+                        mapOf(
+                            "Москва" to listOf(moscowCity),
+                            "Санкт-Петербург" to listOf(spbCity),
+                            "Калининград" to listOf(kaliningradCity),
+                        ),
+                )
+            val storage = createTestStorage()
+            val repository = MyCityRepositoryImpl(dictionary, storage)
+
+            val flow = repository.getSelectedCity
+            val cities = mutableListOf<City>()
+
+            coroutineScope {
+                val job =
+                    launch {
+                        flow.take(3).toList(cities)
+                    }
+
+                advanceUntilIdle()
+                assertEquals(158830, cities[0].id)
+
+                repository.selectCity(158831, "Санкт-Петербург")
+                advanceUntilIdle()
+
+                repository.selectCity(3, "Калининград")
+                advanceUntilIdle()
+
+                job.cancel()
+            }
+
+            assertEquals(3, cities.size)
+            assertEquals(158830, cities[0].id)
+            assertEquals(158831, cities[1].id)
+            assertEquals(3, cities[2].id)
+            assertEquals("Калининград", cities[2].name)
         }
 }

@@ -40,6 +40,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
             implementation(project(":Storage"))
+            implementation(project(":Utils"))
         }
 
         androidMain.dependencies {

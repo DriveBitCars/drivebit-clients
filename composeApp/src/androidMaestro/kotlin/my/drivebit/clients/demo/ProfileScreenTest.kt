@@ -51,6 +51,8 @@ class MockProfileViewModelForTest : ProfileViewModel {
                 ),
             )
     }
+
+    override fun refresh() {}
 }
 
 class ProfileScreenTest : Screen {

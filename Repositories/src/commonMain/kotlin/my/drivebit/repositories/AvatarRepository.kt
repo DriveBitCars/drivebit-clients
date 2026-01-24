@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import my.drivebit.network.services.Photo
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.DEFAULT_AVATAR_PATH
+import my.drivebit.utils.extractPathFromApiUrl
 
 interface AvatarRepository {
     val avatarUrl: Flow<String>
@@ -27,22 +28,23 @@ internal class AvatarRepositoryImpl(
 ) : AvatarRepository,
     CachedRepository<String> by cachedRepository {
     private val _avatarUrlState = MutableStateFlow<String?>(null)
+    internal val avatarUrlState get() = _avatarUrlState
 
     init {
         coroutineScope.launch {
             cachedRepository.get().collect { url ->
-                _avatarUrlState.value = url
+                avatarUrlState.value = url
             }
         }
     }
 
     override val avatarUrl: Flow<String> =
         kotlinx.coroutines.flow.flow {
-            if (_avatarUrlState.value == null) {
+            if (avatarUrlState.value == null) {
                 val initialValue = cachedRepository.get().first()
-                _avatarUrlState.value = initialValue
+                avatarUrlState.value = initialValue
             }
-            _avatarUrlState.collect { value ->
+            avatarUrlState.collect { value ->
                 value?.let { emit(it) }
             }
         }
@@ -54,39 +56,18 @@ internal class AvatarRepositoryImpl(
     override suspend fun refresh() {
         clearCache()
         val newUrl = cachedRepository.get().first()
-        _avatarUrlState.value = newUrl
+        avatarUrlState.value = newUrl
     }
 
     internal suspend fun calculateAvatarUrl(): String =
         if (storage.isLogined()) {
             runCatching {
                 val apiUrl = photo.getAvatar().url
-                val path = extractPathFromApiUrl(apiUrl)
-                val avatarPath = extractAvatarFileName(path)
-                "https://drivebit.my/avatar/$avatarPath"
+                extractPathFromApiUrl(apiUrl)
             }.getOrElse {
                 DEFAULT_AVATAR_PATH
             }
         } else {
             DEFAULT_AVATAR_PATH
-        }
-
-    private fun extractPathFromApiUrl(apiUrl: String): String =
-        when {
-            apiUrl.startsWith("http://155.212.170.94:9000") -> apiUrl.removePrefix("http://155.212.170.94:9000")
-            apiUrl.startsWith("https://155.212.170.94:9000") -> apiUrl.removePrefix("https://155.212.170.94:9000")
-            apiUrl.startsWith("http://") || apiUrl.startsWith("https://") -> {
-                val withoutProtocol = apiUrl.removePrefix("http://").removePrefix("https://")
-                val pathStart = withoutProtocol.indexOf('/')
-                if (pathStart >= 0) withoutProtocol.substring(pathStart) else "/"
-            }
-            else -> if (apiUrl.startsWith("/")) apiUrl else "/$apiUrl"
-        }
-
-    private fun extractAvatarFileName(path: String): String =
-        when {
-            path.startsWith("/publicbct/avatars/") -> path.removePrefix("/publicbct/avatars/")
-            path.startsWith("/publicbct/avatars") -> path.removePrefix("/publicbct/avatars")
-            else -> path.substringAfterLast('/')
         }
 }

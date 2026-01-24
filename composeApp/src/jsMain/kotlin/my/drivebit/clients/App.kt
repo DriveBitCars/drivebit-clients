@@ -53,6 +53,7 @@ import my.drivebit.screens.ProductionYearInputPage
 import my.drivebit.screens.ProfilePage
 import my.drivebit.screens.SearchPage
 import my.drivebit.screens.SeatsCountInputPage
+import my.drivebit.shared.storage.Storage
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.MapViewModel
@@ -105,7 +106,12 @@ actual fun App() {
                     LoginPage(viewModelQualifier = named("email"))
                 }
                 currentPath.startsWith("/profile") -> {
-                    ProfilePage()
+                    val storage: Storage = koinInject()
+                    if (storage.isLogined()) {
+                        ProfilePage()
+                    } else {
+                        window.location.href = "/"
+                    }
                 }
                 currentPath.startsWith("/my-cars") -> {
                     MyCarsPage()
@@ -377,34 +383,36 @@ private fun CarsListView(cars: List<CarItem>) {
         }) {
             Div()
 
-            Div({
-                style {
-                    display(DisplayStyle.Flex)
-                    flexDirection(FlexDirection.Row)
-                    gap(8.px)
-                }
-            }) {
-                ScrollButton(
-                    direction = "left",
-                    onClick = {
-                        val container =
-                            kotlinx.browser.document.getElementById(
-                                scrollContainerId,
-                            ) as? org.w3c.dom.HTMLElement
-                        container?.scrollBy(-296.0, 0.0)
-                    },
-                )
+            if (cars.isNotEmpty()) {
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Row)
+                        gap(8.px)
+                    }
+                }) {
+                    ScrollButton(
+                        direction = "left",
+                        onClick = {
+                            val container =
+                                kotlinx.browser.document.getElementById(
+                                    scrollContainerId,
+                                ) as? org.w3c.dom.HTMLElement
+                            container?.scrollBy(-296.0, 0.0)
+                        },
+                    )
 
-                ScrollButton(
-                    direction = "right",
-                    onClick = {
-                        val container =
-                            kotlinx.browser.document.getElementById(
-                                scrollContainerId,
-                            ) as? org.w3c.dom.HTMLElement
-                        container?.scrollBy(296.0, 0.0)
-                    },
-                )
+                    ScrollButton(
+                        direction = "right",
+                        onClick = {
+                            val container =
+                                kotlinx.browser.document.getElementById(
+                                    scrollContainerId,
+                                ) as? org.w3c.dom.HTMLElement
+                            container?.scrollBy(296.0, 0.0)
+                        },
+                    )
+                }
             }
         }
 

@@ -155,12 +155,14 @@ val commonViewModelsModule: Module =
                 storage = get(),
                 avatarRepository = get(),
                 carMenuViewModel = get(),
+                profileViewModel = get(),
             )
         }
 
-        factory<ProfileViewModel> {
+        single<ProfileViewModel> {
             ProfileViewModelImpl(
                 userService = get(),
+                storage = get(),
             )
         }
 

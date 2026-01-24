@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.User
 import my.drivebit.network.services.UserGetResponse
+import my.drivebit.shared.storage.Storage
 
 sealed interface ProfileState {
     data object Loading : ProfileState
@@ -27,10 +28,13 @@ interface ProfileViewModel {
     val state: StateFlow<ProfileState>
 
     fun loadProfile()
+
+    fun refresh()
 }
 
 class ProfileViewModelImpl(
     private val userService: User,
+    private val storage: Storage,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : ProfileViewModel {
     private val viewModelScope = coroutineScope
@@ -46,6 +50,11 @@ class ProfileViewModelImpl(
 
     override fun loadProfile() {
         viewModelScope.launch {
+            if (!storage.isLogined()) {
+                _state.update { ProfileState.Error("Не авторизован") }
+                return@launch
+            }
+
             _state.update { ProfileState.Loading }
             runCatching {
                 userService.userGet()
@@ -61,5 +70,9 @@ class ProfileViewModelImpl(
                 _state.update { ProfileState.Error(errorMessage) }
             }
         }
+    }
+
+    override fun refresh() {
+        loadProfile()
     }
 }
