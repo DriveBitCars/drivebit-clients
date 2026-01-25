@@ -13,6 +13,8 @@ fun AppWithHeader(content: @Composable () -> Unit) {
         HeaderRow {
             Logo()
 
+            Hero()
+
             Row(
                 alignItems = AlignItems.Center,
             ) {
