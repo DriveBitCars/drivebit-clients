@@ -309,7 +309,7 @@ fun HomePage() {
                     isSelected = filter.title == selected,
                     onClick = {
                         filterViewModel.onSelect(filter.title)
-                        if (filter.title == "По близости") {
+                        if (filter.title == "Поблизости") {
                             mapViewModel.requestLocationForNearbyFilter()
                         }
                     },
@@ -318,7 +318,7 @@ fun HomePage() {
         }
 
         when (selected) {
-            "По близости" -> {
+            "Поблизости" -> {
                 NearbyMapView(
                     cameraPosition = mapState.value.cameraPosition,
                     onMarkerClick = { marker ->

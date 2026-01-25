@@ -36,7 +36,7 @@ class FiltersViewModel(
                         ),
                         FilterItem(
                             icon = FILTER_MAIN_POINT_SVG,
-                            title = "По близости",
+                            title = "Поблизости",
                             backgroundIcon = SEARCHBACKGROUND_CAR1_JPG,
                         ),
                     ),
@@ -52,7 +52,7 @@ class FiltersViewModel(
         _state.update { it.copy(selected = title) }
         saveSelectedFilter(title)
 
-        if (title == "По близости") {
+        if (title == "Поблизости") {
             onNearbyFilterSelected?.invoke()
         }
     }
