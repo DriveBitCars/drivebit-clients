@@ -67,13 +67,11 @@ data class CarDTOPagedResult(
 @Serializable
 data class CarItem(
     val id: String,
-    val brand: String? = null,
-    val model: String? = null,
     val year: Int? = null,
     val price: Double? = null,
     val cityId: String? = null,
     val photos: List<CarPhotoItem> = emptyList(),
-    val general: CarGeneral? = null,
+    val general: CarGeneral,
 )
 
 @Serializable
@@ -136,15 +134,16 @@ data class CarDetailResponse(
 
 @Serializable
 data class CarGeneral(
-    val brandName: String? = null,
-    val modelName: String? = null,
+    val brandName: String,
+    val modelName: String,
     val year: Int? = null,
     val licensePlate: String? = null,
-    val vin: String? = null,
-    val seats: Int? = null,
+    val vin: String,
+    val seats: Int,
     val mileage: Int? = null,
     val description: String? = null,
     val photos: List<CarPhotoItem> = emptyList(),
+    val address: CarAddress,
 )
 
 @Serializable
@@ -170,6 +169,19 @@ data class CarBody(
     val colorTranslate: String? = null,
     val carRoofType: String? = null,
     val carRoofTypeTranslate: String? = null,
+)
+
+@Serializable
+data class CarAddress(
+    val postalCode: String? = null,
+    val region: String? = null,
+    val regionArea: String? = null,
+    val cityType: String? = null,
+    val city: String? = null,
+    val street: String? = null,
+    val house: String? = null,
+    val geoLat: Double,
+    val geoLon: Double,
 )
 
 @Serializable
@@ -210,7 +222,7 @@ class CarImpl(
 ) : Car {
     private fun sanitizeCarItems(items: List<CarItem>): List<CarItem> =
         items.map { car ->
-            val photosFromGeneral = car.general?.photos ?: emptyList()
+            val photosFromGeneral = car.general.photos
             val photosFromTopLevel = car.photos
             val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
 
@@ -220,7 +232,7 @@ class CarImpl(
                         photo.copy(url = extractPathFromApiUrl(photo.url))
                     },
                 general =
-                    car.general?.copy(
+                    car.general.copy(
                         photos =
                             photosFromGeneral.map { photo ->
                                 photo.copy(url = extractPathFromApiUrl(photo.url))

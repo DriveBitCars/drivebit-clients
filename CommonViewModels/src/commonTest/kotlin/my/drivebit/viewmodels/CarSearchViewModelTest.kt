@@ -6,6 +6,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import my.drivebit.network.services.CarAddress
+import my.drivebit.network.services.CarGeneral
 import my.drivebit.network.services.CarItem
 import my.drivebit.network.services.CarSearchResponse
 import my.drivebit.repositories.CarSearchRepository
@@ -54,8 +56,8 @@ class CarSearchViewModelTest {
             val mockRepository = MockCarSearchRepository()
             val expectedCars =
                 listOf(
-                    CarItem(id = "1", brand = "BMW", model = "X5"),
-                    CarItem(id = "2", brand = "Audi", model = "A4"),
+                    testCarItem(id = "1", brand = "BMW", model = "X5"),
+                    testCarItem(id = "2", brand = "Audi", model = "A4"),
                 )
             mockRepository.searchResult = CarSearchResponse(expectedCars)
             val viewModel =
@@ -104,8 +106,8 @@ class CarSearchViewModelTest {
             val mockRepository = MockCarSearchRepository()
             val expectedCars =
                 listOf(
-                    CarItem(id = "1", brand = "BMW", model = "X5"),
-                    CarItem(id = "2", brand = "Audi", model = "A4"),
+                    testCarItem(id = "1", brand = "BMW", model = "X5"),
+                    testCarItem(id = "2", brand = "Audi", model = "A4"),
                 )
             mockRepository.searchResult = CarSearchResponse(expectedCars)
             val viewModel =
@@ -169,3 +171,22 @@ class CarSearchViewModelTest {
             assertEquals("Не удалось найти машины", errorState.message)
         }
 }
+
+private fun testCarItem(
+    id: String,
+    brand: String? = null,
+    model: String? = null,
+): CarItem =
+    CarItem(
+        id = id,
+        brand = brand,
+        model = model,
+        general =
+            CarGeneral(
+                address =
+                    CarAddress(
+                        geoLat = 0.0,
+                        geoLon = 0.0,
+                    ),
+            ),
+    )

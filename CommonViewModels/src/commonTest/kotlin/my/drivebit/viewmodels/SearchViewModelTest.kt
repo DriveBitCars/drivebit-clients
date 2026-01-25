@@ -9,6 +9,8 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.NetworkException
 import my.drivebit.network.services.Car
+import my.drivebit.network.services.CarAddress
+import my.drivebit.network.services.CarGeneral
 import my.drivebit.network.services.CarItem
 import my.drivebit.network.services.CarSearchResponse
 import my.drivebit.network.services.City
@@ -88,7 +90,7 @@ class MockSearchCarService : Car {
         CarSearchResponse(
             cars =
                 listOf(
-                    CarItem(
+                    testCarItem(
                         id = "car-1",
                         brand = "BMW",
                         model = "X5",
@@ -184,7 +186,7 @@ class MockSearchCarSearchRepository : CarSearchRepository {
         CarSearchResponse(
             cars =
                 listOf(
-                    CarItem(
+                    testCarItem(
                         id = "car-1",
                         brand = "BMW",
                         model = "X5",
@@ -598,3 +600,24 @@ class SearchViewModelTest {
             assertEquals(0, resultsState.cars.size)
         }
 }
+
+private fun testCarItem(
+    id: String,
+    brand: String? = null,
+    model: String? = null,
+    year: Int? = null,
+): CarItem =
+    CarItem(
+        id = id,
+        brand = brand,
+        model = model,
+        year = year,
+        general =
+            CarGeneral(
+                address =
+                    CarAddress(
+                        geoLat = 0.0,
+                        geoLon = 0.0,
+                    ),
+            ),
+    )
