@@ -7,7 +7,6 @@ import my.drivebit.network.services.AddressData
 import my.drivebit.network.services.AddressSuggestion
 import my.drivebit.repositories.AddressSuggestRepository
 import my.drivebit.repositories.ResultAddressSuggest
-import my.drivebit.repositories.SelectedCityRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,15 +15,10 @@ private class FakeAddressSuggestRepository : AddressSuggestRepository {
     var shouldReturnError = false
     var errorMessage: String = "Error"
     var lastQuery: String? = null
-    var lastCity: String? = null
     var callCount = 0
 
-    override suspend fun suggest(
-        query: String,
-        city: String,
-    ): ResultAddressSuggest {
+    override suspend fun suggest(query: String): ResultAddressSuggest {
         lastQuery = query
-        lastCity = city
         callCount++
         if (shouldReturnError) {
             return ResultAddressSuggest.Error(errorMessage)
@@ -56,39 +50,15 @@ private class FakeAddressSuggestRepository : AddressSuggestRepository {
     }
 }
 
-private class FakeSelectedCityRepository : SelectedCityRepository {
-    private var cityId: Int? = null
-    private var cityName: String? = "Москва"
-
-    override fun saveCity(
-        cityId: Int,
-        cityName: String,
-    ) {
-        this.cityId = cityId
-        this.cityName = cityName
-    }
-
-    override fun getCityId(): Int? = cityId
-
-    override fun getCityName(): String? = cityName
-
-    override fun clearCity() {
-        cityId = null
-        cityName = null
-    }
-}
-
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class AddressSuggestViewModelTest {
     @Test
     fun `initial state should have empty query and suggestions`() =
         runTest {
             val fakeRepo = FakeAddressSuggestRepository()
-            val fakeCityRepo = FakeSelectedCityRepository()
             val viewModel =
                 AddressSuggestViewModel(
                     addressSuggestRepository = fakeRepo,
-                    selectedCityRepository = fakeCityRepo,
                     coroutineScope = backgroundScope,
                 )
 
@@ -100,11 +70,9 @@ class AddressSuggestViewModelTest {
     fun `updateQuery should update query value`() =
         runTest {
             val fakeRepo = FakeAddressSuggestRepository()
-            val fakeCityRepo = FakeSelectedCityRepository()
             val viewModel =
                 AddressSuggestViewModel(
                     addressSuggestRepository = fakeRepo,
-                    selectedCityRepository = fakeCityRepo,
                     coroutineScope = backgroundScope,
                 )
 
@@ -117,11 +85,9 @@ class AddressSuggestViewModelTest {
     fun `suggestions should be updated after debounce delay`() =
         runTest {
             val fakeRepo = FakeAddressSuggestRepository()
-            val fakeCityRepo = FakeSelectedCityRepository()
             val viewModel =
                 AddressSuggestViewModel(
                     addressSuggestRepository = fakeRepo,
-                    selectedCityRepository = fakeCityRepo,
                     coroutineScope = backgroundScope,
                 )
 
@@ -140,11 +106,9 @@ class AddressSuggestViewModelTest {
     fun `should cancel previous request when new query is entered`() =
         runTest {
             val fakeRepo = FakeAddressSuggestRepository()
-            val fakeCityRepo = FakeSelectedCityRepository()
             val viewModel =
                 AddressSuggestViewModel(
                     addressSuggestRepository = fakeRepo,
-                    selectedCityRepository = fakeCityRepo,
                     coroutineScope = backgroundScope,
                 )
 
@@ -157,14 +121,12 @@ class AddressSuggestViewModelTest {
         }
 
     @Test
-    fun `should call repository with correct city`() =
+    fun `should call repository with correct query`() =
         runTest {
             val fakeRepo = FakeAddressSuggestRepository()
-            val fakeCityRepo = FakeSelectedCityRepository()
             val viewModel =
                 AddressSuggestViewModel(
                     addressSuggestRepository = fakeRepo,
-                    selectedCityRepository = fakeCityRepo,
                     coroutineScope = backgroundScope,
                 )
 
@@ -172,7 +134,6 @@ class AddressSuggestViewModelTest {
             kotlinx.coroutines.delay(3100)
 
             assertEquals("Ленина", fakeRepo.lastQuery)
-            assertEquals("Москва", fakeRepo.lastCity)
             assertEquals(1, fakeRepo.callCount)
         }
 
@@ -184,11 +145,9 @@ class AddressSuggestViewModelTest {
                     shouldReturnError = true
                     errorMessage = "Network error"
                 }
-            val fakeCityRepo = FakeSelectedCityRepository()
             val viewModel =
                 AddressSuggestViewModel(
                     addressSuggestRepository = fakeRepo,
-                    selectedCityRepository = fakeCityRepo,
                     coroutineScope = backgroundScope,
                 )
 
@@ -202,11 +161,9 @@ class AddressSuggestViewModelTest {
     fun `clearSuggestions should clear suggestions list`() =
         runTest {
             val fakeRepo = FakeAddressSuggestRepository()
-            val fakeCityRepo = FakeSelectedCityRepository()
             val viewModel =
                 AddressSuggestViewModel(
                     addressSuggestRepository = fakeRepo,
-                    selectedCityRepository = fakeCityRepo,
                     coroutineScope = backgroundScope,
                 )
 

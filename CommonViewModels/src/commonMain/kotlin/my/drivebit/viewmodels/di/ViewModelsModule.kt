@@ -194,7 +194,6 @@ val commonViewModelsModule: Module =
         factory {
             AddressSuggestViewModel(
                 addressSuggestRepository = get(),
-                selectedCityRepository = get(),
             )
         }
 

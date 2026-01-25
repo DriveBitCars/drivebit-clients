@@ -14,7 +14,6 @@ import my.drivebit.components.StringList
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.repositories.SelectedAddressRepository
-import my.drivebit.repositories.SelectedCityRepository
 import my.drivebit.viewmodels.AddressSuggestViewModel
 import org.koin.compose.koinInject
 
@@ -25,9 +24,9 @@ fun AddressInputPage(
 ) {
     val viewModel: AddressSuggestViewModel = koinInject()
     val selectedAddressRepository: SelectedAddressRepository = koinInject()
-    val selectedCityRepository: SelectedCityRepository = koinInject()
-
-    selectedCityRepository.getCityName() ?: return
+    // val selectedCityRepository: SelectedCityRepository = koinInject()
+    // Выбор города при создании машины отключён: город вводится вместе с адресом
+    // selectedCityRepository.getCityName() ?: return
 
     val suggestions by viewModel.suggestions.collectAsState()
 
