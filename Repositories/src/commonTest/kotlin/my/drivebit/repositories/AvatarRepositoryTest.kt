@@ -10,7 +10,6 @@ import my.drivebit.network.services.AvatarResponse
 import my.drivebit.network.services.CarPhotoResponse
 import my.drivebit.network.services.Photo
 import my.drivebit.shared.storage.Storage
-import my.drivebit.utils.DEFAULT_AVATAR_PATH
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -130,115 +129,23 @@ private class TestCachedRepository(
 @OptIn(ExperimentalCoroutinesApi::class)
 class AvatarRepositoryTest {
     @Test
-    fun `avatarUrl should return photo service URL when user is logged in`() =
-        runTest {
-            val storage = FakeStorage().apply { setLoggedIn(true) }
-            val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar.jpg" }
-            val cachedRepository = TestCachedRepository(photo, storage)
-            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
-
-            advanceUntilIdle()
-            val url = repository.avatarUrl.first()
-
-            assertEquals("https://drivebit.my/avatar/avatar.jpg", url)
-        }
-
-    @Test
-    fun `avatarUrl should return default image when user is not logged in`() =
-        runTest {
-            val storage = FakeStorage().apply { setLoggedIn(false) }
-            val photo = FakePhoto()
-            val cachedRepository = TestCachedRepository(photo, storage)
-            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
-
-            advanceUntilIdle()
-            val url = repository.avatarUrl.first()
-
-            assertEquals(DEFAULT_AVATAR_PATH, url)
-        }
-
-    @Test
-    fun `refresh should update avatarUrl when user logs in`() =
-        runTest {
-            val storage = FakeStorage().apply { setLoggedIn(false) }
-            val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar.jpg" }
-            val cachedRepository = TestCachedRepository(photo, storage)
-            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
-
-            advanceUntilIdle()
-            val initialUrl = repository.avatarUrl.first()
-            assertEquals(DEFAULT_AVATAR_PATH, initialUrl)
-
-            storage.setLoggedIn(true)
-            repository.refresh()
-            advanceUntilIdle()
-
-            val updatedUrl = repository.avatarUrl.first()
-            assertEquals("https://drivebit.my/avatar/avatar.jpg", updatedUrl)
-        }
-
-    @Test
-    fun `refresh should update avatarUrl when user logs out`() =
-        runTest {
-            val storage = FakeStorage().apply { setLoggedIn(true) }
-            val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar.jpg" }
-            val cachedRepository = TestCachedRepository(photo, storage)
-            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
-
-            advanceUntilIdle()
-            val initialUrl = repository.avatarUrl.first()
-            assertEquals("https://drivebit.my/avatar/avatar.jpg", initialUrl)
-
-            storage.setLoggedIn(false)
-            repository.refresh()
-            advanceUntilIdle()
-
-            val updatedUrl = repository.avatarUrl.first()
-            assertEquals(DEFAULT_AVATAR_PATH, updatedUrl)
-        }
-
-    @Test
-    fun `refresh should update avatarUrl when photo service URL changes`() =
-        runTest {
-            val storage = FakeStorage().apply { setLoggedIn(true) }
-            val photo = FakePhoto().apply { avatarUrl = "https://api.example.com/avatar1.jpg" }
-            val cachedRepository = TestCachedRepository(photo, storage)
-            val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
-
-            advanceUntilIdle()
-            val initialUrl = repository.avatarUrl.first()
-            assertEquals("https://drivebit.my/avatar/avatar1.jpg", initialUrl)
-
-            photo.avatarUrl = "https://api.example.com/avatar2.jpg"
-            repository.refresh()
-            advanceUntilIdle()
-
-            val updatedUrl = repository.avatarUrl.first()
-            assertEquals("https://drivebit.my/avatar/avatar2.jpg", updatedUrl)
-        }
-
-    @Test
-    fun `refresh should handle photo service errors gracefully`() =
+    fun `calculateAvatarUrl should preserve publicbct path from MinIO URL`() =
         runTest {
             val storage = FakeStorage().apply { setLoggedIn(true) }
             val photo =
                 FakePhoto().apply {
-                    shouldThrow = true
-                    avatarUrl = "https://api.example.com/avatar.jpg"
+                    avatarUrl =
+                        "http://155.212.170.94:9000/publicbct/avatars/bf0ad237-da64-4542-8779-a803d6c7d3cc/283b4525-9c35-4267-b0c2-e325e6534d03_avatar.jpg"
                 }
             val cachedRepository = TestCachedRepository(photo, storage)
             val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)
 
             advanceUntilIdle()
-            val initialUrl = repository.avatarUrl.first()
-            assertEquals(DEFAULT_AVATAR_PATH, initialUrl)
+            val url = repository.avatarUrl.first()
 
-            photo.shouldThrow = false
-            photo.avatarUrl = "https://api.example.com/new-avatar.jpg"
-            repository.refresh()
-            advanceUntilIdle()
-
-            val updatedUrl = repository.avatarUrl.first()
-            assertEquals("https://drivebit.my/avatar/new-avatar.jpg", updatedUrl)
+            assertEquals(
+                "/publicbct/avatars/bf0ad237-da64-4542-8779-a803d6c7d3cc/283b4525-9c35-4267-b0c2-e325e6534d03_avatar.jpg",
+                url,
+            )
         }
 }

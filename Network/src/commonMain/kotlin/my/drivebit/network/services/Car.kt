@@ -13,9 +13,11 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
-import my.drivebit.network.NetworkException
 import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
+import my.drivebit.utils.extractPathFromApiUrl
+
+internal expect fun getCurrentDomainForCar(): String
 
 interface Car {
     suspend fun search(
@@ -207,51 +209,6 @@ data class CarResponse(
 class CarImpl(
     private val httpClient: HttpClient,
 ) : Car {
-    private fun ensureHttpsUrl(url: String): String {
-        val sanitizedUrl = url.replace(" ", "%20")
-
-        val isHttp = sanitizedUrl.startsWith("http://")
-        val isHttps = sanitizedUrl.startsWith("https://")
-
-        if (!isHttp && !isHttps) {
-            val isRelativePublicbct = sanitizedUrl.startsWith("/publicbct/")
-            if (isRelativePublicbct) {
-                return "https://drivebit.my$sanitizedUrl"
-            }
-            return sanitizedUrl
-        }
-
-        val withoutScheme = sanitizedUrl.substringAfter("://")
-        val host = withoutScheme.substringBefore("/").substringBefore(":")
-
-        val isLocalAddress =
-            host == "localhost" ||
-                host == "127.0.0.1" ||
-                host.startsWith("10.") ||
-                host.startsWith("192.168.") ||
-                (
-                    host.startsWith("172.") &&
-                        host
-                            .split(".")
-                            .getOrNull(1)
-                            ?.toIntOrNull()
-                            ?.let { it in 16..31 } == true
-                )
-
-        val isProductionMinIO = host == "155.212.170.94" && sanitizedUrl.contains(":9000")
-        if (isProductionMinIO) {
-            val path = sanitizedUrl.substringAfter(":9000")
-            val normalizedPath = if (path.startsWith("/")) path else "/$path"
-            return "https://drivebit.my$normalizedPath"
-        }
-
-        if (isLocalAddress) {
-            return sanitizedUrl
-        }
-
-        return if (isHttp) sanitizedUrl.replaceFirst("http://", "https://") else sanitizedUrl
-    }
-
     private fun sanitizeCarItems(items: List<CarItem>): List<CarItem> =
         items.map { car ->
             val photosFromGeneral = car.general?.photos ?: emptyList()
@@ -261,13 +218,13 @@ class CarImpl(
             car.copy(
                 photos =
                     allPhotos.map { photo ->
-                        photo.copy(url = ensureHttpsUrl(photo.url))
+                        photo.copy(url = extractPathFromApiUrl(photo.url))
                     },
                 general =
                     car.general?.copy(
                         photos =
                             photosFromGeneral.map { photo ->
-                                photo.copy(url = ensureHttpsUrl(photo.url))
+                                photo.copy(url = extractPathFromApiUrl(photo.url))
                             },
                     ),
             )
@@ -277,8 +234,15 @@ class CarImpl(
         result.copy(
             photos =
                 result.photos.map { photo ->
-                    photo.copy(url = ensureHttpsUrl(photo.url))
+                    photo.copy(url = extractPathFromApiUrl(photo.url))
                 },
+            general =
+                result.general?.copy(
+                    photos =
+                        result.general.photos.map { photo ->
+                            photo.copy(url = extractPathFromApiUrl(photo.url))
+                        },
+                ),
         )
 
     override suspend fun search(

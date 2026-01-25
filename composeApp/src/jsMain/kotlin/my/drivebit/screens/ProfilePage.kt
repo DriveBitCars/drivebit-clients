@@ -2,10 +2,12 @@ package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -92,6 +94,12 @@ private fun buildEditNameUrlParams(
 fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
     val state by viewModel.state.collectAsState()
     val navigationController = LocalNavigationController.current
+
+    LaunchedEffect(state) {
+        if (state is ProfileState.Error && (state as ProfileState.Error).message == "Не авторизован") {
+            window.location.href = "/"
+        }
+    }
 
     PageWithLogo {
         PageContainer {

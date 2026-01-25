@@ -14,6 +14,7 @@ import kotlinx.serialization.json.Json
 import my.drivebit.network.parseResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -102,8 +103,8 @@ class CarItemPhotosTest {
                     }
                 }
 
-            val response = httpClient.get("https://drivebit.my/api/Car/my")
-            val result: List<CarItem> = response.parseResponse()
+            val carService = CarImpl(httpClient)
+            val result = carService.getMyCars()
 
             assertNotNull(result)
             assertEquals(1, result.size)
@@ -121,19 +122,31 @@ class CarItemPhotosTest {
 
             val photosFromGeneral = car.general?.photos ?: emptyList()
             assertEquals(11, photosFromGeneral[0].id)
-            assertEquals(
-                "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/28005139-1f22-497d-84d8-6cba79b978f0_c",
-                photosFromGeneral[0].url,
+            assertTrue(
+                photosFromGeneral[0].url.contains(
+                    "a575c0b1-3736-475f-a4a8-5a87cfbdb18a",
+                ),
+                "URL should contain correct path",
             )
+            assertFalse(
+                photosFromGeneral[0].url.contains("155.212.170.94:9000"),
+                "URL should not contain MinIO IP and port",
+            )
+
             assertEquals(12, photosFromGeneral[1].id)
-            assertEquals(
-                "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/c876fa26-2a58-4ec2-8b3a-82c84d0fef53_c",
-                photosFromGeneral[1].url,
+            assertTrue(
+                photosFromGeneral[1].url.contains(
+                    "a575c0b1-3736-475f-a4a8-5a87cfbdb18a",
+                ),
+                "URL should contain correct path",
             )
+
             assertEquals(14, photosFromGeneral[2].id)
-            assertEquals(
-                "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/4c39d7ba-f09f-4514-b80f-662024e56395_c",
-                photosFromGeneral[2].url,
+            assertTrue(
+                photosFromGeneral[2].url.contains(
+                    "4c39d7ba-f09f-4514-b80f-662024e56395_c",
+                ),
+                "URL should contain correct path",
             )
         }
 
@@ -178,7 +191,7 @@ class CarItemPhotosTest {
                     }
                 }
 
-            val response = httpClient.get("https://drivebit.my/api/Car/my")
+            val response = httpClient.get("https://drivebit.ru/api/Car/my")
             val result: List<CarItem> = response.parseResponse()
 
             assertNotNull(result)
@@ -227,7 +240,7 @@ class CarItemPhotosTest {
                     }
                 }
 
-            val response = httpClient.get("https://drivebit.my/api/Car/my")
+            val response = httpClient.get("https://drivebit.ru/api/Car/my")
             val result: List<CarItem> = response.parseResponse()
 
             assertNotNull(result)
@@ -301,7 +314,7 @@ class CarItemPhotosTest {
                     }
                 }
 
-            val response = httpClient.get("https://drivebit.my/api/Car/my")
+            val response = httpClient.get("https://drivebit.ru/api/Car/my")
             val result: List<CarItem> = response.parseResponse()
 
             assertNotNull(result)
@@ -374,7 +387,7 @@ class CarItemPhotosTest {
                     }
                 }
 
-            val response = httpClient.get("https://drivebit.my/api/Car/my")
+            val response = httpClient.get("https://drivebit.ru/api/Car/my")
             val result: List<CarItem> = response.parseResponse()
 
             assertNotNull(result)

@@ -6,6 +6,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
@@ -88,24 +91,24 @@ class SearchViewModelImpl(
     private fun performInitialSearch(filters: List<FilterSuggestion>) {
         viewModelScope.launch {
             _state.update { SearchState.Searching(suggestedFilters = filters) }
-            runCatching {
-                carSearchRepository.searchCarsByUserCity()
-            }.onSuccess { response ->
-                _state.update {
-                    SearchState.SearchResults(
-                        suggestedFilters = filters,
-                        cars = response.cars,
-                    )
+            carSearchRepository
+                .searchCarsByUserCity
+                .catch { e ->
+                    val errorMessage =
+                        ErrorHandler.extractErrorMessage(
+                            exception = e,
+                            defaultNetworkError = "Ошибка сети",
+                            defaultGenericError = "Не удалось выполнить поиск",
+                        )
+                    _state.update { SearchState.Error(errorMessage) }
+                }.collectLatest { response ->
+                    _state.update {
+                        SearchState.SearchResults(
+                            suggestedFilters = filters,
+                            cars = response.cars,
+                        )
+                    }
                 }
-            }.onFailure { e ->
-                val errorMessage =
-                    ErrorHandler.extractErrorMessage(
-                        exception = e,
-                        defaultNetworkError = "Ошибка сети",
-                        defaultGenericError = "Не удалось выполнить поиск",
-                    )
-                _state.update { SearchState.Error(errorMessage) }
-            }
         }
     }
 
@@ -122,7 +125,7 @@ class SearchViewModelImpl(
             _state.update { SearchState.Searching(suggestedFilters = filters) }
 
             runCatching {
-                val city = myCityRepository.getSelectedCity()
+                val city = myCityRepository.getSelectedCity.first()
                 carService.search(
                     cityId = city.id.toString(),
                     dateFrom = null,

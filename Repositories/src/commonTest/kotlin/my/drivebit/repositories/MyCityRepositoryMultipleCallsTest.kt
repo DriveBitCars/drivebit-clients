@@ -1,5 +1,6 @@
 package my.drivebit.repositories
 
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.City
 import my.drivebit.network.services.Dictionary
@@ -90,14 +91,14 @@ class MyCityRepositoryMultipleCallsTest {
             val repository = MyCityRepositoryImpl(mockDictionary, mockStorage)
 
             println("\n=== Тест 1: getSelectedCity с сохраненным городом ===")
-            val city1 = repository.getSelectedCity()
+            val city1 = repository.getSelectedCity.first()
             println("Результат: ${city1.name} (id: ${city1.id})")
             println("Количество вызовов searchCities: ${mockDictionary.searchCitiesCallCount}")
 
             mockDictionary.searchCitiesCallCount = 0
 
             println("\n=== Тест 2: Повторный вызов getSelectedCity ===")
-            val city2 = repository.getSelectedCity()
+            val city2 = repository.getSelectedCity.first()
             println("Результат: ${city2.name} (id: ${city2.id})")
             println("Количество вызовов searchCities: ${mockDictionary.searchCitiesCallCount}")
 
@@ -120,7 +121,7 @@ class MyCityRepositoryMultipleCallsTest {
             val repository = MyCityRepositoryImpl(mockDictionary, mockStorage)
 
             println("\n=== Тест: getSelectedCity с именем города ===")
-            val city = repository.getSelectedCity()
+            val city = repository.getSelectedCity.first()
             println("Результат: ${city.name} (id: ${city.id})")
             println("Количество вызовов searchCities: ${mockDictionary.searchCitiesCallCount}")
             println("Последний запрос: ${mockDictionary.lastSearchQuery}")
@@ -149,7 +150,7 @@ class MyCityRepositoryMultipleCallsTest {
             val repository = MyCityRepositoryImpl(mockDictionary, mockStorage)
 
             println("\n=== Тест: getSelectedCity когда город не найден по ID ===")
-            val city = repository.getSelectedCity()
+            val city = repository.getSelectedCity.first()
             println("Результат: ${city.name} (id: ${city.id})")
             println("Количество вызовов searchCities: ${mockDictionary.searchCitiesCallCount}")
 
@@ -176,7 +177,7 @@ class MyCityRepositoryMultipleCallsTest {
             repeat(3) { index ->
                 println("\n--- Вызов #${index + 1} ---")
                 mockDictionary.searchCitiesCallCount = 0
-                val city = repository.getSelectedCity()
+                val city = repository.getSelectedCity.first()
                 println("Результат: ${city.name} (id: ${city.id})")
                 println("Количество вызовов searchCities в этом вызове: ${mockDictionary.searchCitiesCallCount}")
             }

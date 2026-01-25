@@ -14,7 +14,7 @@ import my.drivebit.network.services.Auth
 
 expect fun createPlatformHttpClientEngine(): HttpClientEngine
 
-const val DEFAULT_BASE_URL = "https://drivebit.my/api/"
+const val DEFAULT_BASE_URL = "https://drivebit.ru/api/"
 
 fun createHttpClientWithConfig(
     json: Json =
@@ -42,7 +42,7 @@ fun createHttpClientWithConfig(
                     }
                 }
             filter { request ->
-                request.url.host.contains("drivebit.my") || request.url.host.contains("api.drivebit.my")
+                request.url.host.contains("drivebit.ru") || request.url.host.contains("api.drivebit.ru")
             }
         }
 

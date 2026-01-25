@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import my.drivebit.network.NetworkException
 import my.drivebit.network.services.User
 import my.drivebit.network.services.UserGetResponse
+import my.drivebit.shared.storage.Storage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -83,6 +84,42 @@ class MockProfileUserService : User {
     }
 }
 
+class MockStorageForProfile : Storage {
+    private var isLoggedIn = true
+
+    override fun isLogined(): Boolean = isLoggedIn
+
+    override fun saveToken(token: String) {}
+
+    override fun getToken(): String? = if (isLoggedIn) "test-token" else null
+
+    override fun saveRefreshToken(refreshToken: String) {}
+
+    override fun getRefreshToken(): String? = if (isLoggedIn) "test-refresh-token" else null
+
+    override fun logout() {
+        isLoggedIn = false
+    }
+
+    override fun putString(
+        key: String,
+        value: String,
+    ) {}
+
+    override fun getString(
+        key: String,
+        defaultValue: String,
+    ): String = defaultValue
+
+    override fun contains(key: String): Boolean = false
+
+    override fun remove(key: String) {}
+
+    fun setLoggedIn(loggedIn: Boolean) {
+        isLoggedIn = loggedIn
+    }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
     @Test
@@ -90,9 +127,11 @@ class ProfileViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
             val mockUserService = MockProfileUserService()
+            val mockStorage = MockStorageForProfile()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,
+                    storage = mockStorage,
                     coroutineScope = testScope,
                 )
 
@@ -106,9 +145,11 @@ class ProfileViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
             val mockUserService = MockProfileUserService()
+            val mockStorage = MockStorageForProfile()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,
+                    storage = mockStorage,
                     coroutineScope = testScope,
                 )
 
@@ -136,9 +177,11 @@ class ProfileViewModelTest {
             mockUserService.shouldThrowNetworkException = true
             mockUserService.errorMessage = "Unauthorized"
             mockUserService.networkExceptionStatusCode = HttpStatusCode.Unauthorized
+            val mockStorage = MockStorageForProfile()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,
+                    storage = mockStorage,
                     coroutineScope = testScope,
                 )
 
@@ -157,9 +200,11 @@ class ProfileViewModelTest {
             val mockUserService = MockProfileUserService()
             mockUserService.shouldThrowError = true
             mockUserService.errorMessage = "Connection failed"
+            val mockStorage = MockStorageForProfile()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,
+                    storage = mockStorage,
                     coroutineScope = testScope,
                 )
 
@@ -178,9 +223,11 @@ class ProfileViewModelTest {
             val mockUserService = MockProfileUserService()
             mockUserService.shouldThrowError = true
             mockUserService.errorMessage = ""
+            val mockStorage = MockStorageForProfile()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,
+                    storage = mockStorage,
                     coroutineScope = testScope,
                 )
 
@@ -204,9 +251,11 @@ class ProfileViewModelTest {
                     firstName = "Jane",
                     createdAt = "",
                 )
+            val mockStorage = MockStorageForProfile()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,
+                    storage = mockStorage,
                     coroutineScope = testScope,
                 )
 
@@ -230,9 +279,11 @@ class ProfileViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
             val mockUserService = MockProfileUserService()
+            val mockStorage = MockStorageForProfile()
             val viewModel =
                 ProfileViewModelImpl(
                     userService = mockUserService,
+                    storage = mockStorage,
                     coroutineScope = testScope,
                 )
 

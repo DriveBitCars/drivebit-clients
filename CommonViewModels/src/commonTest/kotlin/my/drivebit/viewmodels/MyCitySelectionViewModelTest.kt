@@ -25,11 +25,14 @@ class MockMyCityRepository : MyCityRepository {
         return searchResults[query] ?: emptyList()
     }
 
-    override suspend fun getSelectedCity(): City {
-        val moscowResults = searchResults["Москва"] ?: emptyList()
-        return moscowResults.firstOrNull { it.id == (selectedCityId ?: 158830) }
-            ?: City(id = 158830, name = "Москва")
-    }
+    override val getSelectedCity: kotlinx.coroutines.flow.Flow<City>
+        get() {
+            val moscowResults = searchResults["Москва"] ?: emptyList()
+            val city =
+                moscowResults.firstOrNull { it.id == (selectedCityId ?: 158830) }
+                    ?: City(id = 158830, name = "Москва")
+            return kotlinx.coroutines.flow.flowOf(city)
+        }
 
     override fun selectCity(
         cityId: Int,

@@ -17,20 +17,16 @@ class MockCarSearchRepository : CarSearchRepository {
     var shouldThrowError = false
     var errorMessage = "Network error"
     var searchResult: CarSearchResponse = CarSearchResponse(emptyList())
-    var lastDateFrom: String? = null
-    var lastDateTo: String? = null
 
-    override suspend fun searchCarsByUserCity(
-        dateFrom: String?,
-        dateTo: String?,
-    ): CarSearchResponse {
-        if (shouldThrowError) {
-            throw Exception(errorMessage)
+    override val searchCarsByUserCity: kotlinx.coroutines.flow.Flow<CarSearchResponse>
+        get() {
+            if (shouldThrowError) {
+                return kotlinx.coroutines.flow.flow {
+                    throw Exception(errorMessage)
+                }
+            }
+            return kotlinx.coroutines.flow.flowOf(searchResult)
         }
-        lastDateFrom = dateFrom
-        lastDateTo = dateTo
-        return searchResult
-    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -101,11 +97,17 @@ class CarSearchViewModelTest {
         }
 
     @Test
-    fun `SearchCarsWithDates intent should pass dates to repository`() =
+    fun `SearchCarsWithDates intent should trigger search and set state to Success`() =
         runTest {
             val testDispatcher = StandardTestDispatcher()
             val testScope = CoroutineScope(SupervisorJob() + testDispatcher)
             val mockRepository = MockCarSearchRepository()
+            val expectedCars =
+                listOf(
+                    CarItem(id = "1", brand = "BMW", model = "X5"),
+                    CarItem(id = "2", brand = "Audi", model = "A4"),
+                )
+            mockRepository.searchResult = CarSearchResponse(expectedCars)
             val viewModel =
                 CarSearchViewModelImpl(
                     carSearchRepository = mockRepository,
@@ -120,32 +122,9 @@ class CarSearchViewModelTest {
             )
             testDispatcher.scheduler.advanceUntilIdle()
 
-            assertEquals("2024-01-01", mockRepository.lastDateFrom)
-            assertEquals("2024-01-10", mockRepository.lastDateTo)
-        }
-
-    @Test
-    fun `SearchCarsWithDates intent should handle null dates`() =
-        runTest {
-            val testDispatcher = StandardTestDispatcher()
-            val testScope = CoroutineScope(SupervisorJob() + testDispatcher)
-            val mockRepository = MockCarSearchRepository()
-            val viewModel =
-                CarSearchViewModelImpl(
-                    carSearchRepository = mockRepository,
-                    coroutineScope = testScope,
-                )
-
-            viewModel.handleIntent(
-                CarSearchIntent.SearchCarsWithDates(
-                    dateFrom = null,
-                    dateTo = null,
-                ),
-            )
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(null, mockRepository.lastDateFrom)
-            assertEquals(null, mockRepository.lastDateTo)
+            assertIs<CarSearchState.Success>(viewModel.state.value)
+            val successState = viewModel.state.value as CarSearchState.Success
+            assertEquals(2, successState.cars.size)
         }
 
     @Test

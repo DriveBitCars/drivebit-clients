@@ -81,7 +81,7 @@ class CarDetailResponseTest {
                     }
                 }
 
-            val response = httpClient.get("https://drivebit.my/api/Car/test-id")
+            val response = httpClient.get("https://drivebit.ru/api/Car/test-id")
             val result: CarDetailResponse = response.parseResponse()
 
             assertNotNull(result)
@@ -148,7 +148,7 @@ class CarDetailResponseTest {
                     }
                 }
 
-            val response = httpClient.get("https://drivebit.my/api/Car/test-id")
+            val response = httpClient.get("https://drivebit.ru/api/Car/test-id")
             val result: CarDetailResponse = response.parseResponse()
 
             assertNotNull(result)

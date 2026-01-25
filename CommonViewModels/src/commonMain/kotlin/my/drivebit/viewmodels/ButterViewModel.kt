@@ -87,6 +87,7 @@ class ButterViewModelImpl(
     private val storage: Storage,
     private val avatarRepository: AvatarRepository,
     private val carMenuViewModel: CarMenuViewModel,
+    private val profileViewModel: ProfileViewModel? = null,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : ButterViewModel {
     private val _state = MutableStateFlow<ButterState>(ButterState.Idle)
@@ -155,6 +156,7 @@ class ButterViewModelImpl(
     private fun logout() {
         storage.logout()
         avatarRepository.clearCache()
+        profileViewModel?.refresh()
     }
 
     override fun close() {

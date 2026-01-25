@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import my.drivebit.mobile.screens.profile.ProfileScreen
+import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.ButterState
 import my.drivebit.viewmodels.ButterViewModel
 import org.koin.compose.koinInject
@@ -25,6 +26,7 @@ fun ButterMenu() {
     val butterViewModel: ButterViewModel = koinInject()
     val state by butterViewModel.state.collectAsState()
     val navigator = LocalNavigator.currentOrThrow
+    val storage: Storage = koinInject()
 
     when (val currentState = state) {
         is ButterState.Idle -> {}
@@ -44,7 +46,9 @@ fun ButterMenu() {
                                 "Мой профиль" -> {
                                     {
                                         item.onClick()
-                                        navigator.push(ProfileScreen())
+                                        if (storage.isLogined()) {
+                                            navigator.push(ProfileScreen())
+                                        }
                                     }
                                 }
                                 else -> item.onClick

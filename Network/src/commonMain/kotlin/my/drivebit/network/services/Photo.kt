@@ -12,8 +12,7 @@ import io.ktor.http.HttpHeaders
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
-import my.drivebit.network.services.Car
-import my.drivebit.network.utils.UrlSanitizer
+import my.drivebit.utils.extractPathFromApiUrl
 
 interface Photo {
     suspend fun getAvatar(): AvatarResponse
@@ -52,7 +51,7 @@ class PhotoImpl(
     private val httpClient: HttpClient,
     private val carService: Car? = null,
 ) : Photo {
-    private fun ensureHttpsUrl(url: String): String = UrlSanitizer.ensureHttpsUrl(url)
+    private fun ensureHttpsUrl(url: String): String = extractPathFromApiUrl(url)
 
     override suspend fun getAvatar(): AvatarResponse {
         val url = "${DEFAULT_BASE_URL}Photo/avatar/my"

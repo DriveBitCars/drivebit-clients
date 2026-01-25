@@ -28,6 +28,10 @@ class MockProfileViewModel(
         _state.value = initialState
     }
 
+    override fun refresh() {
+        loadProfile()
+    }
+
     fun setState(newState: ProfileState) {
         _state.value = newState
     }

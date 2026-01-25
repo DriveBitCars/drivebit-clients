@@ -164,14 +164,17 @@ class MockSearchMyCityRepository : MyCityRepository {
             name = "Москва",
         )
 
-    override suspend fun getSelectedCity(): City = selectedCity
+    override val getSelectedCity: kotlinx.coroutines.flow.Flow<City>
+        get() = kotlinx.coroutines.flow.flowOf(selectedCity)
 
     override suspend fun searchCities(query: String): List<City> = emptyList()
 
     override fun selectCity(
         cityId: Int,
         cityName: String,
-    ) {}
+    ) {
+        selectedCity = City(id = cityId, name = cityName)
+    }
 }
 
 class MockSearchCarSearchRepository : CarSearchRepository {
@@ -190,15 +193,15 @@ class MockSearchCarSearchRepository : CarSearchRepository {
                 ),
         )
 
-    override suspend fun searchCarsByUserCity(
-        dateFrom: String?,
-        dateTo: String?,
-    ): CarSearchResponse {
-        if (shouldThrowError) {
-            throw Exception(errorMessage)
+    override val searchCarsByUserCity: kotlinx.coroutines.flow.Flow<CarSearchResponse>
+        get() {
+            if (shouldThrowError) {
+                return kotlinx.coroutines.flow.flow {
+                    throw Exception(errorMessage)
+                }
+            }
+            return kotlinx.coroutines.flow.flowOf(searchResult)
         }
-        return searchResult
-    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
