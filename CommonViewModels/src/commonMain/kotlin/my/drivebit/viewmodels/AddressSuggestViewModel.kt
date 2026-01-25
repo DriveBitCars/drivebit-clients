@@ -17,12 +17,10 @@ import kotlinx.coroutines.flow.onEach
 import my.drivebit.network.services.AddressSuggestion
 import my.drivebit.repositories.AddressSuggestRepository
 import my.drivebit.repositories.ResultAddressSuggest
-import my.drivebit.repositories.SelectedCityRepository
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class AddressSuggestViewModel(
     private val addressSuggestRepository: AddressSuggestRepository,
-    private val selectedCityRepository: SelectedCityRepository,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
     private val viewModelScope = coroutineScope
@@ -39,9 +37,8 @@ class AddressSuggestViewModel(
             .distinctUntilChanged()
             .flatMapLatest { query ->
                 flow {
-                    val city = selectedCityRepository.getCityName()
-                    if (city != null && query.isNotBlank() && query.length >= 3) {
-                        when (val result = addressSuggestRepository.suggest(query, city)) {
+                    if (query.isNotBlank() && query.length >= 3) {
+                        when (val result = addressSuggestRepository.suggest(query)) {
                             is ResultAddressSuggest.Success -> {
                                 emit(result.suggestions)
                             }

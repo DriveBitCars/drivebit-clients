@@ -193,7 +193,6 @@ data class CarCreateRequest(
     val seatsCount: Int? = null,
     val licensePlate: String? = null,
     val ValidAddressString: String? = null,
-    val cityId: String? = null,
     val addr: String? = null,
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,

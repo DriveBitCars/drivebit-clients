@@ -23,13 +23,13 @@ internal class CreateCarRepositoryImpl(
 ) : CreateCarRepository {
     override suspend fun createCar(dailyRate: Double): Result<CarResponse> =
         runCatching {
-            val savedCityId = selectedCityRepository.getCityId()
-            val cityIdString = savedCityId?.toString()
+            // val savedCityId = selectedCityRepository.getCityId()
+            // val cityIdString = savedCityId?.toString()
             val address = selectedAddressRepository.getAddress() ?: ""
 
             println("🚗 [CreateCarRepository] Создание машины:")
-            println("   - savedCityId (Int?): $savedCityId")
-            println("   - cityId (String?): $cityIdString")
+            // println("   - savedCityId (Int?): $savedCityId")
+            // println("   - cityId (String?): $cityIdString")
             println("   - address: $address")
             println("   - dailyRate: $dailyRate")
 
@@ -45,7 +45,6 @@ internal class CreateCarRepositoryImpl(
                     seatsCount = carDataRepository.getSeatsCount(),
                     licensePlate = licensePlateRepository.getLicensePlate(),
                     ValidAddressString = address,
-                    cityId = cityIdString,
                     addr = null,
                     hourlyRate = 0.0,
                     dailyRate = dailyRate,
@@ -53,7 +52,7 @@ internal class CreateCarRepositoryImpl(
                     MultimediaSystemOptions = emptyList(),
                 )
 
-            println("🚗 [CreateCarRepository] Отправка запроса с cityId: ${request.cityId}")
+            // Выбор города при создании машины отключён: город вводится вместе с адресом, cityId = null
 
             val response = carService.createCar(request)
             val finalResponse = ensureCarId(response)

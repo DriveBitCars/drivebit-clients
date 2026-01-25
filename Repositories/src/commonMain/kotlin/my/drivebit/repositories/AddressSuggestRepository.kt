@@ -4,10 +4,7 @@ import my.drivebit.network.services.AddressSuggestion
 import my.drivebit.network.services.Dadata
 
 interface AddressSuggestRepository {
-    suspend fun suggest(
-        query: String,
-        city: String,
-    ): ResultAddressSuggest
+    suspend fun suggest(query: String): ResultAddressSuggest
 }
 
 sealed interface ResultAddressSuggest {
@@ -23,14 +20,10 @@ sealed interface ResultAddressSuggest {
 internal class AddressSuggestRepositoryImpl(
     private val dadata: Dadata,
 ) : AddressSuggestRepository {
-    override suspend fun suggest(
-        query: String,
-        city: String,
-    ): ResultAddressSuggest {
-        val queryWithCity = "$city $query".trim()
+    override suspend fun suggest(query: String): ResultAddressSuggest {
         val result =
             runCatching {
-                dadata.suggest(queryWithCity)
+                dadata.suggest(query)
             }
 
         return result.fold(

@@ -42,13 +42,13 @@ class AddressSuggestRepositoryTest {
             val fakeDadata = FakeDadata()
             val repo = AddressSuggestRepositoryImpl(fakeDadata)
 
-            val result = repo.suggest("Ленина", "Москва")
+            val result = repo.suggest("Ленина")
 
             assertTrue(result is ResultAddressSuggest.Success)
             assertEquals(2, result.suggestions.size)
             assertEquals("Москва, ул. Ленина, д. 1", result.suggestions[0].value)
             assertEquals("Москва, ул. Пушкина, д. 2", result.suggestions[1].value)
-            assertEquals("Москва Ленина", fakeDadata.lastQuery)
+            assertEquals("Ленина", fakeDadata.lastQuery)
         }
 
     @Test
@@ -61,7 +61,7 @@ class AddressSuggestRepositoryTest {
                 }
             val repo = AddressSuggestRepositoryImpl(fakeDadata)
 
-            val result = repo.suggest("invalid", "Москва")
+            val result = repo.suggest("invalid")
 
             assertTrue(result is ResultAddressSuggest.Error)
             assertEquals("Invalid query", result.message)
@@ -77,7 +77,7 @@ class AddressSuggestRepositoryTest {
                 }
             val repo = AddressSuggestRepositoryImpl(fakeDadata)
 
-            val result = repo.suggest("any", "Москва")
+            val result = repo.suggest("any")
 
             assertTrue(result is ResultAddressSuggest.Error)
             assertEquals("Произошла ошибка", result.message)
@@ -114,7 +114,7 @@ class AddressSuggestRepositoryTest {
                 }
             val repo = AddressSuggestRepositoryImpl(fakeDadata)
 
-            val result = repo.suggest("Ленина", "Москва")
+            val result = repo.suggest("Ленина")
 
             assertTrue(result is ResultAddressSuggest.Success)
             assertEquals(3, result.suggestions.size)
