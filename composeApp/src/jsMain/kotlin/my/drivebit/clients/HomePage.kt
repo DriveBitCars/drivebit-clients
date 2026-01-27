@@ -1,0 +1,317 @@
+package my.drivebit.clients
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.browser.window
+import my.drivebit.components.AppWithHeader
+import my.drivebit.components.CarItemSmall
+import my.drivebit.components.FilterBackgroundImage
+import my.drivebit.components.FilterButtonsRow
+import my.drivebit.components.TextInputField
+import my.drivebit.components.filterButton
+import my.drivebit.design.CSSColors
+import my.drivebit.maps.MapView
+import my.drivebit.maps.models.Location
+import my.drivebit.maps.models.MapCameraPosition
+import my.drivebit.maps.models.MapMarker
+import my.drivebit.network.services.CarItem
+import my.drivebit.viewmodels.CarSearchViewModel
+import my.drivebit.viewmodels.FiltersViewModel
+import my.drivebit.viewmodels.MainContentViewModel
+import my.drivebit.viewmodels.MapViewModel
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.overflowX
+import org.jetbrains.compose.web.css.paddingLeft
+import org.jetbrains.compose.web.css.paddingRight
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
+import org.koin.compose.koinInject
+
+@Composable
+fun HomePage() {
+    val filterViewModel: FiltersViewModel = koinInject()
+    val mapViewModel: MapViewModel = koinInject()
+    val carSearchViewModel: CarSearchViewModel = koinInject()
+    val mainContentViewModel: MainContentViewModel = koinInject()
+
+    val state = filterViewModel.state.collectAsState()
+    val mapState = mapViewModel.state.collectAsState()
+    val carSearchState = carSearchViewModel.state.collectAsState()
+    val cars by mainContentViewModel.firstList.collectAsState()
+    val filters = state.value.filters
+    val selected = state.value.selected
+
+    var searchQuery by remember { mutableStateOf("") }
+
+    AppWithHeader {
+        val selectedFilter = filters.find { it.title == selected }
+        selectedFilter?.let { filter ->
+            FilterBackgroundImage(
+                backgroundIconUrl = filter.backgroundIcon,
+                searchContent = {
+                    Div({
+                        style {
+                            width(100.percent)
+                        }
+                    }) {
+                        TextInputField(
+                            label = "",
+                            value = searchQuery,
+                            onValueChange = { newValue ->
+                                searchQuery = newValue
+                            },
+                            onFocus = {
+                                window.location.href = "/search"
+                            },
+                        )
+                    }
+                },
+            )
+        }
+
+        FilterButtonsRow {
+            filters.forEach { filter ->
+                filterButton(
+                    filter = filter,
+                    isSelected = filter.title == selected,
+                    onClick = {
+                        filterViewModel.onSelect(filter.title)
+                    },
+                )
+            }
+        }
+
+        when (selected) {
+            "Поблизости" -> {
+                console.log("Nearby: cars=$cars")
+
+                val markers =
+                    cars.map { car ->
+                        val lat = car.general.address.geoLat
+                        val lon = car.general.address.geoLon
+                        MapMarker(
+                            id = car.id,
+                            location =
+                                Location(
+                                    latitude = lat,
+                                    longitude = lon,
+                                ),
+                            title = listOfNotNull(car.general.brandName).joinToString(" "),
+                        )
+                    }
+
+                if (markers.isNotEmpty()) {
+                    val first = markers.first()
+                    console.log(
+                        "Markers=${markers.size}, first=${first.id} lat=${first.location.latitude} lon=${first.location.longitude}",
+                    )
+                } else {
+                    console.log("No markers to show")
+                }
+
+                LaunchedEffect(cars) {
+                    mapViewModel.updateCameraPositionFromCars(cars)
+                }
+                NearbyMapView(
+                    cameraPosition = mapState.value.cameraPosition,
+                    markers = markers,
+                    onMarkerClick = { marker ->
+                        println("Clicked marker: ${marker.title}")
+                    },
+                    onCameraMove = { position ->
+                        mapViewModel.updateCameraPosition(position)
+                    },
+                )
+            }
+            else -> {
+                CarsListView(cars = cars)
+            }
+        }
+    }
+}
+
+@Composable
+private fun NearbyMapView(
+    cameraPosition: MapCameraPosition,
+    markers: List<MapMarker>,
+    onMarkerClick: (MapMarker) -> Unit,
+    onCameraMove: (MapCameraPosition) -> Unit,
+) {
+    Div({
+        style {
+            width(100.percent)
+            height(600.px)
+            marginTop(20.px)
+            borderRadius(8.px)
+        }
+    }) {
+        MapView(
+            cameraPosition = cameraPosition,
+            markers = markers,
+            onMarkerClick = onMarkerClick,
+            onCameraMove = onCameraMove,
+        )
+    }
+}
+
+@Composable
+private fun CarsListView(cars: List<CarItem>) {
+    val scrollContainerId = "cars-scroll-container"
+
+    Div({
+        style {
+            width(100.percent)
+            marginTop(20.px)
+        }
+    }) {
+        Div({
+            style {
+                width(100.percent)
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Row)
+                justifyContent(JustifyContent.SpaceBetween)
+                alignItems(AlignItems.Center)
+                marginBottom(16.px)
+            }
+        }) {
+            Div()
+
+            if (cars.isNotEmpty()) {
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Row)
+                        gap(8.px)
+                    }
+                }) {
+                    ScrollButton(
+                        direction = "left",
+                        onClick = {
+                            val container =
+                                kotlinx.browser.document.getElementById(
+                                    scrollContainerId,
+                                ) as? org.w3c.dom.HTMLElement
+                            container?.scrollBy(-296.0, 0.0)
+                        },
+                    )
+
+                    ScrollButton(
+                        direction = "right",
+                        onClick = {
+                            val container =
+                                kotlinx.browser.document.getElementById(
+                                    scrollContainerId,
+                                ) as? org.w3c.dom.HTMLElement
+                            container?.scrollBy(296.0, 0.0)
+                        },
+                    )
+                }
+            }
+        }
+
+        Div({
+            id(scrollContainerId)
+            style {
+                width(100.percent)
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Row)
+                gap(16.px)
+                overflowX("hidden")
+            }
+        }) {
+            cars.forEach { car ->
+                Div({
+                    style {
+                        flexShrink(0)
+                        width(280.px)
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        gap(8.px)
+                    }
+                }) {
+                    CarItemSmall(
+                        car = car,
+                        onClick = {
+                            window.location.href = "/car-detail?id=${car.id}"
+                        },
+                    )
+                    Div({
+                        style {
+                            paddingLeft(12.px)
+                            paddingRight(12.px)
+                        }
+                    })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScrollButton(
+    direction: String,
+    onClick: () -> Unit,
+) {
+    Div({
+        style {
+            width(40.px)
+            height(40.px)
+            borderRadius(50.percent)
+            backgroundColor(CSSColors.White)
+            display(DisplayStyle.Flex)
+            alignItems(AlignItems.Center)
+            justifyContent(JustifyContent.Center)
+            cursor("pointer")
+        }
+        onClick { onClick() }
+        onMouseEnter {
+            (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                "background-color",
+                "#f5f5f5",
+            )
+        }
+        onMouseLeave {
+            (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                "background-color",
+                CSSColors.WhiteString,
+            )
+        }
+    }) {
+        Span({
+            style {
+                fontSize(20.px)
+                fontWeight("bold")
+                color(CSSColors.Black)
+            }
+        }) {
+            Text(if (direction == "left") "‹" else "›")
+        }
+    }
+}

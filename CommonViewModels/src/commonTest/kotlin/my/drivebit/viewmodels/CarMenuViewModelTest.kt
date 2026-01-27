@@ -6,12 +6,27 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import my.drivebit.network.services.CarAddress
+import my.drivebit.network.services.CarGeneral
 import my.drivebit.network.services.CarItem
 import my.drivebit.repositories.MyCarRepository
 import my.drivebit.shared.storage.Storage
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
+private fun defaultGeneral() =
+    CarGeneral(
+        brandName = "Brand",
+        modelName = "Model",
+        vin = "VIN123",
+        seats = 4,
+        address =
+            CarAddress(
+                geoLat = 0.0,
+                geoLon = 0.0,
+            ),
+    )
 
 class MockMyCarRepositoryForMenu : MyCarRepository {
     private var cars: List<CarItem> = emptyList()
@@ -115,7 +130,7 @@ class CarMenuViewModelTest {
                         listOf(
                             CarItem(
                                 id = "1",
-                                general = null,
+                                general = defaultGeneral(),
                                 photos = emptyList(),
                             ),
                         ),
@@ -150,12 +165,12 @@ class CarMenuViewModelTest {
                         listOf(
                             CarItem(
                                 id = "1",
-                                general = null,
+                                general = defaultGeneral(),
                                 photos = emptyList(),
                             ),
                             CarItem(
                                 id = "2",
-                                general = null,
+                                general = defaultGeneral(),
                                 photos = emptyList(),
                             ),
                         ),
@@ -201,7 +216,7 @@ class CarMenuViewModelTest {
                 listOf(
                     CarItem(
                         id = "1",
-                        general = null,
+                        general = defaultGeneral(),
                         photos = emptyList(),
                     ),
                 ),
@@ -222,7 +237,7 @@ class CarMenuViewModelTest {
                         listOf(
                             CarItem(
                                 id = "1",
-                                general = null,
+                                general = defaultGeneral(),
                                 photos = emptyList(),
                             ),
                         ),

@@ -2,6 +2,7 @@ package my.drivebit.repositories
 
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.Car
+import my.drivebit.network.services.CarAddress
 import my.drivebit.network.services.CarGeneral
 import my.drivebit.network.services.CarItem
 import my.drivebit.shared.storage.InMemorySettings
@@ -9,6 +10,19 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MyCarRepositoryTest {
+    private fun generalStub() =
+        CarGeneral(
+            brandName = "Brand",
+            modelName = "Model",
+            vin = "VIN123",
+            seats = 4,
+            address =
+                CarAddress(
+                    geoLat = 0.0,
+                    geoLon = 0.0,
+                ),
+        )
+
     @Test
     fun `should return cars from network on first call`() =
         runTest {
@@ -16,11 +30,11 @@ class MyCarRepositoryTest {
                 listOf(
                     CarItem(
                         id = "car1",
-                        general = CarGeneral(),
+                        general = generalStub(),
                     ),
                     CarItem(
                         id = "car2",
-                        general = CarGeneral(),
+                        general = generalStub(),
                     ),
                 )
 
@@ -76,7 +90,7 @@ class MyCarRepositoryTest {
                 listOf(
                     CarItem(
                         id = "car1",
-                        general = CarGeneral(),
+                        general = generalStub(),
                     ),
                 )
 
@@ -136,7 +150,7 @@ class MyCarRepositoryTest {
                 listOf(
                     CarItem(
                         id = "car1",
-                        general = CarGeneral(),
+                        general = generalStub(),
                     ),
                 )
 
@@ -144,7 +158,7 @@ class MyCarRepositoryTest {
                 listOf(
                     CarItem(
                         id = "car2",
-                        general = CarGeneral(),
+                        general = generalStub(),
                     ),
                 )
 
@@ -203,7 +217,7 @@ class MyCarRepositoryTest {
                 listOf(
                     CarItem(
                         id = "car1",
-                        general = CarGeneral(),
+                        general = generalStub(),
                     ),
                 )
 

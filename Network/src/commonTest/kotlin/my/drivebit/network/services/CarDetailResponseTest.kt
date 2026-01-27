@@ -32,7 +32,11 @@ class CarDetailResponseTest {
                         "vin": "",
                         "seats": 5,
                         "mileage": 0,
-                        "description": null
+                        "description": null,
+                        "address": {
+                            "geoLat": 47.0,
+                            "geoLon": 39.0
+                        }
                     },
                     "chassis": {
                         "horsePower": 0,

@@ -31,6 +31,14 @@ class CarUrlSanitizationTest {
                         }
                     ],
                     "general": {
+                        "brandName": "Brand",
+                        "modelName": "Model",
+                        "vin": "VIN123",
+                        "seats": 4,
+                        "address": {
+                            "geoLat": 47.0,
+                            "geoLon": 39.0
+                        },
                         "photos": [
                             {
                                 "id": 2,
@@ -158,6 +166,14 @@ class CarUrlSanitizationTest {
                         "id": "test-car-id",
                         "photos": [],
                         "general": {
+                            "brandName": "Brand",
+                            "modelName": "Model",
+                            "vin": "VIN123",
+                            "seats": 4,
+                            "address": {
+                                "geoLat": 47.0,
+                                "geoLon": 39.0
+                            },
                             "photos": [
                                 {
                                     "id": 1,
@@ -191,7 +207,7 @@ class CarUrlSanitizationTest {
 
             assertTrue(result.isNotEmpty())
             val carItem = result[0]
-            assertTrue(carItem.general?.photos?.isNotEmpty() == true)
+            assertTrue(carItem.general.photos.isNotEmpty())
 
             val photoUrl =
                 carItem.general

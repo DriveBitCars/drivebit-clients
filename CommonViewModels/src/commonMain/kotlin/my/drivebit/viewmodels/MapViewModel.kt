@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.maps.LocationManager
+import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
+import my.drivebit.network.services.CarItem
 
 data class MapScreenState(
     val cameraPosition: MapCameraPosition = MapCameraPosition.default(),
@@ -50,5 +52,38 @@ class MapViewModel(
 
     fun updateCameraPosition(position: MapCameraPosition) {
         _state.update { it.copy(cameraPosition = position) }
+    }
+
+    fun updateCameraPositionFromCars(cars: List<CarItem>) {
+        val validCars =
+            cars.map { car ->
+                val lat = car.general.address.geoLat
+                val lon = car.general.address.geoLon
+                lat to lon
+            }
+
+        val targetPosition =
+            if (validCars.isNotEmpty()) {
+                val (avgLat, avgLon) =
+                    validCars
+                        .fold(0.0 to 0.0) { acc, next -> (acc.first + next.first) to (acc.second + next.second) }
+                        .let { (sumLat, sumLon) ->
+                            val count = validCars.size.toDouble()
+                            (sumLat / count) to (sumLon / count)
+                        }
+
+                MapCameraPosition(
+                    location =
+                        Location(
+                            latitude = avgLat,
+                            longitude = avgLon,
+                        ),
+                    zoom = _state.value.cameraPosition.zoom,
+                )
+            } else {
+                MapCameraPosition.default()
+            }
+
+        _state.update { it.copy(cameraPosition = targetPosition) }
     }
 }

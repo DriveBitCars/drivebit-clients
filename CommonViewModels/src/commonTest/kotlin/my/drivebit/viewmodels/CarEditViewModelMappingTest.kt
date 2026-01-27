@@ -3,6 +3,7 @@ package my.drivebit.viewmodels
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import my.drivebit.network.services.CarAddress
 import my.drivebit.network.services.CarBody
 import my.drivebit.network.services.CarChassis
 import my.drivebit.network.services.CarDetailResponse
@@ -86,7 +87,13 @@ class CarEditViewModelMappingTest {
                             modelName = "CL",
                             year = 2020,
                             licensePlate = "K128CT",
+                            vin = "VIN123",
                             seats = 5,
+                            address =
+                                CarAddress(
+                                    geoLat = 0.0,
+                                    geoLon = 0.0,
+                                ),
                         ),
                     chassis =
                         CarChassis(
