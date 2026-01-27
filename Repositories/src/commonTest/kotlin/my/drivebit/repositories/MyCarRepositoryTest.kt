@@ -22,6 +22,7 @@ class MyCarRepositoryTest {
                     geoLon = 0.0,
                 ),
         )
+
     @Test
     fun `should return cars from network on first call`() =
         runTest {
