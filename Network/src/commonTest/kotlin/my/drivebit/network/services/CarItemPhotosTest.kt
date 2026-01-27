@@ -112,15 +112,15 @@ class CarItemPhotosTest {
             val car = result.first()
             assertEquals("a575c0b1-3736-475f-a4a8-5a87cfbdb18a", car.id)
             assertNotNull(car.general)
-            assertEquals("Adam", car.general?.brandName)
-            assertEquals("Revo", car.general?.modelName)
-            assertEquals("YAAAK", car.general?.licensePlate)
+            assertEquals("Adam", car.general.brandName)
+            assertEquals("Revo", car.general.modelName)
+            assertEquals("YAAAK", car.general.licensePlate)
 
-            assertNotNull(car.general?.photos)
-            assertEquals(3, car.general?.photos?.size ?: 0, "Photos should be deserialized in general.photos")
-            assertTrue(car.general?.photos?.isNotEmpty() == true, "Photos list should not be empty")
+            assertNotNull(car.general.photos)
+            assertEquals(3, car.general.photos.size, "Photos should be deserialized in general.photos")
+            assertTrue(car.general.photos.isNotEmpty(), "Photos list should not be empty")
 
-            val photosFromGeneral = car.general?.photos ?: emptyList()
+            val photosFromGeneral = car.general.photos
             assertEquals(11, photosFromGeneral[0].id)
             assertTrue(
                 photosFromGeneral[0].url.contains(
@@ -163,7 +163,13 @@ class CarItemPhotosTest {
                             "brandName": "Adam",
                             "modelName": "Revo",
                             "year": 0,
-                            "licensePlate": "YAAAK"
+                            "licensePlate": "YAAAK",
+                            "vin": "VIN123",
+                            "seats": 4,
+                            "address": {
+                                "geoLat": 47.0,
+                                "geoLon": 39.0
+                            }
                         }
                     }
                 ]
@@ -212,7 +218,13 @@ class CarItemPhotosTest {
                         "id": "a575c0b1-3736-475f-a4a8-5a87cfbdb18a",
                         "general": {
                             "brandName": "Adam",
-                            "modelName": "Revo"
+                            "modelName": "Revo",
+                            "vin": "VIN123",
+                            "seats": 4,
+                            "address": {
+                                "geoLat": 47.0,
+                                "geoLon": 39.0
+                            }
                         }
                     }
                 ]
@@ -273,6 +285,12 @@ class CarItemPhotosTest {
                         "general": {
                             "brandName": "Adam",
                             "modelName": "Revo",
+                            "vin": "VIN123",
+                            "seats": 4,
+                            "address": {
+                                "geoLat": 47.0,
+                                "geoLon": 39.0
+                            },
                             "photos": [
                                 {
                                     "id": 2,
@@ -323,7 +341,7 @@ class CarItemPhotosTest {
             val car = result.first()
             assertEquals("a575c0b1-3736-475f-a4a8-5a87cfbdb18a", car.id)
 
-            val photosFromGeneral = car.general?.photos ?: emptyList()
+            val photosFromGeneral = car.general.photos
             val photosFromTopLevel = car.photos
             assertEquals(1, photosFromTopLevel.size, "Should have 1 photo from top level")
             assertEquals(2, photosFromGeneral.size, "Should have 2 photos from general")
@@ -352,6 +370,12 @@ class CarItemPhotosTest {
                         "general": {
                             "brandName": "Adam",
                             "modelName": "Revo",
+                            "vin": "VIN123",
+                            "seats": 4,
+                            "address": {
+                                "geoLat": 47.0,
+                                "geoLon": 39.0
+                            },
                             "photos": [
                                 {
                                     "id": 1,
@@ -394,7 +418,7 @@ class CarItemPhotosTest {
             assertEquals(1, result.size)
 
             val car = result.first()
-            val photosFromGeneral = car.general?.photos ?: emptyList()
+            val photosFromGeneral = car.general.photos
             val photosFromTopLevel = car.photos
 
             assertEquals(1, photosFromTopLevel.size, "Should have 1 photo from top level")

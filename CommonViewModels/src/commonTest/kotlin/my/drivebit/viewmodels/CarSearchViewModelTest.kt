@@ -56,8 +56,8 @@ class CarSearchViewModelTest {
             val mockRepository = MockCarSearchRepository()
             val expectedCars =
                 listOf(
-                    testCarItem(id = "1", brand = "BMW", model = "X5"),
-                    testCarItem(id = "2", brand = "Audi", model = "A4"),
+                    testCarItem(id = "1", brandName = "BMW", modelName = "X5"),
+                    testCarItem(id = "2", brandName = "Audi", modelName = "A4"),
                 )
             mockRepository.searchResult = CarSearchResponse(expectedCars)
             val viewModel =
@@ -72,8 +72,8 @@ class CarSearchViewModelTest {
             assertIs<CarSearchState.Success>(viewModel.state.value)
             val successState = viewModel.state.value as CarSearchState.Success
             assertEquals(2, successState.cars.size)
-            assertEquals("BMW", successState.cars[0].brand)
-            assertEquals("Audi", successState.cars[1].brand)
+            assertEquals("BMW", successState.cars[0].general.brandName)
+            assertEquals("Audi", successState.cars[1].general.brandName)
         }
 
     @Test
@@ -106,8 +106,8 @@ class CarSearchViewModelTest {
             val mockRepository = MockCarSearchRepository()
             val expectedCars =
                 listOf(
-                    testCarItem(id = "1", brand = "BMW", model = "X5"),
-                    testCarItem(id = "2", brand = "Audi", model = "A4"),
+                    testCarItem(id = "1", brandName = "BMW", modelName = "X5"),
+                    testCarItem(id = "2", brandName = "Audi", modelName = "A4"),
                 )
             mockRepository.searchResult = CarSearchResponse(expectedCars)
             val viewModel =
@@ -174,15 +174,17 @@ class CarSearchViewModelTest {
 
 private fun testCarItem(
     id: String,
-    brand: String? = null,
-    model: String? = null,
+    brandName: String,
+    modelName: String,
 ): CarItem =
     CarItem(
         id = id,
-        brand = brand,
-        model = model,
         general =
             CarGeneral(
+                brandName = brandName,
+                modelName = modelName,
+                vin = "VIN123",
+                seats = 4,
                 address =
                     CarAddress(
                         geoLat = 0.0,

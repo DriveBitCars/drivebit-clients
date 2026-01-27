@@ -12,6 +12,10 @@ import kotlin.test.assertEquals
 class MyCarRepositoryTest {
     private fun generalStub() =
         CarGeneral(
+            brandName = "Brand",
+            modelName = "Model",
+            vin = "VIN123",
+            seats = 4,
             address =
                 CarAddress(
                     geoLat = 0.0,

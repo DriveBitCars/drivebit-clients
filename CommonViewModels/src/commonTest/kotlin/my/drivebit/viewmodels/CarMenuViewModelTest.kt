@@ -17,6 +17,10 @@ import kotlin.test.assertEquals
 
 private fun defaultGeneral() =
     CarGeneral(
+        brandName = "Brand",
+        modelName = "Model",
+        vin = "VIN123",
+        seats = 4,
         address =
             CarAddress(
                 geoLat = 0.0,

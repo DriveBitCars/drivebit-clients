@@ -92,8 +92,8 @@ class MockSearchCarService : Car {
                 listOf(
                     testCarItem(
                         id = "car-1",
-                        brand = "BMW",
-                        model = "X5",
+                        brandName = "BMW",
+                        modelName = "X5",
                         year = 2021,
                     ),
                 ),
@@ -188,8 +188,8 @@ class MockSearchCarSearchRepository : CarSearchRepository {
                 listOf(
                     testCarItem(
                         id = "car-1",
-                        brand = "BMW",
-                        model = "X5",
+                        brandName = "BMW",
+                        modelName = "X5",
                         year = 2021,
                     ),
                 ),
@@ -233,7 +233,7 @@ class SearchViewModelTest {
             assertEquals("🏖️ Туризм", resultsState.suggestedFilters[0].title)
             assertEquals("🚗 Все", resultsState.suggestedFilters[1].title)
             assertEquals(1, resultsState.cars.size)
-            assertEquals("BMW", resultsState.cars[0].brand)
+            assertEquals("BMW", resultsState.cars[0].general.brandName)
         }
 
     @Test
@@ -475,8 +475,8 @@ class SearchViewModelTest {
             assertIs<SearchState.SearchResults>(viewModel.state.value)
             val resultsState = viewModel.state.value as SearchState.SearchResults
             assertEquals(1, resultsState.cars.size)
-            assertEquals("BMW", resultsState.cars[0].brand)
-            assertEquals("X5", resultsState.cars[0].model)
+            assertEquals("BMW", resultsState.cars[0].general.brandName)
+            assertEquals("X5", resultsState.cars[0].general.modelName)
         }
 
     @Test
@@ -603,17 +603,19 @@ class SearchViewModelTest {
 
 private fun testCarItem(
     id: String,
-    brand: String? = null,
-    model: String? = null,
+    brandName: String,
+    modelName: String,
     year: Int? = null,
 ): CarItem =
     CarItem(
         id = id,
-        brand = brand,
-        model = model,
         year = year,
         general =
             CarGeneral(
+                brandName = brandName,
+                modelName = modelName,
+                vin = "VIN123",
+                seats = 4,
                 address =
                     CarAddress(
                         geoLat = 0.0,

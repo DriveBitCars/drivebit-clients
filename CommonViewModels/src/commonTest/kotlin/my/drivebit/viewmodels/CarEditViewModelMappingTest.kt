@@ -87,6 +87,7 @@ class CarEditViewModelMappingTest {
                             modelName = "CL",
                             year = 2020,
                             licensePlate = "K128CT",
+                            vin = "VIN123",
                             seats = 5,
                             address =
                                 CarAddress(

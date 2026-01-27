@@ -10,6 +10,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.Car
+import my.drivebit.network.services.CarAddress
+import my.drivebit.network.services.CarGeneral
 import my.drivebit.network.services.CarItem
 import my.drivebit.network.services.CarSearchResponse
 import my.drivebit.network.services.City
@@ -85,6 +87,27 @@ class CarSearchRepositoryTest {
         }
     }
 
+    private fun testCarItem(
+        id: String,
+        brandName: String,
+        modelName: String,
+    ): CarItem =
+        CarItem(
+            id = id,
+            general =
+                CarGeneral(
+                    brandName = brandName,
+                    modelName = modelName,
+                    vin = "VIN123",
+                    seats = 4,
+                    address =
+                        CarAddress(
+                            geoLat = 0.0,
+                            geoLon = 0.0,
+                        ),
+                ),
+        )
+
     @Test
     fun `should search cars using selected city from MyCityRepository`() =
         runTest {
@@ -93,8 +116,8 @@ class CarSearchRepositoryTest {
             mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
             val expectedCars =
                 listOf(
-                    CarItem(id = "1", brand = "BMW", model = "X5"),
-                    CarItem(id = "2", brand = "Audi", model = "A4"),
+                    testCarItem(id = "1", brandName = "BMW", modelName = "X5"),
+                    testCarItem(id = "2", brandName = "Audi", modelName = "A4"),
                 )
             mockCarService.searchResult = CarSearchResponse(expectedCars)
             val repository = CarSearchRepositoryImpl(mockCarService, mockMyCityRepository)
@@ -105,8 +128,8 @@ class CarSearchRepositoryTest {
             assertEquals(null, mockCarService.searchDateFrom)
             assertEquals(null, mockCarService.searchDateTo)
             assertEquals(2, result.cars.size)
-            assertEquals("BMW", result.cars[0].brand)
-            assertEquals("Audi", result.cars[1].brand)
+            assertEquals("BMW", result.cars[0].general.brandName)
+            assertEquals("Audi", result.cars[1].general.brandName)
         }
 
     @Test
@@ -147,8 +170,8 @@ class CarSearchRepositoryTest {
             val mockCarService = MockCarService()
             val mockMyCityRepository = MockMyCityRepository()
             mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
-            val moscowCars = listOf(CarItem(id = "1", brand = "BMW", model = "X5"))
-            val spbCars = listOf(CarItem(id = "2", brand = "Audi", model = "A4"))
+            val moscowCars = listOf(testCarItem(id = "1", brandName = "BMW", modelName = "X5"))
+            val spbCars = listOf(testCarItem(id = "2", brandName = "Audi", modelName = "A4"))
             mockCarService.searchResult = CarSearchResponse(moscowCars)
             val repository = CarSearchRepositoryImpl(mockCarService, mockMyCityRepository)
 
@@ -165,7 +188,7 @@ class CarSearchRepositoryTest {
                 assertEquals(1, results.size)
                 assertEquals("158830", mockCarService.searchCityId)
                 assertEquals(1, results[0].cars.size)
-                assertEquals("BMW", results[0].cars[0].brand)
+                assertEquals("BMW", results[0].cars[0].general.brandName)
 
                 mockCarService.searchResult = CarSearchResponse(spbCars)
                 mockMyCityRepository.selectCity(158831, "Санкт-Петербург")
@@ -177,6 +200,6 @@ class CarSearchRepositoryTest {
             assertEquals(2, results.size)
             assertEquals("158831", mockCarService.searchCityId)
             assertEquals(1, results[1].cars.size)
-            assertEquals("Audi", results[1].cars[0].brand)
+            assertEquals("Audi", results[1].cars[0].general.brandName)
         }
 }
