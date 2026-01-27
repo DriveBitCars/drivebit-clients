@@ -12,9 +12,11 @@ class CarItemSmallTitleTest {
         modelName: String? = null,
         year: Int? = null,
     ) = CarGeneral(
-        brandName = brandName,
-        modelName = modelName,
+        brandName = brandName ?: "",
+        modelName = modelName ?: "",
         year = year,
+        vin = "VIN123",
+        seats = 4,
         address = CarAddress(geoLat = 0.0, geoLon = 0.0),
     )
 
