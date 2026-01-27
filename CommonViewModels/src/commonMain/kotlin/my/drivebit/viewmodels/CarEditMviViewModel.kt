@@ -79,6 +79,15 @@ sealed interface CarEditIntent {
         val value: String,
     ) : CarEditIntent
 
+    data class UpdateTrunkSizeSearch(
+        val value: String,
+    ) : CarEditIntent
+
+    data class SelectTrunkSize(
+        val trunkSize: String,
+        val translate: String,
+    ) : CarEditIntent
+
     data class UpdateProductionYear(
         val value: String,
     ) : CarEditIntent
@@ -92,6 +101,10 @@ sealed interface CarEditIntent {
     ) : CarEditIntent
 
     data class UpdateDailyRate(
+        val value: String,
+    ) : CarEditIntent
+
+    data class UpdateDescription(
         val value: String,
     ) : CarEditIntent
 
@@ -115,6 +128,10 @@ sealed interface CarEditIntent {
         val isFocused: Boolean,
     ) : CarEditIntent
 
+    data class SetTrunkSizeFocus(
+        val isFocused: Boolean,
+    ) : CarEditIntent
+
     data class SetBrandBlurTimeout(
         val timeout: Int?,
     ) : CarEditIntent
@@ -134,6 +151,10 @@ sealed interface CarEditIntent {
     data class SetEngineTypeBlurTimeout(
         val timeout: Int?,
     ) : CarEditIntent
+
+    data class SetTrunkSizeBlurTimeout(
+        val timeout: Int?,
+    ) : CarEditIntent
 }
 
 sealed interface CarEditMviState {
@@ -151,16 +172,19 @@ sealed interface CarEditMviState {
         val bodyTypes: List<EnumItem> = emptyList(),
         val driveTypes: List<EnumItem> = emptyList(),
         val engineTypes: List<EnumItem> = emptyList(),
+        val trunkSizes: List<EnumItem> = emptyList(),
         val isBrandFocused: Boolean = false,
         val isModelFocused: Boolean = false,
         val isBodyTypeFocused: Boolean = false,
         val isDriveTypeFocused: Boolean = false,
         val isEngineTypeFocused: Boolean = false,
+        val isTrunkSizeFocused: Boolean = false,
         val brandBlurTimeout: Int? = null,
         val modelBlurTimeout: Int? = null,
         val bodyTypeBlurTimeout: Int? = null,
         val driveTypeBlurTimeout: Int? = null,
         val engineTypeBlurTimeout: Int? = null,
+        val trunkSizeBlurTimeout: Int? = null,
         val saveError: String? = null,
         val hasChanges: Boolean = false,
     ) : CarEditMviState {
@@ -178,6 +202,14 @@ interface CarEditMviViewModel {
     fun handleIntent(intent: CarEditIntent)
 }
 
+private data class CarEditEnumsState(
+    val brands: List<CarBrand>,
+    val models: List<CarModel>,
+    val bodyTypes: List<EnumItem>,
+    val driveTypes: List<EnumItem>,
+    val engineTypes: List<EnumItem>,
+)
+
 class CarEditMviViewModelImpl(
     private val carService: Car,
     private val myCarRepository: MyCarRepository,
@@ -186,6 +218,7 @@ class CarEditMviViewModelImpl(
     private val bodyTypeViewModel: BodyTypeViewModel,
     private val driveTypeViewModel: DriveTypeViewModel,
     private val engineTypeViewModel: EngineTypeViewModel,
+    private val trunkSizeViewModel: TrunkSizeViewModel,
     private val carId: String,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
     private val observerCoroutineScope: CoroutineScope? = null,
@@ -213,17 +246,21 @@ class CarEditMviViewModelImpl(
                 driveTypeViewModel.driveTypes,
                 engineTypeViewModel.engineTypes,
             ) { brands, models, bodyTypes, driveTypes, engineTypes ->
+                CarEditEnumsState(brands, models, bodyTypes, driveTypes, engineTypes)
+            }.combine(trunkSizeViewModel.trunkSizes) { enumsState, trunkSizes ->
                 _state.update { currentState ->
                     when (currentState) {
                         is CarEditMviState.Success -> {
-                            val updatedFormData = resolveBrandAndModelIds(currentState.formData, brands, models)
+                            val updatedFormData =
+                                resolveBrandAndModelIds(currentState.formData, enumsState.brands, enumsState.models)
                             currentState.copy(
                                 formData = updatedFormData,
-                                brands = brands,
-                                models = models,
-                                bodyTypes = bodyTypes,
-                                driveTypes = driveTypes,
-                                engineTypes = engineTypes,
+                                brands = enumsState.brands,
+                                models = enumsState.models,
+                                bodyTypes = enumsState.bodyTypes,
+                                driveTypes = enumsState.driveTypes,
+                                engineTypes = enumsState.engineTypes,
+                                trunkSizes = trunkSizes,
                             )
                         }
                         else -> currentState
@@ -308,6 +345,12 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.SelectEngineType -> {
                 selectEngineType(intent.engineType, intent.translate)
             }
+            is CarEditIntent.UpdateTrunkSizeSearch -> {
+                updateFormData { it.copy(trunkSizeSearch = intent.value) }
+            }
+            is CarEditIntent.SelectTrunkSize -> {
+                selectTrunkSize(intent.trunkSize, intent.translate)
+            }
             is CarEditIntent.UpdateEngineVolume -> {
                 updateFormData { it.copy(engineVolume = intent.value) }
             }
@@ -322,6 +365,9 @@ class CarEditMviViewModelImpl(
             }
             is CarEditIntent.UpdateDailyRate -> {
                 updateFormData { it.copy(dailyRate = intent.value) }
+            }
+            is CarEditIntent.UpdateDescription -> {
+                updateFormData { it.copy(description = intent.value) }
             }
             is CarEditIntent.SetBrandFocus -> {
                 updateFocusState { it.copy(isBrandFocused = intent.isFocused) }
@@ -338,6 +384,9 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.SetEngineTypeFocus -> {
                 updateFocusState { it.copy(isEngineTypeFocused = intent.isFocused) }
             }
+            is CarEditIntent.SetTrunkSizeFocus -> {
+                updateFocusState { it.copy(isTrunkSizeFocused = intent.isFocused) }
+            }
             is CarEditIntent.SetBrandBlurTimeout -> {
                 updateFocusState { it.copy(brandBlurTimeout = intent.timeout) }
             }
@@ -353,6 +402,9 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.SetEngineTypeBlurTimeout -> {
                 updateFocusState { it.copy(engineTypeBlurTimeout = intent.timeout) }
             }
+            is CarEditIntent.SetTrunkSizeBlurTimeout -> {
+                updateFocusState { it.copy(trunkSizeBlurTimeout = intent.timeout) }
+            }
         }
     }
 
@@ -363,6 +415,7 @@ class CarEditMviViewModelImpl(
             bodyTypeViewModel.loadBodyTypes()
             driveTypeViewModel.loadDriveTypes()
             engineTypeViewModel.loadEngineTypes()
+            trunkSizeViewModel.loadTrunkSizes()
             runCatching {
                 val car = carService.getCar(carId)
                 val formData = mapToFormData(car)
@@ -419,9 +472,14 @@ class CarEditMviViewModelImpl(
                         driveType = formData.driveType,
                         engineType = formData.engineType,
                         engineVolume = engineVolumeValue,
-                        // productionYear = formData.productionYear.toIntOrNull()?.takeIf { it > 0 },
-                        seatsCount = seatsCountValue,
+                        year =
+                            formData.productionYear
+                                .toIntOrNull()
+                                ?: throw IllegalArgumentException("Year is required"),
+                        seats = seatsCountValue,
+                        trunkSize = formData.trunkSize,
                         licensePlate = formData.licensePlate.takeIf { it.isNotBlank() },
+                        description = formData.description.takeIf { it.isNotBlank() },
                         ValidAddressString = formData.address,
                         hourlyRate = hourlyRateValue,
                         dailyRate = dailyRateValue,
@@ -550,6 +608,20 @@ class CarEditMviViewModelImpl(
         updateFocusState { it.copy(isEngineTypeFocused = false) }
     }
 
+    private fun selectTrunkSize(
+        trunkSize: String,
+        translate: String,
+    ) {
+        updateFormData {
+            it.copy(
+                trunkSize = trunkSize,
+                trunkSizeTranslate = translate,
+                trunkSizeSearch = translate,
+            )
+        }
+        updateFocusState { it.copy(isTrunkSizeFocused = false) }
+    }
+
     private fun updateFormData(update: (CarEditFormData) -> CarEditFormData) {
         _state.update { currentState ->
             when (currentState) {
@@ -599,7 +671,11 @@ class CarEditMviViewModelImpl(
             engineVolume = NumberFormatter.formatDouble(car.resolvedEngineVolume()),
             productionYear = NumberFormatter.formatInt(car.resolvedProductionYear()),
             seatsCount = NumberFormatter.formatInt(car.resolvedSeatsCount()),
+            trunkSize = car.resolvedTrunkSize(),
+            trunkSizeTranslate = car.resolvedTrunkSizeTranslate() ?: "",
+            trunkSizeSearch = car.resolvedTrunkSizeTranslate() ?: "",
             address = car.ValidAddressString ?: "",
+            description = car.general?.description ?: "",
             hourlyRate = NumberFormatter.formatDouble(car.resolvedHourlyRate()),
             dailyRate = NumberFormatter.formatDouble(car.resolvedDailyRate()),
             photos = car.photos,

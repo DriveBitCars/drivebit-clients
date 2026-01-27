@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import my.drivebit.components.Column
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
@@ -12,7 +13,6 @@ import my.drivebit.viewmodels.InputFieldType
 import my.drivebit.viewmodels.ValidatorViewModel
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -54,13 +54,7 @@ private fun inputFieldInternal(
             else -> null
         }
 
-    Div({
-        style {
-            display(DisplayStyle.Flex)
-            flexDirection(FlexDirection.Column)
-            gap(8.px)
-        }
-    }) {
+    Column(gap = 8.px) {
         Span({
             style {
                 applyTypography(CSSTypography.Styles.body)

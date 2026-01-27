@@ -36,7 +36,6 @@ import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Input
 import org.koin.compose.koinInject
 import kotlin.coroutines.resume
@@ -150,12 +149,7 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                         }
                     }
 
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                        }
-                    }) {
+                    Column {
                         Column(gap = 8.px, marginBottom = 24.px) {
                             RowSpaceBetween {
                                 avatarUrl?.let {
@@ -164,13 +158,7 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                         size = 200.px,
                                     )
                                 }
-                                Div({
-                                    style {
-                                        display(DisplayStyle.Flex)
-                                        flexDirection(FlexDirection.Column)
-                                        gap(8.px)
-                                    }
-                                }) {
+                                Column(gap = 8.px) {
                                     LinkButton(
                                         text =
                                             when (uploadState) {

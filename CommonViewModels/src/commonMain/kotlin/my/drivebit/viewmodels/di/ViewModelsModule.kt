@@ -31,6 +31,8 @@ import my.drivebit.viewmodels.CarSearchViewModelImpl
 import my.drivebit.viewmodels.CityViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModelImpl
+import my.drivebit.viewmodels.DescriptionInputViewModel
+import my.drivebit.viewmodels.DescriptionInputViewModelImpl
 import my.drivebit.viewmodels.DocumentsViewModel
 import my.drivebit.viewmodels.DocumentsViewModelImpl
 import my.drivebit.viewmodels.DriveTypeViewModel
@@ -56,6 +58,7 @@ import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
 import my.drivebit.viewmodels.SearchViewModel
 import my.drivebit.viewmodels.SearchViewModelImpl
+import my.drivebit.viewmodels.TrunkSizeViewModel
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.WinCodeInputViewModel
 import org.koin.core.module.Module
@@ -234,6 +237,12 @@ val commonViewModelsModule: Module =
         }
 
         factory {
+            TrunkSizeViewModel(
+                carEnumsRepository = get(),
+            )
+        }
+
+        factory {
             CityViewModel(
                 cityRepository = get(),
             )
@@ -267,6 +276,7 @@ val commonViewModelsModule: Module =
                 bodyTypeViewModel = get(),
                 driveTypeViewModel = get(),
                 engineTypeViewModel = get(),
+                trunkSizeViewModel = get(),
                 carId = carId,
             )
         }
@@ -282,6 +292,12 @@ val commonViewModelsModule: Module =
                 carDataRepository = get(),
                 createCarRepository = get(),
                 hasPassportRepo = get(),
+            )
+        }
+
+        factory<DescriptionInputViewModel> {
+            DescriptionInputViewModelImpl(
+                carDataRepository = get(),
             )
         }
 

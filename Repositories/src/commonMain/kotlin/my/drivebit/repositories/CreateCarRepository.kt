@@ -15,6 +15,7 @@ internal class CreateCarRepositoryImpl(
     private val selectedBodyTypeRepository: SelectedBodyTypeRepository,
     private val selectedDriveTypeRepository: SelectedDriveTypeRepository,
     private val selectedEngineTypeRepository: SelectedEngineTypeRepository,
+    private val selectedTrunkSizeRepository: SelectedTrunkSizeRepository,
     private val licensePlateRepository: LicensePlateRepository,
     private val selectedAddressRepository: SelectedAddressRepository,
     private val selectedCityRepository: SelectedCityRepository,
@@ -26,6 +27,9 @@ internal class CreateCarRepositoryImpl(
             // val savedCityId = selectedCityRepository.getCityId()
             // val cityIdString = savedCityId?.toString()
             val address = selectedAddressRepository.getAddress() ?: ""
+            val trunkSizeName =
+                selectedTrunkSizeRepository.getTrunkSizeName()
+                    ?: throw IllegalStateException("Trunk size is required")
 
             println("🚗 [CreateCarRepository] Создание машины:")
             // println("   - savedCityId (Int?): $savedCityId")
@@ -41,11 +45,18 @@ internal class CreateCarRepositoryImpl(
                     driveType = selectedDriveTypeRepository.getDriveTypeName(),
                     engineType = selectedEngineTypeRepository.getEngineTypeName(),
                     engineVolume = carDataRepository.getEngineVolume(),
-                    productionYear = carDataRepository.getProductionYear(),
-                    seatsCount = carDataRepository.getSeatsCount(),
+                    year =
+                        carDataRepository.getProductionYear()
+                            ?: throw IllegalStateException("Production year is required"),
+                    seats = carDataRepository.getSeatsCount(),
+                    trunkSize = trunkSizeName,
                     licensePlate = licensePlateRepository.getLicensePlate(),
                     ValidAddressString = address,
                     addr = null,
+                    description =
+                        carDataRepository
+                            .getDescription()
+                            ?.takeIf { it.isNotBlank() },
                     hourlyRate = 0.0,
                     dailyRate = dailyRate,
                     ParkingAssistances = emptyList(),

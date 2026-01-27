@@ -47,6 +47,10 @@ private class FakeCarDataRepository : CarDataRepository {
 
     override fun getMonthlyRate(): Double? = null
 
+    override fun saveDescription(description: String) {}
+
+    override fun getDescription(): String? = null
+
     override fun clearAll() {}
 }
 

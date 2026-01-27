@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.ActionButton
+import my.drivebit.components.Column
 import my.drivebit.components.ErrorContainer
 import my.drivebit.components.PageContainer
 import my.drivebit.components.PageWithLogo
@@ -78,14 +79,10 @@ private fun EditNamePageContent(viewModel: EditProfileViewModel) {
                         else -> saveButtonViewModel.setState(ButtonState.Disabled)
                     }
 
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                            gap(24.px)
-                            maxWidth(400.px)
-                        }
-                    }) {
+                    Column(
+                        gap = 24.px,
+                        modifier = { maxWidth(400.px) },
+                    ) {
                         TextSmartHeader("Редактирование профиля")
 
                         TextInputField(

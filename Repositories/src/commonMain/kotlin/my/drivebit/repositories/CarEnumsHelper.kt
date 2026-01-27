@@ -16,6 +16,8 @@ class CarEnumsHelper(
 
     suspend fun getDriveTypeTranslate(name: String): String = repository.getDriveTypeByName(name).translate
 
+    suspend fun getTrunkSizeTranslate(name: String): String = repository.getTrunkSizeByName(name).translate
+
     suspend fun getAllColors(useTranslation: Boolean = true): List<EnumItem> = repository.getAllColors()
 
     suspend fun getAllBodyTypes(useTranslation: Boolean = true): List<EnumItem> = repository.getAllBodyTypes()
@@ -28,6 +30,8 @@ class CarEnumsHelper(
         repository.getAllTransmissionTypes()
 
     suspend fun getAllDriveTypes(useTranslation: Boolean = true): List<EnumItem> = repository.getAllDriveTypes()
+
+    suspend fun getAllTrunkSizes(useTranslation: Boolean = true): List<EnumItem> = repository.getAllTrunkSizes()
 
     suspend fun refreshEnums() {
         repository.getEnums()

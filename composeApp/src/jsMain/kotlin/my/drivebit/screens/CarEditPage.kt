@@ -7,11 +7,14 @@ import androidx.compose.runtime.remember
 import kotlinx.browser.window
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
+import my.drivebit.components.Column
 import my.drivebit.components.FormSection
 import my.drivebit.components.Loader
 import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
+import my.drivebit.components.Row
 import my.drivebit.components.StringList
+import my.drivebit.components.TextAreaField
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
@@ -87,17 +90,19 @@ fun CarEditPage() {
                         )
                         val formData = currentState.formData
 
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Column)
-                                gap(16.px)
-                            }
-                        }) {
+                        Column(gap = 16.px) {
                             TextInputField(
                                 label = "Госномер",
                                 value = formData.licensePlate,
                                 onValueChange = { viewModel.handleIntent(CarEditIntent.UpdateLicensePlate(it)) },
+                            )
+
+                            TextAreaField(
+                                label = "Описание",
+                                value = formData.description,
+                                onValueChange = { viewModel.handleIntent(CarEditIntent.UpdateDescription(it)) },
+                                maxLength = 1000,
+                                rows = 6,
                             )
 
                             TextInputField(
@@ -282,6 +287,45 @@ fun CarEditPage() {
                             }
 
                             TextInputField(
+                                label = "Размер бака",
+                                value = formData.trunkSizeSearch,
+                                onValueChange = { newValue ->
+                                    viewModel.handleIntent(CarEditIntent.UpdateTrunkSizeSearch(newValue))
+                                },
+                                onFocus = {
+                                    currentState.trunkSizeBlurTimeout?.let { window.clearTimeout(it) }
+                                    viewModel.handleIntent(CarEditIntent.SetTrunkSizeBlurTimeout(null))
+                                    viewModel.handleIntent(CarEditIntent.SetTrunkSizeFocus(true))
+                                    if (formData.trunkSizeTranslate.isNotBlank()) {
+                                        viewModel.handleIntent(CarEditIntent.UpdateTrunkSizeSearch(""))
+                                    }
+                                },
+                                onBlur = {
+                                    val timeout =
+                                        window.setTimeout({
+                                            viewModel.handleIntent(CarEditIntent.SetTrunkSizeFocus(false))
+                                        }, 200)
+                                    viewModel.handleIntent(CarEditIntent.SetTrunkSizeBlurTimeout(timeout))
+                                },
+                            )
+                            if (currentState.trunkSizes.isNotEmpty() && currentState.isTrunkSizeFocused) {
+                                currentState.trunkSizeBlurTimeout?.let { window.clearTimeout(it) }
+                                StringList(
+                                    strings = currentState.trunkSizes.map { it.translate },
+                                    onSelected = { translate ->
+                                        currentState.trunkSizeBlurTimeout?.let { window.clearTimeout(it) }
+                                        val trunkSize = currentState.trunkSizes.find { it.translate == translate }
+                                        trunkSize?.let {
+                                            viewModel.handleIntent(CarEditIntent.SetTrunkSizeBlurTimeout(null))
+                                            viewModel.handleIntent(
+                                                CarEditIntent.SelectTrunkSize(trunkSize.name, trunkSize.translate),
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+
+                            TextInputField(
                                 label = "Объем двигателя (л)",
                                 value = formData.engineVolume,
                                 onValueChange = { newValue ->
@@ -326,22 +370,7 @@ fun CarEditPage() {
                             //    numeric = true,
                             // )
 
-                            // TextInputField(
-                            //    label = "Количество мест",
-                            //    value = formData.seatsCount,
-                            //    onValueChange = { newValue ->
-                            //        viewModel.handleIntent(CarEditIntent.UpdateSeatsCount(newValue))
-                            //    },
-                            //    numeric = true,
-                            // )
-
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    flexDirection(FlexDirection.Row)
-                                    gap(12.px)
-                                }
-                            }) {
+                            Row(gap = 12.px) {
                                 ActionButton(
                                     enabledColor = CSSColors.Blue,
                                     text = "Управление фотографиями",
@@ -362,13 +391,10 @@ fun CarEditPage() {
                                 TextError(currentState.saveError ?: "Ошибка сохранения")
                             }
 
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    justifyContent(JustifyContent.Center)
-                                    marginTop(16.px)
-                                }
-                            }) {
+                            Row(
+                                justifyContent = JustifyContent.Center,
+                                modifier = { marginTop(16.px) },
+                            ) {
                                 Div({
                                     style {
                                         maxWidth(200.px)

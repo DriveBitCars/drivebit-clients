@@ -47,7 +47,11 @@ data class CarEditFormData(
     val engineVolume: String = "",
     val productionYear: String = "",
     val seatsCount: String = "",
+    val trunkSize: String? = null,
+    val trunkSizeTranslate: String = "",
+    val trunkSizeSearch: String = "",
     val address: String = "",
+    val description: String = "",
     val hourlyRate: String = "",
     val dailyRate: String = "",
     val photos: List<my.drivebit.network.services.CarPhotoItem> = emptyList(),
@@ -93,6 +97,13 @@ interface CarEditViewModel {
 
     fun selectEngineType(
         engineType: String,
+        translate: String,
+    )
+
+    fun updateTrunkSizeSearch(value: String)
+
+    fun selectTrunkSize(
+        trunkSize: String,
         translate: String,
     )
 
@@ -155,6 +166,7 @@ class CarEditViewModelImpl(
         val resolvedEngineVolume = car.resolvedEngineVolume()
         val resolvedProductionYear = car.resolvedProductionYear()
         val resolvedSeatsCount = car.resolvedSeatsCount()
+        val resolvedTrunkSize = car.resolvedTrunkSize()
 
         return CarEditFormData(
             carId = car.id,
@@ -177,7 +189,11 @@ class CarEditViewModelImpl(
             engineVolume = if (resolvedEngineVolume > 0.0) NumberFormatter.formatDouble(resolvedEngineVolume) else "",
             productionYear = if (resolvedProductionYear > 0) NumberFormatter.formatInt(resolvedProductionYear) else "",
             seatsCount = if (resolvedSeatsCount > 0) NumberFormatter.formatInt(resolvedSeatsCount) else "",
+            trunkSize = resolvedTrunkSize.takeIf { it.isNotEmpty() },
+            trunkSizeTranslate = car.resolvedTrunkSizeTranslate(),
+            trunkSizeSearch = car.resolvedTrunkSizeTranslate(),
             address = car.ValidAddressString ?: "",
+            description = car.general?.description ?: "",
             photos = car.photos,
         )
     }
@@ -247,6 +263,23 @@ class CarEditViewModelImpl(
         }
     }
 
+    override fun updateTrunkSizeSearch(value: String) {
+        updateFormData { it.copy(trunkSizeSearch = value) }
+    }
+
+    override fun selectTrunkSize(
+        trunkSize: String,
+        translate: String,
+    ) {
+        updateFormData {
+            it.copy(
+                trunkSize = trunkSize,
+                trunkSizeTranslate = translate,
+                trunkSizeSearch = translate,
+            )
+        }
+    }
+
     override fun updateEngineVolume(value: String) {
         updateFormData { it.copy(engineVolume = value) }
     }
@@ -303,9 +336,14 @@ class CarEditViewModelImpl(
                         driveType = formData.driveType,
                         engineType = formData.engineType,
                         engineVolume = formData.engineVolume.toDoubleOrNull(),
-                        productionYear = formData.productionYear.toIntOrNull(),
-                        seatsCount = formData.seatsCount.toIntOrNull(),
+                        year =
+                            formData.productionYear
+                                .toIntOrNull()
+                                ?: throw IllegalArgumentException("Year is required"),
+                        seats = formData.seatsCount.toIntOrNull(),
+                        trunkSize = formData.trunkSize,
                         licensePlate = formData.licensePlate.takeIf { it.isNotBlank() },
+                        description = formData.description.takeIf { it.isNotBlank() },
                         ValidAddressString = formData.address,
                         ParkingAssistances = emptyList(),
                         MultimediaSystemOptions = emptyList(),

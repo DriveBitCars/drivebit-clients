@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import kotlinx.browser.window
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
+import my.drivebit.components.Column
 import my.drivebit.components.FormSection
 import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
@@ -28,7 +29,6 @@ import my.drivebit.viewmodels.OtpVerificationViewModel
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Input
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
@@ -92,13 +92,7 @@ fun OtpVerificationPage() {
             }
 
             FormSection {
-                Div({
-                    style {
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Column)
-                        gap(8.px)
-                    }
-                }) {
+                Column(gap = 8.px) {
                     TextSmallBodyBlack("Код подтверждения")
 
                     Input(type = InputType.Text) {

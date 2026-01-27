@@ -35,6 +35,8 @@ import my.drivebit.screens.ProductionYearInputPage
 import my.drivebit.screens.ProfilePage
 import my.drivebit.screens.SearchPage
 import my.drivebit.screens.SeatsCountInputPage
+import my.drivebit.screens.DescriptionInputPage
+import my.drivebit.screens.TrunkSizeSelectionPage
 import my.drivebit.shared.storage.Storage
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.di.commonViewModelsModule
@@ -123,14 +125,17 @@ actual fun App() {
                 currentPath.startsWith("/address-input") -> {
                     AddressInputPage(
                         onNavigateToWinCode = {
-                            window.location.href = "/license-plate-input"
+                            window.location.href = "/car-brand-selection"
                         },
                     )
                 }
                 currentPath.startsWith("/license-plate-input") -> {
                     LicensePlateInputPage(
                         onLicensePlateEntered = {
-                            window.location.href = "/car-brand-selection"
+                            window.location.href = "/my-cars"
+                        },
+                        onMissingPassport = {
+                            window.location.href = "/passport-upload?autoCreate=1"
                         },
                     )
                 }
@@ -194,7 +199,14 @@ actual fun App() {
                     SeatsCountInputPage(
                         onSeatsCountEntered = {
                             // window.location.href = "/hourly-rate-input"
-                            window.location.href = "/daily-rate-input"
+                            window.location.href = "/trunk-size-selection"
+                        },
+                    )
+                }
+                currentPath.startsWith("/trunk-size-selection") -> {
+                    TrunkSizeSelectionPage(
+                        onTrunkSizeSelected = {
+                            window.location.href = "/description-input"
                         },
                     )
                 }
@@ -207,11 +219,15 @@ actual fun App() {
                 // }
                 currentPath.startsWith("/daily-rate-input") -> {
                     DailyRateInputPage(
-                        onDailyRateEntered = {
-                            kotlinx.browser.window.location.href = "/my-cars"
+                        onNavigateToLicensePlate = {
+                            kotlinx.browser.window.location.href = "/license-plate-input"
                         },
-                        onMissingPassport = {
-                            kotlinx.browser.window.location.href = "/passport-upload?autoCreate=1"
+                    )
+                }
+                currentPath.startsWith("/description-input") -> {
+                    DescriptionInputPage(
+                        onDescriptionEntered = {
+                            window.location.href = "/daily-rate-input"
                         },
                     )
                 }

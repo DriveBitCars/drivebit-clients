@@ -948,6 +948,9 @@ fun createMockCarEnumsRepository(): my.drivebit.repositories.CarEnumsRepository 
         override suspend fun getDriveTypeByName(name: String): my.drivebit.repositories.EnumItem =
             throw NotImplementedError()
 
+        override suspend fun getTrunkSizeByName(name: String): my.drivebit.repositories.EnumItem =
+            throw NotImplementedError()
+
         override suspend fun getAllColors(): List<my.drivebit.repositories.EnumItem> = emptyList()
 
         override suspend fun getAllBodyTypes(): List<my.drivebit.repositories.EnumItem> = emptyList()
@@ -959,6 +962,8 @@ fun createMockCarEnumsRepository(): my.drivebit.repositories.CarEnumsRepository 
         override suspend fun getAllTransmissionTypes(): List<my.drivebit.repositories.EnumItem> = emptyList()
 
         override suspend fun getAllDriveTypes(): List<my.drivebit.repositories.EnumItem> = emptyList()
+
+        override suspend fun getAllTrunkSizes(): List<my.drivebit.repositories.EnumItem> = emptyList()
 
         override suspend fun getAllDocumentTypes(): List<my.drivebit.repositories.EnumItem> = emptyList()
     }
@@ -990,6 +995,15 @@ fun createMockEngineTypeViewModel(
     return EngineTypeViewModel(mockRepository, scope)
 }
 
+fun createMockTrunkSizeViewModel(
+    carEnumsRepository: my.drivebit.repositories.CarEnumsRepository? = null,
+    coroutineScope: CoroutineScope? = null,
+): TrunkSizeViewModel {
+    val mockRepository = carEnumsRepository ?: createMockCarEnumsRepository()
+    val scope = coroutineScope ?: CoroutineScope(SupervisorJob())
+    return TrunkSizeViewModel(mockRepository, scope)
+}
+
 fun TestScope.createCarEditMviViewModel(
     carService: Car = MockCarServiceForMvi(),
     carBrandViewModel: CarBrandViewModel? = null,
@@ -997,6 +1011,7 @@ fun TestScope.createCarEditMviViewModel(
     bodyTypeViewModel: BodyTypeViewModel? = null,
     driveTypeViewModel: DriveTypeViewModel? = null,
     engineTypeViewModel: EngineTypeViewModel? = null,
+    trunkSizeViewModel: TrunkSizeViewModel? = null,
     myCarRepository: MyCarRepository = MockMyCarRepository(),
     carId: String = "",
 ): CarEditMviViewModelImpl {
@@ -1009,6 +1024,7 @@ fun TestScope.createCarEditMviViewModel(
             bodyTypeViewModel = bodyTypeViewModel ?: createMockBodyTypeViewModel(coroutineScope = viewModelScope),
             driveTypeViewModel = driveTypeViewModel ?: createMockDriveTypeViewModel(coroutineScope = viewModelScope),
             engineTypeViewModel = engineTypeViewModel ?: createMockEngineTypeViewModel(coroutineScope = viewModelScope),
+            trunkSizeViewModel = trunkSizeViewModel ?: createMockTrunkSizeViewModel(coroutineScope = viewModelScope),
             myCarRepository = myCarRepository,
             carId = carId,
             coroutineScope = viewModelScope,

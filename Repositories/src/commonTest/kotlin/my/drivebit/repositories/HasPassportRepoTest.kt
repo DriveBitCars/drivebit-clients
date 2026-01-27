@@ -47,6 +47,8 @@ private class FakeCarEnumsRepository : CarEnumsRepository {
 
     override suspend fun getDriveTypeByName(name: String): EnumItem = throw NotImplementedError()
 
+    override suspend fun getTrunkSizeByName(name: String): EnumItem = throw NotImplementedError()
+
     override suspend fun getAllColors(): List<EnumItem> = throw NotImplementedError()
 
     override suspend fun getAllBodyTypes(): List<EnumItem> = throw NotImplementedError()
@@ -58,6 +60,8 @@ private class FakeCarEnumsRepository : CarEnumsRepository {
     override suspend fun getAllTransmissionTypes(): List<EnumItem> = throw NotImplementedError()
 
     override suspend fun getAllDriveTypes(): List<EnumItem> = throw NotImplementedError()
+
+    override suspend fun getAllTrunkSizes(): List<EnumItem> = throw NotImplementedError()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

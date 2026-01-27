@@ -25,6 +25,8 @@ interface CarEnumsRepository {
 
     suspend fun getDriveTypeByName(name: String): EnumItem
 
+    suspend fun getTrunkSizeByName(name: String): EnumItem
+
     suspend fun getAllColors(): List<EnumItem>
 
     suspend fun getAllBodyTypes(): List<EnumItem>
@@ -36,6 +38,8 @@ interface CarEnumsRepository {
     suspend fun getAllTransmissionTypes(): List<EnumItem>
 
     suspend fun getAllDriveTypes(): List<EnumItem>
+
+    suspend fun getAllTrunkSizes(): List<EnumItem>
 
     suspend fun getAllDocumentTypes(): List<EnumItem>
 }
@@ -111,6 +115,14 @@ class CarEnumsRepositoryImpl(
             ?: throw CarEnumsLoadException("DriveType with name $name not found")
     }
 
+    override suspend fun getTrunkSizeByName(name: String): EnumItem {
+        val enums = getEnums()
+        return enums.TrunkSizeEnum
+            .find { it.name == name }
+            ?.toEnumItem()
+            ?: throw CarEnumsLoadException("TrunkSize with name $name not found")
+    }
+
     override suspend fun getAllColors(): List<EnumItem> {
         val enums = getEnums()
         return enums.CarColorEnum.map { it.toEnumItem() }
@@ -139,6 +151,11 @@ class CarEnumsRepositoryImpl(
     override suspend fun getAllDriveTypes(): List<EnumItem> {
         val enums = getEnums()
         return enums.DriveTypeEnum.map { it.toEnumItem() }
+    }
+
+    override suspend fun getAllTrunkSizes(): List<EnumItem> {
+        val enums = getEnums()
+        return enums.TrunkSizeEnum.map { it.toEnumItem() }
     }
 
     override suspend fun getAllDocumentTypes(): List<EnumItem> =
@@ -205,6 +222,9 @@ class CarEnumsRepositoryImpl(
         }
         if (enums.ParkingAssistancesEnum.isEmpty()) {
             throw CarEnumsLoadException("ParkingAssistancesEnum is empty")
+        }
+        if (enums.TrunkSizeEnum.isEmpty()) {
+            throw CarEnumsLoadException("TrunkSizeEnum is empty")
         }
     }
 }

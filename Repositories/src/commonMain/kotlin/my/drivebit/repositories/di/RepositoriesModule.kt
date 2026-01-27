@@ -48,6 +48,8 @@ import my.drivebit.repositories.SelectedDriveTypeRepository
 import my.drivebit.repositories.SelectedDriveTypeRepositoryImpl
 import my.drivebit.repositories.SelectedEngineTypeRepository
 import my.drivebit.repositories.SelectedEngineTypeRepositoryImpl
+import my.drivebit.repositories.SelectedTrunkSizeRepository
+import my.drivebit.repositories.SelectedTrunkSizeRepositoryImpl
 import my.drivebit.repositories.VerifyOtpRepositoryImpl
 import my.drivebit.repositories.WinCodeRepository
 import my.drivebit.repositories.WinCodeRepositoryImpl
@@ -175,6 +177,12 @@ val repositoriesModule: Module =
             )
         }
 
+        single<SelectedTrunkSizeRepository> {
+            SelectedTrunkSizeRepositoryImpl(
+                settings = get(),
+            )
+        }
+
         single<CarDataRepository> {
             CarDataRepositoryImpl(
                 settings = get(),
@@ -239,6 +247,7 @@ val repositoriesModule: Module =
                 selectedBodyTypeRepository = get(),
                 selectedDriveTypeRepository = get(),
                 selectedEngineTypeRepository = get(),
+                selectedTrunkSizeRepository = get(),
                 licensePlateRepository = get(),
                 selectedAddressRepository = get(),
                 selectedCityRepository = get(),

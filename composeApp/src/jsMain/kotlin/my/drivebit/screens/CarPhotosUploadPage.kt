@@ -13,9 +13,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
+import my.drivebit.components.Column
 import my.drivebit.components.FormSection
 import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
+import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
@@ -121,24 +123,9 @@ fun CarPhotosUploadPage(onPhotosUploaded: () -> Unit = {}) {
                 if (carId == null) {
                     TextError("Ошибка: ID автомобиля не найден")
                 } else {
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                            gap(16.px)
-                        }
-                    }) {
-                        Div({
-                            onClick {
-                                val inputElement =
-                                    document.getElementById(
-                                        fileInputId,
-                                    ) as? org.w3c.dom.HTMLInputElement
-                                inputElement?.click()
-                            }
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Column)
+                    Column(gap = 16.px) {
+                        Column(
+                            modifier = {
                                 alignItems(AlignItems.Center)
                                 justifyContent(JustifyContent.Center)
                                 padding(32.px)
@@ -146,28 +133,37 @@ fun CarPhotosUploadPage(onPhotosUploaded: () -> Unit = {}) {
                                 property("border", "2px dashed ${CSSColors.Gray300String}")
                                 cursor("pointer")
                                 property("transition", "border-color 0.2s ease, background-color 0.2s ease")
-                            }
-                            onMouseEnter {
-                                (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
-                                    "border-color",
-                                    CSSColors.BlueString,
-                                )
-                                (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
-                                    "background-color",
-                                    "rgba(59, 130, 246, 0.05)",
-                                )
-                            }
-                            onMouseLeave {
-                                (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
-                                    "border-color",
-                                    CSSColors.Gray300String,
-                                )
-                                (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
-                                    "background-color",
-                                    "transparent",
-                                )
-                            }
-                        }) {
+                            },
+                            attrs = {
+                                onClick {
+                                    val inputElement =
+                                        document.getElementById(
+                                            fileInputId,
+                                        ) as? org.w3c.dom.HTMLInputElement
+                                    inputElement?.click()
+                                }
+                                onMouseEnter {
+                                    (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                                        "border-color",
+                                        CSSColors.BlueString,
+                                    )
+                                    (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                                        "background-color",
+                                        "rgba(59, 130, 246, 0.05)",
+                                    )
+                                }
+                                onMouseLeave {
+                                    (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                                        "border-color",
+                                        CSSColors.Gray300String,
+                                    )
+                                    (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                                        "background-color",
+                                        "transparent",
+                                    )
+                                }
+                            },
+                        ) {
                             Span({
                                 style {
                                     fontSize(18.px)
@@ -228,13 +224,10 @@ fun CarPhotosUploadPage(onPhotosUploaded: () -> Unit = {}) {
                             TextError(error ?: "Произошла ошибка")
                         }
 
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                justifyContent(JustifyContent.Center)
-                                marginTop(16.px)
-                            }
-                        }) {
+                        Row(
+                            justifyContent = JustifyContent.Center,
+                            modifier = { marginTop(16.px) },
+                        ) {
                             Div({
                                 style {
                                     maxWidth(200.px)

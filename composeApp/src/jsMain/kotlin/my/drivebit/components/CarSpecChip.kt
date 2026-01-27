@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import my.drivebit.design.CSSColors
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.css.rgb
-import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -14,17 +13,16 @@ fun CarSpecChip(
     iconPath: String,
     text: String,
 ) {
-    Div({
-        style {
-            display(DisplayStyle.Flex)
-            alignItems(AlignItems.Center)
-            gap(8.px)
+    Row(
+        gap = 8.px,
+        alignItems = AlignItems.Center,
+        modifier = {
             padding(8.px, 12.px)
             backgroundColor(rgb(245, 245, 247))
             borderRadius(8.px)
             border(1.px, LineStyle.Solid, CSSColors.Gray300)
-        }
-    }) {
+        },
+    ) {
         Img(
             src = iconPath,
             alt = text,
