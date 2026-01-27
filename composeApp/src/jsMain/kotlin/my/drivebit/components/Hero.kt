@@ -28,7 +28,7 @@ fun Hero() {
                 fontWeight(CSSTypography.FontWeight.bold)
                 color(CSSColors.Black)
                 lineHeight("1.2")
-             //   marginBottom(12.px)
+                //   marginBottom(12.px)
             }
         }) {
             Text("Арендуй автомобиль до 40% дешевле проката")

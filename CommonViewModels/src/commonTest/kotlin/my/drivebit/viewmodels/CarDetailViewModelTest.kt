@@ -8,8 +8,8 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.NetworkException
-import my.drivebit.network.services.CarAddress
 import my.drivebit.network.services.Car
+import my.drivebit.network.services.CarAddress
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarPhotoItem
 import kotlin.test.Test

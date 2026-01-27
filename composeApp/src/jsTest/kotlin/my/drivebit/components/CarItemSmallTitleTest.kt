@@ -17,6 +17,7 @@ class CarItemSmallTitleTest {
         year = year,
         address = CarAddress(geoLat = 0.0, geoLon = 0.0),
     )
+
     @Test
     fun `should format title with brand model and year`() {
         val car =

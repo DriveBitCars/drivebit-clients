@@ -43,11 +43,11 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -110,21 +110,21 @@ fun HomePage() {
 
         when (selected) {
             "Поблизости" -> {
-                console.log("Nearby: cars=${cars}")
+                console.log("Nearby: cars=$cars")
 
                 val markers =
                     cars.map { car ->
                         val lat = car.general.address.geoLat
                         val lon = car.general.address.geoLon
-                            MapMarker(
-                                id = car.id,
-                                location =
-                                    Location(
-                                        latitude = lat,
-                                        longitude = lon,
-                                    ),
-                                title = listOfNotNull(car.general.brandName).joinToString(" "),
-                            )
+                        MapMarker(
+                            id = car.id,
+                            location =
+                                Location(
+                                    latitude = lat,
+                                    longitude = lon,
+                                ),
+                            title = listOfNotNull(car.general.brandName).joinToString(" "),
+                        )
                     }
 
                 if (markers.isNotEmpty()) {
