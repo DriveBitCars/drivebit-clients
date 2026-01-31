@@ -27,8 +27,8 @@ fun AppWithHeader(content: @Composable () -> Unit) {
             HeaderRow {
                 Logo()
 
-            if (!isMobile) {
-                Hero(isMobile)
+                if (!isMobile) {
+                    Hero(isMobile)
                 }
 
                 Row(

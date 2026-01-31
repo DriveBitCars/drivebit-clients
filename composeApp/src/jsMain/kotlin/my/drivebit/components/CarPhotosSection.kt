@@ -80,13 +80,15 @@ fun CarPhotosSection(car: CarDetailResponse) {
     }
 }
 
-private fun isShowButton(isMobile: Boolean, photoSize: Int): Boolean {
+private fun isShowButton(
+    isMobile: Boolean,
+    photoSize: Int,
+): Boolean {
     if (isMobile) {
         return photoSize > 1
     }
     return photoSize > 3
 }
-
 
 @Composable
 private fun CarMainPhoto(mainPhoto: CarPhotoItem?) {
