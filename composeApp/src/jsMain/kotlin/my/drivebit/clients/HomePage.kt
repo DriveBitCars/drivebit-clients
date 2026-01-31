@@ -10,8 +10,10 @@ import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarItemSmall
+import my.drivebit.components.Column
 import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.FilterButtonsRow
+import my.drivebit.components.Row
 import my.drivebit.components.TextInputField
 import my.drivebit.components.filterButton
 import my.drivebit.design.CSSColors
@@ -25,16 +27,11 @@ import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MapViewModel
 import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
-import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
-import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
@@ -191,26 +188,18 @@ private fun CarsListView(cars: List<CarItem>) {
             marginTop(20.px)
         }
     }) {
-        Div({
-            style {
+        Row(
+            justifyContent = JustifyContent.SpaceBetween,
+            alignItems = AlignItems.Center,
+            modifier = {
                 width(100.percent)
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Row)
-                justifyContent(JustifyContent.SpaceBetween)
-                alignItems(AlignItems.Center)
                 marginBottom(16.px)
-            }
-        }) {
+            },
+        ) {
             Div()
 
             if (cars.isNotEmpty()) {
-                Div({
-                    style {
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Row)
-                        gap(8.px)
-                    }
-                }) {
+                Row(gap = 8.px) {
                     ScrollButton(
                         direction = "left",
                         onClick = {
@@ -236,26 +225,22 @@ private fun CarsListView(cars: List<CarItem>) {
             }
         }
 
-        Div({
-            id(scrollContainerId)
-            style {
+        Row(
+            gap = 16.px,
+            modifier = {
                 width(100.percent)
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Row)
-                gap(16.px)
                 overflowX("hidden")
-            }
-        }) {
+            },
+            attrs = { id(scrollContainerId) },
+        ) {
             cars.forEach { car ->
-                Div({
-                    style {
+                Column(
+                    gap = 8.px,
+                    modifier = {
                         flexShrink(0)
                         width(280.px)
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Column)
-                        gap(8.px)
-                    }
-                }) {
+                    },
+                ) {
                     CarItemSmall(
                         car = car,
                         onClick = {
@@ -279,31 +264,32 @@ private fun ScrollButton(
     direction: String,
     onClick: () -> Unit,
 ) {
-    Div({
-        style {
+    Row(
+        alignItems = AlignItems.Center,
+        justifyContent = JustifyContent.Center,
+        modifier = {
             width(40.px)
             height(40.px)
             borderRadius(50.percent)
             backgroundColor(CSSColors.White)
-            display(DisplayStyle.Flex)
-            alignItems(AlignItems.Center)
-            justifyContent(JustifyContent.Center)
             cursor("pointer")
-        }
-        onClick { onClick() }
-        onMouseEnter {
-            (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
-                "background-color",
-                "#f5f5f5",
-            )
-        }
-        onMouseLeave {
-            (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
-                "background-color",
-                CSSColors.WhiteString,
-            )
-        }
-    }) {
+        },
+        attrs = {
+            onClick { onClick() }
+            onMouseEnter {
+                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                    "background-color",
+                    "#f5f5f5",
+                )
+            }
+            onMouseLeave {
+                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                    "background-color",
+                    CSSColors.WhiteString,
+                )
+            }
+        },
+    ) {
         Span({
             style {
                 fontSize(20.px)

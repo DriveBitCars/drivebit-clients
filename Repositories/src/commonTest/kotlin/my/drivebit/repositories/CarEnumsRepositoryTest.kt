@@ -207,5 +207,9 @@ class CarEnumsRepositoryTest {
                 listOf(
                     NetworkEnumItem(0, "RearParkingSensors", "Задний парктроник"),
                 ),
+            TrunkSizeEnum =
+                listOf(
+                    NetworkEnumItem(0, "Compact", "Компактный"),
+                ),
         )
 }

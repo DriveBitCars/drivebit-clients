@@ -5,7 +5,6 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.network.services.FilterSuggestion
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
@@ -14,13 +13,10 @@ fun FilterSuggestionsList(
     filters: List<FilterSuggestion>,
     onFilterClick: (FilterSuggestion) -> Unit,
 ) {
-    Div({
-        style {
-            display(DisplayStyle.Flex)
-            flexWrap(FlexWrap.Wrap)
-            gap(16.px)
-        }
-    }) {
+    Row(
+        gap = 16.px,
+        flexWrap = FlexWrap.Wrap,
+    ) {
         filters.forEach { filter ->
             FilterSuggestionButton(
                 filter = filter,

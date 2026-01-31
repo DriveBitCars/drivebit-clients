@@ -31,6 +31,10 @@ interface CarDataRepository {
 
     fun getMonthlyRate(): Double?
 
+    fun saveDescription(description: String)
+
+    fun getDescription(): String?
+
     fun clearAll()
 }
 
@@ -45,6 +49,7 @@ internal class CarDataRepositoryImpl(
         private const val HOURLY_RATE_KEY = "car_hourly_rate"
         private const val DAILY_RATE_KEY = "car_daily_rate"
         private const val MONTHLY_RATE_KEY = "car_monthly_rate"
+        private const val DESCRIPTION_KEY = "car_description"
     }
 
     override fun saveEngineVolume(volume: Double) {
@@ -107,6 +112,12 @@ internal class CarDataRepositoryImpl(
         return if (rate < 0) null else rate
     }
 
+    override fun saveDescription(description: String) {
+        settings.putString(DESCRIPTION_KEY, description)
+    }
+
+    override fun getDescription(): String? = settings.getStringOrNullIfEmpty(DESCRIPTION_KEY)
+
     override fun clearAll() {
         settings.remove(ENGINE_VOLUME_KEY)
         settings.remove(PRODUCTION_YEAR_KEY)
@@ -115,5 +126,6 @@ internal class CarDataRepositoryImpl(
         settings.remove(HOURLY_RATE_KEY)
         settings.remove(DAILY_RATE_KEY)
         settings.remove(MONTHLY_RATE_KEY)
+        settings.remove(DESCRIPTION_KEY)
     }
 }

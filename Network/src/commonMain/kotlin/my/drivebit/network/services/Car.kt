@@ -80,6 +80,7 @@ data class CarDetailResponse(
     val general: CarGeneral? = null,
     val chassis: CarChassis? = null,
     val body: CarBody? = null,
+    val trunk: CarTrunk? = null,
     val photos: List<CarPhotoItem> = emptyList(),
     val brandId: Int? = null,
     val brandName: String? = null,
@@ -94,6 +95,8 @@ data class CarDetailResponse(
     val engineVolume: Double? = null,
     val productionYear: Int? = null,
     val seatsCount: Int? = null,
+    val trunkSize: String? = null,
+    val trunkSizeTranslate: String? = null,
     val licensePlate: String? = null,
     val ValidAddressString: String? = null,
     val hourlyRate: Double? = null,
@@ -122,6 +125,10 @@ data class CarDetailResponse(
     fun resolvedProductionYear(): Int = productionYear ?: general?.year ?: 0
 
     fun resolvedSeatsCount(): Int = seatsCount ?: general?.seats ?: 0
+
+    fun resolvedTrunkSize(): String = trunk?.trunkSize ?: trunkSize ?: ""
+
+    fun resolvedTrunkSizeTranslate(): String = trunk?.trunkSizeTranslate ?: trunkSizeTranslate ?: ""
 
     fun resolvedBrandId(): Int? = brandId
 
@@ -172,6 +179,12 @@ data class CarBody(
 )
 
 @Serializable
+data class CarTrunk(
+    val trunkSize: String? = null,
+    val trunkSizeTranslate: String? = null,
+)
+
+@Serializable
 data class CarAddress(
     val postalCode: String? = null,
     val region: String? = null,
@@ -201,11 +214,13 @@ data class CarCreateRequest(
     val driveType: String? = null,
     val engineType: String? = null,
     val engineVolume: Double? = null,
-    val productionYear: Int? = null,
-    val seatsCount: Int? = null,
+    val year: Int,
+    val seats: Int? = null,
+    val trunkSize: String? = null,
     val licensePlate: String? = null,
     val ValidAddressString: String? = null,
     val addr: String? = null,
+    val description: String? = null,
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,
     val ParkingAssistances: List<Int> = emptyList(),

@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
+import my.drivebit.components.Column
 import my.drivebit.components.FormSection
 import my.drivebit.components.Loader
 import my.drivebit.components.PageHeader
@@ -173,13 +174,7 @@ fun CarPhotosPage() {
                     }
 
                     is CarPhotosState.Success -> {
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Column)
-                                gap(16.px)
-                            }
-                        }) {
+                        Column(gap = 16.px) {
                             if (currentState.photos.isNotEmpty()) {
                                 Div({
                                     style {

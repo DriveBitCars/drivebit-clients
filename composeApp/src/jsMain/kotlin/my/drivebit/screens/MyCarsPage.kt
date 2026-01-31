@@ -8,10 +8,12 @@ import kotlinx.browser.window
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CarItemSmall
 import my.drivebit.components.CenteredFormContainer
+import my.drivebit.components.Column
 import my.drivebit.components.FormSection
 import my.drivebit.components.Loader
 import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
+import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
@@ -80,33 +82,16 @@ fun MyCarsPage() {
                     }
 
                     else -> {
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Column)
-                                gap(16.px)
-                            }
-                        }) {
+                        Column(gap = 16.px) {
                             cars.forEach { car ->
-                                Div({
-                                    style {
-                                        display(DisplayStyle.Flex)
-                                        flexDirection(FlexDirection.Column)
-                                        gap(12.px)
-                                    }
-                                }) {
+                                Column(gap = 12.px) {
                                     CarItemSmall(
                                         car = car,
                                         onClick = {
                                             window.location.href = "/car-detail?id=${car.id}"
                                         },
                                     )
-                                    Div({
-                                        style {
-                                            display(DisplayStyle.Flex)
-                                            justifyContent(JustifyContent.Center)
-                                        }
-                                    }) {
+                                    Row(justifyContent = JustifyContent.Center) {
                                         ActionButton(
                                             enabledColor = CSSColors.Blue,
                                             text = "Управлять",
@@ -122,13 +107,10 @@ fun MyCarsPage() {
                 }
             }
 
-            Div({
-                style {
-                    display(DisplayStyle.Flex)
-                    justifyContent(JustifyContent.Center)
-                    marginTop(24.px)
-                }
-            }) {
+            Row(
+                justifyContent = JustifyContent.Center,
+                modifier = { marginTop(24.px) },
+            ) {
                 ActionButton(
                     enabledColor = CSSColors.Blue,
                     text = "Добавить авто",

@@ -1,8 +1,6 @@
 package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -12,27 +10,21 @@ import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
 import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
+import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.repositories.CarDataRepository
 import my.drivebit.viewmodels.ButtonState
-import my.drivebit.viewmodels.CreateCarFromDailyRateState
-import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 
 @Composable
-fun DailyRateInputPage(
-    onDailyRateEntered: () -> Unit,
-    onMissingPassport: () -> Unit = {},
-) {
+fun DailyRateInputPage(onNavigateToLicensePlate: () -> Unit) {
     val carDataRepository: CarDataRepository = koinInject()
-    val createCarViewModel: CreateCarFromDailyRateViewModel = koinInject()
-    val createCarState by createCarViewModel.state.collectAsState()
     val buttonViewModel = createButtonViewModel()
 
     var dailyRate by remember {
@@ -41,28 +33,13 @@ fun DailyRateInputPage(
     }
     var localError by remember { mutableStateOf<String?>(null) }
 
-    val isLoading = createCarState is CreateCarFromDailyRateState.Loading
-    val error = localError ?: (createCarState as? CreateCarFromDailyRateState.Error)?.message
+    val error = localError
 
-    val isValid = dailyRate.toDoubleOrNull()?.let { it >= 0 } == true && !isLoading
+    val isValid = dailyRate.toDoubleOrNull()?.let { it >= 0 } == true
 
     buttonViewModel.setState(
         if (isValid) ButtonState.Enabled else ButtonState.Disabled,
     )
-
-    LaunchedEffect(createCarState) {
-        when (createCarState) {
-            CreateCarFromDailyRateState.MissingPassport -> {
-                createCarViewModel.reset()
-                onMissingPassport()
-            }
-            is CreateCarFromDailyRateState.Success -> {
-                createCarViewModel.reset()
-                onDailyRateEntered()
-            }
-            else -> Unit
-        }
-    }
 
     PageWithLogo {
         CenteredFormContainer {
@@ -87,13 +64,10 @@ fun DailyRateInputPage(
                     TextError(error ?: "Произошла ошибка")
                 }
 
-                Div({
-                    style {
-                        display(DisplayStyle.Flex)
-                        justifyContent(JustifyContent.Center)
-                        marginTop(16.px)
-                    }
-                }) {
+                Row(
+                    justifyContent = JustifyContent.Center,
+                    modifier = { marginTop(16.px) },
+                ) {
                     Div({
                         style {
                             maxWidth(200.px)
@@ -103,11 +77,12 @@ fun DailyRateInputPage(
                         ActionButton(
                             viewModel = buttonViewModel,
                             enabledColor = CSSColors.Blue,
-                            text = if (isLoading) "Создание..." else "Создать",
+                            text = "Далее",
                             onClick = {
                                 val rateValue = dailyRate.toDoubleOrNull()
                                 if (rateValue != null && rateValue >= 0) {
-                                    createCarViewModel.submitDailyRate(rateValue)
+                                    carDataRepository.saveDailyRate(rateValue)
+                                    onNavigateToLicensePlate()
                                 } else {
                                     localError = "Введите корректное значение"
                                 }

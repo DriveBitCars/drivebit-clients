@@ -68,6 +68,7 @@ data class CarEnumsResponse(
     val CarRoofTypeEnum: List<EnumItem>,
     val MultimediaSystemOptionsEnum: List<EnumItem>,
     val ParkingAssistancesEnum: List<EnumItem>,
+    val TrunkSizeEnum: List<EnumItem>,
     val DocumentTypeEnum: List<EnumItem>? = null,
 )
 

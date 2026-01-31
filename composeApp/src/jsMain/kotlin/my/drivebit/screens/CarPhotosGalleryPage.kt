@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.AppWithHeader
+import my.drivebit.components.Column
 import my.drivebit.components.Loader
 import my.drivebit.components.TextError
 import my.drivebit.design.CSSColors
@@ -75,13 +76,7 @@ fun CarPhotosGalleryPage() {
 private fun CarPhotosGalleryContent(car: my.drivebit.network.services.CarDetailResponse) {
     val allPhotos = (car.photos + (car.general?.photos ?: emptyList())).distinctBy { it.id }
 
-    Div({
-        style {
-            display(DisplayStyle.Flex)
-            flexDirection(FlexDirection.Column)
-            gap(24.px)
-        }
-    }) {
+    Column(gap = 24.px) {
         Div({
             style {
                 fontSize(24.px)
@@ -103,14 +98,10 @@ private fun CarPhotosGalleryContent(car: my.drivebit.network.services.CarDetailR
                 Text("Фотографии отсутствуют")
             }
         } else {
-            Div({
-                style {
-                    display(DisplayStyle.Flex)
-                    flexDirection(FlexDirection.Column)
-                    gap(16.px)
-                    width(100.percent)
-                }
-            }) {
+            Column(
+                gap = 16.px,
+                modifier = { width(100.percent) },
+            ) {
                 allPhotos.forEach { photo ->
                     if (photo.url.isNotEmpty()) {
                         Div({

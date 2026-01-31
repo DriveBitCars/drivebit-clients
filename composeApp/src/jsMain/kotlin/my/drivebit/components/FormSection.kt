@@ -1,6 +1,7 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
+import my.drivebit.components.Column
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 
@@ -17,13 +18,7 @@ fun FormSection(
             position(Position.Relative)
         }
     }) {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Column)
-                gap(gap)
-            }
-        }) {
+        Column(gap = gap) {
             content()
         }
 

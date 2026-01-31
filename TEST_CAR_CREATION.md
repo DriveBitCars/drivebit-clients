@@ -65,7 +65,7 @@ curl -X POST "https://drivebit.my/api/Car/my" \
     "driveType": "Front",
     "engineType": "Gasoline",
     "engineVolume": 2.0,
-    "productionYear": 2020,
+    "year": 2020,
     "seatsCount": 5,
     "winCode": "TEST123456789"
   }'

@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarItemSmall
+import my.drivebit.components.Column
 import my.drivebit.components.FilterSuggestionsList
 import my.drivebit.components.Loader
 import my.drivebit.components.TextError
@@ -59,13 +60,7 @@ fun SearchPage() {
                 }
 
                 is SearchState.SearchResults -> {
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                            gap(24.px)
-                        }
-                    }) {
+                    Column(gap = 24.px) {
                         if (currentState.suggestedFilters.isNotEmpty()) {
                             FilterSuggestionsList(
                                 filters = currentState.suggestedFilters,
@@ -85,12 +80,7 @@ fun SearchPage() {
                                 }
                             }) {
                                 currentState.cars.forEach { car ->
-                                    Div({
-                                        style {
-                                            display(DisplayStyle.Flex)
-                                            flexDirection(FlexDirection.Column)
-                                        }
-                                    }) {
+                                    Column {
                                         CarItemSmall(
                                             car = car,
                                             onClick = {
