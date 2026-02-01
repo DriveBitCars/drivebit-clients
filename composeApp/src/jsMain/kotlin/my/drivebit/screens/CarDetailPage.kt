@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.AppWithHeader
+import my.drivebit.components.CarOwnerSection
 import my.drivebit.components.CarPhotosSection
 import my.drivebit.components.CarSpecsRow
 import my.drivebit.components.CarTitleSection
@@ -16,7 +17,11 @@ import my.drivebit.components.TextError
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.CarDetailState
 import my.drivebit.viewmodels.CarDetailViewModel
-import org.jetbrains.compose.web.css.*
+import my.drivebit.viewmodels.CarOwnerUi
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.currentKoinScope
 import org.koin.core.parameter.parametersOf
@@ -67,7 +72,10 @@ fun CarDetailPage() {
                 }
 
                 is CarDetailState.Success -> {
-                    CarDetailContent(car = currentState.car)
+                    CarDetailContent(
+                        car = currentState.car,
+                        owner = currentState.owner,
+                    )
                 }
             }
         }
@@ -75,7 +83,10 @@ fun CarDetailPage() {
 }
 
 @Composable
-private fun CarDetailContent(car: my.drivebit.network.services.CarDetailResponse) {
+private fun CarDetailContent(
+    car: my.drivebit.network.services.CarDetailResponse,
+    owner: CarOwnerUi?,
+) {
     Column(gap = 24.px) {
         CarPhotosSection(car)
 
@@ -93,7 +104,16 @@ private fun CarDetailContent(car: my.drivebit.network.services.CarDetailResponse
 
             CarSpecsRow(car)
 
-            SectionDivider()
+            owner?.let { ownerInfo ->
+                SectionDivider()
+                CarOwnerSection(
+                    name = ownerInfo.name,
+                    avatarUrl = ownerInfo.avatarUrl,
+                    memberSince = ownerInfo.memberSince,
+                    rating = null,
+                    tripsCount = null,
+                )
+            }
         }
     }
 }

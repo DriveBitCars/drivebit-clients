@@ -77,7 +77,14 @@ data class CarItem(
 @Serializable
 data class CarDetailResponse(
     val id: String,
-    val general: CarGeneral? = null,
+    val general: CarGeneral =
+        CarGeneral(
+            brandName = "",
+            modelName = "",
+            vin = "",
+            seats = 0,
+            address = CarAddress(geoLat = 0.0, geoLon = 0.0),
+        ),
     val chassis: CarChassis? = null,
     val body: CarBody? = null,
     val trunk: CarTrunk? = null,
@@ -94,13 +101,12 @@ data class CarDetailResponse(
     val engineTypeTranslate: String? = null,
     val engineVolume: Double? = null,
     val productionYear: Int? = null,
-    val seatsCount: Int? = null,
-    val trunkSize: String? = null,
-    val trunkSizeTranslate: String? = null,
     val licensePlate: String? = null,
     val ValidAddressString: String? = null,
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,
+    val seatsCount: Int? = null,
+    val owner: String = "",
 ) {
     fun resolvedLicensePlate(): String = licensePlate ?: general?.licensePlate ?: ""
 
@@ -124,11 +130,11 @@ data class CarDetailResponse(
 
     fun resolvedProductionYear(): Int = productionYear ?: general?.year ?: 0
 
-    fun resolvedSeatsCount(): Int = seatsCount ?: general?.seats ?: 0
+    fun resolvedSeatsCount(): Int = seatsCount ?: general.seats
 
-    fun resolvedTrunkSize(): String = trunk?.trunkSize ?: trunkSize ?: ""
+    fun resolvedTrunkSize(): String? = trunk?.trunkSize
 
-    fun resolvedTrunkSizeTranslate(): String = trunk?.trunkSizeTranslate ?: trunkSizeTranslate ?: ""
+    fun resolvedTrunkSizeTranslate(): String? = trunk?.trunkSizeTranslate
 
     fun resolvedBrandId(): Int? = brandId
 
@@ -149,8 +155,10 @@ data class CarGeneral(
     val seats: Int,
     val mileage: Int? = null,
     val description: String? = null,
+    val ownerName: String? = null,
     val photos: List<CarPhotoItem> = emptyList(),
     val address: CarAddress,
+    val owner: String? = null,
 )
 
 @Serializable
@@ -263,7 +271,7 @@ class CarImpl(
                     photo.copy(url = extractPathFromApiUrl(photo.url))
                 },
             general =
-                result.general?.copy(
+                result.general.copy(
                     photos =
                         result.general.photos.map { photo ->
                             photo.copy(url = extractPathFromApiUrl(photo.url))

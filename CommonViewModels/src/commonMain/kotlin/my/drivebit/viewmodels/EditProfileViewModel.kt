@@ -42,6 +42,7 @@ interface EditProfileViewModel {
 
 class EditProfileViewModelImpl(
     private val userService: User,
+    private val profileViewModel: ProfileViewModel? = null,
     initialFirstName: String,
     initialLastName: String,
     initialMiddleName: String,
@@ -102,6 +103,7 @@ class EditProfileViewModelImpl(
                         middleName = currentState.middleName.ifBlank { null },
                     )
                 }.onSuccess {
+                    profileViewModel?.refresh()
                     _state.update { EditProfileState.Success }
                 }.onFailure { e ->
                     val errorMessage =

@@ -172,6 +172,7 @@ val commonViewModelsModule: Module =
         factory<EditProfileViewModel> { (firstName: String, lastName: String, middleName: String) ->
             EditProfileViewModelImpl(
                 userService = get(),
+                profileViewModel = get(),
                 initialFirstName = firstName,
                 initialLastName = lastName,
                 initialMiddleName = middleName,
@@ -327,6 +328,7 @@ val commonViewModelsModule: Module =
         factory<CarDetailViewModel> { (carId: String) ->
             CarDetailViewModelImpl(
                 carService = get(),
+                photoService = get(),
                 carId = carId,
             )
         }

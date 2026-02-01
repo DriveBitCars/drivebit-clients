@@ -12,9 +12,11 @@ import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarAddress
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarPhotoItem
+import my.drivebit.network.services.Photo
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 
 class MockCarServiceForDetail : Car {
     var shouldThrowError = false
@@ -83,25 +85,37 @@ class MockCarServiceForDetail : Car {
                 listOf(
                     CarPhotoItem(
                         id = 11,
-                        url = "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/28005139-1f22-497d-84d8-6cba79b978f0_compressed.jpg",
+                        url =
+                            "http://155.212.170.94:9000/publicbct/cars/" +
+                                "a575c0b1-3736-475f-a4a8-5a87cfbdb18a/" +
+                                "28005139-1f22-497d-84d8-6cba79b978f0_compressed.jpg",
                         uploadDate = "2026-01-04T19:23:58.147478Z",
                         carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a",
                     ),
                     CarPhotoItem(
                         id = 12,
-                        url = "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/c876fa26-2a58-4ec2-8b3a-82c84d0fef53_compressed.jpg",
+                        url =
+                            "http://155.212.170.94:9000/publicbct/cars/" +
+                                "a575c0b1-3736-475f-a4a8-5a87cfbdb18a/" +
+                                "c876fa26-2a58-4ec2-8b3a-82c84d0fef53_compressed.jpg",
                         uploadDate = "2026-01-04T19:24:26.05663Z",
                         carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a",
                     ),
                     CarPhotoItem(
                         id = 14,
-                        url = "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/4c39d7ba-f09f-4514-b80f-662024e56395_compressed.jpg",
+                        url =
+                            "http://155.212.170.94:9000/publicbct/cars/" +
+                                "a575c0b1-3736-475f-a4a8-5a87cfbdb18a/" +
+                                "4c39d7ba-f09f-4514-b80f-662024e56395_compressed.jpg",
                         uploadDate = "2026-01-04T20:07:05.060429Z",
                         carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a",
                     ),
                     CarPhotoItem(
                         id = 16,
-                        url = "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/64fe5ca8-6d7a-4a08-8a0a-17f0a0f86511_compressed.jpg",
+                        url =
+                            "http://155.212.170.94:9000/publicbct/cars/" +
+                                "a575c0b1-3736-475f-a4a8-5a87cfbdb18a/" +
+                                "64fe5ca8-6d7a-4a08-8a0a-17f0a0f86511_compressed.jpg",
                         uploadDate = "2026-01-05T18:23:35.866216Z",
                         carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a",
                     ),
@@ -151,6 +165,38 @@ class MockCarServiceForDetail : Car {
     override suspend fun deleteCar(carId: String): Unit = throw NotImplementedError()
 }
 
+class MockPhotoServiceForDetail : Photo {
+    var avatarUrl: String? = "https://example.com/avatar.jpg"
+
+    override suspend fun getAvatar(): my.drivebit.network.services.AvatarResponse =
+        my.drivebit.network.services
+            .AvatarResponse(url = avatarUrl ?: "")
+
+    override suspend fun getAvatarByUserId(userId: String): my.drivebit.network.services.AvatarResponse? =
+        avatarUrl?.let {
+            my.drivebit.network.services
+                .AvatarResponse(url = it)
+        }
+
+    override suspend fun uploadAvatar(
+        fileBytes: ByteArray,
+        fileName: String,
+        contentType: String,
+    ): my.drivebit.network.services.AvatarResponse = throw NotImplementedError()
+
+    override suspend fun getCarPhotos(carId: String): List<my.drivebit.network.services.CarPhotoResponse> =
+        throw NotImplementedError()
+
+    override suspend fun uploadCarPhotos(
+        carId: String,
+        fileBytesList: List<ByteArray>,
+        fileNames: List<String>,
+        contentTypes: List<String>,
+    ): List<my.drivebit.network.services.CarPhotoResponse> = throw NotImplementedError()
+
+    override suspend fun deleteCarPhoto(photoId: Int): Unit = throw NotImplementedError()
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class CarDetailViewModelTest {
     @Test
@@ -159,10 +205,12 @@ class CarDetailViewModelTest {
             val testDispatcher = this
             val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
             val mockCarService = MockCarServiceForDetail()
+            val mockPhotoService = MockPhotoServiceForDetail()
             val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
+                    photoService = mockPhotoService,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -177,10 +225,12 @@ class CarDetailViewModelTest {
             val testDispatcher = this
             val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
             val mockCarService = MockCarServiceForDetail()
+            val mockPhotoService = MockPhotoServiceForDetail()
             val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
+                    photoService = mockPhotoService,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -198,9 +248,52 @@ class CarDetailViewModelTest {
             assertEquals(0, car.resolvedProductionYear())
             assertEquals(4, car.photos.size)
             assertEquals(
-                "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/28005139-1f22-497d-84d8-6cba79b978f0_compressed.jpg",
+                "http://155.212.170.94:9000/publicbct/cars/" +
+                    "a575c0b1-3736-475f-a4a8-5a87cfbdb18a/" +
+                    "28005139-1f22-497d-84d8-6cba79b978f0_compressed.jpg",
                 car.photos[0].url,
             )
+        }
+
+    @Test
+    fun `should load owner info when owner id is present`() =
+        runTest(StandardTestDispatcher()) {
+            val testDispatcher = this
+            val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
+            val mockCarService = MockCarServiceForDetail()
+            val carId = mockCarService.carResponse.id
+            val ownerId = "owner-123"
+            mockCarService.carResponse =
+                mockCarService.carResponse.copy(
+                    owner = ownerId,
+                    general =
+                        mockCarService.carResponse.general.copy(
+                            owner = ownerId,
+                            ownerName = "Иван Иванов",
+                        ),
+                )
+            val mockPhotoService =
+                MockPhotoServiceForDetail().apply {
+                    avatarUrl = "https://example.com/avatar.jpg"
+                }
+            val viewModel =
+                CarDetailViewModelImpl(
+                    carService = mockCarService,
+                    photoService = mockPhotoService,
+                    carId = carId,
+                    coroutineScope = testScope,
+                )
+
+            advanceUntilIdle()
+
+            val state = viewModel.state.value
+            assertIs<CarDetailState.Success>(state)
+            val owner = state.owner
+            assertNotNull(owner)
+            assertEquals(ownerId, owner.id)
+            assertEquals("Иван Иванов", owner.name)
+            assertEquals(null, owner.memberSince)
+            assertEquals("https://example.com/avatar.jpg", owner.avatarUrl)
         }
 
     @Test
@@ -209,10 +302,12 @@ class CarDetailViewModelTest {
             val testDispatcher = this
             val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
             val mockCarService = MockCarServiceForDetail()
+            val mockPhotoService = MockPhotoServiceForDetail()
             val carId = ""
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
+                    photoService = mockPhotoService,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -234,10 +329,12 @@ class CarDetailViewModelTest {
             mockCarService.shouldThrowNetworkException = true
             mockCarService.networkExceptionStatusCode = HttpStatusCode.NotFound
             mockCarService.errorMessage = "Автомобиль не найден"
+            val mockPhotoService = MockPhotoServiceForDetail()
             val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
+                    photoService = mockPhotoService,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -258,10 +355,12 @@ class CarDetailViewModelTest {
             val mockCarService = MockCarServiceForDetail()
             mockCarService.shouldThrowError = true
             mockCarService.errorMessage = "Unexpected error occurred"
+            val mockPhotoService = MockPhotoServiceForDetail()
             val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
+                    photoService = mockPhotoService,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -283,10 +382,12 @@ class CarDetailViewModelTest {
             mockCarService.shouldThrowNetworkException = true
             mockCarService.networkExceptionStatusCode = HttpStatusCode.NotFound
             mockCarService.errorMessage = "404 Not Found"
+            val mockPhotoService = MockPhotoServiceForDetail()
             val carId = "invalid-car-id"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
+                    photoService = mockPhotoService,
                     carId = carId,
                     coroutineScope = testScope,
                 )

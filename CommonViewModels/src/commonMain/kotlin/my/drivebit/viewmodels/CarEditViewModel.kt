@@ -167,6 +167,7 @@ class CarEditViewModelImpl(
         val resolvedProductionYear = car.resolvedProductionYear()
         val resolvedSeatsCount = car.resolvedSeatsCount()
         val resolvedTrunkSize = car.resolvedTrunkSize()
+        val resolvedTrunkSizeTranslate = car.resolvedTrunkSizeTranslate().orEmpty()
 
         return CarEditFormData(
             carId = car.id,
@@ -189,11 +190,11 @@ class CarEditViewModelImpl(
             engineVolume = if (resolvedEngineVolume > 0.0) NumberFormatter.formatDouble(resolvedEngineVolume) else "",
             productionYear = if (resolvedProductionYear > 0) NumberFormatter.formatInt(resolvedProductionYear) else "",
             seatsCount = if (resolvedSeatsCount > 0) NumberFormatter.formatInt(resolvedSeatsCount) else "",
-            trunkSize = resolvedTrunkSize.takeIf { it.isNotEmpty() },
-            trunkSizeTranslate = car.resolvedTrunkSizeTranslate(),
-            trunkSizeSearch = car.resolvedTrunkSizeTranslate(),
+            trunkSize = resolvedTrunkSize?.takeIf { it.isNotEmpty() },
+            trunkSizeTranslate = resolvedTrunkSizeTranslate,
+            trunkSizeSearch = resolvedTrunkSizeTranslate,
             address = car.ValidAddressString ?: "",
-            description = car.general?.description ?: "",
+            description = car.general.description ?: "",
             photos = car.photos,
         )
     }

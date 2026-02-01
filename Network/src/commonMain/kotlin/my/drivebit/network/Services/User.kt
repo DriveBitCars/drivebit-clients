@@ -13,6 +13,8 @@ import my.drivebit.network.parseResponse
 interface User {
     suspend fun userGet(): UserGetResponse
 
+    suspend fun getUserById(userId: String): UserGetResponse
+
     suspend fun updateUser(
         firstName: String?,
         lastName: String?,
@@ -70,6 +72,13 @@ class UserImpl(
 ) : User {
     override suspend fun userGet(): UserGetResponse {
         val url = "${DEFAULT_BASE_URL}User"
+        val response = httpClient.get(url)
+
+        return response.parseResponse()
+    }
+
+    override suspend fun getUserById(userId: String): UserGetResponse {
+        val url = "${DEFAULT_BASE_URL}User/$userId"
         val response = httpClient.get(url)
 
         return response.parseResponse()

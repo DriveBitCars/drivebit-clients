@@ -4,6 +4,9 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -32,6 +35,8 @@ class MockEditProfileUserService : User {
             createdAt = "2025-01-01T00:00:00Z",
         )
     }
+
+    override suspend fun getUserById(userId: String): UserGetResponse = userGet()
 
     override suspend fun updateUser(
         firstName: String?,
@@ -83,6 +88,20 @@ class MockEditProfileUserService : User {
             lastName = "User",
             createdAt = "2025-01-01T00:00:00Z",
         )
+    }
+}
+
+private class TrackingProfileViewModel : ProfileViewModel {
+    private val _state = MutableStateFlow<ProfileState>(ProfileState.Loading)
+    override val state: StateFlow<ProfileState> = _state.asStateFlow()
+    var refreshCount = 0
+
+    override fun loadProfile() {
+        refreshCount++
+    }
+
+    override fun refresh() {
+        refreshCount++
     }
 }
 
@@ -273,5 +292,28 @@ class EditProfileViewModelTest {
             assertEquals(null, mockUserService.lastFirstName)
             assertEquals(null, mockUserService.lastLastName)
             assertEquals(null, mockUserService.lastMiddleName)
+        }
+
+    @Test
+    fun `save should refresh profile view model on success`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + this.coroutineContext)
+            val mockUserService = MockEditProfileUserService()
+            val trackingProfileViewModel = TrackingProfileViewModel()
+            val viewModel =
+                EditProfileViewModelImpl(
+                    userService = mockUserService,
+                    profileViewModel = trackingProfileViewModel,
+                    initialFirstName = "John",
+                    initialLastName = "Doe",
+                    initialMiddleName = "Middle",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(1, trackingProfileViewModel.refreshCount)
+            assertTrue(viewModel.state.value is EditProfileState.Success)
         }
 }
