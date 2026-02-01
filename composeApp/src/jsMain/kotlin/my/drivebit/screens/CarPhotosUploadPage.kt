@@ -23,7 +23,7 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.Photo
 import my.drivebit.utils.getUrlParameter
-import my.drivebit.utils.readAsBytes
+import my.drivebit.utils.reencodeToJpeg
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.attributes.InputType
@@ -33,6 +33,15 @@ import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
+
+private fun processedFileName(originalName: String): String {
+    val nameWithoutExt = originalName.substringBeforeLast(".", originalName)
+    return if (nameWithoutExt.isNotBlank()) {
+        "$nameWithoutExt.jpg"
+    } else {
+        "photo.jpg"
+    }
+}
 
 @Composable
 fun CarPhotosUploadPage(onPhotosUploaded: () -> Unit = {}) {
@@ -72,10 +81,15 @@ fun CarPhotosUploadPage(onPhotosUploaded: () -> Unit = {}) {
                         for (i in 0 until fileList.length) {
                             val file = fileList.item(i) as? org.w3c.files.File
                             if (file != null && file.type.startsWith("image/")) {
-                                val fileBytes = file.readAsBytes()
+                                val fileBytes =
+                                    file.reencodeToJpeg(
+                                        maxWidth = 1920,
+                                        maxHeight = 1920,
+                                        quality = 0.9,
+                                    )
                                 fileBytesList.add(fileBytes)
-                                fileNamesList.add(file.name)
-                                contentTypesList.add(file.type.ifBlank { "image/jpeg" })
+                                fileNamesList.add(processedFileName(file.name))
+                                contentTypesList.add("image/jpeg")
                             }
                         }
 

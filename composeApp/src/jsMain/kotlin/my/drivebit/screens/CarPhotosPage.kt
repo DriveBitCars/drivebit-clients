@@ -12,7 +12,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
@@ -24,6 +23,7 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.utils.getUrlParameter
+import my.drivebit.utils.reencodeToJpeg
 import my.drivebit.viewmodels.CarPhotosState
 import my.drivebit.viewmodels.CarPhotosViewModel
 import org.jetbrains.compose.web.attributes.InputType
@@ -34,112 +34,15 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
-private suspend fun org.w3c.files.File.readAsBytes(): ByteArray =
-    suspendCancellableCoroutine { continuation ->
-        val file = this@readAsBytes
-        val reader = org.w3c.files.FileReader()
-        reader.onload = {
-            val arrayBuffer = reader.result
-            if (arrayBuffer != null) {
-                val uint8Array: dynamic = js("new Uint8Array(arrayBuffer)")
-                val length = uint8Array.length as Int
-                val bytes = ByteArray(length)
-                for (i in 0 until length) {
-                    bytes[i] = (uint8Array[i] as Number).toInt().toByte()
-                }
-                continuation.resume(bytes)
-            } else {
-                continuation.resumeWithException(Exception("Failed to read file: arrayBuffer is null"))
-            }
-        }
-        reader.onerror = {
-            continuation.resumeWithException(Exception("Failed to read file"))
-        }
-        reader.readAsArrayBuffer(file)
+private fun processedFileName(originalName: String): String {
+    val nameWithoutExt = originalName.substringBeforeLast(".", originalName)
+    return if (nameWithoutExt.isNotBlank()) {
+        "$nameWithoutExt.jpg"
+    } else {
+        "photo.jpg"
     }
-
-private suspend fun org.w3c.files.File.compressImage(
-    maxWidth: Int = 1920,
-    maxHeight: Int = 1920,
-    quality: Double = 0.8,
-): ByteArray =
-    suspendCancellableCoroutine { continuation ->
-        val file = this@compressImage
-        val reader = org.w3c.files.FileReader()
-
-        reader.onload = {
-            val img = kotlinx.browser.document.createElement("img") as org.w3c.dom.HTMLImageElement
-            img.addEventListener("load", { _ ->
-                val canvas = kotlinx.browser.document.createElement("canvas") as org.w3c.dom.HTMLCanvasElement
-                val ctx = canvas.getContext("2d") as? org.w3c.dom.CanvasRenderingContext2D
-
-                if (ctx != null) {
-                    val originalWidth = img.naturalWidth
-                    val originalHeight = img.naturalHeight
-
-                    val newWidth: Int
-                    val newHeight: Int
-
-                    if (originalWidth > maxWidth || originalHeight > maxHeight) {
-                        val ratio = minOf(maxWidth.toDouble() / originalWidth, maxHeight.toDouble() / originalHeight)
-                        newWidth = (originalWidth * ratio).toInt()
-                        newHeight = (originalHeight * ratio).toInt()
-                    } else {
-                        newWidth = originalWidth
-                        newHeight = originalHeight
-                    }
-
-                    canvas.width = newWidth
-                    canvas.height = newHeight
-
-                    ctx.drawImage(img, 0.0, 0.0, newWidth.toDouble(), newHeight.toDouble())
-
-                    canvas.toBlob(
-                        { blob: org.w3c.files.Blob? ->
-                            if (blob != null) {
-                                val reader2 = org.w3c.files.FileReader()
-                                reader2.onload = {
-                                    val arrayBuffer = reader2.result
-                                    if (arrayBuffer != null) {
-                                        val uint8Array: dynamic = js("new Uint8Array(arrayBuffer)")
-                                        val length = uint8Array.length as Int
-                                        val bytes = ByteArray(length)
-                                        for (i in 0 until length) {
-                                            bytes[i] = (uint8Array[i] as Number).toInt().toByte()
-                                        }
-                                        continuation.resume(bytes)
-                                    } else {
-                                        continuation.resumeWithException(Exception("Failed to read compressed image"))
-                                    }
-                                }
-                                reader2.onerror = {
-                                    continuation.resumeWithException(Exception("Failed to read compressed image"))
-                                }
-                                reader2.readAsArrayBuffer(blob)
-                            } else {
-                                continuation.resumeWithException(Exception("Failed to compress image"))
-                            }
-                        },
-                        "image/jpeg",
-                        quality,
-                    )
-                } else {
-                    continuation.resumeWithException(Exception("Failed to get canvas context"))
-                }
-            })
-            img.addEventListener("error", { _ ->
-                continuation.resumeWithException(Exception("Failed to load image"))
-            })
-            img.src = reader.result as String
-        }
-        reader.onerror = {
-            continuation.resumeWithException(Exception("Failed to read file"))
-        }
-        reader.readAsDataURL(file)
-    }
+}
 
 @Composable
 fun CarPhotosPage() {
@@ -309,43 +212,16 @@ fun CarPhotosPage() {
 
                                                             val maxFileSize = 2 * 1024 * 1024
                                                             runCatching {
-                                                                val processedBytes: ByteArray
-                                                                val processedFileName: String
+                                                            val processedBytes =
+                                                                file.reencodeToJpeg(
+                                                                    maxWidth = if (fileSize > maxFileSize) 1920 else null,
+                                                                    maxHeight = if (fileSize > maxFileSize) 1920 else null,
+                                                                    quality = if (fileSize > maxFileSize) 0.75 else 0.9,
+                                                                )
+                                                            val processedFileName = processedFileName(file.name)
 
-                                                                if (fileSize > maxFileSize) {
-                                                                    println(
-                                                                        "⚠️ [CarPhotosPage] File ${file.name} is too large ($fileSize bytes), compressing...",
-                                                                    )
-                                                                    processedBytes =
-                                                                        file.compressImage(
-                                                                            maxWidth = 1920,
-                                                                            maxHeight = 1920,
-                                                                            quality = 0.75,
-                                                                        )
-                                                                    val fileName = file.name as String
-                                                                    val lastDotIndex = fileName.lastIndexOf(".")
-                                                                    val fileNameWithoutExt =
-                                                                        if (lastDotIndex >=
-                                                                            0
-                                                                        ) {
-                                                                            fileName.substring(0, lastDotIndex)
-                                                                        } else {
-                                                                            fileName
-                                                                        }
-                                                                    processedFileName = "$fileNameWithoutExt.jpg"
-                                                                    println(
-                                                                        "📸 [CarPhotosPage] File compressed successfully: ${file.name}, original size: $fileSize, compressed size: ${processedBytes.size}",
-                                                                    )
-                                                                } else {
-                                                                    processedBytes = file.readAsBytes()
-                                                                    processedFileName = file.name
-                                                                    println(
-                                                                        "📸 [CarPhotosPage] File processed successfully: ${file.name}, size: ${processedBytes.size}",
-                                                                    )
-                                                                }
-
-                                                                fileBytesList.add(processedBytes)
-                                                                fileNamesList.add(processedFileName)
+                                                            fileBytesList.add(processedBytes)
+                                                            fileNamesList.add(processedFileName)
                                                                 contentTypesList.add("image/jpeg")
                                                             }.onFailure { e ->
                                                                 println(
