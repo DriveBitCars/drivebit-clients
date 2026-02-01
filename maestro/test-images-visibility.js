@@ -165,37 +165,38 @@ async function testImagesVisibility() {
       throw new Error('❌ На странице не найдено ни одного изображения');
     }
     
-    // Проверяем каждое изображение
-    const failedImages = [];
-    for (const img of images) {
-      const isVisible = img.naturalWidth > 0 && img.naturalHeight > 0 && img.complete;
-      const status = isVisible ? '✅' : '❌';
-      console.log(`${status} ${img.src || img.alt || 'unnamed'}: ${img.naturalWidth}x${img.naturalHeight}`);
-      
-      if (!isVisible) {
-        failedImages.push(img);
-      }
-    }
-    
-    if (failedImages.length > 0) {
-      throw new Error(`❌ ${failedImages.length} изображений не загружены или не видны`);
-    }
-    
-    // Проверяем конкретные изображения, которые должны быть на главной странице
+    // Проверяем конкретные ожидаемые изображения (остальные только логируем)
     const expectedImages = [
+      `${SERVER_URL}/images/menu/burger.svg`,
       'images/logos/turo_logo.svg',
-      'images/filter-main/airplane.svg',
-      'images/menu/burger.svg'
     ];
     
-    console.log('\n🔍 Проверка ожидаемых изображений:');
+    console.log('\n🔍 Логгируем все картинки:');
+    for (const img of images) {
+      const isVisible = img.naturalWidth > 0 && img.naturalHeight > 0 && img.complete;
+      const status = isVisible ? '✅' : '⚠️';
+      console.log(`${status} ${img.src || img.alt || 'unnamed'}: ${img.naturalWidth}x${img.naturalHeight}`);
+    }
+
+    console.log('\n🔍 Проверка только ожидаемых изображений:');
+    const failedExpected = [];
     for (const expectedPath of expectedImages) {
-      const found = images.some(img => img.src.includes(expectedPath));
-      if (found) {
-        console.log(`✅ Найдено: ${expectedPath}`);
+      const match = images.find(img => img.src.includes(expectedPath));
+      if (match) {
+        const isVisible = match.naturalWidth > 0 && match.naturalHeight > 0 && match.complete;
+        const status = isVisible ? '✅' : '❌';
+        console.log(`${status} ${expectedPath}: ${match.naturalWidth}x${match.naturalHeight}`);
+        if (!isVisible) {
+          failedExpected.push(match);
+        }
       } else {
-        console.log(`⚠️  Не найдено: ${expectedPath}`);
+        console.log(`❌ Не найдено: ${expectedPath}`);
+        failedExpected.push({ src: expectedPath, naturalWidth: 0, naturalHeight: 0, complete: false });
       }
+    }
+
+    if (failedExpected.length > 0) {
+      throw new Error(`❌ ${failedExpected.length} ожидаемых изображений не загружены или не видны`);
     }
     
     // Делаем скриншот

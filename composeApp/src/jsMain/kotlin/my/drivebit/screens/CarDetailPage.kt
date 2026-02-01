@@ -5,10 +5,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.AppWithHeader
-import my.drivebit.components.CarDescription
 import my.drivebit.components.CarPhotosSection
-import my.drivebit.components.CarTitleSection
 import my.drivebit.components.CarSpecsRow
+import my.drivebit.components.CarTitleSection
 import my.drivebit.components.Column
 import my.drivebit.components.DailyRateLabel
 import my.drivebit.components.Loader
@@ -19,7 +18,6 @@ import my.drivebit.viewmodels.CarDetailState
 import my.drivebit.viewmodels.CarDetailViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.currentKoinScope
 import org.koin.core.parameter.parametersOf
 
@@ -96,8 +94,6 @@ private fun CarDetailContent(car: my.drivebit.network.services.CarDetailResponse
             CarSpecsRow(car)
 
             SectionDivider()
-
-            CarDescription(car.general?.description)
         }
     }
 }
