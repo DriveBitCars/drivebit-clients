@@ -37,6 +37,8 @@ private class MockPhoto : Photo {
         return AvatarResponse(url = "https://example.com/avatar.jpg")
     }
 
+    override suspend fun getAvatarByUserId(userId: String): AvatarResponse? = getAvatar()
+
     override suspend fun uploadAvatar(
         fileBytes: ByteArray,
         fileName: String,

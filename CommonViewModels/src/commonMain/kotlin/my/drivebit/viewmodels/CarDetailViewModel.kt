@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarDetailResponse
+import my.drivebit.network.services.Photo
 import kotlin.runCatching
 
 sealed interface CarDetailState {
@@ -17,6 +18,7 @@ sealed interface CarDetailState {
 
     data class Success(
         val car: CarDetailResponse,
+        val owner: CarOwnerUi? = null,
     ) : CarDetailState
 
     data class Error(
@@ -24,12 +26,20 @@ sealed interface CarDetailState {
     ) : CarDetailState
 }
 
+data class CarOwnerUi(
+    val id: String,
+    val name: String,
+    val avatarUrl: String?,
+    val memberSince: String?,
+)
+
 interface CarDetailViewModel {
     val state: StateFlow<CarDetailState>
 }
 
 class CarDetailViewModelImpl(
     private val carService: Car,
+    private val photoService: Photo,
     private val carId: String,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : CarDetailViewModel {
@@ -47,6 +57,10 @@ class CarDetailViewModelImpl(
                 carService.getCar(carId)
             }.onSuccess { car ->
                 _state.update { CarDetailState.Success(car) }
+                loadOwner(
+                    ownerId = car.general.owner,
+                    ownerName = car.general.ownerName,
+                )
             }.onFailure { e ->
                 val errorMessage =
                     ErrorHandler.extractErrorMessage(
@@ -58,4 +72,44 @@ class CarDetailViewModelImpl(
             }
         }
     }
+
+    private fun loadOwner(
+        ownerId: String?,
+        ownerName: String?,
+    ) {
+        if (ownerId.isNullOrBlank()) {
+            return
+        }
+
+        viewModelScope.launch {
+            val owner =
+                runCatching {
+                    val avatarFromService = photoService.getAvatarByUserId(ownerId)?.url
+
+                    CarOwnerUi(
+                        id = ownerId,
+                        name = buildOwnerName(ownerName),
+                        avatarUrl = avatarFromService,
+                        memberSince = null,
+                    )
+                }.getOrElse {
+                    CarOwnerUi(
+                        id = ownerId,
+                        name = buildOwnerName(ownerName),
+                        avatarUrl = null,
+                        memberSince = null,
+                    )
+                }
+
+            _state.update { current ->
+                if (current is CarDetailState.Success) {
+                    current.copy(owner = owner)
+                } else {
+                    current
+                }
+            }
+        }
+    }
+
+    private fun buildOwnerName(ownerName: String?): String = ownerName?.takeIf { it.isNotBlank() } ?: "Владелец"
 }

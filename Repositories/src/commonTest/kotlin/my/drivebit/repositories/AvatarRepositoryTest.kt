@@ -24,6 +24,13 @@ private class FakePhoto : Photo {
         return AvatarResponse(url = avatarUrl)
     }
 
+    override suspend fun getAvatarByUserId(userId: String): AvatarResponse? {
+        if (shouldThrow) {
+            throw Exception("Network error")
+        }
+        return AvatarResponse(url = avatarUrl)
+    }
+
     override suspend fun uploadAvatar(
         fileBytes: ByteArray,
         fileName: String,

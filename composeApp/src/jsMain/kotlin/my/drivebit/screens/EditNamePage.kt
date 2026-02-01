@@ -22,6 +22,7 @@ import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.EditProfileState
 import my.drivebit.viewmodels.EditProfileViewModel
 import my.drivebit.viewmodels.EditProfileViewModelImpl
+import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
@@ -30,14 +31,16 @@ import org.koin.compose.koinInject
 @Composable
 fun EditNamePage(currentPath: String = "/edit-name") {
     val userService: User = koinInject()
+    val profileViewModel: ProfileViewModel = koinInject()
     val initialFirstName = getUrlParameter("firstName")
     val initialLastName = getUrlParameter("lastName")
     val initialMiddleName = getUrlParameter("middleName")
 
     val viewModel: EditProfileViewModel =
-        remember(initialFirstName, initialLastName, initialMiddleName, userService) {
+        remember(initialFirstName, initialLastName, initialMiddleName, userService, profileViewModel) {
             EditProfileViewModelImpl(
                 userService = userService,
+                profileViewModel = profileViewModel,
                 initialFirstName = initialFirstName,
                 initialLastName = initialLastName,
                 initialMiddleName = initialMiddleName,

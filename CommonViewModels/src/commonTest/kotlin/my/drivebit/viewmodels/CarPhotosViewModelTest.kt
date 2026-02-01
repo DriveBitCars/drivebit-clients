@@ -78,6 +78,8 @@ class MockPhotoServiceForCarPhotos : Photo {
         contentType: String,
     ): my.drivebit.network.services.AvatarResponse = throw NotImplementedError()
 
+    override suspend fun getAvatarByUserId(userId: String): my.drivebit.network.services.AvatarResponse? = null
+
     override suspend fun deleteCarPhoto(photoId: Int) {
         photos = photos.filter { it.id != photoId }
     }

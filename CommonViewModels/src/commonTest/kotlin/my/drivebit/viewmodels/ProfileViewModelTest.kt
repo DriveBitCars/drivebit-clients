@@ -44,6 +44,8 @@ class MockProfileUserService : User {
         return userResponse
     }
 
+    override suspend fun getUserById(userId: String): UserGetResponse = userGet()
+
     override suspend fun updateUser(
         firstName: String?,
         lastName: String?,

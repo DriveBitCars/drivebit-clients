@@ -212,16 +212,37 @@ fun CarPhotosPage() {
 
                                                             val maxFileSize = 2 * 1024 * 1024
                                                             runCatching {
-                                                            val processedBytes =
-                                                                file.reencodeToJpeg(
-                                                                    maxWidth = if (fileSize > maxFileSize) 1920 else null,
-                                                                    maxHeight = if (fileSize > maxFileSize) 1920 else null,
-                                                                    quality = if (fileSize > maxFileSize) 0.75 else 0.9,
-                                                                )
-                                                            val processedFileName = processedFileName(file.name)
+                                                                val processedBytes =
+                                                                    file.reencodeToJpeg(
+                                                                        maxWidth =
+                                                                            if (fileSize >
+                                                                                maxFileSize
+                                                                            ) {
+                                                                                1920
+                                                                            } else {
+                                                                                null
+                                                                            },
+                                                                        maxHeight =
+                                                                            if (fileSize >
+                                                                                maxFileSize
+                                                                            ) {
+                                                                                1920
+                                                                            } else {
+                                                                                null
+                                                                            },
+                                                                        quality =
+                                                                            if (fileSize >
+                                                                                maxFileSize
+                                                                            ) {
+                                                                                0.75
+                                                                            } else {
+                                                                                0.9
+                                                                            },
+                                                                    )
+                                                                val processedFileName = processedFileName(file.name)
 
-                                                            fileBytesList.add(processedBytes)
-                                                            fileNamesList.add(processedFileName)
+                                                                fileBytesList.add(processedBytes)
+                                                                fileNamesList.add(processedFileName)
                                                                 contentTypesList.add("image/jpeg")
                                                             }.onFailure { e ->
                                                                 println(

@@ -17,6 +17,8 @@ import my.drivebit.utils.extractPathFromApiUrl
 interface Photo {
     suspend fun getAvatar(): AvatarResponse
 
+    suspend fun getAvatarByUserId(userId: String): AvatarResponse?
+
     suspend fun uploadAvatar(
         fileBytes: ByteArray,
         fileName: String,
@@ -58,6 +60,16 @@ class PhotoImpl(
         val response = httpClient.get(url)
         val avatarResponse: AvatarResponse = response.parseResponse()
         return avatarResponse.copy(url = ensureHttpsUrl(avatarResponse.url))
+    }
+
+    override suspend fun getAvatarByUserId(userId: String): AvatarResponse? {
+        if (userId.isBlank()) return null
+        val url = "${DEFAULT_BASE_URL}Photo/avatar/$userId"
+        return runCatching {
+            val response = httpClient.get(url)
+            val avatarResponse: AvatarResponse = response.parseResponse()
+            avatarResponse.copy(url = ensureHttpsUrl(avatarResponse.url))
+        }.getOrNull()
     }
 
     override suspend fun uploadAvatar(
