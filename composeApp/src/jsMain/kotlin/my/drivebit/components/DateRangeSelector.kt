@@ -1,0 +1,178 @@
+package my.drivebit.components
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import my.drivebit.design.CSSColors
+import my.drivebit.design.CSSColors.Blue
+import my.drivebit.design.CSSColors.BlueString
+import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.resources.ImagePaths
+import my.drivebit.viewmodels.DateFieldViewModel
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Div
+
+@Composable
+fun DateRangeSelector(
+    startDateViewModel: DateFieldViewModel,
+    endDateViewModel: DateFieldViewModel,
+    onSearchClick: () -> Unit = {},
+) {
+    val startState by startDateViewModel.state.collectAsState()
+    val endState by endDateViewModel.state.collectAsState()
+    val startDate = startState.date
+    val endDate = endState.date
+
+    LaunchedEffect(startDate) {
+        val currentStartDate = startDate
+        val currentEndDate = endDate
+        if (currentStartDate != null && currentEndDate != null) {
+            if (currentStartDate > currentEndDate) {
+                endDateViewModel.setDate(null)
+            }
+        }
+    }
+
+    LaunchedEffect(endDate) {
+        val currentStartDate = startDate
+        val currentEndDate = endDate
+        if (currentStartDate != null && currentEndDate != null) {
+            if (currentEndDate < currentStartDate) {
+                startDateViewModel.setDate(null)
+            }
+        }
+    }
+
+    Div({
+        style {
+            width(100.percent)
+            display(DisplayStyle.Flex)
+            alignItems(AlignItems.Center)
+            gap(12.px)
+            backgroundColor(CSSColors.White)
+            borderRadius(12.px)
+            padding(4.px, 4.px)
+            border(1.px, LineStyle.Solid, CSSColors.Gray300)
+            property("transition", "border-color 0.2s ease")
+        }
+        onMouseEnter {
+            (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                "border-color",
+                CSSColors.BlueString,
+            )
+        }
+        onMouseLeave {
+            (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                "border-color",
+                CSSColors.Gray300String,
+            )
+        }
+    }) {
+        Div({
+            style {
+                flex(1)
+                marginLeft(12.px)
+                cursor("pointer")
+            }
+            onClick {
+                startDateViewModel.openCalendar()
+            }
+        }) {
+            DateField(
+                label = "c",
+                viewModel = startDateViewModel,
+            )
+        }
+
+        Div({
+            style {
+                width(1.px)
+                height(40.px)
+                backgroundColor(CSSColors.Gray300)
+                marginLeft(12.px)
+                marginRight(12.px)
+            }
+        })
+
+        Div({
+            style {
+                flex(1)
+                cursor("pointer")
+            }
+            onClick {
+                endDateViewModel.openCalendar()
+            }
+        }) {
+            DateField(
+                label = "по",
+                viewModel = endDateViewModel,
+                minDate = startDate,
+            )
+        }
+
+        Div({
+            style {
+                flexShrink(0)
+                marginLeft(12.px)
+                width(48.px)
+            }
+        }) {
+            val navigationController = LocalNavigationController.current
+            ActionButton(
+                image = ImagePaths.SEARCH_SVG,
+                enabledColor = Blue,
+                text = "",
+                onClick = {
+                    val queryParams =
+                        buildString {
+                            val currentStartDate = startState.date
+                            val currentEndDate = endState.date
+                            if (currentStartDate != null) {
+                                append("startDate=$currentStartDate")
+                            }
+                            if (currentEndDate != null) {
+                                if (length > 0) append("&")
+                                append("endDate=$currentEndDate")
+                            }
+                        }
+                    val url =
+                        if (queryParams.isNotEmpty()) {
+                            "/search?$queryParams"
+                        } else {
+                            "/search"
+                        }
+                    navigationController?.navigateTo(url)
+                    onSearchClick()
+                },
+            )
+        }
+    }
+
+    if (startState.isCalendarOpen) {
+        DateFieldDialog(
+            label = "Дата начала",
+            viewModel = startDateViewModel,
+            onDateChanged = { date ->
+                val currentEndDate = endState.date
+                if (date != null && currentEndDate != null && date > currentEndDate) {
+                    endDateViewModel.setDate(null)
+                }
+            },
+        )
+    }
+
+    if (endState.isCalendarOpen) {
+        DateFieldDialog(
+            label = "Дата окончания",
+            viewModel = endDateViewModel,
+            minDate = startDate,
+            onDateChanged = { date ->
+                val currentStartDate = startState.date
+                if (date != null && currentStartDate != null && date < currentStartDate) {
+                    startDateViewModel.setDate(null)
+                }
+            },
+        )
+    }
+}

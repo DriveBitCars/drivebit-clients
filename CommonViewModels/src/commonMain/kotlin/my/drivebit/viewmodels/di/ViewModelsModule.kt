@@ -17,6 +17,7 @@ import my.drivebit.viewmodels.ButterViewModelImpl
 import my.drivebit.viewmodels.CarBrandViewModel
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarDetailViewModelImpl
+import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.CarEditMviViewModel
 import my.drivebit.viewmodels.CarEditMviViewModelImpl
 import my.drivebit.viewmodels.CarEditViewModel
@@ -331,5 +332,13 @@ val commonViewModelsModule: Module =
                 photoService = get(),
                 carId = carId,
             )
+        }
+
+        single<DateFieldViewModel>(named("startDate")) {
+            DateFieldViewModel()
+        }
+
+        single<DateFieldViewModel>(named("endDate")) {
+            DateFieldViewModel()
         }
     }
