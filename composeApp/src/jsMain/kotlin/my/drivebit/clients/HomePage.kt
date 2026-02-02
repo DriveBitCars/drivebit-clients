@@ -4,17 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarItemSmall
 import my.drivebit.components.Column
+import my.drivebit.components.DateRangeSelector
 import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.Row
-import my.drivebit.components.TextInputField
 import my.drivebit.components.filterButton
 import my.drivebit.design.CSSColors
 import my.drivebit.maps.MapView
@@ -23,6 +20,7 @@ import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.maps.models.MapMarker
 import my.drivebit.network.services.CarItem
 import my.drivebit.viewmodels.CarSearchViewModel
+import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MapViewModel
@@ -50,6 +48,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
 
 @Composable
 fun HomePage() {
@@ -65,7 +64,8 @@ fun HomePage() {
     val filters = state.value.filters
     val selected = state.value.selected
 
-    var searchQuery by remember { mutableStateOf("") }
+    val startDateViewModel: DateFieldViewModel = koinInject(named("startDate"))
+    val endDateViewModel: DateFieldViewModel = koinInject(named("endDate"))
 
     AppWithHeader {
         val selectedFilter = filters.find { it.title == selected }
@@ -73,22 +73,10 @@ fun HomePage() {
             FilterBackgroundImage(
                 backgroundIconUrl = filter.backgroundIcon,
                 searchContent = {
-                    Div({
-                        style {
-                            width(100.percent)
-                        }
-                    }) {
-                        TextInputField(
-                            label = "",
-                            value = searchQuery,
-                            onValueChange = { newValue ->
-                                searchQuery = newValue
-                            },
-                            onFocus = {
-                                window.location.href = "/search"
-                            },
-                        )
-                    }
+                    DateRangeSelector(
+                        startDateViewModel = startDateViewModel,
+                        endDateViewModel = endDateViewModel,
+                    )
                 },
             )
         }
@@ -107,7 +95,6 @@ fun HomePage() {
 
         when (selected) {
             "Поблизости" -> {
-
                 val markers =
                     cars.map { car ->
                         val lat = car.general.address.geoLat
@@ -141,6 +128,7 @@ fun HomePage() {
                 CarsListView(cars = cars)
             }
         }
+
     }
 }
 

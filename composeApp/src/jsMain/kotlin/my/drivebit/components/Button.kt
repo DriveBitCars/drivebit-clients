@@ -102,6 +102,9 @@ fun ActionButton(
                         width(20.px)
                         height(20.px)
                         property("object-fit", "contain")
+                        if (text.isEmpty()) {
+                            property("filter", "brightness(0) invert(1)")
+                        }
                     }
                 },
             )
