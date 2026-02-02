@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.AppWithHeader
+import my.drivebit.components.CarLocationMap
 import my.drivebit.components.CarOwnerSection
 import my.drivebit.components.CarPhotosSection
 import my.drivebit.components.CarSpecsRow
@@ -105,7 +106,6 @@ private fun CarDetailContent(
             CarSpecsRow(car)
 
             owner?.let { ownerInfo ->
-                SectionDivider()
                 CarOwnerSection(
                     name = ownerInfo.name,
                     avatarUrl = ownerInfo.avatarUrl,
@@ -114,6 +114,13 @@ private fun CarDetailContent(
                     tripsCount = null,
                 )
             }
+        }
+
+        val carLat = car.general.address.geoLat
+        val carLon = car.general.address.geoLon
+
+        if (carLat != 0.0 && carLon != 0.0) {
+            CarLocationMap(car = car)
         }
     }
 }

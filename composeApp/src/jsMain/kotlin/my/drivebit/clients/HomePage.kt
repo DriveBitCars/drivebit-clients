@@ -107,7 +107,6 @@ fun HomePage() {
 
         when (selected) {
             "Поблизости" -> {
-                console.log("Nearby: cars=$cars")
 
                 val markers =
                     cars.map { car ->
@@ -123,15 +122,6 @@ fun HomePage() {
                             title = listOfNotNull(car.general.brandName).joinToString(" "),
                         )
                     }
-
-                if (markers.isNotEmpty()) {
-                    val first = markers.first()
-                    console.log(
-                        "Markers=${markers.size}, first=${first.id} lat=${first.location.latitude} lon=${first.location.longitude}",
-                    )
-                } else {
-                    console.log("No markers to show")
-                }
 
                 LaunchedEffect(cars) {
                     mapViewModel.updateCameraPositionFromCars(cars)
