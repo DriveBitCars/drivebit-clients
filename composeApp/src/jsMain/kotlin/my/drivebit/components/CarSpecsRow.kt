@@ -7,6 +7,7 @@ import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.px
 
 @Composable
+@Suppress("FunctionName")
 fun CarSpecsRow(car: CarDetailResponse) {
     Row(
         gap = 12.px,
@@ -40,7 +41,7 @@ fun CarSpecsRow(car: CarDetailResponse) {
         val driveType = car.resolvedDriveTypeTranslate()
         if (driveType.isNotEmpty()) {
             CarSpecChip(
-                iconPath = "images/manual-gear.svg",
+                iconPath = "images/back-wheel-drive.svg",
                 text = driveType,
             )
         }
@@ -48,7 +49,7 @@ fun CarSpecsRow(car: CarDetailResponse) {
         val transmissionType = car.chassis?.transmissionTranslate
         if (!transmissionType.isNullOrEmpty()) {
             CarSpecChip(
-                iconPath = "images/back-wheel-drive.svg",
+                iconPath = "images/manual-gear.svg",
                 text = transmissionType,
             )
         }
