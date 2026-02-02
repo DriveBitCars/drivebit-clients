@@ -13,7 +13,6 @@ import my.drivebit.components.CarTitleSection
 import my.drivebit.components.Column
 import my.drivebit.components.DailyRateLabel
 import my.drivebit.components.Loader
-import my.drivebit.components.SectionDivider
 import my.drivebit.components.TextError
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.CarDetailState
@@ -28,6 +27,7 @@ import org.koin.compose.currentKoinScope
 import org.koin.core.parameter.parametersOf
 
 @Composable
+@Suppress("FunctionName")
 fun CarDetailPage() {
     val carId = getUrlParameter("id")
 
@@ -84,6 +84,7 @@ fun CarDetailPage() {
 }
 
 @Composable
+@Suppress("FunctionName")
 private fun CarDetailContent(
     car: my.drivebit.network.services.CarDetailResponse,
     owner: CarOwnerUi?,

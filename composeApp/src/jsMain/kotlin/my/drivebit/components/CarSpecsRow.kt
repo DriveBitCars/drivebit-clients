@@ -7,6 +7,7 @@ import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.px
 
 @Composable
+@Suppress("FunctionName")
 fun CarSpecsRow(car: CarDetailResponse) {
     Row(
         gap = 12.px,
