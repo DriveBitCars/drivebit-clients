@@ -121,12 +121,8 @@ class FiltersViewModel(
 
     fun onSelect(title: String) {
         _state.update { it.copy(selected = title) }
-        saveSelectedFilter(title)
+        currentTaskRepository.updateCurrentTask(title)
     }
 
     private fun getSelectedFilter(): String = "Все"
-
-    private fun saveSelectedFilter(filter: String) {
-        currentTaskRepository.updateCurrentTask(filter)
-    }
 }

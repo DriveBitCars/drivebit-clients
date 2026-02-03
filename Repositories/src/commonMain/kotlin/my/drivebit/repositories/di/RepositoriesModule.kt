@@ -237,6 +237,8 @@ val repositoriesModule: Module =
             CarSearchRepositoryImpl(
                 carService = get(),
                 myCityRepository = get(),
+                currentTaskRepository = get(),
+                dictionary = get(),
             )
         }
 
