@@ -6,7 +6,7 @@ import org.jetbrains.compose.web.dom.Div
 
 @Composable
 fun FilterButtonsRow(
-    gap: CSSSizeValue<out CSSUnit.px> = 12.px,
+    gap: CSSSizeValue<out CSSUnit.px> = 6.px,
     marginBottom: CSSSizeValue<out CSSUnit.px> = 20.px,
     content: @Composable () -> Unit,
 ) {

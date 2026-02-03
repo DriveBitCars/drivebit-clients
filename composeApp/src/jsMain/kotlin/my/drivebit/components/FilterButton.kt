@@ -41,7 +41,7 @@ fun filterButton(
         Span({
             style {
                 applyTypography(CSSTypography.Styles.button)
-                marginLeft(8.px)
+                marginLeft(4.px)
             }
         }) {
             Text(filter.title)
