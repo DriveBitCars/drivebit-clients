@@ -1,9 +1,11 @@
 package my.drivebit.viewmodels
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import my.drivebit.network.services.Dictionary
 import my.drivebit.network.services.FilterSuggestion
 import my.drivebit.shared.storage.Storage
@@ -80,12 +82,14 @@ class FiltersViewModelTest {
         runTest(StandardTestDispatcher()) {
             val viewModel = FiltersViewModel(mockStorage, mockDictionary)
             advanceUntilIdle()
-            val initialState = viewModel.state.value
 
-            assertEquals("Все", initialState.selected)
-            assertEquals(2, initialState.filters.size)
-            assertEquals("Все", initialState.filters[0].title)
-            assertEquals("Поблизости", initialState.filters[1].title)
+            withTimeout(5000) {
+                val initialState = viewModel.state.first { it.filters.size >= 2 }
+                assertEquals("Все", initialState.selected)
+                assertEquals(2, initialState.filters.size)
+                assertEquals("Все", initialState.filters[0].title)
+                assertEquals("Поблизости", initialState.filters[1].title)
+            }
         }
 
     @Test
@@ -93,6 +97,10 @@ class FiltersViewModelTest {
         runTest(StandardTestDispatcher()) {
             val viewModel = FiltersViewModel(mockStorage, mockDictionary)
             advanceUntilIdle()
+
+            withTimeout(5000) {
+                viewModel.state.first { it.filters.size >= 2 }
+            }
 
             viewModel.onSelect("Все")
 
@@ -105,6 +113,10 @@ class FiltersViewModelTest {
             val viewModel = FiltersViewModel(mockStorage, mockDictionary)
             advanceUntilIdle()
 
+            withTimeout(5000) {
+                viewModel.state.first { it.filters.size >= 2 }
+            }
+
             viewModel.onSelect("Поблизости")
 
             assertEquals("Поблизости", viewModel.state.value.selected)
@@ -115,6 +127,10 @@ class FiltersViewModelTest {
         runTest(StandardTestDispatcher()) {
             val viewModel = FiltersViewModel(mockStorage, mockDictionary)
             advanceUntilIdle()
+
+            withTimeout(5000) {
+                viewModel.state.first { it.filters.size >= 2 }
+            }
 
             viewModel.onSelect("Все")
             assertEquals("Все", viewModel.state.value.selected)
@@ -131,7 +147,11 @@ class FiltersViewModelTest {
         runTest(StandardTestDispatcher()) {
             val viewModel = FiltersViewModel(mockStorage, mockDictionary)
             advanceUntilIdle()
-            val initialFilters = viewModel.state.value.filters
+
+            val initialFilters =
+                withTimeout(5000) {
+                    viewModel.state.first { it.filters.size >= 2 }.filters
+                }
 
             viewModel.onSelect("Поблизости")
 
