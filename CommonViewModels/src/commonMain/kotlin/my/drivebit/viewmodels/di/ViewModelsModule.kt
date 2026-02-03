@@ -93,7 +93,7 @@ val commonViewModelsModule: Module =
             FiltersViewModel(
                 storage = get(),
                 dictionary = get(),
-                currentTaskRepository = get(),
+                currentFiltersRepository = get(),
             )
         }
 

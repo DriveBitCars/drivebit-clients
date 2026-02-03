@@ -25,8 +25,8 @@ import my.drivebit.repositories.CreateCarRepository
 import my.drivebit.repositories.CreateCarRepositoryImpl
 import my.drivebit.repositories.CreateOtpRepository
 import my.drivebit.repositories.CreateOtpRepositoryImpl
-import my.drivebit.repositories.CurrentTaskRepository
-import my.drivebit.repositories.CurrentTaskRepositoryImpl
+import my.drivebit.repositories.CurrentFiltersRepository
+import my.drivebit.repositories.CurrentFiltersRepositoryImpl
 import my.drivebit.repositories.HasPassportRepo
 import my.drivebit.repositories.HasPassportRepoImpl
 import my.drivebit.repositories.LicensePlateRepository
@@ -203,8 +203,8 @@ val repositoriesModule: Module =
             )
         }
 
-        single<CurrentTaskRepository> {
-            CurrentTaskRepositoryImpl(
+        single<CurrentFiltersRepository> {
+            CurrentFiltersRepositoryImpl(
                 settings = get(),
             )
         }
@@ -237,7 +237,7 @@ val repositoriesModule: Module =
             CarSearchRepositoryImpl(
                 carService = get(),
                 myCityRepository = get(),
-                currentTaskRepository = get(),
+                currentFiltersRepository = get(),
                 dictionary = get(),
             )
         }

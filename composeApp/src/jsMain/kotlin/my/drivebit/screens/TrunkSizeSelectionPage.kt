@@ -63,7 +63,7 @@ fun TrunkSizeSelectionPage(onTrunkSizeSelected: () -> Unit = {}) {
                 },
             ) {
                 TextInputField(
-                    label = "Размер бака",
+                    label = "Размер багажника",
                     value = inputValue,
                     onValueChange = { newValue ->
                         inputValue = newValue

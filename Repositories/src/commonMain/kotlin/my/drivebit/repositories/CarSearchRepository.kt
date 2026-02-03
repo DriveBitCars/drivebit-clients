@@ -9,6 +9,13 @@ import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarSearchResponse
 import my.drivebit.network.services.Dictionary
 
+private data class Quadruple<A, B, C, D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D,
+)
+
 interface CarSearchRepository {
     val searchCarsByUserCity: Flow<CarSearchResponse>
 }
@@ -16,17 +23,23 @@ interface CarSearchRepository {
 internal class CarSearchRepositoryImpl(
     private val carService: Car,
     private val myCityRepository: MyCityRepository,
-    private val currentTaskRepository: CurrentTaskRepository,
+    private val currentFiltersRepository: CurrentFiltersRepository,
     private val dictionary: Dictionary,
 ) : CarSearchRepository {
     @OptIn(ExperimentalCoroutinesApi::class)
     override val searchCarsByUserCity: Flow<CarSearchResponse> =
         combine(
             myCityRepository.getSelectedCity,
-            currentTaskRepository.currentTaskShortName,
-        ) { selectedCity, currentTaskShortName ->
-            selectedCity to currentTaskShortName
-        }.flatMapLatest { (selectedCity, currentTaskShortName) ->
+            currentFiltersRepository.currentTaskShortName,
+            currentFiltersRepository.startState,
+            currentFiltersRepository.endState,
+        ) { selectedCity, currentTaskShortName, startDate, endDate ->
+            Quadruple(selectedCity, currentTaskShortName, startDate, endDate)
+        }.flatMapLatest { quadruple ->
+            val selectedCity = quadruple.first
+            val currentTaskShortName = quadruple.second
+            val startDate = quadruple.third
+            val endDate = quadruple.fourth
             flow {
                 val filter =
                     currentTaskShortName?.let { shortName ->
@@ -38,8 +51,8 @@ internal class CarSearchRepositoryImpl(
                 val result =
                     carService.search(
                         cityId = selectedCity.id.toString(),
-                        dateFrom = null,
-                        dateTo = null,
+                        dateFrom = startDate,
+                        dateTo = endDate,
                         availableMileagePerDayKmMin = filter?.availableMileagePerDayKmMin,
                         dailyPriceMin = filter?.dailyPriceMin,
                         dailyPriceMax = filter?.dailyPriceMax,

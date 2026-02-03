@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Dictionary
-import my.drivebit.repositories.CurrentTaskRepository
+import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.resources.ImagePaths.FILTER_MAIN_CAR_SVG
 import my.drivebit.resources.ImagePaths.FILTER_MAIN_POINT_SVG
 import my.drivebit.resources.ImagePaths.SEARCHBACKGROUND_CAR0_JPG
@@ -37,7 +37,7 @@ data class FilterScreenState(
 class FiltersViewModel(
     private val storage: Storage,
     private val dictionary: Dictionary,
-    private val currentTaskRepository: CurrentTaskRepository,
+    private val currentFiltersRepository: CurrentFiltersRepository,
 ) {
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -70,7 +70,7 @@ class FiltersViewModel(
 
     private fun loadSelectedFilter() {
         viewModelScope.launch {
-            val shortName = currentTaskRepository.currentTaskShortName.first()
+            val shortName = currentFiltersRepository.currentTaskShortName.first()
             val selectedFilter = shortName ?: "Все"
             _state.update { it.copy(selected = selectedFilter) }
         }
@@ -121,7 +121,7 @@ class FiltersViewModel(
 
     fun onSelect(title: String) {
         _state.update { it.copy(selected = title) }
-        currentTaskRepository.updateCurrentTask(title)
+        currentFiltersRepository.updateCurrentTask(title)
     }
 
     private fun getSelectedFilter(): String = "Все"

@@ -18,7 +18,7 @@ import my.drivebit.network.services.CarSearchResponse
 import my.drivebit.network.services.City
 import my.drivebit.network.services.Dictionary
 import my.drivebit.network.services.FilterSuggestion
-import my.drivebit.repositories.CurrentTaskRepository
+import my.drivebit.repositories.CurrentFiltersRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -111,13 +111,25 @@ class CarSearchRepositoryTest {
         }
     }
 
-    private class MockCurrentTaskRepository : CurrentTaskRepository {
+    private class MockCurrentFiltersRepository : CurrentFiltersRepository {
         private val currentTaskShortNameState = MutableStateFlow<String?>(null)
+        private val startStateFlow = MutableStateFlow<String?>(null)
+        private val endStateFlow = MutableStateFlow<String?>(null)
 
         override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
+        override val startState = startStateFlow.asStateFlow()
+        override val endState = endStateFlow.asStateFlow()
 
         override fun updateCurrentTask(shortName: String) {
             currentTaskShortNameState.value = shortName
+        }
+
+        override fun updateStartDate(date: String?) {
+            startStateFlow.value = date
+        }
+
+        override fun updateEndDate(date: String?) {
+            endStateFlow.value = date
         }
     }
 
@@ -174,13 +186,13 @@ class CarSearchRepositoryTest {
                     testCarItem(id = "2", brandName = "Audi", modelName = "A4"),
                 )
             mockCarService.searchResult = CarSearchResponse(expectedCars)
-            val mockCurrentTaskRepository = MockCurrentTaskRepository()
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
             val mockDictionary = MockDictionary()
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
-                    currentTaskRepository = mockCurrentTaskRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
                     dictionary = mockDictionary,
                 )
 
@@ -200,13 +212,13 @@ class CarSearchRepositoryTest {
             val mockCarService = MockCarService()
             val mockMyCityRepository = MockMyCityRepository()
             mockMyCityRepository.selectedCity = City(id = 158831, name = "Санкт-Петербург")
-            val mockCurrentTaskRepository = MockCurrentTaskRepository()
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
             val mockDictionary = MockDictionary()
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
-                    currentTaskRepository = mockCurrentTaskRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
                     dictionary = mockDictionary,
                 )
 
@@ -222,13 +234,13 @@ class CarSearchRepositoryTest {
             mockCarService.shouldThrowError = true
             mockCarService.errorMessage = "City not found"
             val mockMyCityRepository = MockMyCityRepository()
-            val mockCurrentTaskRepository = MockCurrentTaskRepository()
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
             val mockDictionary = MockDictionary()
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
-                    currentTaskRepository = mockCurrentTaskRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
                     dictionary = mockDictionary,
                 )
 
@@ -251,13 +263,13 @@ class CarSearchRepositoryTest {
             val moscowCars = listOf(testCarItem(id = "1", brandName = "BMW", modelName = "X5"))
             val spbCars = listOf(testCarItem(id = "2", brandName = "Audi", modelName = "A4"))
             mockCarService.searchResult = CarSearchResponse(moscowCars)
-            val mockCurrentTaskRepository = MockCurrentTaskRepository()
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
             val mockDictionary = MockDictionary()
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
-                    currentTaskRepository = mockCurrentTaskRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
                     dictionary = mockDictionary,
                 )
 
@@ -296,7 +308,7 @@ class CarSearchRepositoryTest {
             val mockCarService = MockCarService()
             val mockMyCityRepository = MockMyCityRepository()
             mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
-            val mockCurrentTaskRepository = MockCurrentTaskRepository()
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
             val mockDictionary = MockDictionary()
 
             val filter1 =
@@ -325,7 +337,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
-                    currentTaskRepository = mockCurrentTaskRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
                     dictionary = mockDictionary,
                 )
 
@@ -347,7 +359,7 @@ class CarSearchRepositoryTest {
                 assertEquals("BMW", results[0].cars[0].general.brandName)
 
                 mockCarService.searchResult = CarSearchResponse(secondCars)
-                mockCurrentTaskRepository.updateCurrentTask("TASK-1")
+                mockCurrentFiltersRepository.updateCurrentTask("TASK-1")
                 advanceUntilIdle()
 
                 job.cancel()
@@ -366,7 +378,7 @@ class CarSearchRepositoryTest {
             val mockCarService = MockCarService()
             val mockMyCityRepository = MockMyCityRepository()
             mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
-            val mockCurrentTaskRepository = MockCurrentTaskRepository()
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
             val mockDictionary = MockDictionary()
 
             val filter =
@@ -392,11 +404,11 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
-                    currentTaskRepository = mockCurrentTaskRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
                     dictionary = mockDictionary,
                 )
 
-            mockCurrentTaskRepository.updateCurrentTask("TASK-1")
+            mockCurrentFiltersRepository.updateCurrentTask("TASK-1")
             repository.searchCarsByUserCity.first()
 
             assertEquals("158830", mockCarService.searchCityId)
@@ -407,5 +419,180 @@ class CarSearchRepositoryTest {
             assertEquals(2024, mockCarService.searchYearMax)
             assertEquals(4, mockCarService.searchSeatsMin)
             assertEquals(7, mockCarService.searchSeatsMax)
+        }
+
+    @Test
+    fun `should pass start date and end date to carService search when dates are set`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+            val mockDictionary = MockDictionary()
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    dictionary = mockDictionary,
+                )
+
+            mockCurrentFiltersRepository.updateStartDate("2025-02-01")
+            mockCurrentFiltersRepository.updateEndDate("2025-02-15")
+            repository.searchCarsByUserCity.first()
+
+            assertEquals("158830", mockCarService.searchCityId)
+            assertEquals("2025-02-01", mockCarService.searchDateFrom)
+            assertEquals("2025-02-15", mockCarService.searchDateTo)
+        }
+
+    @Test
+    fun `should pass null dates to carService search when dates are not set`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+            val mockDictionary = MockDictionary()
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    dictionary = mockDictionary,
+                )
+
+            repository.searchCarsByUserCity.first()
+
+            assertEquals("158830", mockCarService.searchCityId)
+            assertEquals(null, mockCarService.searchDateFrom)
+            assertEquals(null, mockCarService.searchDateTo)
+        }
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `should automatically update search results when start date changes`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+            val mockDictionary = MockDictionary()
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    dictionary = mockDictionary,
+                )
+
+            val resultsFlow = repository.searchCarsByUserCity
+            val results = mutableListOf<CarSearchResponse>()
+
+            coroutineScope {
+                val job =
+                    launch {
+                        resultsFlow.take(2).toList(results)
+                    }
+
+                advanceUntilIdle()
+                assertEquals(1, results.size)
+                assertEquals(null, mockCarService.searchDateFrom)
+                assertEquals(null, mockCarService.searchDateTo)
+
+                mockCurrentFiltersRepository.updateStartDate("2025-02-01")
+                advanceUntilIdle()
+
+                job.cancel()
+            }
+
+            assertEquals(2, results.size)
+            assertEquals("2025-02-01", mockCarService.searchDateFrom)
+            assertEquals(null, mockCarService.searchDateTo)
+        }
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `should automatically update search results when end date changes`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+            val mockDictionary = MockDictionary()
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    dictionary = mockDictionary,
+                )
+
+            val resultsFlow = repository.searchCarsByUserCity
+            val results = mutableListOf<CarSearchResponse>()
+
+            coroutineScope {
+                val job =
+                    launch {
+                        resultsFlow.take(2).toList(results)
+                    }
+
+                advanceUntilIdle()
+                assertEquals(1, results.size)
+                assertEquals(null, mockCarService.searchDateFrom)
+                assertEquals(null, mockCarService.searchDateTo)
+
+                mockCurrentFiltersRepository.updateEndDate("2025-02-15")
+                advanceUntilIdle()
+
+                job.cancel()
+            }
+
+            assertEquals(2, results.size)
+            assertEquals(null, mockCarService.searchDateFrom)
+            assertEquals("2025-02-15", mockCarService.searchDateTo)
+        }
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `should automatically update search results when both dates change`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+            val mockDictionary = MockDictionary()
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    dictionary = mockDictionary,
+                )
+
+            val resultsFlow = repository.searchCarsByUserCity
+            val results = mutableListOf<CarSearchResponse>()
+
+            coroutineScope {
+                val job =
+                    launch {
+                        resultsFlow.take(2).toList(results)
+                    }
+
+                advanceUntilIdle()
+                assertEquals(1, results.size)
+                assertEquals(null, mockCarService.searchDateFrom)
+                assertEquals(null, mockCarService.searchDateTo)
+
+                mockCurrentFiltersRepository.updateStartDate("2025-02-01")
+                mockCurrentFiltersRepository.updateEndDate("2025-02-15")
+                advanceUntilIdle()
+
+                job.cancel()
+            }
+
+            assertEquals(2, results.size)
+            assertEquals("2025-02-01", mockCarService.searchDateFrom)
+            assertEquals("2025-02-15", mockCarService.searchDateTo)
         }
 }

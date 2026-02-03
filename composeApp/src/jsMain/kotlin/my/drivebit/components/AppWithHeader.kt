@@ -3,6 +3,7 @@ package my.drivebit.components
 import androidx.compose.runtime.Composable
 import my.drivebit.viewmodels.ButterViewModel
 import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Div
@@ -33,6 +34,7 @@ fun AppWithHeader(content: @Composable () -> Unit) {
 
                 Row(
                     alignItems = AlignItems.Center,
+                    gap = 12.px,
                 ) {
                     CityDisplay()
                     MenuUserButton(butterViewModel::onClick)

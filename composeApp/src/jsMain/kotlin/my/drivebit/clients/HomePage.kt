@@ -19,6 +19,7 @@ import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.maps.models.MapMarker
 import my.drivebit.network.services.CarItem
+import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.viewmodels.CarSearchViewModel
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.FiltersViewModel
@@ -56,6 +57,7 @@ fun HomePage() {
     val mapViewModel: MapViewModel = koinInject()
     val carSearchViewModel: CarSearchViewModel = koinInject()
     val mainContentViewModel: MainContentViewModel = koinInject()
+    val currentFiltersRepository: CurrentFiltersRepository = koinInject()
 
     val state = filterViewModel.state.collectAsState()
     val mapState = mapViewModel.state.collectAsState()
@@ -66,6 +68,17 @@ fun HomePage() {
 
     val startDateViewModel: DateFieldViewModel = koinInject(named("startDate"))
     val endDateViewModel: DateFieldViewModel = koinInject(named("endDate"))
+
+    val startState by startDateViewModel.state.collectAsState()
+    val endState by endDateViewModel.state.collectAsState()
+
+    LaunchedEffect(startState.date) {
+        currentFiltersRepository.updateStartDate(startState.date)
+    }
+
+    LaunchedEffect(endState.date) {
+        currentFiltersRepository.updateEndDate(endState.date)
+    }
 
     AppWithHeader {
         val selectedFilter = filters.find { it.title == selected }

@@ -2,6 +2,7 @@ package my.drivebit.components
 
 import androidx.compose.runtime.Composable
 import my.drivebit.network.services.CarDetailResponse
+import my.drivebit.viewmodels.NumberFormatter
 import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.px
@@ -34,7 +35,7 @@ fun CarSpecsRow(car: CarDetailResponse) {
         if (engineVolume > 0) {
             CarSpecChip(
                 iconPath = "images/fuel.svg",
-                text = "${engineVolume.toInt()} л",
+                text = "${NumberFormatter.formatDouble(engineVolume)} л",
             )
         }
 
