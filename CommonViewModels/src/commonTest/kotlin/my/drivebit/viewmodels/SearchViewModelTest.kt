@@ -34,8 +34,10 @@ class MockSearchDictionary : Dictionary {
             FilterSuggestion(
                 id = "1",
                 name = "🏖️ Туризм",
+                shortName = "🏖️ Туризм",
                 type = "tourism",
                 icon = "tourism.svg",
+                iconUrl = "tourism.svg",
                 availableMileagePerDayKmMin = 150,
                 dailyPriceMax = 6000,
                 engineTypes =
@@ -46,8 +48,10 @@ class MockSearchDictionary : Dictionary {
             FilterSuggestion(
                 id = "2",
                 name = "🚗 Все",
+                shortName = "🚗 Все",
                 type = "all",
                 icon = "all.svg",
+                iconUrl = "all.svg",
             ),
         )
 

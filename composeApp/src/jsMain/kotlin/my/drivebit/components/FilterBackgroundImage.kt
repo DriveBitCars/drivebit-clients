@@ -17,7 +17,7 @@ fun FilterBackgroundImage(
             borderRadius(12.px)
             overflow("hidden")
             position(Position.Relative)
-            marginBottom(20.px)
+            marginBottom(30.px)
             property("flex", "1")
             property("min-height", "150px")
             property("max-height", "300px")
@@ -54,7 +54,7 @@ fun FilterBackgroundImage(
             Div({
                 style {
                     position(Position.Absolute)
-                    top(80.px)
+                    top(90.px)
                     left(50.percent)
                     property("transform", "translateX(-50%)")
                     width(80.percent)

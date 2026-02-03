@@ -17,7 +17,6 @@ import my.drivebit.viewmodels.ButterViewModelImpl
 import my.drivebit.viewmodels.CarBrandViewModel
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarDetailViewModelImpl
-import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.CarEditMviViewModel
 import my.drivebit.viewmodels.CarEditMviViewModelImpl
 import my.drivebit.viewmodels.CarEditViewModel
@@ -32,6 +31,7 @@ import my.drivebit.viewmodels.CarSearchViewModelImpl
 import my.drivebit.viewmodels.CityViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModelImpl
+import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.DescriptionInputViewModel
 import my.drivebit.viewmodels.DescriptionInputViewModelImpl
 import my.drivebit.viewmodels.DocumentsViewModel
@@ -92,6 +92,7 @@ val commonViewModelsModule: Module =
         factory {
             FiltersViewModel(
                 storage = get(),
+                dictionary = get(),
             )
         }
 

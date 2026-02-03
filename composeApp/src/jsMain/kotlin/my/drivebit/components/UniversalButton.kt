@@ -26,7 +26,7 @@ fun UniversalButton(
             display(DisplayStyle.Flex)
             alignItems(AlignItems.Center)
             gap(8.px)
-            padding(12.px, 16.px)
+            padding(10.px, 10.px)
             borderRadius(8.px)
             cursor("pointer")
             backgroundColor(if (isSelected) CSSColors.Black else CSSColors.White)

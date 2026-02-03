@@ -8,7 +8,10 @@ import org.jetbrains.compose.web.dom.Div
 fun AppContainer(content: @Composable () -> Unit) {
     Div({
         style {
-            padding(20.px, 40.px)
+            paddingTop(20.px)
+            paddingBottom(40.px)
+            paddingLeft(40.px)
+            paddingRight(40.px)
             fontFamily("system-ui, -apple-system, sans-serif")
             property("min-width", "320px")
             property("max-width", "1200px")

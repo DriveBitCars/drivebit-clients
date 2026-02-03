@@ -89,8 +89,10 @@ data class DocumentEnumsResponse(
 data class FilterSuggestion(
     val id: String? = null,
     val name: String,
+    val shortName: String,
     val type: String? = null,
     val icon: String? = null,
+    val iconUrl: String,
     val availableMileagePerDayKmMin: Int? = null,
     val dailyPriceMin: Int? = null,
     val dailyPriceMax: Int? = null,
