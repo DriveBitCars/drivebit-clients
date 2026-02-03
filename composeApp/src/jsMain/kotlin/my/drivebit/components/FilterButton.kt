@@ -31,6 +31,7 @@ fun filterButton(
                     height(20.px)
                     property("object-fit", "contain")
                     property("transition", "opacity 0.3s ease")
+                    property("pointer-events", "none")
                     if (isSelected) {
                         property("filter", "brightness(0) invert(1)")
                     }
@@ -42,6 +43,7 @@ fun filterButton(
             style {
                 applyTypography(CSSTypography.Styles.button)
                 marginLeft(4.px)
+                property("pointer-events", "none")
             }
         }) {
             Text(filter.title)

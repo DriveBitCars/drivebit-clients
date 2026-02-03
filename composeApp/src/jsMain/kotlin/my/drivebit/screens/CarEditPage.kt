@@ -287,7 +287,7 @@ fun CarEditPage() {
                             }
 
                             TextInputField(
-                                label = "Размер бака",
+                                label = "Размер багажника",
                                 value = formData.trunkSizeSearch,
                                 onValueChange = { newValue ->
                                     viewModel.handleIntent(CarEditIntent.UpdateTrunkSizeSearch(newValue))
