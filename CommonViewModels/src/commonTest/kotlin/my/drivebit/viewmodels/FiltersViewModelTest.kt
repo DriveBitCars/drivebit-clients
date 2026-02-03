@@ -1,5 +1,7 @@
 package my.drivebit.viewmodels
 
+import my.drivebit.network.services.Dictionary
+import my.drivebit.network.services.FilterSuggestion
 import my.drivebit.shared.storage.Storage
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -42,12 +44,35 @@ class MockStorage : Storage {
     }
 }
 
+class MockDictionary : Dictionary {
+    override suspend fun getCarBrands(): List<my.drivebit.network.services.CarBrand> =
+        throw NotImplementedError("Not used in FiltersViewModel")
+
+    override suspend fun getCarModels(brandId: Int): List<my.drivebit.network.services.CarModel> =
+        throw NotImplementedError("Not used in FiltersViewModel")
+
+    override suspend fun searchCities(query: String): List<my.drivebit.network.services.City> =
+        throw NotImplementedError("Not used in FiltersViewModel")
+
+    override suspend fun getAllCities(): List<my.drivebit.network.services.City> =
+        throw NotImplementedError("Not used in FiltersViewModel")
+
+    override suspend fun getCarEnums(): my.drivebit.network.services.CarEnumsResponse =
+        throw NotImplementedError("Not used in FiltersViewModel")
+
+    override suspend fun getDocumentEnums(): my.drivebit.network.services.DocumentEnumsResponse =
+        throw NotImplementedError("Not used in FiltersViewModel")
+
+    override suspend fun getFiltersSuggested(): List<FilterSuggestion> = emptyList()
+}
+
 class FiltersViewModelTest {
     private val mockStorage = MockStorage()
+    private val mockDictionary = MockDictionary()
 
     @Test
     fun `initial state should have correct selected filter`() {
-        val viewModel = FiltersViewModel(mockStorage)
+        val viewModel = FiltersViewModel(mockStorage, mockDictionary)
         val initialState = viewModel.state.value
 
         assertEquals("Все", initialState.selected)
@@ -58,7 +83,7 @@ class FiltersViewModelTest {
 
     @Test
     fun `onSelect should update selected filter when selecting All`() {
-        val viewModel = FiltersViewModel(mockStorage)
+        val viewModel = FiltersViewModel(mockStorage, mockDictionary)
 
         viewModel.onSelect("Все")
 
@@ -67,7 +92,7 @@ class FiltersViewModelTest {
 
     @Test
     fun `onSelect should update selected filter when selecting По близости`() {
-        val viewModel = FiltersViewModel(mockStorage)
+        val viewModel = FiltersViewModel(mockStorage, mockDictionary)
 
         viewModel.onSelect("Поблизости")
 
@@ -76,7 +101,7 @@ class FiltersViewModelTest {
 
     @Test
     fun `onSelect should handle multiple selections correctly`() {
-        val viewModel = FiltersViewModel(mockStorage)
+        val viewModel = FiltersViewModel(mockStorage, mockDictionary)
 
         viewModel.onSelect("Все")
         assertEquals("Все", viewModel.state.value.selected)
@@ -90,7 +115,7 @@ class FiltersViewModelTest {
 
     @Test
     fun `onSelect should maintain filters list unchanged`() {
-        val viewModel = FiltersViewModel(mockStorage)
+        val viewModel = FiltersViewModel(mockStorage, mockDictionary)
         val initialFilters = viewModel.state.value.filters
 
         viewModel.onSelect("Поблизости")

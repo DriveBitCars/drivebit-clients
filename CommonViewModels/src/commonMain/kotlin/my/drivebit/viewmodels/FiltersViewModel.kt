@@ -38,15 +38,16 @@ class FiltersViewModel(
 ) {
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    private val backgroundIcons = listOf(
-        SEARCHBACKGROUND_CAR2_JPG,
-        SEARCHBACKGROUND_CAR3_JPG,
-        SEARCHBACKGROUND_CAR4_JPG,
-        SEARCHBACKGROUND_CAR5_JPG,
-        SEARCHBACKGROUND_CAR6_JPG,
-        SEARCHBACKGROUND_CAR7_JPG,
-        SEARCHBACKGROUND_CAR8_JPG,
-    )
+    private val backgroundIcons =
+        listOf(
+            SEARCHBACKGROUND_CAR2_JPG,
+            SEARCHBACKGROUND_CAR3_JPG,
+            SEARCHBACKGROUND_CAR4_JPG,
+            SEARCHBACKGROUND_CAR5_JPG,
+            SEARCHBACKGROUND_CAR6_JPG,
+            SEARCHBACKGROUND_CAR7_JPG,
+            SEARCHBACKGROUND_CAR8_JPG,
+        )
 
     private val _state =
         MutableStateFlow(
@@ -88,8 +89,9 @@ class FiltersViewModel(
                 )
 
                 suggestedFilters.forEachIndexed { index, suggestion ->
-                    val backgroundIcon = backgroundIcons.getOrNull(index % backgroundIcons.size)
-                        ?: SEARCHBACKGROUND_CAR2_JPG
+                    val backgroundIcon =
+                        backgroundIcons.getOrNull(index % backgroundIcons.size)
+                            ?: SEARCHBACKGROUND_CAR2_JPG
 
                     filterItems.add(
                         FilterItem(
