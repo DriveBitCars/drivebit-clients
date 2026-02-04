@@ -141,7 +141,6 @@ fun HomePage() {
                 CarsListView(cars = cars)
             }
         }
-
     }
 }
 

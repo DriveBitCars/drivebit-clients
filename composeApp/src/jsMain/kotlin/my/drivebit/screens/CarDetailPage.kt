@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.AppWithHeader
+import my.drivebit.components.CarDescription
 import my.drivebit.components.CarLocationMap
 import my.drivebit.components.CarOwnerSection
 import my.drivebit.components.CarPhotosSection
@@ -105,6 +106,8 @@ private fun CarDetailContent(
             DailyRateLabel(dailyRate)
 
             CarSpecsRow(car)
+
+            CarDescription(description = car.general.description)
 
             owner?.let { ownerInfo ->
                 CarOwnerSection(
