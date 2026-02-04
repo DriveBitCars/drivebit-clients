@@ -45,7 +45,7 @@ fun ButterMenu() {
         is ButterState.Opened -> {
             Div({
                 style {
-                    position(Position.Fixed)
+                    position(Position.Absolute)
                     top(0.px)
                     left(0.px)
                     right(0.px)
@@ -108,7 +108,7 @@ fun ButterItems(
 ) {
     Div({
         style {
-            position(Position.Fixed)
+            position(Position.Absolute)
             top(72.px)
             right(36.px)
             width(280.px)
