@@ -2,8 +2,10 @@ package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarItemSmall
@@ -27,8 +29,10 @@ import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MapViewModel
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.flexShrink
@@ -37,13 +41,16 @@ import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.left
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -151,12 +158,29 @@ private fun NearbyMapView(
     onMarkerClick: (MapMarker) -> Unit,
     onCameraMove: (MapCameraPosition) -> Unit,
 ) {
+    SideEffect {
+        val styleId = "hide-leaflet-attribution"
+        if (document.getElementById(styleId) == null) {
+            val style = document.createElement("style")
+            style.id = styleId
+            style.textContent =
+                """
+                .leaflet-control-attribution {
+                    display: none !important;
+                }
+                """.trimIndent()
+            document.head?.appendChild(style)
+        }
+    }
+
     Div({
         style {
             width(100.percent)
             height(600.px)
             marginTop(20.px)
             borderRadius(8.px)
+            position(Position.Relative)
+            property("overflow", "hidden")
         }
     }) {
         MapView(
@@ -165,6 +189,19 @@ private fun NearbyMapView(
             onMarkerClick = onMarkerClick,
             onCameraMove = onCameraMove,
         )
+
+        Div({
+            style {
+                position(Position.Absolute)
+                bottom(0.px)
+                left(0.px)
+                right(0.px)
+                height(30.px)
+                backgroundColor(CSSColors.White)
+                property("z-index", "1000")
+                property("pointer-events", "none")
+            }
+        })
     }
 }
 

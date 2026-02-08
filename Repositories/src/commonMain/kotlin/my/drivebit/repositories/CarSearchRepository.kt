@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarSearchResponse
+import my.drivebit.network.services.City
 import my.drivebit.network.services.Dictionary
 
 private data class Quadruple<A, B, C, D>(
@@ -33,13 +34,23 @@ internal class CarSearchRepositoryImpl(
             currentFiltersRepository.currentTaskShortName,
             currentFiltersRepository.startState,
             currentFiltersRepository.endState,
-        ) { selectedCity, currentTaskShortName, startDate, endDate ->
-            Quadruple(selectedCity, currentTaskShortName, startDate, endDate)
-        }.flatMapLatest { quadruple ->
+            currentFiltersRepository.dailyRateMin,
+            currentFiltersRepository.dailyRateMax,
+        ) { values ->
+            val selectedCity = values[0] as City
+            val currentTaskShortName = values[1] as String?
+            val startDate = values[2] as String?
+            val endDate = values[3] as String?
+            val dailyRateMin = values[4] as Double?
+            val dailyRateMax = values[5] as Double?
+            Quadruple(selectedCity, currentTaskShortName, startDate, endDate) to Pair(dailyRateMin, dailyRateMax)
+        }.flatMapLatest { (quadruple, priceRange) ->
             val selectedCity = quadruple.first
             val currentTaskShortName = quadruple.second
             val startDate = quadruple.third
             val endDate = quadruple.fourth
+            val dailyRateMin = priceRange.first
+            val dailyRateMax = priceRange.second
             flow {
                 val filter =
                     currentTaskShortName?.let { shortName ->
@@ -54,8 +65,8 @@ internal class CarSearchRepositoryImpl(
                         dateFrom = startDate,
                         dateTo = endDate,
                         availableMileagePerDayKmMin = filter?.availableMileagePerDayKmMin,
-                        dailyPriceMin = filter?.dailyPriceMin,
-                        dailyPriceMax = filter?.dailyPriceMax,
+                        dailyPriceMin = dailyRateMin?.toInt() ?: filter?.dailyPriceMin,
+                        dailyPriceMax = dailyRateMax?.toInt() ?: filter?.dailyPriceMax,
                         yearMin = filter?.yearMin,
                         yearMax = filter?.yearMax,
                         seatsMin = filter?.seatsMin,

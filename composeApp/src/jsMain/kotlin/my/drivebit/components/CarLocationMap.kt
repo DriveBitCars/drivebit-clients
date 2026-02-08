@@ -1,16 +1,26 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import kotlinx.browser.document
+import my.drivebit.design.CSSColors
 import my.drivebit.maps.MapView
 import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.maps.models.MapMarker
 import my.drivebit.network.services.CarDetailResponse
+import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.left
 import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.*
 import org.jetbrains.compose.web.dom.Div
 
 @Composable
@@ -44,19 +54,53 @@ fun CarLocationMap(car: CarDetailResponse) {
             title = carName,
         )
 
-    Div({
-        style {
-            width(100.percent)
-            height(400.px)
-            borderRadius(8.px)
-            property("overflow", "hidden")
+    val mapContainerId = "car-location-map-${car.id}"
+
+    SideEffect {
+        val styleId = "hide-leaflet-attribution"
+        if (document.getElementById(styleId) == null) {
+            val style = document.createElement("style")
+            style.id = styleId
+            style.textContent =
+                """
+                .leaflet-control-attribution {
+                    display: none !important;
+                }
+                """.trimIndent()
+            document.head?.appendChild(style)
         }
-    }) {
+    }
+
+    Div(
+        attrs = {
+            id(mapContainerId)
+            style {
+                width(100.percent)
+                height(400.px)
+                borderRadius(8.px)
+                property("overflow", "hidden")
+                position(Position.Relative)
+            }
+        },
+    ) {
         MapView(
             cameraPosition = cameraPosition,
             markers = listOf(marker),
             onMarkerClick = {},
             onCameraMove = {},
         )
+
+        Div({
+            style {
+                position(Position.Absolute)
+                bottom(0.px)
+                left(0.px)
+                right(0.px)
+                height(30.px)
+                backgroundColor(CSSColors.White)
+                property("z-index", "1000")
+                property("pointer-events", "none")
+            }
+        })
     }
 }

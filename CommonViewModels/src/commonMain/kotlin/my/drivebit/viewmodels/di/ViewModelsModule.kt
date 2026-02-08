@@ -57,6 +57,10 @@ import my.drivebit.viewmodels.PassportUploadViewModelImpl
 import my.drivebit.viewmodels.PhoneLoginViewModel
 import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
+import my.drivebit.viewmodels.SearchPageDateEndViewModel
+import my.drivebit.viewmodels.SearchPageDateEndViewModelImpl
+import my.drivebit.viewmodels.SearchPageDateViewModel
+import my.drivebit.viewmodels.SearchPageDateViewModelImpl
 import my.drivebit.viewmodels.SearchViewModel
 import my.drivebit.viewmodels.SearchViewModelImpl
 import my.drivebit.viewmodels.TrunkSizeViewModel
@@ -321,10 +325,19 @@ val commonViewModelsModule: Module =
 
         factory<SearchViewModel> {
             SearchViewModelImpl(
-                dictionary = get(),
-                carService = get(),
-                myCityRepository = get(),
                 carSearchRepository = get(),
+                currentFiltersRepository = get(),
+            )
+        }
+
+        factory<SearchPageDateViewModel> {
+            SearchPageDateViewModelImpl(
+                currentFiltersRepository = get(),
+            )
+        }
+        factory<SearchPageDateEndViewModel> {
+            SearchPageDateEndViewModelImpl(
+                currentFiltersRepository = get(),
             )
         }
 
