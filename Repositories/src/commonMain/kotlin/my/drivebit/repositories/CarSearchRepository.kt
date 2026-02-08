@@ -36,6 +36,7 @@ internal class CarSearchRepositoryImpl(
             currentFiltersRepository.endState,
             currentFiltersRepository.dailyRateMin,
             currentFiltersRepository.dailyRateMax,
+            currentFiltersRepository.brandId,
         ) { values ->
             val selectedCity = values[0] as City
             val currentTaskShortName = values[1] as String?
@@ -43,8 +44,13 @@ internal class CarSearchRepositoryImpl(
             val endDate = values[3] as String?
             val dailyRateMin = values[4] as Double?
             val dailyRateMax = values[5] as Double?
-            Quadruple(selectedCity, currentTaskShortName, startDate, endDate) to Pair(dailyRateMin, dailyRateMax)
-        }.flatMapLatest { (quadruple, priceRange) ->
+            val brandId = values[6] as Int?
+            Triple(
+                Quadruple(selectedCity, currentTaskShortName, startDate, endDate),
+                Pair(dailyRateMin, dailyRateMax),
+                brandId,
+            )
+        }.flatMapLatest { (quadruple, priceRange, brandId) ->
             val selectedCity = quadruple.first
             val currentTaskShortName = quadruple.second
             val startDate = quadruple.third
@@ -74,6 +80,7 @@ internal class CarSearchRepositoryImpl(
                         bodyTypes = filter?.bodyTypes?.map { it.name },
                         engineTypes = filter?.engineTypes?.map { it.name },
                         colors = filter?.colors?.map { it.name },
+                        brandId = brandId,
                     )
 
                 emit(result)

@@ -37,6 +37,7 @@ class MockCarServiceForEdit : Car {
         bodyTypes: List<String>?,
         engineTypes: List<String>?,
         colors: List<String>?,
+        brandId: Int?,
     ) = throw NotImplementedError()
 
     var carResponse: CarDetailResponse =

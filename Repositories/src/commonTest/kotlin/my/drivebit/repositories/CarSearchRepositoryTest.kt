@@ -38,6 +38,7 @@ class CarSearchRepositoryTest {
         var searchBodyTypes: List<String>? = null
         var searchEngineTypes: List<String>? = null
         var searchColors: List<String>? = null
+        var searchBrandId: Int? = null
         var searchResult: CarSearchResponse = CarSearchResponse(emptyList())
         var shouldThrowError = false
         var errorMessage = "Network error"
@@ -56,6 +57,7 @@ class CarSearchRepositoryTest {
             bodyTypes: List<String>?,
             engineTypes: List<String>?,
             colors: List<String>?,
+            brandId: Int?,
         ): CarSearchResponse {
             if (shouldThrowError) {
                 throw Exception(errorMessage)
@@ -73,6 +75,7 @@ class CarSearchRepositoryTest {
             searchBodyTypes = bodyTypes
             searchEngineTypes = engineTypes
             searchColors = colors
+            searchBrandId = brandId
             return searchResult
         }
 
@@ -115,10 +118,22 @@ class CarSearchRepositoryTest {
         private val currentTaskShortNameState = MutableStateFlow<String?>(null)
         private val startStateFlow = MutableStateFlow<String?>(null)
         private val endStateFlow = MutableStateFlow<String?>(null)
+        private val dailyRateMinState = MutableStateFlow<Double?>(null)
+        private val dailyRateMaxState = MutableStateFlow<Double?>(null)
+        private val brandIdState = MutableStateFlow<Int?>(null)
+        private val brandNameState = MutableStateFlow<String?>(null)
+        private val modelIdState = MutableStateFlow<Int?>(null)
+        private val modelNameState = MutableStateFlow<String?>(null)
 
         override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
         override val startState = startStateFlow.asStateFlow()
         override val endState = endStateFlow.asStateFlow()
+        override val dailyRateMin = dailyRateMinState.asStateFlow()
+        override val dailyRateMax = dailyRateMaxState.asStateFlow()
+        override val brandId = brandIdState.asStateFlow()
+        override val brandName = brandNameState.asStateFlow()
+        override val modelId = modelIdState.asStateFlow()
+        override val modelName = modelNameState.asStateFlow()
 
         override fun updateCurrentTask(shortName: String) {
             currentTaskShortNameState.value = shortName
@@ -130,6 +145,24 @@ class CarSearchRepositoryTest {
 
         override fun updateEndDate(date: String?) {
             endStateFlow.value = date
+        }
+
+        override fun updateDailyRateMin(value: Double?) {
+            dailyRateMinState.value = value
+        }
+
+        override fun updateDailyRateMax(value: Double?) {
+            dailyRateMaxState.value = value
+        }
+
+        override fun updateBrand(id: Int?, name: String?) {
+            brandIdState.value = id
+            brandNameState.value = name
+        }
+
+        override fun updateModel(id: Int?, name: String?) {
+            modelIdState.value = id
+            modelNameState.value = name
         }
     }
 

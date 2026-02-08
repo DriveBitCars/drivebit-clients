@@ -34,6 +34,7 @@ interface Car {
         bodyTypes: List<String>? = null,
         engineTypes: List<String>? = null,
         colors: List<String>? = null,
+        brandId: Int? = null,
     ): CarSearchResponse
 
     suspend fun getMyCars(): List<CarItem>
@@ -293,6 +294,7 @@ class CarImpl(
         bodyTypes: List<String>?,
         engineTypes: List<String>?,
         colors: List<String>?,
+        brandId: Int?,
     ): CarSearchResponse {
         val url = "${DEFAULT_BASE_URL}Car/list/city/$cityId"
         val response =
@@ -311,6 +313,7 @@ class CarImpl(
                 bodyTypes?.forEach { parameter("bodyTypes", it) }
                 engineTypes?.forEach { parameter("engineTypes", it) }
                 colors?.forEach { parameter("colors", it) }
+                brandId?.let { parameter("brandId", it) }
             }
         val result: CarDTOPagedResult = response.parseResponse()
         return CarSearchResponse(cars = sanitizeCarItems(result.items))

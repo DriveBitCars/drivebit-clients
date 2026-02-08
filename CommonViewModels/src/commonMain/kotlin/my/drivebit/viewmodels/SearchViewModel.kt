@@ -37,6 +37,16 @@ interface SearchViewModel {
     fun updateDailyRateMin(value: Double?)
 
     fun updateDailyRateMax(value: Double?)
+
+    fun updateBrand(
+        id: Int?,
+        name: String?,
+    )
+
+    fun updateModel(
+        id: Int?,
+        name: String?,
+    )
 }
 
 class SearchViewModelImpl(
@@ -89,5 +99,19 @@ class SearchViewModelImpl(
 
     override fun updateDailyRateMax(value: Double?) {
         currentFiltersRepository.updateDailyRateMax(value)
+    }
+
+    override fun updateBrand(
+        id: Int?,
+        name: String?,
+    ) {
+        currentFiltersRepository.updateBrand(id, name)
+    }
+
+    override fun updateModel(
+        id: Int?,
+        name: String?,
+    ) {
+        currentFiltersRepository.updateModel(id, name)
     }
 }

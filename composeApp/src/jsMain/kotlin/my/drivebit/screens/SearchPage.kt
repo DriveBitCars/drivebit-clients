@@ -13,6 +13,7 @@ import my.drivebit.components.CarItemSmall
 import my.drivebit.components.Column
 import my.drivebit.components.DateFieldDialog
 import my.drivebit.components.Divider
+import my.drivebit.components.BrandModelFilter
 import my.drivebit.components.FilterChip
 import my.drivebit.components.Loader
 import my.drivebit.components.PriceFilter
@@ -61,7 +62,10 @@ fun SearchPage() {
     val currentFiltersRepository: CurrentFiltersRepository = koinInject()
     val dailyRateMin by currentFiltersRepository.dailyRateMin.collectAsState(null)
     val dailyRateMax by currentFiltersRepository.dailyRateMax.collectAsState(null)
+    val filterBrandName by currentFiltersRepository.brandName.collectAsState(null)
+    val filterModelName by currentFiltersRepository.modelName.collectAsState(null)
     var showPriceFilter by remember { mutableStateOf(false) }
+    var showBrandFilter by remember { mutableStateOf(false) }
     val minPrice = remember { mutableStateOf(dailyRateMin?.toInt() ?: 0) }
     val maxPrice = remember { mutableStateOf(dailyRateMax?.toInt() ?: 600) }
 
@@ -78,6 +82,13 @@ fun SearchPage() {
         "${dailyRateMin?.toInt() ?: 0} - ${dailyRateMax?.toInt() ?: 600}"
     } else {
         null
+    }
+
+    val isBrandSelected = filterBrandName != null
+    val brandChipText = when {
+        filterBrandName != null && filterModelName != null -> "$filterBrandName $filterModelName"
+        filterBrandName != null -> filterBrandName
+        else -> null
     }
 
     AppWithHeader {
@@ -112,12 +123,24 @@ fun SearchPage() {
                                 endDate = searchParams.second,
                             )
                         }
-                        Row {
+                        Row(gap = 8.px) {
                             FilterChip(
                                 name = "Цена",
-                                onClick = { showPriceFilter = true },
+                                onClick = {
+                                    showPriceFilter = !showPriceFilter
+                                    showBrandFilter = false
+                                },
                                 isSelected = isPriceSelected,
                                 selectedText = priceText,
+                            )
+                            FilterChip(
+                                name = "Марка",
+                                onClick = {
+                                    showBrandFilter = !showBrandFilter
+                                    showPriceFilter = false
+                                },
+                                isSelected = isBrandSelected,
+                                selectedText = brandChipText,
                             )
                         }
                         if (showPriceFilter) {
@@ -143,6 +166,31 @@ fun SearchPage() {
                                         viewModel.updateDailyRateMin(minPrice.value.toDouble())
                                         viewModel.updateDailyRateMax(maxPrice.value.toDouble())
                                         showPriceFilter = false
+                                    },
+                                )
+                            }
+                        }
+                        if (showBrandFilter) {
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    property("justify-content", "flex-start")
+                                    width(100.percent)
+                                }
+                            }) {
+                                BrandModelFilter(
+                                    onBrandSelected = { brandId, brandName ->
+                                        viewModel.updateBrand(brandId, brandName)
+                                        viewModel.updateModel(null, null)
+                                    },
+                                    onModelSelected = { modelId, modelName ->
+                                        viewModel.updateModel(modelId, modelName)
+                                        showBrandFilter = false
+                                    },
+                                    onReset = {
+                                        viewModel.updateBrand(null, null)
+                                        viewModel.updateModel(null, null)
+                                        showBrandFilter = false
                                     },
                                 )
                             }

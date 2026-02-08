@@ -78,12 +78,20 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     private val endStateFlow = MutableStateFlow<String?>(null)
     private val dailyRateMinState = MutableStateFlow<Double?>(null)
     private val dailyRateMaxState = MutableStateFlow<Double?>(null)
+    private val brandIdState = MutableStateFlow<Int?>(null)
+    private val brandNameState = MutableStateFlow<String?>(null)
+    private val modelIdState = MutableStateFlow<Int?>(null)
+    private val modelNameState = MutableStateFlow<String?>(null)
 
     override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
     override val startState = startStateFlow.asStateFlow()
     override val endState = endStateFlow.asStateFlow()
     override val dailyRateMin = dailyRateMinState.asStateFlow()
     override val dailyRateMax = dailyRateMaxState.asStateFlow()
+    override val brandId = brandIdState.asStateFlow()
+    override val brandName = brandNameState.asStateFlow()
+    override val modelId = modelIdState.asStateFlow()
+    override val modelName = modelNameState.asStateFlow()
 
     override fun updateCurrentTask(shortName: String) {
         currentTaskShortNameState.value = shortName
@@ -103,6 +111,16 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
 
     override fun updateDailyRateMax(value: Double?) {
         dailyRateMaxState.value = value
+    }
+
+    override fun updateBrand(id: Int?, name: String?) {
+        brandIdState.value = id
+        brandNameState.value = name
+    }
+
+    override fun updateModel(id: Int?, name: String?) {
+        modelIdState.value = id
+        modelNameState.value = name
     }
 }
 
