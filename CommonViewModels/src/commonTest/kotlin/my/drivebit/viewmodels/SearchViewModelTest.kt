@@ -52,6 +52,7 @@ class SearchViewModelTest {
     ): SearchViewModelImpl =
         SearchViewModelImpl(
             carSearchRepository = repository,
+            currentFiltersRepository = MockCurrentFiltersRepository(),
             coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
         )
 
