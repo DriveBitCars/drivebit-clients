@@ -45,7 +45,7 @@ fun FilterChip(
                 style {
                     width(16.px)
                     height(10.px)
-                   // paddingTop(8.px)
+                    // paddingTop(8.px)
                 }
             },
         )

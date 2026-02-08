@@ -15,6 +15,11 @@ interface CurrentFiltersRepository {
     val brandName: Flow<String?>
     val modelId: Flow<Int?>
     val modelName: Flow<String?>
+    val driveTypeName: Flow<String?>
+    val driveTypeTranslate: Flow<String?>
+    val bodyTypeName: Flow<String?>
+    val bodyTypeTranslate: Flow<String?>
+    val seatsMin: Flow<Int?>
 
     fun updateCurrentTask(shortName: String)
 
@@ -35,6 +40,18 @@ interface CurrentFiltersRepository {
         id: Int?,
         name: String?,
     )
+
+    fun updateDriveType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateBodyType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateSeatsMin(value: Int?)
 }
 
 internal class CurrentFiltersRepositoryImpl(
@@ -50,6 +67,11 @@ internal class CurrentFiltersRepositoryImpl(
         private const val BRAND_NAME_KEY = "filter_brand_name"
         private const val MODEL_ID_KEY = "filter_model_id"
         private const val MODEL_NAME_KEY = "filter_model_name"
+        private const val DRIVE_TYPE_NAME_KEY = "filter_drive_type_name"
+        private const val DRIVE_TYPE_TRANSLATE_KEY = "filter_drive_type_translate"
+        private const val BODY_TYPE_NAME_KEY = "filter_body_type_name"
+        private const val BODY_TYPE_TRANSLATE_KEY = "filter_body_type_translate"
+        private const val SEATS_MIN_KEY = "filter_seats_min"
     }
 
     private val currentTaskShortNameState = MutableStateFlow<String?>(null)
@@ -61,6 +83,11 @@ internal class CurrentFiltersRepositoryImpl(
     private val brandNameState = MutableStateFlow<String?>(null)
     private val modelIdState = MutableStateFlow<Int?>(null)
     private val modelNameState = MutableStateFlow<String?>(null)
+    private val driveTypeNameState = MutableStateFlow<String?>(null)
+    private val driveTypeTranslateState = MutableStateFlow<String?>(null)
+    private val bodyTypeNameState = MutableStateFlow<String?>(null)
+    private val bodyTypeTranslateState = MutableStateFlow<String?>(null)
+    private val seatsMinState = MutableStateFlow<Int?>(null)
 
     init {
         val savedTaskShortName = settings.getStringOrNullIfEmpty(CURRENT_TASK_SHORT_NAME_KEY)
@@ -89,6 +116,21 @@ internal class CurrentFiltersRepositoryImpl(
 
         val savedModelName = settings.getStringOrNullIfEmpty(MODEL_NAME_KEY)
         modelNameState.value = savedModelName
+
+        val savedDriveTypeName = settings.getStringOrNullIfEmpty(DRIVE_TYPE_NAME_KEY)
+        driveTypeNameState.value = savedDriveTypeName
+
+        val savedDriveTypeTranslate = settings.getStringOrNullIfEmpty(DRIVE_TYPE_TRANSLATE_KEY)
+        driveTypeTranslateState.value = savedDriveTypeTranslate
+
+        val savedBodyTypeName = settings.getStringOrNullIfEmpty(BODY_TYPE_NAME_KEY)
+        bodyTypeNameState.value = savedBodyTypeName
+
+        val savedBodyTypeTranslate = settings.getStringOrNullIfEmpty(BODY_TYPE_TRANSLATE_KEY)
+        bodyTypeTranslateState.value = savedBodyTypeTranslate
+
+        val savedSeatsMin = settings.getInt(SEATS_MIN_KEY, -1)
+        seatsMinState.value = if (savedSeatsMin < 0) null else savedSeatsMin
     }
 
     override val currentTaskShortName: Flow<String?> = currentTaskShortNameState.asStateFlow()
@@ -100,6 +142,11 @@ internal class CurrentFiltersRepositoryImpl(
     override val brandName: Flow<String?> = brandNameState.asStateFlow()
     override val modelId: Flow<Int?> = modelIdState.asStateFlow()
     override val modelName: Flow<String?> = modelNameState.asStateFlow()
+    override val driveTypeName: Flow<String?> = driveTypeNameState.asStateFlow()
+    override val driveTypeTranslate: Flow<String?> = driveTypeTranslateState.asStateFlow()
+    override val bodyTypeName: Flow<String?> = bodyTypeNameState.asStateFlow()
+    override val bodyTypeTranslate: Flow<String?> = bodyTypeTranslateState.asStateFlow()
+    override val seatsMin: Flow<Int?> = seatsMinState.asStateFlow()
 
     override fun updateCurrentTask(shortName: String) {
         settings.putString(CURRENT_TASK_SHORT_NAME_KEY, shortName)
@@ -176,5 +223,50 @@ internal class CurrentFiltersRepositoryImpl(
         }
         modelIdState.value = id
         modelNameState.value = name
+    }
+
+    override fun updateDriveType(
+        name: String?,
+        translate: String?,
+    ) {
+        if (name != null) {
+            settings.putString(DRIVE_TYPE_NAME_KEY, name)
+        } else {
+            settings.remove(DRIVE_TYPE_NAME_KEY)
+        }
+        if (translate != null) {
+            settings.putString(DRIVE_TYPE_TRANSLATE_KEY, translate)
+        } else {
+            settings.remove(DRIVE_TYPE_TRANSLATE_KEY)
+        }
+        driveTypeNameState.value = name
+        driveTypeTranslateState.value = translate
+    }
+
+    override fun updateBodyType(
+        name: String?,
+        translate: String?,
+    ) {
+        if (name != null) {
+            settings.putString(BODY_TYPE_NAME_KEY, name)
+        } else {
+            settings.remove(BODY_TYPE_NAME_KEY)
+        }
+        if (translate != null) {
+            settings.putString(BODY_TYPE_TRANSLATE_KEY, translate)
+        } else {
+            settings.remove(BODY_TYPE_TRANSLATE_KEY)
+        }
+        bodyTypeNameState.value = name
+        bodyTypeTranslateState.value = translate
+    }
+
+    override fun updateSeatsMin(value: Int?) {
+        if (value != null) {
+            settings.putInt(SEATS_MIN_KEY, value)
+        } else {
+            settings.remove(SEATS_MIN_KEY)
+        }
+        seatsMinState.value = value
     }
 }

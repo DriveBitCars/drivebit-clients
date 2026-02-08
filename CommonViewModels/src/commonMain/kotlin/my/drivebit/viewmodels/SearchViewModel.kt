@@ -47,6 +47,18 @@ interface SearchViewModel {
         id: Int?,
         name: String?,
     )
+
+    fun updateDriveType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateBodyType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateSeatsMin(value: Int?)
 }
 
 class SearchViewModelImpl(
@@ -113,5 +125,23 @@ class SearchViewModelImpl(
         name: String?,
     ) {
         currentFiltersRepository.updateModel(id, name)
+    }
+
+    override fun updateDriveType(
+        name: String?,
+        translate: String?,
+    ) {
+        currentFiltersRepository.updateDriveType(name, translate)
+    }
+
+    override fun updateBodyType(
+        name: String?,
+        translate: String?,
+    ) {
+        currentFiltersRepository.updateBodyType(name, translate)
+    }
+
+    override fun updateSeatsMin(value: Int?) {
+        currentFiltersRepository.updateSeatsMin(value)
     }
 }

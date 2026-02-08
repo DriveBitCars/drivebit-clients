@@ -9,29 +9,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
+import my.drivebit.components.BodyTypeFilter
+import my.drivebit.components.BrandModelFilter
 import my.drivebit.components.CarItemSmall
 import my.drivebit.components.Column
 import my.drivebit.components.DateFieldDialog
 import my.drivebit.components.Divider
-import my.drivebit.components.BrandModelFilter
+import my.drivebit.components.DriveTypeFilter
 import my.drivebit.components.FilterChip
 import my.drivebit.components.Loader
 import my.drivebit.components.PriceFilter
 import my.drivebit.components.Row
-import my.drivebit.components.Spacer
+import my.drivebit.components.SeatsFilter
 import my.drivebit.components.TextError
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
+import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.SearchPageDateEndViewModel
-import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.viewmodels.SearchPageDateViewModel
 import my.drivebit.viewmodels.SearchState
 import my.drivebit.viewmodels.SearchViewModel
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
@@ -64,8 +65,14 @@ fun SearchPage() {
     val dailyRateMax by currentFiltersRepository.dailyRateMax.collectAsState(null)
     val filterBrandName by currentFiltersRepository.brandName.collectAsState(null)
     val filterModelName by currentFiltersRepository.modelName.collectAsState(null)
+    val filterDriveTypeTranslate by currentFiltersRepository.driveTypeTranslate.collectAsState(null)
+    val filterBodyTypeTranslate by currentFiltersRepository.bodyTypeTranslate.collectAsState(null)
+    val filterSeatsMin by currentFiltersRepository.seatsMin.collectAsState(null)
     var showPriceFilter by remember { mutableStateOf(false) }
     var showBrandFilter by remember { mutableStateOf(false) }
+    var showDriveTypeFilter by remember { mutableStateOf(false) }
+    var showBodyTypeFilter by remember { mutableStateOf(false) }
+    var showSeatsFilter by remember { mutableStateOf(false) }
     val minPrice = remember { mutableStateOf(dailyRateMin?.toInt() ?: 0) }
     val maxPrice = remember { mutableStateOf(dailyRateMax?.toInt() ?: 600) }
 
@@ -78,18 +85,25 @@ fun SearchPage() {
     }
 
     val isPriceSelected = dailyRateMin != null || dailyRateMax != null
-    val priceText = if (isPriceSelected) {
-        "${dailyRateMin?.toInt() ?: 0} - ${dailyRateMax?.toInt() ?: 600}"
-    } else {
-        null
-    }
+    val priceText =
+        if (isPriceSelected) {
+            "${dailyRateMin?.toInt() ?: 0} - ${dailyRateMax?.toInt() ?: 600}"
+        } else {
+            null
+        }
 
     val isBrandSelected = filterBrandName != null
-    val brandChipText = when {
-        filterBrandName != null && filterModelName != null -> "$filterBrandName $filterModelName"
-        filterBrandName != null -> filterBrandName
-        else -> null
-    }
+    val brandChipText =
+        when {
+            filterBrandName != null && filterModelName != null -> "$filterBrandName $filterModelName"
+            filterBrandName != null -> filterBrandName
+            else -> null
+        }
+
+    val isDriveTypeSelected = filterDriveTypeTranslate != null
+    val isBodyTypeSelected = filterBodyTypeTranslate != null
+    val isSeatsSelected = filterSeatsMin != null
+    val seatsChipText = filterSeatsMin?.let { "$it или более" }
 
     AppWithHeader {
         Div({
@@ -129,6 +143,9 @@ fun SearchPage() {
                                 onClick = {
                                     showPriceFilter = !showPriceFilter
                                     showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
                                 },
                                 isSelected = isPriceSelected,
                                 selectedText = priceText,
@@ -138,9 +155,48 @@ fun SearchPage() {
                                 onClick = {
                                     showBrandFilter = !showBrandFilter
                                     showPriceFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
                                 },
                                 isSelected = isBrandSelected,
                                 selectedText = brandChipText,
+                            )
+                            FilterChip(
+                                name = "Привод",
+                                onClick = {
+                                    showDriveTypeFilter = !showDriveTypeFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                },
+                                isSelected = isDriveTypeSelected,
+                                selectedText = filterDriveTypeTranslate,
+                            )
+                            FilterChip(
+                                name = "Кузов",
+                                onClick = {
+                                    showBodyTypeFilter = !showBodyTypeFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showSeatsFilter = false
+                                },
+                                isSelected = isBodyTypeSelected,
+                                selectedText = filterBodyTypeTranslate,
+                            )
+                            FilterChip(
+                                name = "Количество мест",
+                                onClick = {
+                                    showSeatsFilter = !showSeatsFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                },
+                                isSelected = isSeatsSelected,
+                                selectedText = seatsChipText,
                             )
                         }
                         if (showPriceFilter) {
@@ -191,6 +247,67 @@ fun SearchPage() {
                                         viewModel.updateBrand(null, null)
                                         viewModel.updateModel(null, null)
                                         showBrandFilter = false
+                                    },
+                                )
+                            }
+                        }
+                        if (showDriveTypeFilter) {
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    property("justify-content", "flex-start")
+                                    width(100.percent)
+                                }
+                            }) {
+                                DriveTypeFilter(
+                                    onDriveTypeSelected = { name, translate ->
+                                        viewModel.updateDriveType(name, translate)
+                                        showDriveTypeFilter = false
+                                    },
+                                    onReset = {
+                                        viewModel.updateDriveType(null, null)
+                                        showDriveTypeFilter = false
+                                    },
+                                )
+                            }
+                        }
+                        if (showBodyTypeFilter) {
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    property("justify-content", "flex-start")
+                                    width(100.percent)
+                                }
+                            }) {
+                                BodyTypeFilter(
+                                    onBodyTypeSelected = { name, translate ->
+                                        viewModel.updateBodyType(name, translate)
+                                        showBodyTypeFilter = false
+                                    },
+                                    onReset = {
+                                        viewModel.updateBodyType(null, null)
+                                        showBodyTypeFilter = false
+                                    },
+                                )
+                            }
+                        }
+                        if (showSeatsFilter) {
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    property("justify-content", "flex-start")
+                                    width(100.percent)
+                                }
+                            }) {
+                                SeatsFilter(
+                                    selectedSeatsMin = filterSeatsMin,
+                                    resultsCount = currentState.cars.size,
+                                    onSeatsMinSelected = { seatsMin ->
+                                        viewModel.updateSeatsMin(seatsMin)
+                                    },
+                                    onReset = {
+                                        viewModel.updateSeatsMin(null)
+                                        showSeatsFilter = false
                                     },
                                 )
                             }

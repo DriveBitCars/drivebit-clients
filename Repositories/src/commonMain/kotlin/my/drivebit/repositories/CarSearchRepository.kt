@@ -37,6 +37,9 @@ internal class CarSearchRepositoryImpl(
             currentFiltersRepository.dailyRateMin,
             currentFiltersRepository.dailyRateMax,
             currentFiltersRepository.brandId,
+            currentFiltersRepository.driveTypeName,
+            currentFiltersRepository.bodyTypeName,
+            currentFiltersRepository.seatsMin,
         ) { values ->
             val selectedCity = values[0] as City
             val currentTaskShortName = values[1] as String?
@@ -45,12 +48,19 @@ internal class CarSearchRepositoryImpl(
             val dailyRateMin = values[4] as Double?
             val dailyRateMax = values[5] as Double?
             val brandId = values[6] as Int?
+            val driveTypeName = values[7] as String?
+            val bodyTypeName = values[8] as String?
+            val seatsMin = values[9] as Int?
             Triple(
                 Quadruple(selectedCity, currentTaskShortName, startDate, endDate),
                 Pair(dailyRateMin, dailyRateMax),
-                brandId,
+                Quadruple(brandId, driveTypeName, bodyTypeName, seatsMin),
             )
-        }.flatMapLatest { (quadruple, priceRange, brandId) ->
+        }.flatMapLatest { (quadruple, priceRange, brandDriveBodySeatsQuadruple) ->
+            val brandId = brandDriveBodySeatsQuadruple.first
+            val driveTypeName = brandDriveBodySeatsQuadruple.second
+            val bodyTypeName = brandDriveBodySeatsQuadruple.third
+            val seatsMin = brandDriveBodySeatsQuadruple.fourth
             val selectedCity = quadruple.first
             val currentTaskShortName = quadruple.second
             val startDate = quadruple.third
@@ -75,12 +85,13 @@ internal class CarSearchRepositoryImpl(
                         dailyPriceMax = dailyRateMax?.toInt() ?: filter?.dailyPriceMax,
                         yearMin = filter?.yearMin,
                         yearMax = filter?.yearMax,
-                        seatsMin = filter?.seatsMin,
+                        seatsMin = seatsMin ?: filter?.seatsMin,
                         seatsMax = filter?.seatsMax,
-                        bodyTypes = filter?.bodyTypes?.map { it.name },
+                        bodyTypes = bodyTypeName?.let { listOf(it) } ?: filter?.bodyTypes?.map { it.name },
                         engineTypes = filter?.engineTypes?.map { it.name },
                         colors = filter?.colors?.map { it.name },
                         brandId = brandId,
+                        driveTypes = driveTypeName?.let { listOf(it) },
                     )
 
                 emit(result)

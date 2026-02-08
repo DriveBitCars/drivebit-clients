@@ -82,6 +82,11 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     private val brandNameState = MutableStateFlow<String?>(null)
     private val modelIdState = MutableStateFlow<Int?>(null)
     private val modelNameState = MutableStateFlow<String?>(null)
+    private val driveTypeNameState = MutableStateFlow<String?>(null)
+    private val driveTypeTranslateState = MutableStateFlow<String?>(null)
+    private val bodyTypeNameState = MutableStateFlow<String?>(null)
+    private val bodyTypeTranslateState = MutableStateFlow<String?>(null)
+    private val seatsMinState = MutableStateFlow<Int?>(null)
 
     override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
     override val startState = startStateFlow.asStateFlow()
@@ -92,6 +97,11 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     override val brandName = brandNameState.asStateFlow()
     override val modelId = modelIdState.asStateFlow()
     override val modelName = modelNameState.asStateFlow()
+    override val driveTypeName = driveTypeNameState.asStateFlow()
+    override val driveTypeTranslate = driveTypeTranslateState.asStateFlow()
+    override val bodyTypeName = bodyTypeNameState.asStateFlow()
+    override val bodyTypeTranslate = bodyTypeTranslateState.asStateFlow()
+    override val seatsMin = seatsMinState.asStateFlow()
 
     override fun updateCurrentTask(shortName: String) {
         currentTaskShortNameState.value = shortName
@@ -113,14 +123,40 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
         dailyRateMaxState.value = value
     }
 
-    override fun updateBrand(id: Int?, name: String?) {
+    override fun updateBrand(
+        id: Int?,
+        name: String?,
+    ) {
         brandIdState.value = id
         brandNameState.value = name
     }
 
-    override fun updateModel(id: Int?, name: String?) {
+    override fun updateModel(
+        id: Int?,
+        name: String?,
+    ) {
         modelIdState.value = id
         modelNameState.value = name
+    }
+
+    override fun updateDriveType(
+        name: String?,
+        translate: String?,
+    ) {
+        driveTypeNameState.value = name
+        driveTypeTranslateState.value = translate
+    }
+
+    override fun updateBodyType(
+        name: String?,
+        translate: String?,
+    ) {
+        bodyTypeNameState.value = name
+        bodyTypeTranslateState.value = translate
+    }
+
+    override fun updateSeatsMin(value: Int?) {
+        seatsMinState.value = value
     }
 }
 
