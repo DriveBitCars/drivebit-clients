@@ -37,6 +37,46 @@ interface SearchViewModel {
     fun updateDailyRateMin(value: Double?)
 
     fun updateDailyRateMax(value: Double?)
+
+    fun updateBrand(
+        id: Int?,
+        name: String?,
+    )
+
+    fun updateModel(
+        id: Int?,
+        name: String?,
+    )
+
+    fun updateDriveType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateBodyType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateSeatsMin(value: Int?)
+
+    fun updateEngineType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateColor(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateYearMin(value: Int?)
+
+    fun updateYearMax(value: Int?)
+
+    fun updateSeatsMax(value: Int?)
+
+    fun updateAvailableMileagePerDayKmMin(value: Int?)
 }
 
 class SearchViewModelImpl(
@@ -89,5 +129,67 @@ class SearchViewModelImpl(
 
     override fun updateDailyRateMax(value: Double?) {
         currentFiltersRepository.updateDailyRateMax(value)
+    }
+
+    override fun updateBrand(
+        id: Int?,
+        name: String?,
+    ) {
+        currentFiltersRepository.updateBrand(id, name)
+    }
+
+    override fun updateModel(
+        id: Int?,
+        name: String?,
+    ) {
+        currentFiltersRepository.updateModel(id, name)
+    }
+
+    override fun updateDriveType(
+        name: String?,
+        translate: String?,
+    ) {
+        currentFiltersRepository.updateDriveType(name, translate)
+    }
+
+    override fun updateBodyType(
+        name: String?,
+        translate: String?,
+    ) {
+        currentFiltersRepository.updateBodyType(name, translate)
+    }
+
+    override fun updateSeatsMin(value: Int?) {
+        currentFiltersRepository.updateSeatsMin(value)
+    }
+
+    override fun updateEngineType(
+        name: String?,
+        translate: String?,
+    ) {
+        currentFiltersRepository.updateEngineType(name, translate)
+    }
+
+    override fun updateColor(
+        name: String?,
+        translate: String?,
+    ) {
+        currentFiltersRepository.updateColor(name, translate)
+    }
+
+    override fun updateYearMin(value: Int?) {
+        currentFiltersRepository.updateYearMin(value)
+    }
+
+    override fun updateYearMax(value: Int?) {
+        currentFiltersRepository.updateYearMax(value)
+    }
+
+    override fun updateSeatsMax(value: Int?) {
+        currentFiltersRepository.updateSeatsMax(value)
+    }
+
+    override fun updateAvailableMileagePerDayKmMin(value: Int?) {
+        currentFiltersRepository.updateAvailableMileagePerDayKmMin(value)
     }
 }

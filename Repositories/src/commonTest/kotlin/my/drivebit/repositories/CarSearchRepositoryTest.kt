@@ -38,6 +38,8 @@ class CarSearchRepositoryTest {
         var searchBodyTypes: List<String>? = null
         var searchEngineTypes: List<String>? = null
         var searchColors: List<String>? = null
+        var searchBrandId: Int? = null
+        var searchDriveTypes: List<String>? = null
         var searchResult: CarSearchResponse = CarSearchResponse(emptyList())
         var shouldThrowError = false
         var errorMessage = "Network error"
@@ -56,6 +58,8 @@ class CarSearchRepositoryTest {
             bodyTypes: List<String>?,
             engineTypes: List<String>?,
             colors: List<String>?,
+            brandId: Int?,
+            driveTypes: List<String>?,
         ): CarSearchResponse {
             if (shouldThrowError) {
                 throw Exception(errorMessage)
@@ -73,6 +77,8 @@ class CarSearchRepositoryTest {
             searchBodyTypes = bodyTypes
             searchEngineTypes = engineTypes
             searchColors = colors
+            searchBrandId = brandId
+            searchDriveTypes = driveTypes
             return searchResult
         }
 
@@ -115,10 +121,48 @@ class CarSearchRepositoryTest {
         private val currentTaskShortNameState = MutableStateFlow<String?>(null)
         private val startStateFlow = MutableStateFlow<String?>(null)
         private val endStateFlow = MutableStateFlow<String?>(null)
+        private val dailyRateMinState = MutableStateFlow<Double?>(null)
+        private val dailyRateMaxState = MutableStateFlow<Double?>(null)
+        private val brandIdState = MutableStateFlow<Int?>(null)
+        private val brandNameState = MutableStateFlow<String?>(null)
+        private val modelIdState = MutableStateFlow<Int?>(null)
+        private val modelNameState = MutableStateFlow<String?>(null)
+        private val driveTypeNameState = MutableStateFlow<String?>(null)
+        private val driveTypeTranslateState = MutableStateFlow<String?>(null)
+        private val bodyTypeNameState = MutableStateFlow<String?>(null)
+        private val bodyTypeTranslateState = MutableStateFlow<String?>(null)
+        private val seatsMinState = MutableStateFlow<Int?>(null)
+        private val engineTypeNameState = MutableStateFlow<String?>(null)
+        private val engineTypeTranslateState = MutableStateFlow<String?>(null)
+        private val colorNameState = MutableStateFlow<String?>(null)
+        private val colorTranslateState = MutableStateFlow<String?>(null)
+        private val yearMinState = MutableStateFlow<Int?>(null)
+        private val yearMaxState = MutableStateFlow<Int?>(null)
+        private val seatsMaxState = MutableStateFlow<Int?>(null)
+        private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
 
         override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
         override val startState = startStateFlow.asStateFlow()
         override val endState = endStateFlow.asStateFlow()
+        override val dailyRateMin = dailyRateMinState.asStateFlow()
+        override val dailyRateMax = dailyRateMaxState.asStateFlow()
+        override val brandId = brandIdState.asStateFlow()
+        override val brandName = brandNameState.asStateFlow()
+        override val modelId = modelIdState.asStateFlow()
+        override val modelName = modelNameState.asStateFlow()
+        override val driveTypeName = driveTypeNameState.asStateFlow()
+        override val driveTypeTranslate = driveTypeTranslateState.asStateFlow()
+        override val bodyTypeName = bodyTypeNameState.asStateFlow()
+        override val bodyTypeTranslate = bodyTypeTranslateState.asStateFlow()
+        override val seatsMin = seatsMinState.asStateFlow()
+        override val engineTypeName = engineTypeNameState.asStateFlow()
+        override val engineTypeTranslate = engineTypeTranslateState.asStateFlow()
+        override val colorName = colorNameState.asStateFlow()
+        override val colorTranslate = colorTranslateState.asStateFlow()
+        override val yearMin = yearMinState.asStateFlow()
+        override val yearMax = yearMaxState.asStateFlow()
+        override val seatsMax = seatsMaxState.asStateFlow()
+        override val availableMileagePerDayKmMin = availableMileagePerDayKmMinState.asStateFlow()
 
         override fun updateCurrentTask(shortName: String) {
             currentTaskShortNameState.value = shortName
@@ -130,6 +174,82 @@ class CarSearchRepositoryTest {
 
         override fun updateEndDate(date: String?) {
             endStateFlow.value = date
+        }
+
+        override fun updateDailyRateMin(value: Double?) {
+            dailyRateMinState.value = value
+        }
+
+        override fun updateDailyRateMax(value: Double?) {
+            dailyRateMaxState.value = value
+        }
+
+        override fun updateBrand(
+            id: Int?,
+            name: String?,
+        ) {
+            brandIdState.value = id
+            brandNameState.value = name
+        }
+
+        override fun updateModel(
+            id: Int?,
+            name: String?,
+        ) {
+            modelIdState.value = id
+            modelNameState.value = name
+        }
+
+        override fun updateDriveType(
+            name: String?,
+            translate: String?,
+        ) {
+            driveTypeNameState.value = name
+            driveTypeTranslateState.value = translate
+        }
+
+        override fun updateBodyType(
+            name: String?,
+            translate: String?,
+        ) {
+            bodyTypeNameState.value = name
+            bodyTypeTranslateState.value = translate
+        }
+
+        override fun updateSeatsMin(value: Int?) {
+            seatsMinState.value = value
+        }
+
+        override fun updateEngineType(
+            name: String?,
+            translate: String?,
+        ) {
+            engineTypeNameState.value = name
+            engineTypeTranslateState.value = translate
+        }
+
+        override fun updateColor(
+            name: String?,
+            translate: String?,
+        ) {
+            colorNameState.value = name
+            colorTranslateState.value = translate
+        }
+
+        override fun updateYearMin(value: Int?) {
+            yearMinState.value = value
+        }
+
+        override fun updateYearMax(value: Int?) {
+            yearMaxState.value = value
+        }
+
+        override fun updateSeatsMax(value: Int?) {
+            seatsMaxState.value = value
+        }
+
+        override fun updateAvailableMileagePerDayKmMin(value: Int?) {
+            availableMileagePerDayKmMinState.value = value
         }
     }
 

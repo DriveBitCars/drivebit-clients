@@ -55,6 +55,8 @@ class MyCarRepositoryTest {
                         bodyTypes: List<String>?,
                         engineTypes: List<String>?,
                         colors: List<String>?,
+                        brandId: Int?,
+                        driveTypes: List<String>?,
                     ) = throw NotImplementedError()
 
                     override suspend fun getMyCars(): List<CarItem> {
@@ -111,6 +113,8 @@ class MyCarRepositoryTest {
                         bodyTypes: List<String>?,
                         engineTypes: List<String>?,
                         colors: List<String>?,
+                        brandId: Int?,
+                        driveTypes: List<String>?,
                     ) = throw NotImplementedError()
 
                     override suspend fun getMyCars(): List<CarItem> {
@@ -179,6 +183,8 @@ class MyCarRepositoryTest {
                         bodyTypes: List<String>?,
                         engineTypes: List<String>?,
                         colors: List<String>?,
+                        brandId: Int?,
+                        driveTypes: List<String>?,
                     ) = throw NotImplementedError()
 
                     override suspend fun getMyCars(): List<CarItem> {
@@ -238,6 +244,8 @@ class MyCarRepositoryTest {
                         bodyTypes: List<String>?,
                         engineTypes: List<String>?,
                         colors: List<String>?,
+                        brandId: Int?,
+                        driveTypes: List<String>?,
                     ) = throw NotImplementedError()
 
                     override suspend fun getMyCars(): List<CarItem> {

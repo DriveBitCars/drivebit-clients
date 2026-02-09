@@ -36,7 +36,7 @@ fun PriceRangeSlider(
         Div({
             style {
                 position(Position.Absolute)
-                property("left", "${minPercent}%")
+                property("left", "$minPercent%")
                 top(0.px)
                 property("width", "${maxPercent - minPercent}%")
                 height(100.percent)
