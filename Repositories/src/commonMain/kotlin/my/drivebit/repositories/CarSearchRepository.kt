@@ -56,7 +56,26 @@ internal class CarSearchRepositoryImpl(
                 Pair(dailyRateMin, dailyRateMax),
                 Quadruple(brandId, driveTypeName, bodyTypeName, seatsMin),
             )
-        }.flatMapLatest { (quadruple, priceRange, brandDriveBodySeatsQuadruple) ->
+        }.combine(
+            combine(
+                currentFiltersRepository.engineTypeName,
+                currentFiltersRepository.colorName,
+                currentFiltersRepository.yearMin,
+                currentFiltersRepository.yearMax,
+                currentFiltersRepository.seatsMax,
+                currentFiltersRepository.availableMileagePerDayKmMin,
+            ) { values ->
+                Quadruple(
+                    Pair(values[0] as String?, values[1] as String?),
+                    Pair(values[2] as Int?, values[3] as Int?),
+                    values[4] as Int?,
+                    values[5] as Int?,
+                )
+            },
+        ) { mainFilters, extraFilters ->
+            Pair(mainFilters, extraFilters)
+        }.flatMapLatest { (mainFilters, extraFilters) ->
+            val (quadruple, priceRange, brandDriveBodySeatsQuadruple) = mainFilters
             val brandId = brandDriveBodySeatsQuadruple.first
             val driveTypeName = brandDriveBodySeatsQuadruple.second
             val bodyTypeName = brandDriveBodySeatsQuadruple.third
@@ -67,6 +86,12 @@ internal class CarSearchRepositoryImpl(
             val endDate = quadruple.fourth
             val dailyRateMin = priceRange.first
             val dailyRateMax = priceRange.second
+            val engineTypeName = extraFilters.first.first
+            val colorName = extraFilters.first.second
+            val yearMin = extraFilters.second.first
+            val yearMax = extraFilters.second.second
+            val seatsMax = extraFilters.third
+            val availableMileagePerDayKmMin = extraFilters.fourth
             flow {
                 val filter =
                     currentTaskShortName?.let { shortName ->
@@ -80,16 +105,16 @@ internal class CarSearchRepositoryImpl(
                         cityId = selectedCity.id.toString(),
                         dateFrom = startDate,
                         dateTo = endDate,
-                        availableMileagePerDayKmMin = filter?.availableMileagePerDayKmMin,
+                        availableMileagePerDayKmMin = availableMileagePerDayKmMin ?: filter?.availableMileagePerDayKmMin,
                         dailyPriceMin = dailyRateMin?.toInt() ?: filter?.dailyPriceMin,
                         dailyPriceMax = dailyRateMax?.toInt() ?: filter?.dailyPriceMax,
-                        yearMin = filter?.yearMin,
-                        yearMax = filter?.yearMax,
+                        yearMin = yearMin ?: filter?.yearMin,
+                        yearMax = yearMax ?: filter?.yearMax,
                         seatsMin = seatsMin ?: filter?.seatsMin,
-                        seatsMax = filter?.seatsMax,
+                        seatsMax = seatsMax ?: filter?.seatsMax,
                         bodyTypes = bodyTypeName?.let { listOf(it) } ?: filter?.bodyTypes?.map { it.name },
-                        engineTypes = filter?.engineTypes?.map { it.name },
-                        colors = filter?.colors?.map { it.name },
+                        engineTypes = engineTypeName?.let { listOf(it) } ?: filter?.engineTypes?.map { it.name },
+                        colors = colorName?.let { listOf(it) } ?: filter?.colors?.map { it.name },
                         brandId = brandId,
                         driveTypes = driveTypeName?.let { listOf(it) },
                     )

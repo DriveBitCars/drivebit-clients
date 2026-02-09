@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.window
+import my.drivebit.components.AllFiltersPanel
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.BodyTypeFilter
 import my.drivebit.components.BrandModelFilter
@@ -68,11 +69,18 @@ fun SearchPage() {
     val filterDriveTypeTranslate by currentFiltersRepository.driveTypeTranslate.collectAsState(null)
     val filterBodyTypeTranslate by currentFiltersRepository.bodyTypeTranslate.collectAsState(null)
     val filterSeatsMin by currentFiltersRepository.seatsMin.collectAsState(null)
+    val filterEngineTypeTranslate by currentFiltersRepository.engineTypeTranslate.collectAsState(null)
+    val filterColorTranslate by currentFiltersRepository.colorTranslate.collectAsState(null)
+    val filterYearMin by currentFiltersRepository.yearMin.collectAsState(null)
+    val filterYearMax by currentFiltersRepository.yearMax.collectAsState(null)
+    val filterSeatsMax by currentFiltersRepository.seatsMax.collectAsState(null)
+    val filterMileageMin by currentFiltersRepository.availableMileagePerDayKmMin.collectAsState(null)
     var showPriceFilter by remember { mutableStateOf(false) }
     var showBrandFilter by remember { mutableStateOf(false) }
     var showDriveTypeFilter by remember { mutableStateOf(false) }
     var showBodyTypeFilter by remember { mutableStateOf(false) }
     var showSeatsFilter by remember { mutableStateOf(false) }
+    var showAllFilters by remember { mutableStateOf(false) }
     val minPrice = remember { mutableStateOf(dailyRateMin?.toInt() ?: 0) }
     val maxPrice = remember { mutableStateOf(dailyRateMax?.toInt() ?: 600) }
 
@@ -104,6 +112,13 @@ fun SearchPage() {
     val isBodyTypeSelected = filterBodyTypeTranslate != null
     val isSeatsSelected = filterSeatsMin != null
     val seatsChipText = filterSeatsMin?.let { "$it или более" }
+    val isAllFiltersSelected =
+        filterEngineTypeTranslate != null ||
+            filterColorTranslate != null ||
+            filterYearMin != null ||
+            filterYearMax != null ||
+            filterSeatsMax != null ||
+            filterMileageMin != null
 
     AppWithHeader {
         Div({
@@ -146,6 +161,7 @@ fun SearchPage() {
                                     showDriveTypeFilter = false
                                     showBodyTypeFilter = false
                                     showSeatsFilter = false
+                                    showAllFilters = false
                                 },
                                 isSelected = isPriceSelected,
                                 selectedText = priceText,
@@ -158,6 +174,7 @@ fun SearchPage() {
                                     showDriveTypeFilter = false
                                     showBodyTypeFilter = false
                                     showSeatsFilter = false
+                                    showAllFilters = false
                                 },
                                 isSelected = isBrandSelected,
                                 selectedText = brandChipText,
@@ -170,6 +187,7 @@ fun SearchPage() {
                                     showBrandFilter = false
                                     showBodyTypeFilter = false
                                     showSeatsFilter = false
+                                    showAllFilters = false
                                 },
                                 isSelected = isDriveTypeSelected,
                                 selectedText = filterDriveTypeTranslate,
@@ -182,6 +200,7 @@ fun SearchPage() {
                                     showBrandFilter = false
                                     showDriveTypeFilter = false
                                     showSeatsFilter = false
+                                    showAllFilters = false
                                 },
                                 isSelected = isBodyTypeSelected,
                                 selectedText = filterBodyTypeTranslate,
@@ -194,9 +213,23 @@ fun SearchPage() {
                                     showBrandFilter = false
                                     showDriveTypeFilter = false
                                     showBodyTypeFilter = false
+                                    showAllFilters = false
                                 },
                                 isSelected = isSeatsSelected,
                                 selectedText = seatsChipText,
+                            )
+                            FilterChip(
+                                name = "Все",
+                                onClick = {
+                                    showAllFilters = !showAllFilters
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                },
+                                isSelected = isAllFiltersSelected,
+                                selectedText = null,
                             )
                         }
                         if (showPriceFilter) {
@@ -308,6 +341,51 @@ fun SearchPage() {
                                     onReset = {
                                         viewModel.updateSeatsMin(null)
                                         showSeatsFilter = false
+                                    },
+                                )
+                            }
+                        }
+                        if (showAllFilters) {
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    property("justify-content", "flex-start")
+                                    width(100.percent)
+                                }
+                            }) {
+                                AllFiltersPanel(
+                                    selectedEngineTypeTranslate = filterEngineTypeTranslate,
+                                    selectedColorTranslate = filterColorTranslate,
+                                    selectedYearMin = filterYearMin,
+                                    selectedYearMax = filterYearMax,
+                                    selectedSeatsMax = filterSeatsMax,
+                                    selectedMileageMin = filterMileageMin,
+                                    onEngineTypeSelected = { name, translate ->
+                                        viewModel.updateEngineType(name, translate)
+                                    },
+                                    onColorSelected = { name, translate ->
+                                        viewModel.updateColor(name, translate)
+                                    },
+                                    onYearMinChanged = { yearMin ->
+                                        viewModel.updateYearMin(yearMin)
+                                    },
+                                    onYearMaxChanged = { yearMax ->
+                                        viewModel.updateYearMax(yearMax)
+                                    },
+                                    onSeatsMaxChanged = { seatsMax ->
+                                        viewModel.updateSeatsMax(seatsMax)
+                                    },
+                                    onMileageMinChanged = { mileageMin ->
+                                        viewModel.updateAvailableMileagePerDayKmMin(mileageMin)
+                                    },
+                                    onReset = {
+                                        viewModel.updateEngineType(null, null)
+                                        viewModel.updateColor(null, null)
+                                        viewModel.updateYearMin(null)
+                                        viewModel.updateYearMax(null)
+                                        viewModel.updateSeatsMax(null)
+                                        viewModel.updateAvailableMileagePerDayKmMin(null)
+                                        showAllFilters = false
                                     },
                                 )
                             }

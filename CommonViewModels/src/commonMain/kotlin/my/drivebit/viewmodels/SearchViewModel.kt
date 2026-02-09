@@ -59,6 +59,24 @@ interface SearchViewModel {
     )
 
     fun updateSeatsMin(value: Int?)
+
+    fun updateEngineType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateColor(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateYearMin(value: Int?)
+
+    fun updateYearMax(value: Int?)
+
+    fun updateSeatsMax(value: Int?)
+
+    fun updateAvailableMileagePerDayKmMin(value: Int?)
 }
 
 class SearchViewModelImpl(
@@ -143,5 +161,35 @@ class SearchViewModelImpl(
 
     override fun updateSeatsMin(value: Int?) {
         currentFiltersRepository.updateSeatsMin(value)
+    }
+
+    override fun updateEngineType(
+        name: String?,
+        translate: String?,
+    ) {
+        currentFiltersRepository.updateEngineType(name, translate)
+    }
+
+    override fun updateColor(
+        name: String?,
+        translate: String?,
+    ) {
+        currentFiltersRepository.updateColor(name, translate)
+    }
+
+    override fun updateYearMin(value: Int?) {
+        currentFiltersRepository.updateYearMin(value)
+    }
+
+    override fun updateYearMax(value: Int?) {
+        currentFiltersRepository.updateYearMax(value)
+    }
+
+    override fun updateSeatsMax(value: Int?) {
+        currentFiltersRepository.updateSeatsMax(value)
+    }
+
+    override fun updateAvailableMileagePerDayKmMin(value: Int?) {
+        currentFiltersRepository.updateAvailableMileagePerDayKmMin(value)
     }
 }

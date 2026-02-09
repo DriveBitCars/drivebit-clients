@@ -87,6 +87,14 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     private val bodyTypeNameState = MutableStateFlow<String?>(null)
     private val bodyTypeTranslateState = MutableStateFlow<String?>(null)
     private val seatsMinState = MutableStateFlow<Int?>(null)
+    private val engineTypeNameState = MutableStateFlow<String?>(null)
+    private val engineTypeTranslateState = MutableStateFlow<String?>(null)
+    private val colorNameState = MutableStateFlow<String?>(null)
+    private val colorTranslateState = MutableStateFlow<String?>(null)
+    private val yearMinState = MutableStateFlow<Int?>(null)
+    private val yearMaxState = MutableStateFlow<Int?>(null)
+    private val seatsMaxState = MutableStateFlow<Int?>(null)
+    private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
 
     override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
     override val startState = startStateFlow.asStateFlow()
@@ -102,6 +110,14 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     override val bodyTypeName = bodyTypeNameState.asStateFlow()
     override val bodyTypeTranslate = bodyTypeTranslateState.asStateFlow()
     override val seatsMin = seatsMinState.asStateFlow()
+    override val engineTypeName = engineTypeNameState.asStateFlow()
+    override val engineTypeTranslate = engineTypeTranslateState.asStateFlow()
+    override val colorName = colorNameState.asStateFlow()
+    override val colorTranslate = colorTranslateState.asStateFlow()
+    override val yearMin = yearMinState.asStateFlow()
+    override val yearMax = yearMaxState.asStateFlow()
+    override val seatsMax = seatsMaxState.asStateFlow()
+    override val availableMileagePerDayKmMin = availableMileagePerDayKmMinState.asStateFlow()
 
     override fun updateCurrentTask(shortName: String) {
         currentTaskShortNameState.value = shortName
@@ -157,6 +173,38 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
 
     override fun updateSeatsMin(value: Int?) {
         seatsMinState.value = value
+    }
+
+    override fun updateEngineType(
+        name: String?,
+        translate: String?,
+    ) {
+        engineTypeNameState.value = name
+        engineTypeTranslateState.value = translate
+    }
+
+    override fun updateColor(
+        name: String?,
+        translate: String?,
+    ) {
+        colorNameState.value = name
+        colorTranslateState.value = translate
+    }
+
+    override fun updateYearMin(value: Int?) {
+        yearMinState.value = value
+    }
+
+    override fun updateYearMax(value: Int?) {
+        yearMaxState.value = value
+    }
+
+    override fun updateSeatsMax(value: Int?) {
+        seatsMaxState.value = value
+    }
+
+    override fun updateAvailableMileagePerDayKmMin(value: Int?) {
+        availableMileagePerDayKmMinState.value = value
     }
 }
 

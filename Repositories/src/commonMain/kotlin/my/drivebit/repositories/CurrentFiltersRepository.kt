@@ -20,6 +20,14 @@ interface CurrentFiltersRepository {
     val bodyTypeName: Flow<String?>
     val bodyTypeTranslate: Flow<String?>
     val seatsMin: Flow<Int?>
+    val engineTypeName: Flow<String?>
+    val engineTypeTranslate: Flow<String?>
+    val colorName: Flow<String?>
+    val colorTranslate: Flow<String?>
+    val yearMin: Flow<Int?>
+    val yearMax: Flow<Int?>
+    val seatsMax: Flow<Int?>
+    val availableMileagePerDayKmMin: Flow<Int?>
 
     fun updateCurrentTask(shortName: String)
 
@@ -52,6 +60,24 @@ interface CurrentFiltersRepository {
     )
 
     fun updateSeatsMin(value: Int?)
+
+    fun updateEngineType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateColor(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateYearMin(value: Int?)
+
+    fun updateYearMax(value: Int?)
+
+    fun updateSeatsMax(value: Int?)
+
+    fun updateAvailableMileagePerDayKmMin(value: Int?)
 }
 
 internal class CurrentFiltersRepositoryImpl(
@@ -72,6 +98,14 @@ internal class CurrentFiltersRepositoryImpl(
         private const val BODY_TYPE_NAME_KEY = "filter_body_type_name"
         private const val BODY_TYPE_TRANSLATE_KEY = "filter_body_type_translate"
         private const val SEATS_MIN_KEY = "filter_seats_min"
+        private const val ENGINE_TYPE_NAME_KEY = "filter_engine_type_name"
+        private const val ENGINE_TYPE_TRANSLATE_KEY = "filter_engine_type_translate"
+        private const val COLOR_NAME_KEY = "filter_color_name"
+        private const val COLOR_TRANSLATE_KEY = "filter_color_translate"
+        private const val YEAR_MIN_KEY = "filter_year_min"
+        private const val YEAR_MAX_KEY = "filter_year_max"
+        private const val SEATS_MAX_KEY = "filter_seats_max"
+        private const val AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY = "filter_available_mileage_per_day_km_min"
     }
 
     private val currentTaskShortNameState = MutableStateFlow<String?>(null)
@@ -88,6 +122,14 @@ internal class CurrentFiltersRepositoryImpl(
     private val bodyTypeNameState = MutableStateFlow<String?>(null)
     private val bodyTypeTranslateState = MutableStateFlow<String?>(null)
     private val seatsMinState = MutableStateFlow<Int?>(null)
+    private val engineTypeNameState = MutableStateFlow<String?>(null)
+    private val engineTypeTranslateState = MutableStateFlow<String?>(null)
+    private val colorNameState = MutableStateFlow<String?>(null)
+    private val colorTranslateState = MutableStateFlow<String?>(null)
+    private val yearMinState = MutableStateFlow<Int?>(null)
+    private val yearMaxState = MutableStateFlow<Int?>(null)
+    private val seatsMaxState = MutableStateFlow<Int?>(null)
+    private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
 
     init {
         val savedTaskShortName = settings.getStringOrNullIfEmpty(CURRENT_TASK_SHORT_NAME_KEY)
@@ -131,6 +173,30 @@ internal class CurrentFiltersRepositoryImpl(
 
         val savedSeatsMin = settings.getInt(SEATS_MIN_KEY, -1)
         seatsMinState.value = if (savedSeatsMin < 0) null else savedSeatsMin
+
+        val savedEngineTypeName = settings.getStringOrNullIfEmpty(ENGINE_TYPE_NAME_KEY)
+        engineTypeNameState.value = savedEngineTypeName
+
+        val savedEngineTypeTranslate = settings.getStringOrNullIfEmpty(ENGINE_TYPE_TRANSLATE_KEY)
+        engineTypeTranslateState.value = savedEngineTypeTranslate
+
+        val savedColorName = settings.getStringOrNullIfEmpty(COLOR_NAME_KEY)
+        colorNameState.value = savedColorName
+
+        val savedColorTranslate = settings.getStringOrNullIfEmpty(COLOR_TRANSLATE_KEY)
+        colorTranslateState.value = savedColorTranslate
+
+        val savedYearMin = settings.getInt(YEAR_MIN_KEY, -1)
+        yearMinState.value = if (savedYearMin < 0) null else savedYearMin
+
+        val savedYearMax = settings.getInt(YEAR_MAX_KEY, -1)
+        yearMaxState.value = if (savedYearMax < 0) null else savedYearMax
+
+        val savedSeatsMax = settings.getInt(SEATS_MAX_KEY, -1)
+        seatsMaxState.value = if (savedSeatsMax < 0) null else savedSeatsMax
+
+        val savedAvailableMileage = settings.getInt(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY, -1)
+        availableMileagePerDayKmMinState.value = if (savedAvailableMileage < 0) null else savedAvailableMileage
     }
 
     override val currentTaskShortName: Flow<String?> = currentTaskShortNameState.asStateFlow()
@@ -147,6 +213,14 @@ internal class CurrentFiltersRepositoryImpl(
     override val bodyTypeName: Flow<String?> = bodyTypeNameState.asStateFlow()
     override val bodyTypeTranslate: Flow<String?> = bodyTypeTranslateState.asStateFlow()
     override val seatsMin: Flow<Int?> = seatsMinState.asStateFlow()
+    override val engineTypeName: Flow<String?> = engineTypeNameState.asStateFlow()
+    override val engineTypeTranslate: Flow<String?> = engineTypeTranslateState.asStateFlow()
+    override val colorName: Flow<String?> = colorNameState.asStateFlow()
+    override val colorTranslate: Flow<String?> = colorTranslateState.asStateFlow()
+    override val yearMin: Flow<Int?> = yearMinState.asStateFlow()
+    override val yearMax: Flow<Int?> = yearMaxState.asStateFlow()
+    override val seatsMax: Flow<Int?> = seatsMaxState.asStateFlow()
+    override val availableMileagePerDayKmMin: Flow<Int?> = availableMileagePerDayKmMinState.asStateFlow()
 
     override fun updateCurrentTask(shortName: String) {
         settings.putString(CURRENT_TASK_SHORT_NAME_KEY, shortName)
@@ -268,5 +342,77 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(SEATS_MIN_KEY)
         }
         seatsMinState.value = value
+    }
+
+    override fun updateEngineType(
+        name: String?,
+        translate: String?,
+    ) {
+        if (name != null) {
+            settings.putString(ENGINE_TYPE_NAME_KEY, name)
+        } else {
+            settings.remove(ENGINE_TYPE_NAME_KEY)
+        }
+        if (translate != null) {
+            settings.putString(ENGINE_TYPE_TRANSLATE_KEY, translate)
+        } else {
+            settings.remove(ENGINE_TYPE_TRANSLATE_KEY)
+        }
+        engineTypeNameState.value = name
+        engineTypeTranslateState.value = translate
+    }
+
+    override fun updateColor(
+        name: String?,
+        translate: String?,
+    ) {
+        if (name != null) {
+            settings.putString(COLOR_NAME_KEY, name)
+        } else {
+            settings.remove(COLOR_NAME_KEY)
+        }
+        if (translate != null) {
+            settings.putString(COLOR_TRANSLATE_KEY, translate)
+        } else {
+            settings.remove(COLOR_TRANSLATE_KEY)
+        }
+        colorNameState.value = name
+        colorTranslateState.value = translate
+    }
+
+    override fun updateYearMin(value: Int?) {
+        if (value != null) {
+            settings.putInt(YEAR_MIN_KEY, value)
+        } else {
+            settings.remove(YEAR_MIN_KEY)
+        }
+        yearMinState.value = value
+    }
+
+    override fun updateYearMax(value: Int?) {
+        if (value != null) {
+            settings.putInt(YEAR_MAX_KEY, value)
+        } else {
+            settings.remove(YEAR_MAX_KEY)
+        }
+        yearMaxState.value = value
+    }
+
+    override fun updateSeatsMax(value: Int?) {
+        if (value != null) {
+            settings.putInt(SEATS_MAX_KEY, value)
+        } else {
+            settings.remove(SEATS_MAX_KEY)
+        }
+        seatsMaxState.value = value
+    }
+
+    override fun updateAvailableMileagePerDayKmMin(value: Int?) {
+        if (value != null) {
+            settings.putInt(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY, value)
+        } else {
+            settings.remove(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY)
+        }
+        availableMileagePerDayKmMinState.value = value
     }
 }

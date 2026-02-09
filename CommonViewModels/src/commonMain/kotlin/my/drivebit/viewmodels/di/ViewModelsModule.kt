@@ -29,6 +29,7 @@ import my.drivebit.viewmodels.CarPhotosViewModelImpl
 import my.drivebit.viewmodels.CarSearchViewModel
 import my.drivebit.viewmodels.CarSearchViewModelImpl
 import my.drivebit.viewmodels.CityViewModel
+import my.drivebit.viewmodels.ColorViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModelImpl
 import my.drivebit.viewmodels.DateFieldViewModel
@@ -240,6 +241,12 @@ val commonViewModelsModule: Module =
 
         factory {
             EngineTypeViewModel(
+                carEnumsRepository = get(),
+            )
+        }
+
+        factory {
+            ColorViewModel(
                 carEnumsRepository = get(),
             )
         }
