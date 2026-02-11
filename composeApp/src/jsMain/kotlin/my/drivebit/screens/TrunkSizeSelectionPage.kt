@@ -39,7 +39,7 @@ fun TrunkSizeSelectionPage(onTrunkSizeSelected: () -> Unit = {}) {
     PageWithLogo {
         CenteredFormContainer {
             PageHeader {
-                TextSmartHeader("Выберите размер бака")
+                TextSmartHeader("Размер багажника")
             }
 
             FormSection(

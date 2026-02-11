@@ -21,6 +21,7 @@ fun TextInputField(
     onFocus: (() -> Unit)? = null,
     onBlur: (() -> Unit)? = null,
     numeric: Boolean = false,
+    errorMessage: String? = null,
 ) {
     Column(gap = 12.px) {
         Span({
@@ -62,12 +63,25 @@ fun TextInputField(
                     applyTypography(CSSTypography.Styles.body)
                     fontSize(CSSTypography.FontSize.base)
                     color(CSSColors.Black)
-                    border(1.px, LineStyle.Solid, CSSColors.Gray600)
+                    val borderColor = if (errorMessage != null) CSSColors.Red else CSSColors.Gray600
+                    border(1.px, LineStyle.Solid, borderColor)
                     borderRadius(8.px)
                     padding(12.px, 16.px)
                     width(100.percent)
                 }
             },
         )
+
+        if (errorMessage != null) {
+            Span({
+                style {
+                    applyTypography(CSSTypography.Styles.body)
+                    fontSize(CSSTypography.FontSize.sm)
+                    color(CSSColors.Red)
+                }
+            }) {
+                Text(errorMessage)
+            }
+        }
     }
 }

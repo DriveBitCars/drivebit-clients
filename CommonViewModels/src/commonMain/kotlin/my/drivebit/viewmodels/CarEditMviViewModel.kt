@@ -186,10 +186,11 @@ sealed interface CarEditMviState {
         val engineTypeBlurTimeout: Int? = null,
         val trunkSizeBlurTimeout: Int? = null,
         val saveError: String? = null,
+        val licensePlateError: String? = null,
         val hasChanges: Boolean = false,
     ) : CarEditMviState {
         val isSaveButtonEnabled: Boolean
-            get() = hasChanges
+            get() = hasChanges && licensePlateError == null
     }
 
     data object NavigateToMyCars : CarEditMviState
@@ -313,7 +314,26 @@ class CarEditMviViewModelImpl(
                 deleteCar()
             }
             is CarEditIntent.UpdateLicensePlate -> {
-                updateFormData { it.copy(licensePlate = intent.value) }
+                val filtered = LicensePlateValidator.filterInput(intent.value)
+                val error =
+                    if (filtered.isBlank() || LicensePlateValidator.isValid(filtered)) {
+                        null
+                    } else {
+                        LicensePlateValidator.ERROR_MESSAGE
+                    }
+                _state.update { currentState ->
+                    when (currentState) {
+                        is CarEditMviState.Success -> {
+                            _hasChanges.value = true
+                            currentState.copy(
+                                formData = currentState.formData.copy(licensePlate = filtered),
+                                licensePlateError = error,
+                                hasChanges = true,
+                            )
+                        }
+                        else -> currentState
+                    }
+                }
             }
             is CarEditIntent.UpdateBrandSearch -> {
                 carBrandViewModel.updateQuery(intent.value)
@@ -451,6 +471,15 @@ class CarEditMviViewModelImpl(
             if (currentState !is CarEditMviState.Success) return@launch
             val formData = currentState.formData
             val carIdToSave = currentState.carId
+
+            if (formData.licensePlate.isNotBlank() && !LicensePlateValidator.isValid(formData.licensePlate)) {
+                _state.update {
+                    (it as? CarEditMviState.Success)?.copy(
+                        licensePlateError = LicensePlateValidator.ERROR_MESSAGE,
+                    ) ?: it
+                }
+                return@launch
+            }
 
             _state.update { (it as? CarEditMviState.Success)?.copy(hasChanges = false) ?: it }
             _hasChanges.value = false

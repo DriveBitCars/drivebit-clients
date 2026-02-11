@@ -95,6 +95,8 @@ fun CarEditPage() {
                                 label = "Госномер",
                                 value = formData.licensePlate,
                                 onValueChange = { viewModel.handleIntent(CarEditIntent.UpdateLicensePlate(it)) },
+                                maxLength = 9,
+                                errorMessage = currentState.licensePlateError,
                             )
 
                             TextAreaField(

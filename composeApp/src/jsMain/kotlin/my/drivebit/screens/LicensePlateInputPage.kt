@@ -21,6 +21,7 @@ import my.drivebit.repositories.LicensePlateRepository
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.CreateCarFromDailyRateState
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
+import my.drivebit.viewmodels.LicensePlateValidator
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
@@ -40,7 +41,7 @@ fun LicensePlateInputPage(
 
     val isLoading = createCarState is CreateCarFromDailyRateState.Loading
     val errorFromState = (createCarState as? CreateCarFromDailyRateState.Error)?.message
-    val isValid = licensePlate.trim().isNotEmpty() && licensePlate.trim().length >= 2 && !isLoading
+    val isValid = LicensePlateValidator.isValid(licensePlate) && !isLoading
 
     buttonViewModel.setState(
         when {
@@ -75,14 +76,20 @@ fun LicensePlateInputPage(
                     label = "Государственный номер",
                     value = licensePlate,
                     onValueChange = { newValue ->
-                        licensePlate = newValue.uppercase()
-                        error = null
+                        val filtered = LicensePlateValidator.filterInput(newValue)
+                        licensePlate = filtered
+                        error = if (filtered.isBlank() || LicensePlateValidator.isValid(filtered)) {
+                            null
+                        } else {
+                            LicensePlateValidator.ERROR_MESSAGE
+                        }
                     },
-                    maxLength = 20,
+                    maxLength = LicensePlateValidator.MAX_LENGTH,
+                    errorMessage = error,
                 )
 
-                if (error != null || errorFromState != null) {
-                    TextError(error ?: errorFromState ?: "Произошла ошибка")
+                if (errorFromState != null) {
+                    TextError(errorFromState)
                 }
 
                 Row(
@@ -100,12 +107,16 @@ fun LicensePlateInputPage(
                             enabledColor = CSSColors.Blue,
                             text = if (isLoading) "Создание..." else "Создать",
                             onClick = {
-                                val plate = licensePlate.trim().uppercase()
-                                if (plate.isNotEmpty() && plate.length >= 2) {
+                                val plate = licensePlate.trim()
+                                if (LicensePlateValidator.isValid(plate)) {
                                     licensePlateRepository.saveLicensePlate(plate)
                                     createCarViewModel.createFromSavedDailyRate()
                                 } else {
-                                    error = "Введите номер"
+                                    error = if (plate.isEmpty()) {
+                                        "Введите номер"
+                                    } else {
+                                        LicensePlateValidator.ERROR_MESSAGE
+                                    }
                                 }
                             },
                         )
