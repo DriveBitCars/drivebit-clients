@@ -8,11 +8,10 @@ import androidx.compose.runtime.setValue
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
-import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
-import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.repositories.CarDataRepository
 import my.drivebit.viewmodels.ButtonState
@@ -22,7 +21,10 @@ import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 
 @Composable
-fun ProductionYearInputPage(onYearEntered: () -> Unit = {}) {
+fun ProductionYearInputPage(
+    onYearEntered: () -> Unit = {},
+    onBack: () -> Unit = {},
+) {
     val carDataRepository: CarDataRepository = koinInject()
     val buttonViewModel = createButtonViewModel()
     var year by remember { mutableStateOf("") }
@@ -40,9 +42,10 @@ fun ProductionYearInputPage(onYearEntered: () -> Unit = {}) {
 
     PageWithLogo {
         CenteredFormContainer {
-            PageHeader {
-                TextSmartHeader("Год выпуска")
-            }
+            ToolbarBackArrow(
+                title = "Год выпуска",
+                onBackClick = onBack,
+            )
 
             FormSection {
                 TextInputField(

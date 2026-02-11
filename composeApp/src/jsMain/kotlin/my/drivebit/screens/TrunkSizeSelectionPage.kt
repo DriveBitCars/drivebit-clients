@@ -9,18 +9,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
-import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.StringList
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
-import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.repositories.SelectedTrunkSizeRepository
 import my.drivebit.viewmodels.TrunkSizeViewModel
 import org.koin.compose.koinInject
 
 @Composable
-fun TrunkSizeSelectionPage(onTrunkSizeSelected: () -> Unit = {}) {
+fun TrunkSizeSelectionPage(
+    onTrunkSizeSelected: () -> Unit = {},
+    onBack: () -> Unit = {},
+) {
     val viewModel: TrunkSizeViewModel = koinInject()
     val selectedTrunkSizeRepository: SelectedTrunkSizeRepository = koinInject()
     val trunkSizes by viewModel.trunkSizes.collectAsState()
@@ -38,9 +40,10 @@ fun TrunkSizeSelectionPage(onTrunkSizeSelected: () -> Unit = {}) {
 
     PageWithLogo {
         CenteredFormContainer {
-            PageHeader {
-                TextSmartHeader("Размер багажника")
-            }
+            ToolbarBackArrow(
+                title = "Размер багажника",
+                onBackClick = onBack,
+            )
 
             FormSection(
                 listingContent = {

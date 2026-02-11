@@ -9,18 +9,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
-import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.StringList
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
-import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.repositories.SelectedDriveTypeRepository
 import my.drivebit.viewmodels.DriveTypeViewModel
 import org.koin.compose.koinInject
 
 @Composable
-fun DriveTypeSelectionPage(onDriveTypeSelected: () -> Unit = {}) {
+fun DriveTypeSelectionPage(
+    onDriveTypeSelected: () -> Unit = {},
+    onBack: () -> Unit = {},
+) {
     val viewModel: DriveTypeViewModel = koinInject()
     val selectedDriveTypeRepository: SelectedDriveTypeRepository = koinInject()
     val driveTypes by viewModel.driveTypes.collectAsState()
@@ -38,9 +40,10 @@ fun DriveTypeSelectionPage(onDriveTypeSelected: () -> Unit = {}) {
 
     PageWithLogo {
         CenteredFormContainer {
-            PageHeader {
-                TextSmartHeader("Выберите привод")
-            }
+            ToolbarBackArrow(
+                title = "Выберите привод",
+                onBackClick = onBack,
+            )
 
             FormSection(
                 listingContent = {

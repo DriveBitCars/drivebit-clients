@@ -10,12 +10,11 @@ import androidx.compose.runtime.setValue
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
-import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
-import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.repositories.LicensePlateRepository
 import my.drivebit.viewmodels.ButtonState
@@ -31,6 +30,7 @@ import org.koin.compose.koinInject
 fun LicensePlateInputPage(
     onLicensePlateEntered: () -> Unit = {},
     onMissingPassport: () -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
     val licensePlateRepository: LicensePlateRepository = koinInject()
     val createCarViewModel: CreateCarFromDailyRateViewModel = koinInject()
@@ -67,9 +67,10 @@ fun LicensePlateInputPage(
 
     PageWithLogo {
         CenteredFormContainer {
-            PageHeader {
-                TextSmartHeader("Введите номер")
-            }
+            ToolbarBackArrow(
+                title = "Введите номер",
+                onBackClick = onBack,
+            )
 
             FormSection {
                 TextInputField(

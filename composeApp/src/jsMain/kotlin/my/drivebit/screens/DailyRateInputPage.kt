@@ -8,12 +8,11 @@ import androidx.compose.runtime.setValue
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
-import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
-import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.repositories.CarDataRepository
 import my.drivebit.viewmodels.ButtonState
@@ -23,7 +22,10 @@ import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 
 @Composable
-fun DailyRateInputPage(onNavigateToLicensePlate: () -> Unit) {
+fun DailyRateInputPage(
+    onNavigateToLicensePlate: () -> Unit,
+    onBack: () -> Unit = {},
+) {
     val carDataRepository: CarDataRepository = koinInject()
     val buttonViewModel = createButtonViewModel()
 
@@ -43,9 +45,10 @@ fun DailyRateInputPage(onNavigateToLicensePlate: () -> Unit) {
 
     PageWithLogo {
         CenteredFormContainer {
-            PageHeader {
-                TextSmartHeader("Оплата за день")
-            }
+            ToolbarBackArrow(
+                title = "Оплата за день",
+                onBackClick = onBack,
+            )
 
             FormSection {
                 TextInputField(
