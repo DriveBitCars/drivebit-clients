@@ -9,18 +9,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
-import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.StringList
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
-import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.repositories.SelectedCarBrandRepository
 import my.drivebit.viewmodels.CarBrandViewModel
 import org.koin.compose.koinInject
 
 @Composable
-fun CarBrandSelectionPage(onBrandSelected: (brandId: Int) -> Unit = {}) {
+fun CarBrandSelectionPage(
+    onBrandSelected: (brandId: Int) -> Unit = {},
+    onBack: () -> Unit = {},
+) {
     val viewModel: CarBrandViewModel = koinInject()
     val selectedCarBrandRepository: SelectedCarBrandRepository = koinInject()
     val brands by viewModel.brands.collectAsState()
@@ -34,9 +36,10 @@ fun CarBrandSelectionPage(onBrandSelected: (brandId: Int) -> Unit = {}) {
 
     PageWithLogo {
         CenteredFormContainer {
-            PageHeader {
-                TextSmartHeader("Выберите бренд")
-            }
+            ToolbarBackArrow(
+                title = "Выберите бренд",
+                onBackClick = onBack,
+            )
 
             FormSection(
                 listingContent = {

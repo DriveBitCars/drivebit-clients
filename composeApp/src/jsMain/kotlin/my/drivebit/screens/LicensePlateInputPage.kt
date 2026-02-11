@@ -10,17 +10,17 @@ import androidx.compose.runtime.setValue
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
-import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
-import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.repositories.LicensePlateRepository
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.CreateCarFromDailyRateState
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
+import my.drivebit.viewmodels.LicensePlateValidator
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
@@ -30,6 +30,7 @@ import org.koin.compose.koinInject
 fun LicensePlateInputPage(
     onLicensePlateEntered: () -> Unit = {},
     onMissingPassport: () -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
     val licensePlateRepository: LicensePlateRepository = koinInject()
     val createCarViewModel: CreateCarFromDailyRateViewModel = koinInject()
@@ -40,7 +41,7 @@ fun LicensePlateInputPage(
 
     val isLoading = createCarState is CreateCarFromDailyRateState.Loading
     val errorFromState = (createCarState as? CreateCarFromDailyRateState.Error)?.message
-    val isValid = licensePlate.trim().isNotEmpty() && licensePlate.trim().length >= 2 && !isLoading
+    val isValid = LicensePlateValidator.isValid(licensePlate) && !isLoading
 
     buttonViewModel.setState(
         when {
@@ -66,23 +67,30 @@ fun LicensePlateInputPage(
 
     PageWithLogo {
         CenteredFormContainer {
-            PageHeader {
-                TextSmartHeader("Введите номер")
-            }
+            ToolbarBackArrow(
+                title = "Введите номер",
+                onBackClick = onBack,
+            )
 
             FormSection {
                 TextInputField(
                     label = "Государственный номер",
                     value = licensePlate,
                     onValueChange = { newValue ->
-                        licensePlate = newValue.uppercase()
-                        error = null
+                        val filtered = LicensePlateValidator.filterInput(newValue)
+                        licensePlate = filtered
+                        error = if (filtered.isBlank() || LicensePlateValidator.isValid(filtered)) {
+                            null
+                        } else {
+                            LicensePlateValidator.ERROR_MESSAGE
+                        }
                     },
-                    maxLength = 20,
+                    maxLength = LicensePlateValidator.MAX_LENGTH,
+                    errorMessage = error,
                 )
 
-                if (error != null || errorFromState != null) {
-                    TextError(error ?: errorFromState ?: "Произошла ошибка")
+                if (errorFromState != null) {
+                    TextError(errorFromState)
                 }
 
                 Row(
@@ -100,12 +108,16 @@ fun LicensePlateInputPage(
                             enabledColor = CSSColors.Blue,
                             text = if (isLoading) "Создание..." else "Создать",
                             onClick = {
-                                val plate = licensePlate.trim().uppercase()
-                                if (plate.isNotEmpty() && plate.length >= 2) {
+                                val plate = licensePlate.trim()
+                                if (LicensePlateValidator.isValid(plate)) {
                                     licensePlateRepository.saveLicensePlate(plate)
                                     createCarViewModel.createFromSavedDailyRate()
                                 } else {
-                                    error = "Введите номер"
+                                    error = if (plate.isEmpty()) {
+                                        "Введите номер"
+                                    } else {
+                                        LicensePlateValidator.ERROR_MESSAGE
+                                    }
                                 }
                             },
                         )

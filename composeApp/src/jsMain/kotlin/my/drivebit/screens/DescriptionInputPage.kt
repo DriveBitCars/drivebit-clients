@@ -6,11 +6,10 @@ import androidx.compose.runtime.getValue
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
-import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.Row
 import my.drivebit.components.TextAreaField
-import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DescriptionInputViewModel
@@ -26,7 +25,10 @@ import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 
 @Composable
-fun DescriptionInputPage(onDescriptionEntered: () -> Unit = {}) {
+fun DescriptionInputPage(
+    onDescriptionEntered: () -> Unit = {},
+    onBack: () -> Unit = {},
+) {
     val viewModel: DescriptionInputViewModel = koinInject()
     val state by viewModel.state.collectAsState()
     val buttonViewModel = createButtonViewModel()
@@ -37,9 +39,10 @@ fun DescriptionInputPage(onDescriptionEntered: () -> Unit = {}) {
 
     PageWithLogo {
         CenteredFormContainer {
-            PageHeader {
-                TextSmartHeader("Описание автомобиля")
-            }
+            ToolbarBackArrow(
+                title = "Описание автомобиля",
+                onBackClick = onBack,
+            )
 
             FormSection {
                 TextAreaField(

@@ -137,6 +137,9 @@ actual fun App() {
                         onMissingPassport = {
                             window.location.href = "/passport-upload?autoCreate=1"
                         },
+                        onBack = {
+                            window.location.href = "/daily-rate-input"
+                        },
                     )
                 }
                 // currentPath == "/win-code-input" -> {
@@ -151,12 +154,18 @@ actual fun App() {
                         onBrandSelected = { brandId ->
                             window.location.href = "/car-model-selection?brandId=$brandId"
                         },
+                        onBack = {
+                            window.location.href = "/address-input"
+                        },
                     )
                 }
                 currentPath.startsWith("/car-model-selection") -> {
                     CarModelSelectionPage(
                         onModelSelected = {
                             window.location.href = "/body-type-selection"
+                        },
+                        onBack = {
+                            window.location.href = "/car-brand-selection"
                         },
                     )
                 }
@@ -165,12 +174,18 @@ actual fun App() {
                         onBodyTypeSelected = {
                             window.location.href = "/drive-type-selection"
                         },
+                        onBack = {
+                            window.location.href = "/car-model-selection"
+                        },
                     )
                 }
                 currentPath.startsWith("/drive-type-selection") -> {
                     DriveTypeSelectionPage(
                         onDriveTypeSelected = {
                             window.location.href = "/engine-type-selection"
+                        },
+                        onBack = {
+                            window.location.href = "/body-type-selection"
                         },
                     )
                 }
@@ -179,6 +194,9 @@ actual fun App() {
                         onEngineTypeSelected = {
                             window.location.href = "/engine-volume-input"
                         },
+                        onBack = {
+                            window.location.href = "/drive-type-selection"
+                        },
                     )
                 }
                 currentPath.startsWith("/engine-volume-input") -> {
@@ -186,12 +204,18 @@ actual fun App() {
                         onVolumeEntered = {
                             window.location.href = "/production-year-input"
                         },
+                        onBack = {
+                            window.location.href = "/engine-type-selection"
+                        },
                     )
                 }
                 currentPath.startsWith("/production-year-input") -> {
                     ProductionYearInputPage(
                         onYearEntered = {
                             window.location.href = "/seats-count-input"
+                        },
+                        onBack = {
+                            window.location.href = "/engine-volume-input"
                         },
                     )
                 }
@@ -201,12 +225,18 @@ actual fun App() {
                             // window.location.href = "/hourly-rate-input"
                             window.location.href = "/trunk-size-selection"
                         },
+                        onBack = {
+                            window.location.href = "/production-year-input"
+                        },
                     )
                 }
                 currentPath.startsWith("/trunk-size-selection") -> {
                     TrunkSizeSelectionPage(
                         onTrunkSizeSelected = {
                             window.location.href = "/description-input"
+                        },
+                        onBack = {
+                            window.location.href = "/seats-count-input"
                         },
                     )
                 }
@@ -222,12 +252,18 @@ actual fun App() {
                         onNavigateToLicensePlate = {
                             kotlinx.browser.window.location.href = "/license-plate-input"
                         },
+                        onBack = {
+                            window.location.href = "/description-input"
+                        },
                     )
                 }
                 currentPath.startsWith("/description-input") -> {
                     DescriptionInputPage(
                         onDescriptionEntered = {
                             window.location.href = "/daily-rate-input"
+                        },
+                        onBack = {
+                            window.location.href = "/trunk-size-selection"
                         },
                     )
                 }

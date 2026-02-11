@@ -173,12 +173,12 @@ class CarEditMviViewModelTest {
             val initialState = viewModel.state.value as CarEditMviState.Success
             assertFalse(initialState.hasChanges, "hasChanges should be false initially")
 
-            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("NEW123"))
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
             advanceUntilIdle()
 
             val updatedState = viewModel.state.value
             assertIs<CarEditMviState.Success>(updatedState)
-            assertEquals("NEW123", updatedState.formData.licensePlate)
+            assertEquals("А123ВЕ12", updatedState.formData.licensePlate)
             assertTrue(updatedState.hasChanges, "hasChanges should be true after update")
         }
 
@@ -228,7 +228,7 @@ class CarEditMviViewModelTest {
             assertFalse(initialState.hasChanges, "hasChanges should be false initially")
             assertFalse(initialState.isSaveButtonEnabled, "Save button should be disabled when no changes")
 
-            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("NEW123"))
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
             advanceUntilIdle()
 
             val updatedState = viewModel.state.value as CarEditMviState.Success
@@ -246,7 +246,7 @@ class CarEditMviViewModelTest {
 
             val initialState = viewModel.state.value as CarEditMviState.Success
 
-            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("NEW123"))
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
             advanceUntilIdle()
 
             val stateWithChanges = viewModel.state.value as CarEditMviState.Success
@@ -268,7 +268,7 @@ class CarEditMviViewModelTest {
             viewModel.handleIntent(CarEditIntent.LoadCar("ef4d16a2-aeeb-457e-abbe-b72473634690"))
             advanceUntilIdle()
 
-            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("NEW123"))
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
             advanceUntilIdle()
 
             val stateBeforeSave = viewModel.state.value as CarEditMviState.Success
@@ -721,7 +721,7 @@ class CarEditMviViewModelTest {
             val initialState = viewModel.state.value
             assertIs<CarEditMviState.Success>(initialState)
 
-            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("NEW123"))
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
             advanceUntilIdle()
 
             viewModel.handleIntent(CarEditIntent.SaveCar)
@@ -750,7 +750,7 @@ class CarEditMviViewModelTest {
             val initialState = viewModel.state.value
             assertIs<CarEditMviState.Success>(initialState)
 
-            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("NEW123"))
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
             advanceUntilIdle()
 
             viewModel.handleIntent(CarEditIntent.SaveCar)
@@ -791,7 +791,7 @@ class CarEditMviViewModelTest {
             val initialState = viewModel.state.value as CarEditMviState.Success
             assertFalse(initialState.hasChanges, "hasChanges should be false initially")
 
-            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("NEW123"))
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
             advanceUntilIdle()
 
             val stateWithChanges = viewModel.state.value as CarEditMviState.Success
@@ -861,7 +861,7 @@ class CarEditMviViewModelTest {
             val initialHasChanges = viewModel.hasChanges.value
             assertFalse(initialHasChanges, "hasChanges should be false initially")
 
-            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("NEW123"))
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
             advanceUntilIdle()
 
             val hasChangesAfterUpdate = viewModel.hasChanges.value
@@ -884,7 +884,7 @@ class CarEditMviViewModelTest {
             val initialHasChanges = viewModel.hasChanges.value
             assertFalse(initialHasChanges, "hasChanges should be false initially")
 
-            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("NEW123"))
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
             advanceUntilIdle()
 
             val hasChangesAfterUpdate = viewModel.hasChanges.value
@@ -895,6 +895,145 @@ class CarEditMviViewModelTest {
 
             val hasChangesAfterSave = viewModel.hasChanges.value
             assertFalse(hasChangesAfterSave, "hasChanges should be false after save")
+        }
+
+    @Test
+    fun `UpdateLicensePlate should filter input and set to uppercase`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("а123ве12"))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as CarEditMviState.Success
+            assertEquals("А123ВЕ12", state.formData.licensePlate)
+        }
+
+    @Test
+    fun `UpdateLicensePlate should remove disallowed characters`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А 123-ВЕ.12"))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as CarEditMviState.Success
+            assertEquals("А123ВЕ12", state.formData.licensePlate)
+        }
+
+    @Test
+    fun `UpdateLicensePlate should remove Latin characters`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("A123BE12"))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as CarEditMviState.Success
+            assertEquals("12312", state.formData.licensePlate)
+        }
+
+    @Test
+    fun `UpdateLicensePlate with valid plate should have no error`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as CarEditMviState.Success
+            assertEquals(null, state.licensePlateError)
+        }
+
+    @Test
+    fun `UpdateLicensePlate with incomplete plate should have error`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123"))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as CarEditMviState.Success
+            assertEquals(LicensePlateValidator.ERROR_MESSAGE, state.licensePlateError)
+        }
+
+    @Test
+    fun `UpdateLicensePlate with empty value should have no error`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate(""))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as CarEditMviState.Success
+            assertEquals(null, state.licensePlateError)
+        }
+
+    @Test
+    fun `SaveCar should be blocked when licensePlate is invalid`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123"))
+            advanceUntilIdle()
+
+            val stateBeforeSave = viewModel.state.value as CarEditMviState.Success
+            assertTrue(stateBeforeSave.licensePlateError != null)
+
+            viewModel.handleIntent(CarEditIntent.SaveCar)
+            advanceUntilIdle()
+
+            val stateAfterSave = viewModel.state.value
+            assertIs<CarEditMviState.Success>(stateAfterSave)
+            assertTrue(stateAfterSave.licensePlateError != null, "Should still have license plate error")
+        }
+
+    @Test
+    fun `isSaveButtonEnabled should be false when licensePlateError is present`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123"))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as CarEditMviState.Success
+            assertTrue(state.hasChanges)
+            assertFalse(state.isSaveButtonEnabled, "Save button should be disabled when license plate has error")
+        }
+
+    @Test
+    fun `isSaveButtonEnabled should be true when licensePlate is valid and hasChanges`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as CarEditMviState.Success
+            assertTrue(state.hasChanges)
+            assertTrue(state.isSaveButtonEnabled, "Save button should be enabled when license plate is valid")
+        }
+
+    @Test
+    fun `UpdateLicensePlate should truncate to max 9 characters`() =
+        runTest(StandardTestDispatcher()) {
+            val viewModel = createCarEditMviViewModel(carId = "test-car-id")
+            advanceUntilIdle()
+
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ1234567"))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as CarEditMviState.Success
+            assertEquals(9, state.formData.licensePlate.length)
         }
 }
 
