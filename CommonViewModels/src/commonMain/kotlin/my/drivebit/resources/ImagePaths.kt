@@ -30,6 +30,7 @@ object ImagePaths {
     const val MENU_BURGER_SVG = "images/menu/burger.svg"
     const val MENU_BUTER_SVG = "images/menu/buter.svg"
     const val MENU_USER_SVG = "images/menu/user.svg"
+    const val PATH_DISTANCE_SVG = "images/path-distance.svg"
     const val SEARCH_SVG = "images/search.svg"
     const val SEARCHBACKGROUND_CAR0_JPG = "images/searchbackground/car0.jpg"
     const val SEARCHBACKGROUND_CAR1_JPG = "images/searchbackground/car1.jpg"

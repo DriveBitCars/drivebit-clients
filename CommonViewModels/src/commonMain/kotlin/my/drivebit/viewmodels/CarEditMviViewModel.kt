@@ -104,6 +104,10 @@ sealed interface CarEditIntent {
         val value: String,
     ) : CarEditIntent
 
+    data class UpdateAvailableMileagePerDayKm(
+        val value: String,
+    ) : CarEditIntent
+
     data class UpdateDescription(
         val value: String,
     ) : CarEditIntent
@@ -386,6 +390,9 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.UpdateDailyRate -> {
                 updateFormData { it.copy(dailyRate = intent.value) }
             }
+            is CarEditIntent.UpdateAvailableMileagePerDayKm -> {
+                updateFormData { it.copy(availableMileagePerDayKm = intent.value) }
+            }
             is CarEditIntent.UpdateDescription -> {
                 updateFormData { it.copy(description = intent.value) }
             }
@@ -492,6 +499,8 @@ class CarEditMviViewModelImpl(
                         ?.takeIf { it > 0 }
                 val hourlyRateValue = formData.hourlyRate.takeIf { it.isNotBlank() }?.toDoubleOrNull()
                 val dailyRateValue = formData.dailyRate.takeIf { it.isNotBlank() }?.toDoubleOrNull()
+                val availableMileagePerDayKmValue =
+                    formData.availableMileagePerDayKm.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val request =
                     CarCreateRequest(
                         id = formData.carId,
@@ -512,6 +521,7 @@ class CarEditMviViewModelImpl(
                         ValidAddressString = formData.address,
                         hourlyRate = hourlyRateValue,
                         dailyRate = dailyRateValue,
+                        availableMileagePerDayKm = availableMileagePerDayKmValue,
                         ParkingAssistances = emptyList(),
                         MultimediaSystemOptions = emptyList(),
                     )
@@ -707,6 +717,7 @@ class CarEditMviViewModelImpl(
             description = car.general?.description ?: "",
             hourlyRate = NumberFormatter.formatDouble(car.resolvedHourlyRate()),
             dailyRate = NumberFormatter.formatDouble(car.resolvedDailyRate()),
+            availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             photos = car.photos,
         )
 }

@@ -108,6 +108,7 @@ data class CarDetailResponse(
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,
     val seatsCount: Int? = null,
+    val availableMileagePerDayKm: Int? = null,
     val owner: String = "",
 ) {
     fun resolvedLicensePlate(): String = licensePlate ?: general?.licensePlate ?: ""
@@ -233,6 +234,7 @@ data class CarCreateRequest(
     val description: String? = null,
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,
+    val availableMileagePerDayKm: Int? = null,
     val ParkingAssistances: List<Int> = emptyList(),
     val MultimediaSystemOptions: List<Int> = emptyList(),
 )

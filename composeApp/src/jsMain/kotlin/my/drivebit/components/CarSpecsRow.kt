@@ -54,5 +54,13 @@ fun CarSpecsRow(car: CarDetailResponse) {
                 text = transmissionType,
             )
         }
+
+        val availableMileage = car.availableMileagePerDayKm
+        if (availableMileage != null && availableMileage > 0) {
+            CarSpecChip(
+                iconPath = "images/path-distance.svg",
+                text = "${NumberFormatter.formatInt(availableMileage)} км/день",
+            )
+        }
     }
 }
