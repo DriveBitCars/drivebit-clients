@@ -362,6 +362,17 @@ fun CarEditPage() {
                                 numeric = true,
                             )
 
+                            TextInputField(
+                                label = "Доступный пробег в день (км)",
+                                value = formData.availableMileagePerDayKm,
+                                onValueChange = { newValue ->
+                                    if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
+                                        viewModel.handleIntent(CarEditIntent.UpdateAvailableMileagePerDayKm(newValue))
+                                    }
+                                },
+                                numeric = true,
+                            )
+
                             // TextInputField(
                             //    label = "Год выпуска",
                             //    value = formData.productionYear,

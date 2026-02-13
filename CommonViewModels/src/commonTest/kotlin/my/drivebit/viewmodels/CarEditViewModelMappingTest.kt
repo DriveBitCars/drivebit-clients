@@ -36,6 +36,7 @@ class CarEditViewModelMappingTest {
                     seatsCount = 5,
                     licensePlate = "K128CT",
                     ValidAddressString = "Test Address",
+                    availableMileagePerDayKm = 200,
                     photos =
                         listOf(
                             CarPhotoItem(
@@ -70,6 +71,7 @@ class CarEditViewModelMappingTest {
             assertEquals("3.0", formData.engineVolume)
             assertEquals("2020", formData.productionYear)
             assertEquals("5", formData.seatsCount)
+            assertEquals("200", formData.availableMileagePerDayKm)
             assertEquals("Test Address", formData.address)
             assertEquals(1, formData.photos.size)
             assertEquals("https://example.com/photo.jpg", formData.photos[0].url)
@@ -143,6 +145,7 @@ class CarEditViewModelMappingTest {
             assertEquals("3.0", formData.engineVolume)
             assertEquals("2020", formData.productionYear)
             assertEquals("5", formData.seatsCount)
+            assertEquals("", formData.availableMileagePerDayKm)
             assertEquals("Test Address", formData.address)
             assertEquals(1, formData.photos.size)
             assertEquals("https://example.com/photo.jpg", formData.photos[0].url)
@@ -196,6 +199,7 @@ class CarEditViewModelMappingTest {
             assertEquals("", formData.engineVolume)
             assertEquals("", formData.productionYear)
             assertEquals("", formData.seatsCount)
+            assertEquals("", formData.availableMileagePerDayKm)
             assertEquals("", formData.address)
             assertEquals(0, formData.photos.size)
         }
@@ -243,6 +247,7 @@ class CarEditViewModelMappingTest {
             assertEquals("", formData.engineVolume)
             assertEquals("2020", formData.productionYear)
             assertEquals("", formData.seatsCount)
+            assertEquals("", formData.availableMileagePerDayKm)
             assertEquals("", formData.address)
         }
 }
