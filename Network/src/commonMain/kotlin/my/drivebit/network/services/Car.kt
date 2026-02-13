@@ -298,25 +298,25 @@ class CarImpl(
         brandId: Int?,
         driveTypes: List<String>?,
     ): CarSearchResponse {
-        val url = "${DEFAULT_BASE_URL}Car/list/city/$cityId"
+        val url = "${DEFAULT_BASE_URL}Car/list/filtered/$cityId"
         val response =
             httpClient.get(url) {
                 parameter("page", 1)
                 parameter("pageSize", 100)
-                dateFrom?.let { parameter("dateFrom", it) }
-                dateTo?.let { parameter("dateTo", it) }
-                availableMileagePerDayKmMin?.let { parameter("availableMileagePerDayKmMin", it) }
-                dailyPriceMin?.let { parameter("dailyPriceMin", it) }
-                dailyPriceMax?.let { parameter("dailyPriceMax", it) }
-                yearMin?.let { parameter("yearMin", it) }
-                yearMax?.let { parameter("yearMax", it) }
-                seatsMin?.let { parameter("seatsMin", it) }
-                seatsMax?.let { parameter("seatsMax", it) }
-                bodyTypes?.forEach { parameter("bodyTypes", it) }
-                engineTypes?.forEach { parameter("engineTypes", it) }
-                colors?.forEach { parameter("colors", it) }
-                brandId?.let { parameter("brandId", it) }
-                driveTypes?.forEach { parameter("driveTypes", it) }
+                dateFrom?.let { parameter("BookingStart", it) }
+                dateTo?.let { parameter("BookingEnd", it) }
+                availableMileagePerDayKmMin?.let { parameter("AvailableMileagePerDayKmMin", it) }
+                dailyPriceMin?.let { parameter("DailyRateMin", it) }
+                dailyPriceMax?.let { parameter("DailyRateMax", it) }
+                yearMin?.let { parameter("YearMin", it) }
+                yearMax?.let { parameter("YearMax", it) }
+                seatsMin?.let { parameter("SeatsMin", it) }
+                seatsMax?.let { parameter("SeatsMax", it) }
+                bodyTypes?.forEach { parameter("BodyType", it) }
+                engineTypes?.forEach { parameter("EngineType", it) }
+                colors?.forEach { parameter("Color", it) }
+                brandId?.let { parameter("BrandId", it) }
+                driveTypes?.forEach { parameter("DriveType", it) }
             }
         val result: CarDTOPagedResult = response.parseResponse()
         return CarSearchResponse(cars = sanitizeCarItems(result.items))
