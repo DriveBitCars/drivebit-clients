@@ -53,6 +53,7 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
 import org.w3c.dom.url.URLSearchParams
 
 @Composable
@@ -60,7 +61,7 @@ fun SearchPage() {
     val viewModel: SearchViewModel = koinInject()
     val state by viewModel.state.collectAsState()
     val searchParams = rememberSearchParams()
-    val currentFiltersRepository: CurrentFiltersRepository = koinInject()
+    val currentFiltersRepository: CurrentFiltersRepository = koinInject(named("search"))
     val dailyRateMin by currentFiltersRepository.dailyRateMin.collectAsState(null)
     val dailyRateMax by currentFiltersRepository.dailyRateMax.collectAsState(null)
     val filterBrandName by currentFiltersRepository.brandName.collectAsState(null)

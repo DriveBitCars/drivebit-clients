@@ -203,9 +203,17 @@ val repositoriesModule: Module =
             )
         }
 
-        single<CurrentFiltersRepository> {
+        single<CurrentFiltersRepository>(named("main")) {
             CurrentFiltersRepositoryImpl(
                 settings = get(),
+                keyPrefix = "main",
+            )
+        }
+
+        single<CurrentFiltersRepository>(named("search")) {
+            CurrentFiltersRepositoryImpl(
+                settings = get(),
+                keyPrefix = "search",
             )
         }
 
@@ -233,11 +241,20 @@ val repositoriesModule: Module =
             )
         }
 
-        single<CarSearchRepository> {
+        single<CarSearchRepository>(named("main")) {
             CarSearchRepositoryImpl(
                 carService = get(),
                 myCityRepository = get(),
-                currentFiltersRepository = get(),
+                currentFiltersRepository = get(named("main")),
+                dictionary = get(),
+            )
+        }
+
+        single<CarSearchRepository>(named("search")) {
+            CarSearchRepositoryImpl(
+                carService = get(),
+                myCityRepository = get(),
+                currentFiltersRepository = get(named("search")),
                 dictionary = get(),
             )
         }

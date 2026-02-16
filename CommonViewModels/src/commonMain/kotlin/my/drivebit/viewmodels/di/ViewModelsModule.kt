@@ -99,7 +99,7 @@ val commonViewModelsModule: Module =
             FiltersViewModel(
                 storage = get(),
                 dictionary = get(),
-                currentFiltersRepository = get(),
+                currentFiltersRepository = get(named("main")),
             )
         }
 
@@ -129,13 +129,13 @@ val commonViewModelsModule: Module =
 
         factory<CarSearchViewModel> {
             CarSearchViewModelImpl(
-                carSearchRepository = get(),
+                carSearchRepository = get(named("main")),
             )
         }
 
         single<MainContentViewModel> {
             MainContentViewModelImpl(
-                carSearchRepository = get(),
+                carSearchRepository = get(named("main")),
             )
         }
 
@@ -327,19 +327,19 @@ val commonViewModelsModule: Module =
 
         factory<SearchViewModel> {
             SearchViewModelImpl(
-                carSearchRepository = get(),
-                currentFiltersRepository = get(),
+                carSearchRepository = get(named("search")),
+                currentFiltersRepository = get(named("search")),
             )
         }
 
         factory<SearchPageDateViewModel> {
             SearchPageDateViewModelImpl(
-                currentFiltersRepository = get(),
+                currentFiltersRepository = get(named("search")),
             )
         }
         factory<SearchPageDateEndViewModel> {
             SearchPageDateEndViewModelImpl(
-                currentFiltersRepository = get(),
+                currentFiltersRepository = get(named("search")),
             )
         }
 
