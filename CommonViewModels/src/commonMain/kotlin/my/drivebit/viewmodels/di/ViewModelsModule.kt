@@ -57,6 +57,8 @@ import my.drivebit.viewmodels.PassportUploadViewModelImpl
 import my.drivebit.viewmodels.PhoneLoginViewModel
 import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
+import my.drivebit.viewmodels.RentViewModel
+import my.drivebit.viewmodels.RentViewModelImpl
 import my.drivebit.viewmodels.SearchPageDateEndViewModel
 import my.drivebit.viewmodels.SearchPageDateEndViewModelImpl
 import my.drivebit.viewmodels.SearchPageDateViewModel
@@ -345,6 +347,13 @@ val commonViewModelsModule: Module =
             CarDetailViewModelImpl(
                 carService = get(),
                 photoService = get(),
+                carId = carId,
+            )
+        }
+
+        factory<RentViewModel> { (carId: String) ->
+            RentViewModelImpl(
+                booking = get(),
                 carId = carId,
             )
         }
