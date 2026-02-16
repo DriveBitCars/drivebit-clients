@@ -129,7 +129,10 @@ val networkModule =
             DictionaryImpl(get(named("unauthorized")))
         }
         single<Booking> {
-            BookingImpl(get(named("unauthorized")))
+            BookingImpl(
+                unauthorizedHttpClient = get(named("unauthorized")),
+                authorizedHttpClient = get(named("authorized")),
+            )
         }
         single<Documents> {
             DocumentsImpl(get(named("authorized")))
