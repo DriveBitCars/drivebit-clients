@@ -23,13 +23,9 @@ fun PriceFilter(
     var minInputValue by remember { mutableStateOf("$minValue") }
     var maxInputValue by remember { mutableStateOf("$maxValue+") }
 
-    LaunchedEffect(minValue) {
         minInputValue = "$minValue"
-    }
 
-    LaunchedEffect(maxValue) {
         maxInputValue = "$maxValue+"
-    }
 
     val sliderMax = 1000
 
