@@ -12,8 +12,8 @@ import org.jetbrains.compose.web.css.*
 
 @Composable
 fun PriceFilter(
-    minPrice: MutableState<Int> = remember { mutableStateOf(0) },
-    maxPrice: MutableState<Int> = remember { mutableStateOf(600) },
+    minPrice: MutableState<Int> = remember { mutableStateOf(500) },
+    maxPrice: MutableState<Int> = remember { mutableStateOf(2000) },
     resultsCount: Int = 200,
     onReset: () -> Unit = {},
     onViewResults: () -> Unit = {},
