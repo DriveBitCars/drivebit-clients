@@ -64,7 +64,7 @@ fun HomePage() {
     val mapViewModel: MapViewModel = koinInject()
     val carSearchViewModel: CarSearchViewModel = koinInject()
     val mainContentViewModel: MainContentViewModel = koinInject()
-    val currentFiltersRepository: CurrentFiltersRepository = koinInject()
+    val currentFiltersRepository: CurrentFiltersRepository = koinInject(named("main"))
 
     val state = filterViewModel.state.collectAsState()
     val mapState = mapViewModel.state.collectAsState()

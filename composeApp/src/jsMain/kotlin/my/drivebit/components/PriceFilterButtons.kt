@@ -88,7 +88,7 @@ fun PriceFilterButtons(
                 )
             }
         }) {
-            Text("Показать $resultsCount+ результатов")
+            Text("Показать")
         }
     }
 }

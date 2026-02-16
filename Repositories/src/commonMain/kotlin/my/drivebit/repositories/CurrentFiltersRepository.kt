@@ -82,6 +82,7 @@ interface CurrentFiltersRepository {
 
 internal class CurrentFiltersRepositoryImpl(
     private val settings: Settings,
+    private val keyPrefix: String? = null,
 ) : CurrentFiltersRepository {
     companion object {
         private const val CURRENT_TASK_SHORT_NAME_KEY = "current_task_short_name"
@@ -108,6 +109,8 @@ internal class CurrentFiltersRepositoryImpl(
         private const val AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY = "filter_available_mileage_per_day_km_min"
     }
 
+    private fun key(name: String): String = if (keyPrefix != null) "${keyPrefix}_$name" else name
+
     private val currentTaskShortNameState = MutableStateFlow<String?>(null)
     private val startStateFlow = MutableStateFlow<String?>(null)
     private val endStateFlow = MutableStateFlow<String?>(null)
@@ -132,7 +135,7 @@ internal class CurrentFiltersRepositoryImpl(
     private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
 
     init {
-        val savedTaskShortName = settings.getStringOrNullIfEmpty(CURRENT_TASK_SHORT_NAME_KEY)
+        val savedTaskShortName = settings.getStringOrNullIfEmpty(key(CURRENT_TASK_SHORT_NAME_KEY))
         currentTaskShortNameState.value = savedTaskShortName
 
         val savedStartDate = settings.getStringOrNullIfEmpty(START_DATE_KEY)
@@ -141,61 +144,61 @@ internal class CurrentFiltersRepositoryImpl(
         val savedEndDate = settings.getStringOrNullIfEmpty(END_DATE_KEY)
         endStateFlow.value = savedEndDate
 
-        val savedDailyRateMin = settings.getDouble(DAILY_RATE_MIN_KEY, -1.0)
+        val savedDailyRateMin = settings.getDouble(key(DAILY_RATE_MIN_KEY), -1.0)
         dailyRateMinState.value = if (savedDailyRateMin < 0) null else savedDailyRateMin
 
-        val savedDailyRateMax = settings.getDouble(DAILY_RATE_MAX_KEY, -1.0)
+        val savedDailyRateMax = settings.getDouble(key(DAILY_RATE_MAX_KEY), -1.0)
         dailyRateMaxState.value = if (savedDailyRateMax < 0) null else savedDailyRateMax
 
-        val savedBrandId = settings.getInt(BRAND_ID_KEY, -1)
+        val savedBrandId = settings.getInt(key(BRAND_ID_KEY), -1)
         brandIdState.value = if (savedBrandId < 0) null else savedBrandId
 
-        val savedBrandName = settings.getStringOrNullIfEmpty(BRAND_NAME_KEY)
+        val savedBrandName = settings.getStringOrNullIfEmpty(key(BRAND_NAME_KEY))
         brandNameState.value = savedBrandName
 
-        val savedModelId = settings.getInt(MODEL_ID_KEY, -1)
+        val savedModelId = settings.getInt(key(MODEL_ID_KEY), -1)
         modelIdState.value = if (savedModelId < 0) null else savedModelId
 
-        val savedModelName = settings.getStringOrNullIfEmpty(MODEL_NAME_KEY)
+        val savedModelName = settings.getStringOrNullIfEmpty(key(MODEL_NAME_KEY))
         modelNameState.value = savedModelName
 
-        val savedDriveTypeName = settings.getStringOrNullIfEmpty(DRIVE_TYPE_NAME_KEY)
+        val savedDriveTypeName = settings.getStringOrNullIfEmpty(key(DRIVE_TYPE_NAME_KEY))
         driveTypeNameState.value = savedDriveTypeName
 
-        val savedDriveTypeTranslate = settings.getStringOrNullIfEmpty(DRIVE_TYPE_TRANSLATE_KEY)
+        val savedDriveTypeTranslate = settings.getStringOrNullIfEmpty(key(DRIVE_TYPE_TRANSLATE_KEY))
         driveTypeTranslateState.value = savedDriveTypeTranslate
 
-        val savedBodyTypeName = settings.getStringOrNullIfEmpty(BODY_TYPE_NAME_KEY)
+        val savedBodyTypeName = settings.getStringOrNullIfEmpty(key(BODY_TYPE_NAME_KEY))
         bodyTypeNameState.value = savedBodyTypeName
 
-        val savedBodyTypeTranslate = settings.getStringOrNullIfEmpty(BODY_TYPE_TRANSLATE_KEY)
+        val savedBodyTypeTranslate = settings.getStringOrNullIfEmpty(key(BODY_TYPE_TRANSLATE_KEY))
         bodyTypeTranslateState.value = savedBodyTypeTranslate
 
-        val savedSeatsMin = settings.getInt(SEATS_MIN_KEY, -1)
+        val savedSeatsMin = settings.getInt(key(SEATS_MIN_KEY), -1)
         seatsMinState.value = if (savedSeatsMin < 0) null else savedSeatsMin
 
-        val savedEngineTypeName = settings.getStringOrNullIfEmpty(ENGINE_TYPE_NAME_KEY)
+        val savedEngineTypeName = settings.getStringOrNullIfEmpty(key(ENGINE_TYPE_NAME_KEY))
         engineTypeNameState.value = savedEngineTypeName
 
-        val savedEngineTypeTranslate = settings.getStringOrNullIfEmpty(ENGINE_TYPE_TRANSLATE_KEY)
+        val savedEngineTypeTranslate = settings.getStringOrNullIfEmpty(key(ENGINE_TYPE_TRANSLATE_KEY))
         engineTypeTranslateState.value = savedEngineTypeTranslate
 
-        val savedColorName = settings.getStringOrNullIfEmpty(COLOR_NAME_KEY)
+        val savedColorName = settings.getStringOrNullIfEmpty(key(COLOR_NAME_KEY))
         colorNameState.value = savedColorName
 
-        val savedColorTranslate = settings.getStringOrNullIfEmpty(COLOR_TRANSLATE_KEY)
+        val savedColorTranslate = settings.getStringOrNullIfEmpty(key(COLOR_TRANSLATE_KEY))
         colorTranslateState.value = savedColorTranslate
 
-        val savedYearMin = settings.getInt(YEAR_MIN_KEY, -1)
+        val savedYearMin = settings.getInt(key(YEAR_MIN_KEY), -1)
         yearMinState.value = if (savedYearMin < 0) null else savedYearMin
 
-        val savedYearMax = settings.getInt(YEAR_MAX_KEY, -1)
+        val savedYearMax = settings.getInt(key(YEAR_MAX_KEY), -1)
         yearMaxState.value = if (savedYearMax < 0) null else savedYearMax
 
-        val savedSeatsMax = settings.getInt(SEATS_MAX_KEY, -1)
+        val savedSeatsMax = settings.getInt(key(SEATS_MAX_KEY), -1)
         seatsMaxState.value = if (savedSeatsMax < 0) null else savedSeatsMax
 
-        val savedAvailableMileage = settings.getInt(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY, -1)
+        val savedAvailableMileage = settings.getInt(key(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY), -1)
         availableMileagePerDayKmMinState.value = if (savedAvailableMileage < 0) null else savedAvailableMileage
     }
 
@@ -223,7 +226,7 @@ internal class CurrentFiltersRepositoryImpl(
     override val availableMileagePerDayKmMin: Flow<Int?> = availableMileagePerDayKmMinState.asStateFlow()
 
     override fun updateCurrentTask(shortName: String) {
-        settings.putString(CURRENT_TASK_SHORT_NAME_KEY, shortName)
+        settings.putString(key(CURRENT_TASK_SHORT_NAME_KEY), shortName)
         currentTaskShortNameState.value = shortName
     }
 
@@ -247,18 +250,18 @@ internal class CurrentFiltersRepositoryImpl(
 
     override fun updateDailyRateMin(value: Double?) {
         if (value != null) {
-            settings.putDouble(DAILY_RATE_MIN_KEY, value)
+            settings.putDouble(key(DAILY_RATE_MIN_KEY), value)
         } else {
-            settings.remove(DAILY_RATE_MIN_KEY)
+            settings.remove(key(DAILY_RATE_MIN_KEY))
         }
         dailyRateMinState.value = value
     }
 
     override fun updateDailyRateMax(value: Double?) {
         if (value != null) {
-            settings.putDouble(DAILY_RATE_MAX_KEY, value)
+            settings.putDouble(key(DAILY_RATE_MAX_KEY), value)
         } else {
-            settings.remove(DAILY_RATE_MAX_KEY)
+            settings.remove(key(DAILY_RATE_MAX_KEY))
         }
         dailyRateMaxState.value = value
     }
@@ -268,14 +271,14 @@ internal class CurrentFiltersRepositoryImpl(
         name: String?,
     ) {
         if (id != null) {
-            settings.putInt(BRAND_ID_KEY, id)
+            settings.putInt(key(BRAND_ID_KEY), id)
         } else {
-            settings.remove(BRAND_ID_KEY)
+            settings.remove(key(BRAND_ID_KEY))
         }
         if (name != null) {
-            settings.putString(BRAND_NAME_KEY, name)
+            settings.putString(key(BRAND_NAME_KEY), name)
         } else {
-            settings.remove(BRAND_NAME_KEY)
+            settings.remove(key(BRAND_NAME_KEY))
         }
         brandIdState.value = id
         brandNameState.value = name
@@ -286,14 +289,14 @@ internal class CurrentFiltersRepositoryImpl(
         name: String?,
     ) {
         if (id != null) {
-            settings.putInt(MODEL_ID_KEY, id)
+            settings.putInt(key(MODEL_ID_KEY), id)
         } else {
-            settings.remove(MODEL_ID_KEY)
+            settings.remove(key(MODEL_ID_KEY))
         }
         if (name != null) {
-            settings.putString(MODEL_NAME_KEY, name)
+            settings.putString(key(MODEL_NAME_KEY), name)
         } else {
-            settings.remove(MODEL_NAME_KEY)
+            settings.remove(key(MODEL_NAME_KEY))
         }
         modelIdState.value = id
         modelNameState.value = name
@@ -304,14 +307,14 @@ internal class CurrentFiltersRepositoryImpl(
         translate: String?,
     ) {
         if (name != null) {
-            settings.putString(DRIVE_TYPE_NAME_KEY, name)
+            settings.putString(key(DRIVE_TYPE_NAME_KEY), name)
         } else {
-            settings.remove(DRIVE_TYPE_NAME_KEY)
+            settings.remove(key(DRIVE_TYPE_NAME_KEY))
         }
         if (translate != null) {
-            settings.putString(DRIVE_TYPE_TRANSLATE_KEY, translate)
+            settings.putString(key(DRIVE_TYPE_TRANSLATE_KEY), translate)
         } else {
-            settings.remove(DRIVE_TYPE_TRANSLATE_KEY)
+            settings.remove(key(DRIVE_TYPE_TRANSLATE_KEY))
         }
         driveTypeNameState.value = name
         driveTypeTranslateState.value = translate
@@ -322,14 +325,14 @@ internal class CurrentFiltersRepositoryImpl(
         translate: String?,
     ) {
         if (name != null) {
-            settings.putString(BODY_TYPE_NAME_KEY, name)
+            settings.putString(key(BODY_TYPE_NAME_KEY), name)
         } else {
-            settings.remove(BODY_TYPE_NAME_KEY)
+            settings.remove(key(BODY_TYPE_NAME_KEY))
         }
         if (translate != null) {
-            settings.putString(BODY_TYPE_TRANSLATE_KEY, translate)
+            settings.putString(key(BODY_TYPE_TRANSLATE_KEY), translate)
         } else {
-            settings.remove(BODY_TYPE_TRANSLATE_KEY)
+            settings.remove(key(BODY_TYPE_TRANSLATE_KEY))
         }
         bodyTypeNameState.value = name
         bodyTypeTranslateState.value = translate
@@ -337,9 +340,9 @@ internal class CurrentFiltersRepositoryImpl(
 
     override fun updateSeatsMin(value: Int?) {
         if (value != null) {
-            settings.putInt(SEATS_MIN_KEY, value)
+            settings.putInt(key(SEATS_MIN_KEY), value)
         } else {
-            settings.remove(SEATS_MIN_KEY)
+            settings.remove(key(SEATS_MIN_KEY))
         }
         seatsMinState.value = value
     }
@@ -349,14 +352,14 @@ internal class CurrentFiltersRepositoryImpl(
         translate: String?,
     ) {
         if (name != null) {
-            settings.putString(ENGINE_TYPE_NAME_KEY, name)
+            settings.putString(key(ENGINE_TYPE_NAME_KEY), name)
         } else {
-            settings.remove(ENGINE_TYPE_NAME_KEY)
+            settings.remove(key(ENGINE_TYPE_NAME_KEY))
         }
         if (translate != null) {
-            settings.putString(ENGINE_TYPE_TRANSLATE_KEY, translate)
+            settings.putString(key(ENGINE_TYPE_TRANSLATE_KEY), translate)
         } else {
-            settings.remove(ENGINE_TYPE_TRANSLATE_KEY)
+            settings.remove(key(ENGINE_TYPE_TRANSLATE_KEY))
         }
         engineTypeNameState.value = name
         engineTypeTranslateState.value = translate
@@ -367,14 +370,14 @@ internal class CurrentFiltersRepositoryImpl(
         translate: String?,
     ) {
         if (name != null) {
-            settings.putString(COLOR_NAME_KEY, name)
+            settings.putString(key(COLOR_NAME_KEY), name)
         } else {
-            settings.remove(COLOR_NAME_KEY)
+            settings.remove(key(COLOR_NAME_KEY))
         }
         if (translate != null) {
-            settings.putString(COLOR_TRANSLATE_KEY, translate)
+            settings.putString(key(COLOR_TRANSLATE_KEY), translate)
         } else {
-            settings.remove(COLOR_TRANSLATE_KEY)
+            settings.remove(key(COLOR_TRANSLATE_KEY))
         }
         colorNameState.value = name
         colorTranslateState.value = translate
@@ -382,36 +385,36 @@ internal class CurrentFiltersRepositoryImpl(
 
     override fun updateYearMin(value: Int?) {
         if (value != null) {
-            settings.putInt(YEAR_MIN_KEY, value)
+            settings.putInt(key(YEAR_MIN_KEY), value)
         } else {
-            settings.remove(YEAR_MIN_KEY)
+            settings.remove(key(YEAR_MIN_KEY))
         }
         yearMinState.value = value
     }
 
     override fun updateYearMax(value: Int?) {
         if (value != null) {
-            settings.putInt(YEAR_MAX_KEY, value)
+            settings.putInt(key(YEAR_MAX_KEY), value)
         } else {
-            settings.remove(YEAR_MAX_KEY)
+            settings.remove(key(YEAR_MAX_KEY))
         }
         yearMaxState.value = value
     }
 
     override fun updateSeatsMax(value: Int?) {
         if (value != null) {
-            settings.putInt(SEATS_MAX_KEY, value)
+            settings.putInt(key(SEATS_MAX_KEY), value)
         } else {
-            settings.remove(SEATS_MAX_KEY)
+            settings.remove(key(SEATS_MAX_KEY))
         }
         seatsMaxState.value = value
     }
 
     override fun updateAvailableMileagePerDayKmMin(value: Int?) {
         if (value != null) {
-            settings.putInt(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY, value)
+            settings.putInt(key(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY), value)
         } else {
-            settings.remove(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY)
+            settings.remove(key(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY))
         }
         availableMileagePerDayKmMinState.value = value
     }

@@ -313,7 +313,6 @@ class CarImpl(
                 yearMin?.let { parameter("YearMin", it) }
                 yearMax?.let { parameter("YearMax", it) }
                 seatsMin?.let { parameter("SeatsMin", it) }
-                seatsMax?.let { parameter("SeatsMax", it) }
                 bodyTypes?.forEach { parameter("BodyType", it) }
                 engineTypes?.forEach { parameter("EngineType", it) }
                 colors?.forEach { parameter("Color", it) }
