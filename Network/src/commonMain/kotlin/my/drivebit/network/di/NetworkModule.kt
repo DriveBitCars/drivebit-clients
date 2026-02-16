@@ -8,6 +8,8 @@ import my.drivebit.network.createHttpClientWithConfig
 import my.drivebit.network.createPlatformHttpClientEngine
 import my.drivebit.network.services.Auth
 import my.drivebit.network.services.AuthImpl
+import my.drivebit.network.services.Booking
+import my.drivebit.network.services.BookingImpl
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarImpl
 import my.drivebit.network.services.Dadata
@@ -125,6 +127,9 @@ val networkModule =
         }
         single<Dictionary> {
             DictionaryImpl(get(named("unauthorized")))
+        }
+        single<Booking> {
+            BookingImpl(get(named("unauthorized")))
         }
         single<Documents> {
             DocumentsImpl(get(named("authorized")))

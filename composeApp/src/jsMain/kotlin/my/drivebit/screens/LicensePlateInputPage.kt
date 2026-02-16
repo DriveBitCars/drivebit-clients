@@ -79,11 +79,12 @@ fun LicensePlateInputPage(
                     onValueChange = { newValue ->
                         val filtered = LicensePlateValidator.filterInput(newValue)
                         licensePlate = filtered
-                        error = if (filtered.isBlank() || LicensePlateValidator.isValid(filtered)) {
-                            null
-                        } else {
-                            LicensePlateValidator.ERROR_MESSAGE
-                        }
+                        error =
+                            if (filtered.isBlank() || LicensePlateValidator.isValid(filtered)) {
+                                null
+                            } else {
+                                LicensePlateValidator.ERROR_MESSAGE
+                            }
                     },
                     maxLength = LicensePlateValidator.MAX_LENGTH,
                     errorMessage = error,
@@ -113,11 +114,12 @@ fun LicensePlateInputPage(
                                     licensePlateRepository.saveLicensePlate(plate)
                                     createCarViewModel.createFromSavedDailyRate()
                                 } else {
-                                    error = if (plate.isEmpty()) {
-                                        "Введите номер"
-                                    } else {
-                                        LicensePlateValidator.ERROR_MESSAGE
-                                    }
+                                    error =
+                                        if (plate.isEmpty()) {
+                                            "Введите номер"
+                                        } else {
+                                            LicensePlateValidator.ERROR_MESSAGE
+                                        }
                                 }
                             },
                         )
