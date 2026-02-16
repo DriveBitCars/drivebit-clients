@@ -94,10 +94,14 @@ internal class CarSearchRepositoryImpl(
             val availableMileagePerDayKmMin = extraFilters.fourth
             flow {
                 val filter =
-                    currentTaskShortName?.let { shortName ->
-                        dictionary
-                            .getFiltersSuggested()
-                            .firstOrNull { it.shortName == shortName }
+                    if (currentTaskShortName == "Все") {
+                        null
+                    } else {
+                        currentTaskShortName?.let { shortName ->
+                            dictionary
+                                .getFiltersSuggested()
+                                .firstOrNull { it.shortName == shortName }
+                        }
                     }
 
                 val result =
