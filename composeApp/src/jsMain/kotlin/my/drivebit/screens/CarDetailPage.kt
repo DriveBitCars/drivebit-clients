@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.AppWithHeader
+import my.drivebit.components.CarBook
 import my.drivebit.components.CarDescription
 import my.drivebit.components.CarLocationMap
 import my.drivebit.components.CarOwnerSection
@@ -14,11 +15,19 @@ import my.drivebit.components.CarTitleSection
 import my.drivebit.components.Column
 import my.drivebit.components.DailyRateLabel
 import my.drivebit.components.Loader
+import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.CarDetailState
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarOwnerUi
+import my.drivebit.viewmodels.RentViewModel
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.flexWrap
+import org.jetbrains.compose.web.css.minWidth
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
@@ -77,6 +86,7 @@ fun CarDetailPage() {
                     CarDetailContent(
                         car = currentState.car,
                         owner = currentState.owner,
+                        koinScope = koinScope,
                     )
                 }
             }
@@ -89,35 +99,55 @@ fun CarDetailPage() {
 private fun CarDetailContent(
     car: my.drivebit.network.services.CarDetailResponse,
     owner: CarOwnerUi?,
+    koinScope: org.koin.core.scope.Scope,
 ) {
     Column(gap = 24.px) {
         CarPhotosSection(car)
 
-        Column(gap = 16.px) {
-            val carName = "${car.resolvedBrandName()} ${car.resolvedModelName()}".trim()
-            val carYear = car.resolvedProductionYear()
+        Row(
+            gap = 24.px,
+            flexWrap = FlexWrap.Wrap,
+            alignItems = AlignItems.FlexStart,
+        ) {
+            Column(
+                gap = 16.px,
+                modifier = {
+                    flex(2)
+                    minWidth(0.px)
+                },
+            ) {
+                val carName = "${car.resolvedBrandName()} ${car.resolvedModelName()}".trim()
+                val carYear = car.resolvedProductionYear()
 
-            CarTitleSection(
-                carName = carName,
-                carYear = carYear,
-            )
-
-            val dailyRate = car.resolvedDailyRate()
-            DailyRateLabel(dailyRate)
-
-            CarSpecsRow(car)
-
-            CarDescription(description = car.general.description)
-
-            owner?.let { ownerInfo ->
-                CarOwnerSection(
-                    name = ownerInfo.name,
-                    avatarUrl = ownerInfo.avatarUrl,
-                    memberSince = ownerInfo.memberSince,
-                    rating = null,
-                    tripsCount = null,
+                CarTitleSection(
+                    carName = carName,
+                    carYear = carYear,
                 )
+
+                val dailyRate = car.resolvedDailyRate()
+                DailyRateLabel(dailyRate)
+
+                CarSpecsRow(car)
+
+                CarDescription(description = car.general.description)
+
+                owner?.let { ownerInfo ->
+                    CarOwnerSection(
+                        name = ownerInfo.name,
+                        avatarUrl = ownerInfo.avatarUrl,
+                        memberSince = ownerInfo.memberSince,
+                        rating = null,
+                        tripsCount = null,
+                    )
+                }
             }
+
+            CarBook(
+                viewModel =
+                    remember(car.id) {
+                        koinScope.get<RentViewModel>(parameters = { parametersOf(car.id) })
+                    },
+            )
         }
 
         val carLat = car.general.address.geoLat
