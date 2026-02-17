@@ -8,9 +8,12 @@ import androidx.compose.runtime.remember
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
+import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.RentState
 import my.drivebit.viewmodels.RentViewModel
+import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
@@ -22,9 +25,20 @@ import org.jetbrains.compose.web.dom.Text
 fun CarBook(viewModel: RentViewModel) {
     val state by viewModel.state.collectAsState()
     val bookState = state as? RentState.Book ?: return
+    val navigationController = LocalNavigationController.current
+    val buttonViewModel = createButtonViewModel()
 
     val startDateViewModel = remember { DateFieldViewModel() }
     val endDateViewModel = remember { DateFieldViewModel() }
+
+    LaunchedEffect(Unit) {
+        viewModel.setOnBookingSuccess { navigationController?.navigateTo("/my-bookings") }
+    }
+    LaunchedEffect(bookState.isCreating) {
+        buttonViewModel.setState(
+            if (bookState.isCreating) ButtonState.Loading else ButtonState.Enabled,
+        )
+    }
     val startDateState by startDateViewModel.state.collectAsState()
     val endDateState by endDateViewModel.state.collectAsState()
 
@@ -105,10 +119,22 @@ fun CarBook(viewModel: RentViewModel) {
                 }
             }
             ActionButton(
+                viewModel = buttonViewModel,
                 enabledColor = CSSColors.Blue,
                 text = "Забронировать",
                 onClick = { viewModel.onBookClick() },
             )
+            bookState.createError?.let { error ->
+                Span({
+                    style {
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(CSSTypography.FontSize.xs)
+                        color(CSSColors.Red)
+                    }
+                }) {
+                    Text(error)
+                }
+            }
         }
     }
 

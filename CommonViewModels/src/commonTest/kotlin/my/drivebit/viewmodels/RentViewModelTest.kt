@@ -27,7 +27,23 @@ private class FakeBooking(
     override suspend fun getMyAsRenter() = throw NotImplementedError()
 
     override suspend fun createAsRenter(request: my.drivebit.network.services.CreateBookingRequest) =
-        throw NotImplementedError()
+        my.drivebit.network.services.BookingDTO(
+            id = "booking-1",
+            carId = request.carId,
+            carBrandName = null,
+            carModelName = null,
+            renterId = "renter-1",
+            renterName = null,
+            renterPhone = null,
+            ownerId = "owner-1",
+            ownerName = null,
+            ownerPhone = null,
+            startAt = request.startAt,
+            endAt = request.endAt,
+            totalAmount = 0.0,
+            status = "created",
+            createdAt = "2025-02-16T10:00:00Z",
+        )
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
