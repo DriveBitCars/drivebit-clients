@@ -148,7 +148,11 @@ fun CarBook(viewModel: RentViewModel) {
         DateFieldDialog(
             label = "Дата начала",
             viewModel = startDateViewModel,
-            minDate = Clock.System.now().toString().take(10),
+            minDate =
+                Clock.System
+                    .now()
+                    .toString()
+                    .take(10),
             onDateChanged = { date ->
                 viewModel.setStartDate(if (date != null) "${date}T10:00:00Z" else null)
             },
