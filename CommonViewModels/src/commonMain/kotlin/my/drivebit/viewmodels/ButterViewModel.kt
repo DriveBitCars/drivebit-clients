@@ -76,6 +76,13 @@ private val myDocuments =
         onClick = {},
     )
 
+private val myBookings =
+    ButterModel(
+        iconUrl = ImagePaths.BUTTER_CAR_ICON_SVG,
+        text = "Мои бронирования",
+        onClick = {},
+    )
+
 private val logout =
     ButterModel(
         iconUrl = ImagePaths.BUTTER_LOGOUT_SVG,
@@ -128,6 +135,7 @@ class ButterViewModelImpl(
                     if (storage.isLogined()) {
                         add(profile.copy(onClick = { close() }))
                         add(myDocuments.copy(onClick = { close() }))
+                        add(myBookings.copy(onClick = { close() }))
                     } else {
                         add(login.copy(onClick = { close() }))
                         add(registr.copy(onClick = { close() }))
