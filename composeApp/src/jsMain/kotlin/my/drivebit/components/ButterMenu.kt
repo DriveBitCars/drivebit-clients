@@ -91,6 +91,11 @@ fun ButterMenu() {
                                         butterViewModel.close()
                                         navigationController?.navigateTo("/documents")
                                     })
+                                "Мои бронирования" ->
+                                    item.copy(onClick = {
+                                        butterViewModel.close()
+                                        navigationController?.navigateTo("/my-bookings")
+                                    })
                                 else -> item
                             }
                         },

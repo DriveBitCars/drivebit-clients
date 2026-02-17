@@ -5,12 +5,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import kotlinx.datetime.Clock
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
+import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.RentState
 import my.drivebit.viewmodels.RentViewModel
+import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
@@ -21,10 +25,26 @@ import org.jetbrains.compose.web.dom.Text
 @Suppress("FunctionName")
 fun CarBook(viewModel: RentViewModel) {
     val state by viewModel.state.collectAsState()
+    val navigationController = LocalNavigationController.current
+    val buttonViewModel = createButtonViewModel()
+
+    LaunchedEffect(state) {
+        if (state is RentState.NavigateToMyBookings) {
+            navigationController?.navigateTo("/my-bookings")
+            viewModel.consumeNavigationEvent()
+        }
+    }
+
     val bookState = state as? RentState.Book ?: return
 
     val startDateViewModel = remember { DateFieldViewModel() }
     val endDateViewModel = remember { DateFieldViewModel() }
+
+    LaunchedEffect(bookState.isCreating) {
+        buttonViewModel.setState(
+            if (bookState.isCreating) ButtonState.Loading else ButtonState.Enabled,
+        )
+    }
     val startDateState by startDateViewModel.state.collectAsState()
     val endDateState by endDateViewModel.state.collectAsState()
 
@@ -105,10 +125,22 @@ fun CarBook(viewModel: RentViewModel) {
                 }
             }
             ActionButton(
+                viewModel = buttonViewModel,
                 enabledColor = CSSColors.Blue,
                 text = "Забронировать",
                 onClick = { viewModel.onBookClick() },
             )
+            bookState.createError?.let { error ->
+                Span({
+                    style {
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(CSSTypography.FontSize.xs)
+                        color(CSSColors.Red)
+                    }
+                }) {
+                    Text(error)
+                }
+            }
         }
     }
 
@@ -116,6 +148,11 @@ fun CarBook(viewModel: RentViewModel) {
         DateFieldDialog(
             label = "Дата начала",
             viewModel = startDateViewModel,
+            minDate =
+                Clock.System
+                    .now()
+                    .toString()
+                    .take(10),
             onDateChanged = { date ->
                 viewModel.setStartDate(if (date != null) "${date}T10:00:00Z" else null)
             },

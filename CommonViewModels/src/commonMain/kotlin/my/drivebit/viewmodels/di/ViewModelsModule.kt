@@ -46,6 +46,8 @@ import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MainContentViewModelImpl
 import my.drivebit.viewmodels.MapViewModel
+import my.drivebit.viewmodels.MyBookingsAsRenterViewModel
+import my.drivebit.viewmodels.MyBookingsAsRenterViewModelImpl
 import my.drivebit.viewmodels.MyCarsViewModel
 import my.drivebit.viewmodels.MyCarsViewModelImpl
 import my.drivebit.viewmodels.MyCitySelectionViewModel
@@ -268,6 +270,12 @@ val commonViewModelsModule: Module =
         factory<MyCarsViewModel> {
             MyCarsViewModelImpl(
                 myCarRepository = get(),
+            )
+        }
+
+        single<MyBookingsAsRenterViewModel> {
+            MyBookingsAsRenterViewModelImpl(
+                booking = get(),
             )
         }
 

@@ -28,6 +28,7 @@ import my.drivebit.screens.EngineVolumeInputPage
 import my.drivebit.screens.LicensePlateInputPage
 import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
+import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCarsPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.DocumentsPage
@@ -93,6 +94,14 @@ actual fun App() {
                 }
                 currentPath.startsWith("/my-cars") -> {
                     MyCarsPage()
+                }
+                currentPath.startsWith("/my-bookings") -> {
+                    val storage: Storage = koinInject()
+                    if (storage.isLogined()) {
+                        MyBookingsPage()
+                    } else {
+                        window.location.href = "/"
+                    }
                 }
                 currentPath.startsWith("/documents") -> {
                     DocumentsPage()

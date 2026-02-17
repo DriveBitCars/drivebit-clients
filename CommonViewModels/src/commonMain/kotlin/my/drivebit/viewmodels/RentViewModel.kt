@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
+import my.drivebit.network.services.CreateBookingRequest
 
 sealed interface RentState {
     data class Book(
@@ -21,7 +22,11 @@ sealed interface RentState {
         val showEndDateError: Boolean = false,
         val middlePrice: String = "",
         val totalAmount: String = "",
+        val isCreating: Boolean = false,
+        val createError: String? = null,
     ) : RentState
+
+    data object NavigateToMyBookings : RentState
 }
 
 interface RentViewModel {
@@ -30,6 +35,8 @@ interface RentViewModel {
     fun setStartDate(date: String?)
 
     fun setEndDate(date: String?)
+
+    fun consumeNavigationEvent()
 
     fun onBookClick()
 }
@@ -41,9 +48,14 @@ class RentViewModelImpl(
 ) : RentViewModel {
     private val viewModelScope = coroutineScope
     private var calculateJob: Job? = null
+    private var createJob: Job? = null
 
     private val _state = MutableStateFlow<RentState>(RentState.Book())
     override val state: StateFlow<RentState> = _state.asStateFlow()
+
+    override fun consumeNavigationEvent() {
+        _state.value = RentState.Book()
+    }
 
     override fun setStartDate(date: String?) {
         _state.update {
@@ -73,11 +85,47 @@ class RentViewModelImpl(
         val showEndDateError = current.endDate.isNullOrBlank()
         _state.update {
             if (it is RentState.Book) {
-                it.copy(showStartDateError = showStartDateError, showEndDateError = showEndDateError)
+                it.copy(
+                    showStartDateError = showStartDateError,
+                    showEndDateError = showEndDateError,
+                    createError = null,
+                )
             } else {
                 it
             }
         }
+        if (showStartDateError || showEndDateError) return
+        val start = current.startDate!!.trim()
+        val end = current.endDate!!.trim()
+        createJob?.cancel()
+        createJob =
+            viewModelScope.launch {
+                _state.update {
+                    if (it is RentState.Book) it.copy(isCreating = true, createError = null) else it
+                }
+                runCatching {
+                    booking.createAsRenter(
+                        CreateBookingRequest(
+                            carId = carId,
+                            startAt = start,
+                            endAt = end,
+                        ),
+                    )
+                }.onSuccess {
+                    _state.value = RentState.NavigateToMyBookings
+                }.onFailure { e ->
+                    _state.update { s ->
+                        if (s is RentState.Book) {
+                            s.copy(
+                                isCreating = false,
+                                createError = localizeBookingError(e.message),
+                            )
+                        } else {
+                            s
+                        }
+                    }
+                }
+            }
     }
 
     private fun scheduleCalculate() {
@@ -126,6 +174,14 @@ class RentViewModelImpl(
                 }
             }
     }
+
+    private fun localizeBookingError(message: String?): String =
+        when {
+            message == null || message.isBlank() -> "Не удалось создать бронирование"
+            "CannotBookOwnCar" in message -> "Нельзя забронировать свой автомобиль"
+            "Start date cannot be in the past" in message -> "Дата начала не может быть в прошлом"
+            else -> message
+        }
 
     private fun formatPrice(value: Double): String =
         if (value == value.toLong().toDouble()) "${value.toLong()}.0" else value.toString()

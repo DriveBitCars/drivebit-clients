@@ -3,6 +3,7 @@ package my.drivebit.resources
 object ImagePaths {
     const val BACK_WHEEL_DRIVE_SVG = "images/back-wheel-drive.svg"
     const val BACKGROUNDS_HERO_BG_JPG = "images/backgrounds/hero-bg.jpg"
+    const val BUTTER_BOOKING_SVG = "images/butter/booking.svg"
     const val BUTTER_CAR_ICON_SVG = "images/butter/car-icon.svg"
     const val BUTTER_DOCS_SVG = "images/butter/docs.svg"
     const val BUTTER_LOGOUT_SVG = "images/butter/logout.svg"
