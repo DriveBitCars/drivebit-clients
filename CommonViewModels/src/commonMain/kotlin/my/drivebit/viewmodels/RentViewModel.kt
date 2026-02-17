@@ -25,6 +25,8 @@ sealed interface RentState {
         val isCreating: Boolean = false,
         val createError: String? = null,
     ) : RentState
+
+    data object NavigateToMyBookings : RentState
 }
 
 interface RentViewModel {
@@ -34,7 +36,7 @@ interface RentViewModel {
 
     fun setEndDate(date: String?)
 
-    fun setOnBookingSuccess(callback: (() -> Unit)?)
+    fun consumeNavigationEvent()
 
     fun onBookClick()
 }
@@ -47,13 +49,12 @@ class RentViewModelImpl(
     private val viewModelScope = coroutineScope
     private var calculateJob: Job? = null
     private var createJob: Job? = null
-    private var onBookingSuccess: (() -> Unit)? = null
 
     private val _state = MutableStateFlow<RentState>(RentState.Book())
     override val state: StateFlow<RentState> = _state.asStateFlow()
 
-    override fun setOnBookingSuccess(callback: (() -> Unit)?) {
-        onBookingSuccess = callback
+    override fun consumeNavigationEvent() {
+        _state.value = RentState.Book()
     }
 
     override fun setStartDate(date: String?) {
@@ -111,16 +112,13 @@ class RentViewModelImpl(
                         ),
                     )
                 }.onSuccess {
-                    _state.update { s ->
-                        if (s is RentState.Book) s.copy(isCreating = false, createError = null) else s
-                    }
-                    onBookingSuccess?.invoke()
+                    _state.value = RentState.NavigateToMyBookings
                 }.onFailure { e ->
                     _state.update { s ->
                         if (s is RentState.Book) {
                             s.copy(
                                 isCreating = false,
-                                createError = e.message ?: "Не удалось создать бронирование",
+                                createError = localizeBookingError(e.message),
                             )
                         } else {
                             s
@@ -176,6 +174,14 @@ class RentViewModelImpl(
                 }
             }
     }
+
+    private fun localizeBookingError(message: String?): String =
+        when {
+            message == null || message.isBlank() -> "Не удалось создать бронирование"
+            "CannotBookOwnCar" in message -> "Нельзя забронировать свой автомобиль"
+            "Start date cannot be in the past" in message -> "Дата начала не может быть в прошлом"
+            else -> message
+        }
 
     private fun formatPrice(value: Double): String =
         if (value == value.toLong().toDouble()) "${value.toLong()}.0" else value.toString()

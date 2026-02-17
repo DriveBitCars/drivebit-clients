@@ -131,6 +131,8 @@ class RentViewModelTest {
             viewModel.onBookClick()
             advanceUntilIdle()
 
+            assertTrue(viewModel.state.value is RentState.NavigateToMyBookings)
+            viewModel.consumeNavigationEvent()
             val state = viewModel.state.value as RentState.Book
             assertFalse(state.showStartDateError)
             assertFalse(state.showEndDateError)
