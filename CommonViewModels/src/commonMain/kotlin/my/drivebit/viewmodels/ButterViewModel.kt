@@ -78,7 +78,7 @@ private val myDocuments =
 
 private val myBookings =
     ButterModel(
-        iconUrl = ImagePaths.BUTTER_CAR_ICON_SVG,
+        iconUrl = ImagePaths.BUTTER_BOOKING_SVG,
         text = "Мои бронирования",
         onClick = {},
     )
