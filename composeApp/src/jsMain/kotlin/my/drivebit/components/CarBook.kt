@@ -95,6 +95,7 @@ fun CarBook(
                 viewModel = endDateViewModel,
                 minDate = startDateState.date,
                 showError = bookState.showEndDateError,
+                enabled = startDateState.date != null,
                 onDateChanged = { date ->
                     viewModel.setEndDate(if (date != null) "${date}T18:00:00Z" else null)
                 },
@@ -181,6 +182,7 @@ private fun CarBookDateField(
     viewModel: DateFieldViewModel,
     minDate: String? = null,
     showError: Boolean,
+    enabled: Boolean = true,
     onDateChanged: (String?) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
@@ -188,15 +190,19 @@ private fun CarBookDateField(
 
     Div({
         style {
-            cursor("pointer")
+            cursor(if (enabled) "pointer" else "not-allowed")
             marginBottom(if (showError) 4.px else 0.px)
             border(1.px, LineStyle.Solid, if (showError) CSSColors.Red else CSSColors.Gray300)
             borderRadius(8.px)
             padding(12.px, 14.px)
             property("transition", "border-color 0.2s ease")
+            if (!enabled) {
+                property("opacity", "0.6")
+                property("pointer-events", "none")
+            }
         }
         onClick {
-            viewModel.openCalendar()
+            if (enabled) viewModel.openCalendar()
         }
     }) {
         Row(
@@ -219,7 +225,13 @@ private fun CarBookDateField(
                     applyTypography(CSSTypography.Styles.body)
                     fontSize(CSSTypography.FontSize.base)
                     fontWeight(CSSTypography.FontWeight.medium)
-                    color(if (state.date != null) CSSColors.Black else CSSColors.Gray600)
+                    color(
+                        when {
+                            !enabled -> CSSColors.Gray600
+                            state.date != null -> CSSColors.Black
+                            else -> CSSColors.Gray600
+                        },
+                    )
                 }
             }) {
                 Text(currentDate)
