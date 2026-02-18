@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
@@ -10,6 +12,8 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.network.services.CarBookingItem
+import my.drivebit.utils.parseDisabledDatesFromBookings
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.RentState
@@ -23,7 +27,10 @@ import org.jetbrains.compose.web.dom.Text
 
 @Composable
 @Suppress("FunctionName")
-fun CarBook(viewModel: RentViewModel) {
+fun CarBook(
+    viewModel: RentViewModel,
+    carBookings: List<CarBookingItem> = emptyList(),
+) {
     val state by viewModel.state.collectAsState()
     val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
@@ -37,6 +44,7 @@ fun CarBook(viewModel: RentViewModel) {
 
     val bookState = state as? RentState.Book ?: return
 
+    val disabledDates = remember(carBookings) { parseDisabledDatesFromBookings(carBookings) }
     val startDateViewModel = remember { DateFieldViewModel() }
     val endDateViewModel = remember { DateFieldViewModel() }
 
@@ -89,6 +97,7 @@ fun CarBook(viewModel: RentViewModel) {
                 viewModel = endDateViewModel,
                 minDate = startDateState.date,
                 showError = bookState.showEndDateError,
+                enabled = startDateState.date != null,
                 onDateChanged = { date ->
                     viewModel.setEndDate(if (date != null) "${date}T18:00:00Z" else null)
                 },
@@ -145,7 +154,7 @@ fun CarBook(viewModel: RentViewModel) {
     }
 
     if (startDateState.isCalendarOpen) {
-        DateFieldDialog(
+        BookingDatePickerDialog(
             label = "Дата начала",
             viewModel = startDateViewModel,
             minDate =
@@ -153,16 +162,18 @@ fun CarBook(viewModel: RentViewModel) {
                     .now()
                     .toString()
                     .take(10),
+            disabledDates = disabledDates,
             onDateChanged = { date ->
                 viewModel.setStartDate(if (date != null) "${date}T10:00:00Z" else null)
             },
         )
     }
     if (endDateState.isCalendarOpen) {
-        DateFieldDialog(
+        BookingDatePickerDialog(
             label = "Дата окончания",
             viewModel = endDateViewModel,
             minDate = startDateState.date,
+            disabledDates = disabledDates,
             onDateChanged = { date ->
                 viewModel.setEndDate(if (date != null) "${date}T18:00:00Z" else null)
             },
@@ -171,12 +182,14 @@ fun CarBook(viewModel: RentViewModel) {
 }
 
 @Composable
+@Suppress("FunctionName")
 private fun CarBookDateField(
     label: String,
     actionLabel: String,
     viewModel: DateFieldViewModel,
     minDate: String? = null,
     showError: Boolean,
+    enabled: Boolean = true,
     onDateChanged: (String?) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
@@ -184,15 +197,19 @@ private fun CarBookDateField(
 
     Div({
         style {
-            cursor("pointer")
+            cursor(if (enabled) "pointer" else "not-allowed")
             marginBottom(if (showError) 4.px else 0.px)
             border(1.px, LineStyle.Solid, if (showError) CSSColors.Red else CSSColors.Gray300)
             borderRadius(8.px)
             padding(12.px, 14.px)
             property("transition", "border-color 0.2s ease")
+            if (!enabled) {
+                property("opacity", "0.6")
+                property("pointer-events", "none")
+            }
         }
         onClick {
-            viewModel.openCalendar()
+            if (enabled) viewModel.openCalendar()
         }
     }) {
         Row(
@@ -215,7 +232,13 @@ private fun CarBookDateField(
                     applyTypography(CSSTypography.Styles.body)
                     fontSize(CSSTypography.FontSize.base)
                     fontWeight(CSSTypography.FontWeight.medium)
-                    color(if (state.date != null) CSSColors.Black else CSSColors.Gray600)
+                    color(
+                        when {
+                            !enabled -> CSSColors.Gray600
+                            state.date != null -> CSSColors.Black
+                            else -> CSSColors.Gray600
+                        },
+                    )
                 }
             }) {
                 Text(currentDate)

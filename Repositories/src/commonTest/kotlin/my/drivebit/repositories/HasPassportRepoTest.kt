@@ -23,6 +23,7 @@ private class FakeDocuments : Documents {
         fileBytes: ByteArray,
         fileName: String,
         contentType: String,
+        documentType: String,
     ): Document = throw NotImplementedError()
 
     override suspend fun getDocumentUrl(documentId: Int): String = throw NotImplementedError()

@@ -16,6 +16,11 @@ sealed interface DocumentsState {
 
     data object Loading : DocumentsState
 
+    data class Uploading(
+        val documentType: String,
+        val documents: List<Document>,
+    ) : DocumentsState
+
     data class Success(
         val documents: List<Document>,
     ) : DocumentsState
@@ -29,6 +34,13 @@ interface DocumentsViewModel {
     val state: StateFlow<DocumentsState>
 
     fun load()
+
+    fun uploadDocument(
+        documentType: String,
+        fileBytes: ByteArray,
+        fileName: String,
+        contentType: String,
+    )
 }
 
 class DocumentsViewModelImpl(
@@ -56,6 +68,38 @@ class DocumentsViewModelImpl(
                         exception = e,
                         defaultNetworkError = "Ошибка сети",
                         defaultGenericError = "Не удалось загрузить документы",
+                    )
+                _state.update { DocumentsState.Error(message) }
+            }
+        }
+    }
+
+    override fun uploadDocument(
+        documentType: String,
+        fileBytes: ByteArray,
+        fileName: String,
+        contentType: String,
+    ) {
+        viewModelScope.launch {
+            val currentDocs =
+                (_state.value as? DocumentsState.Success)?.documents ?: emptyList()
+            _state.update { DocumentsState.Uploading(documentType, currentDocs) }
+
+            runCatching {
+                documents.uploadDocument(
+                    fileBytes = fileBytes,
+                    fileName = fileName,
+                    contentType = contentType,
+                    documentType = documentType,
+                )
+            }.onSuccess {
+                load()
+            }.onFailure { e ->
+                val message =
+                    ErrorHandler.extractErrorMessage(
+                        exception = e,
+                        defaultNetworkError = "Ошибка сети",
+                        defaultGenericError = "Не удалось загрузить документ",
                     )
                 _state.update { DocumentsState.Error(message) }
             }

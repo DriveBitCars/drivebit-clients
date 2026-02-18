@@ -77,6 +77,12 @@ data class CarItem(
 )
 
 @Serializable
+data class CarBookingItem(
+    val startAt: String,
+    val endAt: String,
+)
+
+@Serializable
 data class CarDetailResponse(
     val id: String,
     val general: CarGeneral =
@@ -110,6 +116,7 @@ data class CarDetailResponse(
     val seatsCount: Int? = null,
     val availableMileagePerDayKm: Int? = null,
     val owner: String = "",
+    val carBookings: List<CarBookingItem> = emptyList(),
 ) {
     fun resolvedLicensePlate(): String = licensePlate ?: general?.licensePlate ?: ""
 

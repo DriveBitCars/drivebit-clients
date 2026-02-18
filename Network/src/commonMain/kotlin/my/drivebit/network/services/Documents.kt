@@ -19,6 +19,7 @@ interface Documents {
         fileBytes: ByteArray,
         fileName: String,
         contentType: String,
+        documentType: String,
     ): Document
 
     suspend fun getDocumentUrl(documentId: Int): String
@@ -51,6 +52,7 @@ class DocumentsImpl(
         fileBytes: ByteArray,
         fileName: String,
         contentType: String,
+        documentType: String,
     ): Document {
         val url = "${DEFAULT_BASE_URL}Documents/upload"
         val response =
@@ -58,6 +60,7 @@ class DocumentsImpl(
                 setBody(
                     MultiPartFormDataContent(
                         formData {
+                            append("Type", documentType)
                             append(
                                 "file",
                                 fileBytes,
