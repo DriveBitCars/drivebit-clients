@@ -77,6 +77,7 @@ class PassportUploadViewModelImpl(
                     fileBytes = fileBytes,
                     fileName = fileName,
                     contentType = contentType,
+                    documentType = "PassportMainPageRus",
                 )
             }.onSuccess { doc ->
                 _state.update { PassportUploadState.Success(doc) }

@@ -19,6 +19,7 @@ object CSSColors {
     val Blue: CSSColorValue = ColorsDriveBit.Blue.toCSSColor()
     val BlueRed: CSSColorValue = ColorsDriveBit.BlueRed.toCSSColor()
     val Red: CSSColorValue = ColorsDriveBit.Red.toCSSColor()
+    val Green: CSSColorValue = rgb(34, 197, 94)
 
     // Строковые версии цветов для использования в setProperty
     val BlackString: String = ColorsDriveBit.Black.toHexString()

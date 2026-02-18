@@ -1,7 +1,6 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,9 +22,9 @@ fun PriceFilter(
     var minInputValue by remember { mutableStateOf("$minValue") }
     var maxInputValue by remember { mutableStateOf("$maxValue+") }
 
-        minInputValue = "$minValue"
+    minInputValue = "$minValue"
 
-        maxInputValue = "$maxValue+"
+    maxInputValue = "$maxValue+"
 
     val sliderMax = 1000
 
