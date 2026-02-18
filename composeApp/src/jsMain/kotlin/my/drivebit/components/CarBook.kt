@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
@@ -6,12 +8,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.datetime.Clock
-import my.drivebit.network.services.CarBookingItem
-import my.drivebit.utils.parseDisabledDatesFromBookings
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.network.services.CarBookingItem
+import my.drivebit.utils.parseDisabledDatesFromBookings
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.RentState
@@ -155,7 +157,11 @@ fun CarBook(
         BookingDatePickerDialog(
             label = "Дата начала",
             viewModel = startDateViewModel,
-            minDate = Clock.System.now().toString().take(10),
+            minDate =
+                Clock.System
+                    .now()
+                    .toString()
+                    .take(10),
             disabledDates = disabledDates,
             onDateChanged = { date ->
                 viewModel.setStartDate(if (date != null) "${date}T10:00:00Z" else null)
@@ -176,6 +182,7 @@ fun CarBook(
 }
 
 @Composable
+@Suppress("FunctionName")
 private fun CarBookDateField(
     label: String,
     actionLabel: String,
