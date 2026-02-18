@@ -6,6 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.datetime.Clock
+import my.drivebit.network.services.CarBookingItem
+import my.drivebit.utils.parseDisabledDatesFromBookings
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
@@ -23,7 +25,10 @@ import org.jetbrains.compose.web.dom.Text
 
 @Composable
 @Suppress("FunctionName")
-fun CarBook(viewModel: RentViewModel) {
+fun CarBook(
+    viewModel: RentViewModel,
+    carBookings: List<CarBookingItem> = emptyList(),
+) {
     val state by viewModel.state.collectAsState()
     val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
@@ -37,6 +42,7 @@ fun CarBook(viewModel: RentViewModel) {
 
     val bookState = state as? RentState.Book ?: return
 
+    val disabledDates = remember(carBookings) { parseDisabledDatesFromBookings(carBookings) }
     val startDateViewModel = remember { DateFieldViewModel() }
     val endDateViewModel = remember { DateFieldViewModel() }
 
@@ -145,24 +151,22 @@ fun CarBook(viewModel: RentViewModel) {
     }
 
     if (startDateState.isCalendarOpen) {
-        DateFieldDialog(
+        BookingDatePickerDialog(
             label = "Дата начала",
             viewModel = startDateViewModel,
-            minDate =
-                Clock.System
-                    .now()
-                    .toString()
-                    .take(10),
+            minDate = Clock.System.now().toString().take(10),
+            disabledDates = disabledDates,
             onDateChanged = { date ->
                 viewModel.setStartDate(if (date != null) "${date}T10:00:00Z" else null)
             },
         )
     }
     if (endDateState.isCalendarOpen) {
-        DateFieldDialog(
+        BookingDatePickerDialog(
             label = "Дата окончания",
             viewModel = endDateViewModel,
             minDate = startDateState.date,
+            disabledDates = disabledDates,
             onDateChanged = { date ->
                 viewModel.setEndDate(if (date != null) "${date}T18:00:00Z" else null)
             },

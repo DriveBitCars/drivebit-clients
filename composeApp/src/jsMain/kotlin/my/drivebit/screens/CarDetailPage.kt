@@ -147,6 +147,7 @@ private fun CarDetailContent(
                     remember(car.id) {
                         koinScope.get<RentViewModel>(parameters = { parametersOf(car.id) })
                     },
+                carBookings = car.carBookings,
             )
         }
 
