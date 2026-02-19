@@ -7,7 +7,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import kotlin.time.Duration.Companion.hours
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import my.drivebit.utils.addDays
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
@@ -56,6 +61,13 @@ fun CarBook(
     val startDateState by startDateViewModel.state.collectAsState()
     val endDateState by endDateViewModel.state.collectAsState()
 
+    val endDateMinDate =
+        startDateState.date?.take(10)?.let { str ->
+            if (str.length == 10) {
+                runCatching { addDays(LocalDate.parse(str), 1).toString() }.getOrNull()
+            } else null
+        } ?: null
+
     LaunchedEffect(bookState.startDate) {
         bookState.startDate?.let { iso ->
             val datePart = iso.take(10)
@@ -63,9 +75,11 @@ fun CarBook(
         }
     }
     LaunchedEffect(bookState.endDate) {
-        bookState.endDate?.let { iso ->
-            val datePart = iso.take(10)
+        if (bookState.endDate != null) {
+            val datePart = bookState.endDate!!.take(10)
             if (datePart.length == 10) endDateViewModel.setDate(datePart)
+        } else {
+            endDateViewModel.setDate(null)
         }
     }
 
@@ -88,14 +102,14 @@ fun CarBook(
                 viewModel = startDateViewModel,
                 showError = bookState.showStartDateError,
                 onDateChanged = { date ->
-                    viewModel.setStartDate(if (date != null) "${date}T10:00:00Z" else null)
+                    viewModel.setStartDate(if (date != null) formatStartAt(date) else null)
                 },
             )
             CarBookDateField(
                 label = "Дата окончания",
                 actionLabel = "по",
                 viewModel = endDateViewModel,
-                minDate = startDateState.date,
+                minDate = endDateMinDate,
                 showError = bookState.showEndDateError,
                 enabled = startDateState.date != null,
                 onDateChanged = { date ->
@@ -164,7 +178,7 @@ fun CarBook(
                     .take(10),
             disabledDates = disabledDates,
             onDateChanged = { date ->
-                viewModel.setStartDate(if (date != null) "${date}T10:00:00Z" else null)
+                viewModel.setStartDate(if (date != null) formatStartAt(date) else null)
             },
         )
     }
@@ -172,7 +186,7 @@ fun CarBook(
         BookingDatePickerDialog(
             label = "Дата окончания",
             viewModel = endDateViewModel,
-            minDate = startDateState.date,
+            minDate = endDateMinDate,
             disabledDates = disabledDates,
             onDateChanged = { date ->
                 viewModel.setEndDate(if (date != null) "${date}T18:00:00Z" else null)
@@ -265,6 +279,16 @@ private fun CarBookDateField(
         }) {
             Text("Выберите дату")
         }
+    }
+}
+
+private fun formatStartAt(date: String): String {
+    val selectedDate = LocalDate.parse(date.take(10))
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    return if (selectedDate == today) {
+        (Clock.System.now() + 1.hours).toString()
+    } else {
+        "${date}T10:00:00Z"
     }
 }
 

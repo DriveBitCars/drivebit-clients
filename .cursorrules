@@ -26,7 +26,7 @@ This is a Kotlin Multiplatform project for Drivebit mobile clients targeting And
 - iOS: Open `iosApp/` in Xcode
 
 ## Server Access
-- SSH: `ssh root@143.198.69.242`
+- SSH: `ssh root@155.212.170.94`
 
 ## Development Workflow
 - No need to run full checks locally - push to CI instead

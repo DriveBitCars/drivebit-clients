@@ -15,7 +15,13 @@ interface Booking {
 
     suspend fun getMyAsRenter(): List<BookingDTO>
 
+    suspend fun getMyAsOwner(): List<BookingDTO>
+
     suspend fun createAsRenter(request: CreateBookingRequest): BookingDTO
+
+    suspend fun confirmAsOwner(bookingId: String): BookingDTO
+
+    suspend fun declineAsOwner(bookingId: String): BookingDTO
 }
 
 @Serializable
@@ -80,6 +86,12 @@ class BookingImpl(
         return response.parseResponse()
     }
 
+    override suspend fun getMyAsOwner(): List<BookingDTO> {
+        val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/list"
+        val response = authorizedHttpClient.get(url)
+        return response.parseResponse()
+    }
+
     override suspend fun createAsRenter(request: CreateBookingRequest): BookingDTO {
         val url = "${DEFAULT_BASE_URL}Booking/my/as-renter"
         val response =
@@ -87,6 +99,18 @@ class BookingImpl(
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }
+        return response.parseResponse()
+    }
+
+    override suspend fun confirmAsOwner(bookingId: String): BookingDTO {
+        val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/confirm"
+        val response = authorizedHttpClient.post(url) { }
+        return response.parseResponse()
+    }
+
+    override suspend fun declineAsOwner(bookingId: String): BookingDTO {
+        val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/decline"
+        val response = authorizedHttpClient.post(url) { }
         return response.parseResponse()
     }
 }

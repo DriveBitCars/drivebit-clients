@@ -60,7 +60,17 @@ class RentViewModelImpl(
     override fun setStartDate(date: String?) {
         _state.update {
             if (it is RentState.Book) {
-                it.copy(startDate = date, showStartDateError = false)
+                val endDate =
+                    when {
+                        date == null -> null
+                        it.endDate != null -> {
+                            val startDay = date.take(10)
+                            val endDay = it.endDate.take(10)
+                            if (endDay <= startDay) null else it.endDate
+                        }
+                        else -> it.endDate
+                    }
+                it.copy(startDate = date, endDate = endDate, showStartDateError = false)
             } else {
                 it
             }
@@ -82,7 +92,12 @@ class RentViewModelImpl(
     override fun onBookClick() {
         val current = _state.value as? RentState.Book ?: return
         val showStartDateError = current.startDate.isNullOrBlank()
-        val showEndDateError = current.endDate.isNullOrBlank()
+        val endDateBlank = current.endDate.isNullOrBlank()
+        val endDateTooEarly =
+            !endDateBlank &&
+                current.startDate != null &&
+                current.endDate!!.take(10) <= current.startDate.take(10)
+        val showEndDateError = endDateBlank || endDateTooEarly
         _state.update {
             if (it is RentState.Book) {
                 it.copy(
