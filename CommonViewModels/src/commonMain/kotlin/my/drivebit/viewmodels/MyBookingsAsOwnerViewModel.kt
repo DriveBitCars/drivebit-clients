@@ -19,8 +19,11 @@ interface MyBookingsAsOwnerViewModel {
     val actionInProgress: StateFlow<Set<String>>
 
     fun loadBookings()
+
     fun refreshBookings()
+
     fun confirmBooking(bookingId: String)
+
     fun declineBooking(bookingId: String)
 }
 
@@ -87,10 +90,9 @@ class MyBookingsAsOwnerViewModelImpl(
         ) {
             _actionInProgress.update { it + bookingId }
             try {
-                val updated = booking.confirmAsOwner(bookingId)
-                _bookings.update { list ->
-                    list.map { if (it.id == bookingId) updated else it }
-                }
+                booking.confirmAsOwner(bookingId)
+                val result = booking.getMyAsOwner()
+                _bookings.value = result
             } finally {
                 _actionInProgress.update { it - bookingId }
             }
@@ -114,10 +116,9 @@ class MyBookingsAsOwnerViewModelImpl(
         ) {
             _actionInProgress.update { it + bookingId }
             try {
-                val updated = booking.declineAsOwner(bookingId)
-                _bookings.update { list ->
-                    list.map { if (it.id == bookingId) updated else it }
-                }
+                booking.declineAsOwner(bookingId)
+                val result = booking.getMyAsOwner()
+                _bookings.value = result
             } finally {
                 _actionInProgress.update { it - bookingId }
             }

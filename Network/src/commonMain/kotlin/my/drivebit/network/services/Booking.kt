@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.consumeResponse
 import my.drivebit.network.parseResponse
 
 interface Booking {
@@ -20,9 +21,9 @@ interface Booking {
 
     suspend fun createAsRenter(request: CreateBookingRequest): BookingDTO
 
-    suspend fun confirmAsOwner(bookingId: String): BookingDTO
+    suspend fun confirmAsOwner(bookingId: String)
 
-    suspend fun declineAsOwner(bookingId: String): BookingDTO
+    suspend fun declineAsOwner(bookingId: String)
 }
 
 @Serializable
@@ -103,15 +104,15 @@ class BookingImpl(
         return response.parseResponse()
     }
 
-    override suspend fun confirmAsOwner(bookingId: String): BookingDTO {
+    override suspend fun confirmAsOwner(bookingId: String) {
         val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/confirm"
         val response = authorizedHttpClient.put(url) { }
-        return response.parseResponse()
+        response.consumeResponse()
     }
 
-    override suspend fun declineAsOwner(bookingId: String): BookingDTO {
+    override suspend fun declineAsOwner(bookingId: String) {
         val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/decline"
         val response = authorizedHttpClient.put(url) { }
-        return response.parseResponse()
+        response.consumeResponse()
     }
 }
