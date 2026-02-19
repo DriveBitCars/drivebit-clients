@@ -106,6 +106,53 @@ object Icons {
                     )
                 }.build()
 
+    val DealsIcon: ImageVector
+        get() =
+            ImageVector
+                .Builder(
+                    name = "deals",
+                    defaultWidth = 24.dp,
+                    defaultHeight = 24.dp,
+                    viewportWidth = 48f,
+                    viewportHeight = 48f,
+                ).apply {
+                    path(
+                        fill = null,
+                        strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
+                        strokeLineWidth = 1.5f,
+                        pathBuilder = {
+                            moveTo(24f, 13f)
+                            lineTo(24f, 35f)
+                        },
+                    )
+                    path(
+                        fill = null,
+                        strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
+                        strokeLineWidth = 1.5f,
+                        pathBuilder = {
+                            moveTo(45.5f, 24f)
+                            arcTo(21.5f, 21.5f, 0f, true, true, 2.5f, 24f)
+                            arcTo(21.5f, 21.5f, 0f, true, true, 45.5f, 24f)
+                        },
+                    )
+                    path(
+                        fill = null,
+                        strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
+                        strokeLineWidth = 1.5f,
+                        pathBuilder = {
+                            moveTo(24f, 10f)
+                            lineTo(24f, 38f)
+                            moveTo(20f, 21f)
+                            quadTo(24f, 18f, 28f, 21f)
+                            quadTo(24f, 24f, 20f, 27f)
+                            quadTo(24f, 30f, 28f, 27f)
+                        },
+                    )
+                }.build()
+
     val MoreIcon: ImageVector
         get() =
             ImageVector

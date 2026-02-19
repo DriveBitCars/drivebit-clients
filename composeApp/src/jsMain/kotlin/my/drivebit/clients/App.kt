@@ -30,6 +30,7 @@ import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCarsPage
+import my.drivebit.screens.MyDealsPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.ProductionYearInputPage
@@ -99,6 +100,14 @@ actual fun App() {
                     val storage: Storage = koinInject()
                     if (storage.isLogined()) {
                         MyBookingsPage()
+                    } else {
+                        window.location.href = "/"
+                    }
+                }
+                currentPath.startsWith("/my-deals") -> {
+                    val storage: Storage = koinInject()
+                    if (storage.isLogined()) {
+                        MyDealsPage()
                     } else {
                         window.location.href = "/"
                     }
