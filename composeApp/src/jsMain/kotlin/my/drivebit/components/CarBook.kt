@@ -7,17 +7,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import kotlin.time.Duration.Companion.hours
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import my.drivebit.utils.addDays
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.CarBookingItem
+import my.drivebit.utils.addDays
 import my.drivebit.utils.parseDisabledDatesFromBookings
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateFieldViewModel
@@ -29,6 +28,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import kotlin.time.Duration.Companion.hours
 
 @Composable
 @Suppress("FunctionName")
@@ -65,7 +65,9 @@ fun CarBook(
         startDateState.date?.take(10)?.let { str ->
             if (str.length == 10) {
                 runCatching { addDays(LocalDate.parse(str), 1).toString() }.getOrNull()
-            } else null
+            } else {
+                null
+            }
         } ?: null
 
     LaunchedEffect(bookState.startDate) {
@@ -284,7 +286,11 @@ private fun CarBookDateField(
 
 private fun formatStartAt(date: String): String {
     val selectedDate = LocalDate.parse(date.take(10))
-    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val today =
+        Clock.System
+            .now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
     return if (selectedDate == today) {
         (Clock.System.now() + 1.hours).toString()
     } else {

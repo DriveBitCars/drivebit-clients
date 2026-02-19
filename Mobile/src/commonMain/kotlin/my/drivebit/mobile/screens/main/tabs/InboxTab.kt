@@ -21,12 +21,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import kotlinx.coroutines.delay
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import kotlinx.coroutines.delay
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.DrivebitTheme
@@ -130,8 +130,9 @@ internal fun DealItemCard(
             .joinToString(" ")
             .ifBlank { "Автомобиль" }
     val dateRange = "${booking.startAt.take(10)} — ${booking.endAt.take(10)}"
-    val canConfirmOrDecline = booking.status.equals("Pending", ignoreCase = true) ||
-        booking.status.equals("AwaitingOwnerConfirmation", ignoreCase = true)
+    val canConfirmOrDecline =
+        booking.status.equals("Pending", ignoreCase = true) ||
+            booking.status.equals("AwaitingOwnerConfirmation", ignoreCase = true)
 
     Card(
         modifier = Modifier.fillMaxWidth(),

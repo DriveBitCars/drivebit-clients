@@ -111,8 +111,9 @@ private fun DealItemCard(
             "${mapIso8601ToDateString(booking.createdAt)}, в ${mapIso8601ToTimeString(booking.createdAt)}"
         }.getOrElse { booking.createdAt }
     val relativeTime = runCatching { formatRelativeTime(Instant.parse(booking.createdAt)) }.getOrElse { "" }
-    val canConfirmOrDecline = booking.status.equals("Pending", ignoreCase = true) ||
-        booking.status.equals("AwaitingOwnerConfirmation", ignoreCase = true)
+    val canConfirmOrDecline =
+        booking.status.equals("Pending", ignoreCase = true) ||
+            booking.status.equals("AwaitingOwnerConfirmation", ignoreCase = true)
 
     Column(
         gap = 16.px,
