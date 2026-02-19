@@ -5,6 +5,7 @@ object ImagePaths {
     const val BACKGROUNDS_HERO_BG_JPG = "images/backgrounds/hero-bg.jpg"
     const val BUTTER_BOOKING_SVG = "images/butter/booking.svg"
     const val BUTTER_CAR_ICON_SVG = "images/butter/car-icon.svg"
+    const val BUTTER_DEALS_SVG = "images/butter/deals.svg"
     const val BUTTER_DOCS_SVG = "images/butter/docs.svg"
     const val BUTTER_LOGOUT_SVG = "images/butter/logout.svg"
     const val FILTER_MAIN_ADMISSION_SVG = "images/filter-main/admission.svg"

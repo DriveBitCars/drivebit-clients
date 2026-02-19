@@ -106,6 +106,59 @@ object Icons {
                     )
                 }.build()
 
+    val DealsIcon: ImageVector
+        get() =
+            ImageVector
+                .Builder(
+                    name = "deals",
+                    defaultWidth = 24.dp,
+                    defaultHeight = 24.dp,
+                    viewportWidth = 48f,
+                    viewportHeight = 48f,
+                ).apply {
+                    path(
+                        fill = null,
+                        strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
+                        strokeLineWidth = 1.5f,
+                        pathBuilder = {
+                            moveTo(18.52f, 30.88f)
+                            cubicTo(19.6f, 32.28f, 20.95f, 32.8f, 22.83f, 32.8f)
+                            horizontalLineTo(25.44f)
+                            cubicTo(27.86f, 32.8f, 29.83f, 30.83f, 29.83f, 28.41f)
+                            horizontalLineTo(29.83f)
+                            cubicTo(29.83f, 26f, 27.86f, 24f, 25.44f, 24f)
+                            horizontalLineTo(22.56f)
+                            cubicTo(20.14f, 24f, 18.17f, 22f, 18.17f, 19.61f)
+                            horizontalLineTo(18.17f)
+                            cubicTo(18.17f, 17.19f, 20.14f, 15.21f, 22.56f, 15.21f)
+                            horizontalLineTo(25.16f)
+                            cubicTo(27.09f, 15.21f, 28.44f, 15.73f, 29.52f, 17.14f)
+                        },
+                    )
+                    path(
+                        fill = null,
+                        strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
+                        strokeLineWidth = 1.5f,
+                        pathBuilder = {
+                            moveTo(24f, 13f)
+                            lineTo(24f, 35f)
+                        },
+                    )
+                    path(
+                        fill = null,
+                        strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
+                        strokeLineWidth = 1.5f,
+                        pathBuilder = {
+                            moveTo(45.5f, 24f)
+                            arcTo(21.5f, 21.5f, 0f, true, true, 2.5f, 24f)
+                            arcTo(21.5f, 21.5f, 0f, true, true, 45.5f, 24f)
+                        },
+                    )
+                }.build()
+
     val MoreIcon: ImageVector
         get() =
             ImageVector

@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
@@ -40,7 +41,7 @@ object InboxTab : Tab {
             return TabOptions(
                 index = 3u,
                 title = "Мои сделки",
-                icon = rememberVectorPainter(Icons.InboxIcon),
+                icon = rememberVectorPainter(Icons.DealsIcon),
             )
         }
 
@@ -54,6 +55,10 @@ object InboxTab : Tab {
 
         LaunchedEffect(Unit) {
             viewModel.loadBookings()
+            while (true) {
+                delay(30_000)
+                viewModel.refreshBookings()
+            }
         }
 
         Column(
