@@ -3,6 +3,7 @@ package my.drivebit.network.services
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -104,13 +105,13 @@ class BookingImpl(
 
     override suspend fun confirmAsOwner(bookingId: String): BookingDTO {
         val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/confirm"
-        val response = authorizedHttpClient.post(url) { }
+        val response = authorizedHttpClient.put(url) { }
         return response.parseResponse()
     }
 
     override suspend fun declineAsOwner(bookingId: String): BookingDTO {
         val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/decline"
-        val response = authorizedHttpClient.post(url) { }
+        val response = authorizedHttpClient.put(url) { }
         return response.parseResponse()
     }
 }
