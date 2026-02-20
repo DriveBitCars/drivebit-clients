@@ -4,7 +4,9 @@ const API_BASE = process.env.API_BASE_URL || "https://drivebit.my/api";
 const CITY_ID = "158835";
 const PAGE_SIZE = 100;
 const OUTPUT = process.env.OUTPUT_PATH || "prerender-bot.html";
-const BASE = "https://drivebit.my";
+const SITEMAP_FILENAME = process.env.SITEMAP_FILENAME || "sitemap.xml";
+const CAR_DIR = process.env.CAR_DIR || "car";
+const BASE = process.env.SITE_BASE || "https://drivebit.my";
 
 function formatCarTitle(car) {
   const g = car.general || {};
@@ -54,6 +56,123 @@ async function fetchAllCars() {
   return cars;
 }
 
+async function fetchCarDetail(carId) {
+  const url = `${API_BASE}/Car/${carId}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`API error ${res.status} for Car/${carId}`);
+  }
+  return res.json();
+}
+
+function buildCarDetailHtml(car) {
+  const name = formatCarTitle(car);
+  const dailyRate = car.dailyRate ?? car.DailyRate ?? car.price ?? car.Price ?? 0;
+  const description = car.general?.description ?? "";
+  const addr = car.general?.address ?? car.address;
+  const addrCity = (typeof addr === "object" ? addr?.city : null) ?? "";
+  const addrRegion = (typeof addr === "object" ? addr?.region : null) ?? "";
+
+  const photosFromTop = car.photos ?? [];
+  const photosFromGeneral = car.general?.photos ?? [];
+  const allPhotos = [...photosFromTop, ...photosFromGeneral].filter((p) => p?.url);
+  const uniquePhotos = Array.from(new Map(allPhotos.map((p) => [p.id, p])).values());
+  const firstPhotoUrl = uniquePhotos[0] ? sanitizePhotoUrl(uniquePhotos[0].url) : null;
+
+  const chassis = car.chassis ?? {};
+  const body = car.body ?? {};
+  const specs = [];
+  if (car.seatsCount ?? car.general?.seats) specs.push(`${car.seatsCount ?? car.general?.seats} мест`);
+  if (chassis.engineTypeTranslate) specs.push(chassis.engineTypeTranslate);
+  if (chassis.engineVolume) specs.push(`${chassis.engineVolume} л`);
+  if (chassis.driveTypeTranslate) specs.push(chassis.driveTypeTranslate);
+  if (chassis.transmissionTranslate) specs.push(chassis.transmissionTranslate);
+  if (car.availableMileagePerDayKm) specs.push(`${car.availableMileagePerDayKm} км/день`);
+
+  const photoUrlForMeta = firstPhotoUrl ? (firstPhotoUrl.startsWith("http") ? firstPhotoUrl : BASE + firstPhotoUrl) : `${BASE}/images/logos/logo.png`;
+  const carUrl = `${BASE}/car/${car.id}.html`;
+  const spaUrl = `${BASE}/car-detail?id=${car.id}`;
+
+  const photosHtml = uniquePhotos
+    .map((p) => {
+      const url = sanitizePhotoUrl(p?.url);
+      return url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(name)}" class="car-detail-photo">` : "";
+    })
+    .filter(Boolean)
+    .join("\n");
+
+  const productLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: name,
+    description: description || `Аренда ${name} от собственника`,
+    ...(photoUrlForMeta && { image: photoUrlForMeta }),
+    url: carUrl,
+    ...(dailyRate > 0 && {
+      offers: {
+        "@type": "Offer",
+        price: Math.round(dailyRate),
+        priceCurrency: "RUB",
+      },
+    }),
+  };
+
+  return `<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аренда ${escapeHtml(name)} | DriveBit</title>
+    <meta name="description" content="Аренда ${escapeHtml(name)} от собственника. ${dailyRate > 0 ? Math.round(dailyRate) + "₽/сутки. " : ""}DriveBit - аренда авто дешевле проката на 40%.">
+    <meta name="keywords" content="аренда ${escapeHtml(name)}, аренда авто, прокат автомобилей, DriveBit">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="product">
+    <meta property="og:url" content="${carUrl}">
+    <meta property="og:title" content="Аренда ${escapeHtml(name)} | DriveBit">
+    <meta property="og:description" content="Аренда от собственника${dailyRate > 0 ? ". " + Math.round(dailyRate) + "₽/сутки" : ""}">
+    <meta property="og:image" content="${photoUrlForMeta}">
+    <link rel="canonical" href="${carUrl}">
+    <link rel="icon" type="image/svg+xml" href="/images/logos/turo_logo.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script type="application/ld+json">${JSON.stringify(productLd)}</script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', system-ui, sans-serif; }
+        body { color: #1a1a1a; background: #fff; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+        header { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 12px 0; }
+        .logo { text-decoration: none; color: #2563eb; font-size: 24px; font-weight: 700; }
+        .car-detail-photo { width: 100%; max-height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 8px; }
+        .car-detail-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 24px 0; }
+        .car-detail-title { font-size: 1.8rem; margin: 24px 0 8px; }
+        .car-detail-price { font-size: 1.8rem; color: #2563eb; font-weight: 700; margin: 16px 0; }
+        .car-detail-specs { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; color: #4b5563; }
+        .car-detail-spec { background: #f3f4f6; padding: 8px 16px; border-radius: 8px; font-size: 14px; }
+        .car-detail-desc { margin: 24px 0; color: #4b5563; }
+        .car-detail-location { margin: 16px 0; color: #6b7280; font-size: 14px; }
+        .book-btn { display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; text-decoration: none; border-radius: 12px; font-weight: 600; margin: 24px 0; }
+        .back-link { color: #2563eb; text-decoration: none; font-size: 14px; margin-top: 24px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="/" class="logo">DriveBit</a>
+        </div>
+    </header>
+    <main class="container">
+        <a href="/" class="back-link">← Каталог автомобилей</a>
+        <div class="car-detail-photos">${photosHtml || '<div class="car-detail-photo" style="background:#e5e7eb;height:300px;display:flex;align-items:center;justify-content:center;color:#6b7280;">Нет фото</div>'}</div>
+        <h1 class="car-detail-title">${escapeHtml(name)}</h1>
+        ${addrCity || addrRegion ? `<div class="car-detail-location">📍 ${escapeHtml(addrCity || addrRegion)}</div>` : ""}
+        <div class="car-detail-price">${dailyRate > 0 ? Math.round(dailyRate) + "₽" : "Цена по запросу"} <span>/ сутки</span></div>
+        ${specs.length > 0 ? `<div class="car-detail-specs">${specs.map((s) => `<span class="car-detail-spec">${escapeHtml(s)}</span>`).join("")}</div>` : ""}
+        ${description ? `<div class="car-detail-desc">${escapeHtml(description)}</div>` : ""}
+        <a href="${spaUrl}" class="book-btn">Забронировать</a>
+    </main>
+</body>
+</html>`;
+}
+
 function escapeHtml(s) {
   if (s == null || s === "") return "";
   return String(s)
@@ -71,7 +190,7 @@ function buildSitemap(cars) {
     { loc: `${BASE}/list-your-car.html`, priority: "0.8", changefreq: "weekly" },
   ];
   const carUrls = cars.map((car) => ({
-    loc: `${BASE}/car-detail?id=${encodeURIComponent(car.id)}`,
+    loc: `${BASE}/car/${car.id}.html`,
     priority: "0.7",
     changefreq: "weekly",
   }));
@@ -99,7 +218,7 @@ function buildHtml(cars) {
   const listItems = cars.map((car, idx) => {
     const name = formatCarTitle(car);
     const photoUrl = getFirstPhotoUrl(car);
-    const detailUrl = `/car-detail?id=${encodeURIComponent(car.id)}`;
+    const detailUrl = `/car/${car.id}.html`;
     return {
       "@type": "ListItem",
       position: idx + 1,
@@ -166,7 +285,7 @@ function buildHtml(cars) {
         ? `${Math.round(Number(price))}₽`
         : "Цена по запросу";
       const photoUrl = getFirstPhotoUrl(car);
-      const detailUrl = `/car-detail?id=${encodeURIComponent(car.id)}`;
+      const detailUrl = `/car/${car.id}.html`;
       const imgHtml = photoUrl
         ? `<img src="${escapeHtml(photoUrl)}" alt="${name}" class="car-image">`
         : '<div class="car-image car-no-photo">Нет фото</div>';
@@ -274,18 +393,35 @@ ${cardsHtml}
 
 async function main() {
   try {
-    const cars = await fetchAllCars();
-    const html = buildHtml(cars);
     const fs = await import("fs");
     const path = await import("path");
+    const outputDir = path.dirname(OUTPUT);
+    const carOutputDir = path.join(outputDir, CAR_DIR);
+
+    const cars = await fetchAllCars();
+    fs.mkdirSync(carOutputDir, { recursive: true });
+
+    for (let i = 0; i < cars.length; i++) {
+      const car = cars[i];
+      try {
+        const detail = await fetchCarDetail(car.id);
+        const carHtml = buildCarDetailHtml(detail);
+        const carPath = path.join(carOutputDir, `${car.id}.html`);
+        fs.writeFileSync(carPath, carHtml, "utf-8");
+        console.log(`  [${i + 1}/${cars.length}] car/${car.id}.html`);
+      } catch (e) {
+        console.warn(`  [${i + 1}/${cars.length}] car/${car.id}.html failed: ${e.message}`);
+      }
+    }
+
+    const html = buildHtml(cars);
     fs.writeFileSync(OUTPUT, html, "utf-8");
     console.log(`Generated prerender-bot.html with ${cars.length} cars`);
 
     const sitemap = buildSitemap(cars);
-    const sitemapDir = path.dirname(OUTPUT);
-    const sitemapPath = path.join(sitemapDir, "sitemap.xml");
+    const sitemapPath = path.join(outputDir, SITEMAP_FILENAME);
     fs.writeFileSync(sitemapPath, sitemap, "utf-8");
-    console.log(`Generated sitemap.xml with ${3 + cars.length} URLs`);
+    console.log(`Generated ${SITEMAP_FILENAME} with ${3 + cars.length} URLs`);
   } catch (err) {
     console.error("Error:", err.message);
     process.exit(1);

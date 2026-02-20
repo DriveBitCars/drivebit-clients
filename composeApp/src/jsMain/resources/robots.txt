@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Allow: /car/
 Allow: /car-detail
 
 Disallow: /login-by-phone
@@ -43,4 +44,5 @@ Disallow: /change-phone
 Host: drivebit.my
 
 Sitemap: https://drivebit.my/sitemap.xml
+Sitemap: https://drivebit.ru/sitemap-ru.xml
 

@@ -147,6 +147,28 @@ open iosApp/iosApp.xcodeproj
 - **Smart caching** for dependencies
 - **Incremental compilation** for development
 
+## 🔍 Prerender для роботов
+
+Боты получают статический HTML с каталогом машин. Для каждой машины генерируется отдельная страница в `car/{id}.html`. Пользователи получают SPA.
+
+### Проверка prerender через curl
+
+```bash
+# Бот получает prerender (title: «Каталог Москва»)
+curl -s -H "User-Agent: Mozilla/5.0 (compatible; Googlebot/2.1)" "https://drivebit.my/" | grep -o '<title>[^<]*'
+curl -s -H "User-Agent: Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)" "https://drivebit.my/" | grep -o '<title>[^<]*'
+
+# Человек получает SPA (title: «Дешевле проката на 40%»)
+curl -s -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0" "https://drivebit.my/" | grep -o '<title>[^<]*'
+
+# Явно запросить prerender-страницу
+curl -s "https://drivebit.my/prerender-bot.html" | head -20
+curl -s "https://drivebit.ru/prerender-bot-ru.html" | head -20
+
+# Страницы машин
+curl -s "https://drivebit.my/car/dacc0a4f-7644-4373-acaa-dbbe41648ab4.html" | grep -o '<title>[^<]*'
+```
+
 ## 🤝 Contributing
 
 1. Fork the repository

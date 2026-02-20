@@ -106,11 +106,14 @@ jobs:
         
         echo "✅ Cache-busting version added"
 
-    - name: Generate prerender-bot.html and sitemap.xml
+    - name: Generate prerender and sitemap for drivebit.my
       run: |
-        OUTPUT_PATH=composeApp/build/dist/js/productionExecutable/prerender-bot.html node scripts/generate-prerender-bot.js
-        ls -la composeApp/build/dist/js/productionExecutable/prerender-bot.html
-        ls -la composeApp/build/dist/js/productionExecutable/sitemap.xml
+        OUTPUT_PATH=composeApp/build/dist/js/productionExecutable/prerender-bot.html SITE_BASE=https://drivebit.my node scripts/generate-prerender-bot.js
+        ls -la composeApp/build/dist/js/productionExecutable/prerender-bot.html composeApp/build/dist/js/productionExecutable/sitemap.xml
+    - name: Generate prerender and sitemap for drivebit.ru
+      run: |
+        OUTPUT_PATH=composeApp/build/dist/js/productionExecutable/prerender-bot-ru.html SITE_BASE=https://drivebit.ru SITEMAP_FILENAME=sitemap-ru.xml node scripts/generate-prerender-bot.js
+        ls -la composeApp/build/dist/js/productionExecutable/prerender-bot-ru.html composeApp/build/dist/js/productionExecutable/sitemap-ru.xml
 
     - name: Verify GitHub Secrets
       run: |
@@ -219,6 +222,19 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         source: "composeApp/build/dist/js/productionExecutable/*"
+        target: "/var/www/drivebit-clients"
+        strip_components: 0
+        overwrite: true
+
+    - name: Copy car detail pages
+      continue-on-error: true
+      uses: appleboy/scp-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        source: "composeApp/build/dist/js/productionExecutable/car"
         target: "/var/www/drivebit-clients"
         strip_components: 0
         overwrite: true

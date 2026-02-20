@@ -53,7 +53,7 @@ server {
         try_files /login-by-mail.html /index.html;
     }
 
-    # Главная страница: боты получают prerender-bot.html, люди — SPA
+    # Главная: боты получают prerender. Для drivebit.ru заменить prerender-bot.html на prerender-bot-ru.html
     location = / {
         if ($is_bot) {
             rewrite ^ /prerender-bot.html last;
