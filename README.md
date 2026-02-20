@@ -149,7 +149,7 @@ open iosApp/iosApp.xcodeproj
 
 ## 🔍 Prerender для роботов
 
-Боты (Googlebot, Yandex и др.) получают статический HTML с каталогом машин, пользователи — SPA.
+Боты получают статический HTML с каталогом машин. Для каждой машины генерируется отдельная страница в `car/{id}.html`. Пользователи получают SPA.
 
 ### Проверка prerender через curl
 
@@ -164,6 +164,9 @@ curl -s -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0" 
 # Явно запросить prerender-страницу
 curl -s "https://drivebit.my/prerender-bot.html" | head -20
 curl -s "https://drivebit.ru/prerender-bot-ru.html" | head -20
+
+# Страницы машин
+curl -s "https://drivebit.my/car/dacc0a4f-7644-4373-acaa-dbbe41648ab4.html" | grep -o '<title>[^<]*'
 ```
 
 ## 🤝 Contributing
