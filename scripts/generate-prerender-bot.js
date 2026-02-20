@@ -4,7 +4,8 @@ const API_BASE = process.env.API_BASE_URL || "https://drivebit.my/api";
 const CITY_ID = "158835";
 const PAGE_SIZE = 100;
 const OUTPUT = process.env.OUTPUT_PATH || "prerender-bot.html";
-const BASE = "https://drivebit.my";
+const SITEMAP_FILENAME = process.env.SITEMAP_FILENAME || "sitemap.xml";
+const BASE = process.env.SITE_BASE || "https://drivebit.my";
 
 function formatCarTitle(car) {
   const g = car.general || {};
@@ -283,7 +284,7 @@ async function main() {
 
     const sitemap = buildSitemap(cars);
     const sitemapDir = path.dirname(OUTPUT);
-    const sitemapPath = path.join(sitemapDir, "sitemap.xml");
+    const sitemapPath = path.join(sitemapDir, SITEMAP_FILENAME);
     fs.writeFileSync(sitemapPath, sitemap, "utf-8");
     console.log(`Generated sitemap.xml with ${3 + cars.length} URLs`);
   } catch (err) {

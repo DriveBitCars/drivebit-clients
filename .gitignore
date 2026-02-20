@@ -50,7 +50,9 @@ composeApp.js
 
 # Generated prerender (created by scripts/generate-prerender-bot.js)
 prerender-bot.html
+prerender-bot-ru.html
 /sitemap.xml
+/sitemap-ru.xml
 
 # SSH keys and sensitive files
 id_rsa

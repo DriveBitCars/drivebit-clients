@@ -43,4 +43,5 @@ Disallow: /change-phone
 Host: drivebit.my
 
 Sitemap: https://drivebit.my/sitemap.xml
+Sitemap: https://drivebit.ru/sitemap-ru.xml
 
