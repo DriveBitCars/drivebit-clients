@@ -48,6 +48,10 @@ assets/
 # Compiled JS files
 composeApp.js
 
+# Generated prerender (created by scripts/generate-prerender-bot.js)
+prerender-bot.html
+/sitemap.xml
+
 # SSH keys and sensitive files
 id_rsa
 id_rsa_api_drivebit
