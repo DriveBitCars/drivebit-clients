@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+Allow: /car-detail
+
 Disallow: /login-by-phone
 Disallow: /login-by-mail
 Disallow: /signup
@@ -38,7 +40,7 @@ Disallow: /edit-name
 Disallow: /change-email
 Disallow: /change-phone
 
-Crawl-delay: 1
+Host: drivebit.my
 
 Sitemap: https://drivebit.my/sitemap.xml
 

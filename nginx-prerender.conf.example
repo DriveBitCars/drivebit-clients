@@ -1,5 +1,16 @@
 # Пример конфигурации Nginx для пререндеринга
 # Сохраните это в /etc/nginx/sites-available/drivebit-clients
+# map должен быть на уровне http (при include внутри http {} работает)
+map $http_user_agent $is_bot {
+    default 0;
+    ~*googlebot 1;
+    ~*yandex 1;
+    ~*bingbot 1;
+    ~*baiduspider 1;
+    ~*bot 1;
+    ~*crawler 1;
+    ~*spider 1;
+}
 
 server {
     listen 80;
@@ -42,8 +53,11 @@ server {
         try_files /login-by-mail.html /index.html;
     }
 
-    # Главная страница
+    # Главная страница: боты получают prerender-bot.html, люди — SPA
     location = / {
+        if ($is_bot) {
+            rewrite ^ /prerender-bot.html last;
+        }
         try_files /index.html =404;
     }
 

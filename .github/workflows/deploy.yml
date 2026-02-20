@@ -106,6 +106,12 @@ jobs:
         
         echo "✅ Cache-busting version added"
 
+    - name: Generate prerender-bot.html and sitemap.xml
+      run: |
+        OUTPUT_PATH=composeApp/build/dist/js/productionExecutable/prerender-bot.html node scripts/generate-prerender-bot.js
+        ls -la composeApp/build/dist/js/productionExecutable/prerender-bot.html
+        ls -la composeApp/build/dist/js/productionExecutable/sitemap.xml
+
     - name: Verify GitHub Secrets
       run: |
         echo "🔍 Verifying GitHub Secrets..."
