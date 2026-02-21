@@ -23,6 +23,11 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
     - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
@@ -47,6 +52,20 @@ jobs:
           fast-build-
           build-
 
+    - name: Cache Kotlin/JS (Node/Yarn) tools
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/nodejs
+          ~/.gradle/yarn
+          ~/.gradle/kotlin-js-store
+          ~/.cache/yarn
+          kotlin-js-store/
+        key: fast-kotlin-js-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/package.json', '**/yarn.lock', 'kotlin-js-store/yarn.lock', 'kotlin-js-store/wasm/yarn.lock') }}
+        restore-keys: |
+          fast-kotlin-js-
+          check-kotlin-js-
+
     - name: Make gradlew executable
       run: chmod +x ./gradlew
 
@@ -55,6 +74,9 @@ jobs:
 
     - name: Quick Android builds (all modules)
       run: ./gradlew compileDebugKotlinAndroid --no-daemon --stacktrace --parallel
+
+    - name: Update yarn lock
+      run: ./gradlew kotlinUpgradeYarnLock kotlinStoreYarnLock --no-daemon || true
 
     - name: Quick JS builds (all modules)
       run: ./gradlew compileKotlinJs --no-daemon --stacktrace --parallel
