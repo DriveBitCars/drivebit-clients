@@ -79,7 +79,7 @@ jobs:
       run: ./gradlew kotlinUpgradeYarnLock kotlinStoreYarnLock --no-daemon || true
 
     - name: Quick JS builds (all modules)
-      run: ./gradlew compileKotlinJs --no-daemon --stacktrace --parallel
+      run: ./gradlew compileKotlinJs --no-daemon --stacktrace --no-parallel --no-build-cache
 
     - name: Upload JS failure logs (on failure)
       if: failure()
