@@ -68,7 +68,7 @@ fun CarBook(
             } else {
                 null
             }
-        } ?: null
+        }
 
     LaunchedEffect(bookState.startDate) {
         bookState.startDate?.let { iso ->
