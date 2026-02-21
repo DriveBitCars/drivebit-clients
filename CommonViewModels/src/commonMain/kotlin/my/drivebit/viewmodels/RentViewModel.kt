@@ -60,15 +60,18 @@ class RentViewModelImpl(
     override fun setStartDate(date: String?) {
         _state.update {
             if (it is RentState.Book) {
+                val currentEnd = it.endDate
                 val endDate =
                     when {
                         date == null -> null
-                        it.endDate != null -> {
-                            val startDay = date.take(10)
-                            val endDay = it.endDate.take(10)
-                            if (endDay <= startDay) null else it.endDate
+                        currentEnd != null -> {
+                            runCatching {
+                                val startInstant = Instant.parse(date)
+                                val endInstant = Instant.parse(currentEnd)
+                                if (endInstant <= startInstant) null else currentEnd
+                            }.getOrElse { currentEnd }
                         }
-                        else -> it.endDate
+                        else -> currentEnd
                     }
                 it.copy(startDate = date, endDate = endDate, showStartDateError = false)
             } else {
@@ -96,7 +99,9 @@ class RentViewModelImpl(
         val endDateTooEarly =
             !endDateBlank &&
                 current.startDate != null &&
-                current.endDate!!.take(10) <= current.startDate.take(10)
+                runCatching {
+                    Instant.parse(current.endDate!!) <= Instant.parse(current.startDate!!)
+                }.getOrDefault(true)
         val showEndDateError = endDateBlank || endDateTooEarly
         _state.update {
             if (it is RentState.Book) {

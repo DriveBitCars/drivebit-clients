@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
 package my.drivebit.components
@@ -9,7 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
@@ -19,7 +22,7 @@ import my.drivebit.network.services.CarBookingItem
 import my.drivebit.utils.addDays
 import my.drivebit.utils.parseDisabledDatesFromBookings
 import my.drivebit.viewmodels.ButtonState
-import my.drivebit.viewmodels.DateFieldViewModel
+import my.drivebit.viewmodels.DateTimeFieldViewModel
 import my.drivebit.viewmodels.RentState
 import my.drivebit.viewmodels.RentViewModel
 import my.drivebit.viewmodels.createButtonViewModel
@@ -50,19 +53,19 @@ fun CarBook(
     val bookState = state as? RentState.Book ?: return
 
     val disabledDates = remember(carBookings) { parseDisabledDatesFromBookings(carBookings) }
-    val startDateViewModel = remember { DateFieldViewModel() }
-    val endDateViewModel = remember { DateFieldViewModel() }
+    val startDateTimeViewModel = remember { DateTimeFieldViewModel() }
+    val endDateTimeViewModel = remember { DateTimeFieldViewModel() }
 
     LaunchedEffect(bookState.isCreating) {
         buttonViewModel.setState(
             if (bookState.isCreating) ButtonState.Loading else ButtonState.Enabled,
         )
     }
-    val startDateState by startDateViewModel.state.collectAsState()
-    val endDateState by endDateViewModel.state.collectAsState()
+    val startDateTimeState by startDateTimeViewModel.state.collectAsState()
+    val endDateTimeState by endDateTimeViewModel.state.collectAsState()
 
     val endDateMinDate =
-        startDateState.date?.take(10)?.let { str ->
+        startDateTimeState.date?.take(10)?.let { str ->
             if (str.length == 10) {
                 runCatching { addDays(LocalDate.parse(str), 1).toString() }.getOrNull()
             } else {
@@ -72,16 +75,44 @@ fun CarBook(
 
     LaunchedEffect(bookState.startDate) {
         bookState.startDate?.let { iso ->
-            val datePart = iso.take(10)
-            if (datePart.length == 10) startDateViewModel.setDate(datePart)
+            runCatching {
+                val instant = kotlinx.datetime.Instant.parse(iso)
+                val ldt = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                startDateTimeViewModel.setDate(ldt.date.toString())
+                startDateTimeViewModel.setTime(
+                    "${ldt.hour.toString().padStart(2, '0')}:${ldt.minute.toString().padStart(2, '0')}",
+                )
+            }.getOrNull() ?: run {
+                val datePart = iso.take(10)
+                if (datePart.length == 10) {
+                    startDateTimeViewModel.setDate(datePart)
+                    startDateTimeViewModel.setTime("10:00")
+                }
+            }
+        } ?: run {
+            startDateTimeViewModel.setDate(null)
+            startDateTimeViewModel.setTime(null)
         }
     }
     LaunchedEffect(bookState.endDate) {
-        if (bookState.endDate != null) {
-            val datePart = bookState.endDate!!.take(10)
-            if (datePart.length == 10) endDateViewModel.setDate(datePart)
-        } else {
-            endDateViewModel.setDate(null)
+        bookState.endDate?.let { iso ->
+            runCatching {
+                val instant = kotlinx.datetime.Instant.parse(iso)
+                val ldt = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                endDateTimeViewModel.setDate(ldt.date.toString())
+                endDateTimeViewModel.setTime(
+                    "${ldt.hour.toString().padStart(2, '0')}:${ldt.minute.toString().padStart(2, '0')}",
+                )
+            }.getOrNull() ?: run {
+                val datePart = iso.take(10)
+                if (datePart.length == 10) {
+                    endDateTimeViewModel.setDate(datePart)
+                    endDateTimeViewModel.setTime("18:00")
+                }
+            }
+        } ?: run {
+            endDateTimeViewModel.setDate(null)
+            endDateTimeViewModel.setTime(null)
         }
     }
 
@@ -98,24 +129,24 @@ fun CarBook(
         }
     }) {
         Column(gap = 16.px) {
-            CarBookDateField(
+            CarBookDateTimeField(
                 label = "Дата начала",
                 actionLabel = "c",
-                viewModel = startDateViewModel,
+                viewModel = startDateTimeViewModel,
                 showError = bookState.showStartDateError,
-                onDateChanged = { date ->
-                    viewModel.setStartDate(if (date != null) formatStartAt(date) else null)
+                onDateTimeChanged = { date, time ->
+                    viewModel.setStartDate(if (date != null && time != null) formatStartAt(date, time) else null)
                 },
             )
-            CarBookDateField(
+            CarBookDateTimeField(
                 label = "Дата окончания",
                 actionLabel = "по",
-                viewModel = endDateViewModel,
+                viewModel = endDateTimeViewModel,
                 minDate = endDateMinDate,
                 showError = bookState.showEndDateError,
-                enabled = startDateState.date != null,
-                onDateChanged = { date ->
-                    viewModel.setEndDate(if (date != null) "${date}T18:00:00Z" else null)
+                enabled = startDateTimeState.date != null,
+                onDateTimeChanged = { date, time ->
+                    viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
                 },
             )
             if (bookState.totalAmount.isNotEmpty() && bookState.middlePrice.isNotEmpty()) {
@@ -169,29 +200,51 @@ fun CarBook(
         }
     }
 
-    if (startDateState.isCalendarOpen) {
-        BookingDatePickerDialog(
+    if (startDateTimeState.isCalendarOpen) {
+        BookingDatePickerForDateTime(
             label = "Дата начала",
-            viewModel = startDateViewModel,
+            viewModel = startDateTimeViewModel,
             minDate =
                 Clock.System
                     .now()
                     .toString()
                     .take(10),
             disabledDates = disabledDates,
-            onDateChanged = { date ->
-                viewModel.setStartDate(if (date != null) formatStartAt(date) else null)
+            defaultTime = "10:00",
+            onDateTimeChanged = { date, time ->
+                viewModel.setStartDate(if (date != null && time != null) formatStartAt(date, time) else null)
             },
         )
     }
-    if (endDateState.isCalendarOpen) {
-        BookingDatePickerDialog(
+    if (startDateTimeState.isTimePickerOpen) {
+        BookingTimePickerDialog(
+            label = "Время начала",
+            viewModel = startDateTimeViewModel,
+            defaultTime = "10:00",
+            onDateTimeChanged = { date, time ->
+                viewModel.setStartDate(if (date != null && time != null) formatStartAt(date, time) else null)
+            },
+        )
+    }
+    if (endDateTimeState.isCalendarOpen) {
+        BookingDatePickerForDateTime(
             label = "Дата окончания",
-            viewModel = endDateViewModel,
+            viewModel = endDateTimeViewModel,
             minDate = endDateMinDate,
             disabledDates = disabledDates,
-            onDateChanged = { date ->
-                viewModel.setEndDate(if (date != null) "${date}T18:00:00Z" else null)
+            defaultTime = "18:00",
+            onDateTimeChanged = { date, time ->
+                viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
+            },
+        )
+    }
+    if (endDateTimeState.isTimePickerOpen) {
+        BookingTimePickerDialog(
+            label = "Время окончания",
+            viewModel = endDateTimeViewModel,
+            defaultTime = "18:00",
+            onDateTimeChanged = { date, time ->
+                viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
             },
         )
     }
@@ -199,21 +252,21 @@ fun CarBook(
 
 @Composable
 @Suppress("FunctionName")
-private fun CarBookDateField(
+private fun CarBookDateTimeField(
     label: String,
     actionLabel: String,
-    viewModel: DateFieldViewModel,
+    viewModel: DateTimeFieldViewModel,
     minDate: String? = null,
     showError: Boolean,
     enabled: Boolean = true,
-    onDateChanged: (String?) -> Unit,
+    onDateTimeChanged: (date: String?, time: String?) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    val currentDate = state.date?.let { formatDateForDisplay(it) } ?: "выберите даты"
+    val dateText = state.date?.let { formatDateForDisplay(it) } ?: "дата"
+    val timeText = state.time ?: "время"
 
     Div({
         style {
-            cursor(if (enabled) "pointer" else "not-allowed")
             marginBottom(if (showError) 4.px else 0.px)
             border(1.px, LineStyle.Solid, if (showError) CSSColors.Red else CSSColors.Gray300)
             borderRadius(8.px)
@@ -223,9 +276,6 @@ private fun CarBookDateField(
                 property("opacity", "0.6")
                 property("pointer-events", "none")
             }
-        }
-        onClick {
-            if (enabled) viewModel.openCalendar()
         }
     }) {
         Row(
@@ -242,33 +292,112 @@ private fun CarBookDateField(
             }) {
                 Text(actionLabel)
             }
-            Span({
+            Div({
                 style {
                     flex(1)
-                    applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.base)
-                    fontWeight(CSSTypography.FontWeight.medium)
-                    color(
-                        when {
-                            !enabled -> CSSColors.Gray600
-                            state.date != null -> CSSColors.Black
-                            else -> CSSColors.Gray600
-                        },
-                    )
+                    display(DisplayStyle.Flex)
+                    gap(8.px)
+                    flexWrap(FlexWrap.Wrap)
                 }
             }) {
-                Text(currentDate)
-            }
-            Img(
-                src = "/images/arrow-bottom.svg",
-                alt = "",
-                attrs = {
+                Div({
                     style {
-                        width(16.px)
-                        height(10.px)
+                        cursor(if (enabled) "pointer" else "not-allowed")
+                        padding(4.px, 8.px)
+                        borderRadius(6.px)
+                        property("transition", "background-color 0.2s ease")
                     }
-                },
-            )
+                    onClick {
+                        if (enabled) viewModel.openCalendar()
+                    }
+                    onMouseEnter {
+                        if (enabled) {
+                            (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                                "background-color",
+                                CSSColors.Gray300String,
+                            )
+                        }
+                    }
+                    onMouseLeave {
+                        (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                            "background-color",
+                            "transparent",
+                        )
+                    }
+                }) {
+                    Row(alignItems = AlignItems.Center, gap = 4.px) {
+                        Span({
+                            style {
+                                applyTypography(CSSTypography.Styles.body)
+                                fontSize(CSSTypography.FontSize.base)
+                                fontWeight(CSSTypography.FontWeight.medium)
+                                color(if (state.date != null) CSSColors.Black else CSSColors.Gray600)
+                            }
+                        }) {
+                            Text(dateText)
+                        }
+                        Img(
+                            src = "/images/arrow-bottom.svg",
+                            alt = "",
+                            attrs = {
+                                style {
+                                    width(12.px)
+                                    height(8.px)
+                                }
+                            },
+                        )
+                    }
+                }
+                Div({
+                    style {
+                        cursor(if (enabled && state.date != null) "pointer" else "not-allowed")
+                        padding(4.px, 8.px)
+                        borderRadius(6.px)
+                        property("transition", "background-color 0.2s ease")
+                        if (state.date == null) property("opacity", "0.6")
+                    }
+                    onClick {
+                        if (enabled && state.date != null) viewModel.openTimePicker()
+                    }
+                    onMouseEnter {
+                        if (enabled && state.date != null) {
+                            (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                                "background-color",
+                                CSSColors.Gray300String,
+                            )
+                        }
+                    }
+                    onMouseLeave {
+                        (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                            "background-color",
+                            "transparent",
+                        )
+                    }
+                }) {
+                    Row(alignItems = AlignItems.Center, gap = 4.px) {
+                        Span({
+                            style {
+                                applyTypography(CSSTypography.Styles.body)
+                                fontSize(CSSTypography.FontSize.base)
+                                fontWeight(CSSTypography.FontWeight.medium)
+                                color(if (state.time != null) CSSColors.Black else CSSColors.Gray600)
+                            }
+                        }) {
+                            Text(timeText)
+                        }
+                        Img(
+                            src = "/images/arrow-bottom.svg",
+                            alt = "",
+                            attrs = {
+                                style {
+                                    width(12.px)
+                                    height(8.px)
+                                }
+                            },
+                        )
+                    }
+                }
+            }
         }
     }
     if (showError) {
@@ -279,23 +408,31 @@ private fun CarBookDateField(
                 color(CSSColors.Red)
             }
         }) {
-            Text("Выберите дату")
+            Text("Выберите дату и время")
         }
     }
 }
 
-private fun formatStartAt(date: String): String {
+private fun formatStartAt(date: String, time: String): String {
     val selectedDate = LocalDate.parse(date.take(10))
     val today =
         Clock.System
             .now()
             .toLocalDateTime(TimeZone.currentSystemDefault())
             .date
+    val localDateTime = LocalDateTime.parse("${date.take(10)}T${time}:00")
+    val instant = localDateTime.toInstant(TimeZone.currentSystemDefault())
     return if (selectedDate == today) {
-        (Clock.System.now() + 1.hours).toString()
+        val now = Clock.System.now()
+        if (instant.epochSeconds <= now.epochSeconds) (now + 1.hours).toString() else instant.toString()
     } else {
-        "${date}T10:00:00Z"
+        instant.toString()
     }
+}
+
+private fun formatEndAt(date: String, time: String): String {
+    val localDateTime = LocalDateTime.parse("${date.take(10)}T${time}:00")
+    return localDateTime.toInstant(TimeZone.currentSystemDefault()).toString()
 }
 
 private fun formatDateForDisplay(dateString: String): String {
