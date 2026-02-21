@@ -72,6 +72,9 @@ jobs:
     - name: Update yarn lock
       run: ./gradlew kotlinUpgradeYarnLock kotlinStoreYarnLock --no-daemon || true
 
+    - name: Clean composeApp dist (avoid stale cache)
+      run: rm -rf composeApp/build/dist
+
     - name: Build JS Browser Distribution
       run: ./gradlew :composeApp:jsBrowserDistribution --no-daemon --stacktrace --no-parallel --no-build-cache
 
@@ -104,3 +107,14 @@ jobs:
         echo ""
         echo "📄 composeApp.js size:"
         ls -lh composeApp/build/dist/js/productionExecutable/composeApp.js 2>/dev/null || echo "File not found"
+
+    - name: Upload logs (on failure)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: wasm-test-logs
+        path: |
+          composeApp/build/dist/
+          build/js/yarn-error.log
+        if-no-files-found: ignore
+        retention-days: 7
