@@ -413,14 +413,17 @@ private fun CarBookDateTimeField(
     }
 }
 
-private fun formatStartAt(date: String, time: String): String {
+private fun formatStartAt(
+    date: String,
+    time: String,
+): String {
     val selectedDate = LocalDate.parse(date.take(10))
     val today =
         Clock.System
             .now()
             .toLocalDateTime(TimeZone.currentSystemDefault())
             .date
-    val localDateTime = LocalDateTime.parse("${date.take(10)}T${time}:00")
+    val localDateTime = LocalDateTime.parse("${date.take(10)}T$time:00")
     val instant = localDateTime.toInstant(TimeZone.currentSystemDefault())
     return if (selectedDate == today) {
         val now = Clock.System.now()
@@ -430,8 +433,11 @@ private fun formatStartAt(date: String, time: String): String {
     }
 }
 
-private fun formatEndAt(date: String, time: String): String {
-    val localDateTime = LocalDateTime.parse("${date.take(10)}T${time}:00")
+private fun formatEndAt(
+    date: String,
+    time: String,
+): String {
+    val localDateTime = LocalDateTime.parse("${date.take(10)}T$time:00")
     return localDateTime.toInstant(TimeZone.currentSystemDefault()).toString()
 }
 
