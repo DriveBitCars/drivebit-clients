@@ -17,10 +17,14 @@ import my.drivebit.design.applyTypography
 import my.drivebit.utils.addMonths
 import my.drivebit.utils.lastDayOfMonth
 import my.drivebit.viewmodels.DateFieldViewModel
+import my.drivebit.viewmodels.DateTimeFieldViewModel
+import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.HTMLInputElement
 
 @Composable
 @Suppress("FunctionName")
@@ -119,6 +123,286 @@ fun BookingDatePickerDialog(
                     }
                     onClick {
                         viewModel.closeCalendar()
+                    }
+                    onMouseEnter {
+                        (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                            "background-color",
+                            CSSColors.Gray600String,
+                        )
+                    }
+                    onMouseLeave {
+                        (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                            "background-color",
+                            CSSColors.Gray300String,
+                        )
+                    }
+                }) {
+                    Text("Отмена")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@Suppress("FunctionName")
+fun BookingDatePickerForDateTime(
+    label: String,
+    viewModel: DateTimeFieldViewModel,
+    minDate: String? = null,
+    disabledDates: Set<String> = emptySet(),
+    defaultTime: String = "10:00",
+    onDateTimeChanged: (date: String?, time: String?) -> Unit = { _, _ -> },
+) {
+    val state by viewModel.state.collectAsState()
+
+    if (!state.isCalendarOpen) return
+
+    var displayMonth by remember { mutableStateOf(initialDisplayMonth(state.date, minDate)) }
+
+    Div({
+        style {
+            position(Position.Fixed)
+            top(0.px)
+            left(0.px)
+            right(0.px)
+            bottom(0.px)
+            property("background-color", "rgba(0, 0, 0, 0.5)")
+            property("z-index", "1000")
+            display(DisplayStyle.Flex)
+            alignItems(AlignItems.Center)
+            justifyContent(JustifyContent.Center)
+            padding(16.px)
+        }
+        onClick {
+            viewModel.closeCalendar()
+        }
+    }) {
+        Div({
+            style {
+                width(100.percent)
+                property("max-width", "360px")
+                backgroundColor(CSSColors.White)
+                borderRadius(12.px)
+                padding(18.px)
+                border(1.px, LineStyle.Solid, CSSColors.Gray300)
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
+                gap(16.px)
+                property("box-shadow", "0 8px 24px rgba(0, 0, 0, 0.2)")
+                property("margin", "0 12px")
+            }
+            onClick { event ->
+                event.stopPropagation()
+            }
+        }) {
+            Span({
+                style {
+                    applyTypography(CSSTypography.Styles.body)
+                    fontSize(CSSTypography.FontSize.base)
+                    fontWeight(CSSTypography.FontWeight.semibold)
+                    color(CSSColors.Black)
+                    marginBottom(4.px)
+                }
+            }) {
+                Text(label)
+            }
+
+            CalendarMonth(
+                displayMonth = displayMonth,
+                minDate = minDate,
+                disabledDates = disabledDates,
+                selectedDate = state.date,
+                onMonthChange = { displayMonth = it },
+                onDateSelected = { dateStr ->
+                    viewModel.setDate(dateStr)
+                    if (state.time == null) viewModel.setTime(defaultTime)
+                    val time = state.time ?: defaultTime
+                    onDateTimeChanged(dateStr, time)
+                    viewModel.closeCalendar()
+                },
+            )
+
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    justifyContent(JustifyContent.FlexEnd)
+                    gap(8.px)
+                }
+            }) {
+                Div({
+                    style {
+                        padding(10.px, 18.px)
+                        borderRadius(8.px)
+                        backgroundColor(CSSColors.Gray300)
+                        color(CSSColors.Black)
+                        cursor("pointer")
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(CSSTypography.FontSize.sm)
+                        fontWeight(CSSTypography.FontWeight.medium)
+                        property("transition", "background-color 0.2s ease")
+                    }
+                    onClick {
+                        viewModel.closeCalendar()
+                    }
+                    onMouseEnter {
+                        (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                            "background-color",
+                            CSSColors.Gray600String,
+                        )
+                    }
+                    onMouseLeave {
+                        (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                            "background-color",
+                            CSSColors.Gray300String,
+                        )
+                    }
+                }) {
+                    Text("Отмена")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@Suppress("FunctionName")
+fun BookingTimePickerDialog(
+    label: String,
+    viewModel: DateTimeFieldViewModel,
+    defaultTime: String = "10:00",
+    onDateTimeChanged: (date: String?, time: String?) -> Unit = { _, _ -> },
+) {
+    val state by viewModel.state.collectAsState()
+
+    if (!state.isTimePickerOpen) return
+
+    Div({
+        style {
+            position(Position.Fixed)
+            top(0.px)
+            left(0.px)
+            right(0.px)
+            bottom(0.px)
+            property("background-color", "rgba(0, 0, 0, 0.5)")
+            property("z-index", "1000")
+            display(DisplayStyle.Flex)
+            alignItems(AlignItems.Center)
+            justifyContent(JustifyContent.Center)
+            padding(16.px)
+        }
+        onClick {
+            viewModel.closeTimePicker()
+        }
+    }) {
+        Div({
+            style {
+                width(100.percent)
+                property("max-width", "320px")
+                backgroundColor(CSSColors.White)
+                borderRadius(12.px)
+                padding(18.px)
+                border(1.px, LineStyle.Solid, CSSColors.Gray300)
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
+                gap(16.px)
+                property("box-shadow", "0 8px 24px rgba(0, 0, 0, 0.2)")
+                property("margin", "0 12px")
+            }
+            onClick { event ->
+                event.stopPropagation()
+            }
+        }) {
+            Span({
+                style {
+                    applyTypography(CSSTypography.Styles.body)
+                    fontSize(CSSTypography.FontSize.base)
+                    fontWeight(CSSTypography.FontWeight.semibold)
+                    color(CSSColors.Black)
+                    marginBottom(4.px)
+                }
+            }) {
+                Text(label)
+            }
+
+            Div({
+                style {
+                    width(100.percent)
+                    padding(10.px, 14.px)
+                    borderRadius(8.px)
+                    border(1.px, LineStyle.Solid, CSSColors.Gray300)
+                    property("box-sizing", "border-box")
+                }
+            }) {
+                Input(
+                    type = InputType.Text,
+                    attrs = {
+                        attr("type", "time")
+                        value(state.time ?: defaultTime)
+                        onInput { event ->
+                            val newValue = (event.target as HTMLInputElement).value
+                            viewModel.setTime(newValue.ifEmpty { null })
+                        }
+                    },
+                )
+            }
+
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    justifyContent(JustifyContent.FlexEnd)
+                    gap(8.px)
+                }
+            }) {
+                Div({
+                    style {
+                        padding(10.px, 18.px)
+                        borderRadius(8.px)
+                        backgroundColor(CSSColors.Blue)
+                        color(CSSColors.White)
+                        cursor("pointer")
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(CSSTypography.FontSize.sm)
+                        fontWeight(CSSTypography.FontWeight.medium)
+                        property("transition", "background-color 0.2s ease")
+                    }
+                    onClick {
+                        val date = state.date?.take(10)?.takeIf { it.length == 10 }
+                        val time = state.time ?: defaultTime
+                        if (date != null && time.isNotEmpty()) {
+                            onDateTimeChanged(date, time)
+                            viewModel.closeTimePicker()
+                        }
+                    }
+                    onMouseEnter {
+                        (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                            "opacity",
+                            "0.9",
+                        )
+                    }
+                    onMouseLeave {
+                        (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                            "opacity",
+                            "1",
+                        )
+                    }
+                }) {
+                    Text("Готово")
+                }
+                Div({
+                    style {
+                        padding(10.px, 18.px)
+                        borderRadius(8.px)
+                        backgroundColor(CSSColors.Gray300)
+                        color(CSSColors.Black)
+                        cursor("pointer")
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(CSSTypography.FontSize.sm)
+                        fontWeight(CSSTypography.FontWeight.medium)
+                        property("transition", "background-color 0.2s ease")
+                    }
+                    onClick {
+                        viewModel.closeTimePicker()
                     }
                     onMouseEnter {
                         (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
