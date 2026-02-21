@@ -76,6 +76,8 @@ jobs:
       run: rm -rf composeApp/build/dist
 
     - name: Build JS Browser Distribution
+      env:
+        NODE_OPTIONS: --max-old-space-size=4096
       run: ./gradlew :composeApp:jsBrowserDistribution --no-daemon --stacktrace --no-parallel --no-build-cache
 
     - name: Check composeApp.js for skiko references
