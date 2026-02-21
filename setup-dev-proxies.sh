@@ -57,7 +57,7 @@ echo "✅ Найдена конфигурация: $NGINX_CONFIG"
 
 # Показываем текущую конфигурацию
 echo "📄 Текущая конфигурация:"
-grep -E "location /(api|publicbct|avatar)/" "$NGINX_CONFIG" || echo "⚠️  Прокси блоки не найдены"
+grep -E "location /(api|publicbct|privatebct|avatar)/" "$NGINX_CONFIG" || echo "⚠️  Прокси блоки не найдены"
 
 # Создаем резервную копию
 BACKUP="${NGINX_CONFIG}.backup.$(date +%Y%m%d_%H%M%S)"
@@ -83,6 +83,12 @@ fi
 if grep -q "location /avatar/" "$NGINX_CONFIG"; then
     sed -i '/location \/avatar\//,/^[[:space:]]*}/d' "$NGINX_CONFIG"
     echo "   ✅ Удален блок /avatar/"
+fi
+
+# Удаляем /privatebct/
+if grep -q "location /privatebct/" "$NGINX_CONFIG"; then
+    sed -i '/location \/privatebct\//,/^[[:space:]]*}/d' "$NGINX_CONFIG"
+    echo "   ✅ Удален блок /privatebct/"
 fi
 
 # Находим место для вставки (перед location /)
@@ -115,7 +121,7 @@ if grep -q "^[[:space:]]*location /[[:space:]]*{" "$NGINX_CONFIG"; then
     # /publicbct/... -> http://155.212.170.94:9000/publicbct/...
     location /publicbct/ {
         proxy_pass http://155.212.170.94:9000/publicbct/;
-        proxy_set_header Host $host;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -130,12 +136,26 @@ if grep -q "^[[:space:]]*location /[[:space:]]*{" "$NGINX_CONFIG"; then
         add_header Cache-Control "public, max-age=86400";
     }
 
+    # Проксирование MinIO (privatebct) для presigned URL документов
+    # /privatebct/... -> http://155.212.170.94:9000/privatebct/...
+    location /privatebct/ {
+        proxy_pass http://155.212.170.94:9000/privatebct/;
+        proxy_set_header Host 155.212.170.94:9000;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
     # Проксирование аватаров (альтернативный путь)
     # /avatar/... -> http://155.212.170.94:9000/publicbct/avatars/...
     location /avatar/ {
         rewrite ^/avatar/(.*)$ /publicbct/avatars/$1 break;
         proxy_pass http://155.212.170.94:9000;
-        proxy_set_header Host $host;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -183,7 +203,7 @@ else
     # /publicbct/... -> http://155.212.170.94:9000/publicbct/...
     location /publicbct/ {
         proxy_pass http://155.212.170.94:9000/publicbct/;
-        proxy_set_header Host $host;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -198,12 +218,26 @@ else
         add_header Cache-Control "public, max-age=86400";
     }
 
+    # Проксирование MinIO (privatebct) для presigned URL документов
+    # /privatebct/... -> http://155.212.170.94:9000/privatebct/...
+    location /privatebct/ {
+        proxy_pass http://155.212.170.94:9000/privatebct/;
+        proxy_set_header Host 155.212.170.94:9000;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
     # Проксирование аватаров (альтернативный путь)
     # /avatar/... -> http://155.212.170.94:9000/publicbct/avatars/...
     location /avatar/ {
         rewrite ^/avatar/(.*)$ /publicbct/avatars/$1 break;
         proxy_pass http://155.212.170.94:9000;
-        proxy_set_header Host $host;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -234,6 +268,8 @@ echo "📄 Новая конфигурация прокси:"
 grep -A 5 "location /api/" "$NGINX_CONFIG" || true
 echo ""
 grep -A 5 "location /publicbct/" "$NGINX_CONFIG" || true
+echo ""
+grep -A 5 "location /privatebct/" "$NGINX_CONFIG" || true
 echo ""
 grep -A 5 "location /avatar/" "$NGINX_CONFIG" || true
 
