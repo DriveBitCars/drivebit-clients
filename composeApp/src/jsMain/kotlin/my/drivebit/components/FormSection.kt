@@ -18,7 +18,7 @@ fun FormSection(
             position(Position.Relative)
         }
     }) {
-        Column(gap = gap) {
+        Column(gap = gap, modifier = { width(100.percent) }) {
             content()
         }
 
