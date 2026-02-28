@@ -11,7 +11,7 @@ import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.BodyTypeFilter
 import my.drivebit.components.BrandModelFilter
-import my.drivebit.components.CarItemSmall
+import my.drivebit.components.CarsGrid
 import my.drivebit.components.Column
 import my.drivebit.components.DateFieldDialog
 import my.drivebit.components.Divider
@@ -314,25 +314,7 @@ fun SearchPage() {
                             }
                         }
                         if (currentState.cars.isNotEmpty()) {
-                            Div({
-                                style {
-                                    display(DisplayStyle.Grid)
-                                    property("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                                    gap(24.px)
-                                    width(100.percent)
-                                }
-                            }) {
-                                currentState.cars.forEach { car ->
-                                    Column {
-                                        CarItemSmall(
-                                            car = car,
-                                            onClick = {
-                                                window.location.href = "/car-detail?id=${car.id}"
-                                            },
-                                        )
-                                    }
-                                }
-                            }
+                            CarsGrid(cars = currentState.cars)
                         } else {
                             Div({
                                 style {

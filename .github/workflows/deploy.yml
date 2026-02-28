@@ -94,7 +94,7 @@ jobs:
         TIMESTAMP=$(date +%s)
         echo "Timestamp: $TIMESTAMP"
         
-        # Update composeApp.js version in index.html
+        # Update composeApp.js version in index.html (preload and script)
         sed -i "s/composeApp\.js?v=[0-9]*/composeApp.js?v=$TIMESTAMP/g" composeApp/build/dist/js/productionExecutable/index.html
         
         # Rename JS files with timestamp

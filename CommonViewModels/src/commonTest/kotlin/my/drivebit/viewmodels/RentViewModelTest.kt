@@ -163,8 +163,8 @@ class RentViewModelTest {
             advanceUntilIdle()
 
             val state = viewModel.state.value as RentState.Book
-            assertEquals("3000.0", state.totalAmount)
-            assertEquals("1000.0", state.middlePrice)
+            assertEquals("3000", state.totalAmount)
+            assertEquals("1000", state.middlePrice)
         }
 
     @Test
@@ -185,7 +185,7 @@ class RentViewModelTest {
             advanceUntilIdle()
 
             val state = viewModel.state.value as RentState.Book
-            assertEquals("1500.0", state.totalAmount)
-            assertEquals("1500.0", state.middlePrice)
+            assertEquals("1500", state.totalAmount)
+            assertEquals("1500", state.middlePrice)
         }
 }

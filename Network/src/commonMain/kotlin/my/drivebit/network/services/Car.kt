@@ -211,8 +211,8 @@ data class CarAddress(
     val city: String? = null,
     val street: String? = null,
     val house: String? = null,
-    val geoLat: Double,
-    val geoLon: Double,
+    val geoLat: Double? = null,
+    val geoLon: Double? = null,
 )
 
 @Serializable

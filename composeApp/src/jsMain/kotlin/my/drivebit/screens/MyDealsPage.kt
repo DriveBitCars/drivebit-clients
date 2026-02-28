@@ -146,7 +146,7 @@ private fun DealItemCard(
                     }) {
                         Text(renterName)
                     }
-                    DealStatusTag(text = booking.status)
+                    DealStatusTag(text = booking.statusTranslate?.takeIf { it.isNotBlank() } ?: booking.status)
                 }
                 Span({
                     style {
@@ -187,7 +187,7 @@ private fun DealItemCard(
                     color(CSSColors.Black)
                 }
             }) {
-                Text("${booking.status}: $statusDateTime")
+                Text("${booking.statusTranslate?.takeIf { it.isNotBlank() } ?: booking.status}: $statusDateTime")
             }
         }
 

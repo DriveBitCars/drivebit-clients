@@ -154,7 +154,7 @@ private fun CarDetailContent(
         val carLat = car.general.address.geoLat
         val carLon = car.general.address.geoLon
 
-        if (carLat != 0.0 && carLon != 0.0) {
+        if (carLat != null && carLon != null && carLat != 0.0 && carLon != 0.0) {
             CarLocationMap(car = car)
         }
     }

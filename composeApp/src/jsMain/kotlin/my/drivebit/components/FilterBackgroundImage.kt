@@ -18,9 +18,6 @@ fun FilterBackgroundImage(
             overflow("hidden")
             position(Position.Relative)
             marginBottom(30.px)
-            property("flex", "1")
-            property("min-height", "150px")
-            property("max-height", "300px")
         }
         classes("filter-background")
     }) {
@@ -31,6 +28,7 @@ fun FilterBackgroundImage(
                 style {
                     width(100.percent)
                     height(100.percent)
+                    display(DisplayStyle.Block)
                     property("object-fit", "cover")
                     property("object-position", "center")
                 }
