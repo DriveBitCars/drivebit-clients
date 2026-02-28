@@ -91,6 +91,7 @@ object TripsTab : Tab {
                 }
                 else -> {
                     LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         items(bookings, key = { it.id }) { booking ->

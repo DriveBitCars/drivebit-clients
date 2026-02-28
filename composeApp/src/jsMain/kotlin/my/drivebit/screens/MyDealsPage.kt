@@ -46,7 +46,7 @@ fun MyDealsPage() {
     }
 
     PageWithLogo {
-        CenteredFormContainer {
+        CenteredFormContainer(maxWidth = 600.px) {
             PageHeader {
                 TextSmartHeader("Мои сделки (${bookings.size})")
             }

@@ -39,7 +39,7 @@ fun MyBookingsPage() {
     }
 
     PageWithLogo {
-        CenteredFormContainer {
+        CenteredFormContainer(maxWidth = 600.px) {
             PageHeader {
                 TextSmartHeader("Все заявки (${bookings.size})")
             }
@@ -60,7 +60,7 @@ fun MyBookingsPage() {
                         }
                     }
                     else -> {
-                        Column(gap = 16.px) {
+                        Column(gap = 16.px, modifier = { width(100.percent) }) {
                             bookings.forEach { booking ->
                                 BookingItemCard(booking = booking)
                             }
@@ -98,6 +98,8 @@ private fun BookingItemCard(booking: BookingDTO) {
     Column(
         gap = 16.px,
         modifier = {
+            width(100.percent)
+            property("box-sizing", "border-box")
             padding(16.px)
             borderRadius(12.px)
             border(1.px, LineStyle.Solid, CSSColors.Gray300)
