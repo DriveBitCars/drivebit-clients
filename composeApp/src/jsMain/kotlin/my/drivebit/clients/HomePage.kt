@@ -116,19 +116,22 @@ fun HomePage() {
         when (selected) {
             "Поблизости" -> {
                 val markers =
-                    cars.map { car ->
-                        val lat = car.general.address.geoLat
-                        val lon = car.general.address.geoLon
-                        MapMarker(
-                            id = car.id,
-                            location =
-                                Location(
-                                    latitude = lat,
-                                    longitude = lon,
-                                ),
-                            title = listOfNotNull(car.general.brandName).joinToString(" "),
-                        )
-                    }
+                    cars
+                        .mapNotNull { car ->
+                            val lat = car.general.address.geoLat
+                            val lon = car.general.address.geoLon
+                            if (lat != null && lon != null) {
+                                MapMarker(
+                                    id = car.id,
+                                    location =
+                                        Location(
+                                            latitude = lat,
+                                            longitude = lon,
+                                        ),
+                                    title = listOfNotNull(car.general.brandName).joinToString(" "),
+                                )
+                            } else null
+                        }
 
                 LaunchedEffect(cars) {
                     mapViewModel.updateCameraPositionFromCars(cars)

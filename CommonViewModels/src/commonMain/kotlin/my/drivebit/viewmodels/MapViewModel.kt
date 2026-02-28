@@ -56,11 +56,12 @@ class MapViewModel(
 
     fun updateCameraPositionFromCars(cars: List<CarItem>) {
         val validCars =
-            cars.map { car ->
-                val lat = car.general.address.geoLat
-                val lon = car.general.address.geoLon
-                lat to lon
-            }
+            cars
+                .mapNotNull { car ->
+                    val lat = car.general.address.geoLat
+                    val lon = car.general.address.geoLon
+                    if (lat != null && lon != null) lat to lon else null
+                }
 
         val targetPosition =
             if (validCars.isNotEmpty()) {

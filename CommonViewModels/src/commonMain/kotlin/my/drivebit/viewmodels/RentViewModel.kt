@@ -203,7 +203,11 @@ class RentViewModelImpl(
             else -> message
         }
 
-    private fun formatPrice(value: Double): String = kotlin.math.round(value).toInt().toString()
+    private fun formatPrice(value: Double): String =
+        kotlin.math
+            .round(value)
+            .toInt()
+            .toString()
 
     private fun daysBetween(
         startAt: String,
