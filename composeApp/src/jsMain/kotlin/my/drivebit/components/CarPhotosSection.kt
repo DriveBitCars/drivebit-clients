@@ -24,7 +24,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
             gap = 16.px,
         ) {
             if (isMobile) {
-                CarMainPhoto(mainPhoto)
+                CarMainPhoto(mainPhoto, car.id, allPhotos.isNotEmpty())
             } else {
                 Row(
                     gap = 16.px,
@@ -34,7 +34,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
                         gap = 8.px,
                         modifier = { flex(1) },
                     ) {
-                        CarMainPhoto(mainPhoto)
+                        CarMainPhoto(mainPhoto, car.id, allPhotos.isNotEmpty())
                     }
 
                     Column(
@@ -42,7 +42,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
                         modifier = { width(200.px) },
                     ) {
                         thumbnailPhotos.forEach { photo ->
-                            CarThumbnail(photo)
+                            CarThumbnail(photo, car.id, allPhotos.isNotEmpty())
                         }
                     }
                 }
@@ -91,30 +91,52 @@ private fun isShowButton(
 }
 
 @Composable
-private fun CarMainPhoto(mainPhoto: CarPhotoItem?) {
+private fun CarMainPhoto(mainPhoto: CarPhotoItem?, carId: String, isClickable: Boolean) {
     if (mainPhoto != null && mainPhoto.url.isNotEmpty()) {
-        Img(
-            src = mainPhoto.url,
-            attrs = {
-                style {
-                    width(100.percent)
-                    height(400.px)
-                    property("object-fit", "cover")
-                    borderRadius(8.px)
-                }
-            },
-        )
+        if (isClickable) {
+            Div({
+                style { cursor("pointer") }
+                onClick { window.location.href = "/car-photos-gallery?id=$carId" }
+            }) {
+                Img(
+                    src = mainPhoto.url,
+                    attrs = {
+                        style {
+                            width(100.percent)
+                            height(400.px)
+                            property("object-fit", "cover")
+                            borderRadius(8.px)
+                        }
+                    },
+                )
+            }
+        } else {
+            Img(
+                src = mainPhoto.url,
+                attrs = {
+                    style {
+                        width(100.percent)
+                        height(400.px)
+                        property("object-fit", "cover")
+                        borderRadius(8.px)
+                    }
+                },
+            )
+        }
     } else {
         NoPhotoPlaceholder()
     }
 }
 
 @Composable
-private fun CarThumbnail(photo: CarPhotoItem) {
+private fun CarThumbnail(photo: CarPhotoItem, carId: String, isClickable: Boolean) {
     Div({
         style {
             position(Position.Relative)
-            cursor("pointer")
+            if (isClickable) cursor("pointer")
+        }
+        if (isClickable) {
+            onClick { window.location.href = "/car-photos-gallery?id=$carId" }
         }
     }) {
         Img(
