@@ -72,7 +72,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
                             color(CSSColors.Gray600)
                         }
                     }) {
-                        Text("View ${allPhotos.size} photos")
+                        Text("Показать ${allPhotos.size} фотографий")
                     }
                 }
             }
