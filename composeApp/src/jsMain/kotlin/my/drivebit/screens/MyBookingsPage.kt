@@ -126,7 +126,7 @@ private fun BookingItemCard(booking: BookingDTO) {
                     }) {
                         Text(ownerName)
                     }
-                    StatusTag(text = booking.status)
+                    StatusTag(text = booking.statusTranslate?.takeIf { it.isNotBlank() } ?: booking.status)
                 }
                 Span({
                     style {
@@ -167,7 +167,7 @@ private fun BookingItemCard(booking: BookingDTO) {
                     color(CSSColors.Black)
                 }
             }) {
-                Text("${booking.status}: $statusDateTime")
+                Text("${booking.statusTranslate?.takeIf { it.isNotBlank() } ?: booking.status}: $statusDateTime")
             }
         }
 

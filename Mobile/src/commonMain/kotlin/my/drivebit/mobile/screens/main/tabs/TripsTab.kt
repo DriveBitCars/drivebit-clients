@@ -136,7 +136,7 @@ internal fun BookingItemCard(booking: BookingDTO) {
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = booking.status,
+                text = booking.statusTranslate?.takeIf { it.isNotBlank() } ?: booking.status,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

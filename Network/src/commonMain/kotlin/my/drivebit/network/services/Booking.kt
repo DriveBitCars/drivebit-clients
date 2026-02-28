@@ -56,6 +56,7 @@ data class BookingDTO(
     val endAt: String,
     val totalAmount: Double,
     val status: String,
+    val statusTranslate: String? = null,
     val createdAt: String,
     val comment: String? = null,
 )
