@@ -70,6 +70,8 @@ import my.drivebit.viewmodels.SearchPageDateViewModelImpl
 import my.drivebit.viewmodels.SearchViewModel
 import my.drivebit.viewmodels.SearchViewModelImpl
 import my.drivebit.viewmodels.TrunkSizeViewModel
+import my.drivebit.viewmodels.UnreadMessagesViewModel
+import my.drivebit.viewmodels.UnreadMessagesViewModelImpl
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.WinCodeInputViewModel
 import org.koin.core.module.Module
@@ -172,6 +174,13 @@ val commonViewModelsModule: Module =
                 avatarRepository = get(),
                 carMenuViewModel = get(),
                 profileViewModel = get(),
+            )
+        }
+
+        single<UnreadMessagesViewModel> {
+            UnreadMessagesViewModelImpl(
+                chat = get(),
+                storage = get(),
             )
         }
 
