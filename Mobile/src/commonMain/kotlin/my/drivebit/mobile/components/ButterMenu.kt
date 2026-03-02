@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import my.drivebit.mobile.screens.chat.ChatListScreen
 import my.drivebit.mobile.screens.profile.ProfileScreen
 import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.ButterState
@@ -48,6 +49,14 @@ fun ButterMenu() {
                                         item.onClick()
                                         if (storage.isLogined()) {
                                             navigator.push(ProfileScreen())
+                                        }
+                                    }
+                                }
+                                "Входящие" -> {
+                                    {
+                                        item.onClick()
+                                        if (storage.isLogined()) {
+                                            navigator.push(ChatListScreen())
                                         }
                                     }
                                 }

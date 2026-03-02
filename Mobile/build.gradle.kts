@@ -46,6 +46,7 @@ kotlin {
             implementation(project(":CommonViewModels"))
             implementation(project(":Network"))
             implementation(project(":Utils"))
+            implementation(libs.kotlinx.datetime)
 
             implementation(libs.coil.compose)
             implementation(libs.coil.compose.svg)

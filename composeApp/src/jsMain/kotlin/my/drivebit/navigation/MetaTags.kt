@@ -49,6 +49,20 @@ object MetaTags {
                     path = "/signup",
                     noindex = true,
                 ),
+            "/chats" to
+                PageMeta(
+                    title = "Входящие - DriveBit",
+                    description = "Сообщения и чаты в DriveBit. Общайтесь с арендаторами и владельцами автомобилей.",
+                    path = "/chats",
+                    noindex = true,
+                ),
+            "/chat" to
+                PageMeta(
+                    title = "Чат - DriveBit",
+                    description = "Переписка в DriveBit.",
+                    path = "/chat",
+                    noindex = true,
+                ),
         )
 
     fun updateForPath(path: String) {

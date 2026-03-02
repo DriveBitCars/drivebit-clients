@@ -14,6 +14,10 @@ import my.drivebit.viewmodels.AvatarUploadViewModelImpl
 import my.drivebit.viewmodels.BodyTypeViewModel
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
+import my.drivebit.viewmodels.ChatDetailViewModel
+import my.drivebit.viewmodels.ChatDetailViewModelImpl
+import my.drivebit.viewmodels.ChatListViewModel
+import my.drivebit.viewmodels.ChatListViewModelImpl
 import my.drivebit.viewmodels.CarBrandViewModel
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarDetailViewModelImpl
@@ -181,6 +185,19 @@ val commonViewModelsModule: Module =
             UnreadMessagesViewModelImpl(
                 chat = get(),
                 storage = get(),
+            )
+        }
+
+        factory<ChatListViewModel> {
+            ChatListViewModelImpl(
+                chat = get(),
+            )
+        }
+
+        factory<ChatDetailViewModel> { (chatId: String) ->
+            ChatDetailViewModelImpl(
+                chat = get(),
+                chatId = chatId,
             )
         }
 
