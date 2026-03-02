@@ -8,6 +8,7 @@ object ImagePaths {
     const val BUTTER_DEALS_SVG = "images/butter/deals.svg"
     const val BUTTER_DOCS_SVG = "images/butter/docs.svg"
     const val BUTTER_LOGOUT_SVG = "images/butter/logout.svg"
+    const val BUTTER_MAIL_SVG = "images/butter/mail.svg"
     const val FILTER_MAIN_ADMISSION_SVG = "images/filter-main/admission.svg"
     const val FILTER_MAIN_AIRPLANE_SVG = "images/filter-main/airplane.svg"
     const val FILTER_MAIN_CALENDAR_SVG = "images/filter-main/calendar.svg"

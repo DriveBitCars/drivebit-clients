@@ -12,6 +12,8 @@ import my.drivebit.screens.CarModelSelectionPage
 import my.drivebit.screens.CarPhotosPage
 import my.drivebit.screens.CarPhotosUploadPage
 import my.drivebit.screens.CarDetailPage
+import my.drivebit.screens.ChatDetailPage
+import my.drivebit.screens.ChatListPage
 import my.drivebit.screens.CarPhotosGalleryPage
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePhonePage
@@ -108,6 +110,22 @@ actual fun App() {
                     val storage: Storage = koinInject()
                     if (storage.isLogined()) {
                         MyDealsPage()
+                    } else {
+                        window.location.href = "/"
+                    }
+                }
+                currentPath.startsWith("/chats") -> {
+                    val storage: Storage = koinInject()
+                    if (storage.isLogined()) {
+                        ChatListPage()
+                    } else {
+                        window.location.href = "/"
+                    }
+                }
+                currentPath.startsWith("/chat") -> {
+                    val storage: Storage = koinInject()
+                    if (storage.isLogined()) {
+                        ChatDetailPage()
                     } else {
                         window.location.href = "/"
                     }

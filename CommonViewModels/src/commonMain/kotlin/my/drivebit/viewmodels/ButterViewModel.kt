@@ -90,6 +90,13 @@ private val myDeals =
         onClick = {},
     )
 
+private val inbox =
+    ButterModel(
+        iconUrl = ImagePaths.BUTTER_MAIL_SVG,
+        text = "Входящие",
+        onClick = {},
+    )
+
 private val logout =
     ButterModel(
         iconUrl = ImagePaths.BUTTER_LOGOUT_SVG,
@@ -141,6 +148,7 @@ class ButterViewModelImpl(
                 buildList {
                     if (storage.isLogined()) {
                         add(profile.copy(onClick = { close() }))
+                        add(inbox.copy(onClick = { close() }))
                         add(myDocuments.copy(onClick = { close() }))
                         add(myBookings.copy(onClick = { close() }))
                         add(myDeals.copy(onClick = { close() }))

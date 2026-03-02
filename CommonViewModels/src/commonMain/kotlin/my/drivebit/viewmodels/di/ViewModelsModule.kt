@@ -14,6 +14,10 @@ import my.drivebit.viewmodels.AvatarUploadViewModelImpl
 import my.drivebit.viewmodels.BodyTypeViewModel
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
+import my.drivebit.viewmodels.ChatDetailViewModel
+import my.drivebit.viewmodels.ChatDetailViewModelImpl
+import my.drivebit.viewmodels.ChatListViewModel
+import my.drivebit.viewmodels.ChatListViewModelImpl
 import my.drivebit.viewmodels.CarBrandViewModel
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarDetailViewModelImpl
@@ -70,6 +74,8 @@ import my.drivebit.viewmodels.SearchPageDateViewModelImpl
 import my.drivebit.viewmodels.SearchViewModel
 import my.drivebit.viewmodels.SearchViewModelImpl
 import my.drivebit.viewmodels.TrunkSizeViewModel
+import my.drivebit.viewmodels.UnreadMessagesViewModel
+import my.drivebit.viewmodels.UnreadMessagesViewModelImpl
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.WinCodeInputViewModel
 import org.koin.core.module.Module
@@ -172,6 +178,26 @@ val commonViewModelsModule: Module =
                 avatarRepository = get(),
                 carMenuViewModel = get(),
                 profileViewModel = get(),
+            )
+        }
+
+        single<UnreadMessagesViewModel> {
+            UnreadMessagesViewModelImpl(
+                chat = get(),
+                storage = get(),
+            )
+        }
+
+        factory<ChatListViewModel> {
+            ChatListViewModelImpl(
+                chat = get(),
+            )
+        }
+
+        factory<ChatDetailViewModel> { (chatId: String) ->
+            ChatDetailViewModelImpl(
+                chat = get(),
+                chatId = chatId,
             )
         }
 
