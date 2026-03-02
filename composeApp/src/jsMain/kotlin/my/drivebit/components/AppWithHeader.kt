@@ -34,6 +34,19 @@ fun AppWithHeader(content: @Composable () -> Unit) {
 
     ResponsiveContainer { isMobile ->
         AppContainer {
+            if (storage.isLogined() && hasUnreadState.value) {
+                Div({
+                    style {
+                        backgroundColor(CSSColors.Black)
+                        color(CSSColors.White)
+                        padding(8.px)
+                        textAlign("center")
+                    }
+                }) {
+                    Text("У Вас есть непрочитанные сообщения")
+                }
+            }
+
             Div({
                 style {
                     display(DisplayStyle.Flex)
@@ -74,19 +87,6 @@ fun AppWithHeader(content: @Composable () -> Unit) {
                         }
 
                         ButterMenu()
-                    }
-
-                    if (storage.isLogined() && hasUnreadState.value) {
-                        Div({
-                            style {
-                                backgroundColor(CSSColors.Black)
-                                color(CSSColors.White)
-                                padding(8.px)
-                                textAlign("center")
-                            }
-                        }) {
-                            Text("У Вас есть непрочитанные сообщения")
-                        }
                     }
 
                     content()
