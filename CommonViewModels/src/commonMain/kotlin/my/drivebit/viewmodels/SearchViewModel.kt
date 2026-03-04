@@ -7,13 +7,17 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.CarItem
 import my.drivebit.repositories.CarSearchRepository
 import my.drivebit.repositories.CurrentFiltersRepository
+
+private const val PAGE_SIZE = 12
 
 sealed interface SearchState {
     data object Loading : SearchState
@@ -31,8 +35,11 @@ sealed interface SearchState {
 
 interface SearchViewModel {
     val state: StateFlow<SearchState>
+    val displayedCars: StateFlow<List<CarItem>>
+    val paginationInfo: StateFlow<Triple<Int, Int, Int>>
 
     fun loadSearchResults()
+    fun setPage(page: Int)
 
     fun updateDailyRateMin(value: Double?)
 
@@ -87,9 +94,42 @@ class SearchViewModelImpl(
     private val viewModelScope = coroutineScope
 
     private val _state = MutableStateFlow<SearchState>(SearchState.Loading)
+    private val _currentPage = MutableStateFlow(0)
 
     override val state: StateFlow<SearchState>
         get() = _state.asStateFlow()
+
+    override val displayedCars: StateFlow<List<CarItem>> =
+        combine(_state, _currentPage) { searchState, page ->
+            when (val s = searchState) {
+                is SearchState.SearchResults -> {
+                    val totalPages = (s.cars.size + PAGE_SIZE - 1) / PAGE_SIZE
+                    val clampedPage = if (totalPages > 0) page.coerceIn(0, totalPages - 1) else 0
+                    s.cars.drop(clampedPage * PAGE_SIZE).take(PAGE_SIZE)
+                }
+                else -> emptyList()
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
+            initialValue = emptyList(),
+        )
+
+    override val paginationInfo: StateFlow<Triple<Int, Int, Int>> =
+        combine(_state, _currentPage) { searchState, page ->
+            when (val s = searchState) {
+                is SearchState.SearchResults -> {
+                    val totalPages = (s.cars.size + PAGE_SIZE - 1) / PAGE_SIZE
+                    val clampedPage = if (totalPages > 0) page.coerceIn(0, totalPages - 1) else 0
+                    Triple(clampedPage, totalPages, s.cars.size)
+                }
+                else -> Triple(0, 0, 0)
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
+            initialValue = Triple(0, 0, 0),
+        )
 
     init {
         loadSearchResults()
@@ -114,6 +154,7 @@ class SearchViewModelImpl(
                             )
                         _state.update { SearchState.Error(errorMessage) }
                     }.collectLatest { response ->
+                        _currentPage.value = 0
                         _state.update {
                             SearchState.SearchResults(
                                 cars = response.cars,
@@ -191,5 +232,9 @@ class SearchViewModelImpl(
 
     override fun updateAvailableMileagePerDayKmMin(value: Int?) {
         currentFiltersRepository.updateAvailableMileagePerDayKmMin(value)
+    }
+
+    override fun setPage(page: Int) {
+        _currentPage.value = page.coerceAtLeast(0)
     }
 }

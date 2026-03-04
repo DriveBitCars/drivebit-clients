@@ -9,6 +9,7 @@ import kotlinx.browser.document
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.DateRangeSelector
+import my.drivebit.components.PaginationBar
 import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.filterButton
@@ -51,6 +52,8 @@ fun HomePage() {
     val mapState = mapViewModel.state.collectAsState()
     val carSearchState = carSearchViewModel.state.collectAsState()
     val cars by mainContentViewModel.firstList.collectAsState()
+    val displayedCars by mainContentViewModel.displayedCars.collectAsState()
+    val paginationInfo by mainContentViewModel.paginationInfo.collectAsState()
     val filters = state.value.filters
     val selected = state.value.selected
 
@@ -135,7 +138,14 @@ fun HomePage() {
                         marginTop(20.px)
                     }
                 }) {
-                    CarsGrid(cars = cars)
+                    CarsGrid(cars = displayedCars)
+                    PaginationBar(
+                        currentPage = paginationInfo.first,
+                        totalPages = paginationInfo.second,
+                        totalCount = paginationInfo.third,
+                        pageSize = 12,
+                        onPageChange = { mainContentViewModel.setPage(it) },
+                    )
                 }
             }
         }
