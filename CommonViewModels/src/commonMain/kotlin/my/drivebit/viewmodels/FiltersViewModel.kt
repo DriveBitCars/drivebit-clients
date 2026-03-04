@@ -120,23 +120,29 @@ class FiltersViewModel(
     }
 
     fun onSelect(title: String) {
-        _state.update { it.copy(selected = title) }
-        currentFiltersRepository.updateCurrentTask(title)
-        if (title == "Все") {
-            currentFiltersRepository.updateDailyRateMin(null)
-            currentFiltersRepository.updateDailyRateMax(null)
-            currentFiltersRepository.updateBrand(null, null)
-            currentFiltersRepository.updateModel(null, null)
-            currentFiltersRepository.updateDriveType(null, null)
-            currentFiltersRepository.updateBodyType(null, null)
-            currentFiltersRepository.updateSeatsMin(null)
-            currentFiltersRepository.updateEngineType(null, null)
-            currentFiltersRepository.updateColor(null, null)
-            currentFiltersRepository.updateYearMin(null)
-            currentFiltersRepository.updateYearMax(null)
-            currentFiltersRepository.updateSeatsMax(null)
-            currentFiltersRepository.updateAvailableMileagePerDayKmMin(null)
+        val effectiveTitle =
+            if (title != "Все" && title == _state.value.selected) "Все" else title
+        _state.update { it.copy(selected = effectiveTitle) }
+        currentFiltersRepository.updateCurrentTask(effectiveTitle)
+        if (effectiveTitle == "Все") {
+            clearAllFilters()
         }
+    }
+
+    private fun clearAllFilters() {
+        currentFiltersRepository.updateDailyRateMin(null)
+        currentFiltersRepository.updateDailyRateMax(null)
+        currentFiltersRepository.updateBrand(null, null)
+        currentFiltersRepository.updateModel(null, null)
+        currentFiltersRepository.updateDriveType(null, null)
+        currentFiltersRepository.updateBodyType(null, null)
+        currentFiltersRepository.updateSeatsMin(null)
+        currentFiltersRepository.updateEngineType(null, null)
+        currentFiltersRepository.updateColor(null, null)
+        currentFiltersRepository.updateYearMin(null)
+        currentFiltersRepository.updateYearMax(null)
+        currentFiltersRepository.updateSeatsMax(null)
+        currentFiltersRepository.updateAvailableMileagePerDayKmMin(null)
     }
 
     private fun getSelectedFilter(): String = "Все"
