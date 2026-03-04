@@ -28,6 +28,9 @@ interface CurrentFiltersRepository {
     val yearMax: Flow<Int?>
     val seatsMax: Flow<Int?>
     val availableMileagePerDayKmMin: Flow<Int?>
+    val currentPage: Flow<Int>
+
+    fun setPage(page: Int)
 
     fun updateCurrentTask(shortName: String)
 
@@ -133,6 +136,7 @@ internal class CurrentFiltersRepositoryImpl(
     private val yearMaxState = MutableStateFlow<Int?>(null)
     private val seatsMaxState = MutableStateFlow<Int?>(null)
     private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
+    private val currentPageState = MutableStateFlow(0)
 
     init {
         val savedTaskShortName = settings.getStringOrNullIfEmpty(key(CURRENT_TASK_SHORT_NAME_KEY))
@@ -224,10 +228,16 @@ internal class CurrentFiltersRepositoryImpl(
     override val yearMax: Flow<Int?> = yearMaxState.asStateFlow()
     override val seatsMax: Flow<Int?> = seatsMaxState.asStateFlow()
     override val availableMileagePerDayKmMin: Flow<Int?> = availableMileagePerDayKmMinState.asStateFlow()
+    override val currentPage: Flow<Int> = currentPageState.asStateFlow()
+
+    override fun setPage(page: Int) {
+        currentPageState.value = page.coerceAtLeast(0)
+    }
 
     override fun updateCurrentTask(shortName: String) {
         settings.putString(key(CURRENT_TASK_SHORT_NAME_KEY), shortName)
         currentTaskShortNameState.value = shortName
+        currentPageState.value = 0
     }
 
     override fun updateStartDate(date: String?) {
@@ -237,6 +247,7 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(START_DATE_KEY)
         }
         startStateFlow.value = date
+        currentPageState.value = 0
     }
 
     override fun updateEndDate(date: String?) {
@@ -246,6 +257,7 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(END_DATE_KEY)
         }
         endStateFlow.value = date
+        currentPageState.value = 0
     }
 
     override fun updateDailyRateMin(value: Double?) {
@@ -255,6 +267,7 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(key(DAILY_RATE_MIN_KEY))
         }
         dailyRateMinState.value = value
+        currentPageState.value = 0
     }
 
     override fun updateDailyRateMax(value: Double?) {
@@ -264,6 +277,7 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(key(DAILY_RATE_MAX_KEY))
         }
         dailyRateMaxState.value = value
+        currentPageState.value = 0
     }
 
     override fun updateBrand(
@@ -282,6 +296,7 @@ internal class CurrentFiltersRepositoryImpl(
         }
         brandIdState.value = id
         brandNameState.value = name
+        currentPageState.value = 0
     }
 
     override fun updateModel(
@@ -300,6 +315,7 @@ internal class CurrentFiltersRepositoryImpl(
         }
         modelIdState.value = id
         modelNameState.value = name
+        currentPageState.value = 0
     }
 
     override fun updateDriveType(
@@ -318,6 +334,7 @@ internal class CurrentFiltersRepositoryImpl(
         }
         driveTypeNameState.value = name
         driveTypeTranslateState.value = translate
+        currentPageState.value = 0
     }
 
     override fun updateBodyType(
@@ -336,6 +353,7 @@ internal class CurrentFiltersRepositoryImpl(
         }
         bodyTypeNameState.value = name
         bodyTypeTranslateState.value = translate
+        currentPageState.value = 0
     }
 
     override fun updateSeatsMin(value: Int?) {
@@ -345,6 +363,7 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(key(SEATS_MIN_KEY))
         }
         seatsMinState.value = value
+        currentPageState.value = 0
     }
 
     override fun updateEngineType(
@@ -363,6 +382,7 @@ internal class CurrentFiltersRepositoryImpl(
         }
         engineTypeNameState.value = name
         engineTypeTranslateState.value = translate
+        currentPageState.value = 0
     }
 
     override fun updateColor(
@@ -381,6 +401,7 @@ internal class CurrentFiltersRepositoryImpl(
         }
         colorNameState.value = name
         colorTranslateState.value = translate
+        currentPageState.value = 0
     }
 
     override fun updateYearMin(value: Int?) {
@@ -390,6 +411,7 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(key(YEAR_MIN_KEY))
         }
         yearMinState.value = value
+        currentPageState.value = 0
     }
 
     override fun updateYearMax(value: Int?) {
@@ -399,6 +421,7 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(key(YEAR_MAX_KEY))
         }
         yearMaxState.value = value
+        currentPageState.value = 0
     }
 
     override fun updateSeatsMax(value: Int?) {
@@ -408,6 +431,7 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(key(SEATS_MAX_KEY))
         }
         seatsMaxState.value = value
+        currentPageState.value = 0
     }
 
     override fun updateAvailableMileagePerDayKmMin(value: Int?) {
@@ -417,5 +441,6 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(key(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY))
         }
         availableMileagePerDayKmMinState.value = value
+        currentPageState.value = 0
     }
 }

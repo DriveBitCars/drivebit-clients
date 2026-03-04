@@ -76,7 +76,10 @@ data class ChatScreen(
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
                     ) {
                         items(messages.reversed()) { message ->
-                            MessageBubble(message = message)
+                            MessageBubble(
+                                message = message,
+                                participantId = chatDetail?.participant?.id,
+                            )
                         }
                     }
                     Row(
@@ -108,10 +111,21 @@ data class ChatScreen(
 }
 
 @Composable
-private fun MessageBubble(message: MessageDto) {
+private fun MessageBubble(
+    message: MessageDto,
+    participantId: String? = null,
+) {
+    val senderId = message.sender?.id
+    val isOwnMessage = participantId != null && senderId != null && senderId != participantId
+    val displayName =
+        when {
+            message.isSystemMessage -> null
+            isOwnMessage -> "Вы"
+            else -> message.sender?.name?.takeIf { it.isNotBlank() }
+        }
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         if (!message.isSystemMessage) {
-            message.sender?.name?.takeIf { it.isNotBlank() }?.let { name ->
+            displayName?.let { name ->
                 Text(
                     text = name,
                     style = MaterialTheme.typography.labelSmall,

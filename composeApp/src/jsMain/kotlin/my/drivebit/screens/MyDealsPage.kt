@@ -98,14 +98,14 @@ private fun DealItemCard(
             .joinToString(" ")
             .ifBlank { "Автомобиль" }
     val shortId = booking.id.takeLast(6)
-    val durationHours =
+    val periodStart =
         runCatching {
-            val start = Instant.parse(booking.startAt)
-            val end = Instant.parse(booking.endAt)
-            ((end.epochSeconds - start.epochSeconds) / 3600).toInt()
-        }.getOrElse { 0 }
-    val periodStart = runCatching { mapIso8601ToDateString(booking.startAt) }.getOrElse { booking.startAt.take(10) }
-    val periodEnd = runCatching { mapIso8601ToDateString(booking.endAt) }.getOrElse { booking.endAt.take(10) }
+            "${mapIso8601ToDateString(booking.startAt)} ${mapIso8601ToTimeString(booking.startAt)}"
+        }.getOrElse { booking.startAt.take(16) }
+    val periodEnd =
+        runCatching {
+            "${mapIso8601ToDateString(booking.endAt)} ${mapIso8601ToTimeString(booking.endAt)}"
+        }.getOrElse { booking.endAt.take(16) }
     val statusDateTime =
         runCatching {
             "${mapIso8601ToDateString(booking.createdAt)}, в ${mapIso8601ToTimeString(booking.createdAt)}"
@@ -175,7 +175,7 @@ private fun DealItemCard(
                     color(CSSColors.Black)
                 }
             }) {
-                Text("$durationHours ч: $periodStart - $periodEnd")
+                Text("$periodStart - $periodEnd")
             }
         }
 

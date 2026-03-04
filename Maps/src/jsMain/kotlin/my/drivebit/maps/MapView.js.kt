@@ -155,24 +155,28 @@ actual fun MapView(
                 val tileLayer = Leaflet.tileLayer(tileLayerUrl, tileLayerOptions)
                 tileLayer.addTo(map)
 
-                var moveTimeout: Int? = null
+                mapContainer["moveTimeout"] = null
                 map.on("moveend") {
-                    moveTimeout?.let { window.clearTimeout(it) }
-                    moveTimeout =
+                    (mapContainer["moveTimeout"] as? Int)?.let { window.clearTimeout(it) }
+                    val timeoutId =
                         window.setTimeout({
-                            val center = map.getCenter()
-                            val zoom = map.getZoom()
-                            onCameraMove(
-                                MapCameraPosition(
-                                    location =
-                                        my.drivebit.maps.models.Location(
-                                            latitude = center.lat.toDouble(),
-                                            longitude = center.lng.toDouble(),
-                                        ),
-                                    zoom = zoom.toFloat(),
-                                ),
-                            )
+                            val currentMap = mapContainer["map"] as? Map
+                            if (currentMap != null && currentMap == map) {
+                                val center = map.getCenter()
+                                val zoom = map.getZoom()
+                                onCameraMove(
+                                    MapCameraPosition(
+                                        location =
+                                            my.drivebit.maps.models.Location(
+                                                latitude = center.lat.toDouble(),
+                                                longitude = center.lng.toDouble(),
+                                            ),
+                                        zoom = zoom.toFloat(),
+                                    ),
+                                )
+                            }
                         }, 300)
+                    mapContainer["moveTimeout"] = timeoutId
                 }
             }
         }
@@ -220,6 +224,7 @@ actual fun MapView(
 
     DisposableEffect(Unit) {
         onDispose {
+            (mapContainer["moveTimeout"] as? Int)?.let { window.clearTimeout(it) }
             leafletMarkers.forEach { it.remove() }
             leafletMarkers.clear()
             val map = mapContainer["map"] as? Map

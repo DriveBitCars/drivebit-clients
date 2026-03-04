@@ -31,6 +31,8 @@ class MockSearchCarSearchRepository : CarSearchRepository {
                         year = 2021,
                     ),
                 ),
+            totalCount = 1,
+            totalPages = 1,
         )
 
     override val searchCarsByUserCity: Flow<CarSearchResponse>
@@ -42,6 +44,11 @@ class MockSearchCarSearchRepository : CarSearchRepository {
             }
             return kotlinx.coroutines.flow.flowOf(searchResult)
         }
+
+    override val currentPage: kotlinx.coroutines.flow.Flow<Int> =
+        kotlinx.coroutines.flow.flowOf(0)
+
+    override fun setPage(page: Int) {}
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -98,7 +105,7 @@ class SearchViewModelTest {
 
             advanceUntilIdle()
 
-            repository.searchResult = CarSearchResponse(emptyList())
+            repository.searchResult = CarSearchResponse(emptyList(), totalCount = 0, totalPages = 0)
             viewModel.loadSearchResults()
 
             advanceUntilIdle()

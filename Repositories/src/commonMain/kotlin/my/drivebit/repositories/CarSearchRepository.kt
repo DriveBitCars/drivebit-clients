@@ -17,8 +17,13 @@ private data class Quadruple<A, B, C, D>(
     val fourth: D,
 )
 
+private const val PAGE_SIZE = 9
+
 interface CarSearchRepository {
     val searchCarsByUserCity: Flow<CarSearchResponse>
+    val currentPage: Flow<Int>
+
+    fun setPage(page: Int)
 }
 
 internal class CarSearchRepositoryImpl(
@@ -74,7 +79,9 @@ internal class CarSearchRepositoryImpl(
             },
         ) { mainFilters, extraFilters ->
             Pair(mainFilters, extraFilters)
-        }.flatMapLatest { (mainFilters, extraFilters) ->
+        }.combine(currentFiltersRepository.currentPage) { filtersPair, page ->
+            Triple(filtersPair.first, filtersPair.second, page)
+        }.flatMapLatest { (mainFilters, extraFilters, page) ->
             val (quadruple, priceRange, brandDriveBodySeatsQuadruple) = mainFilters
             val brandId = brandDriveBodySeatsQuadruple.first
             val driveTypeName = brandDriveBodySeatsQuadruple.second
@@ -121,9 +128,17 @@ internal class CarSearchRepositoryImpl(
                         colors = colorName?.let { listOf(it) } ?: filter?.colors?.map { it.name },
                         brandId = brandId,
                         driveTypes = driveTypeName?.let { listOf(it) },
+                        page = page + 1,
+                        pageSize = PAGE_SIZE,
                     )
 
                 emit(result)
             }
         }
+
+    override val currentPage: Flow<Int> = currentFiltersRepository.currentPage
+
+    override fun setPage(page: Int) {
+        currentFiltersRepository.setPage(page)
+    }
 }

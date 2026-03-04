@@ -95,6 +95,7 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     private val yearMaxState = MutableStateFlow<Int?>(null)
     private val seatsMaxState = MutableStateFlow<Int?>(null)
     private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
+    private val currentPageState = MutableStateFlow(0)
 
     override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
     override val startState = startStateFlow.asStateFlow()
@@ -118,6 +119,11 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     override val yearMax = yearMaxState.asStateFlow()
     override val seatsMax = seatsMaxState.asStateFlow()
     override val availableMileagePerDayKmMin = availableMileagePerDayKmMinState.asStateFlow()
+    override val currentPage = currentPageState.asStateFlow()
+
+    override fun setPage(page: Int) {
+        currentPageState.value = page.coerceAtLeast(0)
+    }
 
     override fun updateCurrentTask(shortName: String) {
         currentTaskShortNameState.value = shortName

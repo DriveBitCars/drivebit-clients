@@ -40,6 +40,8 @@ class CarSearchRepositoryTest {
         var searchColors: List<String>? = null
         var searchBrandId: Int? = null
         var searchDriveTypes: List<String>? = null
+        var searchPage: Int = 1
+        var searchPageSize: Int = 9
         var searchResult: CarSearchResponse = CarSearchResponse(emptyList())
         var shouldThrowError = false
         var errorMessage = "Network error"
@@ -60,6 +62,8 @@ class CarSearchRepositoryTest {
             colors: List<String>?,
             brandId: Int?,
             driveTypes: List<String>?,
+            page: Int,
+            pageSize: Int,
         ): CarSearchResponse {
             if (shouldThrowError) {
                 throw Exception(errorMessage)
@@ -79,6 +83,8 @@ class CarSearchRepositoryTest {
             searchColors = colors
             searchBrandId = brandId
             searchDriveTypes = driveTypes
+            searchPage = page
+            searchPageSize = pageSize
             return searchResult
         }
 
@@ -140,6 +146,7 @@ class CarSearchRepositoryTest {
         private val yearMaxState = MutableStateFlow<Int?>(null)
         private val seatsMaxState = MutableStateFlow<Int?>(null)
         private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
+        private val currentPageState = MutableStateFlow(0)
 
         override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
         override val startState = startStateFlow.asStateFlow()
@@ -163,6 +170,11 @@ class CarSearchRepositoryTest {
         override val yearMax = yearMaxState.asStateFlow()
         override val seatsMax = seatsMaxState.asStateFlow()
         override val availableMileagePerDayKmMin = availableMileagePerDayKmMinState.asStateFlow()
+        override val currentPage = currentPageState.asStateFlow()
+
+        override fun setPage(page: Int) {
+            currentPageState.value = page.coerceAtLeast(0)
+        }
 
         override fun updateCurrentTask(shortName: String) {
             currentTaskShortNameState.value = shortName

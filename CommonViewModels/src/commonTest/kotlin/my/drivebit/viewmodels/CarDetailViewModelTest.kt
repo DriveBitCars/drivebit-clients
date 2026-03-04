@@ -138,6 +138,8 @@ class MockCarServiceForDetail : Car {
         colors: List<String>?,
         brandId: Int?,
         driveTypes: List<String>?,
+        page: Int,
+        pageSize: Int,
     ) = throw NotImplementedError()
 
     override suspend fun getMyCars(): List<my.drivebit.network.services.CarItem> = throw NotImplementedError()

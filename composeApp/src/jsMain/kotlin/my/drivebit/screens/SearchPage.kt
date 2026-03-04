@@ -13,6 +13,7 @@ import my.drivebit.components.BodyTypeFilter
 import my.drivebit.components.BrandModelFilter
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.Column
+import my.drivebit.components.PaginationBar
 import my.drivebit.components.DateFieldDialog
 import my.drivebit.components.Divider
 import my.drivebit.components.DriveTypeFilter
@@ -60,6 +61,8 @@ import org.w3c.dom.url.URLSearchParams
 fun SearchPage() {
     val viewModel: SearchViewModel = koinInject()
     val state by viewModel.state.collectAsState()
+    val displayedCars by viewModel.displayedCars.collectAsState()
+    val paginationInfo by viewModel.paginationInfo.collectAsState()
     val searchParams = rememberSearchParams()
     val currentFiltersRepository: CurrentFiltersRepository = koinInject(named("search"))
     val dailyRateMin by currentFiltersRepository.dailyRateMin.collectAsState(null)
@@ -211,7 +214,7 @@ fun SearchPage() {
                                 PriceFilter(
                                     minPrice = minPrice,
                                     maxPrice = maxPrice,
-                                    resultsCount = currentState.cars.size,
+                                    resultsCount = currentState.totalCount,
                                     onReset = {
                                         minPrice.value = 0
                                         maxPrice.value = 600
@@ -302,7 +305,7 @@ fun SearchPage() {
                             }) {
                                 SeatsFilter(
                                     selectedSeatsMin = filterSeatsMin,
-                                    resultsCount = currentState.cars.size,
+                                    resultsCount = currentState.totalCount,
                                     onSeatsMinSelected = { seatsMin ->
                                         viewModel.updateSeatsMin(seatsMin)
                                     },
@@ -314,7 +317,14 @@ fun SearchPage() {
                             }
                         }
                         if (currentState.cars.isNotEmpty()) {
-                            CarsGrid(cars = currentState.cars)
+                            CarsGrid(cars = displayedCars)
+                            PaginationBar(
+                                currentPage = paginationInfo.first,
+                                totalPages = paginationInfo.second,
+                                totalCount = paginationInfo.third,
+                                pageSize = 9,
+                                onPageChange = { viewModel.setPage(it) },
+                            )
                         } else {
                             Div({
                                 style {
