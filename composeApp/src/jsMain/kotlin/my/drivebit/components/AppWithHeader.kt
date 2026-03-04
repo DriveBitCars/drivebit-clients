@@ -6,21 +6,9 @@ import my.drivebit.design.CSSColors
 import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModel
-import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.backgroundColor
-import org.jetbrains.compose.web.css.color
-import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flex
-import org.jetbrains.compose.web.css.flexDirection
-import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.minHeight
-import org.jetbrains.compose.web.css.padding
-import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.textAlign
-import org.jetbrains.compose.web.css.vh
+import kotlinx.browser.window
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
@@ -35,14 +23,24 @@ fun AppWithHeader(content: @Composable () -> Unit) {
     ResponsiveContainer { isMobile ->
         AppContainer {
             if (storage.isLogined() && hasUnreadState.value) {
-                Div({
-                    style {
-                        backgroundColor(CSSColors.Black)
-                        color(CSSColors.White)
-                        padding(8.px)
-                        textAlign("center")
-                    }
-                }) {
+                A(
+                    attrs = {
+                        attr("href", "/chats")
+                        onClick { event ->
+                            event.preventDefault()
+                            window.location.href = "/chats"
+                        }
+                        style {
+                            display(DisplayStyle.Block)
+                            backgroundColor(CSSColors.Black)
+                            color(CSSColors.White)
+                            padding(8.px)
+                            textAlign("center")
+                            property("text-decoration", "none")
+                            cursor("pointer")
+                        }
+                    },
+                ) {
                     Text("У Вас есть непрочитанные сообщения")
                 }
             }

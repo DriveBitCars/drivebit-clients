@@ -7,7 +7,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.delay
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
@@ -19,6 +21,7 @@ import my.drivebit.network.services.MessageDto
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.viewmodels.ChatDetailViewModel
+import my.drivebit.viewmodels.UnreadMessagesViewModel
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.placeholder
@@ -28,11 +31,14 @@ import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.currentKoinScope
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 @Composable
 fun ChatDetailPage() {
     val chatId = getUrlParameter("id")
+    val unreadMessagesViewModel: UnreadMessagesViewModel = koinInject()
+    val hasUnread by unreadMessagesViewModel.hasUnread.collectAsState()
 
     if (chatId.isBlank()) {
         AppWithHeader {
@@ -64,6 +70,21 @@ fun ChatDetailPage() {
         viewModel.loadMessages()
     }
 
+    LaunchedEffect(hasUnread) {
+        if (hasUnread) {
+            viewModel.loadMessages()
+        }
+    }
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            delay(100)
+            (document.getElementById("chat-messages-scroll") as? org.w3c.dom.HTMLElement)?.let { el ->
+                el.scrollTop = el.scrollHeight.toDouble()
+            }
+        }
+    }
+
     var messageText by remember { mutableStateOf("") }
 
     AppWithHeader {
@@ -87,6 +108,7 @@ fun ChatDetailPage() {
                         }
                     }) {
                         Div({
+                            attr("id", "chat-messages-scroll")
                             style {
                                 flex(1)
                                 property("overflow-y", "auto")
@@ -95,7 +117,10 @@ fun ChatDetailPage() {
                         }) {
                             Column(gap = 12.px, modifier = { width(100.percent) }) {
                                 messages.forEach { message ->
-                                    MessageBubble(message = message)
+                                    MessageBubble(
+                                        message = message,
+                                        participantId = chatDetail?.participant?.id,
+                                    )
                                 }
                             }
                         }
@@ -153,9 +178,19 @@ fun ChatDetailPage() {
 }
 
 @Composable
-private fun MessageBubble(message: MessageDto) {
+private fun MessageBubble(
+    message: MessageDto,
+    participantId: String? = null,
+) {
     val isSystemMessage = message.isSystemMessage
-    val senderName = message.sender?.name?.takeIf { it.isNotBlank() } ?: ""
+    val senderId = message.sender?.id
+    val isOwnMessage = participantId != null && senderId != null && senderId != participantId
+    val senderName =
+        when {
+            isSystemMessage -> ""
+            isOwnMessage -> "Вы"
+            else -> message.sender?.name?.takeIf { it.isNotBlank() } ?: ""
+        }
     val text = message.text?.takeIf { it.isNotBlank() } ?: ""
     val timeStr = runCatching { mapIso8601ToTimeString(message.createdAt) }.getOrElse { "" }
 
