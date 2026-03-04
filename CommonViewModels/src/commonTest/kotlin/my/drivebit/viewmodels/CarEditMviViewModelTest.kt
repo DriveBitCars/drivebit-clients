@@ -49,6 +49,8 @@ class MockCarServiceForMvi : Car {
         colors: List<String>?,
         brandId: Int?,
         driveTypes: List<String>?,
+        page: Int,
+        pageSize: Int,
     ) = throw NotImplementedError()
 
     var carResponse: CarDetailResponse =

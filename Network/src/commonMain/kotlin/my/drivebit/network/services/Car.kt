@@ -36,6 +36,8 @@ interface Car {
         colors: List<String>? = null,
         brandId: Int? = null,
         driveTypes: List<String>? = null,
+        page: Int = 1,
+        pageSize: Int = 9,
     ): CarSearchResponse
 
     suspend fun getMyCars(): List<CarItem>
@@ -55,6 +57,8 @@ interface Car {
 @Serializable
 data class CarSearchResponse(
     val cars: List<CarItem> = emptyList(),
+    val totalCount: Int = 0,
+    val totalPages: Int = 0,
 )
 
 @Serializable
@@ -306,12 +310,14 @@ class CarImpl(
         colors: List<String>?,
         brandId: Int?,
         driveTypes: List<String>?,
+        page: Int,
+        pageSize: Int,
     ): CarSearchResponse {
         val url = "${DEFAULT_BASE_URL}Car/list/filtered/$cityId"
         val response =
             httpClient.get(url) {
-                parameter("page", 1)
-                parameter("pageSize", 100)
+                parameter("page", page)
+                parameter("pageSize", pageSize)
                 dateFrom?.let { parameter("BookingStart", it) }
                 dateTo?.let { parameter("BookingEnd", it) }
                 availableMileagePerDayKmMin?.let { parameter("AvailableMileagePerDayKmMin", it) }
@@ -327,7 +333,11 @@ class CarImpl(
                 driveTypes?.forEach { parameter("DriveType", it) }
             }
         val result: CarDTOPagedResult = response.parseResponse()
-        return CarSearchResponse(cars = sanitizeCarItems(result.items))
+        return CarSearchResponse(
+            cars = sanitizeCarItems(result.items),
+            totalCount = result.totalCount,
+            totalPages = result.totalPages,
+        )
     }
 
     override suspend fun getMyCars(): List<CarItem> {

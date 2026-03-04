@@ -214,7 +214,7 @@ fun SearchPage() {
                                 PriceFilter(
                                     minPrice = minPrice,
                                     maxPrice = maxPrice,
-                                    resultsCount = currentState.cars.size,
+                                    resultsCount = currentState.totalCount,
                                     onReset = {
                                         minPrice.value = 0
                                         maxPrice.value = 600
@@ -305,7 +305,7 @@ fun SearchPage() {
                             }) {
                                 SeatsFilter(
                                     selectedSeatsMin = filterSeatsMin,
-                                    resultsCount = currentState.cars.size,
+                                    resultsCount = currentState.totalCount,
                                     onSeatsMinSelected = { seatsMin ->
                                         viewModel.updateSeatsMin(seatsMin)
                                     },
@@ -322,7 +322,7 @@ fun SearchPage() {
                                 currentPage = paginationInfo.first,
                                 totalPages = paginationInfo.second,
                                 totalCount = paginationInfo.third,
-                                pageSize = 12,
+                                pageSize = 9,
                                 onPageChange = { viewModel.setPage(it) },
                             )
                         } else {

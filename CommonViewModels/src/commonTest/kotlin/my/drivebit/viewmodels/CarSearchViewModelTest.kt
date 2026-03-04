@@ -29,6 +29,11 @@ class MockCarSearchRepository : CarSearchRepository {
             }
             return kotlinx.coroutines.flow.flowOf(searchResult)
         }
+
+    override val currentPage: kotlinx.coroutines.flow.Flow<Int> =
+        kotlinx.coroutines.flow.flowOf(0)
+
+    override fun setPage(page: Int) {}
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
