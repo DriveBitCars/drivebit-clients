@@ -143,7 +143,7 @@ fun HomePage() {
                         currentPage = paginationInfo.first,
                         totalPages = paginationInfo.second,
                         totalCount = paginationInfo.third,
-                        pageSize = 12,
+                        pageSize = 9,
                         onPageChange = { mainContentViewModel.setPage(it) },
                     )
                 }
