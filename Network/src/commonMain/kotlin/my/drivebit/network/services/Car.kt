@@ -12,6 +12,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
@@ -74,7 +75,7 @@ data class CarDTOPagedResult(
 data class CarItem(
     val id: String,
     val year: Int? = null,
-    val price: Double? = null,
+    @JsonNames("dailyRate", "DailyRate", "Price") val price: Double? = null,
     val cityId: String? = null,
     val photos: List<CarPhotoItem> = emptyList(),
     val general: CarGeneral,

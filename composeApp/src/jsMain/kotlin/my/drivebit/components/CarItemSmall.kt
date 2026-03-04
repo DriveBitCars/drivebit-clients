@@ -7,6 +7,7 @@ import my.drivebit.network.services.CarItem
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
@@ -76,6 +77,36 @@ fun CarItemSmall(
                     }
                 }) {
                     Text(carName)
+                }
+            }
+            Div({
+                style {
+                    marginTop(4.px)
+                    fontSize(14.px)
+                    fontWeight("600")
+                    color(CSSColors.Black)
+                }
+            }) {
+                val price = car.price?.takeIf { it > 0 }
+                if (price != null) {
+                    Text("от ${price.toInt()} ₽ ")
+                    Span({
+                        style {
+                            fontWeight("400")
+                            color(CSSColors.Gray600)
+                        }
+                    }) {
+                        Text("/ сутки")
+                    }
+                } else {
+                    Span({
+                        style {
+                            fontWeight("400")
+                            color(CSSColors.Gray600)
+                        }
+                    }) {
+                        Text("Цена по запросу")
+                    }
                 }
             }
         }
