@@ -9,10 +9,41 @@ import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CheckBookingAvailabilityResponse
+import my.drivebit.shared.storage.Storage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+
+private class FakeStorage(
+    private val isLoggedIn: Boolean = true,
+) : Storage {
+    override fun isLogined() = isLoggedIn
+
+    override fun saveToken(token: String) {}
+
+    override fun getToken(): String? = null
+
+    override fun saveRefreshToken(token: String) {}
+
+    override fun getRefreshToken(): String? = null
+
+    override fun logout() {}
+
+    override fun putString(
+        key: String,
+        value: String,
+    ) {}
+
+    override fun getString(
+        key: String,
+        defaultValue: String,
+    ): String = defaultValue
+
+    override fun contains(key: String): Boolean = false
+
+    override fun remove(key: String) {}
+}
 
 private class FakeBooking(
     private val calculateResult: (CheckBookingAvailabilityRequest) -> CheckBookingAvailabilityResponse,
@@ -59,9 +90,11 @@ class RentViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1000.0) }
+            val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
                 )
@@ -81,9 +114,11 @@ class RentViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1000.0) }
+            val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
                 )
@@ -103,9 +138,11 @@ class RentViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1000.0) }
+            val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
                 )
@@ -123,9 +160,11 @@ class RentViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) }
+            val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
                 )
@@ -150,9 +189,11 @@ class RentViewModelTest {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking =
                 FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 3000.0) }
+            val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
                 )
@@ -172,9 +213,11 @@ class RentViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1500.0) }
+            val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
                 )
@@ -187,5 +230,30 @@ class RentViewModelTest {
             val state = viewModel.state.value as RentState.Book
             assertEquals("1500", state.totalAmount)
             assertEquals("1500", state.middlePrice)
+        }
+
+    @Test
+    fun `onBookClick emits NavigateToLogin when not logged in`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) }
+            val storage = FakeStorage(isLoggedIn = false)
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    storage = storage,
+                    carId = "car-123",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2025-02-16T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2025-02-18T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.onBookClick()
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as RentState.NavigateToLogin
+            assertEquals("car-123", state.carId)
         }
 }

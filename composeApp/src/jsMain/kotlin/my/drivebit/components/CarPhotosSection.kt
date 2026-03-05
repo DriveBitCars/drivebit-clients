@@ -91,7 +91,11 @@ private fun isShowButton(
 }
 
 @Composable
-private fun CarMainPhoto(mainPhoto: CarPhotoItem?, carId: String, isClickable: Boolean) {
+private fun CarMainPhoto(
+    mainPhoto: CarPhotoItem?,
+    carId: String,
+    isClickable: Boolean,
+) {
     if (mainPhoto != null && mainPhoto.url.isNotEmpty()) {
         if (isClickable) {
             Div({
@@ -129,7 +133,11 @@ private fun CarMainPhoto(mainPhoto: CarPhotoItem?, carId: String, isClickable: B
 }
 
 @Composable
-private fun CarThumbnail(photo: CarPhotoItem, carId: String, isClickable: Boolean) {
+private fun CarThumbnail(
+    photo: CarPhotoItem,
+    carId: String,
+    isClickable: Boolean,
+) {
     Div({
         style {
             position(Position.Relative)

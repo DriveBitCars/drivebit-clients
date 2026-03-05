@@ -13,6 +13,7 @@ import kotlinx.datetime.Instant
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CreateBookingRequest
+import my.drivebit.shared.storage.Storage
 
 sealed interface RentState {
     data class Book(
@@ -27,6 +28,12 @@ sealed interface RentState {
     ) : RentState
 
     data object NavigateToMyBookings : RentState
+
+    data class NavigateToLogin(
+        val carId: String,
+        val startDate: String? = null,
+        val endDate: String? = null,
+    ) : RentState
 }
 
 interface RentViewModel {
@@ -43,6 +50,7 @@ interface RentViewModel {
 
 class RentViewModelImpl(
     private val booking: Booking,
+    private val storage: Storage,
     private val carId: String,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : RentViewModel {
@@ -94,6 +102,15 @@ class RentViewModelImpl(
 
     override fun onBookClick() {
         val current = _state.value as? RentState.Book ?: return
+        if (!storage.isLogined()) {
+            _state.value =
+                RentState.NavigateToLogin(
+                    carId = carId,
+                    startDate = current.startDate,
+                    endDate = current.endDate,
+                )
+            return
+        }
         val showStartDateError = current.startDate.isNullOrBlank()
         val endDateBlank = current.endDate.isNullOrBlank()
         val endDateTooEarly =

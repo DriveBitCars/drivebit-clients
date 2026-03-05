@@ -66,45 +66,48 @@ data class ChatScreen(
             when {
                 isLoading && messages.isEmpty() -> Loader()
                 error != null -> Text("Ошибка: $error", modifier = Modifier.padding(innerPadding))
-                else -> Column(
-                    modifier = Modifier.padding(innerPadding).fillMaxSize(),
-                ) {
-                    LazyColumn(
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
-                        reverseLayout = true,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                else ->
+                    Column(
+                        modifier = Modifier.padding(innerPadding).fillMaxSize(),
                     ) {
-                        items(messages.reversed()) { message ->
-                            MessageBubble(
-                                message = message,
-                                participantId = chatDetail?.participant?.id,
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        OutlinedTextField(
-                            value = messageText,
-                            onValueChange = { messageText = it },
-                            placeholder = { Text("Введите сообщение...") },
-                            modifier = Modifier.weight(1f),
-                        )
-                        androidx.compose.material3.Button(
-                            onClick = {
-                                if (messageText.isNotBlank()) {
-                                    viewModel.sendMessage(messageText.trim())
-                                    messageText = ""
-                                }
-                            },
+                        LazyColumn(
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                            reverseLayout = true,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding =
+                                androidx.compose.foundation.layout
+                                    .PaddingValues(16.dp),
                         ) {
-                            Text("Отправить")
+                            items(messages.reversed()) { message ->
+                                MessageBubble(
+                                    message = message,
+                                    participantId = chatDetail?.participant?.id,
+                                )
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            OutlinedTextField(
+                                value = messageText,
+                                onValueChange = { messageText = it },
+                                placeholder = { Text("Введите сообщение...") },
+                                modifier = Modifier.weight(1f),
+                            )
+                            androidx.compose.material3.Button(
+                                onClick = {
+                                    if (messageText.isNotBlank()) {
+                                        viewModel.sendMessage(messageText.trim())
+                                        messageText = ""
+                                    }
+                                },
+                            ) {
+                                Text("Отправить")
+                            }
                         }
                     }
-                }
             }
         }
     }
@@ -150,4 +153,3 @@ private fun MessageBubble(
         }
     }
 }
-

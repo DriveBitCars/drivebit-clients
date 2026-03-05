@@ -58,22 +58,26 @@ class ChatListScreen : Screen {
             when {
                 isLoading && chats.isEmpty() -> Loader()
                 error != null -> Text("Ошибка: $error")
-                chats.isEmpty() -> Text(
-                    "У вас пока нет сообщений",
-                    modifier = Modifier.padding(innerPadding).padding(16.dp),
-                )
-                else -> LazyColumn(
-                    modifier = Modifier.padding(innerPadding).fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-                ) {
-                    items(chats) { chat ->
-                        ChatListItem(
-                            chat = chat,
-                            onClick = { navigator.push(ChatScreen(chatId = chat.id)) },
-                        )
+                chats.isEmpty() ->
+                    Text(
+                        "У вас пока нет сообщений",
+                        modifier = Modifier.padding(innerPadding).padding(16.dp),
+                    )
+                else ->
+                    LazyColumn(
+                        modifier = Modifier.padding(innerPadding).fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding =
+                            androidx.compose.foundation.layout
+                                .PaddingValues(16.dp),
+                    ) {
+                        items(chats) { chat ->
+                            ChatListItem(
+                                chat = chat,
+                                onClick = { navigator.push(ChatScreen(chatId = chat.id)) },
+                            )
+                        }
                     }
-                }
             }
         }
     }
@@ -86,9 +90,10 @@ private fun ChatListItem(
 ) {
     val participantName = chat.participant.name?.takeIf { it.isNotBlank() } ?: "Собеседник"
     val lastMessageText = chat.lastMessage?.text?.takeIf { it.isNotBlank() } ?: "Нет сообщений"
-    val relativeTime = runCatching {
-        chat.lastMessage?.createdAt?.let { formatRelativeTime(Instant.parse(it)) } ?: ""
-    }.getOrElse { "" }
+    val relativeTime =
+        runCatching {
+            chat.lastMessage?.createdAt?.let { formatRelativeTime(Instant.parse(it)) } ?: ""
+        }.getOrElse { "" }
 
     Card(
         onClick = onClick,
@@ -155,4 +160,3 @@ private fun ChatListItem(
         }
     }
 }
-

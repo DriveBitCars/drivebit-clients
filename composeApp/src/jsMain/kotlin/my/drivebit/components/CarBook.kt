@@ -19,7 +19,11 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.CarBookingItem
+import my.drivebit.utils.END_AT
+import my.drivebit.utils.RETURN_CAR_ID
+import my.drivebit.utils.START_AT
 import my.drivebit.utils.addDays
+import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.parseDisabledDatesFromBookings
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateTimeFieldViewModel
@@ -38,19 +42,42 @@ import kotlin.time.Duration.Companion.hours
 fun CarBook(
     viewModel: RentViewModel,
     carBookings: List<CarBookingItem> = emptyList(),
+    initialStartAt: String? = null,
+    initialEndAt: String? = null,
 ) {
     val state by viewModel.state.collectAsState()
     val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
 
     LaunchedEffect(state) {
-        if (state is RentState.NavigateToMyBookings) {
-            navigationController?.navigateTo("/my-bookings")
-            viewModel.consumeNavigationEvent()
+        when (state) {
+            is RentState.NavigateToMyBookings -> {
+                navigationController?.navigateTo("/my-bookings")
+                viewModel.consumeNavigationEvent()
+            }
+            is RentState.NavigateToLogin -> {
+                val loginState = state as RentState.NavigateToLogin
+                val params = mutableListOf("$RETURN_CAR_ID=${loginState.carId.encodeUrlParameter()}")
+                loginState.startDate?.takeIf { it.isNotBlank() }?.let {
+                    params.add("$START_AT=${it.encodeUrlParameter()}")
+                }
+                loginState.endDate?.takeIf { it.isNotBlank() }?.let {
+                    params.add("$END_AT=${it.encodeUrlParameter()}")
+                }
+                val query = params.joinToString("&")
+                navigationController?.navigateTo("/login-by-phone?$query")
+                viewModel.consumeNavigationEvent()
+            }
+            else -> {}
         }
     }
 
     val bookState = state as? RentState.Book ?: return
+
+    LaunchedEffect(initialStartAt, initialEndAt) {
+        initialStartAt?.let { viewModel.setStartDate(it) }
+        initialEndAt?.let { viewModel.setEndDate(it) }
+    }
 
     val disabledDates = remember(carBookings) { parseDisabledDatesFromBookings(carBookings) }
     val startDateTimeViewModel = remember { DateTimeFieldViewModel() }

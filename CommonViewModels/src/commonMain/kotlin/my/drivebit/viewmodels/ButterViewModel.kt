@@ -179,7 +179,9 @@ class ButterViewModelImpl(
 
     private fun logout() {
         storage.logout()
-        avatarRepository.clearCache()
+        coroutineScope.launch {
+            avatarRepository.refresh()
+        }
         profileViewModel?.refresh()
     }
 

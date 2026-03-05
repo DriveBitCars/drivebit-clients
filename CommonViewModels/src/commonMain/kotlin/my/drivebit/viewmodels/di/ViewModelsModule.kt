@@ -14,10 +14,6 @@ import my.drivebit.viewmodels.AvatarUploadViewModelImpl
 import my.drivebit.viewmodels.BodyTypeViewModel
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
-import my.drivebit.viewmodels.ChatDetailViewModel
-import my.drivebit.viewmodels.ChatDetailViewModelImpl
-import my.drivebit.viewmodels.ChatListViewModel
-import my.drivebit.viewmodels.ChatListViewModelImpl
 import my.drivebit.viewmodels.CarBrandViewModel
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarDetailViewModelImpl
@@ -32,6 +28,10 @@ import my.drivebit.viewmodels.CarPhotosViewModel
 import my.drivebit.viewmodels.CarPhotosViewModelImpl
 import my.drivebit.viewmodels.CarSearchViewModel
 import my.drivebit.viewmodels.CarSearchViewModelImpl
+import my.drivebit.viewmodels.ChatDetailViewModel
+import my.drivebit.viewmodels.ChatDetailViewModelImpl
+import my.drivebit.viewmodels.ChatListViewModel
+import my.drivebit.viewmodels.ChatListViewModelImpl
 import my.drivebit.viewmodels.CityViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModelImpl
@@ -396,6 +396,7 @@ val commonViewModelsModule: Module =
         factory<RentViewModel> { (carId: String) ->
             RentViewModelImpl(
                 booking = get(),
+                storage = get(),
                 carId = carId,
             )
         }
