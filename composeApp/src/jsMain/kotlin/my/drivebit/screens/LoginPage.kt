@@ -23,7 +23,9 @@ import my.drivebit.resources.ImagePaths
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
+import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.encodeUrlParameter
+import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.AuthFormState
 import my.drivebit.viewmodels.AuthFormViewModel
 import my.drivebit.viewmodels.ButtonState
@@ -66,6 +68,7 @@ private fun LoginPageContent(
         }
     var inputValue by inputValueState
     val navigationController = LocalNavigationController.current!!
+    val returnCarId = getUrlParameter(RETURN_CAR_ID)
     val loginState by viewModel.state.collectAsState()
     val validationState by validatorViewModel.validationState.collectAsState()
 
@@ -91,7 +94,9 @@ private fun LoginPageContent(
         val identifier = (loginState as AuthFormState.Success).identifier
         val encodedIdentifier = identifier.encodeUrlParameter()
         val otpResult = OTPRESULT.VerifyOtp.name
-        navigationController.navigateTo("/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult")
+        val returnCarIdParam =
+            if (returnCarId.isNotBlank()) "&$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}" else ""
+        navigationController.navigateTo("/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult$returnCarIdParam")
     }
 
     PageWithLogo {
@@ -134,7 +139,13 @@ private fun LoginPageContent(
                     enabledColor = CSSColors.Gray300,
                     text = viewModel.secondaryButtonText,
                     onClick = {
-                        val path = viewModel.secondaryButtonNavigationPath
+                        val basePath = viewModel.secondaryButtonNavigationPath
+                        val path =
+                            if (returnCarId.isNotBlank()) {
+                                "$basePath?$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}"
+                            } else {
+                                basePath
+                            }
                         navigationController.navigateTo(path)
                     },
                 )

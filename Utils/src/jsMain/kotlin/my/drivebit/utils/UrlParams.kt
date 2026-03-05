@@ -18,6 +18,8 @@ enum class OTPRESULT {
 
 const val OTP_RESULT_PARAM = "otpResult"
 
+const val RETURN_CAR_ID = "returnCarId"
+
 fun getUrlParameter(name: String): String {
     val queryString = window.location.search
     return getUrlParameterFromQueryString(queryString, name)

@@ -396,6 +396,7 @@ val commonViewModelsModule: Module =
         factory<RentViewModel> { (carId: String) ->
             RentViewModelImpl(
                 booking = get(),
+                storage = get(),
                 carId = carId,
             )
         }

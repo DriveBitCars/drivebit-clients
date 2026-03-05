@@ -19,7 +19,9 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.CarBookingItem
+import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.addDays
+import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.parseDisabledDatesFromBookings
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateTimeFieldViewModel
@@ -44,9 +46,18 @@ fun CarBook(
     val buttonViewModel = createButtonViewModel()
 
     LaunchedEffect(state) {
-        if (state is RentState.NavigateToMyBookings) {
-            navigationController?.navigateTo("/my-bookings")
-            viewModel.consumeNavigationEvent()
+        when (state) {
+            is RentState.NavigateToMyBookings -> {
+                navigationController?.navigateTo("/my-bookings")
+                viewModel.consumeNavigationEvent()
+            }
+            is RentState.NavigateToLogin -> {
+                val loginState = state as RentState.NavigateToLogin
+                val encodedCarId = loginState.carId.encodeUrlParameter()
+                navigationController?.navigateTo("/login-by-phone?$RETURN_CAR_ID=$encodedCarId")
+                viewModel.consumeNavigationEvent()
+            }
+            else -> {}
         }
     }
 

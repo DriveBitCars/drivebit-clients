@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import my.drivebit.network.services.Booking
+import my.drivebit.shared.storage.Storage
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CreateBookingRequest
 
@@ -27,6 +28,8 @@ sealed interface RentState {
     ) : RentState
 
     data object NavigateToMyBookings : RentState
+
+    data class NavigateToLogin(val carId: String) : RentState
 }
 
 interface RentViewModel {
@@ -43,6 +46,7 @@ interface RentViewModel {
 
 class RentViewModelImpl(
     private val booking: Booking,
+    private val storage: Storage,
     private val carId: String,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : RentViewModel {
@@ -93,6 +97,10 @@ class RentViewModelImpl(
     }
 
     override fun onBookClick() {
+        if (!storage.isLogined()) {
+            _state.value = RentState.NavigateToLogin(carId)
+            return
+        }
         val current = _state.value as? RentState.Book ?: return
         val showStartDateError = current.startDate.isNullOrBlank()
         val endDateBlank = current.endDate.isNullOrBlank()

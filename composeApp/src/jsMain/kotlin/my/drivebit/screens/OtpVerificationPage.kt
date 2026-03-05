@@ -22,6 +22,8 @@ import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.NEW_LOGIN
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
+import my.drivebit.utils.RETURN_CAR_ID
+import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.OtpVerificationState
@@ -46,6 +48,7 @@ fun OtpVerificationPage() {
         koinInject(named(otpResultType.name))
     val identifier = getUrlParameter(IDENTIFIER)
     val newLogin = getUrlParameter(NEW_LOGIN)
+    val returnCarId = getUrlParameter(RETURN_CAR_ID)
     val additionalParams =
         remember(newLogin) {
             if (newLogin.isNotEmpty()) {
@@ -77,7 +80,9 @@ fun OtpVerificationPage() {
         LaunchedEffect(Unit) {
             when (otpResultType) {
                 OTPRESULT.VerifyOtp -> {
-                    window.location.href = "/"
+                    val redirectPath =
+                        if (returnCarId.isNotBlank()) "/car-detail?id=${returnCarId.encodeUrlParameter()}" else "/"
+                    window.location.href = redirectPath
                 }
                 OTPRESULT.ChangeEmail -> navigationController?.navigateTo("/profile")
                 OTPRESULT.ChangePhone -> navigationController?.navigateTo("/profile")
