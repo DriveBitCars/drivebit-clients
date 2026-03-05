@@ -23,7 +23,9 @@ import my.drivebit.resources.ImagePaths
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
+import my.drivebit.utils.END_AT
 import my.drivebit.utils.RETURN_CAR_ID
+import my.drivebit.utils.START_AT
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.AuthFormState
@@ -69,6 +71,8 @@ private fun LoginPageContent(
     var inputValue by inputValueState
     val navigationController = LocalNavigationController.current!!
     val returnCarId = getUrlParameter(RETURN_CAR_ID)
+    val startAt = getUrlParameter(START_AT)
+    val endAt = getUrlParameter(END_AT)
     val loginState by viewModel.state.collectAsState()
     val validationState by validatorViewModel.validationState.collectAsState()
 
@@ -94,9 +98,13 @@ private fun LoginPageContent(
         val identifier = (loginState as AuthFormState.Success).identifier
         val encodedIdentifier = identifier.encodeUrlParameter()
         val otpResult = OTPRESULT.VerifyOtp.name
-        val returnCarIdParam =
-            if (returnCarId.isNotBlank()) "&$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}" else ""
-        navigationController.navigateTo("/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult$returnCarIdParam")
+        val returnParams = mutableListOf<String>()
+        if (returnCarId.isNotBlank()) returnParams.add("$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}")
+        if (startAt.isNotBlank()) returnParams.add("$START_AT=${startAt.encodeUrlParameter()}")
+        if (endAt.isNotBlank()) returnParams.add("$END_AT=${endAt.encodeUrlParameter()}")
+        val returnParamsStr = returnParams.joinToString("&")
+        val returnParamsFragment = if (returnParamsStr.isNotBlank()) "&$returnParamsStr" else ""
+        navigationController.navigateTo("/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult$returnParamsFragment")
     }
 
     PageWithLogo {
@@ -140,12 +148,11 @@ private fun LoginPageContent(
                     text = viewModel.secondaryButtonText,
                     onClick = {
                         val basePath = viewModel.secondaryButtonNavigationPath
-                        val path =
-                            if (returnCarId.isNotBlank()) {
-                                "$basePath?$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}"
-                            } else {
-                                basePath
-                            }
+                        val params = mutableListOf<String>()
+                        if (returnCarId.isNotBlank()) params.add("$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}")
+                        if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
+                        if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
+                        val path = if (params.isNotEmpty()) "$basePath?${params.joinToString("&")}" else basePath
                         navigationController.navigateTo(path)
                     },
                 )

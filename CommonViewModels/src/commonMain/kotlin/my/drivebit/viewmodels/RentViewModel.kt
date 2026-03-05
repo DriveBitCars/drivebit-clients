@@ -29,7 +29,11 @@ sealed interface RentState {
 
     data object NavigateToMyBookings : RentState
 
-    data class NavigateToLogin(val carId: String) : RentState
+    data class NavigateToLogin(
+        val carId: String,
+        val startDate: String? = null,
+        val endDate: String? = null,
+    ) : RentState
 }
 
 interface RentViewModel {
@@ -97,11 +101,16 @@ class RentViewModelImpl(
     }
 
     override fun onBookClick() {
+        val current = _state.value as? RentState.Book ?: return
         if (!storage.isLogined()) {
-            _state.value = RentState.NavigateToLogin(carId)
+            _state.value =
+                RentState.NavigateToLogin(
+                    carId = carId,
+                    startDate = current.startDate,
+                    endDate = current.endDate,
+                )
             return
         }
-        val current = _state.value as? RentState.Book ?: return
         val showStartDateError = current.startDate.isNullOrBlank()
         val endDateBlank = current.endDate.isNullOrBlank()
         val endDateTooEarly =

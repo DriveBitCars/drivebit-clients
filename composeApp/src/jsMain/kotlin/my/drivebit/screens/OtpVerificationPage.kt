@@ -22,7 +22,9 @@ import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.NEW_LOGIN
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
+import my.drivebit.utils.END_AT
 import my.drivebit.utils.RETURN_CAR_ID
+import my.drivebit.utils.START_AT
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.ButtonState
@@ -49,6 +51,8 @@ fun OtpVerificationPage() {
     val identifier = getUrlParameter(IDENTIFIER)
     val newLogin = getUrlParameter(NEW_LOGIN)
     val returnCarId = getUrlParameter(RETURN_CAR_ID)
+    val startAt = getUrlParameter(START_AT)
+    val endAt = getUrlParameter(END_AT)
     val additionalParams =
         remember(newLogin) {
             if (newLogin.isNotEmpty()) {
@@ -81,7 +85,14 @@ fun OtpVerificationPage() {
             when (otpResultType) {
                 OTPRESULT.VerifyOtp -> {
                     val redirectPath =
-                        if (returnCarId.isNotBlank()) "/car-detail?id=${returnCarId.encodeUrlParameter()}" else "/"
+                        if (returnCarId.isNotBlank()) {
+                            val params = mutableListOf("id=${returnCarId.encodeUrlParameter()}")
+                            if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
+                            if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
+                            "/car-detail?${params.joinToString("&")}"
+                        } else {
+                            "/"
+                        }
                     window.location.href = redirectPath
                 }
                 OTPRESULT.ChangeEmail -> navigationController?.navigateTo("/profile")

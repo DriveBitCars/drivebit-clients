@@ -17,6 +17,8 @@ import my.drivebit.components.DailyRateLabel
 import my.drivebit.components.Loader
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
+import my.drivebit.utils.END_AT
+import my.drivebit.utils.START_AT
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.CarDetailState
 import my.drivebit.viewmodels.CarDetailViewModel
@@ -148,6 +150,8 @@ private fun CarDetailContent(
                         koinScope.get<RentViewModel>(parameters = { parametersOf(car.id) })
                     },
                 carBookings = car.carBookings,
+                initialStartAt = getUrlParameter(START_AT).takeIf { it.isNotBlank() },
+                initialEndAt = getUrlParameter(END_AT).takeIf { it.isNotBlank() },
             )
         }
 

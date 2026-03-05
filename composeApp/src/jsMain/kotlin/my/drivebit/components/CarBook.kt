@@ -19,7 +19,9 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.CarBookingItem
+import my.drivebit.utils.END_AT
 import my.drivebit.utils.RETURN_CAR_ID
+import my.drivebit.utils.START_AT
 import my.drivebit.utils.addDays
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.parseDisabledDatesFromBookings
@@ -40,6 +42,8 @@ import kotlin.time.Duration.Companion.hours
 fun CarBook(
     viewModel: RentViewModel,
     carBookings: List<CarBookingItem> = emptyList(),
+    initialStartAt: String? = null,
+    initialEndAt: String? = null,
 ) {
     val state by viewModel.state.collectAsState()
     val navigationController = LocalNavigationController.current
@@ -53,8 +57,15 @@ fun CarBook(
             }
             is RentState.NavigateToLogin -> {
                 val loginState = state as RentState.NavigateToLogin
-                val encodedCarId = loginState.carId.encodeUrlParameter()
-                navigationController?.navigateTo("/login-by-phone?$RETURN_CAR_ID=$encodedCarId")
+                val params = mutableListOf("$RETURN_CAR_ID=${loginState.carId.encodeUrlParameter()}")
+                loginState.startDate?.takeIf { it.isNotBlank() }?.let {
+                    params.add("$START_AT=${it.encodeUrlParameter()}")
+                }
+                loginState.endDate?.takeIf { it.isNotBlank() }?.let {
+                    params.add("$END_AT=${it.encodeUrlParameter()}")
+                }
+                val query = params.joinToString("&")
+                navigationController?.navigateTo("/login-by-phone?$query")
                 viewModel.consumeNavigationEvent()
             }
             else -> {}
@@ -62,6 +73,11 @@ fun CarBook(
     }
 
     val bookState = state as? RentState.Book ?: return
+
+    LaunchedEffect(initialStartAt, initialEndAt) {
+        initialStartAt?.let { viewModel.setStartDate(it) }
+        initialEndAt?.let { viewModel.setEndDate(it) }
+    }
 
     val disabledDates = remember(carBookings) { parseDisabledDatesFromBookings(carBookings) }
     val startDateTimeViewModel = remember { DateTimeFieldViewModel() }
