@@ -9,9 +9,9 @@ import kotlinx.browser.document
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.DateRangeSelector
-import my.drivebit.components.PaginationBar
 import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.FilterButtonsRow
+import my.drivebit.components.PaginationBar
 import my.drivebit.components.filterButton
 import my.drivebit.design.CSSColors
 import my.drivebit.maps.MapView
@@ -114,7 +114,9 @@ fun HomePage() {
                                         ),
                                     title = listOfNotNull(car.general.brandName).joinToString(" "),
                                 )
-                            } else null
+                            } else {
+                                null
+                            }
                         }
 
                 LaunchedEffect(cars) {
@@ -205,4 +207,3 @@ private fun NearbyMapView(
         })
     }
 }
-

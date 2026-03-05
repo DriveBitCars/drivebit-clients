@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import my.drivebit.network.services.Booking
-import my.drivebit.shared.storage.Storage
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CreateBookingRequest
+import my.drivebit.shared.storage.Storage
 
 sealed interface RentState {
     data class Book(

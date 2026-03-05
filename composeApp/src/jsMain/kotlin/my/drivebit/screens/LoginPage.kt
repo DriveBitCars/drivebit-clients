@@ -20,10 +20,10 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.resources.ImagePaths
+import my.drivebit.utils.END_AT
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
-import my.drivebit.utils.END_AT
 import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.START_AT
 import my.drivebit.utils.encodeUrlParameter
@@ -104,7 +104,9 @@ private fun LoginPageContent(
         if (endAt.isNotBlank()) returnParams.add("$END_AT=${endAt.encodeUrlParameter()}")
         val returnParamsStr = returnParams.joinToString("&")
         val returnParamsFragment = if (returnParamsStr.isNotBlank()) "&$returnParamsStr" else ""
-        navigationController.navigateTo("/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult$returnParamsFragment")
+        navigationController.navigateTo(
+            "/verify-otp?$IDENTIFIER=$encodedIdentifier&$OTP_RESULT_PARAM=$otpResult$returnParamsFragment",
+        )
     }
 
     PageWithLogo {

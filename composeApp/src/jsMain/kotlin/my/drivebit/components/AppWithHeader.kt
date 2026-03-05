@@ -2,11 +2,11 @@ package my.drivebit.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import kotlinx.browser.window
 import my.drivebit.design.CSSColors
 import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModel
-import kotlinx.browser.window
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Div

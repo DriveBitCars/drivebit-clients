@@ -14,11 +14,20 @@ import my.drivebit.network.parseResponse
 interface Chat {
     suspend fun hasUnread(): HasUnreadResponse
 
-    suspend fun getChats(limit: Int = 20, offset: Int = 0, search: String? = null): ChatListResponse
+    suspend fun getChats(
+        limit: Int = 20,
+        offset: Int = 0,
+        search: String? = null,
+    ): ChatListResponse
 
     suspend fun getChat(chatId: String): ChatDetailDto
 
-    suspend fun getMessages(chatId: String, limit: Int = 20, before: String? = null, after: String? = null): MessageListResponse
+    suspend fun getMessages(
+        chatId: String,
+        limit: Int = 20,
+        before: String? = null,
+        after: String? = null,
+    ): MessageListResponse
 
     suspend fun sendMessage(request: SendMessageRequest): MessageDto
 }
@@ -108,12 +117,17 @@ class ChatImpl(
         return response.parseResponse()
     }
 
-    override suspend fun getChats(limit: Int, offset: Int, search: String?): ChatListResponse {
-        val response = httpClient.get("${DEFAULT_BASE_URL}Chat") {
-            parameter("limit", limit)
-            parameter("offset", offset)
-            search?.takeIf { it.isNotBlank() }?.let { parameter("search", it) }
-        }
+    override suspend fun getChats(
+        limit: Int,
+        offset: Int,
+        search: String?,
+    ): ChatListResponse {
+        val response =
+            httpClient.get("${DEFAULT_BASE_URL}Chat") {
+                parameter("limit", limit)
+                parameter("offset", offset)
+                search?.takeIf { it.isNotBlank() }?.let { parameter("search", it) }
+            }
         return response.parseResponse()
     }
 
@@ -129,20 +143,22 @@ class ChatImpl(
         before: String?,
         after: String?,
     ): MessageListResponse {
-        val response = httpClient.get("${DEFAULT_BASE_URL}Chat/$chatId/messages") {
-            parameter("limit", limit)
-            before?.takeIf { it.isNotBlank() }?.let { parameter("before", it) }
-            after?.takeIf { it.isNotBlank() }?.let { parameter("after", it) }
-        }
+        val response =
+            httpClient.get("${DEFAULT_BASE_URL}Chat/$chatId/messages") {
+                parameter("limit", limit)
+                before?.takeIf { it.isNotBlank() }?.let { parameter("before", it) }
+                after?.takeIf { it.isNotBlank() }?.let { parameter("after", it) }
+            }
         return response.parseResponse()
     }
 
     override suspend fun sendMessage(request: SendMessageRequest): MessageDto {
         val url = "${DEFAULT_BASE_URL}Chat/messages"
-        val response = httpClient.post(url) {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }
+        val response =
+            httpClient.post(url) {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
         return response.parseResponse()
     }
 }

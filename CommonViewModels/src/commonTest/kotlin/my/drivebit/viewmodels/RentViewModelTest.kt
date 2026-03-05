@@ -7,24 +7,41 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.Booking
-import my.drivebit.shared.storage.Storage
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CheckBookingAvailabilityResponse
+import my.drivebit.shared.storage.Storage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-private class FakeStorage(private val isLoggedIn: Boolean = true) : Storage {
+private class FakeStorage(
+    private val isLoggedIn: Boolean = true,
+) : Storage {
     override fun isLogined() = isLoggedIn
+
     override fun saveToken(token: String) {}
+
     override fun getToken(): String? = null
+
     override fun saveRefreshToken(token: String) {}
+
     override fun getRefreshToken(): String? = null
+
     override fun logout() {}
-    override fun putString(key: String, value: String) {}
-    override fun getString(key: String, defaultValue: String): String = defaultValue
+
+    override fun putString(
+        key: String,
+        value: String,
+    ) {}
+
+    override fun getString(
+        key: String,
+        defaultValue: String,
+    ): String = defaultValue
+
     override fun contains(key: String): Boolean = false
+
     override fun remove(key: String) {}
 }
 

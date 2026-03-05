@@ -13,12 +13,12 @@ import my.drivebit.components.BodyTypeFilter
 import my.drivebit.components.BrandModelFilter
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.Column
-import my.drivebit.components.PaginationBar
 import my.drivebit.components.DateFieldDialog
 import my.drivebit.components.Divider
 import my.drivebit.components.DriveTypeFilter
 import my.drivebit.components.FilterChip
 import my.drivebit.components.Loader
+import my.drivebit.components.PaginationBar
 import my.drivebit.components.PriceFilter
 import my.drivebit.components.Row
 import my.drivebit.components.SeatsFilter

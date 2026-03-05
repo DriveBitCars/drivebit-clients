@@ -1,5 +1,3 @@
 package my.drivebit.network.services
 
-internal actual fun getCurrentDomainForCar(): String {
-    return "drivebit.ru"
-}
+internal actual fun getCurrentDomainForCar(): String = "drivebit.ru"

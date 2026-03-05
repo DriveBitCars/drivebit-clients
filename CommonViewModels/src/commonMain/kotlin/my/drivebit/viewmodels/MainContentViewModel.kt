@@ -17,6 +17,7 @@ interface MainContentViewModel {
     val paginationInfo: StateFlow<Triple<Int, Int, Int>>
 
     fun refresh()
+
     fun setPage(page: Int)
 }
 

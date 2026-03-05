@@ -16,8 +16,8 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.ChatListDto
-import my.drivebit.viewmodels.ChatListViewModel
 import my.drivebit.utils.formatRelativeTime
+import my.drivebit.viewmodels.ChatListViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -78,9 +78,10 @@ private fun ChatListItem(
 ) {
     val participantName = chat.participant.name?.takeIf { it.isNotBlank() } ?: "Собеседник"
     val lastMessageText = chat.lastMessage?.text?.takeIf { it.isNotBlank() } ?: ""
-    val relativeTime = runCatching {
-        chat.lastMessage?.createdAt?.let { formatRelativeTime(Instant.parse(it)) } ?: ""
-    }.getOrElse { "" }
+    val relativeTime =
+        runCatching {
+            chat.lastMessage?.createdAt?.let { formatRelativeTime(Instant.parse(it)) } ?: ""
+        }.getOrElse { "" }
 
     Div({
         style {
