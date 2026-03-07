@@ -37,38 +37,26 @@ fun CarRatesSection(car: CarDetailResponse) {
     val hasAnyRate = dailyRate > 0 || rate4 != null || rate7 != null || rate14 != null || rate21 != null
     if (!hasAnyRate) return
 
-    Column(gap = 8.px, modifier = { marginTop(16.px) }) {
+    Column(gap = 4.px, modifier = { marginTop(16.px) }) {
+        val rateStyle: org.jetbrains.compose.web.css.StyleScope.() -> Unit = {
+            fontSize(16.px)
+            fontWeight("500")
+            color(CSSColors.Black)
+        }
         if (dailyRate > 0) {
-            Div({
-                style {
-                    fontSize(24.px)
-                    fontWeight("600")
-                    color(CSSColors.Black)
-                }
-            }) {
+            Div({ style(rateStyle) }) {
                 Text("от ${dailyRate.toInt()} ₽ / сутки")
             }
         }
-        val extendedRates =
-            listOf(
-                Pair("4 дня", rate4),
-                Pair("7 дней", rate7),
-                Pair("14 дней", rate14),
-                Pair("21 день", rate21),
-            ).filter { it.second != null }
-        if (extendedRates.isNotEmpty()) {
-            Row(gap = 12.px, flexWrap = org.jetbrains.compose.web.css.FlexWrap.Wrap) {
-                extendedRates.forEach { (label, rate) ->
-                    rate?.let {
-                        Div({
-                            style {
-                                fontSize(14.px)
-                                color(CSSColors.Gray600)
-                            }
-                        }) {
-                            Text("$label: от ${it.toInt()} ₽ / сутки")
-                        }
-                    }
+        listOf(
+            Pair("4 дня", rate4),
+            Pair("7 дней", rate7),
+            Pair("14 дней", rate14),
+            Pair("21 день", rate21),
+        ).forEach { (label, rate) ->
+            rate?.let {
+                Div({ style(rateStyle) }) {
+                    Text("$label: от ${it.toInt()} ₽ / сутки")
                 }
             }
         }
