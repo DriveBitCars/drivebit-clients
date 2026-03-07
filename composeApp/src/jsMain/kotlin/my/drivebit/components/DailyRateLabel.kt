@@ -74,7 +74,7 @@ fun CarRatesSection(car: CarDetailResponse) {
                         Td({
                             style {
                                 padding(12.px, 16.px)
-                                property("border-bottom", "1px solid ${CSSColors.Gray300String}")
+                                //property("border-bottom", "1px solid ${CSSColors.Gray300String}")
                             }
                         }) {
                             Text(label)
@@ -83,7 +83,7 @@ fun CarRatesSection(car: CarDetailResponse) {
                             style {
                                 padding(12.px, 16.px)
                                 property("text-align", "right")
-                                property("border-bottom", "1px solid ${CSSColors.Gray300String}")
+                             //   property("border-bottom", "1px solid ${CSSColors.Gray300String}")
                             }
                         }) {
                             Text("от ${rate.toInt()} ₽ / сутки")
