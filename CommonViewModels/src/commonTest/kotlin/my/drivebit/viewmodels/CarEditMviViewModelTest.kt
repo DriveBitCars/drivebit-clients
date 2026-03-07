@@ -48,6 +48,7 @@ class MockCarServiceForMvi : Car {
         engineTypes: List<String>?,
         colors: List<String>?,
         brandId: Int?,
+        modelId: Int?,
         driveTypes: List<String>?,
         page: Int,
         pageSize: Int,

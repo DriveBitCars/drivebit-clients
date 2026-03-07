@@ -37,6 +37,7 @@ interface Car {
         engineTypes: List<String>? = null,
         colors: List<String>? = null,
         brandId: Int? = null,
+        modelId: Int? = null,
         driveTypes: List<String>? = null,
         page: Int = 1,
         pageSize: Int = 9,
@@ -319,6 +320,7 @@ class CarImpl(
         engineTypes: List<String>?,
         colors: List<String>?,
         brandId: Int?,
+        modelId: Int?,
         driveTypes: List<String>?,
         page: Int,
         pageSize: Int,
@@ -340,6 +342,7 @@ class CarImpl(
                 engineTypes?.forEach { parameter("EngineType", it) }
                 colors?.forEach { parameter("Color", it) }
                 brandId?.let { parameter("BrandId", it) }
+                modelId?.let { parameter("ModelId", it) }
                 driveTypes?.forEach { parameter("DriveType", it) }
             }
         val result: CarDTOPagedResult = response.parseResponse()

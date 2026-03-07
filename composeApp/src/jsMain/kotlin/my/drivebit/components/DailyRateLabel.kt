@@ -39,7 +39,7 @@ fun CarRatesSection(car: CarDetailResponse) {
 
     Column(gap = 4.px, modifier = { marginTop(16.px) }) {
         val rateStyle: org.jetbrains.compose.web.css.StyleScope.() -> Unit = {
-            fontSize(16.px)
+            fontSize(32.px)
             fontWeight("500")
             color(CSSColors.Black)
         }
