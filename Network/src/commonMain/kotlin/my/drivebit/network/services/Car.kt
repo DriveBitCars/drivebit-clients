@@ -11,6 +11,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
@@ -36,6 +37,7 @@ interface Car {
         engineTypes: List<String>? = null,
         colors: List<String>? = null,
         brandId: Int? = null,
+        modelId: Int? = null,
         driveTypes: List<String>? = null,
         page: Int = 1,
         pageSize: Int = 9,
@@ -118,6 +120,10 @@ data class CarDetailResponse(
     val ValidAddressString: String? = null,
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,
+    val dailyRate4Days: Double? = null,
+    val dailyRate7Days: Double? = null,
+    val dailyRate14Days: Double? = null,
+    val dailyRate21Days: Double? = null,
     val seatsCount: Int? = null,
     val availableMileagePerDayKm: Int? = null,
     val owner: String = "",
@@ -241,14 +247,18 @@ data class CarCreateRequest(
     val seats: Int? = null,
     val trunkSize: String? = null,
     val licensePlate: String? = null,
-    val ValidAddressString: String? = null,
+    @SerialName("validAddressString") val ValidAddressString: String? = null,
     val addr: String? = null,
     val description: String? = null,
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,
+    val dailyRate4Days: Double? = null,
+    val dailyRate7Days: Double? = null,
+    val dailyRate14Days: Double? = null,
+    val dailyRate21Days: Double? = null,
     val availableMileagePerDayKm: Int? = null,
-    val ParkingAssistances: List<Int> = emptyList(),
-    val MultimediaSystemOptions: List<Int> = emptyList(),
+    @SerialName("parkingAssistances") val ParkingAssistances: List<Int> = emptyList(),
+    @SerialName("multimediaSystemOptions") val MultimediaSystemOptions: List<Int> = emptyList(),
 )
 
 @Serializable
@@ -310,6 +320,7 @@ class CarImpl(
         engineTypes: List<String>?,
         colors: List<String>?,
         brandId: Int?,
+        modelId: Int?,
         driveTypes: List<String>?,
         page: Int,
         pageSize: Int,
@@ -331,6 +342,7 @@ class CarImpl(
                 engineTypes?.forEach { parameter("EngineType", it) }
                 colors?.forEach { parameter("Color", it) }
                 brandId?.let { parameter("BrandId", it) }
+                modelId?.let { parameter("ModelId", it) }
                 driveTypes?.forEach { parameter("DriveType", it) }
             }
         val result: CarDTOPagedResult = response.parseResponse()

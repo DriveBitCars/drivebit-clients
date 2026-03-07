@@ -17,6 +17,14 @@ private data class Quadruple<A, B, C, D>(
     val fourth: D,
 )
 
+private data class Quintuple<A, B, C, D, E>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D,
+    val fifth: E,
+)
+
 private const val PAGE_SIZE = 9
 
 interface CarSearchRepository {
@@ -42,6 +50,7 @@ internal class CarSearchRepositoryImpl(
             currentFiltersRepository.dailyRateMin,
             currentFiltersRepository.dailyRateMax,
             currentFiltersRepository.brandId,
+            currentFiltersRepository.modelId,
             currentFiltersRepository.driveTypeName,
             currentFiltersRepository.bodyTypeName,
             currentFiltersRepository.seatsMin,
@@ -53,13 +62,14 @@ internal class CarSearchRepositoryImpl(
             val dailyRateMin = values[4] as Double?
             val dailyRateMax = values[5] as Double?
             val brandId = values[6] as Int?
-            val driveTypeName = values[7] as String?
-            val bodyTypeName = values[8] as String?
-            val seatsMin = values[9] as Int?
+            val modelId = values[7] as Int?
+            val driveTypeName = values[8] as String?
+            val bodyTypeName = values[9] as String?
+            val seatsMin = values[10] as Int?
             Triple(
                 Quadruple(selectedCity, currentTaskShortName, startDate, endDate),
                 Pair(dailyRateMin, dailyRateMax),
-                Quadruple(brandId, driveTypeName, bodyTypeName, seatsMin),
+                Quintuple(brandId, modelId, driveTypeName, bodyTypeName, seatsMin),
             )
         }.combine(
             combine(
@@ -82,11 +92,12 @@ internal class CarSearchRepositoryImpl(
         }.combine(currentFiltersRepository.currentPage) { filtersPair, page ->
             Triple(filtersPair.first, filtersPair.second, page)
         }.flatMapLatest { (mainFilters, extraFilters, page) ->
-            val (quadruple, priceRange, brandDriveBodySeatsQuadruple) = mainFilters
-            val brandId = brandDriveBodySeatsQuadruple.first
-            val driveTypeName = brandDriveBodySeatsQuadruple.second
-            val bodyTypeName = brandDriveBodySeatsQuadruple.third
-            val seatsMin = brandDriveBodySeatsQuadruple.fourth
+            val (quadruple, priceRange, brandModelDriveBodySeats) = mainFilters
+            val brandId = brandModelDriveBodySeats.first
+            val modelId = brandModelDriveBodySeats.second
+            val driveTypeName = brandModelDriveBodySeats.third
+            val bodyTypeName = brandModelDriveBodySeats.fourth
+            val seatsMin = brandModelDriveBodySeats.fifth
             val selectedCity = quadruple.first
             val currentTaskShortName = quadruple.second
             val startDate = quadruple.third
@@ -127,6 +138,7 @@ internal class CarSearchRepositoryImpl(
                         engineTypes = engineTypeName?.let { listOf(it) } ?: filter?.engineTypes?.map { it.name },
                         colors = colorName?.let { listOf(it) } ?: filter?.colors?.map { it.name },
                         brandId = brandId,
+                        modelId = modelId,
                         driveTypes = driveTypeName?.let { listOf(it) },
                         page = page + 1,
                         pageSize = PAGE_SIZE,

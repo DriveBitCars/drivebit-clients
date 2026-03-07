@@ -39,6 +39,7 @@ class CarSearchRepositoryTest {
         var searchEngineTypes: List<String>? = null
         var searchColors: List<String>? = null
         var searchBrandId: Int? = null
+        var searchModelId: Int? = null
         var searchDriveTypes: List<String>? = null
         var searchPage: Int = 1
         var searchPageSize: Int = 9
@@ -61,6 +62,7 @@ class CarSearchRepositoryTest {
             engineTypes: List<String>?,
             colors: List<String>?,
             brandId: Int?,
+            modelId: Int?,
             driveTypes: List<String>?,
             page: Int,
             pageSize: Int,
@@ -82,6 +84,7 @@ class CarSearchRepositoryTest {
             searchEngineTypes = engineTypes
             searchColors = colors
             searchBrandId = brandId
+            searchModelId = modelId
             searchDriveTypes = driveTypes
             searchPage = page
             searchPageSize = pageSize

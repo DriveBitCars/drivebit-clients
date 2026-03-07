@@ -59,6 +59,10 @@ internal class CreateCarRepositoryImpl(
                             ?.takeIf { it.isNotBlank() },
                     hourlyRate = 0.0,
                     dailyRate = dailyRate,
+                    dailyRate4Days = carDataRepository.getDailyRate4Days(),
+                    dailyRate7Days = carDataRepository.getDailyRate7Days(),
+                    dailyRate14Days = carDataRepository.getDailyRate14Days(),
+                    dailyRate21Days = carDataRepository.getDailyRate21Days(),
                     ParkingAssistances = emptyList(),
                     MultimediaSystemOptions = emptyList(),
                 )

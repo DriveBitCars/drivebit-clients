@@ -104,6 +104,22 @@ sealed interface CarEditIntent {
         val value: String,
     ) : CarEditIntent
 
+    data class UpdateDailyRate4Days(
+        val value: String,
+    ) : CarEditIntent
+
+    data class UpdateDailyRate7Days(
+        val value: String,
+    ) : CarEditIntent
+
+    data class UpdateDailyRate14Days(
+        val value: String,
+    ) : CarEditIntent
+
+    data class UpdateDailyRate21Days(
+        val value: String,
+    ) : CarEditIntent
+
     data class UpdateAvailableMileagePerDayKm(
         val value: String,
     ) : CarEditIntent
@@ -390,6 +406,18 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.UpdateDailyRate -> {
                 updateFormData { it.copy(dailyRate = intent.value) }
             }
+            is CarEditIntent.UpdateDailyRate4Days -> {
+                updateFormData { it.copy(dailyRate4Days = intent.value) }
+            }
+            is CarEditIntent.UpdateDailyRate7Days -> {
+                updateFormData { it.copy(dailyRate7Days = intent.value) }
+            }
+            is CarEditIntent.UpdateDailyRate14Days -> {
+                updateFormData { it.copy(dailyRate14Days = intent.value) }
+            }
+            is CarEditIntent.UpdateDailyRate21Days -> {
+                updateFormData { it.copy(dailyRate21Days = intent.value) }
+            }
             is CarEditIntent.UpdateAvailableMileagePerDayKm -> {
                 updateFormData { it.copy(availableMileagePerDayKm = intent.value) }
             }
@@ -499,6 +527,10 @@ class CarEditMviViewModelImpl(
                         ?.takeIf { it > 0 }
                 val hourlyRateValue = formData.hourlyRate.takeIf { it.isNotBlank() }?.toDoubleOrNull()
                 val dailyRateValue = formData.dailyRate.takeIf { it.isNotBlank() }?.toDoubleOrNull()
+                val dailyRate4DaysValue = formData.dailyRate4Days.takeIf { it.isNotBlank() }?.toDoubleOrNull()
+                val dailyRate7DaysValue = formData.dailyRate7Days.takeIf { it.isNotBlank() }?.toDoubleOrNull()
+                val dailyRate14DaysValue = formData.dailyRate14Days.takeIf { it.isNotBlank() }?.toDoubleOrNull()
+                val dailyRate21DaysValue = formData.dailyRate21Days.takeIf { it.isNotBlank() }?.toDoubleOrNull()
                 val availableMileagePerDayKmValue =
                     formData.availableMileagePerDayKm.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val request =
@@ -521,6 +553,10 @@ class CarEditMviViewModelImpl(
                         ValidAddressString = formData.address,
                         hourlyRate = hourlyRateValue,
                         dailyRate = dailyRateValue,
+                        dailyRate4Days = dailyRate4DaysValue,
+                        dailyRate7Days = dailyRate7DaysValue,
+                        dailyRate14Days = dailyRate14DaysValue,
+                        dailyRate21Days = dailyRate21DaysValue,
                         availableMileagePerDayKm = availableMileagePerDayKmValue,
                         ParkingAssistances = emptyList(),
                         MultimediaSystemOptions = emptyList(),
@@ -717,6 +753,10 @@ class CarEditMviViewModelImpl(
             description = car.general?.description ?: "",
             hourlyRate = NumberFormatter.formatDouble(car.resolvedHourlyRate()),
             dailyRate = NumberFormatter.formatDouble(car.resolvedDailyRate()),
+            dailyRate4Days = car.dailyRate4Days?.let { NumberFormatter.formatDouble(it) } ?: "",
+            dailyRate7Days = car.dailyRate7Days?.let { NumberFormatter.formatDouble(it) } ?: "",
+            dailyRate14Days = car.dailyRate14Days?.let { NumberFormatter.formatDouble(it) } ?: "",
+            dailyRate21Days = car.dailyRate21Days?.let { NumberFormatter.formatDouble(it) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             photos = car.photos,
         )
