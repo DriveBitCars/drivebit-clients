@@ -33,6 +33,22 @@ fun DailyRateInputPage(
         val savedRate = carDataRepository.getDailyRate()
         mutableStateOf(savedRate?.toString() ?: "")
     }
+    var dailyRate4Days by remember {
+        val saved = carDataRepository.getDailyRate4Days()
+        mutableStateOf(saved?.toString() ?: "")
+    }
+    var dailyRate7Days by remember {
+        val saved = carDataRepository.getDailyRate7Days()
+        mutableStateOf(saved?.toString() ?: "")
+    }
+    var dailyRate14Days by remember {
+        val saved = carDataRepository.getDailyRate14Days()
+        mutableStateOf(saved?.toString() ?: "")
+    }
+    var dailyRate21Days by remember {
+        val saved = carDataRepository.getDailyRate21Days()
+        mutableStateOf(saved?.toString() ?: "")
+    }
     var localError by remember { mutableStateOf<String?>(null) }
 
     val error = localError
@@ -42,6 +58,8 @@ fun DailyRateInputPage(
     buttonViewModel.setState(
         if (isValid) ButtonState.Enabled else ButtonState.Disabled,
     )
+
+    fun parseRate(value: String): Double? = value.takeIf { it.isNotBlank() }?.replace(',', '.')?.toDoubleOrNull()
 
     PageWithLogo {
         CenteredFormContainer {
@@ -57,6 +75,54 @@ fun DailyRateInputPage(
                     onValueChange = { newValue ->
                         if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
                             dailyRate = newValue.replace(',', '.')
+                            localError = null
+                        }
+                    },
+                    numeric = true,
+                )
+
+                TextInputField(
+                    label = "Оплата за 4 дня (₽)",
+                    value = dailyRate4Days,
+                    onValueChange = { newValue ->
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
+                            dailyRate4Days = newValue.replace(',', '.')
+                            localError = null
+                        }
+                    },
+                    numeric = true,
+                )
+
+                TextInputField(
+                    label = "Оплата за 7 дней (₽)",
+                    value = dailyRate7Days,
+                    onValueChange = { newValue ->
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
+                            dailyRate7Days = newValue.replace(',', '.')
+                            localError = null
+                        }
+                    },
+                    numeric = true,
+                )
+
+                TextInputField(
+                    label = "Оплата за 14 дней (₽)",
+                    value = dailyRate14Days,
+                    onValueChange = { newValue ->
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
+                            dailyRate14Days = newValue.replace(',', '.')
+                            localError = null
+                        }
+                    },
+                    numeric = true,
+                )
+
+                TextInputField(
+                    label = "Оплата за 21 день (₽)",
+                    value = dailyRate21Days,
+                    onValueChange = { newValue ->
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
+                            dailyRate21Days = newValue.replace(',', '.')
                             localError = null
                         }
                     },
@@ -85,6 +151,10 @@ fun DailyRateInputPage(
                                 val rateValue = dailyRate.toDoubleOrNull()
                                 if (rateValue != null && rateValue >= 0) {
                                     carDataRepository.saveDailyRate(rateValue)
+                                    carDataRepository.saveDailyRate4Days(parseRate(dailyRate4Days))
+                                    carDataRepository.saveDailyRate7Days(parseRate(dailyRate7Days))
+                                    carDataRepository.saveDailyRate14Days(parseRate(dailyRate14Days))
+                                    carDataRepository.saveDailyRate21Days(parseRate(dailyRate21Days))
                                     onNavigateToLicensePlate()
                                 } else {
                                     localError = "Введите корректное значение"

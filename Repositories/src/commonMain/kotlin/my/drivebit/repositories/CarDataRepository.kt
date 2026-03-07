@@ -27,6 +27,22 @@ interface CarDataRepository {
 
     fun getDailyRate(): Double?
 
+    fun saveDailyRate4Days(rate: Double?)
+
+    fun getDailyRate4Days(): Double?
+
+    fun saveDailyRate7Days(rate: Double?)
+
+    fun getDailyRate7Days(): Double?
+
+    fun saveDailyRate14Days(rate: Double?)
+
+    fun getDailyRate14Days(): Double?
+
+    fun saveDailyRate21Days(rate: Double?)
+
+    fun getDailyRate21Days(): Double?
+
     fun saveMonthlyRate(rate: Double)
 
     fun getMonthlyRate(): Double?
@@ -48,6 +64,10 @@ internal class CarDataRepositoryImpl(
         private const val CAR_ID_KEY = "car_id"
         private const val HOURLY_RATE_KEY = "car_hourly_rate"
         private const val DAILY_RATE_KEY = "car_daily_rate"
+        private const val DAILY_RATE_4_DAYS_KEY = "car_daily_rate_4_days"
+        private const val DAILY_RATE_7_DAYS_KEY = "car_daily_rate_7_days"
+        private const val DAILY_RATE_14_DAYS_KEY = "car_daily_rate_14_days"
+        private const val DAILY_RATE_21_DAYS_KEY = "car_daily_rate_21_days"
         private const val MONTHLY_RATE_KEY = "car_monthly_rate"
         private const val DESCRIPTION_KEY = "car_description"
     }
@@ -103,6 +123,58 @@ internal class CarDataRepositoryImpl(
         return if (rate < 0) null else rate
     }
 
+    override fun saveDailyRate4Days(rate: Double?) {
+        if (rate != null && rate >= 0) {
+            settings.putDouble(DAILY_RATE_4_DAYS_KEY, rate)
+        } else {
+            settings.remove(DAILY_RATE_4_DAYS_KEY)
+        }
+    }
+
+    override fun getDailyRate4Days(): Double? {
+        val rate = settings.getDouble(DAILY_RATE_4_DAYS_KEY, -1.0)
+        return if (rate < 0) null else rate
+    }
+
+    override fun saveDailyRate7Days(rate: Double?) {
+        if (rate != null && rate >= 0) {
+            settings.putDouble(DAILY_RATE_7_DAYS_KEY, rate)
+        } else {
+            settings.remove(DAILY_RATE_7_DAYS_KEY)
+        }
+    }
+
+    override fun getDailyRate7Days(): Double? {
+        val rate = settings.getDouble(DAILY_RATE_7_DAYS_KEY, -1.0)
+        return if (rate < 0) null else rate
+    }
+
+    override fun saveDailyRate14Days(rate: Double?) {
+        if (rate != null && rate >= 0) {
+            settings.putDouble(DAILY_RATE_14_DAYS_KEY, rate)
+        } else {
+            settings.remove(DAILY_RATE_14_DAYS_KEY)
+        }
+    }
+
+    override fun getDailyRate14Days(): Double? {
+        val rate = settings.getDouble(DAILY_RATE_14_DAYS_KEY, -1.0)
+        return if (rate < 0) null else rate
+    }
+
+    override fun saveDailyRate21Days(rate: Double?) {
+        if (rate != null && rate >= 0) {
+            settings.putDouble(DAILY_RATE_21_DAYS_KEY, rate)
+        } else {
+            settings.remove(DAILY_RATE_21_DAYS_KEY)
+        }
+    }
+
+    override fun getDailyRate21Days(): Double? {
+        val rate = settings.getDouble(DAILY_RATE_21_DAYS_KEY, -1.0)
+        return if (rate < 0) null else rate
+    }
+
     override fun saveMonthlyRate(rate: Double) {
         settings.putDouble(MONTHLY_RATE_KEY, rate)
     }
@@ -125,6 +197,10 @@ internal class CarDataRepositoryImpl(
         settings.remove(CAR_ID_KEY)
         settings.remove(HOURLY_RATE_KEY)
         settings.remove(DAILY_RATE_KEY)
+        settings.remove(DAILY_RATE_4_DAYS_KEY)
+        settings.remove(DAILY_RATE_7_DAYS_KEY)
+        settings.remove(DAILY_RATE_14_DAYS_KEY)
+        settings.remove(DAILY_RATE_21_DAYS_KEY)
         settings.remove(MONTHLY_RATE_KEY)
         settings.remove(DESCRIPTION_KEY)
     }

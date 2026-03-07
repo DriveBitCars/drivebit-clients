@@ -10,10 +10,10 @@ import my.drivebit.components.CarDescription
 import my.drivebit.components.CarLocationMap
 import my.drivebit.components.CarOwnerSection
 import my.drivebit.components.CarPhotosSection
+import my.drivebit.components.CarRatesSection
 import my.drivebit.components.CarSpecsRow
 import my.drivebit.components.CarTitleSection
 import my.drivebit.components.Column
-import my.drivebit.components.DailyRateLabel
 import my.drivebit.components.Loader
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
@@ -126,8 +126,7 @@ private fun CarDetailContent(
                     carYear = carYear,
                 )
 
-                val dailyRate = car.resolvedDailyRate()
-                DailyRateLabel(dailyRate)
+                CarRatesSection(car)
 
                 CarSpecsRow(car)
 

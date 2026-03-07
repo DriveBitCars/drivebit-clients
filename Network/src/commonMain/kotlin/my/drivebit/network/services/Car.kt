@@ -11,6 +11,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
@@ -118,6 +119,10 @@ data class CarDetailResponse(
     val ValidAddressString: String? = null,
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,
+    val dailyRate4Days: Double? = null,
+    val dailyRate7Days: Double? = null,
+    val dailyRate14Days: Double? = null,
+    val dailyRate21Days: Double? = null,
     val seatsCount: Int? = null,
     val availableMileagePerDayKm: Int? = null,
     val owner: String = "",
@@ -241,14 +246,18 @@ data class CarCreateRequest(
     val seats: Int? = null,
     val trunkSize: String? = null,
     val licensePlate: String? = null,
-    val ValidAddressString: String? = null,
+    @SerialName("validAddressString") val ValidAddressString: String? = null,
     val addr: String? = null,
     val description: String? = null,
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,
+    val dailyRate4Days: Double? = null,
+    val dailyRate7Days: Double? = null,
+    val dailyRate14Days: Double? = null,
+    val dailyRate21Days: Double? = null,
     val availableMileagePerDayKm: Int? = null,
-    val ParkingAssistances: List<Int> = emptyList(),
-    val MultimediaSystemOptions: List<Int> = emptyList(),
+    @SerialName("parkingAssistances") val ParkingAssistances: List<Int> = emptyList(),
+    @SerialName("multimediaSystemOptions") val MultimediaSystemOptions: List<Int> = emptyList(),
 )
 
 @Serializable

@@ -54,6 +54,10 @@ data class CarEditFormData(
     val description: String = "",
     val hourlyRate: String = "",
     val dailyRate: String = "",
+    val dailyRate4Days: String = "",
+    val dailyRate7Days: String = "",
+    val dailyRate14Days: String = "",
+    val dailyRate21Days: String = "",
     val availableMileagePerDayKm: String = "",
     val photos: List<my.drivebit.network.services.CarPhotoItem> = emptyList(),
 )
@@ -196,6 +200,12 @@ class CarEditViewModelImpl(
             trunkSizeSearch = resolvedTrunkSizeTranslate,
             address = car.ValidAddressString ?: "",
             description = car.general.description ?: "",
+            hourlyRate = car.hourlyRate?.let { NumberFormatter.formatDouble(it) } ?: "",
+            dailyRate = car.dailyRate?.let { NumberFormatter.formatDouble(it) } ?: "",
+            dailyRate4Days = car.dailyRate4Days?.let { NumberFormatter.formatDouble(it) } ?: "",
+            dailyRate7Days = car.dailyRate7Days?.let { NumberFormatter.formatDouble(it) } ?: "",
+            dailyRate14Days = car.dailyRate14Days?.let { NumberFormatter.formatDouble(it) } ?: "",
+            dailyRate21Days = car.dailyRate21Days?.let { NumberFormatter.formatDouble(it) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             photos = car.photos,
         )

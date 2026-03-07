@@ -43,6 +43,22 @@ private class FakeCarDataRepository : CarDataRepository {
 
     override fun getDailyRate(): Double? = dailyRate
 
+    override fun saveDailyRate4Days(rate: Double?) {}
+
+    override fun getDailyRate4Days(): Double? = null
+
+    override fun saveDailyRate7Days(rate: Double?) {}
+
+    override fun getDailyRate7Days(): Double? = null
+
+    override fun saveDailyRate14Days(rate: Double?) {}
+
+    override fun getDailyRate14Days(): Double? = null
+
+    override fun saveDailyRate21Days(rate: Double?) {}
+
+    override fun getDailyRate21Days(): Double? = null
+
     override fun saveMonthlyRate(rate: Double) {}
 
     override fun getMonthlyRate(): Double? = null
