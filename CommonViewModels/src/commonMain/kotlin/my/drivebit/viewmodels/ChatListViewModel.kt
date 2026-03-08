@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Chat
 import my.drivebit.network.services.ChatListDto
+import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.utils.safeLaunchWithErrorHandler
 
 interface ChatListViewModel {
@@ -23,6 +24,7 @@ interface ChatListViewModel {
 
 class ChatListViewModelImpl(
     private val chat: Chat,
+    private val participantAvatarCache: ParticipantAvatarCache,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : ChatListViewModel {
     private val _chats = MutableStateFlow<List<ChatListDto>>(emptyList())
@@ -50,7 +52,9 @@ class ChatListViewModelImpl(
             },
         ) {
             val result = chat.getChats(limit = 50, offset = 0, search = search)
-            _chats.value = result.chats ?: emptyList()
+            val chatsList = result.chats ?: emptyList()
+            _chats.value = chatsList
+            chatsList.forEach { participantAvatarCache.fetchIfNeeded(it.participant.id, it.participant.avatar) }
         }
     }
 
@@ -58,8 +62,10 @@ class ChatListViewModelImpl(
         coroutineScope.launch {
             runCatching {
                 val result = chat.getChats(limit = 50, offset = 0)
-                _chats.value = result.chats ?: emptyList()
+                val chatsList = result.chats ?: emptyList()
+                _chats.value = chatsList
                 _error.value = null
+                chatsList.forEach { participantAvatarCache.fetchIfNeeded(it.participant.id, it.participant.avatar) }
             }
         }
     }

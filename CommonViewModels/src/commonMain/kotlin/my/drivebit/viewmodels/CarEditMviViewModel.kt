@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
+import my.drivebit.network.services.CarAddress
 import my.drivebit.network.services.CarBrand
 import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
@@ -125,6 +126,10 @@ sealed interface CarEditIntent {
     ) : CarEditIntent
 
     data class UpdateDescription(
+        val value: String,
+    ) : CarEditIntent
+
+    data class UpdateAddress(
         val value: String,
     ) : CarEditIntent
 
@@ -424,6 +429,9 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.UpdateDescription -> {
                 updateFormData { it.copy(description = intent.value) }
             }
+            is CarEditIntent.UpdateAddress -> {
+                updateFormData { it.copy(address = intent.value) }
+            }
             is CarEditIntent.SetBrandFocus -> {
                 updateFocusState { it.copy(isBrandFocused = intent.isFocused) }
             }
@@ -715,6 +723,11 @@ class CarEditMviViewModelImpl(
         }
     }
 
+    private fun buildAddressFromGeneral(addr: CarAddress): String? {
+        val parts = listOfNotNull(addr.region, addr.city, addr.street, addr.house?.takeIf { it != "None" })
+        return parts.joinToString(", ").takeIf { it.isNotBlank() }
+    }
+
     private fun updateFocusState(update: (CarEditMviState.Success) -> CarEditMviState.Success) {
         _state.update { currentState ->
             when (currentState) {
@@ -749,7 +762,9 @@ class CarEditMviViewModelImpl(
             trunkSize = car.resolvedTrunkSize(),
             trunkSizeTranslate = car.resolvedTrunkSizeTranslate() ?: "",
             trunkSizeSearch = car.resolvedTrunkSizeTranslate() ?: "",
-            address = car.ValidAddressString ?: "",
+            address = car.ValidAddressString
+                ?: buildAddressFromGeneral(car.general.address)
+                ?: "",
             description = car.general?.description ?: "",
             hourlyRate = NumberFormatter.formatDouble(car.resolvedHourlyRate()),
             dailyRate = NumberFormatter.formatDouble(car.resolvedDailyRate()),

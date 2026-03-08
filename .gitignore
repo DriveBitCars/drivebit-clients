@@ -55,6 +55,9 @@ prerender-bot-ru.html
 /sitemap-ru.xml
 /car/
 
+# Owner passwords (create from owner-passwords.example.json)
+scripts/owner-passwords.json
+
 # SSH keys and sensitive files
 id_rsa
 id_rsa_api_drivebit

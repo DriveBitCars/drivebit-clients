@@ -3,12 +3,15 @@ package my.drivebit.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import kotlinx.browser.window
 import kotlinx.datetime.Instant
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
+import my.drivebit.components.MessageTextWithDealsLink
+import my.drivebit.components.ParticipantAvatar
 import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
 import my.drivebit.components.Row
@@ -35,10 +38,17 @@ fun ChatListPage() {
         viewModel.loadChats()
     }
 
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(10_000)
+            viewModel.refreshChats()
+        }
+    }
+
     PageWithLogo {
-        CenteredFormContainer(maxWidth = 600.px) {
+        CenteredFormContainer(maxWidth = 1200.px) {
             PageHeader {
-                TextSmartHeader("Входящие (${chats.size})")
+                TextSmartHeader("Входящие")
             }
 
             when {
@@ -100,7 +110,11 @@ private fun ChatListItem(
             alignItems = AlignItems.Center,
             modifier = { width(100.percent) },
         ) {
-            ChatAvatar(name = participantName)
+            ParticipantAvatar(
+                userId = chat.participant.id,
+                name = participantName,
+                initialAvatarUrl = chat.participant.avatar,
+            )
             Column(gap = 4.px, modifier = { width(100.percent) }) {
                 Row(
                     gap = 8.px,
@@ -146,7 +160,10 @@ private fun ChatListItem(
                             flex(1)
                         }
                     }) {
-                        Text(lastMessageText.ifBlank { "Нет сообщений" })
+                        MessageTextWithDealsLink(
+                            text = lastMessageText.ifBlank { "Нет сообщений" },
+                            stopPropagation = true,
+                        )
                     }
                     Span({
                         style {
@@ -163,24 +180,3 @@ private fun ChatListItem(
     }
 }
 
-@Composable
-private fun ChatAvatar(name: String) {
-    val initial = name.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
-    Div({
-        style {
-            width(48.px)
-            height(48.px)
-            borderRadius(50.percent)
-            display(DisplayStyle.Flex)
-            flexDirection(FlexDirection.Column)
-            alignItems(AlignItems.Center)
-            property("justify-content", "center")
-            backgroundColor(CSSColors.Gray300)
-            color(CSSColors.Gray600)
-            fontSize(18.px)
-            fontWeight("700")
-        }
-    }) {
-        Text(initial)
-    }
-}

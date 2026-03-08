@@ -191,6 +191,7 @@ val commonViewModelsModule: Module =
         factory<ChatListViewModel> {
             ChatListViewModelImpl(
                 chat = get(),
+                participantAvatarCache = get(),
             )
         }
 
@@ -198,6 +199,7 @@ val commonViewModelsModule: Module =
             ChatDetailViewModelImpl(
                 chat = get(),
                 chatId = chatId,
+                participantAvatarCache = get(),
             )
         }
 
