@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Chat
 import my.drivebit.network.services.ChatDetailDto
+import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.network.services.MessageDto
 import my.drivebit.network.services.SendMessageRequest
 import my.drivebit.utils.safeLaunchWithErrorHandler
@@ -33,6 +34,7 @@ interface ChatDetailViewModel {
 class ChatDetailViewModelImpl(
     private val chat: Chat,
     private val chatId: String,
+    private val participantAvatarCache: ParticipantAvatarCache,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : ChatDetailViewModel {
     private val _chatDetail = MutableStateFlow<ChatDetailDto?>(null)
@@ -65,6 +67,9 @@ class ChatDetailViewModelImpl(
         ) {
             val detail = chat.getChat(chatId)
             _chatDetail.value = detail
+            detail?.participant?.let { participant ->
+                participantAvatarCache.fetchIfNeeded(participant.id, participant.avatar)
+            }
         }
     }
 

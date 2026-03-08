@@ -35,6 +35,8 @@ import my.drivebit.repositories.MyCarRepository
 import my.drivebit.repositories.MyCarRepositoryImpl
 import my.drivebit.repositories.MyCityRepository
 import my.drivebit.repositories.MyCityRepositoryImpl
+import my.drivebit.repositories.ParticipantAvatarCache
+import my.drivebit.repositories.ParticipantAvatarCacheImpl
 import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.repositories.SelectedAddressRepository
 import my.drivebit.repositories.SelectedAddressRepositoryImpl
@@ -85,6 +87,10 @@ val repositoriesModule: Module =
             ChangePhoneRepositoryImpl(
                 user = get(),
             )
+        }
+
+        single<ParticipantAvatarCache> {
+            ParticipantAvatarCacheImpl(photo = get())
         }
 
         single<AvatarRepository> {

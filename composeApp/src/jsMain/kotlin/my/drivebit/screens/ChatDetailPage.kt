@@ -11,7 +11,9 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import my.drivebit.components.AppWithHeader
+import my.drivebit.components.MessageTextWithDealsLink
 import my.drivebit.components.Column
+import my.drivebit.components.ParticipantAvatar
 import my.drivebit.components.Loader
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
@@ -70,6 +72,13 @@ fun ChatDetailPage() {
         viewModel.loadMessages()
     }
 
+    LaunchedEffect(chatId) {
+        while (true) {
+            delay(10_000)
+            viewModel.loadMessages()
+        }
+    }
+
     LaunchedEffect(hasUnread) {
         if (hasUnread) {
             viewModel.loadMessages()
@@ -120,6 +129,8 @@ fun ChatDetailPage() {
                                     MessageBubble(
                                         message = message,
                                         participantId = chatDetail?.participant?.id,
+                                        participantName = chatDetail?.participant?.name,
+                                        participantAvatarUrl = chatDetail?.participant?.avatar,
                                     )
                                 }
                             }
@@ -138,6 +149,15 @@ fun ChatDetailPage() {
                             Input(InputType.Text) {
                                 value(messageText)
                                 onInput { messageText = it.target.value }
+                                onKeyDown { event ->
+                                    if (event.key == "Enter") {
+                                        event.preventDefault()
+                                        if (messageText.isNotBlank()) {
+                                            viewModel.sendMessage(messageText.trim())
+                                            messageText = ""
+                                        }
+                                    }
+                                }
                                 placeholder("Введите сообщение...")
                                 style {
                                     flex(1)
@@ -181,6 +201,8 @@ fun ChatDetailPage() {
 private fun MessageBubble(
     message: MessageDto,
     participantId: String? = null,
+    participantName: String? = null,
+    participantAvatarUrl: String? = null,
 ) {
     val isSystemMessage = message.isSystemMessage
     val senderId = message.sender?.id
@@ -203,45 +225,65 @@ private fun MessageBubble(
                 fontSize(13.px)
             }
         }) {
-            Text(text.ifBlank { "Системное сообщение" })
+            MessageTextWithDealsLink(text = text.ifBlank { "Системное сообщение" })
         }
         return
     }
 
+    val showOpponentAvatar = !isOwnMessage && participantId != null
+
     Div({
         style {
-            padding(12.px)
-            borderRadius(12.px)
-            property("max-width", "80%")
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Row)
+            alignItems(AlignItems.FlexStart)
+            gap(12.px)
+            property("max-width", "100%")
         }
     }) {
-        Column(gap = 4.px) {
-            if (senderName.isNotBlank()) {
+        if (showOpponentAvatar) {
+            ParticipantAvatar(
+                userId = participantId,
+                name = participantName?.takeIf { it.isNotBlank() } ?: "Собеседник",
+                initialAvatarUrl = participantAvatarUrl,
+                size = 40.px,
+            )
+        }
+        Div({
+            style {
+                padding(12.px)
+                borderRadius(12.px)
+                property("max-width", "80%")
+            }
+        }) {
+            Column(gap = 4.px) {
+                if (senderName.isNotBlank()) {
+                    Span({
+                        style {
+                            fontSize(12.px)
+                            color(CSSColors.Gray600)
+                            fontWeight("600")
+                        }
+                    }) {
+                        Text(senderName)
+                    }
+                }
                 Span({
                     style {
-                        fontSize(12.px)
-                        color(CSSColors.Gray600)
-                        fontWeight("600")
+                        fontSize(14.px)
+                        color(CSSColors.Black)
                     }
                 }) {
-                    Text(senderName)
+                    MessageTextWithDealsLink(text = text)
                 }
-            }
-            Span({
-                style {
-                    fontSize(14.px)
-                    color(CSSColors.Black)
+                Span({
+                    style {
+                        fontSize(11.px)
+                        color(CSSColors.Gray600)
+                    }
+                }) {
+                    Text(timeStr)
                 }
-            }) {
-                Text(text)
-            }
-            Span({
-                style {
-                    fontSize(11.px)
-                    color(CSSColors.Gray600)
-                }
-            }) {
-                Text(timeStr)
             }
         }
     }

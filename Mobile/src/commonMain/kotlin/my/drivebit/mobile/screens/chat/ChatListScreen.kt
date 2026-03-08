@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +46,13 @@ class ChatListScreen : Screen {
 
         LaunchedEffect(Unit) {
             viewModel.loadChats()
+        }
+
+        LaunchedEffect(Unit) {
+            while (true) {
+                delay(10_000)
+                viewModel.loadChats()
+            }
         }
 
         Scaffold(
