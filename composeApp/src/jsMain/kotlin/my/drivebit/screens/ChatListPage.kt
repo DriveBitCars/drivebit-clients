@@ -48,7 +48,7 @@ fun ChatListPage() {
     PageWithLogo {
         CenteredFormContainer(maxWidth = 1200.px) {
             PageHeader {
-                TextSmartHeader("Входящие (${chats.size})")
+                TextSmartHeader("Входящие")
             }
 
             when {
