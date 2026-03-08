@@ -3,7 +3,9 @@ package my.drivebit.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
@@ -22,12 +24,14 @@ import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.ButtonState
+import my.drivebit.viewmodels.AddressSuggestViewModel
 import my.drivebit.viewmodels.CarEditIntent
 import my.drivebit.viewmodels.CarEditMviState
 import my.drivebit.viewmodels.CarEditMviViewModel
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import org.koin.compose.koinInject
 import org.koin.compose.currentKoinScope
 import org.koin.core.parameter.parametersOf
 
@@ -89,6 +93,10 @@ fun CarEditPage() {
                             },
                         )
                         val formData = currentState.formData
+                        val addressSuggestViewModel: AddressSuggestViewModel = koinInject()
+                        val addressSuggestions by addressSuggestViewModel.suggestions.collectAsState()
+                        var addressBlurTimeout by remember { mutableStateOf<Int?>(null) }
+                        var isAddressFocused by remember { mutableStateOf(false) }
 
                         Column(gap = 16.px) {
                             TextInputField(
@@ -98,6 +106,38 @@ fun CarEditPage() {
                                 maxLength = 9,
                                 errorMessage = currentState.licensePlateError,
                             )
+
+                            TextInputField(
+                                label = "Адрес",
+                                value = formData.address,
+                                onValueChange = { newValue ->
+                                    viewModel.handleIntent(CarEditIntent.UpdateAddress(newValue))
+                                    addressSuggestViewModel.updateQuery(newValue)
+                                },
+                                onFocus = {
+                                    addressBlurTimeout?.let { window.clearTimeout(it) }
+                                    addressBlurTimeout = null
+                                    isAddressFocused = true
+                                },
+                                onBlur = {
+                                    val timeout =
+                                        window.setTimeout({
+                                            isAddressFocused = false
+                                            addressSuggestViewModel.clearSuggestions()
+                                        }, 200)
+                                    addressBlurTimeout = timeout
+                                },
+                            )
+                            if (addressSuggestions.isNotEmpty() && isAddressFocused) {
+                                StringList(
+                                    strings = addressSuggestions.mapNotNull { it.value },
+                                    onSelected = { suggestionValue ->
+                                        viewModel.handleIntent(CarEditIntent.UpdateAddress(suggestionValue))
+                                        addressSuggestViewModel.clearSuggestions()
+                                        isAddressFocused = false
+                                    },
+                                )
+                            }
 
                             TextAreaField(
                                 label = "Описание",
