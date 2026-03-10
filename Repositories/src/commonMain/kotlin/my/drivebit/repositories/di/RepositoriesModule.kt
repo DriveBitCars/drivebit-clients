@@ -35,9 +35,9 @@ import my.drivebit.repositories.MyCarRepository
 import my.drivebit.repositories.MyCarRepositoryImpl
 import my.drivebit.repositories.MyCityRepository
 import my.drivebit.repositories.MyCityRepositoryImpl
+import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.repositories.ParticipantAvatarCacheImpl
-import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.repositories.SelectedAddressRepository
 import my.drivebit.repositories.SelectedAddressRepositoryImpl
 import my.drivebit.repositories.SelectedBodyTypeRepository

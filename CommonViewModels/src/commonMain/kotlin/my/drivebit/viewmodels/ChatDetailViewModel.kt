@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Chat
 import my.drivebit.network.services.ChatDetailDto
-import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.network.services.MessageDto
 import my.drivebit.network.services.SendMessageRequest
+import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.utils.safeLaunchWithErrorHandler
 
 interface ChatDetailViewModel {

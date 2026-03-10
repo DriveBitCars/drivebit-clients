@@ -26,11 +26,13 @@ fun ParticipantAvatar(
         cache.fetchIfNeeded(userId, initialAvatarUrl)
     }
 
-    val rawAvatarUrl = initialAvatarUrl?.takeIf { it.isNotBlank() }
-        ?: avatarUrlByUserId[userId]?.takeIf { it.isNotBlank() }
-    val avatarUrl = rawAvatarUrl?.let { raw ->
-        if (raw.contains("155.212.170.94")) extractPathFromApiUrl(raw) else raw
-    }
+    val rawAvatarUrl =
+        initialAvatarUrl?.takeIf { it.isNotBlank() }
+            ?: avatarUrlByUserId[userId]?.takeIf { it.isNotBlank() }
+    val avatarUrl =
+        rawAvatarUrl?.let { raw ->
+            if (raw.contains("155.212.170.94")) extractPathFromApiUrl(raw) else raw
+        }
 
     if (avatarUrl != null) {
         Div({

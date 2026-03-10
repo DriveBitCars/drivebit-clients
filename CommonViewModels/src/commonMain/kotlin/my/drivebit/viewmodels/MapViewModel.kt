@@ -36,7 +36,7 @@ class MapViewModel(
                 if (location != null) {
                     MapCameraPosition(
                         location = location,
-                        zoom = 13f,
+                        zoom = 10f,
                     )
                 } else {
                     MapCameraPosition.default()

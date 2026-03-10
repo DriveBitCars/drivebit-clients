@@ -10,16 +10,60 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
+private val FooterBg = Color("#101221")
+private val FooterTextColor = CSSColors.White
+
+@Composable
+private fun FooterLink(href: String, text: String) {
+    A(attrs = {
+        attr("href", href)
+        style {
+            applyTypography(CSSTypography.Styles.caption)
+            color(FooterTextColor)
+            textDecoration("none")
+            property("transition", "opacity 0.2s ease")
+        }
+    }) {
+        Text(text)
+    }
+}
+
+@Composable
+private fun FooterCaption(text: String) {
+    Span({
+        style {
+            applyTypography(CSSTypography.Styles.caption)
+            color(FooterTextColor)
+        }
+    }) {
+        Text(text)
+    }
+}
+
+@Composable
+private fun FooterPhoneLink() {
+    A(attrs = {
+        attr("href", "tel:+79268237180")
+        style {
+            applyTypography(CSSTypography.Styles.body)
+            fontSize(CSSTypography.FontSize.xl)
+            fontWeight(CSSTypography.FontWeight.medium)
+            color(FooterTextColor)
+            textDecoration("none")
+            property("transition", "color 0.2s ease")
+        }
+    }) {
+        Text("+7 (926) 823-71-80")
+    }
+}
+
 @Composable
 fun Footer() {
-    val footerBg = Color("#101221")
-    val footerText = CSSColors.White
-
     Div({
         style {
             marginTop(24.px)
             padding(32.px, 24.px)
-            backgroundColor(footerBg)
+            backgroundColor(FooterBg)
             property("border-radius", "12px")
         }
     }) {
@@ -30,19 +74,7 @@ fun Footer() {
                 width(100.percent)
             },
         ) {
-            A(attrs = {
-                attr("href", "tel:+79268237180")
-                style {
-                    applyTypography(CSSTypography.Styles.body)
-                    fontSize(20.px)
-                    fontWeight(CSSTypography.FontWeight.medium)
-                    color(footerText)
-                    textDecoration("none")
-                    property("transition", "color 0.2s ease")
-                }
-            }) {
-                Text("+7 (926) 823-71-80")
-            }
+            FooterPhoneLink()
             Row(
                 gap = 16.px,
                 alignItems = AlignItems.Center,
@@ -54,43 +86,16 @@ fun Footer() {
                         property("text-align", "left")
                     }
                 }) {
-                    Span({
-                        style {
-                            applyTypography(CSSTypography.Styles.caption)
-                            color(footerText)
-                        }
-                    }) {
-                        Text("© DriveBit Аренда автомобилей от собственников")
-                    }
+                    FooterCaption("© DriveBit Аренда автомобилей от собственников")
                 }
-                A(attrs = {
-                    attr("href", "/offer")
-                    style {
-                        applyTypography(CSSTypography.Styles.caption)
-                        color(footerText)
-                        textDecoration("none")
-                        property("transition", "opacity 0.2s ease")
-                    }
-                }) {
-                    Text("Оферта")
-                }
+                FooterLink("/offer", "Оферта")
                 Div({
                     style {
                         flex(1)
                         property("text-align", "right")
                     }
                 }) {
-                    A(attrs = {
-                        attr("href", "/privacy")
-                        style {
-                            applyTypography(CSSTypography.Styles.caption)
-                            color(footerText)
-                            textDecoration("none")
-                            property("transition", "opacity 0.2s ease")
-                        }
-                    }) {
-                        Text("Политика конфиденциальности")
-                    }
+                    FooterLink("/privacy", "Политика конфиденциальности")
                 }
             }
         }
