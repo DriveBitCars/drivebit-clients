@@ -1,6 +1,7 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
+import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.*
@@ -12,7 +13,7 @@ import org.jetbrains.compose.web.dom.Text
 @Composable
 fun Footer() {
     val footerBg = Color("#101221")
-    val footerText = Color.white
+    val footerText = CSSColors.White
 
     Div({
         style {
@@ -22,14 +23,13 @@ fun Footer() {
             property("border-radius", "12px")
         }
     }) {
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Column)
+        Column(
+            gap = 24.px,
+            modifier = {
                 alignItems(AlignItems.Center)
-                gap(24.px)
-            }
-        }) {
+                width(100.percent)
+            },
+        ) {
             A(attrs = {
                 attr("href", "tel:+79268237180")
                 style {
@@ -43,23 +43,25 @@ fun Footer() {
             }) {
                 Text("+7 (926) 823-71-80")
             }
-            Div({
-                style {
-                    display(DisplayStyle.Flex)
-                    width(100.percent)
-                    justifyContent(JustifyContent.SpaceBetween)
-                    alignItems(AlignItems.Center)
-                    flexWrap(FlexWrap.Wrap)
-                    gap(12.px)
-                }
-            }) {
-                Span({
+            Row(
+                gap = 16.px,
+                alignItems = AlignItems.Center,
+                modifier = { width(100.percent) },
+            ) {
+                Div({
                     style {
-                        applyTypography(CSSTypography.Styles.caption)
-                        color(footerText)
+                        flex(1)
+                        property("text-align", "left")
                     }
                 }) {
-                    Text("© DriveBit Аренда автомобилей от собственников")
+                    Span({
+                        style {
+                            applyTypography(CSSTypography.Styles.caption)
+                            color(footerText)
+                        }
+                    }) {
+                        Text("© DriveBit Аренда автомобилей от собственников")
+                    }
                 }
                 A(attrs = {
                     attr("href", "/offer")
@@ -67,21 +69,28 @@ fun Footer() {
                         applyTypography(CSSTypography.Styles.caption)
                         color(footerText)
                         textDecoration("none")
-                        property("transition", "color 0.2s ease")
+                        property("transition", "opacity 0.2s ease")
                     }
                 }) {
                     Text("Оферта")
                 }
-                A(attrs = {
-                    attr("href", "/privacy")
+                Div({
                     style {
-                        applyTypography(CSSTypography.Styles.caption)
-                        color(footerText)
-                        textDecoration("none")
-                        property("transition", "color 0.2s ease")
+                        flex(1)
+                        property("text-align", "right")
                     }
                 }) {
-                    Text("Политика конфиденциальности")
+                    A(attrs = {
+                        attr("href", "/privacy")
+                        style {
+                            applyTypography(CSSTypography.Styles.caption)
+                            color(footerText)
+                            textDecoration("none")
+                            property("transition", "opacity 0.2s ease")
+                        }
+                    }) {
+                        Text("Политика конфиденциальности")
+                    }
                 }
             }
         }
