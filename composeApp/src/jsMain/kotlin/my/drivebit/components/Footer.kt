@@ -11,13 +11,13 @@ import org.jetbrains.compose.web.dom.Text
 
 @Composable
 fun Footer() {
-    val footerBg = rgb(26, 26, 26)
-    val footerText = rgb(220, 220, 220)
+    val footerBg = Color("#101221")
+    val footerText = Color.white
 
     Div({
         style {
             marginTop(24.px)
-            padding(16.px, 0.px)
+            padding(32.px, 24.px)
             backgroundColor(footerBg)
             property("border-radius", "12px")
         }
@@ -27,31 +27,62 @@ fun Footer() {
                 display(DisplayStyle.Flex)
                 flexDirection(FlexDirection.Column)
                 alignItems(AlignItems.Center)
-                justifyContent(JustifyContent.Center)
-                gap(8.px)
-                flexWrap(FlexWrap.Wrap)
+                gap(24.px)
             }
         }) {
             A(attrs = {
                 attr("href", "tel:+79268237180")
                 style {
                     applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.lg)
+                    fontSize(20.px)
                     fontWeight(CSSTypography.FontWeight.medium)
                     color(footerText)
                     textDecoration("none")
                     property("transition", "color 0.2s ease")
                 }
             }) {
-                Text("+7 (926) 823-7180")
+                Text("+7 (926) 823-71-80")
             }
-            Span({
+            Div({
                 style {
-                    applyTypography(CSSTypography.Styles.caption)
-                    color(rgb(160, 160, 160))
+                    display(DisplayStyle.Flex)
+                    width(100.percent)
+                    justifyContent(JustifyContent.SpaceBetween)
+                    alignItems(AlignItems.Center)
+                    flexWrap(FlexWrap.Wrap)
+                    gap(12.px)
                 }
             }) {
-                Text("DriveBit · Аренда автомобилей от собственников")
+                Span({
+                    style {
+                        applyTypography(CSSTypography.Styles.caption)
+                        color(footerText)
+                    }
+                }) {
+                    Text("© DriveBit Аренда автомобилей от собственников")
+                }
+                A(attrs = {
+                    attr("href", "/offer")
+                    style {
+                        applyTypography(CSSTypography.Styles.caption)
+                        color(footerText)
+                        textDecoration("none")
+                        property("transition", "color 0.2s ease")
+                    }
+                }) {
+                    Text("Оферта")
+                }
+                A(attrs = {
+                    attr("href", "/privacy")
+                    style {
+                        applyTypography(CSSTypography.Styles.caption)
+                        color(footerText)
+                        textDecoration("none")
+                        property("transition", "color 0.2s ease")
+                    }
+                }) {
+                    Text("Политика конфиденциальности")
+                }
             }
         }
     }
