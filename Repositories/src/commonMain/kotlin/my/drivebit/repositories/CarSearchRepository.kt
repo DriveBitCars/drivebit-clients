@@ -26,6 +26,7 @@ private data class Quintuple<A, B, C, D, E>(
 )
 
 private const val PAGE_SIZE = 9
+private const val MAP_NEARBY_PAGE_SIZE = 100
 
 interface CarSearchRepository {
     val searchCarsByUserCity: Flow<CarSearchResponse>
@@ -122,6 +123,13 @@ internal class CarSearchRepositoryImpl(
                         }
                     }
 
+                val (effectivePage, effectivePageSize) =
+                    if (currentTaskShortName == "Поблизости") {
+                        Pair(0, MAP_NEARBY_PAGE_SIZE)
+                    } else {
+                        Pair(page, PAGE_SIZE)
+                    }
+
                 val result =
                     carService.search(
                         cityId = selectedCity.id.toString(),
@@ -140,8 +148,8 @@ internal class CarSearchRepositoryImpl(
                         brandId = brandId,
                         modelId = modelId,
                         driveTypes = driveTypeName?.let { listOf(it) },
-                        page = page + 1,
-                        pageSize = PAGE_SIZE,
+                        page = effectivePage + 1,
+                        pageSize = effectivePageSize,
                     )
 
                 emit(result)

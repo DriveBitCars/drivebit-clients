@@ -5,6 +5,6 @@ data class MapCameraPosition(
     val zoom: Float = 15f,
 ) {
     companion object {
-        fun default() = MapCameraPosition(location = Location.moscow(), zoom = 13f)
+        fun default() = MapCameraPosition(location = Location.moscow(), zoom = 15f)
     }
 }

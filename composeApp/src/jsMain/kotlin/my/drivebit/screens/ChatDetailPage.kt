@@ -11,10 +11,10 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import my.drivebit.components.AppWithHeader
-import my.drivebit.components.MessageTextWithDealsLink
 import my.drivebit.components.Column
-import my.drivebit.components.ParticipantAvatar
 import my.drivebit.components.Loader
+import my.drivebit.components.MessageTextWithDealsLink
+import my.drivebit.components.ParticipantAvatar
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.ToolbarBackArrow

@@ -2,14 +2,14 @@ package my.drivebit.mobile.screens.chat
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.delay
 import my.drivebit.network.services.MessageDto
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
@@ -109,15 +109,16 @@ data class ChatScreen(
                                 placeholder = { Text("Введите сообщение...") },
                                 modifier = Modifier.weight(1f),
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                                keyboardActions = KeyboardActions(
-                                    onSend = {
-                                        if (messageText.isNotBlank()) {
-                                            viewModel.sendMessage(messageText.trim())
-                                            messageText = ""
-                                            focusManager.clearFocus()
-                                        }
-                                    },
-                                ),
+                                keyboardActions =
+                                    KeyboardActions(
+                                        onSend = {
+                                            if (messageText.isNotBlank()) {
+                                                viewModel.sendMessage(messageText.trim())
+                                                messageText = ""
+                                                focusManager.clearFocus()
+                                            }
+                                        },
+                                    ),
                             )
                             androidx.compose.material3.Button(
                                 onClick = {

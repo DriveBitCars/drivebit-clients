@@ -3,17 +3,17 @@ package my.drivebit.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import kotlinx.browser.window
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
 import my.drivebit.components.MessageTextWithDealsLink
-import my.drivebit.components.ParticipantAvatar
 import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
+import my.drivebit.components.ParticipantAvatar
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
@@ -179,4 +179,3 @@ private fun ChatListItem(
         }
     }
 }
-

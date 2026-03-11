@@ -762,9 +762,10 @@ class CarEditMviViewModelImpl(
             trunkSize = car.resolvedTrunkSize(),
             trunkSizeTranslate = car.resolvedTrunkSizeTranslate() ?: "",
             trunkSizeSearch = car.resolvedTrunkSizeTranslate() ?: "",
-            address = car.ValidAddressString
-                ?: buildAddressFromGeneral(car.general.address)
-                ?: "",
+            address =
+                car.ValidAddressString
+                    ?: buildAddressFromGeneral(car.general.address)
+                    ?: "",
             description = car.general?.description ?: "",
             hourlyRate = NumberFormatter.formatDouble(car.resolvedHourlyRate()),
             dailyRate = NumberFormatter.formatDouble(car.resolvedDailyRate()),

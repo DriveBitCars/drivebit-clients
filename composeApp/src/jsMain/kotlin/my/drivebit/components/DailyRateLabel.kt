@@ -6,13 +6,11 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.network.services.CarDetailResponse
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.Table
 import org.jetbrains.compose.web.dom.Tbody
 import org.jetbrains.compose.web.dom.Td
-import org.jetbrains.compose.web.dom.Th
-import org.jetbrains.compose.web.dom.Thead
+import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.Tr
-import org.jetbrains.compose.web.dom.Table
 
 @Composable
 fun DailyRateLabel(dailyRate: Double) {
@@ -74,7 +72,7 @@ fun CarRatesSection(car: CarDetailResponse) {
                         Td({
                             style {
                                 padding(12.px, 16.px)
-                                //property("border-bottom", "1px solid ${CSSColors.Gray300String}")
+                                // property("border-bottom", "1px solid ${CSSColors.Gray300String}")
                             }
                         }) {
                             Text(label)
@@ -83,7 +81,7 @@ fun CarRatesSection(car: CarDetailResponse) {
                             style {
                                 padding(12.px, 16.px)
                                 property("text-align", "right")
-                             //   property("border-bottom", "1px solid ${CSSColors.Gray300String}")
+                                //   property("border-bottom", "1px solid ${CSSColors.Gray300String}")
                             }
                         }) {
                             Text("от ${rate.toInt()} ₽ / сутки")
