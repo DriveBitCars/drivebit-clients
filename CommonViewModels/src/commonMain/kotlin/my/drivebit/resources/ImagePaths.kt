@@ -27,6 +27,7 @@ object ImagePaths {
     const val FUEL_SVG = "images/fuel.svg"
     const val HERO_CARS_JPG = "images/hero-cars.jpg"
     const val LOGIN_LETTER_SVG = "images/login/letter.svg"
+    const val LOGOS_DRIVEBIT_FOOTER_SVG = "images/logos/drivebit-footer.svg"
     const val LOGOS_LOGO_PNG = "images/logos/logo.png"
     const val LOGOS_TURO_LOGO_SVG = "images/logos/turo_logo.svg"
     const val MANUAL_GEAR_SVG = "images/manual-gear.svg"

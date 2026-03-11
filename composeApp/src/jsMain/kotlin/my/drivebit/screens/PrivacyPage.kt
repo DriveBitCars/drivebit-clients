@@ -22,7 +22,8 @@ fun PrivacyPage() {
     var loadError by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        window.fetch("/privacy.txt")
+        window
+            .fetch("/privacy.txt")
             .then { it.text() }
             .then { privacyText = it }
             .catch { loadError = true }
@@ -38,10 +39,16 @@ fun PrivacyPage() {
         }) {
             A(attrs = {
                 attr("href", "/")
-                onClick { it.preventDefault(); window.location.href = "/" }
+                onClick {
+                    it.preventDefault()
+                    window.location.href = "/"
+                }
                 style {
                     applyTypography(CSSTypography.Styles.body)
-                    color(org.jetbrains.compose.web.css.Color("#1a73e8"))
+                    color(
+                        org.jetbrains.compose.web.css
+                            .Color("#1a73e8"),
+                    )
                     textDecoration("none")
                     property("margin-bottom", "16px")
                     display(DisplayStyle.InlineBlock)
@@ -61,7 +68,14 @@ fun PrivacyPage() {
             }
             when {
                 loadError -> {
-                    P({ style { color(org.jetbrains.compose.web.css.Color("#c5221f")) } }) {
+                    P({
+                        style {
+                            color(
+                                org.jetbrains.compose.web.css
+                                    .Color("#c5221f"),
+                            )
+                        }
+                    }) {
                         Text("Не удалось загрузить текст. Попробуйте позже.")
                     }
                 }
@@ -78,7 +92,14 @@ fun PrivacyPage() {
                     }
                 }
                 else -> {
-                    P({ style { color(org.jetbrains.compose.web.css.Color("#5f6368")) } }) {
+                    P({
+                        style {
+                            color(
+                                org.jetbrains.compose.web.css
+                                    .Color("#5f6368"),
+                            )
+                        }
+                    }) {
                         Text("Загрузка…")
                     }
                 }
