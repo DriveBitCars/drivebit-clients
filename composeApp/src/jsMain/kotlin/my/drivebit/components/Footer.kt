@@ -63,7 +63,7 @@ fun Footer() {
             }
             Row(
                 alignItems = AlignItems.Center,
-                modifier = { width(100.percent) },
+                modifier = { width(80.percent) },
             ) {
                 Row(
                     gap = 8.px,
