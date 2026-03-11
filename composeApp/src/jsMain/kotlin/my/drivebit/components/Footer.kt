@@ -3,15 +3,13 @@ package my.drivebit.components
 import androidx.compose.runtime.Composable
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
-import my.drivebit.resources.ImagePaths
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
-private val FooterBg = Color("#101221")
+private val FooterBg = Color("#09052B")
 private val FooterTextColor = Color("#ffffff")
 
 @Composable
@@ -70,20 +68,19 @@ fun Footer() {
                     alignItems = AlignItems.Center,
                     modifier = { flex(1) },
                 ) {
-                    Img(
-                        src = ImagePaths.LOGOS_DRIVEBIT_FOOTER_SVG,
-                        alt = "DriveBit",
-                        attrs = {
-                            style {
-                                width(28.px)
-                                height(28.px)
-                                property("object-fit", "contain")
-                            }
-                        },
-                    )
                     Span({
                         style {
-                            applyTypography(CSSTypography.Styles.caption)
+                            applyTypography(CSSTypography.Styles.body)
+                            fontSize(32.px)
+                            color(FooterTextColor)
+                        }
+                    }) {
+                        Text("©")
+                    }
+                    Span({
+                        style {
+                            applyTypography(CSSTypography.Styles.body)
+                            fontSize(15.px)
                             color(FooterTextColor)
                         }
                     }) {
@@ -92,7 +89,6 @@ fun Footer() {
                 }
                 Row(
                     justifyContent = JustifyContent.Center,
-                    modifier = { flex(1) },
                 ) {
                     FooterLink("/offer", "Оферта")
                 }
