@@ -1,6 +1,7 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.sp
 import kotlinx.browser.window
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
@@ -120,7 +121,7 @@ private fun AdvantageGrid() {
     }) {
         AdvantageChip("Стоит дешевле")
         AdvantageChip("Машины чище")
-        AdvantageTooltipBlock("Штрафов меньше", ADVANTAGE_TOOLTIP_TEXT)
+        AdvantageTooltipBlock(ADVANTAGE_TOOLTIP_TEXT)
         AdvantageChip("Пробег меньше")
         AdvantageChip("Выбор больше")
         AdvantageChip("Оформить проще")
@@ -128,7 +129,7 @@ private fun AdvantageGrid() {
 }
 
 @Composable
-private fun AdvantageTooltipBlock(title: String, bodyText: String) {
+private fun AdvantageTooltipBlock(bodyText: String) {
     Div({
         style {
             padding(14.px, 16.px)
@@ -139,23 +140,14 @@ private fun AdvantageTooltipBlock(title: String, bodyText: String) {
         }
     }) {
         Column(
-            gap = 6.px,
-            modifier = { width(100.percent) },
+            modifier = {
+                height(100.px)
+                width(200.px) },
         ) {
             Span({
                 style {
                     applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.sm)
-                    fontWeight(CSSTypography.FontWeight.semibold)
-                    color(CSSColors.Black)
-                }
-            }) {
-                Text(title)
-            }
-            Span({
-                style {
-                    applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.xs)
+                    fontSize(CSSTypography.FontSize.lg)
                     color(CSSColors.Gray600)
                     lineHeight("1.4")
                 }
