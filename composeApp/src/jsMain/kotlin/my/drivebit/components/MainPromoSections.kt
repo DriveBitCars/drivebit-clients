@@ -63,43 +63,16 @@ private fun WhySectionCard() {
                 gap = 6.px,
                 modifier = {
                     flex(1)
-                    property("min-width", "200px")
-                    property("max-width", "320px")
                     property("height", "100%")
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Column)
                     property("justify-content", "space-between")
                 },
             ) {
-                Div({
-                    style {
-                        flex(1)
-                        display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Column)
-                        property("justify-content", "center")
-                    }
-                }) {
-                    Span({
-                        style {
-                            applyTypography(CSSTypography.Styles.body)
-                            fontSize(CSSTypography.FontSize.xxl)
-                            fontWeight(CSSTypography.FontWeight.bold)
-                            color(CSSColors.Black)
-                            lineHeight("1.25")
-                        }
-                    }) {
-                        Text("Зачем вот это все?")
-                    }
-                    Span({
-                        style {
-                            applyTypography(CSSTypography.Styles.body)
-                            fontSize(CSSTypography.FontSize.base)
-                            color(CSSColors.Gray600)
-                        }
-                    }) {
-                        Text("Преимущества аренды авто от частных владельцев")
-                    }
-                }
+                WhySectionHeading(
+                    title = "Зачем вот это все?",
+                    subtitle = "Преимущества аренды авто от частных владельцев",
+                )
                 Div({
                     style {
                         property("align-self", "flex-start")
@@ -113,6 +86,43 @@ private fun WhySectionCard() {
                 }
             }
             AdvantageGrid()
+        }
+    }
+}
+
+@Composable
+private fun WhySectionHeading(
+    title: String,
+    subtitle: String,
+) {
+    Div({
+        style {
+            flex(1)
+            height(100.percent)
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Column)
+            property("justify-content", "center")
+        }
+    }) {
+        Span({
+            style {
+                applyTypography(CSSTypography.Styles.body)
+                fontSize(CSSTypography.FontSize.xxl)
+                fontWeight(CSSTypography.FontWeight.bold)
+                color(CSSColors.Black)
+                lineHeight("1.25")
+            }
+        }) {
+            Text(title)
+        }
+        Span({
+            style {
+                applyTypography(CSSTypography.Styles.body)
+                fontSize(CSSTypography.FontSize.base)
+                color(CSSColors.Gray600)
+            }
+        }) {
+            Text(subtitle)
         }
     }
 }
