@@ -98,16 +98,16 @@ private fun WhySectionLeftContent(isMobile: Boolean) {
             title = "Зачем вот это все?",
             subtitle = "Преимущества аренды авто от частных владельцев",
         )
-        Div({
-            style {
-                property("align-self", "flex-start")
-            }
-        }) {
-            PromoRectButton(
-                text = "Арендовать автомобиль",
-                onClick = { },
-            )
-        }
+                Div({
+                    style {
+                        property("align-self", "flex-start")
+                    }
+                }) {
+                    PromoRectButton(
+                        text = "Арендовать автомобиль",
+                        onClick = { window.location.href = "/search" },
+                    )
+                }
     }
 }
 

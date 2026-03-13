@@ -9,8 +9,10 @@ import org.jetbrains.compose.web.dom.Img
 fun FilterBackgroundImage(
     backgroundIconUrl: String,
     searchContent: (@Composable () -> Unit)? = null,
+    id: String? = null,
 ) {
     Div({
+        id?.let { attr("id", it) }
         style {
             width(100.percent)
             height(250.px)

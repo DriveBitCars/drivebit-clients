@@ -83,6 +83,7 @@ fun HomePage() {
                         endDateViewModel = endDateViewModel,
                     )
                 },
+                id = "search",
             )
         }
 
