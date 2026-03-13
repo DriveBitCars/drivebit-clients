@@ -12,12 +12,12 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 private val PromoBlueBg: CSSColorValue = Color("#E3F2FD")
-private val PromoIndigo: CSSColorValue = Color("#3730A3")
+private val PromoChipBlue: CSSColorValue = Color("#4338CA")
 
 @Composable
 fun MainPromoSections() {
     Column(
-        gap = 20.px,
+        gap = 16.px,
         modifier = {
             width(100.percent)
             marginTop(20.px)
@@ -36,10 +36,10 @@ private fun PromoCard(
     Div({
         style {
             width(100.percent)
-            padding(28.px, 32.px)
+            padding(24.px, 32.px)
             backgroundColor(backgroundColor)
             borderRadius(12.px)
-            property("box-shadow", "0 2px 12px rgba(0,0,0,0.08)")
+            property("box-shadow", "0 2px 12px rgba(0,0,0,0.06)")
             property("box-sizing", "border-box")
         }
     }) {
@@ -53,16 +53,17 @@ private fun WhySectionCard() {
         Row(
             gap = 32.px,
             flexWrap = FlexWrap.Wrap,
+            alignItems = AlignItems.FlexStart,
             modifier = {
                 width(100.percent)
             },
         ) {
             Column(
-                gap = 4.px,
+                gap = 6.px,
                 modifier = {
                     flex(1)
-                    property("min-width", "220px")
-                    property("max-width", "360px")
+                    property("min-width", "200px")
+                    property("max-width", "320px")
                 },
             ) {
                 Span({
@@ -103,44 +104,74 @@ private fun WhySectionCard() {
     }
 }
 
+private const val ADVANTAGE_TOOLTIP_TEXT =
+    "Частники не зарабатывают на несоразмерной ответственности за повреждения и не штрафуют за ложные повреждения автомобиля."
+
 @Composable
 private fun AdvantageGrid() {
-    val items =
-        listOf(
-            "Стоит дешевле" to null,
-            "Машины чище" to null,
-            "Штрафов меньше" to "Частники не зарабатывают на страховании ответственности за повреждения и не штрафуют за ложные повреждения.",
-            "Пробег меньше" to null,
-            "Выбор больше" to null,
-            "Оформить проще" to null,
-        )
     Div({
         style {
             flex(2)
             property("min-width", "280px")
             display(DisplayStyle.Grid)
             property("grid-template-columns", "1fr 1fr")
-            property("grid-template-rows", "1fr 1fr 1fr")
-            property("grid-auto-flow", "column")
-            property("gap", "10px")
+            property("gap", "12px")
         }
     }) {
-        items.forEach { (label, tooltip) ->
-            AdvantageChip(label = label, tooltip = tooltip)
+        AdvantageChip("Стоит дешевле")
+        AdvantageChip("Машины чище")
+        AdvantageTooltipBlock("Штрафов меньше", ADVANTAGE_TOOLTIP_TEXT)
+        AdvantageChip("Пробег меньше")
+        AdvantageChip("Выбор больше")
+        AdvantageChip("Оформить проще")
+    }
+}
+
+@Composable
+private fun AdvantageTooltipBlock(title: String, bodyText: String) {
+    Div({
+        style {
+            padding(14.px, 16.px)
+            backgroundColor(CSSColors.White)
+            borderRadius(8.px)
+            property("box-shadow", "0 2px 8px rgba(0,0,0,0.08)")
+            property("border", "1px solid rgba(0,0,0,0.08)")
+        }
+    }) {
+        Column(
+            gap = 6.px,
+            modifier = { width(100.percent) },
+        ) {
+            Span({
+                style {
+                    applyTypography(CSSTypography.Styles.body)
+                    fontSize(CSSTypography.FontSize.sm)
+                    fontWeight(CSSTypography.FontWeight.semibold)
+                    color(CSSColors.Black)
+                }
+            }) {
+                Text(title)
+            }
+            Span({
+                style {
+                    applyTypography(CSSTypography.Styles.body)
+                    fontSize(CSSTypography.FontSize.xs)
+                    color(CSSColors.Gray600)
+                    lineHeight("1.4")
+                }
+            }) {
+                Text(bodyText)
+            }
         }
     }
 }
 
 @Composable
-private fun AdvantageChip(
-    label: String,
-    tooltip: String?,
-) {
+private fun AdvantageChip(label: String) {
     Button({
-        tooltip?.let { attr("title", it) }
         style {
-            padding(12.px, 16.px)
-            backgroundColor(PromoIndigo)
+            padding(14.px, 18.px)
+            backgroundColor(PromoChipBlue)
             color(CSSColors.White)
             border(0.px)
             borderRadius(8.px)
