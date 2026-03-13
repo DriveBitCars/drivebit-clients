@@ -19,6 +19,7 @@ object CSSTypography {
         val xl = 20.px
         val xxl = 24.px
         val xxxl = 32.px
+        val xxxxl = 42.px
     }
 
     // Веса шрифтов
