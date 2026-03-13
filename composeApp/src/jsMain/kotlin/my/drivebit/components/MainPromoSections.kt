@@ -141,14 +141,14 @@ private fun AdvantageTooltipBlock(bodyText: String) {
     }) {
         Column(
             modifier = {
-                height(100.px)
-                width(200.px) },
+                height(130.px)
+                width(300.px) },
         ) {
             Span({
                 style {
                     applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.lg)
-                    color(CSSColors.Gray600)
+                    fontSize(CSSTypography.FontSize.base)
+                    color(CSSColors.Black)
                     lineHeight("1.4")
                 }
             }) {
