@@ -63,7 +63,8 @@ private fun WhySectionCard() {
                 gap = 6.px,
                 modifier = {
                     flex(1)
-                    property("height", "100%")
+                    property("min-height", "100%")
+                    property("align-self", "stretch")
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Column)
                     property("justify-content", "space-between")
