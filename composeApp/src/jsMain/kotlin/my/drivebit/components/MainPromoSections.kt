@@ -157,17 +157,18 @@ private fun AdvantageGrid() {
 private fun AdvantageTooltipBlock(bodyText: String) {
     Div({
         style {
+            height(150.px)
+            width(330.px)
             padding(14.px, 16.px)
             backgroundColor(CSSColors.White)
             borderRadius(8.px)
             property("box-shadow", "0 2px 8px rgba(0,0,0,0.08)")
             property("border", "1px solid rgba(0,0,0,0.08)")
+            property("box-sizing", "border-box")
         }
     }) {
         Column(
-            modifier = {
-                height(130.px)
-                width(250.px) },
+            modifier = { width(100.percent) },
         ) {
             Span({
                 style {
@@ -187,6 +188,8 @@ private fun AdvantageTooltipBlock(bodyText: String) {
 private fun AdvantageChip(label: String) {
     Button({
         style {
+            height(150.px)
+            width(330.px)
             padding(14.px, 18.px)
             backgroundColor(PromoChipBlue)
             color(CSSColors.White)
@@ -197,6 +200,7 @@ private fun AdvantageChip(label: String) {
             fontSize(CSSTypography.FontSize.sm)
             fontWeight(CSSTypography.FontWeight.medium)
             property("text-align", "center")
+            property("box-sizing", "border-box")
         }
     }) {
         Text(label)
