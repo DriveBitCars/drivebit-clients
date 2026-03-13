@@ -189,6 +189,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
+- **Дизайн (Figma):** [Untitled — главная / промо-блоки](https://www.figma.com/design/HKUnzXUJHqkwH7KS1RAB75/Untitled?node-id=2-2)
 - **Kotlin Multiplatform:** [Documentation](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)
 - **Compose Multiplatform:** [GitHub](https://github.com/JetBrains/compose-multiplatform)
 - **Kotlin/WASM:** [Documentation](https://kotl.in/wasm/)
