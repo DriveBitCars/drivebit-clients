@@ -109,7 +109,7 @@ private fun WhySectionHeading(
         Span({
             style {
                 applyTypography(CSSTypography.Styles.body)
-                fontSize(CSSTypography.FontSize.xxxxl)
+                fontSize(CSSTypography.FontSize.xxxl)
                 fontWeight(CSSTypography.FontWeight.bold)
                 color(CSSColors.Black)
                 lineHeight("1.25")
@@ -120,7 +120,7 @@ private fun WhySectionHeading(
         Span({
             style {
                 applyTypography(CSSTypography.Styles.body)
-                fontSize(CSSTypography.FontSize.xxxl)
+                fontSize(CSSTypography.FontSize.xxl)
                 color(CSSColors.Black)
             }
         }) {
