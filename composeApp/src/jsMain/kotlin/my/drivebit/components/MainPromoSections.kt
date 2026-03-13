@@ -201,6 +201,7 @@ private fun AdvantageChip(label: String) {
             fontWeight(CSSTypography.FontWeight.semibold)
             property("text-align", "center")
             property("box-sizing", "border-box")
+            property("box-shadow", "0 4px 12px rgba(0,0,0,0.15)")
         }
     }) {
         Text(label)
