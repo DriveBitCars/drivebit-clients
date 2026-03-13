@@ -191,7 +191,7 @@ private fun AdvantageChip(label: String) {
             height(150.px)
             width(330.px)
             padding(14.px, 18.px)
-            backgroundColor(PromoChipBlue)
+            backgroundColor(Color("#09052B"))
             color(CSSColors.White)
             border(0.px)
             borderRadius(8.px)
