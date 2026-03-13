@@ -9,6 +9,7 @@ import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
@@ -52,41 +53,60 @@ private fun PromoCard(
 @Composable
 private fun WhySectionCard() {
     PromoCard(backgroundColor = PromoBlueBg) {
-        Row(
-            gap = 32.px,
-            flexWrap = FlexWrap.Wrap,
-            alignItems = AlignItems.Stretch,
-            modifier = {
-                width(100.percent)
-            },
-        ) {
-            Column(
-                gap = 6.px,
-                modifier = {
-                    flex(1)
-                    property("min-height", "100%")
-                    property("align-self", "stretch")
-                    display(DisplayStyle.Flex)
-                    flexDirection(FlexDirection.Column)
-                    property("justify-content", "space-between")
-                },
-            ) {
-                WhySectionHeading(
-                    title = "Зачем вот это все?",
-                    subtitle = "Преимущества аренды авто от частных владельцев",
-                )
-                Div({
-                    style {
-                        property("align-self", "flex-start")
-                    }
-                }) {
-                    PromoRectButton(
-                        text = "Арендовать автомобиль",
-                        onClick = { },
-                    )
+        ResponsiveContainer { isMobile ->
+            if (isMobile) {
+                Column(
+                    gap = 32.px,
+                    modifier = { width(100.percent) },
+                ) {
+                    WhySectionLeftContent(isMobile = true)
+                    AdvantageGrid(isMobile = true)
+                }
+            } else {
+                Row(
+                    gap = 32.px,
+                    flexWrap = FlexWrap.Wrap,
+                    alignItems = AlignItems.Stretch,
+                    modifier = {
+                        width(100.percent)
+                    },
+                ) {
+                    WhySectionLeftContent(isMobile = false)
+                    AdvantageGrid(isMobile = false)
                 }
             }
-            AdvantageGrid()
+        }
+    }
+}
+
+@Composable
+private fun WhySectionLeftContent(isMobile: Boolean) {
+    Column(
+        gap = 6.px,
+        modifier = {
+            if (!isMobile) {
+                flex(1)
+                property("min-height", "100%")
+                property("align-self", "stretch")
+            }
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Column)
+            property("justify-content", "space-between")
+        },
+    ) {
+        WhySectionHeading(
+            title = "Зачем вот это все?",
+            subtitle = "Преимущества аренды авто от частных владельцев",
+        )
+        Div({
+            style {
+                property("align-self", "flex-start")
+            }
+        }) {
+            PromoRectButton(
+                text = "Арендовать автомобиль",
+                onClick = { },
+            )
         }
     }
 }
@@ -133,20 +153,49 @@ private const val ADVANTAGE_TOOLTIP_TEXT =
     "Частники не зарабатывают на несоразмерной ответственности за повреждения и не штрафуют за ложные повреждения автомобиля."
 
 @Composable
-private fun AdvantageGrid() {
+private fun AdvantageGrid(isMobile: Boolean) {
     Div({
         style {
-            flex(2)
-            property("min-width", "250px")
-            display(DisplayStyle.Grid)
-            property("grid-template-columns", "1fr 1fr")
-            property("row-gap", "68px")
-            property("column-gap", "40px")
+            if (!isMobile) {
+                flex(2)
+                property("min-width", "250px")
+                display(DisplayStyle.Grid)
+                property("grid-template-columns", "1fr 1fr")
+                property("row-gap", "68px")
+                property("column-gap", "40px")
+            } else {
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
+                gap(16.px)
+                width(100.percent)
+            }
         }
     }) {
         AdvantageChip("Стоит дешевле")
         AdvantageChip("Машины чище")
-        AdvantageTooltipBlock(ADVANTAGE_TOOLTIP_TEXT)
+        Div({
+            style {
+                width(100.percent)
+                position(Position.Relative)
+            }
+        }) {
+            AdvantageTooltipBlock(ADVANTAGE_TOOLTIP_TEXT)
+            Img(
+                src = "/images/arm.svg",
+                alt = "",
+                attrs = {
+                    style {
+                        position(Position.Absolute)
+                        bottom(0.px)
+                        right(8.px)
+                        width(48.px)
+                        height(48.px)
+                        property("object-fit", "contain")
+                        property("pointer-events", "none")
+                    }
+                },
+            )
+        }
         AdvantageChip("Пробег меньше")
         AdvantageChip("Выбор больше")
         AdvantageChip("Оформить проще")
