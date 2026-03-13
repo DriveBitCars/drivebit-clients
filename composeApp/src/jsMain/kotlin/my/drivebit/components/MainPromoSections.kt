@@ -4,6 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 import kotlinx.browser.window
 import my.drivebit.design.CSSColors
+import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.REDIRECT_PATH
+import my.drivebit.utils.encodeUrlParameter
+import org.koin.compose.koinInject
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.*
@@ -259,6 +263,7 @@ private fun AdvantageChip(label: String) {
 
 @Composable
 private fun EarnSectionCard() {
+    val storage: Storage = koinInject()
     PromoCard(backgroundColor = CSSColors.White) {
         Column(
             gap = 8.px,
@@ -300,7 +305,14 @@ private fun EarnSectionCard() {
             }) {
                 PromoRectButton(
                     text = "Сдать автомобиль",
-                    onClick = { window.location.href = "/list-your-car" }, // Todo нужно зарегаться
+                    onClick = {
+                        if (storage.isLogined()) {
+                            window.location.href = "/list-your-car.html"
+                        } else {
+                            val redirect = "/list-your-car.html".encodeUrlParameter()
+                            window.location.href = "/login-by-phone?$REDIRECT_PATH=$redirect"
+                        }
+                    },
                 )
             }
         }

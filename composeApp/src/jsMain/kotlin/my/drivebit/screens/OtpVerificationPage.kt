@@ -23,6 +23,7 @@ import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.NEW_LOGIN
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
+import my.drivebit.utils.REDIRECT_PATH
 import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.START_AT
 import my.drivebit.utils.encodeUrlParameter
@@ -53,6 +54,7 @@ fun OtpVerificationPage() {
     val returnCarId = getUrlParameter(RETURN_CAR_ID)
     val startAt = getUrlParameter(START_AT)
     val endAt = getUrlParameter(END_AT)
+    val redirectPath = getUrlParameter(REDIRECT_PATH)
     val additionalParams =
         remember(newLogin) {
             if (newLogin.isNotEmpty()) {
@@ -84,16 +86,18 @@ fun OtpVerificationPage() {
         LaunchedEffect(Unit) {
             when (otpResultType) {
                 OTPRESULT.VerifyOtp -> {
-                    val redirectPath =
-                        if (returnCarId.isNotBlank()) {
-                            val params = mutableListOf("id=${returnCarId.encodeUrlParameter()}")
-                            if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
-                            if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
-                            "/car-detail?${params.joinToString("&")}"
-                        } else {
-                            "/"
+                    val targetPath =
+                        when {
+                            redirectPath.isNotBlank() -> redirectPath
+                            returnCarId.isNotBlank() -> {
+                                val params = mutableListOf("id=${returnCarId.encodeUrlParameter()}")
+                                if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
+                                if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
+                                "/car-detail?${params.joinToString("&")}"
+                            }
+                            else -> "/"
                         }
-                    window.location.href = redirectPath
+                    window.location.href = targetPath
                 }
                 OTPRESULT.ChangeEmail -> navigationController?.navigateTo("/profile")
                 OTPRESULT.ChangePhone -> navigationController?.navigateTo("/profile")

@@ -24,6 +24,8 @@ const val START_AT = "startAt"
 
 const val END_AT = "endAt"
 
+const val REDIRECT_PATH = "redirect"
+
 fun getUrlParameter(name: String): String {
     val queryString = window.location.search
     return getUrlParameterFromQueryString(queryString, name)
