@@ -103,6 +103,7 @@ private fun WhySectionHeading(
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Column)
             property("justify-content", "center")
+            gap(100.px)
         }
     }) {
         Span({
