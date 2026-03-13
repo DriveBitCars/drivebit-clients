@@ -14,6 +14,7 @@ import org.jetbrains.compose.web.dom.Text
 
 private val PromoBlueBg: CSSColorValue = Color("#E3F2FD")
 private val PromoChipBlue: CSSColorValue = Color("#4338CA")
+private val PromoRectButtonBlue: CSSColorValue = Color("#2962FF")
 
 @Composable
 fun MainPromoSections() {
@@ -79,8 +80,7 @@ private fun WhySectionCard() {
                         property("align-self", "flex-start")
                     }
                 }) {
-                    ActionButton(
-                        enabledColor = CSSColors.Blue,
+                    PromoRectButton(
                         text = "Арендовать автомобиль",
                         onClick = { },
                     )
@@ -248,10 +248,9 @@ private fun EarnSectionCard() {
                     property("max-width", "280px")
                 }
             }) {
-                ActionButton(
-                    enabledColor = CSSColors.Blue,
+                PromoRectButton(
                     text = "Сдать автомобиль",
-                    onClick = { window.location.href = "/list-your-car" },
+                    onClick = { window.location.href = "/list-your-car" }, // Todo нужно зарегаться
                 )
             }
         }
