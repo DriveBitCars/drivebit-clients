@@ -24,6 +24,7 @@ import my.drivebit.utils.END_AT
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
+import my.drivebit.utils.REDIRECT_PATH
 import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.START_AT
 import my.drivebit.utils.encodeUrlParameter
@@ -73,6 +74,7 @@ private fun LoginPageContent(
     val returnCarId = getUrlParameter(RETURN_CAR_ID)
     val startAt = getUrlParameter(START_AT)
     val endAt = getUrlParameter(END_AT)
+    val redirectPath = getUrlParameter(REDIRECT_PATH)
     val loginState by viewModel.state.collectAsState()
     val validationState by validatorViewModel.validationState.collectAsState()
 
@@ -102,6 +104,7 @@ private fun LoginPageContent(
         if (returnCarId.isNotBlank()) returnParams.add("$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}")
         if (startAt.isNotBlank()) returnParams.add("$START_AT=${startAt.encodeUrlParameter()}")
         if (endAt.isNotBlank()) returnParams.add("$END_AT=${endAt.encodeUrlParameter()}")
+        if (redirectPath.isNotBlank()) returnParams.add("$REDIRECT_PATH=${redirectPath.encodeUrlParameter()}")
         val returnParamsStr = returnParams.joinToString("&")
         val returnParamsFragment = if (returnParamsStr.isNotBlank()) "&$returnParamsStr" else ""
         navigationController.navigateTo(
@@ -154,6 +157,7 @@ private fun LoginPageContent(
                         if (returnCarId.isNotBlank()) params.add("$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}")
                         if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
                         if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
+                        if (redirectPath.isNotBlank()) params.add("$REDIRECT_PATH=${redirectPath.encodeUrlParameter()}")
                         val path = if (params.isNotEmpty()) "$basePath?${params.joinToString("&")}" else basePath
                         navigationController.navigateTo(path)
                     },

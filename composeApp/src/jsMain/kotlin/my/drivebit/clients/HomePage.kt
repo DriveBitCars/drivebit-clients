@@ -9,6 +9,7 @@ import kotlinx.browser.document
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.DateRangeSelector
+import my.drivebit.components.MainPromoSections
 import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.PaginationBar
@@ -82,6 +83,7 @@ fun HomePage() {
                         endDateViewModel = endDateViewModel,
                     )
                 },
+                id = "search",
             )
         }
 
@@ -151,6 +153,7 @@ fun HomePage() {
                 }
             }
         }
+        MainPromoSections()
     }
 }
 
