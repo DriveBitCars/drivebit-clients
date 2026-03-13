@@ -113,10 +113,10 @@ private fun AdvantageGrid() {
     Div({
         style {
             flex(2)
-            property("min-width", "280px")
+            property("min-width", "250px")
             display(DisplayStyle.Grid)
             property("grid-template-columns", "1fr 1fr")
-            property("gap", "12px")
+            property("gap", "24px")
         }
     }) {
         AdvantageChip("Стоит дешевле")
@@ -142,12 +142,12 @@ private fun AdvantageTooltipBlock(bodyText: String) {
         Column(
             modifier = {
                 height(130.px)
-                width(300.px) },
+                width(250.px) },
         ) {
             Span({
                 style {
                     applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.base)
+                    fontSize(CSSTypography.FontSize.lg)
                     color(CSSColors.Black)
                     lineHeight("1.4")
                 }
