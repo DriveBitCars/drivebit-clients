@@ -54,7 +54,7 @@ private fun WhySectionCard() {
         Row(
             gap = 32.px,
             flexWrap = FlexWrap.Wrap,
-            alignItems = AlignItems.FlexStart,
+            alignItems = AlignItems.Stretch,
             modifier = {
                 width(100.percent)
             },
@@ -65,31 +65,43 @@ private fun WhySectionCard() {
                     flex(1)
                     property("min-width", "200px")
                     property("max-width", "320px")
+                    property("height", "100%")
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    property("justify-content", "space-between")
                 },
             ) {
-                Span({
+                Div({
                     style {
-                        applyTypography(CSSTypography.Styles.body)
-                        fontSize(CSSTypography.FontSize.xxl)
-                        fontWeight(CSSTypography.FontWeight.bold)
-                        color(CSSColors.Black)
-                        lineHeight("1.25")
+                        flex(1)
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        property("justify-content", "center")
                     }
                 }) {
-                    Text("Зачем вот это все?")
-                }
-                Span({
-                    style {
-                        applyTypography(CSSTypography.Styles.body)
-                        fontSize(CSSTypography.FontSize.base)
-                        color(CSSColors.Gray600)
+                    Span({
+                        style {
+                            applyTypography(CSSTypography.Styles.body)
+                            fontSize(CSSTypography.FontSize.xxl)
+                            fontWeight(CSSTypography.FontWeight.bold)
+                            color(CSSColors.Black)
+                            lineHeight("1.25")
+                        }
+                    }) {
+                        Text("Зачем вот это все?")
                     }
-                }) {
-                    Text("Преимущества аренды авто от частных владельцев")
+                    Span({
+                        style {
+                            applyTypography(CSSTypography.Styles.body)
+                            fontSize(CSSTypography.FontSize.base)
+                            color(CSSColors.Gray600)
+                        }
+                    }) {
+                        Text("Преимущества аренды авто от частных владельцев")
+                    }
                 }
                 Div({
                     style {
-                        marginTop(20.px)
                         property("align-self", "flex-start")
                     }
                 }) {
@@ -116,7 +128,8 @@ private fun AdvantageGrid() {
             property("min-width", "250px")
             display(DisplayStyle.Grid)
             property("grid-template-columns", "1fr 1fr")
-            property("gap", "24px")
+            property("row-gap", "68px")
+            property("column-gap", "40px")
         }
     }) {
         AdvantageChip("Стоит дешевле")
