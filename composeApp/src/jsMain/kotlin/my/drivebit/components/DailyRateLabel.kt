@@ -38,9 +38,17 @@ fun CarRatesSection(car: CarDetailResponse) {
     val hasAnyRate = dailyRate > 0 || rate4 != null || rate7 != null || rate14 != null || rate21 != null
     if (!hasAnyRate) return
 
+    val minDailyRate = listOfNotNull(
+        dailyRate.takeIf { it > 0 },
+        rate4,
+        rate7,
+        rate14,
+        rate21,
+    ).minOrNull() ?: 0.0
+
     val rates =
         listOfNotNull(
-            if (dailyRate > 0) Pair("Сутки", dailyRate) else null,
+            if (minDailyRate > 0) Pair("Сутки", minDailyRate) else null,
             rate4?.let { Pair("4 дня", it) },
             rate7?.let { Pair("7 дней", it) },
             rate14?.let { Pair("14 дней", it) },
