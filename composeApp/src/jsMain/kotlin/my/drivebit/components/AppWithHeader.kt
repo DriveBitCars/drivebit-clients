@@ -59,9 +59,23 @@ fun AppWithHeader(content: @Composable () -> Unit) {
                         flexDirection(FlexDirection.Column)
                     }
                 }) {
+                    if (isMobile) {
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                justifyContent(JustifyContent.Center)
+                                padding(12.px, 0.px)
+                                marginBottom(8.px)
+                            }
+                        }) {
+                            HeaderNav()
+                        }
+                    }
                     HeaderRow {
                         Logo()
-
+                        if (!isMobile) {
+                            HeaderNav()
+                        }
                         Row(
                             alignItems = AlignItems.Center,
                             gap = 12.px,
