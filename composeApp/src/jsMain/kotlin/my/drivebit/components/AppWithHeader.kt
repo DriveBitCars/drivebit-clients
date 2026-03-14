@@ -59,22 +59,8 @@ fun AppWithHeader(content: @Composable () -> Unit) {
                         flexDirection(FlexDirection.Column)
                     }
                 }) {
-                    if (isMobile) {
-                        Div({
-                            style {
-                                marginBottom(12.px)
-                            }
-                        }) {
-                            Hero(isMobile)
-                        }
-                    }
-
                     HeaderRow {
                         Logo()
-
-                        if (!isMobile) {
-                            Hero(isMobile)
-                        }
 
                         Row(
                             alignItems = AlignItems.Center,

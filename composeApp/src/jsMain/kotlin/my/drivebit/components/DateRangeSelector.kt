@@ -18,6 +18,9 @@ fun DateRangeSelector(
     startDateViewModel: DateFieldViewModel,
     endDateViewModel: DateFieldViewModel,
     onSearchClick: () -> Unit = {},
+    startLabel: String = "c",
+    endLabel: String = "по",
+    showSearchButton: Boolean = true,
 ) {
     val startState by startDateViewModel.state.collectAsState()
     val endState by endDateViewModel.state.collectAsState()
@@ -80,7 +83,7 @@ fun DateRangeSelector(
             }
         }) {
             DateField(
-                label = "c",
+                label = startLabel,
                 viewModel = startDateViewModel,
             )
         }
@@ -105,46 +108,159 @@ fun DateRangeSelector(
             }
         }) {
             DateField(
-                label = "по",
+                label = endLabel,
                 viewModel = endDateViewModel,
                 minDate = startDate,
             )
         }
 
+        if (showSearchButton) {
+            Div({
+                style {
+                    flexShrink(0)
+                    marginLeft(12.px)
+                    width(48.px)
+                }
+            }) {
+                val navigationController = LocalNavigationController.current
+                ActionButton(
+                    image = ImagePaths.SEARCH_SVG,
+                    enabledColor = Blue,
+                    text = "",
+                    onClick = {
+                        val queryParams =
+                            buildString {
+                                val currentStartDate = startState.date
+                                val currentEndDate = endState.date
+                                if (currentStartDate != null) {
+                                    append("startDate=$currentStartDate")
+                                }
+                                if (currentEndDate != null) {
+                                    if (length > 0) append("&")
+                                    append("endDate=$currentEndDate")
+                                }
+                            }
+                        val url =
+                            if (queryParams.isNotEmpty()) {
+                                "/search?$queryParams"
+                            } else {
+                                "/search"
+                            }
+                        navigationController?.navigateTo(url)
+                        onSearchClick()
+                    },
+                )
+            }
+        }
+    }
+
+    if (startState.isCalendarOpen) {
+        DateFieldDialog(
+            label = "Дата начала",
+            viewModel = startDateViewModel,
+            onDateChanged = { date ->
+                val currentEndDate = endState.date
+                if (date != null && currentEndDate != null && date > currentEndDate) {
+                    endDateViewModel.setDate(null)
+                }
+            },
+        )
+    }
+
+    if (endState.isCalendarOpen) {
+        DateFieldDialog(
+            label = "Дата окончания",
+            viewModel = endDateViewModel,
+            minDate = startDate,
+            onDateChanged = { date ->
+                val currentStartDate = startState.date
+                if (date != null && currentStartDate != null && date < currentStartDate) {
+                    startDateViewModel.setDate(null)
+                }
+            },
+        )
+    }
+}
+
+@Composable
+fun HeroDateRangeSelector(
+    startDateViewModel: DateFieldViewModel,
+    endDateViewModel: DateFieldViewModel,
+) {
+    val startState by startDateViewModel.state.collectAsState()
+    val endState by endDateViewModel.state.collectAsState()
+    val startDate = startState.date
+    val endDate = endState.date
+
+    LaunchedEffect(startDate) {
+        val currentStartDate = startDate
+        val currentEndDate = endDate
+        if (currentStartDate != null && currentEndDate != null && currentStartDate > currentEndDate) {
+            endDateViewModel.setDate(null)
+        }
+    }
+
+    LaunchedEffect(endDate) {
+        val currentStartDate = startDate
+        val currentEndDate = endDate
+        if (currentStartDate != null && currentEndDate != null && currentEndDate < currentStartDate) {
+            startDateViewModel.setDate(null)
+        }
+    }
+
+    Div({
+        style {
+            width(100.percent)
+            height(90.px)
+            display(DisplayStyle.Flex)
+            alignItems(AlignItems.Center)
+            gap(0.px)
+            backgroundColor(CSSColors.White)
+            borderRadius(20.px)
+            padding(0.px, 34.px)
+            property("box-sizing", "border-box")
+        }
+        onMouseEnter {
+            (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                "border",
+                "none",
+            )
+        }
+    }) {
         Div({
             style {
-                flexShrink(0)
-                marginLeft(12.px)
-                width(48.px)
+                flex(1)
+                cursor("pointer")
             }
+            onClick { startDateViewModel.openCalendar() }
         }) {
-            val navigationController = LocalNavigationController.current
-            ActionButton(
-                image = ImagePaths.SEARCH_SVG,
-                enabledColor = Blue,
-                text = "",
-                onClick = {
-                    val queryParams =
-                        buildString {
-                            val currentStartDate = startState.date
-                            val currentEndDate = endState.date
-                            if (currentStartDate != null) {
-                                append("startDate=$currentStartDate")
-                            }
-                            if (currentEndDate != null) {
-                                if (length > 0) append("&")
-                                append("endDate=$currentEndDate")
-                            }
-                        }
-                    val url =
-                        if (queryParams.isNotEmpty()) {
-                            "/search?$queryParams"
-                        } else {
-                            "/search"
-                        }
-                    navigationController?.navigateTo(url)
-                    onSearchClick()
-                },
+            DateField(
+                label = "Начало аренды",
+                viewModel = startDateViewModel,
+            )
+        }
+
+        Div({
+            style {
+                width(1.px)
+                height(64.px)
+                backgroundColor(CSSColors.Gray300)
+                marginLeft(24.px)
+                marginRight(24.px)
+            }
+        })
+
+        Div({
+            style {
+                flex(1)
+                cursor("pointer")
+            }
+            onClick { endDateViewModel.openCalendar() }
+        }) {
+            DateField(
+                label = "Завершение аренды",
+                viewModel = endDateViewModel,
+                minDate = startDate,
             )
         }
     }
