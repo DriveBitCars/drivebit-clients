@@ -7,7 +7,8 @@ This is a Kotlin Multiplatform project for Drivebit mobile clients targeting And
 - Use Kotlin coding conventions
 - Follow Material Design guidelines for Android
 - Follow iOS Human Interface Guidelines for iOS
-- Use Compose Multiplatform for shared UI
+- **Write UI maximally in Compose** - prefer Compose Multiplatform for all shared and platform UI
+- **Reuse existing components** - before adding new UI, search the codebase for existing components (buttons, inputs, cards, typography, etc.) and reuse or extend them instead of duplicating
 - Prefer immutable data structures
 - Use meaningful variable and function names
 - Do NOT write comments unless explicitly requested

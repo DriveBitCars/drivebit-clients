@@ -33,6 +33,7 @@ import my.drivebit.screens.LoginPage
 import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCarsPage
 import my.drivebit.screens.MyDealsPage
+import my.drivebit.screens.ContactsPage
 import my.drivebit.screens.OfferPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.PrivacyPage
@@ -137,6 +138,9 @@ actual fun App() {
                 }
                 currentPath.startsWith("/offer") -> {
                     OfferPage()
+                }
+                currentPath.startsWith("/contacts") -> {
+                    ContactsPage()
                 }
                 currentPath.startsWith("/privacy") -> {
                     PrivacyPage()

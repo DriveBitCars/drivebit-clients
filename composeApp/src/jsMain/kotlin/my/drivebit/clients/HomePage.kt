@@ -8,9 +8,8 @@ import androidx.compose.runtime.getValue
 import kotlinx.browser.document
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarsGrid
-import my.drivebit.components.DateRangeSelector
+import my.drivebit.components.HeroBanner
 import my.drivebit.components.MainPromoSections
-import my.drivebit.components.FilterBackgroundImage
 import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.filterButton
@@ -75,15 +74,10 @@ fun HomePage() {
     AppWithHeader {
         val selectedFilter = filters.find { it.title == selected }
         selectedFilter?.let { filter ->
-            FilterBackgroundImage(
+            HeroBanner(
                 backgroundIconUrl = filter.backgroundIcon,
-                searchContent = {
-                    DateRangeSelector(
-                        startDateViewModel = startDateViewModel,
-                        endDateViewModel = endDateViewModel,
-                    )
-                },
-                id = "search",
+                startDateViewModel = startDateViewModel,
+                endDateViewModel = endDateViewModel,
             )
         }
 
