@@ -183,6 +183,25 @@ fun DateRangeSelector(
 }
 
 @Composable
+private fun CalendarIconPurple(size: CSSSizeValue<out CSSUnit.px>) {
+    Div({
+        style {
+            width(size)
+            height(size)
+            property("background-color", "#ECE0FF")
+            property("mask-image", "url(${ImagePaths.FILTER_MAIN_CALENDAR_SVG})")
+            property("mask-size", "contain")
+            property("mask-repeat", "no-repeat")
+            property("mask-position", "center")
+            property("-webkit-mask-image", "url(${ImagePaths.FILTER_MAIN_CALENDAR_SVG})")
+            property("-webkit-mask-size", "contain")
+            property("-webkit-mask-repeat", "no-repeat")
+            property("-webkit-mask-position", "center")
+        }
+    })
+}
+
+@Composable
 fun HeroDateRangeSelector(
     startDateViewModel: DateFieldViewModel,
     endDateViewModel: DateFieldViewModel,
@@ -231,6 +250,10 @@ fun HeroDateRangeSelector(
         Div({
             style {
                 flex(1)
+                display(DisplayStyle.Flex)
+                alignItems(AlignItems.Center)
+                justifyContent(JustifyContent.SpaceBetween)
+                gap(if (compact) 8.px else 12.px)
                 cursor("pointer")
             }
             onClick { startDateViewModel.openCalendar() }
@@ -239,6 +262,7 @@ fun HeroDateRangeSelector(
                 label = "Начало аренды",
                 viewModel = startDateViewModel,
             )
+            CalendarIconPurple(size = if (compact) 20.px else 24.px)
         }
 
         Div({
@@ -254,6 +278,10 @@ fun HeroDateRangeSelector(
         Div({
             style {
                 flex(1)
+                display(DisplayStyle.Flex)
+                alignItems(AlignItems.Center)
+                justifyContent(JustifyContent.SpaceBetween)
+                gap(if (compact) 8.px else 12.px)
                 cursor("pointer")
             }
             onClick { endDateViewModel.openCalendar() }
@@ -263,6 +291,7 @@ fun HeroDateRangeSelector(
                 viewModel = endDateViewModel,
                 minDate = startDate,
             )
+            CalendarIconPurple(size = if (compact) 20.px else 24.px)
         }
     }
 
