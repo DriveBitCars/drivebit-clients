@@ -186,6 +186,7 @@ fun DateRangeSelector(
 fun HeroDateRangeSelector(
     startDateViewModel: DateFieldViewModel,
     endDateViewModel: DateFieldViewModel,
+    compact: Boolean = false,
 ) {
     val startState by startDateViewModel.state.collectAsState()
     val endState by endDateViewModel.state.collectAsState()
@@ -211,13 +212,13 @@ fun HeroDateRangeSelector(
     Div({
         style {
             width(100.percent)
-            height(90.px)
+            height(if (compact) 72.px else 90.px)
             display(DisplayStyle.Flex)
             alignItems(AlignItems.Center)
             gap(0.px)
             backgroundColor(CSSColors.White)
             borderRadius(20.px)
-            padding(0.px, 34.px)
+            padding(0.px, if (compact) 16.px else 34.px)
             property("box-sizing", "border-box")
         }
         onMouseEnter {
@@ -243,10 +244,10 @@ fun HeroDateRangeSelector(
         Div({
             style {
                 width(1.px)
-                height(64.px)
+                height(if (compact) 48.px else 64.px)
                 backgroundColor(CSSColors.Gray300)
-                marginLeft(24.px)
-                marginRight(24.px)
+                marginLeft(if (compact) 12.px else 24.px)
+                marginRight(if (compact) 12.px else 24.px)
             }
         })
 
