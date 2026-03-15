@@ -9,8 +9,8 @@ interface CurrentFiltersRepository {
     val currentTaskShortName: Flow<String?>
     val startState: Flow<String?>
     val endState: Flow<String?>
-    val dailyRateMin: Flow<Double?>
-    val dailyRateMax: Flow<Double?>
+    val dailyRateMin: Flow<Int?>
+    val dailyRateMax: Flow<Int?>
     val brandId: Flow<Int?>
     val brandName: Flow<String?>
     val modelId: Flow<Int?>
@@ -38,9 +38,9 @@ interface CurrentFiltersRepository {
 
     fun updateEndDate(date: String?)
 
-    fun updateDailyRateMin(value: Double?)
+    fun updateDailyRateMin(value: Int?)
 
-    fun updateDailyRateMax(value: Double?)
+    fun updateDailyRateMax(value: Int?)
 
     fun updateBrand(
         id: Int?,
@@ -117,8 +117,8 @@ internal class CurrentFiltersRepositoryImpl(
     private val currentTaskShortNameState = MutableStateFlow<String?>(null)
     private val startStateFlow = MutableStateFlow<String?>(null)
     private val endStateFlow = MutableStateFlow<String?>(null)
-    private val dailyRateMinState = MutableStateFlow<Double?>(null)
-    private val dailyRateMaxState = MutableStateFlow<Double?>(null)
+    private val dailyRateMinState = MutableStateFlow<Int?>(null)
+    private val dailyRateMaxState = MutableStateFlow<Int?>(null)
     private val brandIdState = MutableStateFlow<Int?>(null)
     private val brandNameState = MutableStateFlow<String?>(null)
     private val modelIdState = MutableStateFlow<Int?>(null)
@@ -148,10 +148,10 @@ internal class CurrentFiltersRepositoryImpl(
         val savedEndDate = settings.getStringOrNullIfEmpty(END_DATE_KEY)
         endStateFlow.value = savedEndDate
 
-        val savedDailyRateMin = settings.getDouble(key(DAILY_RATE_MIN_KEY), -1.0)
+        val savedDailyRateMin = settings.getInt(key(DAILY_RATE_MIN_KEY), -1)
         dailyRateMinState.value = if (savedDailyRateMin < 0) null else savedDailyRateMin
 
-        val savedDailyRateMax = settings.getDouble(key(DAILY_RATE_MAX_KEY), -1.0)
+        val savedDailyRateMax = settings.getInt(key(DAILY_RATE_MAX_KEY), -1)
         dailyRateMaxState.value = if (savedDailyRateMax < 0) null else savedDailyRateMax
 
         val savedBrandId = settings.getInt(key(BRAND_ID_KEY), -1)
@@ -209,8 +209,8 @@ internal class CurrentFiltersRepositoryImpl(
     override val currentTaskShortName: Flow<String?> = currentTaskShortNameState.asStateFlow()
     override val startState: Flow<String?> = startStateFlow.asStateFlow()
     override val endState: Flow<String?> = endStateFlow.asStateFlow()
-    override val dailyRateMin: Flow<Double?> = dailyRateMinState.asStateFlow()
-    override val dailyRateMax: Flow<Double?> = dailyRateMaxState.asStateFlow()
+    override val dailyRateMin: Flow<Int?> = dailyRateMinState.asStateFlow()
+    override val dailyRateMax: Flow<Int?> = dailyRateMaxState.asStateFlow()
     override val brandId: Flow<Int?> = brandIdState.asStateFlow()
     override val brandName: Flow<String?> = brandNameState.asStateFlow()
     override val modelId: Flow<Int?> = modelIdState.asStateFlow()
@@ -260,9 +260,9 @@ internal class CurrentFiltersRepositoryImpl(
         currentPageState.value = 0
     }
 
-    override fun updateDailyRateMin(value: Double?) {
+    override fun updateDailyRateMin(value: Int?) {
         if (value != null) {
-            settings.putDouble(key(DAILY_RATE_MIN_KEY), value)
+            settings.putInt(key(DAILY_RATE_MIN_KEY), value)
         } else {
             settings.remove(key(DAILY_RATE_MIN_KEY))
         }
@@ -270,9 +270,9 @@ internal class CurrentFiltersRepositoryImpl(
         currentPageState.value = 0
     }
 
-    override fun updateDailyRateMax(value: Double?) {
+    override fun updateDailyRateMax(value: Int?) {
         if (value != null) {
-            settings.putDouble(key(DAILY_RATE_MAX_KEY), value)
+            settings.putInt(key(DAILY_RATE_MAX_KEY), value)
         } else {
             settings.remove(key(DAILY_RATE_MAX_KEY))
         }

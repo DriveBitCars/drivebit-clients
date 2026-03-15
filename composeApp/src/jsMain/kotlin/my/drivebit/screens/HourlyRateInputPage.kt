@@ -29,7 +29,7 @@ fun HourlyRateInputPage(onHourlyRateEntered: () -> Unit = {}) {
     var hourlyRate by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
 
-    val isValid = hourlyRate.toDoubleOrNull()?.let { it >= 0 } == true
+    val isValid = hourlyRate.toIntOrNull()?.let { it >= 0 } == true
 
     buttonViewModel.setState(
         if (isValid) {
@@ -51,7 +51,9 @@ fun HourlyRateInputPage(onHourlyRateEntered: () -> Unit = {}) {
                     value = hourlyRate,
                     onValueChange = { newValue ->
                         if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
-                            hourlyRate = newValue.replace(',', '.')
+                            if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                                hourlyRate = newValue
+                            }
                             error = null
                         }
                     },
@@ -80,7 +82,7 @@ fun HourlyRateInputPage(onHourlyRateEntered: () -> Unit = {}) {
                             enabledColor = CSSColors.Blue,
                             text = "Продолжить",
                             onClick = {
-                                val rateValue = hourlyRate.toDoubleOrNull()
+                                val rateValue = hourlyRate.toIntOrNull()
                                 if (rateValue != null && rateValue >= 0) {
                                     carDataRepository.saveHourlyRate(rateValue)
                                     onHourlyRateEntered()

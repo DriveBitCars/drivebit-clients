@@ -53,13 +53,13 @@ fun DailyRateInputPage(
 
     val error = localError
 
-    val isValid = dailyRate.toDoubleOrNull()?.let { it >= 0 } == true
+    val isValid = dailyRate.toIntOrNull()?.let { it >= 0 } == true
 
     buttonViewModel.setState(
         if (isValid) ButtonState.Enabled else ButtonState.Disabled,
     )
 
-    fun parseRate(value: String): Double? = value.takeIf { it.isNotBlank() }?.replace(',', '.')?.toDoubleOrNull()
+    fun parseRate(value: String): Int? = value.takeIf { it.isNotBlank() }?.toIntOrNull()?.takeIf { it >= 0 }
 
     PageWithLogo {
         CenteredFormContainer {
@@ -73,8 +73,8 @@ fun DailyRateInputPage(
                     label = "Оплата за день (₽)",
                     value = dailyRate,
                     onValueChange = { newValue ->
-                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
-                            dailyRate = newValue.replace(',', '.')
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                            dailyRate = newValue
                             localError = null
                         }
                     },
@@ -85,8 +85,8 @@ fun DailyRateInputPage(
                     label = "Оплата за 4 дня (₽)",
                     value = dailyRate4Days,
                     onValueChange = { newValue ->
-                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
-                            dailyRate4Days = newValue.replace(',', '.')
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                            dailyRate4Days = newValue
                             localError = null
                         }
                     },
@@ -97,8 +97,8 @@ fun DailyRateInputPage(
                     label = "Оплата за 7 дней (₽)",
                     value = dailyRate7Days,
                     onValueChange = { newValue ->
-                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
-                            dailyRate7Days = newValue.replace(',', '.')
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                            dailyRate7Days = newValue
                             localError = null
                         }
                     },
@@ -109,8 +109,8 @@ fun DailyRateInputPage(
                     label = "Оплата за 14 дней (₽)",
                     value = dailyRate14Days,
                     onValueChange = { newValue ->
-                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
-                            dailyRate14Days = newValue.replace(',', '.')
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                            dailyRate14Days = newValue
                             localError = null
                         }
                     },
@@ -121,8 +121,8 @@ fun DailyRateInputPage(
                     label = "Оплата за 21 день (₽)",
                     value = dailyRate21Days,
                     onValueChange = { newValue ->
-                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
-                            dailyRate21Days = newValue.replace(',', '.')
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                            dailyRate21Days = newValue
                             localError = null
                         }
                     },
@@ -148,7 +148,7 @@ fun DailyRateInputPage(
                             enabledColor = CSSColors.Blue,
                             text = "Далее",
                             onClick = {
-                                val rateValue = dailyRate.toDoubleOrNull()
+                                val rateValue = dailyRate.toIntOrNull()
                                 if (rateValue != null && rateValue >= 0) {
                                     carDataRepository.saveDailyRate(rateValue)
                                     carDataRepository.saveDailyRate4Days(parseRate(dailyRate4Days))

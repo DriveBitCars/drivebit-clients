@@ -78,10 +78,27 @@ data class CarItem(
     val id: String,
     val year: Int? = null,
     @JsonNames("dailyRate", "DailyRate", "Price") val price: Double? = null,
+    val dailyRate4Days: Double? = null,
+    val dailyRate7Days: Double? = null,
+    val dailyRate14Days: Double? = null,
+    val dailyRate21Days: Double? = null,
+    val deposit: Double? = null,
     val cityId: String? = null,
     val photos: List<CarPhotoItem> = emptyList(),
     val general: CarGeneral,
-)
+) {
+    fun minDailyPrice(): Int? {
+        val all =
+            listOfNotNull(
+                price?.takeIf { it > 0 }?.toInt(),
+                dailyRate4Days?.takeIf { it > 0 }?.toInt(),
+                dailyRate7Days?.takeIf { it > 0 }?.toInt(),
+                dailyRate14Days?.takeIf { it > 0 }?.toInt(),
+                dailyRate21Days?.takeIf { it > 0 }?.toInt(),
+            )
+        return all.minOrNull()
+    }
+}
 
 @Serializable
 data class CarBookingItem(
@@ -126,6 +143,7 @@ data class CarDetailResponse(
     val dailyRate21Days: Double? = null,
     val seatsCount: Int? = null,
     val availableMileagePerDayKm: Int? = null,
+    val deposit: Double? = null,
     val owner: String = "",
     val carBookings: List<CarBookingItem> = emptyList(),
 ) {
@@ -161,9 +179,11 @@ data class CarDetailResponse(
 
     fun resolvedModelId(): Int? = modelId
 
-    fun resolvedHourlyRate(): Double = hourlyRate ?: 0.0
+    fun resolvedHourlyRate(): Int = hourlyRate?.toInt() ?: 0
 
-    fun resolvedDailyRate(): Double = dailyRate ?: 0.0
+    fun resolvedDailyRate(): Int = dailyRate?.toInt() ?: 0
+
+    fun resolvedDeposit(): Int = deposit?.toInt() ?: 0
 }
 
 @Serializable
@@ -250,12 +270,13 @@ data class CarCreateRequest(
     @SerialName("validAddressString") val ValidAddressString: String? = null,
     val addr: String? = null,
     val description: String? = null,
-    val hourlyRate: Double? = null,
-    val dailyRate: Double? = null,
-    val dailyRate4Days: Double? = null,
-    val dailyRate7Days: Double? = null,
-    val dailyRate14Days: Double? = null,
-    val dailyRate21Days: Double? = null,
+    val hourlyRate: Int? = null,
+    val dailyRate: Int? = null,
+    val dailyRate4Days: Int? = null,
+    val dailyRate7Days: Int? = null,
+    val dailyRate14Days: Int? = null,
+    val dailyRate21Days: Int? = null,
+    val deposit: Int? = null,
     val availableMileagePerDayKm: Int? = null,
     @SerialName("parkingAssistances") val ParkingAssistances: List<Int> = emptyList(),
     @SerialName("multimediaSystemOptions") val MultimediaSystemOptions: List<Int> = emptyList(),

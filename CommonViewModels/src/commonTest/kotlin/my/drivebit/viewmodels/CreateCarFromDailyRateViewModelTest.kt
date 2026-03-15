@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 private class FakeCarDataRepository : CarDataRepository {
-    private var dailyRate: Double? = null
+    private var dailyRate: Int? = null
 
     override fun saveEngineVolume(volume: Double) {}
 
@@ -33,35 +33,35 @@ private class FakeCarDataRepository : CarDataRepository {
 
     override fun getCarId(): String? = null
 
-    override fun saveHourlyRate(rate: Double) {}
+    override fun saveHourlyRate(rate: Int) {}
 
-    override fun getHourlyRate(): Double? = null
+    override fun getHourlyRate(): Int? = null
 
-    override fun saveDailyRate(rate: Double) {
+    override fun saveDailyRate(rate: Int) {
         dailyRate = rate
     }
 
-    override fun getDailyRate(): Double? = dailyRate
+    override fun getDailyRate(): Int? = dailyRate
 
-    override fun saveDailyRate4Days(rate: Double?) {}
+    override fun saveDailyRate4Days(rate: Int?) {}
 
-    override fun getDailyRate4Days(): Double? = null
+    override fun getDailyRate4Days(): Int? = null
 
-    override fun saveDailyRate7Days(rate: Double?) {}
+    override fun saveDailyRate7Days(rate: Int?) {}
 
-    override fun getDailyRate7Days(): Double? = null
+    override fun getDailyRate7Days(): Int? = null
 
-    override fun saveDailyRate14Days(rate: Double?) {}
+    override fun saveDailyRate14Days(rate: Int?) {}
 
-    override fun getDailyRate14Days(): Double? = null
+    override fun getDailyRate14Days(): Int? = null
 
-    override fun saveDailyRate21Days(rate: Double?) {}
+    override fun saveDailyRate21Days(rate: Int?) {}
 
-    override fun getDailyRate21Days(): Double? = null
+    override fun getDailyRate21Days(): Int? = null
 
-    override fun saveMonthlyRate(rate: Double) {}
+    override fun saveMonthlyRate(rate: Int) {}
 
-    override fun getMonthlyRate(): Double? = null
+    override fun getMonthlyRate(): Int? = null
 
     override fun saveDescription(description: String) {}
 
@@ -79,7 +79,7 @@ private class FakeHasPassportRepo(
 private class FakeCreateCarRepository(
     private val result: Result<CarResponse>,
 ) : CreateCarRepository {
-    override suspend fun createCar(dailyRate: Double): Result<CarResponse> = result
+    override suspend fun createCar(dailyRate: Int): Result<CarResponse> = result
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -97,7 +97,7 @@ class CreateCarFromDailyRateViewModelTest {
                     coroutineScope = testScope,
                 )
 
-            viewModel.submitDailyRate(1000.0)
+            viewModel.submitDailyRate(1000)
             advanceUntilIdle()
 
             val state = viewModel.state.value
@@ -118,7 +118,7 @@ class CreateCarFromDailyRateViewModelTest {
                     coroutineScope = testScope,
                 )
 
-            viewModel.submitDailyRate(1000.0)
+            viewModel.submitDailyRate(1000)
             advanceUntilIdle()
 
             assertIs<CreateCarFromDailyRateState.MissingPassport>(viewModel.state.value)

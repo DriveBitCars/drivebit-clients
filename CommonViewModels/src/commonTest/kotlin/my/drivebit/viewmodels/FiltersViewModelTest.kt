@@ -76,8 +76,8 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     private val currentTaskShortNameState = MutableStateFlow<String?>(null)
     private val startStateFlow = MutableStateFlow<String?>(null)
     private val endStateFlow = MutableStateFlow<String?>(null)
-    private val dailyRateMinState = MutableStateFlow<Double?>(null)
-    private val dailyRateMaxState = MutableStateFlow<Double?>(null)
+    private val dailyRateMinState = MutableStateFlow<Int?>(null)
+    private val dailyRateMaxState = MutableStateFlow<Int?>(null)
     private val brandIdState = MutableStateFlow<Int?>(null)
     private val brandNameState = MutableStateFlow<String?>(null)
     private val modelIdState = MutableStateFlow<Int?>(null)
@@ -137,11 +137,11 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
         endStateFlow.value = date
     }
 
-    override fun updateDailyRateMin(value: Double?) {
+    override fun updateDailyRateMin(value: Int?) {
         dailyRateMinState.value = value
     }
 
-    override fun updateDailyRateMax(value: Double?) {
+    override fun updateDailyRateMax(value: Int?) {
         dailyRateMaxState.value = value
     }
 

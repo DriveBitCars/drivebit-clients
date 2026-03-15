@@ -77,21 +77,21 @@ fun SearchPage() {
     var showDriveTypeFilter by remember { mutableStateOf(false) }
     var showBodyTypeFilter by remember { mutableStateOf(false) }
     var showSeatsFilter by remember { mutableStateOf(false) }
-    val minPrice = remember { mutableStateOf(dailyRateMin?.toInt() ?: 0) }
-    val maxPrice = remember { mutableStateOf(dailyRateMax?.toInt() ?: 600) }
+    val minPrice = remember { mutableStateOf(dailyRateMin ?: 0) }
+    val maxPrice = remember { mutableStateOf(dailyRateMax ?: 600) }
 
     LaunchedEffect(dailyRateMin) {
-        dailyRateMin?.let { minPrice.value = it.toInt() }
+        dailyRateMin?.let { minPrice.value = it }
     }
 
     LaunchedEffect(dailyRateMax) {
-        dailyRateMax?.let { maxPrice.value = it.toInt() }
+        dailyRateMax?.let { maxPrice.value = it }
     }
 
     val isPriceSelected = dailyRateMin != null || dailyRateMax != null
     val priceText =
         if (isPriceSelected) {
-            "${dailyRateMin?.toInt() ?: 0} - ${dailyRateMax?.toInt() ?: 600}"
+            "${dailyRateMin ?: 0} - ${dailyRateMax ?: 600}"
         } else {
             null
         }
@@ -223,8 +223,8 @@ fun SearchPage() {
                                         showPriceFilter = false
                                     },
                                     onViewResults = {
-                                        viewModel.updateDailyRateMin(minPrice.value.toDouble())
-                                        viewModel.updateDailyRateMax(maxPrice.value.toDouble())
+                                        viewModel.updateDailyRateMin(minPrice.value)
+                                        viewModel.updateDailyRateMax(maxPrice.value)
                                         showPriceFilter = false
                                     },
                                 )

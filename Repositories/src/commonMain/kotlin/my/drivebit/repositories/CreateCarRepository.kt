@@ -5,7 +5,7 @@ import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarResponse
 
 interface CreateCarRepository {
-    suspend fun createCar(dailyRate: Double): Result<CarResponse>
+    suspend fun createCar(dailyRate: Int): Result<CarResponse>
 }
 
 internal class CreateCarRepositoryImpl(
@@ -22,18 +22,14 @@ internal class CreateCarRepositoryImpl(
     private val myCarRepository: MyCarRepository,
     private val carService: Car,
 ) : CreateCarRepository {
-    override suspend fun createCar(dailyRate: Double): Result<CarResponse> =
+    override suspend fun createCar(dailyRate: Int): Result<CarResponse> =
         runCatching {
-            // val savedCityId = selectedCityRepository.getCityId()
-            // val cityIdString = savedCityId?.toString()
             val address = selectedAddressRepository.getAddress() ?: ""
             val trunkSizeName =
                 selectedTrunkSizeRepository.getTrunkSizeName()
                     ?: throw IllegalStateException("Trunk size is required")
 
             println("🚗 [CreateCarRepository] Создание машины:")
-            // println("   - savedCityId (Int?): $savedCityId")
-            // println("   - cityId (String?): $cityIdString")
             println("   - address: $address")
             println("   - dailyRate: $dailyRate")
 
@@ -57,7 +53,7 @@ internal class CreateCarRepositoryImpl(
                         carDataRepository
                             .getDescription()
                             ?.takeIf { it.isNotBlank() },
-                    hourlyRate = 0.0,
+                    hourlyRate = 0,
                     dailyRate = dailyRate,
                     dailyRate4Days = carDataRepository.getDailyRate4Days(),
                     dailyRate7Days = carDataRepository.getDailyRate7Days(),
