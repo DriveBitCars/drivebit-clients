@@ -87,9 +87,9 @@ fun CarItemSmall(
                     color(CSSColors.Black)
                 }
             }) {
-                val price = car.price?.takeIf { it > 0 }
+                val price = car.minDailyPrice()
                 if (price != null) {
-                    Text("от ${price.toInt()} ₽ ")
+                    Text("от $price ₽ ")
                     Span({
                         style {
                             fontWeight("400")

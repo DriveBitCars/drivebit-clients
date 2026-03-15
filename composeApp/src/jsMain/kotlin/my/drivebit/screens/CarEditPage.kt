@@ -394,9 +394,8 @@ fun CarEditPage() {
                                 label = "Оплата за день (₽)",
                                 value = formData.dailyRate,
                                 onValueChange = { newValue ->
-                                    val cleanValue = newValue.replace(",", ".")
-                                    if (cleanValue.isEmpty() || cleanValue.toDoubleOrNull() != null) {
-                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate(cleanValue))
+                                    if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
+                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate(newValue))
                                     }
                                 },
                                 numeric = true,
@@ -406,9 +405,8 @@ fun CarEditPage() {
                                 label = "Оплата за 4 дня (₽)",
                                 value = formData.dailyRate4Days,
                                 onValueChange = { newValue ->
-                                    val cleanValue = newValue.replace(",", ".")
-                                    if (cleanValue.isEmpty() || cleanValue.toDoubleOrNull() != null) {
-                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate4Days(cleanValue))
+                                    if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
+                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate4Days(newValue))
                                     }
                                 },
                                 numeric = true,
@@ -418,9 +416,8 @@ fun CarEditPage() {
                                 label = "Оплата за 7 дней (₽)",
                                 value = formData.dailyRate7Days,
                                 onValueChange = { newValue ->
-                                    val cleanValue = newValue.replace(",", ".")
-                                    if (cleanValue.isEmpty() || cleanValue.toDoubleOrNull() != null) {
-                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate7Days(cleanValue))
+                                    if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
+                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate7Days(newValue))
                                     }
                                 },
                                 numeric = true,
@@ -430,9 +427,8 @@ fun CarEditPage() {
                                 label = "Оплата за 14 дней (₽)",
                                 value = formData.dailyRate14Days,
                                 onValueChange = { newValue ->
-                                    val cleanValue = newValue.replace(",", ".")
-                                    if (cleanValue.isEmpty() || cleanValue.toDoubleOrNull() != null) {
-                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate14Days(cleanValue))
+                                    if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
+                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate14Days(newValue))
                                     }
                                 },
                                 numeric = true,
@@ -442,9 +438,19 @@ fun CarEditPage() {
                                 label = "Оплата за 21 день (₽)",
                                 value = formData.dailyRate21Days,
                                 onValueChange = { newValue ->
-                                    val cleanValue = newValue.replace(",", ".")
-                                    if (cleanValue.isEmpty() || cleanValue.toDoubleOrNull() != null) {
-                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate21Days(cleanValue))
+                                    if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
+                                        viewModel.handleIntent(CarEditIntent.UpdateDailyRate21Days(newValue))
+                                    }
+                                },
+                                numeric = true,
+                            )
+
+                            TextInputField(
+                                label = "Залог (₽)",
+                                value = formData.deposit,
+                                onValueChange = { newValue ->
+                                    if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
+                                        viewModel.handleIntent(CarEditIntent.UpdateDeposit(newValue))
                                     }
                                 },
                                 numeric = true,

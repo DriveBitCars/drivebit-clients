@@ -19,33 +19,33 @@ interface CarDataRepository {
 
     fun getCarId(): String?
 
-    fun saveHourlyRate(rate: Double)
+    fun saveHourlyRate(rate: Int)
 
-    fun getHourlyRate(): Double?
+    fun getHourlyRate(): Int?
 
-    fun saveDailyRate(rate: Double)
+    fun saveDailyRate(rate: Int)
 
-    fun getDailyRate(): Double?
+    fun getDailyRate(): Int?
 
-    fun saveDailyRate4Days(rate: Double?)
+    fun saveDailyRate4Days(rate: Int?)
 
-    fun getDailyRate4Days(): Double?
+    fun getDailyRate4Days(): Int?
 
-    fun saveDailyRate7Days(rate: Double?)
+    fun saveDailyRate7Days(rate: Int?)
 
-    fun getDailyRate7Days(): Double?
+    fun getDailyRate7Days(): Int?
 
-    fun saveDailyRate14Days(rate: Double?)
+    fun saveDailyRate14Days(rate: Int?)
 
-    fun getDailyRate14Days(): Double?
+    fun getDailyRate14Days(): Int?
 
-    fun saveDailyRate21Days(rate: Double?)
+    fun saveDailyRate21Days(rate: Int?)
 
-    fun getDailyRate21Days(): Double?
+    fun getDailyRate21Days(): Int?
 
-    fun saveMonthlyRate(rate: Double)
+    fun saveMonthlyRate(rate: Int)
 
-    fun getMonthlyRate(): Double?
+    fun getMonthlyRate(): Int?
 
     fun saveDescription(description: String)
 
@@ -105,82 +105,82 @@ internal class CarDataRepositoryImpl(
 
     override fun getCarId(): String? = settings.getStringOrNullIfEmpty(CAR_ID_KEY)
 
-    override fun saveHourlyRate(rate: Double) {
-        settings.putDouble(HOURLY_RATE_KEY, rate)
+    override fun saveHourlyRate(rate: Int) {
+        settings.putInt(HOURLY_RATE_KEY, rate)
     }
 
-    override fun getHourlyRate(): Double? {
-        val rate = settings.getDouble(HOURLY_RATE_KEY, -1.0)
+    override fun getHourlyRate(): Int? {
+        val rate = settings.getInt(HOURLY_RATE_KEY, -1)
         return if (rate < 0) null else rate
     }
 
-    override fun saveDailyRate(rate: Double) {
-        settings.putDouble(DAILY_RATE_KEY, rate)
+    override fun saveDailyRate(rate: Int) {
+        settings.putInt(DAILY_RATE_KEY, rate)
     }
 
-    override fun getDailyRate(): Double? {
-        val rate = settings.getDouble(DAILY_RATE_KEY, -1.0)
+    override fun getDailyRate(): Int? {
+        val rate = settings.getInt(DAILY_RATE_KEY, -1)
         return if (rate < 0) null else rate
     }
 
-    override fun saveDailyRate4Days(rate: Double?) {
+    override fun saveDailyRate4Days(rate: Int?) {
         if (rate != null && rate >= 0) {
-            settings.putDouble(DAILY_RATE_4_DAYS_KEY, rate)
+            settings.putInt(DAILY_RATE_4_DAYS_KEY, rate)
         } else {
             settings.remove(DAILY_RATE_4_DAYS_KEY)
         }
     }
 
-    override fun getDailyRate4Days(): Double? {
-        val rate = settings.getDouble(DAILY_RATE_4_DAYS_KEY, -1.0)
+    override fun getDailyRate4Days(): Int? {
+        val rate = settings.getInt(DAILY_RATE_4_DAYS_KEY, -1)
         return if (rate < 0) null else rate
     }
 
-    override fun saveDailyRate7Days(rate: Double?) {
+    override fun saveDailyRate7Days(rate: Int?) {
         if (rate != null && rate >= 0) {
-            settings.putDouble(DAILY_RATE_7_DAYS_KEY, rate)
+            settings.putInt(DAILY_RATE_7_DAYS_KEY, rate)
         } else {
             settings.remove(DAILY_RATE_7_DAYS_KEY)
         }
     }
 
-    override fun getDailyRate7Days(): Double? {
-        val rate = settings.getDouble(DAILY_RATE_7_DAYS_KEY, -1.0)
+    override fun getDailyRate7Days(): Int? {
+        val rate = settings.getInt(DAILY_RATE_7_DAYS_KEY, -1)
         return if (rate < 0) null else rate
     }
 
-    override fun saveDailyRate14Days(rate: Double?) {
+    override fun saveDailyRate14Days(rate: Int?) {
         if (rate != null && rate >= 0) {
-            settings.putDouble(DAILY_RATE_14_DAYS_KEY, rate)
+            settings.putInt(DAILY_RATE_14_DAYS_KEY, rate)
         } else {
             settings.remove(DAILY_RATE_14_DAYS_KEY)
         }
     }
 
-    override fun getDailyRate14Days(): Double? {
-        val rate = settings.getDouble(DAILY_RATE_14_DAYS_KEY, -1.0)
+    override fun getDailyRate14Days(): Int? {
+        val rate = settings.getInt(DAILY_RATE_14_DAYS_KEY, -1)
         return if (rate < 0) null else rate
     }
 
-    override fun saveDailyRate21Days(rate: Double?) {
+    override fun saveDailyRate21Days(rate: Int?) {
         if (rate != null && rate >= 0) {
-            settings.putDouble(DAILY_RATE_21_DAYS_KEY, rate)
+            settings.putInt(DAILY_RATE_21_DAYS_KEY, rate)
         } else {
             settings.remove(DAILY_RATE_21_DAYS_KEY)
         }
     }
 
-    override fun getDailyRate21Days(): Double? {
-        val rate = settings.getDouble(DAILY_RATE_21_DAYS_KEY, -1.0)
+    override fun getDailyRate21Days(): Int? {
+        val rate = settings.getInt(DAILY_RATE_21_DAYS_KEY, -1)
         return if (rate < 0) null else rate
     }
 
-    override fun saveMonthlyRate(rate: Double) {
-        settings.putDouble(MONTHLY_RATE_KEY, rate)
+    override fun saveMonthlyRate(rate: Int) {
+        settings.putInt(MONTHLY_RATE_KEY, rate)
     }
 
-    override fun getMonthlyRate(): Double? {
-        val rate = settings.getDouble(MONTHLY_RATE_KEY, -1.0)
+    override fun getMonthlyRate(): Int? {
+        val rate = settings.getInt(MONTHLY_RATE_KEY, -1)
         return if (rate < 0) null else rate
     }
 

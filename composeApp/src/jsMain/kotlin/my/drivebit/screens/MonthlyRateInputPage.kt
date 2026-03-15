@@ -29,7 +29,7 @@ fun MonthlyRateInputPage(onMonthlyRateEntered: () -> Unit = {}) {
     var monthlyRate by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
 
-    val isValid = monthlyRate.toDoubleOrNull()?.let { it >= 0 } == true
+    val isValid = monthlyRate.toIntOrNull()?.let { it >= 0 } == true
 
     buttonViewModel.setState(
         if (isValid) {
@@ -50,8 +50,8 @@ fun MonthlyRateInputPage(onMonthlyRateEntered: () -> Unit = {}) {
                     label = "Оплата за месяц (₽)",
                     value = monthlyRate,
                     onValueChange = { newValue ->
-                        if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' || it == ',' }) {
-                            monthlyRate = newValue.replace(',', '.')
+                        if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                            monthlyRate = newValue
                             error = null
                         }
                     },
@@ -80,7 +80,7 @@ fun MonthlyRateInputPage(onMonthlyRateEntered: () -> Unit = {}) {
                             enabledColor = CSSColors.Blue,
                             text = "Продолжить",
                             onClick = {
-                                val rateValue = monthlyRate.toDoubleOrNull()
+                                val rateValue = monthlyRate.toIntOrNull()
                                 if (rateValue != null && rateValue >= 0) {
                                     carDataRepository.saveMonthlyRate(rateValue)
                                     onMonthlyRateEntered()

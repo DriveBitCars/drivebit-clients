@@ -31,7 +31,7 @@ sealed interface CreateCarFromDailyRateState {
 interface CreateCarFromDailyRateViewModel {
     val state: StateFlow<CreateCarFromDailyRateState>
 
-    fun submitDailyRate(rate: Double)
+    fun submitDailyRate(rate: Int)
 
     fun createFromSavedDailyRate()
 
@@ -60,7 +60,7 @@ class CreateCarFromDailyRateViewModelImpl(
         submitDailyRate(rate)
     }
 
-    override fun submitDailyRate(rate: Double) {
+    override fun submitDailyRate(rate: Int) {
         viewModelScope.launch {
             carDataRepository.saveDailyRate(rate)
             _state.update { CreateCarFromDailyRateState.Loading }

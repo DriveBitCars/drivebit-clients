@@ -10,6 +10,7 @@ import my.drivebit.components.CarDescription
 import my.drivebit.components.CarLocationMap
 import my.drivebit.components.CarOwnerSection
 import my.drivebit.components.CarPhotosSection
+import my.drivebit.components.CarDepositSection
 import my.drivebit.components.CarRatesSection
 import my.drivebit.components.CarSpecsRow
 import my.drivebit.components.CarTitleSection
@@ -127,6 +128,8 @@ private fun CarDetailContent(
                 )
 
                 CarRatesSection(car)
+
+                CarDepositSection(car)
 
                 CarSpecsRow(car)
 

@@ -60,8 +60,8 @@ internal class CarSearchRepositoryImpl(
             val currentTaskShortName = values[1] as String?
             val startDate = values[2] as String?
             val endDate = values[3] as String?
-            val dailyRateMin = values[4] as Double?
-            val dailyRateMax = values[5] as Double?
+            val dailyRateMin = values[4] as Int?
+            val dailyRateMax = values[5] as Int?
             val brandId = values[6] as Int?
             val modelId = values[7] as Int?
             val driveTypeName = values[8] as String?
@@ -136,8 +136,8 @@ internal class CarSearchRepositoryImpl(
                         dateFrom = startDate,
                         dateTo = endDate,
                         availableMileagePerDayKmMin = availableMileagePerDayKmMin ?: filter?.availableMileagePerDayKmMin,
-                        dailyPriceMin = dailyRateMin?.toInt() ?: filter?.dailyPriceMin,
-                        dailyPriceMax = dailyRateMax?.toInt() ?: filter?.dailyPriceMax,
+                        dailyPriceMin = dailyRateMin ?: filter?.dailyPriceMin,
+                        dailyPriceMax = dailyRateMax ?: filter?.dailyPriceMax,
                         yearMin = yearMin ?: filter?.yearMin,
                         yearMax = yearMax ?: filter?.yearMax,
                         seatsMin = seatsMin ?: filter?.seatsMin,
