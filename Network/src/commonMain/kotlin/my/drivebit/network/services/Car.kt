@@ -263,7 +263,7 @@ data class CarCreateRequest(
     val driveType: String? = null,
     val engineType: String? = null,
     val engineVolume: Double? = null,
-    val year: Int,
+    @SerialName("year") @JsonNames("year", "Year", "productionYear") val year: Int,
     val seats: Int? = null,
     val trunkSize: String? = null,
     val licensePlate: String? = null,

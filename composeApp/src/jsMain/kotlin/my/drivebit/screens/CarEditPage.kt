@@ -467,15 +467,17 @@ fun CarEditPage() {
                                 numeric = true,
                             )
 
-                            // TextInputField(
-                            //    label = "Год выпуска",
-                            //    value = formData.productionYear,
-                            //    onValueChange = { newValue ->
-                            //        viewModel.handleIntent(CarEditIntent.UpdateProductionYear(newValue))
-                            //    },
-                            //    maxLength = 4,
-                            //    numeric = true,
-                            // )
+                            TextInputField(
+                                label = "Год выпуска",
+                                value = formData.productionYear,
+                                onValueChange = { newValue ->
+                                    if (newValue.length <= 4 && (newValue.isEmpty() || newValue.all { it.isDigit() })) {
+                                        viewModel.handleIntent(CarEditIntent.UpdateProductionYear(newValue))
+                                    }
+                                },
+                                maxLength = 4,
+                                numeric = true,
+                            )
 
                             Row(gap = 12.px) {
                                 ActionButton(
