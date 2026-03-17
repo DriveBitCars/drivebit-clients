@@ -1,5 +1,8 @@
 # Drivebit Clients - Cursor Rules
 
+## Agent Behavior
+- **Do not tell the user what to do** — you do the work yourself to achieve the result. Prefer making changes, running commands, and iterating until the goal is met instead of giving step-by-step instructions for the user to follow.
+
 ## Project Overview
 This is a Kotlin Multiplatform project for Drivebit mobile clients targeting Android, iOS, and Web platforms.
 

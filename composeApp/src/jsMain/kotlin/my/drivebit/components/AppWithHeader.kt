@@ -59,18 +59,6 @@ fun AppWithHeader(content: @Composable () -> Unit) {
                         flexDirection(FlexDirection.Column)
                     }
                 }) {
-                    if (isMobile) {
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                justifyContent(JustifyContent.Center)
-                                padding(12.px, 0.px)
-                                marginBottom(8.px)
-                            }
-                        }) {
-                            HeaderNav()
-                        }
-                    }
                     HeaderRow {
                         Logo()
                         if (!isMobile) {
@@ -83,8 +71,21 @@ fun AppWithHeader(content: @Composable () -> Unit) {
                             CityDisplay()
                             MenuUserButton(butterViewModel::onClick)
                         }
-
                         ButterMenu()
+                    }
+                    if (isMobile) {
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                justifyContent(JustifyContent.Center)
+                                flexWrap(FlexWrap.Wrap)
+                                gap(8.px)
+                                padding(0.px, 0.px, 12.px, 0.px)
+                                marginBottom(8.px)
+                            }
+                        }) {
+                            HeaderNav()
+                        }
                     }
 
                     content()
