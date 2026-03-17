@@ -14,19 +14,26 @@ private val PromoRectButtonBlue: CSSColorValue = Color("#2962FF")
 fun PromoRectButton(
     text: String,
     onClick: () -> Unit,
+    compact: Boolean = false,
 ) {
     Button({
         onClick { onClick() }
         style {
-            width(292.px)
-            height(90.px)
+            if (compact) {
+                width(100.percent)
+                height(72.px)
+                fontSize(CSSTypography.FontSize.sm)
+            } else {
+                width(292.px)
+                height(90.px)
+                fontSize(CSSTypography.FontSize.base)
+            }
             backgroundColor(PromoRectButtonBlue)
             borderRadius(20.px)
             border(0.px)
             color(CSSColors.White)
             cursor("pointer")
             applyTypography(CSSTypography.Styles.button)
-            fontSize(CSSTypography.FontSize.base)
             fontWeight(CSSTypography.FontWeight.semibold)
             property("box-sizing", "border-box")
         }

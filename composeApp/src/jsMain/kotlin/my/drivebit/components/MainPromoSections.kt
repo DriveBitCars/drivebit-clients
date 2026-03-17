@@ -1,7 +1,10 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.design.CSSColors
 import my.drivebit.shared.storage.Storage
@@ -13,7 +16,6 @@ import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
@@ -110,6 +112,7 @@ private fun WhySectionLeftContent(isMobile: Boolean) {
                     PromoRectButton(
                         text = "Арендовать автомобиль",
                         onClick = { window.location.href = "/search" },
+                        compact = isMobile,
                     )
                 }
     }
@@ -153,8 +156,13 @@ private fun WhySectionHeading(
     }
 }
 
-private const val ADVANTAGE_TOOLTIP_TEXT =
-    "Частники не зарабатывают на несоразмерной ответственности за повреждения и не штрафуют за ложные повреждения автомобиля."
+private val ADVANTAGES = listOf(
+    "Стоит дешевле" to "Стоимость аренды от частного владельца при длительных сроках значительно дешевле. Экономия может составлять 30–40%.",
+    "Машины чище" to "Авто сдаются от случая к случаю, а не постоянно. Собственник значительно лучше следит за состоянием своей машины.",
+    "Пробег меньше" to "Автомобили не используются в коммерческих целях на постоянной основе, дальние поездки на таких машинах организуются нечасто.",
+    "Выбор больше" to "Так как сервис объединяет разных собственников, выбор машин значительно расширяется.",
+    "Оформить проще" to "Максимально простое оформление аренды — регистрируетесь в сервисе, выбираете автомобиль, подаёте заявку на аренду.",
+)
 
 @Composable
 private fun AdvantageGrid(isMobile: Boolean) {
@@ -175,89 +183,109 @@ private fun AdvantageGrid(isMobile: Boolean) {
             }
         }
     }) {
-        AdvantageChip("Стоит дешевле")
-        AdvantageChip("Машины чище")
-        Div({
-            style {
-                width(100.percent)
-                position(Position.Relative)
-            }
-        }) {
-            AdvantageTooltipBlock(ADVANTAGE_TOOLTIP_TEXT)
-            Img(
-                src = "/images/arm.svg",
-                alt = "",
-                attrs = {
-                    style {
-                        position(Position.Absolute)
-                        bottom(0.px)
-                        right(8.px)
-                        width(48.px)
-                        height(48.px)
-                        property("object-fit", "contain")
-                        property("pointer-events", "none")
-                    }
-                },
-            )
+        ADVANTAGES.forEach { (title, fullText) ->
+            AdvantageChip(shortTitle = title, fullText = fullText, isMobile = isMobile)
         }
-        AdvantageChip("Пробег меньше")
-        AdvantageChip("Выбор больше")
-        AdvantageChip("Оформить проще")
     }
 }
 
 @Composable
-private fun AdvantageTooltipBlock(bodyText: String) {
+private fun AdvantageChip(shortTitle: String, fullText: String, isMobile: Boolean) {
+    var hovered by remember { mutableStateOf(false) }
+    val chipHeight = if (isMobile) 120.px else 150.px
+    val chipWidth = if (isMobile) 100.percent else 330.px
+    val fontSizeTitle = if (isMobile) CSSTypography.FontSize.lg else CSSTypography.FontSize.xxl
+    val fontSizeBack = CSSTypography.FontSize.sm
+
     Div({
         style {
-            height(150.px)
-            width(330.px)
-            padding(14.px, 16.px)
-            backgroundColor(CSSColors.White)
-            borderRadius(8.px)
-            property("box-shadow", "0 2px 8px rgba(0,0,0,0.08)")
-            property("border", "1px solid rgba(0,0,0,0.08)")
+            height(chipHeight)
+            if (isMobile) width(100.percent) else width(chipWidth)
+            property("perspective", "1000px")
             property("box-sizing", "border-box")
+            cursor("pointer")
         }
+        onMouseEnter { hovered = true }
+        onMouseLeave { hovered = false }
     }) {
-        Column(
-            modifier = { width(100.percent) },
-        ) {
-            Span({
+        Div({
+            style {
+                position(Position.Relative)
+                width(100.percent)
+                height(100.percent)
+                property("transform-style", "preserve-3d")
+                property("transition", "transform 0.5s ease")
+                if (hovered) {
+                    property("transform", "rotateY(180deg)")
+                }
+            }
+        }) {
+            Div({
                 style {
-                    applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.lg)
-                    color(CSSColors.Black)
-                    lineHeight("1.4")
+                    position(Position.Absolute)
+                    left(0.px)
+                    top(0.px)
+                    width(100.percent)
+                    height(100.percent)
+                    padding(14.px, 18.px)
+                    backgroundColor(Color("#09052B"))
+                    color(CSSColors.White)
+                    borderRadius(20.px)
+                    property("box-sizing", "border-box")
+                    property("box-shadow", "0 4px 12px rgba(0,0,0,0.15)")
+                    property("backface-visibility", "hidden")
+                    property("-webkit-backface-visibility", "hidden")
+                    property("display", "flex")
+                    property("align-items", "center")
+                    property("justify-content", "center")
+                    property("text-align", "center")
                 }
             }) {
-                Text(bodyText)
+                Span({
+                    style {
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(fontSizeTitle)
+                        fontWeight(CSSTypography.FontWeight.semibold)
+                        lineHeight("1.25")
+                    }
+                }) {
+                    Text(shortTitle)
+                }
+            }
+            Div({
+                style {
+                    position(Position.Absolute)
+                    left(0.px)
+                    top(0.px)
+                    width(100.percent)
+                    height(100.percent)
+                    padding(14.px, 18.px)
+                    backgroundColor(CSSColors.White)
+                    color(CSSColors.Black)
+                    borderRadius(20.px)
+                    property("box-sizing", "border-box")
+                    property("box-shadow", "0 4px 12px rgba(0,0,0,0.15)")
+                    property("backface-visibility", "hidden")
+                    property("-webkit-backface-visibility", "hidden")
+                    property("transform", "rotateY(180deg)")
+                    property("display", "flex")
+                    property("align-items", "center")
+                    property("justify-content", "center")
+                    property("overflow-y", "auto")
+                }
+            }) {
+                Span({
+                    style {
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(fontSizeBack)
+                        lineHeight("1.4")
+                        property("text-align", "center")
+                    }
+                }) {
+                    Text(fullText)
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun AdvantageChip(label: String) {
-    Button({
-        style {
-            height(150.px)
-            width(330.px)
-            padding(14.px, 18.px)
-            backgroundColor(Color("#09052B"))
-            color(CSSColors.White)
-            border(0.px)
-            borderRadius(20.px)
-            cursor("pointer")
-            applyTypography(CSSTypography.Styles.button)
-            fontSize(CSSTypography.FontSize.xxl)
-            fontWeight(CSSTypography.FontWeight.semibold)
-            property("text-align", "center")
-            property("box-sizing", "border-box")
-            property("box-shadow", "0 4px 12px rgba(0,0,0,0.15)")
-        }
-    }) {
-        Text(label)
     }
 }
 
@@ -265,55 +293,58 @@ private fun AdvantageChip(label: String) {
 private fun EarnSectionCard() {
     val storage: Storage = koinInject()
     PromoCard(backgroundColor = CSSColors.White) {
-        Column(
-            gap = 8.px,
-            modifier = {
-                width(100.percent)
-                alignItems(AlignItems.Center)
-            },
-        ) {
-            Span({
-                style {
-                    applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.xxl)
-                    fontWeight(CSSTypography.FontWeight.bold)
-                    color(CSSColors.Black)
-                    property("text-align", "center")
-                    lineHeight("1.25")
-                }
-            }) {
-                Text("Получайте доход от автомобиля с DriveBit")
-            }
-            Span({
-                style {
-                    applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.base)
-                    color(CSSColors.Gray600)
-                    property("text-align", "center")
-                    property("max-width", "480px")
-                    lineHeight("1.5")
-                }
-            }) {
-                Text("Подайте заявку на регистрацию в сервисе и сдавайте свой автомобиль на время пока им не пользуетесь.")
-            }
-            Div({
-                style {
-                    marginTop(20.px)
+        ResponsiveContainer { isMobile ->
+            Column(
+                gap = 8.px,
+                modifier = {
                     width(100.percent)
-                    property("max-width", "280px")
+                    alignItems(AlignItems.Center)
+                },
+            ) {
+                Span({
+                    style {
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(if (isMobile) CSSTypography.FontSize.xl else CSSTypography.FontSize.xxl)
+                        fontWeight(CSSTypography.FontWeight.bold)
+                        color(CSSColors.Black)
+                        property("text-align", "center")
+                        lineHeight("1.25")
+                    }
+                }) {
+                    Text("Получайте доход от автомобиля с DriveBit")
                 }
-            }) {
-                PromoRectButton(
-                    text = "Сдать автомобиль",
-                    onClick = {
-                        if (storage.isLogined()) {
-                            window.location.href = "/list-your-car.html"
-                        } else {
-                            val redirect = "/list-your-car.html".encodeUrlParameter()
-                            window.location.href = "/login-by-phone?$REDIRECT_PATH=$redirect"
-                        }
-                    },
-                )
+                Span({
+                    style {
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(CSSTypography.FontSize.sm)
+                        color(CSSColors.Gray600)
+                        property("text-align", "center")
+                        property("max-width", "480px")
+                        lineHeight("1.5")
+                    }
+                }) {
+                    Text("Подайте заявку на регистрацию в сервисе и сдавайте свой автомобиль на время пока им не пользуетесь.")
+                }
+                Div({
+                    style {
+                        marginTop(20.px)
+                        width(100.percent)
+                        property("max-width", "280px")
+                    }
+                }) {
+                    PromoRectButton(
+                        text = "Сдать автомобиль",
+                        compact = isMobile,
+                        onClick = {
+                            if (storage.isLogined()) {
+                                window.location.href = "/list-your-car.html"
+                            } else {
+                                val redirect = "/list-your-car.html".encodeUrlParameter()
+                                window.location.href = "/login-by-phone?$REDIRECT_PATH=$redirect"
+                            }
+                        },
+                    )
+                }
             }
         }
     }
