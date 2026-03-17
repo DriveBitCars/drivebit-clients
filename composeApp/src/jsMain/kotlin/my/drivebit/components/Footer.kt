@@ -20,7 +20,7 @@ private fun FooterLink(href: String, text: String, centered: Boolean = false) {
         attr("href", href)
         style {
             applyTypography(CSSTypography.Styles.body)
-            fontSize(CSSTypography.FontSize.sm)
+            fontSize(CSSTypography.FontSize.base)
             color(FooterTextColor)
             textDecoration("none")
             property("transition", "opacity 0.2s ease")
@@ -83,7 +83,7 @@ fun Footer() {
                         Span({
                             style {
                                 applyTypography(CSSTypography.Styles.body)
-                                fontSize(CSSTypography.FontSize.sm)
+                                fontSize(CSSTypography.FontSize.base)
                                 color(FooterTextColor)
                                 property("text-align", "center")
                                 property("display", "block")
