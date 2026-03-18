@@ -6,6 +6,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.browser.document
+import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.HeroBanner
@@ -19,6 +20,11 @@ import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.maps.models.MapMarker
 import my.drivebit.repositories.CurrentFiltersRepository
+import my.drivebit.utils.END_AT
+import my.drivebit.utils.START_AT
+import my.drivebit.utils.dateToEndAtIso
+import my.drivebit.utils.dateToStartAtIso
+import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.viewmodels.CarSearchViewModel
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.FiltersViewModel
@@ -136,7 +142,19 @@ fun HomePage() {
                         marginTop(20.px)
                     }
                 }) {
-                    CarsGrid(cars = displayedCars)
+                    CarsGrid(
+                        cars = displayedCars,
+                        onCarClick = { car ->
+                            val params = mutableListOf("id=${car.id.encodeUrlParameter()}")
+                            dateToStartAtIso(startState.date)?.let {
+                                params.add("$START_AT=${it.encodeUrlParameter()}")
+                            }
+                            dateToEndAtIso(endState.date)?.let {
+                                params.add("$END_AT=${it.encodeUrlParameter()}")
+                            }
+                            window.location.href = "/car-detail?${params.joinToString("&")}"
+                        },
+                    )
                     PaginationBar(
                         currentPage = paginationInfo.first,
                         totalPages = paginationInfo.second,

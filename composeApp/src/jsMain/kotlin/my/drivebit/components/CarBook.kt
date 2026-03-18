@@ -75,8 +75,53 @@ fun CarBook(
     val bookState = state as? RentState.Book ?: return
 
     LaunchedEffect(initialStartAt, initialEndAt) {
-        initialStartAt?.let { viewModel.setStartDate(it) }
-        initialEndAt?.let { viewModel.setEndDate(it) }
+        when {
+            initialStartAt != null && initialEndAt != null -> {
+                // Если стартовая дата = "сегодня" и время уже в прошлом,
+                // бэкенд возвращает conflict: "Дата начала бронирования должна быть позже текущего времени."
+                // Поэтому корректируем startAt на (now + 1h) перед расчетом.
+                val tz = TimeZone.currentSystemDefault()
+                val nowInstant = Clock.System.now()
+
+                val startInstant = kotlinx.datetime.Instant.parse(initialStartAt)
+                val startLdt = startInstant.toLocalDateTime(tz)
+                val today = nowInstant.toLocalDateTime(tz).date
+
+                val adjustedStartInstant =
+                    if (startLdt.date == today && startInstant.epochSeconds <= nowInstant.epochSeconds) {
+                        nowInstant + 1.hours
+                    } else {
+                        startInstant
+                    }
+
+                val adjustedStartAt = adjustedStartInstant.toString()
+
+                val adjustedEndAt =
+                    if (adjustedStartInstant != startInstant) {
+                        val endInstant = kotlinx.datetime.Instant.parse(initialEndAt)
+                        val endLdt = endInstant.toLocalDateTime(tz)
+                        val endTimeWasDefault = endLdt.hour == 10 && endLdt.minute == 0
+
+                        // Если endAt пришёл "только с датами" (значение по умолчанию 10:00),
+                        // подтягиваем время конца к времени начала.
+                        if (endTimeWasDefault) {
+                            val adjustedStartLdt = adjustedStartInstant.toLocalDateTime(tz)
+                            val newEndLdt = LocalDateTime(endLdt.date, adjustedStartLdt.time)
+                            newEndLdt.toInstant(tz).toString()
+                        } else {
+                            initialEndAt
+                        }
+                    } else {
+                        initialEndAt
+                    }
+
+                viewModel.setInitialDates(adjustedStartAt, adjustedEndAt)
+            }
+            else -> {
+                initialStartAt?.let { viewModel.setStartDate(it) }
+                initialEndAt?.let { viewModel.setEndDate(it) }
+            }
+        }
     }
 
     val disabledDates = remember(carBookings) { parseDisabledDatesFromBookings(carBookings) }
@@ -121,7 +166,7 @@ fun CarBook(
             startDateTimeViewModel.setTime(null)
         }
     }
-    LaunchedEffect(bookState.endDate) {
+    LaunchedEffect(bookState.endDate, startDateTimeState.time) {
         bookState.endDate?.let { iso ->
             runCatching {
                 val instant = kotlinx.datetime.Instant.parse(iso)
@@ -134,7 +179,7 @@ fun CarBook(
                 val datePart = iso.take(10)
                 if (datePart.length == 10) {
                     endDateTimeViewModel.setDate(datePart)
-                    endDateTimeViewModel.setTime("18:00")
+                    endDateTimeViewModel.setTime(startDateTimeState.time ?: "10:00")
                 }
             }
         } ?: run {
@@ -192,6 +237,19 @@ fun CarBook(
                         }
                     }) {
                         Text("${bookState.middlePrice} ₽ / сутки")
+                    }
+                    if (bookState.depositAmount.isNotEmpty()) {
+                        Span({
+                            style {
+                                display(DisplayStyle.Block)
+                                applyTypography(CSSTypography.Styles.body)
+                                fontSize(CSSTypography.FontSize.sm)
+                                color(CSSColors.Gray600)
+                                marginTop(2.px)
+                            }
+                        }) {
+                            Text("Депозит: ${bookState.depositAmount} ₽")
+                        }
                     }
                     Span({
                         style {
@@ -259,7 +317,7 @@ fun CarBook(
             viewModel = endDateTimeViewModel,
             minDate = endDateMinDate,
             disabledDates = disabledDates,
-            defaultTime = "18:00",
+            defaultTime = startDateTimeState.time ?: "10:00",
             onDateTimeChanged = { date, time ->
                 viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
             },
@@ -269,7 +327,7 @@ fun CarBook(
         BookingTimePickerDialog(
             label = "Время окончания",
             viewModel = endDateTimeViewModel,
-            defaultTime = "18:00",
+            defaultTime = startDateTimeState.time ?: "10:00",
             onDateTimeChanged = { date, time ->
                 viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
             },

@@ -780,8 +780,10 @@ class CarEditMviViewModelImpl(
             dailyRate = NumberFormatter.formatInt(car.resolvedDailyRate().takeIf { it > 0 }),
             dailyRate4Days = car.dailyRate4Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             dailyRate7Days = car.dailyRate7Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
-            dailyRate14Days = car.dailyRate14Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
-            dailyRate21Days = car.dailyRate21Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
+            dailyRate14Days =
+                car.dailyRate14Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
+            dailyRate21Days =
+                car.dailyRate21Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             deposit = car.deposit?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             photos = car.photos,

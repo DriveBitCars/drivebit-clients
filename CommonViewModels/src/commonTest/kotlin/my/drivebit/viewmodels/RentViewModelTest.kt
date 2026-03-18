@@ -256,4 +256,100 @@ class RentViewModelTest {
             val state = viewModel.state.value as RentState.NavigateToLogin
             assertEquals("car-123", state.carId)
         }
+
+    @Test
+    fun `middlePrice uses pricePerDay from API when present`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking {
+                    CheckBookingAvailabilityResponse(
+                        isAvailable = true,
+                        estimatedPrice = 5400.0,
+                        pricePerDay = 2700.0,
+                        totalPrice = 5400.0,
+                    )
+                }
+            val storage = FakeStorage(isLoggedIn = true)
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    storage = storage,
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2026-03-18T22:55:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2026-03-20T18:00:00Z")
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as RentState.Book
+            assertEquals("5400", state.totalAmount)
+            assertEquals("2700", state.middlePrice)
+        }
+
+    @Test
+    fun `depositAmount is set when estimatedDeposit is non-zero`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking {
+                    CheckBookingAvailabilityResponse(
+                        isAvailable = true,
+                        estimatedPrice = 3000.0,
+                        pricePerDay = 1500.0,
+                        totalPrice = 3000.0,
+                        estimatedDeposit = 10000.0,
+                    )
+                }
+            val storage = FakeStorage(isLoggedIn = true)
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    storage = storage,
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2026-03-18T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2026-03-20T10:00:00Z")
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as RentState.Book
+            assertEquals("10000", state.depositAmount)
+        }
+
+    @Test
+    fun `depositAmount is empty when estimatedDeposit is zero`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking {
+                    CheckBookingAvailabilityResponse(
+                        isAvailable = true,
+                        estimatedPrice = 5400.0,
+                        pricePerDay = 2700.0,
+                        totalPrice = 5400.0,
+                        estimatedDeposit = 0.0,
+                    )
+                }
+            val storage = FakeStorage(isLoggedIn = true)
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    storage = storage,
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2026-03-18T22:55:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2026-03-20T18:00:00Z")
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as RentState.Book
+            assertEquals("", state.depositAmount)
+        }
 }
