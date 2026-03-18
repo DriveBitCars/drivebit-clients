@@ -259,7 +259,7 @@ fun HeroDateRangeSelector(
             onClick { startDateViewModel.openCalendar() }
         }) {
             DateField(
-                label = "Начало аренды",
+                label = if (compact) "с" else "Начало аренды",
                 viewModel = startDateViewModel,
             )
             CalendarIconPurple(size = if (compact) 20.px else 24.px)
@@ -287,7 +287,7 @@ fun HeroDateRangeSelector(
             onClick { endDateViewModel.openCalendar() }
         }) {
             DateField(
-                label = "Завершение аренды",
+                label = if (compact) "по" else "Завершение аренды",
                 viewModel = endDateViewModel,
                 minDate = startDate,
             )

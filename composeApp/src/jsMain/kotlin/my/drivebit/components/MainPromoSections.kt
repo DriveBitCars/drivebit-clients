@@ -90,7 +90,9 @@ private fun WhySectionLeftContent(isMobile: Boolean) {
     Column(
         gap = 6.px,
         modifier = {
-            if (!isMobile) {
+            if (isMobile) {
+                width(100.percent)
+            } else {
                 flex(1)
                 property("min-height", "100%")
                 property("align-self", "stretch")
@@ -106,7 +108,11 @@ private fun WhySectionLeftContent(isMobile: Boolean) {
         )
                 Div({
                     style {
-                        property("align-self", "flex-start")
+                        if (isMobile) {
+                            width(100.percent)
+                        } else {
+                            property("align-self", "flex-start")
+                        }
                     }
                 }) {
                     PromoRectButton(
