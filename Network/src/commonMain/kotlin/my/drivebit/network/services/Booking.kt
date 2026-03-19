@@ -8,6 +8,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.consumeResponse
 import my.drivebit.network.parseResponse
@@ -37,7 +38,10 @@ data class CheckBookingAvailabilityRequest(
 data class CheckBookingAvailabilityResponse(
     val isAvailable: Boolean,
     val conflict: String? = null,
-    val estimatedPrice: Double? = null,
+    @JsonNames("estimatedPrice", "estimated_price") val estimatedPrice: Double? = null,
+    @JsonNames("pricePerDay", "price_per_day") val pricePerDay: Double? = null,
+    @JsonNames("totalPrice", "total_price") val totalPrice: Double? = null,
+    @JsonNames("estimatedDeposit", "estimated_deposit") val estimatedDeposit: Double? = null,
 )
 
 @Serializable

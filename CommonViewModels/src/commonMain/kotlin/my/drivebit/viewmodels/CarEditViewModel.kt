@@ -201,13 +201,43 @@ class CarEditViewModelImpl(
             trunkSizeSearch = resolvedTrunkSizeTranslate,
             address = car.ValidAddressString ?: "",
             description = car.general.description ?: "",
-            hourlyRate = car.hourlyRate?.toInt()?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it) } ?: "",
-            dailyRate = car.dailyRate?.toInt()?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it) } ?: "",
-            dailyRate4Days = car.dailyRate4Days?.toInt()?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it) } ?: "",
-            dailyRate7Days = car.dailyRate7Days?.toInt()?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it) } ?: "",
-            dailyRate14Days = car.dailyRate14Days?.toInt()?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it) } ?: "",
-            dailyRate21Days = car.dailyRate21Days?.toInt()?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it) } ?: "",
-            deposit = car.deposit?.toInt()?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it) } ?: "",
+            hourlyRate =
+                car.hourlyRate
+                    ?.toInt()
+                    ?.takeIf { it > 0 }
+                    ?.let { NumberFormatter.formatInt(it) } ?: "",
+            dailyRate =
+                car.dailyRate
+                    ?.toInt()
+                    ?.takeIf { it > 0 }
+                    ?.let { NumberFormatter.formatInt(it) } ?: "",
+            dailyRate4Days =
+                car.dailyRate4Days?.toInt()?.takeIf { it > 0 }?.let {
+                    NumberFormatter.formatInt(
+                        it,
+                    )
+                } ?: "",
+            dailyRate7Days =
+                car.dailyRate7Days?.toInt()?.takeIf { it > 0 }?.let {
+                    NumberFormatter.formatInt(
+                        it,
+                    )
+                } ?: "",
+            dailyRate14Days =
+                car.dailyRate14Days
+                    ?.toInt()
+                    ?.takeIf { it > 0 }
+                    ?.let { NumberFormatter.formatInt(it) } ?: "",
+            dailyRate21Days =
+                car.dailyRate21Days
+                    ?.toInt()
+                    ?.takeIf { it > 0 }
+                    ?.let { NumberFormatter.formatInt(it) } ?: "",
+            deposit =
+                car.deposit
+                    ?.toInt()
+                    ?.takeIf { it > 0 }
+                    ?.let { NumberFormatter.formatInt(it) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             photos = car.photos,
         )

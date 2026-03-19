@@ -1,7 +1,7 @@
 config.devServer = config.devServer || {};
 config.devServer.historyApiFallback = true;
 config.devServer.open = false;
-config.devServer.port = 8080;
+config.devServer.port = process.env.PORT ? parseInt(process.env.PORT, 10) : 'auto';
 config.devServer.hot = true;
 config.devServer.liveReload = true;
 

@@ -216,9 +216,9 @@ fun BookingDatePickerForDateTime(
                 onMonthChange = { displayMonth = it },
                 onDateSelected = { dateStr ->
                     viewModel.setDate(dateStr)
-                    if (state.time == null) viewModel.setTime(defaultTime)
-                    val time = state.time ?: defaultTime
-                    onDateTimeChanged(dateStr, time)
+                    val timeToUse = state.time ?: defaultTime
+                    if (state.time == null) viewModel.setTime(timeToUse)
+                    onDateTimeChanged(dateStr, timeToUse)
                     viewModel.closeCalendar()
                 },
             )

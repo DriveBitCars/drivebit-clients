@@ -27,6 +27,11 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.repositories.CurrentFiltersRepository
+import my.drivebit.utils.END_AT
+import my.drivebit.utils.START_AT
+import my.drivebit.utils.dateToEndAtIso
+import my.drivebit.utils.dateToStartAtIso
+import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.SearchPageDateEndViewModel
 import my.drivebit.viewmodels.SearchPageDateViewModel
@@ -72,6 +77,14 @@ fun SearchPage() {
     val filterDriveTypeTranslate by currentFiltersRepository.driveTypeTranslate.collectAsState(null)
     val filterBodyTypeTranslate by currentFiltersRepository.bodyTypeTranslate.collectAsState(null)
     val filterSeatsMin by currentFiltersRepository.seatsMin.collectAsState(null)
+    val startDateByRepo by currentFiltersRepository.startState.collectAsState(null)
+    val endDateByRepo by currentFiltersRepository.endState.collectAsState(null)
+
+    LaunchedEffect(searchParams.first, searchParams.second) {
+        searchParams.first?.let { currentFiltersRepository.updateStartDate(it) }
+        searchParams.second?.let { currentFiltersRepository.updateEndDate(it) }
+    }
+
     var showPriceFilter by remember { mutableStateOf(false) }
     var showBrandFilter by remember { mutableStateOf(false) }
     var showDriveTypeFilter by remember { mutableStateOf(false) }
@@ -317,7 +330,21 @@ fun SearchPage() {
                             }
                         }
                         if (currentState.cars.isNotEmpty()) {
-                            CarsGrid(cars = displayedCars)
+                            CarsGrid(
+                                cars = displayedCars,
+                                onCarClick = { car ->
+                                    val startDate = startDateByRepo ?: searchParams.first
+                                    val endDate = endDateByRepo ?: searchParams.second
+                                    val params = mutableListOf("id=${car.id.encodeUrlParameter()}")
+                                    dateToStartAtIso(startDate)?.let {
+                                        params.add("$START_AT=${it.encodeUrlParameter()}")
+                                    }
+                                    dateToEndAtIso(endDate)?.let {
+                                        params.add("$END_AT=${it.encodeUrlParameter()}")
+                                    }
+                                    window.location.href = "/car-detail?${params.joinToString("&")}"
+                                },
+                            )
                             PaginationBar(
                                 currentPage = paginationInfo.first,
                                 totalPages = paginationInfo.second,

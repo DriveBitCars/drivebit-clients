@@ -23,6 +23,7 @@ sealed interface RentState {
         val showEndDateError: Boolean = false,
         val middlePrice: String = "",
         val totalAmount: String = "",
+        val depositAmount: String = "",
         val isCreating: Boolean = false,
         val createError: String? = null,
     ) : RentState
@@ -42,6 +43,8 @@ interface RentViewModel {
     fun setStartDate(date: String?)
 
     fun setEndDate(date: String?)
+
+    fun setInitialDates(startAt: String?, endAt: String?)
 
     fun consumeNavigationEvent()
 
@@ -98,6 +101,37 @@ class RentViewModelImpl(
             }
         }
         scheduleCalculate()
+    }
+
+    override fun setInitialDates(startAt: String?, endAt: String?) {
+        val startTrimmed = startAt?.takeIf { it.isNotBlank() }
+        val endDateValid =
+            when {
+                startTrimmed == null || endAt.isNullOrBlank() -> endAt?.takeIf { it.isNotBlank() }
+                else ->
+                    runCatching {
+                        val startInstant = Instant.parse(startTrimmed)
+                        val endInstant = Instant.parse(endAt)
+                        if (endInstant <= startInstant) null else endAt
+                    }.getOrElse { endAt }
+            }
+        _state.update {
+            if (it is RentState.Book) {
+                it.copy(
+                    startDate = startTrimmed,
+                    endDate = endDateValid,
+                    showStartDateError = false,
+                    showEndDateError = false,
+                )
+            } else {
+                it
+            }
+        }
+        if (startTrimmed != null && endDateValid != null) {
+            scheduleCalculateWith(startTrimmed, endDateValid)
+        } else {
+            scheduleCalculate()
+        }
     }
 
     override fun onBookClick() {
@@ -165,6 +199,52 @@ class RentViewModelImpl(
             }
     }
 
+    private fun scheduleCalculateWith(startAt: String, endAt: String) {
+        calculateJob?.cancel()
+        calculateJob =
+            viewModelScope.launch {
+                runCatching {
+                    booking.calculate(
+                        CheckBookingAvailabilityRequest(
+                            carId = carId,
+                            startAt = startAt,
+                            endAt = endAt,
+                        ),
+                    )
+                }.onSuccess { response ->
+                    val total = response.totalPrice ?: response.estimatedPrice ?: 0.0
+                    val days = daysBetween(startAt, endAt).coerceAtLeast(1)
+                    val pricePerDayFromApi = response.pricePerDay
+                    val middle =
+                        when {
+                            pricePerDayFromApi != null && pricePerDayFromApi > 0 -> pricePerDayFromApi
+                            days > 0 -> total / days
+                            else -> 0.0
+                        }
+                    val deposit = response.estimatedDeposit ?: 0.0
+                    _state.update {
+                        if (it is RentState.Book) {
+                            it.copy(
+                                totalAmount = formatPrice(total),
+                                middlePrice = formatPrice(middle),
+                                depositAmount = if (deposit > 0) formatPrice(deposit) else "",
+                            )
+                        } else {
+                            it
+                        }
+                    }
+                }.onFailure {
+                    _state.update { current ->
+                        if (current is RentState.Book) {
+                            current.copy(totalAmount = "", middlePrice = "", depositAmount = "")
+                        } else {
+                            current
+                        }
+                    }
+                }
+            }
+    }
+
     private fun scheduleCalculate() {
         calculateJob?.cancel()
         calculateJob =
@@ -174,7 +254,15 @@ class RentViewModelImpl(
                 val end = current.endDate?.takeIf { it.isNotBlank() }
                 if (start == null || end == null) {
                     _state.update {
-                        if (it is RentState.Book) it.copy(totalAmount = "", middlePrice = "") else it
+                        if (it is RentState.Book) {
+                            it.copy(
+                                totalAmount = "",
+                                middlePrice = "",
+                                depositAmount = "",
+                            )
+                        } else {
+                            it
+                        }
                     }
                     return@launch
                 }
@@ -187,14 +275,22 @@ class RentViewModelImpl(
                         ),
                     )
                 }.onSuccess { response ->
-                    val total = response.estimatedPrice ?: 0.0
+                    val total = response.totalPrice ?: response.estimatedPrice ?: 0.0
                     val days = daysBetween(start, end).coerceAtLeast(1)
-                    val middle = if (days > 0) total / days else 0.0
+                    val pricePerDayFromApi = response.pricePerDay
+                    val middle =
+                        when {
+                            pricePerDayFromApi != null && pricePerDayFromApi > 0 -> pricePerDayFromApi
+                            days > 0 -> total / days
+                            else -> 0.0
+                        }
+                    val deposit = response.estimatedDeposit ?: 0.0
                     _state.update {
                         if (it is RentState.Book) {
                             it.copy(
                                 totalAmount = formatPrice(total),
                                 middlePrice = formatPrice(middle),
+                                depositAmount = if (deposit > 0) formatPrice(deposit) else "",
                             )
                         } else {
                             it
@@ -203,7 +299,7 @@ class RentViewModelImpl(
                 }.onFailure {
                     _state.update { current ->
                         if (current is RentState.Book) {
-                            current.copy(totalAmount = "", middlePrice = "")
+                            current.copy(totalAmount = "", middlePrice = "", depositAmount = "")
                         } else {
                             current
                         }
