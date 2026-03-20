@@ -89,6 +89,7 @@ fun CarDetailPage() {
                     CarDetailContent(
                         car = currentState.car,
                         owner = currentState.owner,
+                        disabledBookingDates = currentState.disabledBookingDates,
                         koinScope = koinScope,
                     )
                 }
@@ -102,6 +103,7 @@ fun CarDetailPage() {
 private fun CarDetailContent(
     car: my.drivebit.network.services.CarDetailResponse,
     owner: CarOwnerUi?,
+    disabledBookingDates: Set<String>,
     koinScope: org.koin.core.scope.Scope,
 ) {
     Column(gap = 24.px) {
@@ -151,7 +153,7 @@ private fun CarDetailContent(
                     remember(car.id) {
                         koinScope.get<RentViewModel>(parameters = { parametersOf(car.id) })
                     },
-                carBookings = car.carBookings,
+                disabledDates = disabledBookingDates,
                 initialStartAt = getUrlParameter(START_AT).takeIf { it.isNotBlank() },
                 initialEndAt = getUrlParameter(END_AT).takeIf { it.isNotBlank() },
             )

@@ -391,6 +391,7 @@ val commonViewModelsModule: Module =
             CarDetailViewModelImpl(
                 carService = get(),
                 photoService = get(),
+                carAvailability = get(),
                 carId = carId,
             )
         }

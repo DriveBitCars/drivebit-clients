@@ -9,8 +9,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
+import my.drivebit.network.services.CarAvailability
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.Photo
+import my.drivebit.utils.parseDisabledDatesFromIsoIntervals
 import kotlin.runCatching
 
 sealed interface CarDetailState {
@@ -19,6 +21,7 @@ sealed interface CarDetailState {
     data class Success(
         val car: CarDetailResponse,
         val owner: CarOwnerUi? = null,
+        val disabledBookingDates: Set<String> = emptySet(),
     ) : CarDetailState
 
     data class Error(
@@ -40,6 +43,7 @@ interface CarDetailViewModel {
 class CarDetailViewModelImpl(
     private val carService: Car,
     private val photoService: Photo,
+    private val carAvailability: CarAvailability,
     private val carId: String,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : CarDetailViewModel {
@@ -61,6 +65,7 @@ class CarDetailViewModelImpl(
                     ownerId = car.general.owner,
                     ownerName = car.general.ownerName,
                 )
+                loadBookingBlocks()
             }.onFailure { e ->
                 val errorMessage =
                     ErrorHandler.extractErrorMessage(
@@ -69,6 +74,26 @@ class CarDetailViewModelImpl(
                         defaultGenericError = "Не удалось загрузить информацию об автомобиле",
                     )
                 _state.update { CarDetailState.Error(errorMessage) }
+            }
+        }
+    }
+
+    private fun loadBookingBlocks() {
+        if (carId.isBlank()) {
+            return
+        }
+        viewModelScope.launch {
+            val disabled =
+                runCatching {
+                    val blocks = carAvailability.getBlocks(carId)
+                    parseDisabledDatesFromIsoIntervals(blocks.map { it.startAt to it.endAt })
+                }.getOrDefault(emptySet())
+            _state.update { current ->
+                if (current is CarDetailState.Success) {
+                    current.copy(disabledBookingDates = disabled)
+                } else {
+                    current
+                }
             }
         }
     }

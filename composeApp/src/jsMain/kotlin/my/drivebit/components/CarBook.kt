@@ -18,13 +18,11 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
-import my.drivebit.network.services.CarBookingItem
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.START_AT
 import my.drivebit.utils.addDays
 import my.drivebit.utils.encodeUrlParameter
-import my.drivebit.utils.parseDisabledDatesFromBookings
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateTimeFieldViewModel
 import my.drivebit.viewmodels.RentState
@@ -41,7 +39,7 @@ import kotlin.time.Duration.Companion.hours
 @Suppress("FunctionName")
 fun CarBook(
     viewModel: RentViewModel,
-    carBookings: List<CarBookingItem> = emptyList(),
+    disabledDates: Set<String> = emptySet(),
     initialStartAt: String? = null,
     initialEndAt: String? = null,
 ) {
@@ -124,7 +122,6 @@ fun CarBook(
         }
     }
 
-    val disabledDates = remember(carBookings) { parseDisabledDatesFromBookings(carBookings) }
     val startDateTimeViewModel = remember { DateTimeFieldViewModel() }
     val endDateTimeViewModel = remember { DateTimeFieldViewModel() }
 

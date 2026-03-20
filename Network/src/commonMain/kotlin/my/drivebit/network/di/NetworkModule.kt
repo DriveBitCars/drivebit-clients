@@ -11,6 +11,8 @@ import my.drivebit.network.services.AuthImpl
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingImpl
 import my.drivebit.network.services.Car
+import my.drivebit.network.services.CarAvailability
+import my.drivebit.network.services.CarAvailabilityImpl
 import my.drivebit.network.services.CarImpl
 import my.drivebit.network.services.Chat
 import my.drivebit.network.services.ChatImpl
@@ -120,6 +122,9 @@ val networkModule =
         }
         single<Car> {
             CarImpl(get(named("authorized")))
+        }
+        single<CarAvailability> {
+            CarAvailabilityImpl(get(named("authorized")))
         }
         single<Photo> {
             PhotoImpl(get(named("authorized")), get<Car>())

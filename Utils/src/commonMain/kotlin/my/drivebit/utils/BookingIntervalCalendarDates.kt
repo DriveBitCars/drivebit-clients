@@ -1,13 +1,12 @@
 package my.drivebit.utils
 
 import kotlinx.datetime.LocalDate
-import my.drivebit.network.services.CarBookingItem
 
-fun parseDisabledDatesFromBookings(carBookings: List<CarBookingItem>): Set<String> {
+fun parseDisabledDatesFromIsoIntervals(intervals: List<Pair<String, String>>): Set<String> {
     val result = mutableSetOf<String>()
-    for (booking in carBookings) {
-        val startStr = booking.startAt.take(10)
-        val endStr = booking.endAt.take(10)
+    for ((startRaw, endRaw) in intervals) {
+        val startStr = startRaw.take(10)
+        val endStr = endRaw.take(10)
         if (startStr.length != 10 || endStr.length != 10) continue
         runCatching {
             var d = LocalDate.parse(startStr)

@@ -44,7 +44,10 @@ interface RentViewModel {
 
     fun setEndDate(date: String?)
 
-    fun setInitialDates(startAt: String?, endAt: String?)
+    fun setInitialDates(
+        startAt: String?,
+        endAt: String?,
+    )
 
     fun consumeNavigationEvent()
 
@@ -103,7 +106,10 @@ class RentViewModelImpl(
         scheduleCalculate()
     }
 
-    override fun setInitialDates(startAt: String?, endAt: String?) {
+    override fun setInitialDates(
+        startAt: String?,
+        endAt: String?,
+    ) {
         val startTrimmed = startAt?.takeIf { it.isNotBlank() }
         val endDateValid =
             when {
@@ -199,7 +205,10 @@ class RentViewModelImpl(
             }
     }
 
-    private fun scheduleCalculateWith(startAt: String, endAt: String) {
+    private fun scheduleCalculateWith(
+        startAt: String,
+        endAt: String,
+    ) {
         calculateJob?.cancel()
         calculateJob =
             viewModelScope.launch {
