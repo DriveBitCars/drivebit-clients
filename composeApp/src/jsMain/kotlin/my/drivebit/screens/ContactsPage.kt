@@ -55,7 +55,7 @@ fun ContactsPage() {
                     property("margin-bottom", "8px")
                 }
             }) {
-                Text("Агент")
+                Text("Оператор платформы")
             }
             P({
                 style {
@@ -64,7 +64,7 @@ fun ContactsPage() {
                     lineHeight("1.6")
                 }
             }) {
-                Text("Индивидуальный предприниматель Хребтов Никита Алексеевич")
+                Text("ООО «ДрайвБит»")
             }
             P({
                 style {
@@ -73,7 +73,7 @@ fun ContactsPage() {
                     lineHeight("1.6")
                 }
             }) {
-                Text("ОГРНИП: 317774600453811")
+                Text("ОГРН: 1267700092813")
             }
             P({
                 style {
@@ -82,7 +82,7 @@ fun ContactsPage() {
                     lineHeight("1.6")
                 }
             }) {
-                Text("ИНН: 772765091062")
+                Text("ИНН: 9727127969")
             }
             P({
                 style {
@@ -91,7 +91,7 @@ fun ContactsPage() {
                     property("margin-bottom", "8px")
                 }
             }) {
-                Text("Юридический адрес")
+                Text("Почтовый адрес")
             }
             P({
                 style {
@@ -100,7 +100,7 @@ fun ContactsPage() {
                     lineHeight("1.6")
                 }
             }) {
-                Text("117461, Москва, ул. Каховка, 33-1-84")
+                Text("117461, г. Москва, ул. Каховка, д. 33-1")
             }
             P({
                 style {
