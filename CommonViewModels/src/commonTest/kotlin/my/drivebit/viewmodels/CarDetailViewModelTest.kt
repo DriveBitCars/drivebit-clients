@@ -10,10 +10,13 @@ import kotlinx.coroutines.test.runTest
 import my.drivebit.network.NetworkException
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarAddress
+import my.drivebit.network.services.CarAvailability
+import my.drivebit.network.services.CarAvailabilityBlock
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarPhotoItem
 import my.drivebit.network.services.Photo
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -202,6 +205,18 @@ class MockPhotoServiceForDetail : Photo {
     override suspend fun deleteCarPhoto(photoId: Int): Unit = throw NotImplementedError()
 }
 
+class MockCarAvailabilityForDetail : CarAvailability {
+    var blocks: List<CarAvailabilityBlock> = emptyList()
+    var shouldThrow: Boolean = false
+
+    override suspend fun getBlocks(carId: String): List<CarAvailabilityBlock> {
+        if (shouldThrow) {
+            throw Exception("blocks request failed")
+        }
+        return blocks
+    }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class CarDetailViewModelTest {
     @Test
@@ -211,11 +226,13 @@ class CarDetailViewModelTest {
             val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
             val mockCarService = MockCarServiceForDetail()
             val mockPhotoService = MockPhotoServiceForDetail()
+            val mockCarAvailability = MockCarAvailabilityForDetail()
             val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
                     photoService = mockPhotoService,
+                    carAvailability = mockCarAvailability,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -231,11 +248,13 @@ class CarDetailViewModelTest {
             val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
             val mockCarService = MockCarServiceForDetail()
             val mockPhotoService = MockPhotoServiceForDetail()
+            val mockCarAvailability = MockCarAvailabilityForDetail()
             val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
                     photoService = mockPhotoService,
+                    carAvailability = mockCarAvailability,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -281,10 +300,12 @@ class CarDetailViewModelTest {
                 MockPhotoServiceForDetail().apply {
                     avatarUrl = "https://example.com/avatar.jpg"
                 }
+            val mockCarAvailability = MockCarAvailabilityForDetail()
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
                     photoService = mockPhotoService,
+                    carAvailability = mockCarAvailability,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -308,11 +329,13 @@ class CarDetailViewModelTest {
             val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
             val mockCarService = MockCarServiceForDetail()
             val mockPhotoService = MockPhotoServiceForDetail()
+            val mockCarAvailability = MockCarAvailabilityForDetail()
             val carId = ""
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
                     photoService = mockPhotoService,
+                    carAvailability = mockCarAvailability,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -335,11 +358,13 @@ class CarDetailViewModelTest {
             mockCarService.networkExceptionStatusCode = HttpStatusCode.NotFound
             mockCarService.errorMessage = "Автомобиль не найден"
             val mockPhotoService = MockPhotoServiceForDetail()
+            val mockCarAvailability = MockCarAvailabilityForDetail()
             val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
                     photoService = mockPhotoService,
+                    carAvailability = mockCarAvailability,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -361,11 +386,13 @@ class CarDetailViewModelTest {
             mockCarService.shouldThrowError = true
             mockCarService.errorMessage = "Unexpected error occurred"
             val mockPhotoService = MockPhotoServiceForDetail()
+            val mockCarAvailability = MockCarAvailabilityForDetail()
             val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
                     photoService = mockPhotoService,
+                    carAvailability = mockCarAvailability,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -388,11 +415,13 @@ class CarDetailViewModelTest {
             mockCarService.networkExceptionStatusCode = HttpStatusCode.NotFound
             mockCarService.errorMessage = "404 Not Found"
             val mockPhotoService = MockPhotoServiceForDetail()
+            val mockCarAvailability = MockCarAvailabilityForDetail()
             val carId = "invalid-car-id"
             val viewModel =
                 CarDetailViewModelImpl(
                     carService = mockCarService,
                     photoService = mockPhotoService,
+                    carAvailability = mockCarAvailability,
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -403,5 +432,69 @@ class CarDetailViewModelTest {
             assertIs<CarDetailState.Error>(state)
             val errorState = state as CarDetailState.Error
             assertEquals("404 Not Found", errorState.message)
+        }
+
+    @Test
+    fun `should load disabled booking dates from car availability blocks`() =
+        runTest(StandardTestDispatcher()) {
+            val testDispatcher = this
+            val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
+            val mockCarService = MockCarServiceForDetail()
+            val mockPhotoService = MockPhotoServiceForDetail()
+            val mockCarAvailability =
+                MockCarAvailabilityForDetail().apply {
+                    blocks =
+                        listOf(
+                            CarAvailabilityBlock(
+                                startAt = "2026-03-10T10:00:00Z",
+                                endAt = "2026-03-12T18:00:00Z",
+                            ),
+                        )
+                }
+            val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
+            val viewModel =
+                CarDetailViewModelImpl(
+                    carService = mockCarService,
+                    photoService = mockPhotoService,
+                    carAvailability = mockCarAvailability,
+                    carId = carId,
+                    coroutineScope = testScope,
+                )
+
+            advanceUntilIdle()
+
+            val state = viewModel.state.value
+            assertIs<CarDetailState.Success>(state)
+            assertContains(state.disabledBookingDates, "2026-03-10")
+            assertContains(state.disabledBookingDates, "2026-03-11")
+            assertContains(state.disabledBookingDates, "2026-03-12")
+        }
+
+    @Test
+    fun `should keep success state when availability blocks request fails`() =
+        runTest(StandardTestDispatcher()) {
+            val testDispatcher = this
+            val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
+            val mockCarService = MockCarServiceForDetail()
+            val mockPhotoService = MockPhotoServiceForDetail()
+            val mockCarAvailability =
+                MockCarAvailabilityForDetail().apply {
+                    shouldThrow = true
+                }
+            val carId = "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
+            val viewModel =
+                CarDetailViewModelImpl(
+                    carService = mockCarService,
+                    photoService = mockPhotoService,
+                    carAvailability = mockCarAvailability,
+                    carId = carId,
+                    coroutineScope = testScope,
+                )
+
+            advanceUntilIdle()
+
+            val state = viewModel.state.value
+            assertIs<CarDetailState.Success>(state)
+            assertEquals(emptySet(), state.disabledBookingDates)
         }
 }
