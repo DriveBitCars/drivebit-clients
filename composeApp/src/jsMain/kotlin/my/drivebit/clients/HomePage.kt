@@ -128,7 +128,8 @@ fun HomePage() {
                     cameraPosition = mapState.value.cameraPosition,
                     markers = markers,
                     onMarkerClick = { marker ->
-                        println("Clicked marker: ${marker.title}")
+                        window.location.href =
+                            "/car-edit?id=${marker.id.encodeUrlParameter()}"
                     },
                     onCameraMove = { position ->
                         mapViewModel.updateCameraPosition(position)
