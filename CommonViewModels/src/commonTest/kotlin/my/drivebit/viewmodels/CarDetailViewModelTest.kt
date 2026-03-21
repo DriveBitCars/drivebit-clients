@@ -14,7 +14,12 @@ import my.drivebit.network.services.CarAvailability
 import my.drivebit.network.services.CarAvailabilityBlock
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarPhotoItem
+import my.drivebit.network.services.CreatedReviewDTO
+import my.drivebit.network.services.CreateReviewRequest
 import my.drivebit.network.services.Photo
+import my.drivebit.network.services.Review
+import my.drivebit.network.services.ReviewListDTO
+import my.drivebit.network.services.ReviewListItemDTO
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -217,6 +222,36 @@ class MockCarAvailabilityForDetail : CarAvailability {
     }
 }
 
+class MockReviewForDetail : Review {
+    var shouldThrow = false
+    var lastRequestedPage: Int? = null
+    var response: ReviewListDTO =
+        ReviewListDTO(
+            reviews = emptyList(),
+            totalCount = 0,
+            page = 1,
+            pageSize = 10,
+            totalPages = 0,
+        )
+
+    override suspend fun createReview(request: CreateReviewRequest): CreatedReviewDTO =
+        throw NotImplementedError()
+
+    override suspend fun getReviewsByCarId(
+        carId: String,
+        page: Int,
+        pageSize: Int,
+        sortBy: String,
+        sortOrder: String,
+    ): ReviewListDTO {
+        if (shouldThrow) {
+            throw Exception("reviews failed")
+        }
+        lastRequestedPage = page
+        return response.copy(page = page)
+    }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class CarDetailViewModelTest {
     @Test
@@ -233,6 +268,7 @@ class CarDetailViewModelTest {
                     carService = mockCarService,
                     photoService = mockPhotoService,
                     carAvailability = mockCarAvailability,
+                    reviewService = MockReviewForDetail(),
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -255,6 +291,7 @@ class CarDetailViewModelTest {
                     carService = mockCarService,
                     photoService = mockPhotoService,
                     carAvailability = mockCarAvailability,
+                    reviewService = MockReviewForDetail(),
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -306,6 +343,7 @@ class CarDetailViewModelTest {
                     carService = mockCarService,
                     photoService = mockPhotoService,
                     carAvailability = mockCarAvailability,
+                    reviewService = MockReviewForDetail(),
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -336,6 +374,7 @@ class CarDetailViewModelTest {
                     carService = mockCarService,
                     photoService = mockPhotoService,
                     carAvailability = mockCarAvailability,
+                    reviewService = MockReviewForDetail(),
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -365,6 +404,7 @@ class CarDetailViewModelTest {
                     carService = mockCarService,
                     photoService = mockPhotoService,
                     carAvailability = mockCarAvailability,
+                    reviewService = MockReviewForDetail(),
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -393,6 +433,7 @@ class CarDetailViewModelTest {
                     carService = mockCarService,
                     photoService = mockPhotoService,
                     carAvailability = mockCarAvailability,
+                    reviewService = MockReviewForDetail(),
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -422,6 +463,7 @@ class CarDetailViewModelTest {
                     carService = mockCarService,
                     photoService = mockPhotoService,
                     carAvailability = mockCarAvailability,
+                    reviewService = MockReviewForDetail(),
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -457,6 +499,7 @@ class CarDetailViewModelTest {
                     carService = mockCarService,
                     photoService = mockPhotoService,
                     carAvailability = mockCarAvailability,
+                    reviewService = MockReviewForDetail(),
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -487,6 +530,7 @@ class CarDetailViewModelTest {
                     carService = mockCarService,
                     photoService = mockPhotoService,
                     carAvailability = mockCarAvailability,
+                    reviewService = MockReviewForDetail(),
                     carId = carId,
                     coroutineScope = testScope,
                 )
@@ -496,5 +540,93 @@ class CarDetailViewModelTest {
             val state = viewModel.state.value
             assertIs<CarDetailState.Success>(state)
             assertEquals(emptySet(), state.disabledBookingDates)
+        }
+
+    @Test
+    fun `should load car reviews after car loaded`() =
+        runTest(StandardTestDispatcher()) {
+            val testDispatcher = this
+            val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
+            val mockCarService = MockCarServiceForDetail()
+            val mockReview =
+                MockReviewForDetail().apply {
+                    response =
+                        ReviewListDTO(
+                            reviews =
+                                listOf(
+                                    ReviewListItemDTO(
+                                        id = "r1",
+                                        authorName = "Анна",
+                                        stars = 5,
+                                        text = "Отлично",
+                                        createdAt = "2026-03-01T12:00:00Z",
+                                    ),
+                                ),
+                            totalCount = 1,
+                            page = 1,
+                            pageSize = 10,
+                            totalPages = 1,
+                        )
+                }
+            val carId = mockCarService.carResponse.id
+            val viewModel =
+                CarDetailViewModelImpl(
+                    carService = mockCarService,
+                    photoService = MockPhotoServiceForDetail(),
+                    carAvailability = MockCarAvailabilityForDetail(),
+                    reviewService = mockReview,
+                    carId = carId,
+                    coroutineScope = testScope,
+                )
+
+            advanceUntilIdle()
+
+            val state = viewModel.state.value
+            assertIs<CarDetailState.Success>(state)
+            assertEquals(1, state.reviews.size)
+            assertEquals("Анна", state.reviews[0].authorDisplayName)
+            assertEquals(5, state.reviews[0].stars)
+            assertEquals(false, state.reviewsLoading)
+            assertEquals(null, state.reviewsError)
+        }
+
+    @Test
+    fun `loadReviewsPage should request given page`() =
+        runTest(StandardTestDispatcher()) {
+            val testDispatcher = this
+            val testScope = CoroutineScope(SupervisorJob() + testDispatcher.coroutineContext)
+            val mockCarService = MockCarServiceForDetail()
+            val mockReview =
+                MockReviewForDetail().apply {
+                    response =
+                        ReviewListDTO(
+                            reviews = emptyList(),
+                            totalCount = 25,
+                            page = 1,
+                            pageSize = 10,
+                            totalPages = 3,
+                        )
+                }
+            val carId = mockCarService.carResponse.id
+            val viewModel =
+                CarDetailViewModelImpl(
+                    carService = mockCarService,
+                    photoService = MockPhotoServiceForDetail(),
+                    carAvailability = MockCarAvailabilityForDetail(),
+                    reviewService = mockReview,
+                    carId = carId,
+                    coroutineScope = testScope,
+                )
+
+            advanceUntilIdle()
+            assertEquals(1, mockReview.lastRequestedPage)
+
+            viewModel.loadReviewsPage(2)
+            advanceUntilIdle()
+
+            assertEquals(2, mockReview.lastRequestedPage)
+            val state = viewModel.state.value
+            assertIs<CarDetailState.Success>(state)
+            assertEquals(2, state.reviewsPage)
         }
 }

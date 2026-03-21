@@ -10,6 +10,7 @@ import my.drivebit.components.CarDescription
 import my.drivebit.components.CarLocationMap
 import my.drivebit.components.CarOwnerSection
 import my.drivebit.components.CarPhotosSection
+import my.drivebit.components.CarReviewsSection
 import my.drivebit.components.CarDepositSection
 import my.drivebit.components.CarRatesSection
 import my.drivebit.components.CarSpecsRow
@@ -24,6 +25,7 @@ import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.CarDetailState
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarOwnerUi
+import my.drivebit.viewmodels.CarReviewUi
 import my.drivebit.viewmodels.RentViewModel
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.FlexWrap
@@ -90,6 +92,13 @@ fun CarDetailPage() {
                         car = currentState.car,
                         owner = currentState.owner,
                         disabledBookingDates = currentState.disabledBookingDates,
+                        reviews = currentState.reviews,
+                        reviewsPage = currentState.reviewsPage,
+                        reviewsTotalPages = currentState.reviewsTotalPages,
+                        reviewsTotalCount = currentState.reviewsTotalCount,
+                        reviewsLoading = currentState.reviewsLoading,
+                        reviewsError = currentState.reviewsError,
+                        onLoadReviewsPage = { viewModel.loadReviewsPage(it) },
                         koinScope = koinScope,
                     )
                 }
@@ -104,6 +113,13 @@ private fun CarDetailContent(
     car: my.drivebit.network.services.CarDetailResponse,
     owner: CarOwnerUi?,
     disabledBookingDates: Set<String>,
+    reviews: List<CarReviewUi>,
+    reviewsPage: Int,
+    reviewsTotalPages: Int,
+    reviewsTotalCount: Int,
+    reviewsLoading: Boolean,
+    reviewsError: String?,
+    onLoadReviewsPage: (Int) -> Unit,
     koinScope: org.koin.core.scope.Scope,
 ) {
     Column(gap = 24.px) {
@@ -146,6 +162,16 @@ private fun CarDetailContent(
                         tripsCount = null,
                     )
                 }
+
+                CarReviewsSection(
+                    reviews = reviews,
+                    loading = reviewsLoading,
+                    error = reviewsError,
+                    page = reviewsPage,
+                    totalPages = reviewsTotalPages,
+                    totalCount = reviewsTotalCount,
+                    onLoadPage = onLoadReviewsPage,
+                )
             }
 
             CarBook(

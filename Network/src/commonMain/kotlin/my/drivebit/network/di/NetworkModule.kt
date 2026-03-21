@@ -150,6 +150,9 @@ val networkModule =
             ChatImpl(get(named("authorized")))
         }
         single<Review> {
-            ReviewImpl(get(named("authorized")))
+            ReviewImpl(
+                unauthorizedHttpClient = get(named("unauthorized")),
+                authorizedHttpClient = get(named("authorized")),
+            )
         }
     }

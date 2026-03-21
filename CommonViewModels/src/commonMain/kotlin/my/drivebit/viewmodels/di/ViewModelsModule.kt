@@ -401,6 +401,7 @@ val commonViewModelsModule: Module =
                 carService = get(),
                 photoService = get(),
                 carAvailability = get(),
+                reviewService = get(),
                 carId = carId,
             )
         }
