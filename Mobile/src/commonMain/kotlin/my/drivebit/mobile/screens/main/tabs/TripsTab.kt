@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,8 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import my.drivebit.mobile.screens.main.LeaveReviewScreen
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.DrivebitTheme
@@ -44,6 +48,7 @@ object TripsTab : Tab {
 
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
         val viewModel: MyBookingsAsRenterViewModel = koinInject()
         val bookings by viewModel.bookings.collectAsState()
         val isLoading by viewModel.isLoading.collectAsState()
@@ -95,7 +100,12 @@ object TripsTab : Tab {
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         items(bookings, key = { it.id }) { booking ->
-                            BookingItemCard(booking = booking)
+                            BookingItemCard(
+                                booking = booking,
+                                onLeaveReview = {
+                                    navigator.push(LeaveReviewScreen(carId = booking.carId))
+                                },
+                            )
                         }
                     }
                 }
@@ -105,13 +115,17 @@ object TripsTab : Tab {
 }
 
 @Composable
-internal fun BookingItemCard(booking: BookingDTO) {
+internal fun BookingItemCard(
+    booking: BookingDTO,
+    onLeaveReview: () -> Unit,
+) {
     val carName =
         listOfNotNull(booking.carBrandName, booking.carModelName)
             .filter { it.isNotBlank() }
             .joinToString(" ")
             .ifBlank { "Автомобиль" }
     val dateRange = "${booking.startAt.take(10)} — ${booking.endAt.take(10)}"
+    val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -140,6 +154,15 @@ internal fun BookingItemCard(booking: BookingDTO) {
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (canLeaveReview) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = onLeaveReview,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Оставить отзыв")
+                }
+            }
         }
     }
 }
@@ -175,6 +198,7 @@ fun TripsTabPreview() {
                         status = "Confirmed",
                         createdAt = "2025-02-17T12:00:00Z",
                     ),
+                onLeaveReview = {},
             )
         }
     }

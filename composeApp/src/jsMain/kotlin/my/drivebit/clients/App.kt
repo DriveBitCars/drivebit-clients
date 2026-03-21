@@ -28,6 +28,7 @@ import my.drivebit.screens.EngineTypeSelectionPage
 import my.drivebit.screens.EngineVolumeInputPage
 // import my.drivebit.screens.HourlyRateInputPage
 import my.drivebit.screens.LicensePlateInputPage
+import my.drivebit.screens.LeaveReviewPage
 import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.MyBookingsPage
@@ -105,6 +106,14 @@ actual fun App() {
                     val storage: Storage = koinInject()
                     if (storage.isLogined()) {
                         MyBookingsPage()
+                    } else {
+                        window.location.href = "/"
+                    }
+                }
+                currentPath.startsWith("/leave-review") -> {
+                    val storage: Storage = koinInject()
+                    if (storage.isLogined()) {
+                        LeaveReviewPage()
                     } else {
                         window.location.href = "/"
                     }

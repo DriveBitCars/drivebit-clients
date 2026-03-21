@@ -24,6 +24,8 @@ import my.drivebit.network.services.Documents
 import my.drivebit.network.services.DocumentsImpl
 import my.drivebit.network.services.Photo
 import my.drivebit.network.services.PhotoImpl
+import my.drivebit.network.services.Review
+import my.drivebit.network.services.ReviewImpl
 import my.drivebit.network.services.User
 import my.drivebit.network.services.UserImpl
 import my.drivebit.shared.storage.Storage
@@ -146,5 +148,11 @@ val networkModule =
         }
         single<Chat> {
             ChatImpl(get(named("authorized")))
+        }
+        single<Review> {
+            ReviewImpl(
+                unauthorizedHttpClient = get(named("unauthorized")),
+                authorizedHttpClient = get(named("authorized")),
+            )
         }
     }
