@@ -17,6 +17,7 @@ val defaultJson: Json =
 data class ValidationErrorResponse(
     val errors: Map<String, List<String>>? = null,
     val title: String? = null,
+    val detail: String? = null,
     val error: String? = null,
 )
 
@@ -32,6 +33,7 @@ suspend inline fun <reified T> HttpResponse.parseResponse(json: Json = defaultJs
                     val errorMessages = errorResponse.errors?.flatMap { (_, messages) -> messages } ?: emptyList()
                     when {
                         errorMessages.isNotEmpty() -> errorMessages.joinToString(". ")
+                        errorResponse.detail != null -> errorResponse.detail
                         errorResponse.error != null -> errorResponse.error
                         errorResponse.title != null -> errorResponse.title
                         else -> trimmedBody.trim('"').trim()
@@ -59,6 +61,7 @@ suspend fun HttpResponse.consumeResponse() {
                     val errorMessages = errorResponse.errors?.flatMap { (_, messages) -> messages } ?: emptyList()
                     when {
                         errorMessages.isNotEmpty() -> errorMessages.joinToString(". ")
+                        errorResponse.detail != null -> errorResponse.detail
                         errorResponse.error != null -> errorResponse.error
                         errorResponse.title != null -> errorResponse.title
                         else -> trimmedBody.trim('"').trim()

@@ -35,6 +35,8 @@ import my.drivebit.viewmodels.ChatListViewModelImpl
 import my.drivebit.viewmodels.CityViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModel
 import my.drivebit.viewmodels.CreateCarFromDailyRateViewModelImpl
+import my.drivebit.viewmodels.CreateReviewViewModel
+import my.drivebit.viewmodels.CreateReviewViewModelImpl
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.DescriptionInputViewModel
 import my.drivebit.viewmodels.DescriptionInputViewModelImpl
@@ -312,6 +314,13 @@ val commonViewModelsModule: Module =
         single<MyBookingsAsOwnerViewModel> {
             MyBookingsAsOwnerViewModelImpl(
                 booking = get(),
+            )
+        }
+
+        factory<CreateReviewViewModel> { (carId: String) ->
+            CreateReviewViewModelImpl(
+                review = get(),
+                carId = carId,
             )
         }
 

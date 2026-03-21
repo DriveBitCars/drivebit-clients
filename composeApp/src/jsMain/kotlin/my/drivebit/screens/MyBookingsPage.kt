@@ -17,11 +17,13 @@ import my.drivebit.components.TextSmallBodyGray
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.viewmodels.MyBookingsAsRenterViewModel
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -30,6 +32,7 @@ import org.koin.compose.koinInject
 @Composable
 fun MyBookingsPage() {
     val viewModel: MyBookingsAsRenterViewModel = koinInject()
+    val navigationController = LocalNavigationController.current
     val bookings by viewModel.bookings.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
@@ -62,7 +65,12 @@ fun MyBookingsPage() {
                     else -> {
                         Column(gap = 16.px, modifier = { width(100.percent) }) {
                             bookings.forEach { booking ->
-                                BookingItemCard(booking = booking)
+                                BookingItemCard(
+                                    booking = booking,
+                                    onLeaveReview = {
+                                        navigationController?.navigateTo("/leave-review?carId=${booking.carId}")
+                                    },
+                                )
                             }
                         }
                     }
@@ -73,7 +81,10 @@ fun MyBookingsPage() {
 }
 
 @Composable
-private fun BookingItemCard(booking: BookingDTO) {
+private fun BookingItemCard(
+    booking: BookingDTO,
+    onLeaveReview: () -> Unit,
+) {
     val ownerName = booking.ownerName?.takeIf { it.isNotBlank() } ?: "Владелец"
     val carName =
         listOfNotNull(booking.carBrandName, booking.carModelName)
@@ -94,6 +105,7 @@ private fun BookingItemCard(booking: BookingDTO) {
             "${mapIso8601ToDateString(booking.createdAt)}, в ${mapIso8601ToTimeString(booking.createdAt)}"
         }.getOrElse { booking.createdAt }
     val relativeTime = runCatching { formatRelativeTime(Instant.parse(booking.createdAt)) }.getOrElse { "" }
+    val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
 
     Column(
         gap = 16.px,
@@ -168,6 +180,29 @@ private fun BookingItemCard(booking: BookingDTO) {
                 }
             }) {
                 Text("${booking.statusTranslate?.takeIf { it.isNotBlank() } ?: booking.status}: $statusDateTime")
+            }
+        }
+
+        if (canLeaveReview) {
+            Row(
+                justifyContent = JustifyContent.FlexStart,
+                modifier = { width(100.percent) },
+            ) {
+                Button({
+                    style {
+                        padding(8.px, 16.px)
+                        backgroundColor(CSSColors.Blue)
+                        color(CSSColors.White)
+                        border(0.px)
+                        borderRadius(8.px)
+                        fontSize(14.px)
+                        fontWeight("600")
+                        cursor("pointer")
+                    }
+                    onClick { onLeaveReview() }
+                }) {
+                    Text("Оставить отзыв")
+                }
             }
         }
 
