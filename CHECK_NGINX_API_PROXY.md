@@ -16,14 +16,14 @@ ssh root@143.198.69.242
 ### 2. Найдите конфигурацию nginx
 ```bash
 # Проверьте возможные расположения:
-ls -la /etc/nginx/sites-available/drivebit.my
+ls -la /etc/nginx/sites-available/drivebit.ru
 ls -la /etc/nginx/sites-available/drivebit-clients
 ls -la /etc/nginx/conf.d/drivebit.conf
 ```
 
 ### 3. Проверьте наличие блока location /api/
 ```bash
-grep -A 10 "location /api/" /etc/nginx/sites-available/drivebit.my
+grep -A 10 "location /api/" /etc/nginx/sites-available/drivebit.ru
 ```
 
 Должен быть блок:
@@ -48,8 +48,8 @@ systemctl reload nginx
 
 ### 6. Проверьте работу API
 ```bash
-curl -I https://drivebit.my/api/swagger/index.html
-curl https://drivebit.my/api/Car/my
+curl -I https://drivebit.ru/api/swagger/index.html
+curl https://drivebit.ru/api/Car/my
 ```
 
 ## Что было исправлено

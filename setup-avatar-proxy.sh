@@ -28,16 +28,20 @@ fi
 echo "🔧 Настройка nginx проксирования для аватаров на $SSH_TARGET"
 echo ""
 
-# Проверяем, существует ли конфигурация для drivebit.my
+# Проверяем, существует ли конфигурация для drivebit.ru
 echo "📋 Проверка существующей конфигурации nginx..."
 
 $SSH_CMD -o StrictHostKeyChecking=no "$SSH_TARGET" << 'EOF'
 set -e
 
-# Находим конфигурацию для drivebit.my или dev.drivebit.my
+# Находим конфигурацию для drivebit.ru или dev.drivebit.ru
 NGINX_CONFIG=""
-if [ -f "/etc/nginx/sites-available/dev.drivebit.my" ]; then
+if [ -f "/etc/nginx/sites-available/dev.drivebit.ru" ]; then
+    NGINX_CONFIG="/etc/nginx/sites-available/dev.drivebit.ru"
+elif [ -f "/etc/nginx/sites-available/dev.drivebit.my" ]; then
     NGINX_CONFIG="/etc/nginx/sites-available/dev.drivebit.my"
+elif [ -f "/etc/nginx/sites-available/drivebit.ru" ]; then
+    NGINX_CONFIG="/etc/nginx/sites-available/drivebit.ru"
 elif [ -f "/etc/nginx/sites-available/drivebit.my" ]; then
     NGINX_CONFIG="/etc/nginx/sites-available/drivebit.my"
 elif [ -f "/etc/nginx/sites-available/drivebit-clients" ]; then
@@ -47,7 +51,7 @@ elif [ -f "/etc/nginx/conf.d/drivebit.conf" ]; then
 elif [ -f "/etc/nginx/conf.d/dev.drivebit.conf" ]; then
     NGINX_CONFIG="/etc/nginx/conf.d/dev.drivebit.conf"
 else
-    echo "⚠️  Конфигурация nginx для drivebit.my не найдена"
+    echo "⚠️  Конфигурация nginx для drivebit.ru не найдена"
     echo "📝 Доступные конфигурации:"
     ls -la /etc/nginx/sites-available/ 2>/dev/null || true
     ls -la /etc/nginx/conf.d/ 2>/dev/null || true
@@ -144,7 +148,7 @@ fi
 echo ""
 echo "✅ Настройка завершена успешно!"
 echo "📋 Проверьте работу:"
-echo "   curl -I https://drivebit.my/avatar/test.jpg"
+echo "   curl -I https://drivebit.ru/avatar/test.jpg"
 EOF
 
 if [ $? -eq 0 ]; then
@@ -152,7 +156,7 @@ if [ $? -eq 0 ]; then
     echo "✅ Настройка завершена!"
     echo ""
     echo "🧪 Тест проксирования:"
-    echo "   curl -I https://drivebit.my/avatar/test.jpg"
+    echo "   curl -I https://drivebit.ru/avatar/test.jpg"
 else
     echo ""
     echo "❌ Ошибка при настройке. Проверьте вывод выше."

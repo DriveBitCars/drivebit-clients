@@ -2,7 +2,7 @@
 
 SSH_KEY="$(dirname "$0")/id_rsa_api_drivebit"
 SSH_USER="user1"
-SSH_HOST="api.drivebit.my"
+SSH_HOST="api.drivebit.ru"
 CONTAINER_NAME="drivebit-drivebitbackend-1"
 
 if [ ! -f "$SSH_KEY" ]; then

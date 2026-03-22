@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Скрипт для настройки nginx проксирования для dev.drivebit.my
+# Скрипт для настройки nginx проксирования для dev.drivebit.ru
 # Настраивает все прокси аналогично drivebit.ru/publicbct/
 # Использование: ./setup-dev-proxies.sh [SSH_USER@SSH_HOST]
 # Пример: ./setup-dev-proxies.sh root@143.198.69.242
@@ -28,7 +28,7 @@ if [ -n "$SSH_KEY" ]; then
     SSH_CMD="ssh -i $SSH_KEY -o IdentitiesOnly=yes"
 fi
 
-echo "🔧 Настройка nginx проксирования для dev.drivebit.my на $SSH_TARGET"
+echo "🔧 Настройка nginx проксирования для dev.drivebit.ru на $SSH_TARGET"
 echo "📡 API бэкенд: $NEW_BACKEND"
 echo "📡 MinIO бэкенд: $MINIO_BACKEND"
 echo ""
@@ -37,19 +37,21 @@ echo ""
 $SSH_CMD -o StrictHostKeyChecking=no "$SSH_TARGET" << 'EOF'
 set -e
 
-# Находим конфигурацию для dev.drivebit.my
+# Находим конфигурацию для dev.drivebit.ru
 NGINX_CONFIG=""
-if [ -f "/etc/nginx/sites-available/dev.drivebit.my" ]; then
+if [ -f "/etc/nginx/sites-available/dev.drivebit.ru" ]; then
+    NGINX_CONFIG="/etc/nginx/sites-available/dev.drivebit.ru"
+elif [ -f "/etc/nginx/sites-available/dev.drivebit.my" ]; then
     NGINX_CONFIG="/etc/nginx/sites-available/dev.drivebit.my"
 elif [ -f "/etc/nginx/conf.d/dev.drivebit.conf" ]; then
     NGINX_CONFIG="/etc/nginx/conf.d/dev.drivebit.conf"
 else
-    echo "⚠️  Конфигурация nginx для dev.drivebit.my не найдена"
+    echo "⚠️  Конфигурация nginx для dev.drivebit.ru не найдена"
     echo "📝 Доступные конфигурации:"
     ls -la /etc/nginx/sites-available/ 2>/dev/null || true
     ls -la /etc/nginx/conf.d/ 2>/dev/null || true
     echo ""
-    echo "❌ Создайте сначала конфигурацию для dev.drivebit.my"
+    echo "❌ Создайте сначала конфигурацию для dev.drivebit.ru"
     exit 1
 fi
 
@@ -292,9 +294,9 @@ echo ""
 echo "✅ Настройка завершена успешно!"
 echo ""
 echo "📋 Проверьте работу прокси:"
-echo "   curl -I https://dev.drivebit.my/api/swagger/index.html"
-echo "   curl -I https://dev.drivebit.my/publicbct/avatars/test.jpg"
-echo "   curl -I https://dev.drivebit.my/publicbct/cars/test.jpg"
+echo "   curl -I https://dev.drivebit.ru/api/swagger/index.html"
+echo "   curl -I https://dev.drivebit.ru/publicbct/avatars/test.jpg"
+echo "   curl -I https://dev.drivebit.ru/publicbct/cars/test.jpg"
 EOF
 
 if [ $? -eq 0 ]; then
@@ -302,9 +304,9 @@ if [ $? -eq 0 ]; then
     echo "✅ Настройка завершена!"
     echo ""
     echo "🧪 Тест проксирования:"
-    echo "   curl -I https://dev.drivebit.my/api/swagger/index.html"
-    echo "   curl -I https://dev.drivebit.my/publicbct/avatars/test.jpg"
-    echo "   curl -I https://dev.drivebit.my/publicbct/cars/test.jpg"
+    echo "   curl -I https://dev.drivebit.ru/api/swagger/index.html"
+    echo "   curl -I https://dev.drivebit.ru/publicbct/avatars/test.jpg"
+    echo "   curl -I https://dev.drivebit.ru/publicbct/cars/test.jpg"
 else
     echo ""
     echo "❌ Ошибка при настройке. Проверьте вывод выше."

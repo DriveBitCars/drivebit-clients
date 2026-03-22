@@ -106,11 +106,11 @@ jobs:
         
         echo "✅ Cache-busting version added"
 
-    - name: Generate prerender and sitemap for drivebit.my
+    - name: Generate prerender-bot.html and sitemap.xml
       run: |
-        OUTPUT_PATH=composeApp/build/dist/js/productionExecutable/prerender-bot.html SITE_BASE=https://drivebit.my node scripts/generate-prerender-bot.js
+        OUTPUT_PATH=composeApp/build/dist/js/productionExecutable/prerender-bot.html SITE_BASE=https://drivebit.ru node scripts/generate-prerender-bot.js
         ls -la composeApp/build/dist/js/productionExecutable/prerender-bot.html composeApp/build/dist/js/productionExecutable/sitemap.xml
-    - name: Generate prerender and sitemap for drivebit.ru
+    - name: Generate prerender-bot-ru.html and sitemap-ru.xml
       run: |
         OUTPUT_PATH=composeApp/build/dist/js/productionExecutable/prerender-bot-ru.html SITE_BASE=https://drivebit.ru SITEMAP_FILENAME=sitemap-ru.xml node scripts/generate-prerender-bot.js
         ls -la composeApp/build/dist/js/productionExecutable/prerender-bot-ru.html composeApp/build/dist/js/productionExecutable/sitemap-ru.xml
@@ -371,7 +371,9 @@ jobs:
           
           echo "🔍 Finding nginx configuration file..."
           NGINX_CONFIG=""
-          if [ -f "/etc/nginx/sites-available/drivebit.my" ]; then
+          if [ -f "/etc/nginx/sites-available/drivebit.ru" ]; then
+            NGINX_CONFIG="/etc/nginx/sites-available/drivebit.ru"
+          elif [ -f "/etc/nginx/sites-available/drivebit.my" ]; then
             NGINX_CONFIG="/etc/nginx/sites-available/drivebit.my"
           elif [ -f "/etc/nginx/sites-available/drivebit-clients" ]; then
             NGINX_CONFIG="/etc/nginx/sites-available/drivebit-clients"
@@ -444,6 +446,33 @@ jobs:
           test -f /var/www/drivebit-clients/index.html || (echo "❌ index.html missing after upload" && exit 1)
           echo "📄 Page title from index.html:"
           grep -o '<title>[^<]*' -m1 /var/www/drivebit-clients/index.html || true
+
+    - name: Copy warm-prerender script to server
+      continue-on-error: true
+      uses: appleboy/scp-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        source: "scripts/warm-prerender-after-deploy.sh"
+        target: "/tmp/"
+
+    - name: Invalidate and warm Prerender cache
+      continue-on-error: true
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          set -e
+          chmod +x /tmp/warm-prerender-after-deploy.sh
+          export SITE_URL="https://drivebit.ru"
+          export PRERENDER_COMPOSE_DIR="/opt/drivebit-prerender"
+          export PRERENDER_SERVICE="prerender"
+          /tmp/warm-prerender-after-deploy.sh
 
     - name: Notify deployment success
       if: success()
