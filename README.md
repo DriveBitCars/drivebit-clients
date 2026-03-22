@@ -151,6 +151,14 @@ open iosApp/iosApp.xcodeproj
 
 Боты получают статический HTML с каталогом машин. Для каждой машины генерируется отдельная страница в `car/{id}.html`. Пользователи получают SPA.
 
+### Googlebot и YandexBot
+
+В [`nginx-prerender.conf.example`](nginx-prerender.conf.example) в `map $http_user_agent $is_bot` заданы правила для поисковых ботов, в том числе **`~*yandex`**.
+
+**Главная `/`:** в актуальном примере для ботов отдаётся **статический** файл из деплоя (`prerender-bot-ru.html` для `drivebit.ru`, `prerender-bot.html` для `drivebit.my`) через `map $host$is_bot` и `try_files` — ответ **считан с диска**, без Chromium (приемлемо для краулеров). Остальные пути, где нет готового HTML, по-прежнему могут идти в динамический Prerender (`127.0.0.1:3000`).
+
+**In-memory кэш** Prerender (`prerender-memory-cache`) относится к сервису на :3000. Прогрев после деплоя ([`scripts/warm-prerender-after-deploy.sh`](scripts/warm-prerender-after-deploy.sh)) полезен для путей, которые реально проксируются в Prerender; для главной после включения статики в nginx критичен сам **деплой** файла `prerender-bot-ru.html`.
+
 ### Проверка prerender через curl
 
 ```bash

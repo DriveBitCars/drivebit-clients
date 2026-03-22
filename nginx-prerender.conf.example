@@ -11,8 +11,9 @@
 # запрашивает ту же публичную страницу по $scheme://$host$request_uri.
 # Убедитесь, что с сервера/контейнера доступен этот URL (DNS, firewall).
 #
-# Статическая генерация (prerender-bot.html, car/*.html) в CI может оставаться для
-# кеша или отключаться — этот пример не использует rewrite на prerender-bot.html.
+# Главная для ботов: CI кладёт prerender-bot(-ru).html в root — отдаём файл с диска
+# (миллисекунды). Динамический Prerender на :3000 остаётся для путей без статики.
+# map $host$is_bot: суффикс is_bot — 0 человек, 1 бот.
 
 map $http_user_agent $is_bot {
     default 0;
@@ -23,6 +24,14 @@ map $http_user_agent $is_bot {
     ~*bot 1;
     ~*crawler 1;
     ~*spider 1;
+}
+
+map $host$is_bot $bot_home_file {
+    default /index.html;
+    drivebit.ru1 /prerender-bot-ru.html;
+    www.drivebit.ru1 /prerender-bot-ru.html;
+    drivebit.my1 /prerender-bot.html;
+    www.drivebit.my1 /prerender-bot.html;
 }
 
 server {
@@ -65,12 +74,9 @@ server {
         try_files /login-by-mail.html /index.html;
     }
 
-    # Главная: люди — SPA; боты — Prerender (динамический HTML)
+    # Главная: люди — index.html; боты — статический prerender-bot*.html из деплоя (быстро)
     location = / {
-        if ($is_bot) {
-            return 418;
-        }
-        try_files /index.html =404;
+        try_files $bot_home_file =404;
     }
 
     # Остальные пути: статика при наличии файла, иначе SPA; боты — Prerender

@@ -1,0 +1,9 @@
+# Подключить один раз внутри блока http { } (например через include в /etc/nginx/nginx.conf):
+#
+#   include /etc/nginx/snippets/nginx-prerender-cache-http.conf;
+#
+# Перед первым запуском:
+#   sudo mkdir -p /var/cache/nginx/prerender
+#   sudo chown -R www-data:www-data /var/cache/nginx/prerender
+
+proxy_cache_path /var/cache/nginx/prerender levels=1:2 keys_zone=prerender_cache:20m max_size=512m inactive=24h use_temp_path=off;
