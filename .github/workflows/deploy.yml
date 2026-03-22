@@ -457,6 +457,7 @@ jobs:
         port: ${{ secrets.SERVER_PORT || 22 }}
         source: "scripts/warm-prerender-after-deploy.sh"
         target: "/tmp/"
+        strip_components: 1
 
     - name: Invalidate and warm Prerender cache
       continue-on-error: true
@@ -468,11 +469,22 @@ jobs:
         port: ${{ secrets.SERVER_PORT || 22 }}
         script: |
           set -e
-          chmod +x /tmp/warm-prerender-after-deploy.sh
+          SCRIPT=""
+          for p in /tmp/warm-prerender-after-deploy.sh /tmp/scripts/warm-prerender-after-deploy.sh; do
+            if [ -f "$p" ]; then SCRIPT="$p"; break; fi
+          done
+          if [ -z "$SCRIPT" ]; then
+            SCRIPT=$(find /tmp -maxdepth 4 -name 'warm-prerender-after-deploy.sh' -type f 2>/dev/null | head -1)
+          fi
+          if [ -z "$SCRIPT" ] || [ ! -f "$SCRIPT" ]; then
+            echo "❌ warm-prerender-after-deploy.sh not found under /tmp (check scp strip_components)"
+            exit 1
+          fi
+          chmod +x "$SCRIPT"
           export SITE_URL="https://drivebit.ru"
           export PRERENDER_COMPOSE_DIR="/opt/drivebit-prerender"
           export PRERENDER_SERVICE="prerender"
-          /tmp/warm-prerender-after-deploy.sh
+          "$SCRIPT"
 
     - name: Notify deployment success
       if: success()
