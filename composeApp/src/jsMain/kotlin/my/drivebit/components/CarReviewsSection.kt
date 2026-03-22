@@ -3,6 +3,7 @@ package my.drivebit.components
 import androidx.compose.runtime.Composable
 import my.drivebit.design.CSSColors
 import my.drivebit.viewmodels.CarReviewUi
+import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexWrap
@@ -12,7 +13,6 @@ import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
-import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.fontSize

@@ -7,17 +7,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.design.CSSColors
+import my.drivebit.design.CSSTypography
+import my.drivebit.design.applyTypography
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.REDIRECT_PATH
 import my.drivebit.utils.encodeUrlParameter
-import org.koin.compose.koinInject
-import my.drivebit.design.CSSTypography
-import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.koin.compose.koinInject
 
 private val PromoBlueBg: CSSColorValue = Color("#E3F2FD")
 private val PromoChipBlue: CSSColorValue = Color("#4338CA")
@@ -106,21 +105,21 @@ private fun WhySectionLeftContent(isMobile: Boolean) {
             title = "Зачем вот это все?",
             subtitle = "Преимущества аренды авто от частных владельцев",
         )
-                Div({
-                    style {
-                        if (isMobile) {
-                            width(100.percent)
-                        } else {
-                            property("align-self", "flex-start")
-                        }
-                    }
-                }) {
-                    PromoRectButton(
-                        text = "Арендовать автомобиль",
-                        onClick = { window.location.href = "/search" },
-                        compact = isMobile,
-                    )
+        Div({
+            style {
+                if (isMobile) {
+                    width(100.percent)
+                } else {
+                    property("align-self", "flex-start")
                 }
+            }
+        }) {
+            PromoRectButton(
+                text = "Арендовать автомобиль",
+                onClick = { window.location.href = "/search" },
+                compact = isMobile,
+            )
+        }
     }
 }
 
@@ -162,13 +161,18 @@ private fun WhySectionHeading(
     }
 }
 
-private val ADVANTAGES = listOf(
-    "Стоит дешевле" to "Стоимость аренды от частного владельца при длительных сроках значительно дешевле. Экономия может составлять 30–40%.",
-    "Машины чище" to "Авто сдаются от случая к случаю, а не постоянно. Собственник значительно лучше следит за состоянием своей машины.",
-    "Пробег меньше" to "Автомобили не используются в коммерческих целях на постоянной основе, дальние поездки на таких машинах организуются нечасто.",
-    "Выбор больше" to "Так как сервис объединяет разных собственников, выбор машин значительно расширяется.",
-    "Оформить проще" to "Максимально простое оформление аренды — регистрируетесь в сервисе, выбираете автомобиль, подаёте заявку на аренду.",
-)
+private val ADVANTAGES =
+    listOf(
+        "Стоит дешевле" to
+            "Стоимость аренды от частного владельца при длительных сроках значительно дешевле. Экономия может составлять 30–40%.",
+        "Машины чище" to
+            "Авто сдаются от случая к случаю, а не постоянно. Собственник значительно лучше следит за состоянием своей машины.",
+        "Пробег меньше" to
+            "Автомобили не используются в коммерческих целях на постоянной основе, дальние поездки на таких машинах организуются нечасто.",
+        "Выбор больше" to "Так как сервис объединяет разных собственников, выбор машин значительно расширяется.",
+        "Оформить проще" to
+            "Максимально простое оформление аренды — регистрируетесь в сервисе, выбираете автомобиль, подаёте заявку на аренду.",
+    )
 
 @Composable
 private fun AdvantageGrid(isMobile: Boolean) {
@@ -196,7 +200,11 @@ private fun AdvantageGrid(isMobile: Boolean) {
 }
 
 @Composable
-private fun AdvantageChip(shortTitle: String, fullText: String, isMobile: Boolean) {
+private fun AdvantageChip(
+    shortTitle: String,
+    fullText: String,
+    isMobile: Boolean,
+) {
     var hovered by remember { mutableStateOf(false) }
     val chipHeight = if (isMobile) 120.px else 150.px
     val chipWidth = if (isMobile) 100.percent else 330.px
@@ -329,7 +337,9 @@ private fun EarnSectionCard() {
                         lineHeight("1.5")
                     }
                 }) {
-                    Text("Подайте заявку на регистрацию в сервисе и сдавайте свой автомобиль на время пока им не пользуетесь.")
+                    Text(
+                        "Подайте заявку на регистрацию в сервисе и сдавайте свой автомобиль на время пока им не пользуетесь.",
+                    )
                 }
                 Div({
                     style {

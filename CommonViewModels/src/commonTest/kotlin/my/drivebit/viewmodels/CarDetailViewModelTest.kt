@@ -14,8 +14,8 @@ import my.drivebit.network.services.CarAvailability
 import my.drivebit.network.services.CarAvailabilityBlock
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarPhotoItem
-import my.drivebit.network.services.CreatedReviewDTO
 import my.drivebit.network.services.CreateReviewRequest
+import my.drivebit.network.services.CreatedReviewDTO
 import my.drivebit.network.services.Photo
 import my.drivebit.network.services.Review
 import my.drivebit.network.services.ReviewListDTO
@@ -234,8 +234,7 @@ class MockReviewForDetail : Review {
             totalPages = 0,
         )
 
-    override suspend fun createReview(request: CreateReviewRequest): CreatedReviewDTO =
-        throw NotImplementedError()
+    override suspend fun createReview(request: CreateReviewRequest): CreatedReviewDTO = throw NotImplementedError()
 
     override suspend fun getReviewsByCarId(
         carId: String,

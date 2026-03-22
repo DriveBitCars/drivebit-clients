@@ -9,9 +9,9 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarsGrid
+import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.HeroBanner
 import my.drivebit.components.MainPromoSections
-import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.filterButton
 import my.drivebit.design.CSSColors

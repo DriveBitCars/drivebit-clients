@@ -52,10 +52,11 @@ class CreateReviewViewModelImpl(
     override fun submit() {
         val current = _state.value
         if (current.isSubmitting) return
-        val stars = current.stars ?: run {
-            _state.update { it.copy(error = "Выберите оценку от 1 до 5") }
-            return
-        }
+        val stars =
+            current.stars ?: run {
+                _state.update { it.copy(error = "Выберите оценку от 1 до 5") }
+                return
+            }
         coroutineScope.launch {
             _state.update { it.copy(isSubmitting = true, error = null) }
             runCatching {

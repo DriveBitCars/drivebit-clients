@@ -24,13 +24,14 @@ fun HeroBanner(
     val navigationController = LocalNavigationController.current
 
     val searchClick: () -> Unit = {
-        val queryParams = buildString {
-            if (startState.date != null) append("startDate=${startState.date}")
-            if (endState.date != null) {
-                if (length > 0) append("&")
-                append("endDate=${endState.date}")
+        val queryParams =
+            buildString {
+                if (startState.date != null) append("startDate=${startState.date}")
+                if (endState.date != null) {
+                    if (length > 0) append("&")
+                    append("endDate=${endState.date}")
+                }
             }
-        }
         val url = if (queryParams.isNotEmpty()) "/search?$queryParams" else "/search"
         navigationController?.navigateTo(url)
     }
