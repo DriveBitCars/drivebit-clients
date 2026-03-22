@@ -64,7 +64,7 @@ jobs:
         touch dist/.nojekyll
         
         # Add CNAME file for custom domain
-        echo "dev.drivebit.my" > dist/CNAME
+        echo "dev.drivebit.ru" > dist/CNAME
 
         # Copy list-your-car.html if it exists
         if [ -f "list-your-car.html" ]; then

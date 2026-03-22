@@ -55,7 +55,7 @@ createTestCar()
 TOKEN="your_token_here"
 
 # Создайте автомобиль
-curl -X POST "https://drivebit.my/api/Car/my" \
+curl -X POST "https://drivebit.ru/api/Car/my" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
@@ -71,7 +71,7 @@ curl -X POST "https://drivebit.my/api/Car/my" \
   }'
 
 # Проверьте список
-curl -X GET "https://drivebit.my/api/Car/my" \
+curl -X GET "https://drivebit.ru/api/Car/my" \
   -H "Authorization: Bearer $TOKEN"
 ```
 

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-const API_BASE = process.env.API_BASE_URL || "https://drivebit.my/api";
+const API_BASE = process.env.API_BASE_URL || "https://drivebit.ru/api";
 const CITY_ID = "158835";
 const PAGE_SIZE = 100;
 const OUTPUT = process.env.OUTPUT_PATH || "prerender-bot.html";
 const SITEMAP_FILENAME = process.env.SITEMAP_FILENAME || "sitemap.xml";
 const CAR_DIR = process.env.CAR_DIR || "car";
-const BASE = process.env.SITE_BASE || "https://drivebit.my";
+const BASE = process.env.SITE_BASE || "https://drivebit.ru";
 
 function formatCarTitle(car) {
   const g = car.general || {};

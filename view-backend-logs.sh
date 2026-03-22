@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SSH_USER="user1"
-SSH_HOST="api.drivebit.my"
+SSH_HOST="api.drivebit.ru"
 CONTAINER_NAME="drivebit-drivebitbackend-1"
 
 if [ -n "$SSH_KEY" ]; then

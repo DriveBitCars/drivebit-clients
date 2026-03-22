@@ -4,7 +4,9 @@
 set -e
 
 NGINX_CONFIG=""
-if [ -f "/etc/nginx/sites-available/drivebit.my" ]; then
+if [ -f "/etc/nginx/sites-available/drivebit.ru" ]; then
+    NGINX_CONFIG="/etc/nginx/sites-available/drivebit.ru"
+elif [ -f "/etc/nginx/sites-available/drivebit.my" ]; then
     NGINX_CONFIG="/etc/nginx/sites-available/drivebit.my"
 elif [ -f "/etc/nginx/sites-available/drivebit-clients" ]; then
     NGINX_CONFIG="/etc/nginx/sites-available/drivebit-clients"

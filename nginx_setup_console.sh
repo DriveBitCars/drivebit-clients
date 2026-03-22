@@ -8,7 +8,9 @@ echo "🔧 Настройка nginx для проксирования /api/ на
 
 # Находим конфигурацию
 NGINX_CONFIG=""
-if [ -f "/etc/nginx/sites-available/drivebit.my" ]; then
+if [ -f "/etc/nginx/sites-available/drivebit.ru" ]; then
+    NGINX_CONFIG="/etc/nginx/sites-available/drivebit.ru"
+elif [ -f "/etc/nginx/sites-available/drivebit.my" ]; then
     NGINX_CONFIG="/etc/nginx/sites-available/drivebit.my"
 elif [ -f "/etc/nginx/sites-available/drivebit-clients" ]; then
     NGINX_CONFIG="/etc/nginx/sites-available/drivebit-clients"
@@ -77,7 +79,7 @@ if nginx -t; then
     echo "✅ Nginx перезагружен"
     echo ""
     echo "✅ Настройка завершена!"
-    echo "🧪 Проверьте: curl -I https://drivebit.my/api/swagger/index.html"
+    echo "🧪 Проверьте: curl -I https://drivebit.ru/api/swagger/index.html"
 else
     echo "❌ Ошибка в конфигурации!"
     echo "📄 Восстановление из резервной копии..."

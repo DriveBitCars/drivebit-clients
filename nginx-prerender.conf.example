@@ -1,6 +1,19 @@
 # Пример конфигурации Nginx для пререндеринга
 # Сохраните это в /etc/nginx/sites-available/drivebit-clients
 # map должен быть на уровне http (при include внутри http {} работает)
+#
+# Ускорение повторных запросов ботов: proxy_cache для ответов Prerender.
+# В http { } один раз подключите зону кэша — см. nginx-prerender-cache-http.conf.example
+# (mkdir для /var/cache/nginx/prerender и include файла с proxy_cache_path).
+#
+# Динамический prerender: контейнер scripts/prerender-docker/
+# слушает 127.0.0.1:3000. Боты проксируются на Prerender (Headless Chrome), который
+# запрашивает ту же публичную страницу по $scheme://$host$request_uri.
+# Убедитесь, что с сервера/контейнера доступен этот URL (DNS, firewall).
+#
+# Статическая генерация (prerender-bot.html, car/*.html) в CI может оставаться для
+# кеша или отключаться — этот пример не использует rewrite на prerender-bot.html.
+
 map $http_user_agent $is_bot {
     default 0;
     ~*googlebot 1;
@@ -17,6 +30,8 @@ server {
     server_name your-domain.com;
     root /var/www/drivebit-clients;
     index index.html;
+
+    error_page 418 = @prerender_bot;
 
     # Сжатие
     gzip on;
@@ -36,15 +51,12 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # Кеширование изображений
         proxy_cache_valid 200 1d;
         add_header Cache-Control "public, max-age=86400";
     }
 
-    # Пререндеренные страницы
-    # Если файл существует - отдаем его, иначе fallback на index.html
-    
     location = /login-by-phone {
         try_files /login-by-phone.html /index.html;
     }
@@ -53,17 +65,41 @@ server {
         try_files /login-by-mail.html /index.html;
     }
 
-    # Главная: боты получают prerender. Для drivebit.ru заменить prerender-bot.html на prerender-bot-ru.html
+    # Главная: люди — SPA; боты — Prerender (динамический HTML)
     location = / {
         if ($is_bot) {
-            rewrite ^ /prerender-bot.html last;
+            return 418;
         }
         try_files /index.html =404;
     }
 
-    # Все остальные пути - fallback на index.html (SPA роутинг)
+    # Остальные пути: статика при наличии файла, иначе SPA; боты — Prerender
     location / {
+        if ($is_bot) {
+            return 418;
+        }
         try_files $uri $uri/ /index.html;
     }
-}
 
+    location @prerender_bot {
+        internal;
+        rewrite ^ /$scheme://$host$request_uri break;
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 30s;
+        proxy_buffering on;
+
+        # Раскомментируйте после include зоны кэша в http {} (nginx-prerender-cache-http.conf.example):
+        # proxy_cache prerender_cache;
+        # proxy_cache_key "$scheme$host$request_uri";
+        # proxy_cache_valid 200 30m;
+        # proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        # proxy_cache_lock on;
+        # proxy_cache_lock_timeout 5s;
+        # add_header X-Prerender-Nginx-Cache $upstream_cache_status always;
+    }
+}
