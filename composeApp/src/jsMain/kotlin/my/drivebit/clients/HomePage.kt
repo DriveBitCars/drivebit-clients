@@ -128,8 +128,14 @@ fun HomePage() {
                     cameraPosition = mapState.value.cameraPosition,
                     markers = markers,
                     onMarkerClick = { marker ->
-                        window.location.href =
-                            "/car-edit?id=${marker.id.encodeUrlParameter()}"
+                        val params = mutableListOf("id=${marker.id.encodeUrlParameter()}")
+                        dateToStartAtIso(startState.date)?.let {
+                            params.add("$START_AT=${it.encodeUrlParameter()}")
+                        }
+                        dateToEndAtIso(endState.date)?.let {
+                            params.add("$END_AT=${it.encodeUrlParameter()}")
+                        }
+                        window.location.href = "/car-detail?${params.joinToString("&")}"
                     },
                     onCameraMove = { position ->
                         mapViewModel.updateCameraPosition(position)
