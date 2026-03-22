@@ -23,7 +23,11 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.utils.getUrlParameter
+import my.drivebit.utils.isProcessableCarPhotoImage
+import my.drivebit.utils.isWebpSource
+import my.drivebit.utils.processedCarPhotoFileName
 import my.drivebit.utils.reencodeToJpeg
+import my.drivebit.utils.reencodeToWebp
 import my.drivebit.viewmodels.CarPhotosState
 import my.drivebit.viewmodels.CarPhotosViewModel
 import org.jetbrains.compose.web.attributes.InputType
@@ -34,15 +38,6 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
-
-private fun processedFileName(originalName: String): String {
-    val nameWithoutExt = originalName.substringBeforeLast(".", originalName)
-    return if (nameWithoutExt.isNotBlank()) {
-        "$nameWithoutExt.jpg"
-    } else {
-        "photo.jpg"
-    }
-}
 
 @Composable
 fun CarPhotosPage() {
@@ -204,46 +199,45 @@ fun CarPhotosPage() {
 
                                                     for (i in 0 until fileList.length) {
                                                         val file = fileList.item(i) as? org.w3c.files.File
-                                                        if (file != null && file.type.startsWith("image/")) {
+                                                        if (file != null &&
+                                                            isProcessableCarPhotoImage(file.type, file.name)
+                                                        ) {
                                                             val fileSize = file.size.toInt()
                                                             println(
                                                                 "📸 [CarPhotosPage] Processing file: ${file.name}, type: ${file.type}, size: $fileSize bytes",
                                                             )
 
                                                             val maxFileSize = 2 * 1024 * 1024
+                                                            val useResize = fileSize > maxFileSize
+                                                            val maxDim = if (useResize) 1920 else null
+                                                            val quality = if (useResize) 0.75 else 0.9
+                                                            val asWebp = isWebpSource(file.type, file.name)
                                                             runCatching {
                                                                 val processedBytes =
-                                                                    file.reencodeToJpeg(
-                                                                        maxWidth =
-                                                                            if (fileSize >
-                                                                                maxFileSize
-                                                                            ) {
-                                                                                1920
-                                                                            } else {
-                                                                                null
-                                                                            },
-                                                                        maxHeight =
-                                                                            if (fileSize >
-                                                                                maxFileSize
-                                                                            ) {
-                                                                                1920
-                                                                            } else {
-                                                                                null
-                                                                            },
-                                                                        quality =
-                                                                            if (fileSize >
-                                                                                maxFileSize
-                                                                            ) {
-                                                                                0.75
-                                                                            } else {
-                                                                                0.9
-                                                                            },
+                                                                    if (asWebp) {
+                                                                        file.reencodeToWebp(
+                                                                            maxWidth = maxDim,
+                                                                            maxHeight = maxDim,
+                                                                            quality = quality,
+                                                                        )
+                                                                    } else {
+                                                                        file.reencodeToJpeg(
+                                                                            maxWidth = maxDim,
+                                                                            maxHeight = maxDim,
+                                                                            quality = quality,
+                                                                        )
+                                                                    }
+                                                                val outName =
+                                                                    processedCarPhotoFileName(
+                                                                        file.name,
+                                                                        if (asWebp) "webp" else "jpg",
                                                                     )
-                                                                val processedFileName = processedFileName(file.name)
 
                                                                 fileBytesList.add(processedBytes)
-                                                                fileNamesList.add(processedFileName)
-                                                                contentTypesList.add("image/jpeg")
+                                                                fileNamesList.add(outName)
+                                                                contentTypesList.add(
+                                                                    if (asWebp) "image/webp" else "image/jpeg",
+                                                                )
                                                             }.onFailure { e ->
                                                                 println(
                                                                     "❌ [CarPhotosPage] Error processing file ${file.name}: ${e.message}",

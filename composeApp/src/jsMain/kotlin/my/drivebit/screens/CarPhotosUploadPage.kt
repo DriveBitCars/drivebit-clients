@@ -23,7 +23,11 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.Photo
 import my.drivebit.utils.getUrlParameter
+import my.drivebit.utils.isProcessableCarPhotoImage
+import my.drivebit.utils.isWebpSource
+import my.drivebit.utils.processedCarPhotoFileName
 import my.drivebit.utils.reencodeToJpeg
+import my.drivebit.utils.reencodeToWebp
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.attributes.InputType
@@ -33,15 +37,6 @@ import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
-
-private fun processedFileName(originalName: String): String {
-    val nameWithoutExt = originalName.substringBeforeLast(".", originalName)
-    return if (nameWithoutExt.isNotBlank()) {
-        "$nameWithoutExt.jpg"
-    } else {
-        "photo.jpg"
-    }
-}
 
 @Composable
 fun CarPhotosUploadPage(onPhotosUploaded: () -> Unit = {}) {
@@ -80,16 +75,32 @@ fun CarPhotosUploadPage(onPhotosUploaded: () -> Unit = {}) {
 
                         for (i in 0 until fileList.length) {
                             val file = fileList.item(i) as? org.w3c.files.File
-                            if (file != null && file.type.startsWith("image/")) {
+                            if (file != null && isProcessableCarPhotoImage(file.type, file.name)) {
+                                val asWebp = isWebpSource(file.type, file.name)
                                 val fileBytes =
-                                    file.reencodeToJpeg(
-                                        maxWidth = 1920,
-                                        maxHeight = 1920,
-                                        quality = 0.9,
-                                    )
+                                    if (asWebp) {
+                                        file.reencodeToWebp(
+                                            maxWidth = 1920,
+                                            maxHeight = 1920,
+                                            quality = 0.9,
+                                        )
+                                    } else {
+                                        file.reencodeToJpeg(
+                                            maxWidth = 1920,
+                                            maxHeight = 1920,
+                                            quality = 0.9,
+                                        )
+                                    }
                                 fileBytesList.add(fileBytes)
-                                fileNamesList.add(processedFileName(file.name))
-                                contentTypesList.add("image/jpeg")
+                                fileNamesList.add(
+                                    processedCarPhotoFileName(
+                                        file.name,
+                                        if (asWebp) "webp" else "jpg",
+                                    ),
+                                )
+                                contentTypesList.add(
+                                    if (asWebp) "image/webp" else "image/jpeg",
+                                )
                             }
                         }
 
