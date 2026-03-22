@@ -16,8 +16,8 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyGray
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
-import my.drivebit.network.services.BookingDTO
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.network.services.BookingDTO
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString

@@ -32,6 +32,11 @@ This is a Kotlin Multiplatform project for Drivebit mobile clients targeting And
 ## Server Access
 - SSH: `ssh root@155.212.170.94`
 
+## Verification Before Completion
+- Follow the **verification-before-completion** skill: no claims that work is complete, fixed, or passing without **fresh** command output and exit code
+- **Default verification command for this repo:** `./gradlew check` from the repository root (or `:ModuleName:check` only when it fully covers the changed code)
+- Read full Gradle output; exit code 0 required before asserting success
+
 ## Development Workflow
 - No need to run full checks locally - push to CI instead
 - CI will run all tests and checks automatically on GitHub Actions

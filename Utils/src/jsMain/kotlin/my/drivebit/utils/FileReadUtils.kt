@@ -124,3 +124,93 @@ suspend fun org.w3c.files.File.reencodeToJpeg(
 
         reader.readAsDataURL(sourceFile)
     }
+
+suspend fun org.w3c.files.File.reencodeToWebp(
+    maxWidth: Int? = null,
+    maxHeight: Int? = null,
+    quality: Double = 0.9,
+): ByteArray =
+    suspendCancellableCoroutine { continuation ->
+        val sourceFile = this@reencodeToWebp
+        val reader = FileReader()
+
+        reader.onload = {
+            val img = document.createElement("img") as HTMLImageElement
+
+            img.addEventListener("load", { _ ->
+                val canvas = document.createElement("canvas") as HTMLCanvasElement
+                val ctx = canvas.getContext("2d") as? CanvasRenderingContext2D
+
+                if (ctx == null) {
+                    continuation.resumeWithException(Exception("Failed to get canvas context"))
+                    return@addEventListener
+                }
+
+                val targetWidth: Int
+                val targetHeight: Int
+
+                val limitWidth = maxWidth ?: img.naturalWidth
+                val limitHeight = maxHeight ?: img.naturalHeight
+
+                if (img.naturalWidth > limitWidth || img.naturalHeight > limitHeight) {
+                    val ratio =
+                        minOf(
+                            limitWidth.toDouble() / img.naturalWidth,
+                            limitHeight.toDouble() / img.naturalHeight,
+                        )
+                    targetWidth = (img.naturalWidth * ratio).toInt()
+                    targetHeight = (img.naturalHeight * ratio).toInt()
+                } else {
+                    targetWidth = img.naturalWidth
+                    targetHeight = img.naturalHeight
+                }
+
+                canvas.width = targetWidth
+                canvas.height = targetHeight
+
+                ctx.drawImage(img, 0.0, 0.0, targetWidth.toDouble(), targetHeight.toDouble())
+
+                canvas.toBlob(
+                    { blob: Blob? ->
+                        if (blob != null) {
+                            val resultReader = FileReader()
+                            resultReader.onload = {
+                                val arrayBuffer = resultReader.result
+                                if (arrayBuffer != null) {
+                                    val uint8Array: dynamic = js("new Uint8Array(arrayBuffer)")
+                                    val length = uint8Array.length as Int
+                                    val bytes = ByteArray(length)
+                                    for (i in 0 until length) {
+                                        bytes[i] = (uint8Array[i] as Number).toInt().toByte()
+                                    }
+                                    continuation.resume(bytes)
+                                } else {
+                                    continuation.resumeWithException(Exception("Failed to read re-encoded image"))
+                                }
+                            }
+                            resultReader.onerror = {
+                                continuation.resumeWithException(Exception("Failed to read re-encoded image"))
+                            }
+                            resultReader.readAsArrayBuffer(blob)
+                        } else {
+                            continuation.resumeWithException(Exception("Failed to re-encode image"))
+                        }
+                    },
+                    "image/webp",
+                    quality,
+                )
+            })
+
+            img.addEventListener("error", { _ ->
+                continuation.resumeWithException(Exception("Failed to load image"))
+            })
+
+            img.src = reader.result as String
+        }
+
+        reader.onerror = {
+            continuation.resumeWithException(Exception("Failed to read file"))
+        }
+
+        reader.readAsDataURL(sourceFile)
+    }

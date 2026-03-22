@@ -9,9 +9,9 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarsGrid
+import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.HeroBanner
 import my.drivebit.components.MainPromoSections
-import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.filterButton
 import my.drivebit.design.CSSColors
@@ -128,8 +128,14 @@ fun HomePage() {
                     cameraPosition = mapState.value.cameraPosition,
                     markers = markers,
                     onMarkerClick = { marker ->
-                        window.location.href =
-                            "/car-edit?id=${marker.id.encodeUrlParameter()}"
+                        val params = mutableListOf("id=${marker.id.encodeUrlParameter()}")
+                        dateToStartAtIso(startState.date)?.let {
+                            params.add("$START_AT=${it.encodeUrlParameter()}")
+                        }
+                        dateToEndAtIso(endState.date)?.let {
+                            params.add("$END_AT=${it.encodeUrlParameter()}")
+                        }
+                        window.location.href = "/car-detail?${params.joinToString("&")}"
                     },
                     onCameraMove = { position ->
                         mapViewModel.updateCameraPosition(position)

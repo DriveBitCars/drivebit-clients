@@ -1,9 +1,9 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
-import my.drivebit.design.CSSTypography
 import my.drivebit.components.ResponsiveContainer
 import my.drivebit.components.Row
+import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.A
@@ -15,7 +15,11 @@ private val FooterBg = Color("#09052B")
 private val FooterTextColor = Color("#ffffff")
 
 @Composable
-private fun FooterLink(href: String, text: String, centered: Boolean = false) {
+private fun FooterLink(
+    href: String,
+    text: String,
+    centered: Boolean = false,
+) {
     A(attrs = {
         attr("href", href)
         style {

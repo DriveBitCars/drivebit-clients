@@ -6,13 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarBook
+import my.drivebit.components.CarDepositSection
 import my.drivebit.components.CarDescription
 import my.drivebit.components.CarLocationMap
 import my.drivebit.components.CarOwnerSection
 import my.drivebit.components.CarPhotosSection
-import my.drivebit.components.CarReviewsSection
-import my.drivebit.components.CarDepositSection
 import my.drivebit.components.CarRatesSection
+import my.drivebit.components.CarReviewsSection
 import my.drivebit.components.CarSpecsRow
 import my.drivebit.components.CarTitleSection
 import my.drivebit.components.Column
