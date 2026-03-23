@@ -62,9 +62,7 @@ private fun LoginPageContent(mvi: LoginMviViewModel) {
             mutableStateOf(uiState.input)
         }
 
-    LaunchedEffect(uiState.input) {
-        inputValueState.value = uiState.input
-    }
+    inputValueState.value = uiState.input
 
     val navigationController = LocalNavigationController.current!!
     val returnCarId = getUrlParameter(RETURN_CAR_ID)
@@ -92,12 +90,10 @@ private fun LoginPageContent(mvi: LoginMviViewModel) {
         }
     }
 
-    LaunchedEffect(currentPath) {
-        if (currentPath.contains("login-by-phone") || currentPath.contains("login-by-mail")) {
-            mvi.handleIntent(LoginIntent.RestoreDraft)
-            syncPrimaryButtonFromMvi()
-            draftRestoreGeneration++
-        }
+    if (currentPath.contains("login-by-phone") || currentPath.contains("login-by-mail")) {
+        mvi.handleIntent(LoginIntent.RestoreDraft)
+        syncPrimaryButtonFromMvi()
+        draftRestoreGeneration++
     }
 
     LaunchedEffect(windowShowCycle) {

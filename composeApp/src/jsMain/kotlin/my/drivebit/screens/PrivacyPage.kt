@@ -11,7 +11,6 @@ import my.drivebit.components.AppWithHeader
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
