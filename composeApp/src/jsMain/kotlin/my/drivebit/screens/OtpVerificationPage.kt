@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.browser.window
+import my.drivebit.analytics.reachYandexGoalArenda
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
@@ -174,6 +175,7 @@ fun OtpVerificationPage() {
                     enabledColor = CSSColors.Blue,
                     text = "Подтвердить",
                     onClick = {
+                        reachYandexGoalArenda()
                         viewModel.verifyOtp()
                     },
                 )

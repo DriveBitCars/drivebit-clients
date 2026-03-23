@@ -14,6 +14,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import my.drivebit.analytics.reachYandexGoalBron
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
@@ -266,7 +267,10 @@ fun CarBook(
                 viewModel = buttonViewModel,
                 enabledColor = CSSColors.Blue,
                 text = "Забронировать",
-                onClick = { viewModel.onBookClick() },
+                onClick = {
+                    reachYandexGoalBron()
+                    viewModel.onBookClick()
+                },
             )
             bookState.createError?.let { error ->
                 Span({
