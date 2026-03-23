@@ -26,9 +26,9 @@ fun PriceFilterButtons(
         Button({
             onClick {
                 minPrice.value = 0
-                maxPrice.value = 600
+                maxPrice.value = 50000
                 onMinInputValueChange("0")
-                onMaxInputValueChange("600+")
+                onMaxInputValueChange("50000+")
                 onReset()
             }
             style {

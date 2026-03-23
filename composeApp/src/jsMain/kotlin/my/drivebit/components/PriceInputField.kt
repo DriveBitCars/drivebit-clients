@@ -17,7 +17,7 @@ fun PriceInputField(
     value: String,
     onValueChange: (Int) -> Unit,
     minValue: Int = 0,
-    maxValue: Int = 10000,
+    maxValue: Int = 50000,
 ) {
     Column(gap = 8.px, modifier = { flex(1) }) {
         Span({

@@ -15,7 +15,7 @@ fun PriceRangeSlider(
     maxPrice: MutableState<Int>,
     onMinValueChange: (String) -> Unit,
     onMaxValueChange: (String) -> Unit,
-    sliderMax: Int = 1000,
+    sliderMax: Int = 50000,
 ) {
     val minValue by minPrice
     val maxValue by maxPrice
@@ -79,7 +79,7 @@ fun PriceRangeSlider(
                 attr("max", sliderMax.toString())
                 value(maxValue.toString())
                 onInput { event ->
-                    val newValue = (event.target as org.w3c.dom.HTMLInputElement).value.toIntOrNull() ?: 600
+                    val newValue = (event.target as org.w3c.dom.HTMLInputElement).value.toIntOrNull() ?: sliderMax
                     if (newValue >= minValue) {
                         maxPrice.value = newValue
                         onMaxValueChange("$newValue+")

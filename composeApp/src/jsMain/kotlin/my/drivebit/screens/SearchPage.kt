@@ -91,7 +91,7 @@ fun SearchPage() {
     var showBodyTypeFilter by remember { mutableStateOf(false) }
     var showSeatsFilter by remember { mutableStateOf(false) }
     val minPrice = remember { mutableStateOf(dailyRateMin ?: 0) }
-    val maxPrice = remember { mutableStateOf(dailyRateMax ?: 600) }
+    val maxPrice = remember { mutableStateOf(dailyRateMax ?: 50000) }
 
     LaunchedEffect(dailyRateMin) {
         dailyRateMin?.let { minPrice.value = it }
@@ -104,7 +104,7 @@ fun SearchPage() {
     val isPriceSelected = dailyRateMin != null || dailyRateMax != null
     val priceText =
         if (isPriceSelected) {
-            "${dailyRateMin ?: 0} - ${dailyRateMax ?: 600}"
+            "${dailyRateMin ?: 0} - ${dailyRateMax ?: 50000}"
         } else {
             null
         }
@@ -230,7 +230,7 @@ fun SearchPage() {
                                     resultsCount = currentState.totalCount,
                                     onReset = {
                                         minPrice.value = 0
-                                        maxPrice.value = 600
+                                        maxPrice.value = 50000
                                         viewModel.updateDailyRateMin(null)
                                         viewModel.updateDailyRateMax(null)
                                         showPriceFilter = false
