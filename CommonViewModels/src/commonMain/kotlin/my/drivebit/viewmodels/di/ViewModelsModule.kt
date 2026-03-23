@@ -158,19 +158,21 @@ val commonViewModelsModule: Module =
             )
         }
 
-        factory<AuthFormViewModel>(named("phone")) {
+        factory<AuthFormViewModel>(named("phoneChange")) {
             PhoneLoginViewModel(
                 createOtpRepository = get(),
                 phoneValidator = get(named("phone")),
                 phoneInputValidator = get(named("phoneInput")),
+                requireTermsConsent = false,
             )
         }
 
-        factory<AuthFormViewModel>(named("email")) {
+        factory<AuthFormViewModel>(named("emailChange")) {
             EmailLoginViewModel(
                 createOtpRepository = get(),
                 emailValidator = get(named("email")),
                 emailInputValidator = get(named("emailInput")),
+                requireTermsConsent = false,
             )
         }
 

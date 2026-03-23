@@ -27,6 +27,8 @@ sealed interface AuthFormViewModel {
     val secondaryButtonNavigationPath: String
     val state: StateFlow<AuthFormState>
     val validationState: StateFlow<ValidationState>
+    val requiresTermsConsent: Boolean
+    val termsConsentAccepted: StateFlow<Boolean>
 
     fun formatInput(input: String): String
 
@@ -35,6 +37,8 @@ sealed interface AuthFormViewModel {
     fun submit(input: String)
 
     fun clearError()
+
+    fun setTermsConsent(accepted: Boolean)
 }
 
 sealed class AuthFormState {

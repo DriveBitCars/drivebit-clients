@@ -37,25 +37,6 @@ fun PrivacyPage() {
                 property("margin", "0 auto")
             }
         }) {
-            A(attrs = {
-                attr("href", "/")
-                onClick {
-                    it.preventDefault()
-                    window.location.href = "/"
-                }
-                style {
-                    applyTypography(CSSTypography.Styles.body)
-                    color(
-                        org.jetbrains.compose.web.css
-                            .Color("#1a73e8"),
-                    )
-                    textDecoration("none")
-                    property("margin-bottom", "16px")
-                    display(DisplayStyle.InlineBlock)
-                }
-            }) {
-                Text("← На главную")
-            }
             P({
                 style {
                     applyTypography(CSSTypography.Styles.body)

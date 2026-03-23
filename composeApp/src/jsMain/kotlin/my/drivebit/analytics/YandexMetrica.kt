@@ -1,7 +1,7 @@
 package my.drivebit.analytics
 
-import kotlin.js.jsTypeOf
 import kotlinx.browser.window
+import kotlin.js.jsTypeOf
 
 private const val YANDEX_COUNTER_ID = 105947907
 private const val ARENDA_GOAL = "arenda"

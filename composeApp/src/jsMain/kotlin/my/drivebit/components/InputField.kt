@@ -22,6 +22,7 @@ fun InputField(
     authFormViewModel: AuthFormViewModel,
     validatorViewModel: ValidatorViewModel,
     inputValue: MutableState<String>,
+    onFormattedValueCommitted: ((String) -> Unit)? = null,
 ) {
     inputFieldInternal(
         viewModel = validatorViewModel,
@@ -34,6 +35,7 @@ fun InputField(
         autocomplete = authFormViewModel.autocomplete,
         inputName = authFormViewModel.inputName,
         inputValue = inputValue,
+        onFormattedValueCommitted = onFormattedValueCommitted,
     )
 }
 
@@ -45,6 +47,7 @@ private fun inputFieldInternal(
     autocomplete: String,
     inputName: String,
     inputValue: MutableState<String>,
+    onFormattedValueCommitted: ((String) -> Unit)?,
 ) {
     val value by inputValue
     val validationState by viewModel.validationState.collectAsState()
@@ -75,7 +78,11 @@ private fun inputFieldInternal(
                     val newValue = (event.target as org.w3c.dom.HTMLInputElement).value
                     val formattedValue = viewModel.formatInput(newValue)
                     inputValue.value = formattedValue
-                    viewModel.validateInput(formattedValue)
+                    if (onFormattedValueCommitted != null) {
+                        onFormattedValueCommitted(formattedValue)
+                    } else {
+                        viewModel.validateInput(formattedValue)
+                    }
                 }
                 style {
                     width(100.percent)
@@ -108,7 +115,11 @@ private fun inputFieldInternal(
                     )
                 }
                 onBlur {
-                    viewModel.validateInput(value)
+                    if (onFormattedValueCommitted != null) {
+                        onFormattedValueCommitted(value)
+                    } else {
+                        viewModel.validateInput(value)
+                    }
                     val hasError = validationError != null
                     val borderColor =
                         if (hasError) {

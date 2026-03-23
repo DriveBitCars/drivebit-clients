@@ -3,8 +3,8 @@ package my.drivebit.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -15,10 +15,12 @@ import my.drivebit.components.FormSection
 import my.drivebit.components.InputField
 import my.drivebit.components.PageHeader
 import my.drivebit.components.PageWithLogo
+import my.drivebit.components.TermsConsentCheckbox
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.navigation.NavigationState
 import my.drivebit.resources.ImagePaths
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.IDENTIFIER
@@ -30,65 +32,98 @@ import my.drivebit.utils.START_AT
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.AuthFormState
-import my.drivebit.viewmodels.AuthFormViewModel
 import my.drivebit.viewmodels.ButtonState
+import my.drivebit.viewmodels.ButtonViewModel
 import my.drivebit.viewmodels.InputFieldType
 import my.drivebit.viewmodels.ValidationState
-import my.drivebit.viewmodels.ValidatorViewModel
-import my.drivebit.viewmodels.createButtonViewModel
+import my.drivebit.viewmodels.login.LoginIntent
+import my.drivebit.viewmodels.login.LoginMviViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.Qualifier
-import org.koin.core.qualifier.named
 
 @Composable
-fun LoginPage(viewModelQualifier: Qualifier) {
-    val viewModel: AuthFormViewModel = koinInject(viewModelQualifier)
-    val validatorViewModel: ValidatorViewModel =
-        koinInject(
-            if (viewModel.inputType == InputFieldType.Phone) {
-                named("phoneInputField")
-            } else {
-                named("emailInputField")
-            },
-        )
-
-    LoginPageContent(
-        viewModel = viewModel,
-        validatorViewModel = validatorViewModel,
-    )
+fun LoginPage(mviQualifier: Qualifier) {
+    val mvi: LoginMviViewModel = koinInject(mviQualifier)
+    LoginPageContent(mvi = mvi)
 }
 
 @Composable
-private fun LoginPageContent(
-    viewModel: AuthFormViewModel,
-    validatorViewModel: ValidatorViewModel,
-) {
+private fun LoginPageContent(mvi: LoginMviViewModel) {
+    val navigationState: NavigationState = koinInject()
+    val currentPath by navigationState.currentPath.collectAsState()
+    val windowShowCycle by navigationState.windowShowRestoreCycle.collectAsState()
+    val authForm = mvi.asAuthFormViewModel()
+    val validatorViewModel = mvi.validatorViewModel
+    val uiState by mvi.uiState.collectAsState()
     val inputValueState =
         remember {
-            mutableStateOf(viewModel.initialInputValue)
+            mutableStateOf(uiState.input)
         }
-    var inputValue by inputValueState
+
+    LaunchedEffect(uiState.input) {
+        inputValueState.value = uiState.input
+    }
+
     val navigationController = LocalNavigationController.current!!
     val returnCarId = getUrlParameter(RETURN_CAR_ID)
     val startAt = getUrlParameter(START_AT)
     val endAt = getUrlParameter(END_AT)
     val redirectPath = getUrlParameter(REDIRECT_PATH)
-    val loginState by viewModel.state.collectAsState()
+    val loginState = uiState.authState
     val validationState by validatorViewModel.validationState.collectAsState()
+    val termsConsentAccepted = uiState.termsAccepted
 
-    val isValid = derivedStateOf { validationState is ValidationState.Valid }
-    val isLoading = derivedStateOf { loginState is AuthFormState.Loading }
+    var draftRestoreGeneration by remember { mutableIntStateOf(0) }
+    val primaryButtonViewModel = remember { ButtonViewModel() }
 
-    val primaryButtonViewModel = createButtonViewModel()
-
-    LaunchedEffect(isLoading.value, isValid.value) {
+    fun syncPrimaryButtonFromMvi() {
+        val vs = validatorViewModel.validationState.value
+        val u = mvi.uiState.value
+        val isValid = vs is ValidationState.Valid
+        val isLoading = u.authState is AuthFormState.Loading
+        val consentOk = !u.requiresTermsConsent || u.termsAccepted
         when {
-            isLoading.value -> primaryButtonViewModel.setState(ButtonState.Loading)
-            !isValid.value -> primaryButtonViewModel.setState(ButtonState.Disabled)
+            isLoading -> primaryButtonViewModel.setState(ButtonState.Loading)
+            !isValid -> primaryButtonViewModel.setState(ButtonState.Disabled)
+            !consentOk -> primaryButtonViewModel.setState(ButtonState.Disabled)
             else -> primaryButtonViewModel.setState(ButtonState.Enabled)
         }
+    }
+
+    LaunchedEffect(currentPath) {
+        if (currentPath.contains("login-by-phone") || currentPath.contains("login-by-mail")) {
+            mvi.handleIntent(LoginIntent.RestoreDraft)
+            syncPrimaryButtonFromMvi()
+            draftRestoreGeneration++
+        }
+    }
+
+    LaunchedEffect(windowShowCycle) {
+        if (windowShowCycle == 0) return@LaunchedEffect
+        if (currentPath.contains("login-by-phone") || currentPath.contains("login-by-mail")) {
+            mvi.handleIntent(LoginIntent.RestoreDraft)
+            syncPrimaryButtonFromMvi()
+            draftRestoreGeneration++
+        }
+    }
+
+    LaunchedEffect(loginState) {
+        if (loginState is AuthFormState.Success) {
+            mvi.clearDraftStorage()
+        }
+    }
+
+    LaunchedEffect(
+        draftRestoreGeneration,
+        loginState,
+        uiState.termsAccepted,
+        uiState.requiresTermsConsent,
+        uiState.input,
+        validationState,
+    ) {
+        syncPrimaryButtonFromMvi()
     }
 
     if (loginState is AuthFormState.Error) {
@@ -115,14 +150,24 @@ private fun LoginPageContent(
     PageWithLogo {
         CenteredFormContainer {
             PageHeader {
-                TextSmartHeader(viewModel.pageTitle)
+                TextSmartHeader(uiState.pageTitle)
             }
 
             FormSection {
                 InputField(
-                    authFormViewModel = viewModel,
+                    authFormViewModel = authForm,
                     validatorViewModel = validatorViewModel,
                     inputValue = inputValueState,
+                    onFormattedValueCommitted = { formatted ->
+                        mvi.handleIntent(LoginIntent.InputChanged(formatted))
+                    },
+                )
+            }
+
+            if (uiState.requiresTermsConsent) {
+                TermsConsentCheckbox(
+                    accepted = termsConsentAccepted,
+                    onAcceptedChange = { mvi.handleIntent(LoginIntent.TermsChanged(it)) },
                 )
             }
 
@@ -130,9 +175,9 @@ private fun LoginPageContent(
                 ActionButton(
                     viewModel = primaryButtonViewModel,
                     enabledColor = CSSColors.Blue,
-                    text = viewModel.primaryButtonText,
+                    text = uiState.primaryButtonText,
                     onClick = {
-                        viewModel.submit(inputValue)
+                        mvi.handleIntent(LoginIntent.Submit)
                     },
                 )
             }
@@ -148,11 +193,11 @@ private fun LoginPageContent(
 
             ButtonContainer(marginTop = 16.px) {
                 ActionButton(
-                    image = if (viewModel.inputType == InputFieldType.Phone) ImagePaths.LOGIN_LETTER_SVG else null,
+                    image = if (authForm.inputType == InputFieldType.Phone) ImagePaths.LOGIN_LETTER_SVG else null,
                     enabledColor = CSSColors.Gray300,
-                    text = viewModel.secondaryButtonText,
+                    text = uiState.secondaryButtonText,
                     onClick = {
-                        val basePath = viewModel.secondaryButtonNavigationPath
+                        val basePath = uiState.secondaryButtonNavigationPath
                         val params = mutableListOf<String>()
                         if (returnCarId.isNotBlank()) params.add("$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}")
                         if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
