@@ -19,8 +19,20 @@ class PhoneLoginViewModel(
     private val phoneValidator: Validator,
     private val phoneInputValidator: InputValidator,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+    private val requireTermsConsent: Boolean = true,
 ) : AuthFormViewModel {
     private val viewModelScope = coroutineScope
+
+    override val requiresTermsConsent: Boolean = requireTermsConsent
+
+    private val _termsConsentAccepted = MutableStateFlow(!requireTermsConsent)
+    override val termsConsentAccepted: StateFlow<Boolean> = _termsConsentAccepted.asStateFlow()
+
+    override fun setTermsConsent(accepted: Boolean) {
+        if (requireTermsConsent) {
+            _termsConsentAccepted.value = accepted
+        }
+    }
 
     override val pageTitle: String = "Войти или создать аккаунт"
     override val fieldLabel: String = "Телефон"

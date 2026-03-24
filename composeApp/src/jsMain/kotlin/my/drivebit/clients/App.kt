@@ -49,6 +49,7 @@ import my.drivebit.shared.storage.Storage
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.di.commonViewModelsModule
 import my.drivebit.web.di.webModule
+import my.drivebit.web.login.loginWebModule
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
@@ -61,6 +62,7 @@ actual fun App() {
             storageModule,
             repositoriesModule,
             webModule,
+            loginWebModule,
             commonViewModelsModule,
         )
     }) {
@@ -86,10 +88,10 @@ actual fun App() {
                     OtpVerificationPage()
                 }
                 currentPath.startsWith("/login-by-phone") -> {
-                    LoginPage(viewModelQualifier = named("phone"))
+                    LoginPage(mviQualifier = named("phoneLoginMvi"))
                 }
                 currentPath.startsWith("/login-by-mail") -> {
-                    LoginPage(viewModelQualifier = named("email"))
+                    LoginPage(mviQualifier = named("emailLoginMvi"))
                 }
                 currentPath.startsWith("/profile") -> {
                     val storage: Storage = koinInject()

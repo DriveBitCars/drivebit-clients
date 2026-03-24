@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.browser.window
 import org.koin.compose.koinInject
+import kotlin.js.asDynamic
 
 @Composable
 fun Navigation(content: @Composable (String) -> Unit) {
@@ -28,10 +29,19 @@ fun Navigation(content: @Composable (String) -> Unit) {
             MetaTags.updateForPath(newPath)
         }
 
+        val pageShowHandler: (org.w3c.dom.events.Event) -> Unit = { ev ->
+            val persisted = ev.asDynamic().persisted as? Boolean
+            if (persisted == true) {
+                navigationState.notifyWindowShowRestoreFromCache()
+            }
+        }
+
         window.addEventListener("popstate", handler)
+        window.addEventListener("pageshow", pageShowHandler)
 
         onDispose {
             window.removeEventListener("popstate", handler)
+            window.removeEventListener("pageshow", pageShowHandler)
         }
     }
 

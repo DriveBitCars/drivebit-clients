@@ -42,7 +42,7 @@ import org.koin.core.qualifier.named
 fun ChangePhonePage() {
     val createOtpRepository: CreateOtpRepository = koinInject()
     val validatorViewModel: ValidatorViewModel = koinInject(named("phoneInputField"))
-    val authFormViewModel: AuthFormViewModel = koinInject(named("phone"))
+    val authFormViewModel: AuthFormViewModel = koinInject(named("phoneChange"))
 
     ChangePhonePageContent(
         createOtpRepository = createOtpRepository,

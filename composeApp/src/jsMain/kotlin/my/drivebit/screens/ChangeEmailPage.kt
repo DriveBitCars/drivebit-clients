@@ -42,7 +42,7 @@ import org.koin.core.qualifier.named
 fun ChangeEmailPage() {
     val createOtpRepository: CreateOtpRepository = koinInject()
     val validatorViewModel: ValidatorViewModel = koinInject(named("emailInputField"))
-    val authFormViewModel: AuthFormViewModel = koinInject(named("email"))
+    val authFormViewModel: AuthFormViewModel = koinInject(named("emailChange"))
 
     ChangeEmailPageContent(
         createOtpRepository = createOtpRepository,

@@ -11,7 +11,6 @@ import my.drivebit.components.AppWithHeader
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
@@ -37,25 +36,6 @@ fun PrivacyPage() {
                 property("margin", "0 auto")
             }
         }) {
-            A(attrs = {
-                attr("href", "/")
-                onClick {
-                    it.preventDefault()
-                    window.location.href = "/"
-                }
-                style {
-                    applyTypography(CSSTypography.Styles.body)
-                    color(
-                        org.jetbrains.compose.web.css
-                            .Color("#1a73e8"),
-                    )
-                    textDecoration("none")
-                    property("margin-bottom", "16px")
-                    display(DisplayStyle.InlineBlock)
-                }
-            }) {
-                Text("← На главную")
-            }
             P({
                 style {
                     applyTypography(CSSTypography.Styles.body)
