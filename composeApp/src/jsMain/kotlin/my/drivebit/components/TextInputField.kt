@@ -17,6 +17,7 @@ fun TextInputField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
+    placeholder: String? = null,
     maxLength: Int? = null,
     onFocus: (() -> Unit)? = null,
     onBlur: (() -> Unit)? = null,
@@ -39,6 +40,7 @@ fun TextInputField(
             type = InputType.Text,
             attrs = {
                 value(value)
+                placeholder?.let { attr("placeholder", it) }
                 maxLength?.let { attr("maxlength", it.toString()) }
                 if (numeric) {
                     attr("inputmode", "numeric")

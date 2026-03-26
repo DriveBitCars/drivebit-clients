@@ -118,6 +118,7 @@ private fun BrandSelectionContent(
     TextInputField(
         label = "Марка",
         value = query,
+        placeholder = "Начните вводить...",
         onValueChange = onQueryChange,
     )
 
@@ -178,6 +179,7 @@ private fun ModelSelectionContent(
     TextInputField(
         label = "Модель",
         value = query,
+        placeholder = "Начните вводить...",
         onValueChange = onQueryChange,
     )
 

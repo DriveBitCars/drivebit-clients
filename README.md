@@ -177,6 +177,22 @@ curl -s "https://drivebit.ru/prerender-bot-ru.html" | head -20
 curl -s "https://drivebit.ru/car/dacc0a4f-7644-4373-acaa-dbbe41648ab4.html" | grep -o '<title>[^<]*'
 ```
 
+## 🔎 Swagger Discovery (Retride)
+
+Use the discovery CLI to probe and rank Swagger/OpenAPI endpoints for `retride.ru`:
+
+```bash
+python scripts/swagger_discovery/retride_discovery.py --domain retride.ru --out-dir .firecrawl/retride
+```
+
+Dry-run with deterministic timeout parameters:
+
+```bash
+python scripts/swagger_discovery/retride_discovery.py --domain retride.ru --out-dir .firecrawl/retride --timeout-connect 3 --timeout-read 7
+```
+
+More details: [`scripts/swagger_discovery/README.md`](scripts/swagger_discovery/README.md)
+
 ## 🤝 Contributing
 
 1. Fork the repository

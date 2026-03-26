@@ -69,3 +69,5 @@ id_rda
 *.pem
 *.key
 *.pub
+
+.firecrawl
