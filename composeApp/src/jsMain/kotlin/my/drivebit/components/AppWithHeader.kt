@@ -21,7 +21,7 @@ fun AppWithHeader(content: @Composable () -> Unit) {
     val hasUnreadState = unreadMessagesViewModel.hasUnread.collectAsState()
 
     ResponsiveContainer { isMobile ->
-        AppContainer {
+        AppContainer(isMobile = isMobile) {
             if (storage.isLogined() && hasUnreadState.value) {
                 A(
                     attrs = {
