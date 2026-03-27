@@ -17,6 +17,7 @@ import my.drivebit.components.CarSpecsRow
 import my.drivebit.components.CarTitleSection
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
+import my.drivebit.components.ResponsiveContainer
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.utils.END_AT
@@ -29,6 +30,7 @@ import my.drivebit.viewmodels.CarReviewUi
 import my.drivebit.viewmodels.RentViewModel
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexWrap
@@ -48,15 +50,21 @@ fun CarDetailPage() {
 
     if (carId.isBlank()) {
         AppWithHeader {
-            Div({
-                style {
-                    width(100.percent)
-                    padding(20.px)
-                    property("max-width", "1200px")
-                    property("margin", "0 auto")
+            ResponsiveContainer { isMobile ->
+                Div({
+                    style {
+                        width(100.percent)
+                        if (isMobile) {
+                            padding(0.px)
+                        } else {
+                            padding(20.px)
+                        }
+                        property("max-width", "1200px")
+                        property("margin", "0 auto")
+                    }
+                }) {
+                    TextError("Не указан ID автомобиля")
                 }
-            }) {
-                TextError("Не указан ID автомобиля")
             }
         }
         return
@@ -70,37 +78,43 @@ fun CarDetailPage() {
     val state by viewModel.state.collectAsState()
 
     AppWithHeader {
-        Div({
-            style {
-                width(100.percent)
-                padding(20.px)
-                property("max-width", "1200px")
-                property("margin", "0 auto")
-            }
-        }) {
-            when (val currentState = state) {
-                is CarDetailState.Loading -> {
-                    Loader()
+        ResponsiveContainer { isMobile ->
+            Div({
+                style {
+                    width(100.percent)
+                    if (isMobile) {
+                        padding(0.px)
+                    } else {
+                        padding(20.px)
+                    }
+                    property("max-width", "1200px")
+                    property("margin", "0 auto")
                 }
+            }) {
+                when (val currentState = state) {
+                    is CarDetailState.Loading -> {
+                        Loader()
+                    }
 
-                is CarDetailState.Error -> {
-                    TextError(currentState.message)
-                }
+                    is CarDetailState.Error -> {
+                        TextError(currentState.message)
+                    }
 
-                is CarDetailState.Success -> {
-                    CarDetailContent(
-                        car = currentState.car,
-                        owner = currentState.owner,
-                        disabledBookingDates = currentState.disabledBookingDates,
-                        reviews = currentState.reviews,
-                        reviewsPage = currentState.reviewsPage,
-                        reviewsTotalPages = currentState.reviewsTotalPages,
-                        reviewsTotalCount = currentState.reviewsTotalCount,
-                        reviewsLoading = currentState.reviewsLoading,
-                        reviewsError = currentState.reviewsError,
-                        onLoadReviewsPage = { viewModel.loadReviewsPage(it) },
-                        koinScope = koinScope,
-                    )
+                    is CarDetailState.Success -> {
+                        CarDetailContent(
+                            car = currentState.car,
+                            owner = currentState.owner,
+                            disabledBookingDates = currentState.disabledBookingDates,
+                            reviews = currentState.reviews,
+                            reviewsPage = currentState.reviewsPage,
+                            reviewsTotalPages = currentState.reviewsTotalPages,
+                            reviewsTotalCount = currentState.reviewsTotalCount,
+                            reviewsLoading = currentState.reviewsLoading,
+                            reviewsError = currentState.reviewsError,
+                            onLoadReviewsPage = { viewModel.loadReviewsPage(it) },
+                            koinScope = koinScope,
+                        )
+                    }
                 }
             }
         }
@@ -122,67 +136,70 @@ private fun CarDetailContent(
     onLoadReviewsPage: (Int) -> Unit,
     koinScope: org.koin.core.scope.Scope,
 ) {
+    val rentViewModel =
+        remember(car.id) {
+            koinScope.get<RentViewModel>(parameters = { parametersOf(car.id) })
+        }
+
     Column(gap = 24.px) {
         CarPhotosSection(car)
 
-        Row(
-            gap = 24.px,
-            flexWrap = FlexWrap.Wrap,
-            alignItems = AlignItems.FlexStart,
-        ) {
-            Column(
-                gap = 16.px,
-                modifier = {
-                    flex(2)
-                    minWidth(0.px)
-                },
-            ) {
-                val carName = "${car.resolvedBrandName()} ${car.resolvedModelName()}".trim()
-                val carYear = car.resolvedProductionYear()
-
-                CarTitleSection(
-                    carName = carName,
-                    carYear = carYear,
-                )
-
-                CarRatesSection(car)
-
-                CarDepositSection(car)
-
-                CarSpecsRow(car)
-
-                CarDescription(description = car.general.description)
-
-                owner?.let { ownerInfo ->
-                    CarOwnerSection(
-                        name = ownerInfo.name,
-                        avatarUrl = ownerInfo.avatarUrl,
-                        memberSince = ownerInfo.memberSince,
-                        rating = null,
-                        tripsCount = null,
+        ResponsiveContainer { isMobile ->
+            if (isMobile) {
+                Column(gap = 24.px) {
+                    CarDetailInfoColumn(
+                        car = car,
+                        owner = owner,
+                        reviews = reviews,
+                        reviewsPage = reviewsPage,
+                        reviewsTotalPages = reviewsTotalPages,
+                        reviewsTotalCount = reviewsTotalCount,
+                        reviewsLoading = reviewsLoading,
+                        reviewsError = reviewsError,
+                        onLoadReviewsPage = onLoadReviewsPage,
+                    )
+                    Div({
+                        style {
+                            width(100.percent)
+                        }
+                    }) {
+                        CarBook(
+                            viewModel = rentViewModel,
+                            disabledDates = disabledBookingDates,
+                            initialStartAt = getUrlParameter(START_AT).takeIf { it.isNotBlank() },
+                            initialEndAt = getUrlParameter(END_AT).takeIf { it.isNotBlank() },
+                        )
+                    }
+                }
+            } else {
+                Row(
+                    gap = 24.px,
+                    flexWrap = FlexWrap.Wrap,
+                    alignItems = AlignItems.FlexStart,
+                ) {
+                    CarDetailInfoColumn(
+                        car = car,
+                        owner = owner,
+                        reviews = reviews,
+                        reviewsPage = reviewsPage,
+                        reviewsTotalPages = reviewsTotalPages,
+                        reviewsTotalCount = reviewsTotalCount,
+                        reviewsLoading = reviewsLoading,
+                        reviewsError = reviewsError,
+                        onLoadReviewsPage = onLoadReviewsPage,
+                        modifier = {
+                            flex(2)
+                            minWidth(0.px)
+                        },
+                    )
+                    CarBook(
+                        viewModel = rentViewModel,
+                        disabledDates = disabledBookingDates,
+                        initialStartAt = getUrlParameter(START_AT).takeIf { it.isNotBlank() },
+                        initialEndAt = getUrlParameter(END_AT).takeIf { it.isNotBlank() },
                     )
                 }
-
-                CarReviewsSection(
-                    reviews = reviews,
-                    loading = reviewsLoading,
-                    error = reviewsError,
-                    page = reviewsPage,
-                    totalPages = reviewsTotalPages,
-                    totalCount = reviewsTotalCount,
-                    onLoadPage = onLoadReviewsPage,
-                )
             }
-
-            CarBook(
-                viewModel =
-                    remember(car.id) {
-                        koinScope.get<RentViewModel>(parameters = { parametersOf(car.id) })
-                    },
-                disabledDates = disabledBookingDates,
-                initialStartAt = getUrlParameter(START_AT).takeIf { it.isNotBlank() },
-                initialEndAt = getUrlParameter(END_AT).takeIf { it.isNotBlank() },
-            )
         }
 
         val carLat = car.general.address.geoLat
@@ -191,5 +208,61 @@ private fun CarDetailContent(
         if (carLat != null && carLon != null && carLat != 0.0 && carLon != 0.0) {
             CarLocationMap(car = car)
         }
+    }
+}
+
+@Composable
+@Suppress("FunctionName")
+private fun CarDetailInfoColumn(
+    car: my.drivebit.network.services.CarDetailResponse,
+    owner: CarOwnerUi?,
+    reviews: List<CarReviewUi>,
+    reviewsPage: Int,
+    reviewsTotalPages: Int,
+    reviewsTotalCount: Int,
+    reviewsLoading: Boolean,
+    reviewsError: String?,
+    onLoadReviewsPage: (Int) -> Unit,
+    modifier: (StyleScope.() -> Unit)? = null,
+) {
+    Column(
+        gap = 16.px,
+        modifier = modifier,
+    ) {
+        val carName = "${car.resolvedBrandName()} ${car.resolvedModelName()}".trim()
+        val carYear = car.resolvedProductionYear()
+
+        CarTitleSection(
+            carName = carName,
+            carYear = carYear,
+        )
+
+        CarRatesSection(car)
+
+        CarDepositSection(car)
+
+        CarSpecsRow(car)
+
+        CarDescription(description = car.general.description)
+
+        owner?.let { ownerInfo ->
+            CarOwnerSection(
+                name = ownerInfo.name,
+                avatarUrl = ownerInfo.avatarUrl,
+                memberSince = ownerInfo.memberSince,
+                rating = null,
+                tripsCount = null,
+            )
+        }
+
+        CarReviewsSection(
+            reviews = reviews,
+            loading = reviewsLoading,
+            error = reviewsError,
+            page = reviewsPage,
+            totalPages = reviewsTotalPages,
+            totalCount = reviewsTotalCount,
+            onLoadPage = onLoadReviewsPage,
+        )
     }
 }

@@ -41,17 +41,22 @@ private fun PromoCard(
     backgroundColor: CSSColorValue,
     content: @Composable () -> Unit,
 ) {
-    Div({
-        style {
-            width(100.percent)
-            padding(24.px, 32.px)
-            backgroundColor(backgroundColor)
-            borderRadius(12.px)
-            property("box-shadow", "0 2px 12px rgba(0,0,0,0.06)")
-            property("box-sizing", "border-box")
+    ResponsiveContainer { isMobile ->
+        Div({
+            style {
+                width(100.percent)
+                padding(
+                    if (isMobile) 16.px else 24.px,
+                    if (isMobile) 8.px else 32.px,
+                )
+                backgroundColor(backgroundColor)
+                borderRadius(12.px)
+                property("box-shadow", "0 2px 12px rgba(0,0,0,0.06)")
+                property("box-sizing", "border-box")
+            }
+        }) {
+            content()
         }
-    }) {
-        content()
     }
 }
 
