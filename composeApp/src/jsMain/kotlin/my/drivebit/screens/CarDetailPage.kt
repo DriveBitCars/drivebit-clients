@@ -79,18 +79,6 @@ fun CarDetailPage() {
 
     AppWithHeader {
         ResponsiveContainer { isMobile ->
-            Div({
-                style {
-                    width(100.percent)
-                    if (isMobile) {
-                        padding(0.px)
-                    } else {
-                        padding(20.px)
-                    }
-                    property("max-width", "1200px")
-                    property("margin", "0 auto")
-                }
-            }) {
                 when (val currentState = state) {
                     is CarDetailState.Loading -> {
                         Loader()
@@ -118,7 +106,6 @@ fun CarDetailPage() {
                 }
             }
         }
-    }
 }
 
 @Composable
