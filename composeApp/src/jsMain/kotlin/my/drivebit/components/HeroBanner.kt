@@ -85,7 +85,7 @@ fun HeroBanner(
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Column)
                     alignItems(AlignItems.Center)
-                    padding(if (isMobile) 24.px else 48.px, if (isMobile) 16.px else 100.px)
+                    padding(if (isMobile) 20.px else 48.px, if (isMobile) 8.px else 100.px)
                     property("box-sizing", "border-box")
                 }
             }) {

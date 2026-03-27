@@ -40,41 +40,41 @@ private fun FooterLink(
 
 @Composable
 fun Footer() {
-    Div({
-        style {
-            marginTop(24.px)
-            paddingTop(32.px)
-            paddingBottom(32.px)
-            paddingLeft(40.px)
-            paddingRight(40.px)
-            property("box-sizing", "border-box")
-            backgroundColor(FooterBg)
-            property("border-radius", "24px")
-            property("width", "100%")
-            property("margin-left", "auto")
-            property("margin-right", "auto")
-        }
-    }) {
-        Column(
-            gap = 32.px,
-            modifier = {
-                alignItems(AlignItems.Center)
-                width(100.percent)
-            },
-        ) {
-            A(attrs = {
-                attr("href", "tel:+79268237180")
-                style {
-                    applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.xl)
-                    fontWeight(CSSTypography.FontWeight.medium)
-                    color(FooterTextColor)
-                    textDecoration("none")
-                }
-            }) {
-                Text("+7 (926) 823-71-80")
+    ResponsiveContainer { isMobile ->
+        Div({
+            style {
+                marginTop(24.px)
+                paddingTop(32.px)
+                paddingBottom(32.px)
+                paddingLeft(if (isMobile) 8.px else 40.px)
+                paddingRight(if (isMobile) 8.px else 40.px)
+                property("box-sizing", "border-box")
+                backgroundColor(FooterBg)
+                property("border-radius", "24px")
+                property("width", "100%")
+                property("margin-left", "auto")
+                property("margin-right", "auto")
             }
-            ResponsiveContainer { isMobile ->
+        }) {
+            Column(
+                gap = 32.px,
+                modifier = {
+                    alignItems(AlignItems.Center)
+                    width(100.percent)
+                },
+            ) {
+                A(attrs = {
+                    attr("href", "tel:+79268237180")
+                    style {
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(CSSTypography.FontSize.xl)
+                        fontWeight(CSSTypography.FontWeight.medium)
+                        color(FooterTextColor)
+                        textDecoration("none")
+                    }
+                }) {
+                    Text("+7 (926) 823-71-80")
+                }
                 if (isMobile) {
                     Column(
                         gap = 8.px,

@@ -7,17 +7,16 @@ import org.jetbrains.compose.web.dom.Div
 
 @Composable
 fun AppContainer(
-    isMobile: Boolean = false,
+    isMobile: Boolean,
     content: @Composable () -> Unit,
 ) {
-    val horizontal = if (isMobile) 8.px else 40.px
     Div({
         style {
             position(Position.Relative)
-            paddingTop(20.px)
-            paddingBottom(40.px)
-            paddingLeft(horizontal)
-            paddingRight(horizontal)
+            paddingTop(if (isMobile) 8.px else 20.px)
+            paddingBottom(if (isMobile) 16.px else 40.px)
+            paddingLeft(if (isMobile) 8.px else 40.px)
+            paddingRight(if (isMobile) 8.px else 40.px)
             fontFamily("system-ui, -apple-system, sans-serif")
             property("min-width", "320px")
             property("max-width", "1200px")
