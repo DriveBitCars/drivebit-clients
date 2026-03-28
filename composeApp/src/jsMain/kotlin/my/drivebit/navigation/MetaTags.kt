@@ -69,6 +69,20 @@ object MetaTags {
                     path = "/chat",
                     noindex = true,
                 ),
+            "/payment-success" to
+                PageMeta(
+                    title = "Оплата успешна - DriveBit",
+                    description = "Платёж в DriveBit успешно завершён.",
+                    path = "/payment-success",
+                    noindex = true,
+                ),
+            "/payment-failure" to
+                PageMeta(
+                    title = "Оплата не прошла - DriveBit",
+                    description = "Платёж в DriveBit не был завершён.",
+                    path = "/payment-failure",
+                    noindex = true,
+                ),
         )
 
     fun updateForPath(path: String) {

@@ -37,6 +37,8 @@ import my.drivebit.screens.MyDealsPage
 import my.drivebit.screens.ContactsPage
 import my.drivebit.screens.OfferPage
 import my.drivebit.screens.OtpVerificationPage
+import my.drivebit.screens.PaymentFailurePage
+import my.drivebit.screens.PaymentSuccessPage
 import my.drivebit.screens.PrivacyPage
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.ProductionYearInputPage
@@ -155,6 +157,12 @@ actual fun App() {
                 }
                 currentPath.startsWith("/privacy") -> {
                     PrivacyPage()
+                }
+                currentPath.startsWith("/payment-success") -> {
+                    PaymentSuccessPage()
+                }
+                currentPath.startsWith("/payment-failure") -> {
+                    PaymentFailurePage()
                 }
                 currentPath.startsWith("/car-edit") -> {
                     CarEditPage()
