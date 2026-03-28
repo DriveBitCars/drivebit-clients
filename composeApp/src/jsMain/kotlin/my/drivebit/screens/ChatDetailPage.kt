@@ -141,8 +141,10 @@ fun ChatDetailPage() {
                                 display(DisplayStyle.Flex)
                                 flexDirection(FlexDirection.Row)
                                 alignItems(AlignItems.Center)
+                                gap(8.px)
                                 padding(16.px)
                                 width(100.percent)
+                                maxWidth(100.percent)
                                 property("box-sizing", "border-box")
                             }
                         }) {
@@ -161,6 +163,9 @@ fun ChatDetailPage() {
                                 placeholder("Введите сообщение...")
                                 style {
                                     flex(1)
+                                    minWidth(0.px)
+                                    width(100.percent)
+                                    property("box-sizing", "border-box")
                                     padding(12.px)
                                     property("border", "1px solid ${CSSColors.Gray300}")
                                     borderRadius(8.px)
@@ -176,8 +181,8 @@ fun ChatDetailPage() {
                                     }
                                 }
                                 style {
-                                    marginLeft(8.px)
-                                    padding(12.px, 20.px)
+                                    flexShrink(0)
+                                    padding(12.px, 16.px)
                                     backgroundColor(CSSColors.Blue)
                                     color(CSSColors.White)
                                     property("border", "none")
@@ -185,6 +190,7 @@ fun ChatDetailPage() {
                                     cursor("pointer")
                                     fontSize(14.px)
                                     fontWeight("600")
+                                    whiteSpace("nowrap")
                                 }
                             }) {
                                 Text(if (isSending) "..." else "Отправить")
