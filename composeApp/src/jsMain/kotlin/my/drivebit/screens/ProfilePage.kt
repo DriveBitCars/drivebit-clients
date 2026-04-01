@@ -243,6 +243,22 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                 navigationController?.navigateTo("/change-email")
                             }
                         }
+
+                        Spacer(16.px)
+
+                        RowSpaceBetween {
+                            TextSmallBodyBlack("Пароль")
+                            LinkButton("Изменить") {
+                                val login = (user.email ?: user.phone).orEmpty()
+                                val path =
+                                    if (login.isNotBlank()) {
+                                        "/change-password?login=${login.encodeUrlParameter()}"
+                                    } else {
+                                        "/change-password"
+                                    }
+                                navigationController?.navigateTo(path)
+                            }
+                        }
                     }
                 }
             }

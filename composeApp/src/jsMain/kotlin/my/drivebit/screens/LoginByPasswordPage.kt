@@ -131,6 +131,7 @@ private fun PasswordInputField(
         fitContainerWidth = true,
         inputType = InputType.Password,
         placeholder = "Введите пароль",
+        passwordVisibilityToggle = true,
         onValueChange = onValueChange,
     )
 }

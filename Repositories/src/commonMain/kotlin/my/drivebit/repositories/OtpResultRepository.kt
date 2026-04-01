@@ -101,3 +101,33 @@ internal class ChangePhoneRepositoryImpl(
         )
     }
 }
+
+internal class ChangePasswordRepositoryImpl(
+    private val auth: Auth,
+) : OtpResultRepository {
+    override suspend fun otpResult(
+        identifier: String,
+        code: String,
+        additionalParams: Map<String, String>,
+    ): OtpResult {
+        val newPassword = additionalParams["newPassword"]!!
+        val result =
+            runCatching {
+                auth.changePasswordViaOtp(identifier, code, newPassword)
+            }
+
+        return result.fold(
+            onSuccess = { response ->
+                if (!response.success) {
+                    OtpResult.Error(response.error?.takeIf { it.isNotBlank() } ?: "Произошла ошибка")
+                } else {
+                    OtpResult.Success
+                }
+            },
+            onFailure = { throwable ->
+                val message = throwable.message?.takeIf { it.isNotBlank() } ?: "Произошла ошибка"
+                OtpResult.Error(message)
+            },
+        )
+    }
+}

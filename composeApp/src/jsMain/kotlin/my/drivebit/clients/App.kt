@@ -16,6 +16,7 @@ import my.drivebit.screens.ChatDetailPage
 import my.drivebit.screens.ChatListPage
 import my.drivebit.screens.CarPhotosGalleryPage
 import my.drivebit.screens.ChangeEmailPage
+import my.drivebit.screens.ChangePasswordPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.CitySelectionMode
 import my.drivebit.screens.CitySelectionPage
@@ -192,6 +193,9 @@ actual fun App() {
                 }
                 currentPath.startsWith("/change-phone") -> {
                     ChangePhonePage()
+                }
+                currentPath.startsWith("/change-password") -> {
+                    ChangePasswordPage()
                 }
                 currentPath.startsWith("/address-input") -> {
                     AddressInputPage(

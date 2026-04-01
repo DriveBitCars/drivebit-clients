@@ -22,6 +22,7 @@ import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.NEW_LOGIN
+import my.drivebit.utils.NEW_PASSWORD
 import my.drivebit.utils.OTPRESULT
 import my.drivebit.utils.OTP_RESULT_PARAM
 import my.drivebit.utils.REDIRECT_PATH
@@ -52,16 +53,16 @@ fun OtpVerificationPage() {
         koinInject(named(otpResultType.name))
     val identifier = getUrlParameter(IDENTIFIER)
     val newLogin = getUrlParameter(NEW_LOGIN)
+    val newPassword = getUrlParameter(NEW_PASSWORD)
     val returnCarId = getUrlParameter(RETURN_CAR_ID)
     val startAt = getUrlParameter(START_AT)
     val endAt = getUrlParameter(END_AT)
     val redirectPath = getUrlParameter(REDIRECT_PATH)
     val additionalParams =
-        remember(newLogin) {
-            if (newLogin.isNotEmpty()) {
-                mapOf("newLogin" to newLogin)
-            } else {
-                emptyMap()
+        remember(newLogin, newPassword) {
+            buildMap {
+                if (newLogin.isNotEmpty()) put("newLogin", newLogin)
+                if (newPassword.isNotEmpty()) put("newPassword", newPassword)
             }
         }
 
@@ -102,6 +103,7 @@ fun OtpVerificationPage() {
                 }
                 OTPRESULT.ChangeEmail -> navigationController?.navigateTo("/profile")
                 OTPRESULT.ChangePhone -> navigationController?.navigateTo("/profile")
+                OTPRESULT.ChangePassword -> navigationController?.navigateTo("/profile")
             }
         }
     }

@@ -23,6 +23,12 @@ interface Auth {
         code: String,
     ): VerifyOtpResponse
 
+    suspend fun changePasswordViaOtp(
+        identifier: String,
+        code: String,
+        newPassword: String,
+    ): AuthOperationResponse
+
     suspend fun createTokens(refreshToken: String): CreateNewTokensResponse
 }
 
@@ -74,6 +80,19 @@ data class LoginRequest(
 data class AuthResponse(
     val accessToken: AccessTokenDTO,
     val refreshToken: RefreshTokenDTO,
+    val success: Boolean,
+    val error: String? = null,
+)
+
+@Serializable
+data class ChangePasswordRequest(
+    val sessionId: String,
+    val otp: String,
+    val newPassword: String,
+)
+
+@Serializable
+data class AuthOperationResponse(
     val success: Boolean,
     val error: String? = null,
 )
@@ -167,6 +186,33 @@ class AuthImpl(
             println("   - Refresh token expires at: ${result.refreshToken.expiresAt}")
             result
         }.handleServiceError("AuthService", "verifyOtp")
+    }
+
+    override suspend fun changePasswordViaOtp(
+        identifier: String,
+        code: String,
+        newPassword: String,
+    ): AuthOperationResponse {
+        val url = "${DEFAULT_BASE_URL}Auth/change-password-via-otp"
+        println("📡 [AuthService] changePasswordViaOtp called")
+        println("   - URL: $url")
+        println("   - Session ID: $identifier")
+        println("   - OTP code length: ${code.length}")
+        println("   - New password length: ${newPassword.length}")
+
+        return runCatching {
+            val response =
+                httpClient
+                    .post(url) {
+                        contentType(ContentType.Application.Json)
+                        setBody(ChangePasswordRequest(sessionId = identifier, otp = code, newPassword = newPassword))
+                    }
+
+            println("📡 [AuthService] changePasswordViaOtp response received")
+            val result: AuthOperationResponse = response.parseResponse()
+            println("📡 [AuthService] changePasswordViaOtp successful")
+            result
+        }.handleServiceError("AuthService", "changePasswordViaOtp")
     }
 
     override suspend fun createTokens(refreshToken: String): CreateNewTokensResponse {
