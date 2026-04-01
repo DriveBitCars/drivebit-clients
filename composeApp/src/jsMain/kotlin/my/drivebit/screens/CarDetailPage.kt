@@ -79,33 +79,33 @@ fun CarDetailPage() {
 
     AppWithHeader {
         ResponsiveContainer { isMobile ->
-                when (val currentState = state) {
-                    is CarDetailState.Loading -> {
-                        Loader()
-                    }
+            when (val currentState = state) {
+                is CarDetailState.Loading -> {
+                    Loader()
+                }
 
-                    is CarDetailState.Error -> {
-                        TextError(currentState.message)
-                    }
+                is CarDetailState.Error -> {
+                    TextError(currentState.message)
+                }
 
-                    is CarDetailState.Success -> {
-                        CarDetailContent(
-                            car = currentState.car,
-                            owner = currentState.owner,
-                            disabledBookingDates = currentState.disabledBookingDates,
-                            reviews = currentState.reviews,
-                            reviewsPage = currentState.reviewsPage,
-                            reviewsTotalPages = currentState.reviewsTotalPages,
-                            reviewsTotalCount = currentState.reviewsTotalCount,
-                            reviewsLoading = currentState.reviewsLoading,
-                            reviewsError = currentState.reviewsError,
-                            onLoadReviewsPage = { viewModel.loadReviewsPage(it) },
-                            koinScope = koinScope,
-                        )
-                    }
+                is CarDetailState.Success -> {
+                    CarDetailContent(
+                        car = currentState.car,
+                        owner = currentState.owner,
+                        disabledBookingDates = currentState.disabledBookingDates,
+                        reviews = currentState.reviews,
+                        reviewsPage = currentState.reviewsPage,
+                        reviewsTotalPages = currentState.reviewsTotalPages,
+                        reviewsTotalCount = currentState.reviewsTotalCount,
+                        reviewsLoading = currentState.reviewsLoading,
+                        reviewsError = currentState.reviewsError,
+                        onLoadReviewsPage = { viewModel.loadReviewsPage(it) },
+                        koinScope = koinScope,
+                    )
                 }
             }
         }
+    }
 }
 
 @Composable
