@@ -4,11 +4,13 @@ import kotlinx.browser.window
 
 const val IDENTIFIER = "identifier"
 const val NEW_LOGIN = "newLogin"
+const val NEW_PASSWORD = "newPassword"
 
 enum class OTPRESULT {
     VerifyOtp,
     ChangeEmail,
     ChangePhone,
+    ChangePassword,
     ;
 
     companion object {

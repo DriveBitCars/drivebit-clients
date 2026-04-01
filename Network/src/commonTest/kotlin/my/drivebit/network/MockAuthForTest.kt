@@ -2,6 +2,7 @@ package my.drivebit.network
 
 import my.drivebit.network.services.AccessTokenDTO
 import my.drivebit.network.services.Auth
+import my.drivebit.network.services.AuthOperationResponse
 import my.drivebit.network.services.CreateNewTokensResponse
 import my.drivebit.network.services.RefreshTokenDTO
 
@@ -18,6 +19,17 @@ class MockAuthForTest : Auth {
         identifier: String,
         code: String,
     ) = throw NotImplementedError()
+
+    override suspend fun login(
+        login: String,
+        password: String,
+    ) = throw NotImplementedError()
+
+    override suspend fun changePasswordViaOtp(
+        identifier: String,
+        code: String,
+        newPassword: String,
+    ): AuthOperationResponse = throw NotImplementedError()
 
     override suspend fun createTokens(refreshToken: String): CreateNewTokensResponse {
         refreshCallCount++

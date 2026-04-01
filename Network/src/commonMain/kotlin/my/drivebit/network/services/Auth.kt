@@ -13,10 +13,21 @@ import my.drivebit.network.parseResponse
 interface Auth {
     suspend fun createOtp(login: String): CreateOtpResponse
 
+    suspend fun login(
+        login: String,
+        password: String,
+    ): AuthResponse
+
     suspend fun verifyOtp(
         identifier: String,
         code: String,
     ): VerifyOtpResponse
+
+    suspend fun changePasswordViaOtp(
+        identifier: String,
+        code: String,
+        newPassword: String,
+    ): AuthOperationResponse
 
     suspend fun createTokens(refreshToken: String): CreateNewTokensResponse
 }
@@ -60,6 +71,33 @@ data class VerifyOtpResponse(
 )
 
 @Serializable
+data class LoginRequest(
+    val login: String,
+    val password: String,
+)
+
+@Serializable
+data class AuthResponse(
+    val accessToken: AccessTokenDTO,
+    val refreshToken: RefreshTokenDTO,
+    val success: Boolean,
+    val error: String? = null,
+)
+
+@Serializable
+data class ChangePasswordRequest(
+    val sessionId: String,
+    val otp: String,
+    val newPassword: String,
+)
+
+@Serializable
+data class AuthOperationResponse(
+    val success: Boolean,
+    val error: String? = null,
+)
+
+@Serializable
 data class CreateNewTokensRequest(
     val refreshToken: String,
 )
@@ -96,6 +134,33 @@ class AuthImpl(
         }.handleServiceError("AuthService", "createOtp")
     }
 
+    override suspend fun login(
+        login: String,
+        password: String,
+    ): AuthResponse {
+        val url = "${DEFAULT_BASE_URL}Auth/login"
+        println("📡 [AuthService] login called")
+        println("   - URL: $url")
+        println("   - Login: $login")
+        println("   - Password length: ${password.length}")
+
+        return runCatching {
+            val response =
+                httpClient
+                    .post(url) {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(login = login, password = password))
+                    }
+
+            println("📡 [AuthService] login response received")
+            val result: AuthResponse = response.parseResponse()
+            println("📡 [AuthService] login successful")
+            println("   - Access token expires at: ${result.accessToken.expiresAt}")
+            println("   - Refresh token expires at: ${result.refreshToken.expiresAt}")
+            result
+        }.handleServiceError("AuthService", "login")
+    }
+
     override suspend fun verifyOtp(
         identifier: String,
         code: String,
@@ -121,6 +186,33 @@ class AuthImpl(
             println("   - Refresh token expires at: ${result.refreshToken.expiresAt}")
             result
         }.handleServiceError("AuthService", "verifyOtp")
+    }
+
+    override suspend fun changePasswordViaOtp(
+        identifier: String,
+        code: String,
+        newPassword: String,
+    ): AuthOperationResponse {
+        val url = "${DEFAULT_BASE_URL}Auth/change-password-via-otp"
+        println("📡 [AuthService] changePasswordViaOtp called")
+        println("   - URL: $url")
+        println("   - Session ID: $identifier")
+        println("   - OTP code length: ${code.length}")
+        println("   - New password length: ${newPassword.length}")
+
+        return runCatching {
+            val response =
+                httpClient
+                    .post(url) {
+                        contentType(ContentType.Application.Json)
+                        setBody(ChangePasswordRequest(sessionId = identifier, otp = code, newPassword = newPassword))
+                    }
+
+            println("📡 [AuthService] changePasswordViaOtp response received")
+            val result: AuthOperationResponse = response.parseResponse()
+            println("📡 [AuthService] changePasswordViaOtp successful")
+            result
+        }.handleServiceError("AuthService", "changePasswordViaOtp")
     }
 
     override suspend fun createTokens(refreshToken: String): CreateNewTokensResponse {

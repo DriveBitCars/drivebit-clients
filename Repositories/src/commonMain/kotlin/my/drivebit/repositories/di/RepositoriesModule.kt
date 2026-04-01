@@ -17,6 +17,7 @@ import my.drivebit.repositories.CarModelRepository
 import my.drivebit.repositories.CarModelRepositoryImpl
 import my.drivebit.repositories.CarSearchRepository
 import my.drivebit.repositories.CarSearchRepositoryImpl
+import my.drivebit.repositories.ChangePasswordRepositoryImpl
 import my.drivebit.repositories.ChangeEmailRepositoryImpl
 import my.drivebit.repositories.ChangePhoneRepositoryImpl
 import my.drivebit.repositories.CityRepository
@@ -38,6 +39,8 @@ import my.drivebit.repositories.MyCityRepositoryImpl
 import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.repositories.ParticipantAvatarCacheImpl
+import my.drivebit.repositories.PasswordLoginRepository
+import my.drivebit.repositories.PasswordLoginRepositoryImpl
 import my.drivebit.repositories.SelectedAddressRepository
 import my.drivebit.repositories.SelectedAddressRepositoryImpl
 import my.drivebit.repositories.SelectedBodyTypeRepository
@@ -69,6 +72,14 @@ val repositoriesModule: Module =
             )
         }
 
+        single<PasswordLoginRepository> {
+            PasswordLoginRepositoryImpl(
+                auth = get(),
+                storage = get(),
+                avatarRepository = get(),
+            )
+        }
+
         single<OtpResultRepository>(named("VerifyOtp")) {
             VerifyOtpRepositoryImpl(
                 auth = get(),
@@ -86,6 +97,12 @@ val repositoriesModule: Module =
         single<OtpResultRepository>(named("ChangePhone")) {
             ChangePhoneRepositoryImpl(
                 user = get(),
+            )
+        }
+
+        single<OtpResultRepository>(named("ChangePassword")) {
+            ChangePasswordRepositoryImpl(
+                auth = get(),
             )
         }
 

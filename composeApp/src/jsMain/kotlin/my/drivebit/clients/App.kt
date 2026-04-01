@@ -16,6 +16,7 @@ import my.drivebit.screens.ChatDetailPage
 import my.drivebit.screens.ChatListPage
 import my.drivebit.screens.CarPhotosGalleryPage
 import my.drivebit.screens.ChangeEmailPage
+import my.drivebit.screens.ChangePasswordPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.CitySelectionMode
 import my.drivebit.screens.CitySelectionPage
@@ -31,6 +32,7 @@ import my.drivebit.screens.LicensePlateInputPage
 import my.drivebit.screens.LeaveReviewPage
 import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
+import my.drivebit.screens.LoginByPasswordPage
 import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCarsPage
 import my.drivebit.screens.MyDealsPage
@@ -94,6 +96,9 @@ actual fun App() {
                 }
                 currentPath.startsWith("/login-by-mail") -> {
                     LoginPage(mviQualifier = named("emailLoginMvi"))
+                }
+                currentPath.startsWith("/login-by-password") -> {
+                    LoginByPasswordPage()
                 }
                 currentPath.startsWith("/profile") -> {
                     val storage: Storage = koinInject()
@@ -188,6 +193,9 @@ actual fun App() {
                 }
                 currentPath.startsWith("/change-phone") -> {
                     ChangePhonePage()
+                }
+                currentPath.startsWith("/change-password") -> {
+                    ChangePasswordPage()
                 }
                 currentPath.startsWith("/address-input") -> {
                     AddressInputPage(

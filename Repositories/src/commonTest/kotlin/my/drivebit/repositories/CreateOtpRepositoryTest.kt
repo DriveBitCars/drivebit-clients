@@ -3,6 +3,7 @@ package my.drivebit.repositories
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.Auth
+import my.drivebit.network.services.AuthOperationResponse
 import my.drivebit.network.services.CreateOtpResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,6 +30,17 @@ private class FakeAuth : Auth {
         identifier: String,
         code: String,
     ): my.drivebit.network.services.VerifyOtpResponse = throw NotImplementedError()
+
+    override suspend fun login(
+        login: String,
+        password: String,
+    ) = throw NotImplementedError()
+
+    override suspend fun changePasswordViaOtp(
+        identifier: String,
+        code: String,
+        newPassword: String,
+    ): AuthOperationResponse = throw NotImplementedError()
 
     override suspend fun createTokens(refreshToken: String): my.drivebit.network.services.CreateNewTokensResponse =
         throw NotImplementedError()

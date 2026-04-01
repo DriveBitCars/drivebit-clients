@@ -44,6 +44,11 @@ This is a Kotlin Multiplatform project for Drivebit mobile clients targeting And
 - NEVER run `./gradlew clean` without explicit user permission
 - Cache cleaning should only be done when user specifically requests it
 
+## CI failures — how to debug
+- **Do not** start by running `./gradlew check`, full multiplatform compiles, or other broad rebuilds just to discover what broke.
+- **First** determine which workflow and job failed and read the failure: **GitHub MCP** (if the GitHub server is connected and exposes tools), **GitHub Actions UI**, or the **public REST API** (`GET /repos/{owner}/{repo}/actions/runs?branch=…`, then `/runs/{id}/jobs`) to see job names and conclusions. Job log download via API may require repo permissions; use the web UI or authenticated MCP when logs are 403.
+- **Then** reproduce narrowly: e.g. only `./gradlew :Network:check` or the single failing task shown in the log, not the whole tree.
+
 ## Architecture Rules - MVVM/MVI Pattern
 - **ALWAYS extract ALL business logic from UI into ViewModels** - UI components should ONLY handle presentation
 - **UI should ONLY display what comes from ViewModel state** - no business logic, data processing, or state management in UI
