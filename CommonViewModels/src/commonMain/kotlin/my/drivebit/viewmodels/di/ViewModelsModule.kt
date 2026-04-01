@@ -64,6 +64,7 @@ import my.drivebit.viewmodels.MyCityViewModel
 import my.drivebit.viewmodels.MyCityViewModelImpl
 import my.drivebit.viewmodels.PassportUploadViewModel
 import my.drivebit.viewmodels.PassportUploadViewModelImpl
+import my.drivebit.viewmodels.PasswordLoginViewModel
 import my.drivebit.viewmodels.PhoneLoginViewModel
 import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
@@ -173,6 +174,12 @@ val commonViewModelsModule: Module =
                 emailValidator = get(named("email")),
                 emailInputValidator = get(named("emailInput")),
                 requireTermsConsent = false,
+            )
+        }
+
+        factory {
+            PasswordLoginViewModel(
+                passwordLoginRepository = get(),
             )
         }
 

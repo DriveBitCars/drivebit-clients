@@ -17,6 +17,8 @@ fun TextInputField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
+    inputType: InputType<String> = InputType.Text,
+    fitContainerWidth: Boolean = false,
     placeholder: String? = null,
     maxLength: Int? = null,
     onFocus: (() -> Unit)? = null,
@@ -37,7 +39,7 @@ fun TextInputField(
         }
 
         Input(
-            type = InputType.Text,
+            type = inputType,
             attrs = {
                 value(value)
                 placeholder?.let { attr("placeholder", it) }
@@ -70,6 +72,9 @@ fun TextInputField(
                     borderRadius(8.px)
                     padding(12.px, 16.px)
                     width(100.percent)
+                    if (fitContainerWidth) {
+                        property("box-sizing", "border-box")
+                    }
                 }
             },
         )

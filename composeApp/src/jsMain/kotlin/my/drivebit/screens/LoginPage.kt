@@ -204,6 +204,22 @@ private fun LoginPageContent(mvi: LoginMviViewModel) {
                     },
                 )
             }
+
+            ButtonContainer(marginTop = 12.px) {
+                ActionButton(
+                    enabledColor = CSSColors.Gray300,
+                    text = "Логин по паролю",
+                    onClick = {
+                        val params = mutableListOf<String>()
+                        if (returnCarId.isNotBlank()) params.add("$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}")
+                        if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
+                        if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
+                        if (redirectPath.isNotBlank()) params.add("$REDIRECT_PATH=${redirectPath.encodeUrlParameter()}")
+                        val path = if (params.isNotEmpty()) "/login-by-password?${params.joinToString("&")}" else "/login-by-password"
+                        navigationController.navigateTo(path)
+                    },
+                )
+            }
         }
     }
 }

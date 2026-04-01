@@ -38,6 +38,8 @@ import my.drivebit.repositories.MyCityRepositoryImpl
 import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.repositories.ParticipantAvatarCacheImpl
+import my.drivebit.repositories.PasswordLoginRepository
+import my.drivebit.repositories.PasswordLoginRepositoryImpl
 import my.drivebit.repositories.SelectedAddressRepository
 import my.drivebit.repositories.SelectedAddressRepositoryImpl
 import my.drivebit.repositories.SelectedBodyTypeRepository
@@ -66,6 +68,14 @@ val repositoriesModule: Module =
         single<CreateOtpRepository> {
             CreateOtpRepositoryImpl(
                 auth = get(),
+            )
+        }
+
+        single<PasswordLoginRepository> {
+            PasswordLoginRepositoryImpl(
+                auth = get(),
+                storage = get(),
+                avatarRepository = get(),
             )
         }
 

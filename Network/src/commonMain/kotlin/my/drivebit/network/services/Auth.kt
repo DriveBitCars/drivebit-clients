@@ -13,6 +13,11 @@ import my.drivebit.network.parseResponse
 interface Auth {
     suspend fun createOtp(login: String): CreateOtpResponse
 
+    suspend fun login(
+        login: String,
+        password: String,
+    ): AuthResponse
+
     suspend fun verifyOtp(
         identifier: String,
         code: String,
@@ -60,6 +65,20 @@ data class VerifyOtpResponse(
 )
 
 @Serializable
+data class LoginRequest(
+    val login: String,
+    val password: String,
+)
+
+@Serializable
+data class AuthResponse(
+    val accessToken: AccessTokenDTO,
+    val refreshToken: RefreshTokenDTO,
+    val success: Boolean,
+    val error: String? = null,
+)
+
+@Serializable
 data class CreateNewTokensRequest(
     val refreshToken: String,
 )
@@ -94,6 +113,33 @@ class AuthImpl(
             println("   - Expires in: ${result.expiresIn}s")
             result
         }.handleServiceError("AuthService", "createOtp")
+    }
+
+    override suspend fun login(
+        login: String,
+        password: String,
+    ): AuthResponse {
+        val url = "${DEFAULT_BASE_URL}Auth/login"
+        println("📡 [AuthService] login called")
+        println("   - URL: $url")
+        println("   - Login: $login")
+        println("   - Password length: ${password.length}")
+
+        return runCatching {
+            val response =
+                httpClient
+                    .post(url) {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(login = login, password = password))
+                    }
+
+            println("📡 [AuthService] login response received")
+            val result: AuthResponse = response.parseResponse()
+            println("📡 [AuthService] login successful")
+            println("   - Access token expires at: ${result.accessToken.expiresAt}")
+            println("   - Refresh token expires at: ${result.refreshToken.expiresAt}")
+            result
+        }.handleServiceError("AuthService", "login")
     }
 
     override suspend fun verifyOtp(

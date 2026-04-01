@@ -31,6 +31,7 @@ import my.drivebit.screens.LicensePlateInputPage
 import my.drivebit.screens.LeaveReviewPage
 import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
+import my.drivebit.screens.LoginByPasswordPage
 import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCarsPage
 import my.drivebit.screens.MyDealsPage
@@ -94,6 +95,9 @@ actual fun App() {
                 }
                 currentPath.startsWith("/login-by-mail") -> {
                     LoginPage(mviQualifier = named("emailLoginMvi"))
+                }
+                currentPath.startsWith("/login-by-password") -> {
+                    LoginByPasswordPage()
                 }
                 currentPath.startsWith("/profile") -> {
                     val storage: Storage = koinInject()
