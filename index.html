@@ -626,7 +626,17 @@
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/105947907" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
-    <script src="//code.jivo.ru/widget/MWoBzLXYYF" async></script>
+    <script>
+        (function () {
+            var host = window.location.hostname;
+            var isLocal = host === "localhost" || host === "127.0.0.1";
+            if (isLocal) return;
+            var jivoScript = document.createElement("script");
+            jivoScript.src = "//code.jivo.ru/widget/MWoBzLXYYF";
+            jivoScript.async = true;
+            document.head.appendChild(jivoScript);
+        })();
+    </script>
 </head>
 <body>
     <!-- Loader показывается пока JS загружается -->
