@@ -7,9 +7,53 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonNames
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
+
+const val MESSAGE_ACTION_PAY_BOOKING = 1
+
+const val SYSTEM_MESSAGE_PAYMENT_REQUEST = "PaymentRequest"
+
+object SystemMessageTypeAsStringSerializer : KSerializer<String?> {
+    private val backing = String.serializer().nullable
+
+    override val descriptor: SerialDescriptor = backing.descriptor
+
+    override fun deserialize(decoder: Decoder): String? {
+        if (decoder is JsonDecoder) {
+            val element = decoder.decodeJsonElement()
+            if (element is JsonNull) return null
+            val prim = element as? JsonPrimitive ?: return null
+            return prim.contentOrNull?.takeIf { it.isNotBlank() }
+        }
+        return backing.deserialize(decoder)
+    }
+
+    override fun serialize(
+        encoder: Encoder,
+        value: String?,
+    ) {
+        backing.serialize(encoder, value)
+    }
+}
+
+@Serializable
+data class MessageActionBlockDto(
+    val actionType: Int,
+    val actionParameters: Map<String, String>? = null,
+)
 
 interface Chat {
     suspend fun hasUnread(): HasUnreadResponse
@@ -100,6 +144,12 @@ data class MessageDto(
     val isRead: Boolean = false,
     val createdAt: String,
     val isSystemMessage: Boolean = false,
+    @JsonNames("messageActionBlock", "MessageActionBlock")
+    val messageActionBlock: MessageActionBlockDto? = null,
+    @JsonNames("bookingId", "BookingId") val bookingId: String? = null,
+    @Serializable(with = SystemMessageTypeAsStringSerializer::class)
+    @JsonNames("systemMessageType", "SystemMessageType")
+    val systemMessageType: String? = null,
 )
 
 @Serializable
@@ -107,6 +157,19 @@ data class SendMessageRequest(
     val chatId: String,
     val text: String? = null,
 )
+
+fun MessageDto.payBookingIdForAction(): String? {
+    if (!isSystemMessage) return null
+    val booking =
+        messageActionBlock?.actionParameters?.get("bookingId")?.takeIf { it.isNotBlank() }
+            ?: bookingId?.takeIf { it.isNotBlank() }
+            ?: return null
+    if (messageActionBlock?.actionType == MESSAGE_ACTION_PAY_BOOKING) return booking
+    if (systemMessageType?.equals(SYSTEM_MESSAGE_PAYMENT_REQUEST, ignoreCase = true) == true) {
+        return booking
+    }
+    return null
+}
 
 class ChatImpl(
     private val httpClient: HttpClient,

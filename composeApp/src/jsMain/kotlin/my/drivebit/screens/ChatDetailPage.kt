@@ -17,13 +17,18 @@ import my.drivebit.components.MessageTextWithDealsLink
 import my.drivebit.components.ParticipantAvatar
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
+import my.drivebit.components.ActionButton
 import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.MessageDto
+import my.drivebit.network.services.payBookingIdForAction
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.mapIso8601ToTimeString
+import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.ChatDetailViewModel
+import my.drivebit.viewmodels.ChatPayEffect
 import my.drivebit.viewmodels.UnreadMessagesViewModel
+import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.placeholder
@@ -66,6 +71,20 @@ fun ChatDetailPage() {
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val isSending by viewModel.isSending.collectAsState()
+    val isPaying by viewModel.isPaying.collectAsState()
+
+    LaunchedEffect(chatId) {
+        viewModel.payEffects.collect { effect ->
+            when (effect) {
+                is ChatPayEffect.OpenCheckout -> {
+                    window.location.href = effect.url
+                }
+                is ChatPayEffect.ShowInfo -> {
+                    window.alert(effect.text)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(chatId) {
         viewModel.loadChat()
@@ -131,6 +150,15 @@ fun ChatDetailPage() {
                                         participantId = chatDetail?.participant?.id,
                                         participantName = chatDetail?.participant?.name,
                                         participantAvatarUrl = chatDetail?.participant?.avatar,
+                                        isPaying = isPaying,
+                                        onPayBooking = { bookingId ->
+                                            val origin = window.location.origin
+                                            viewModel.payBooking(
+                                                bookingId = bookingId,
+                                                returnUrl = "$origin/payment-success",
+                                                failUrl = "$origin/payment-failure",
+                                            )
+                                        },
                                     )
                                 }
                             }
@@ -209,6 +237,8 @@ private fun MessageBubble(
     participantId: String? = null,
     participantName: String? = null,
     participantAvatarUrl: String? = null,
+    isPaying: Boolean = false,
+    onPayBooking: (String) -> Unit = {},
 ) {
     val isSystemMessage = message.isSystemMessage
     val senderId = message.sender?.id
@@ -223,6 +253,11 @@ private fun MessageBubble(
     val timeStr = runCatching { mapIso8601ToTimeString(message.createdAt) }.getOrElse { "" }
 
     if (isSystemMessage) {
+        val bookingIdForPay = message.payBookingIdForAction()
+        val payButtonVm = createButtonViewModel()
+        LaunchedEffect(isPaying) {
+            payButtonVm.setState(if (isPaying) ButtonState.Loading else ButtonState.Enabled)
+        }
         Div({
             style {
                 padding(8.px)
@@ -231,7 +266,30 @@ private fun MessageBubble(
                 fontSize(13.px)
             }
         }) {
-            MessageTextWithDealsLink(text = text.ifBlank { "Системное сообщение" })
+            Column(
+                gap = 8.px,
+                modifier = {
+                    width(100.percent)
+                    alignItems(AlignItems.Center)
+                },
+            ) {
+                MessageTextWithDealsLink(text = text.ifBlank { "Системное сообщение" })
+                if (bookingIdForPay != null) {
+                    Div({
+                        style {
+                            width(100.percent)
+                            maxWidth(280.px)
+                        }
+                    }) {
+                        ActionButton(
+                            text = "Оплатить",
+                            enabledColor = CSSColors.Blue,
+                            viewModel = payButtonVm,
+                            onClick = { onPayBooking(bookingIdForPay) },
+                        )
+                    }
+                }
+            }
         }
         return
     }

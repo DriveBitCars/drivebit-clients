@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -24,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -31,12 +33,17 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import my.drivebit.network.services.MessageDto
+import my.drivebit.network.services.payBookingIdForAction
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
 import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.viewmodels.ChatDetailViewModel
+import my.drivebit.viewmodels.ChatPayEffect
 import org.koin.compose.currentKoinScope
 import org.koin.core.parameter.parametersOf
+
+private const val MOBILE_PAYMENT_SUCCESS_URL = "https://drivebit.ru/payment-success"
+private const val MOBILE_PAYMENT_FAIL_URL = "https://drivebit.ru/payment-failure"
 
 data class ChatScreen(
     val chatId: String,
@@ -53,7 +60,29 @@ data class ChatScreen(
         val messages by viewModel.messages.collectAsState()
         val isLoading by viewModel.isLoading.collectAsState()
         val error by viewModel.error.collectAsState()
+        val isPaying by viewModel.isPaying.collectAsState()
         var messageText by remember { mutableStateOf("") }
+        var payInfo by remember { mutableStateOf<String?>(null) }
+        val uriHandler = LocalUriHandler.current
+
+        LaunchedEffect(chatId) {
+            viewModel.payEffects.collect { effect ->
+                when (effect) {
+                    is ChatPayEffect.OpenCheckout -> uriHandler.openUri(effect.url)
+                    is ChatPayEffect.ShowInfo -> {
+                        payInfo = effect.text
+                    }
+                }
+            }
+        }
+
+        LaunchedEffect(payInfo) {
+            val msg = payInfo
+            if (msg != null) {
+                delay(6_000)
+                payInfo = null
+            }
+        }
 
         LaunchedEffect(chatId) {
             viewModel.loadChat()
@@ -82,6 +111,14 @@ data class ChatScreen(
                     Column(
                         modifier = Modifier.padding(innerPadding).fillMaxSize(),
                     ) {
+                        payInfo?.let { info ->
+                            Text(
+                                text = info,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            )
+                        }
                         LazyColumn(
                             modifier = Modifier.weight(1f).fillMaxWidth(),
                             reverseLayout = true,
@@ -94,6 +131,14 @@ data class ChatScreen(
                                 MessageBubble(
                                     message = message,
                                     participantId = chatDetail?.participant?.id,
+                                    isPaying = isPaying,
+                                    onPayBooking = { bookingId ->
+                                        viewModel.payBooking(
+                                            bookingId = bookingId,
+                                            returnUrl = MOBILE_PAYMENT_SUCCESS_URL,
+                                            failUrl = MOBILE_PAYMENT_FAIL_URL,
+                                        )
+                                    },
                                 )
                             }
                         }
@@ -141,6 +186,8 @@ data class ChatScreen(
 private fun MessageBubble(
     message: MessageDto,
     participantId: String? = null,
+    isPaying: Boolean = false,
+    onPayBooking: (String) -> Unit = {},
 ) {
     val senderId = message.sender?.id
     val isOwnMessage = participantId != null && senderId != null && senderId != participantId
@@ -169,11 +216,26 @@ private fun MessageBubble(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            Text(
-                text = message.text ?: "Системное сообщение",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            val bookingIdForPay = message.payBookingIdForAction()
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = message.text ?: "Системное сообщение",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (bookingIdForPay != null) {
+                    Button(
+                        onClick = { onPayBooking(bookingIdForPay) },
+                        enabled = !isPaying,
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Text(if (isPaying) "Загрузка…" else "Оплатить")
+                    }
+                }
+            }
         }
     }
 }
