@@ -22,6 +22,8 @@ import my.drivebit.network.services.Dictionary
 import my.drivebit.network.services.DictionaryImpl
 import my.drivebit.network.services.Documents
 import my.drivebit.network.services.DocumentsImpl
+import my.drivebit.network.services.Payment
+import my.drivebit.network.services.PaymentImpl
 import my.drivebit.network.services.Photo
 import my.drivebit.network.services.PhotoImpl
 import my.drivebit.network.services.Review
@@ -148,6 +150,9 @@ val networkModule =
         }
         single<Chat> {
             ChatImpl(get(named("authorized")))
+        }
+        single<Payment> {
+            PaymentImpl(get(named("authorized")))
         }
         single<Review> {
             ReviewImpl(

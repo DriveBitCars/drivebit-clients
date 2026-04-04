@@ -209,6 +209,7 @@ val commonViewModelsModule: Module =
         factory<ChatDetailViewModel> { (chatId: String) ->
             ChatDetailViewModelImpl(
                 chat = get(),
+                payment = get(),
                 chatId = chatId,
                 participantAvatarCache = get(),
             )
@@ -418,6 +419,7 @@ val commonViewModelsModule: Module =
         factory<RentViewModel> { (carId: String) ->
             RentViewModelImpl(
                 booking = get(),
+                payment = get(),
                 storage = get(),
                 carId = carId,
             )

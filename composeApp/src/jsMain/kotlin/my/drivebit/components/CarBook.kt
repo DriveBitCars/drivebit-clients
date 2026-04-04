@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import kotlinx.browser.window
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -26,6 +27,7 @@ import my.drivebit.utils.addDays
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateTimeFieldViewModel
+import my.drivebit.viewmodels.RentPayEffect
 import my.drivebit.viewmodels.RentState
 import my.drivebit.viewmodels.RentViewModel
 import my.drivebit.viewmodels.createButtonViewModel
@@ -45,8 +47,23 @@ fun CarBook(
     initialEndAt: String? = null,
 ) {
     val state by viewModel.state.collectAsState()
+    val isPaying by viewModel.isPaying.collectAsState()
     val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
+    val payButtonViewModel = createButtonViewModel()
+
+    LaunchedEffect(Unit) {
+        viewModel.payEffects.collect { effect ->
+            when (effect) {
+                is RentPayEffect.OpenCheckout -> {
+                    window.location.href = effect.url
+                }
+                is RentPayEffect.ShowInfo -> {
+                    window.alert(effect.text)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(state) {
         when (state) {
@@ -126,10 +143,18 @@ fun CarBook(
     val startDateTimeViewModel = remember { DateTimeFieldViewModel() }
     val endDateTimeViewModel = remember { DateTimeFieldViewModel() }
 
-    LaunchedEffect(bookState.isCreating) {
+    LaunchedEffect(bookState.isCreating, bookState.pendingPaymentBookingId) {
         buttonViewModel.setState(
-            if (bookState.isCreating) ButtonState.Loading else ButtonState.Enabled,
+            when {
+                bookState.isCreating -> ButtonState.Loading
+                bookState.pendingPaymentBookingId != null -> ButtonState.Disabled
+                else -> ButtonState.Enabled
+            },
         )
+    }
+
+    LaunchedEffect(isPaying) {
+        payButtonViewModel.setState(if (isPaying) ButtonState.Loading else ButtonState.Enabled)
     }
     val startDateTimeState by startDateTimeViewModel.state.collectAsState()
     val endDateTimeState by endDateTimeViewModel.state.collectAsState()
@@ -272,6 +297,53 @@ fun CarBook(
                     viewModel.onBookClick()
                 },
             )
+            bookState.pendingPaymentBookingId?.let {
+                Span({
+                    style {
+                        display(DisplayStyle.Block)
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(CSSTypography.FontSize.sm)
+                        color(CSSColors.Gray600)
+                        marginTop((-4).px)
+                    }
+                }) {
+                    Text("Бронирование создано. Оплатите, чтобы подтвердить.")
+                }
+                ActionButton(
+                    viewModel = payButtonViewModel,
+                    enabledColor = CSSColors.Blue,
+                    text = "Оплатить",
+                    onClick = {
+                        val origin = window.location.origin
+                        viewModel.payCreatedBooking(
+                            returnUrl = "$origin/payment-success",
+                            failUrl = "$origin/payment-failure",
+                        )
+                    },
+                )
+                Div({
+                    style {
+                        width(100.percent)
+                        textAlign("center")
+                        marginTop(4.px)
+                    }
+                    onClick {
+                        viewModel.requestNavigateToMyBookings()
+                    }
+                }) {
+                    Span({
+                        style {
+                            applyTypography(CSSTypography.Styles.body)
+                            fontSize(CSSTypography.FontSize.sm)
+                            color(CSSColors.Blue)
+                            property("cursor", "pointer")
+                            property("text-decoration", "underline")
+                        }
+                    }) {
+                        Text("Мои бронирования")
+                    }
+                }
+            }
             bookState.createError?.let { error ->
                 Span({
                     style {

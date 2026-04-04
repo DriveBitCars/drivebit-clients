@@ -7,9 +7,114 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonNames
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
+
+@Serializable
+enum class ActionTypeEnum {
+    None,
+    PayBooking,
+    LeaveReviewForRenter,
+    LeaveReviewForCar,
+    ConfirmBooking,
+}
+
+object ActionTypeEnumSerializer : KSerializer<ActionTypeEnum> {
+    private val backing = ActionTypeEnum.serializer()
+
+    override val descriptor: SerialDescriptor = backing.descriptor
+
+    override fun deserialize(decoder: Decoder): ActionTypeEnum {
+        if (decoder is JsonDecoder) {
+            val element = decoder.decodeJsonElement()
+            if (element is JsonNull) return ActionTypeEnum.None
+            val prim = element as? JsonPrimitive ?: return ActionTypeEnum.None
+            val raw = prim.contentOrNull?.trim().orEmpty()
+            if (raw.isNotEmpty()) {
+                ActionTypeEnum.entries.find { it.name == raw }?.let { return it }
+            }
+            prim.intOrNull?.let { ord ->
+                return ActionTypeEnum.entries.getOrNull(ord) ?: ActionTypeEnum.None
+            }
+            return ActionTypeEnum.None
+        }
+        return backing.deserialize(decoder)
+    }
+
+    override fun serialize(
+        encoder: Encoder,
+        value: ActionTypeEnum,
+    ) {
+        backing.serialize(encoder, value)
+    }
+}
+
+@Serializable
+enum class SystemMessageType {
+    BookingRequest,
+    BookingConfirmed,
+    BookingDeclined,
+    BookingActive,
+    BookingCompleted,
+    BookingCancelledByRenter,
+    BookingCancelledByOwner,
+    BookingExpired,
+    PaymentRequest,
+    PaymentReceived,
+    BookingPaid,
+    BookingPaymentExpired,
+    BookingRefunded,
+    BookingStatusChanged,
+    General,
+}
+
+object SystemMessageTypeNullableSerializer : KSerializer<SystemMessageType?> {
+    private val backing = SystemMessageType.serializer().nullable
+
+    override val descriptor: SerialDescriptor = backing.descriptor
+
+    override fun deserialize(decoder: Decoder): SystemMessageType? {
+        if (decoder is JsonDecoder) {
+            val element = decoder.decodeJsonElement()
+            if (element is JsonNull) return null
+            val prim = element as? JsonPrimitive ?: return null
+            val raw = prim.contentOrNull?.trim() ?: return null
+            if (raw.isEmpty()) return null
+            SystemMessageType.entries.find { it.name == raw }?.let { return it }
+            prim.intOrNull?.let { ord ->
+                return SystemMessageType.entries.getOrNull(ord)
+            }
+            return null
+        }
+        return backing.deserialize(decoder)
+    }
+
+    override fun serialize(
+        encoder: Encoder,
+        value: SystemMessageType?,
+    ) {
+        backing.serialize(encoder, value)
+    }
+}
+
+@Serializable
+data class MessageActionBlockDto(
+    @Serializable(with = ActionTypeEnumSerializer::class)
+    val actionType: ActionTypeEnum = ActionTypeEnum.None,
+    val actionParameters: Map<String, String>? = null,
+)
 
 interface Chat {
     suspend fun hasUnread(): HasUnreadResponse
@@ -100,6 +205,12 @@ data class MessageDto(
     val isRead: Boolean = false,
     val createdAt: String,
     val isSystemMessage: Boolean = false,
+    @JsonNames("messageActionBlock", "MessageActionBlock")
+    val messageActionBlock: MessageActionBlockDto? = null,
+    @JsonNames("bookingId", "BookingId") val bookingId: String? = null,
+    @Serializable(with = SystemMessageTypeNullableSerializer::class)
+    @JsonNames("systemMessageType", "SystemMessageType")
+    val systemMessageType: SystemMessageType? = null,
 )
 
 @Serializable
@@ -107,6 +218,24 @@ data class SendMessageRequest(
     val chatId: String,
     val text: String? = null,
 )
+
+fun MessageDto.payBookingIdForAction(): String? {
+    if (!isSystemMessage) return null
+    val booking =
+        messageActionBlock?.actionParameters?.get("bookingId")?.takeIf { it.isNotBlank() }
+            ?: bookingId?.takeIf { it.isNotBlank() }
+            ?: return null
+    when (messageActionBlock?.actionType) {
+        ActionTypeEnum.PayBooking,
+        ActionTypeEnum.ConfirmBooking,
+        -> return booking
+        else -> {}
+    }
+    if (systemMessageType == SystemMessageType.PaymentRequest) {
+        return booking
+    }
+    return null
+}
 
 class ChatImpl(
     private val httpClient: HttpClient,

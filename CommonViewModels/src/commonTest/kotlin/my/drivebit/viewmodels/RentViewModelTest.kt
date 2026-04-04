@@ -9,6 +9,8 @@ import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CheckBookingAvailabilityResponse
+import my.drivebit.network.services.PayBookingResult
+import my.drivebit.network.services.Payment
 import my.drivebit.shared.storage.Storage
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -83,6 +85,14 @@ private class FakeBooking(
         )
 }
 
+private class FakePayment : Payment {
+    override suspend fun registerBookingPayment(
+        bookingId: String,
+        returnUrl: String,
+        failUrl: String,
+    ): PayBookingResult = PayBookingResult.Failed("unused in test")
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class RentViewModelTest {
     @Test
@@ -94,6 +104,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
@@ -118,6 +129,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
@@ -142,6 +154,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
@@ -164,6 +177,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
@@ -176,6 +190,12 @@ class RentViewModelTest {
             viewModel.onBookClick()
             advanceUntilIdle()
 
+            val created = viewModel.state.value as RentState.Book
+            assertEquals("booking-1", created.pendingPaymentBookingId)
+            assertFalse(created.isCreating)
+            assertFalse(created.showStartDateError)
+            assertFalse(created.showEndDateError)
+            viewModel.requestNavigateToMyBookings()
             assertTrue(viewModel.state.value is RentState.NavigateToMyBookings)
             viewModel.consumeNavigationEvent()
             val state = viewModel.state.value as RentState.Book
@@ -193,6 +213,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
@@ -217,6 +238,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
@@ -241,6 +263,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-123",
                     coroutineScope = testScope,
@@ -274,6 +297,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
@@ -307,6 +331,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
@@ -339,6 +364,7 @@ class RentViewModelTest {
             val viewModel =
                 RentViewModelImpl(
                     booking = booking,
+                    payment = FakePayment(),
                     storage = storage,
                     carId = "car-1",
                     coroutineScope = testScope,
