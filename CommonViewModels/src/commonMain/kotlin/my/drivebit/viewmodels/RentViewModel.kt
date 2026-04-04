@@ -4,8 +4,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -13,7 +16,19 @@ import kotlinx.datetime.Instant
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CreateBookingRequest
+import my.drivebit.network.services.PayBookingResult
+import my.drivebit.network.services.Payment
 import my.drivebit.shared.storage.Storage
+
+sealed interface RentPayEffect {
+    data class OpenCheckout(
+        val url: String,
+    ) : RentPayEffect
+
+    data class ShowInfo(
+        val text: String,
+    ) : RentPayEffect
+}
 
 sealed interface RentState {
     data class Book(
@@ -26,6 +41,7 @@ sealed interface RentState {
         val depositAmount: String = "",
         val isCreating: Boolean = false,
         val createError: String? = null,
+        val pendingPaymentBookingId: String? = null,
     ) : RentState
 
     data object NavigateToMyBookings : RentState
@@ -39,6 +55,8 @@ sealed interface RentState {
 
 interface RentViewModel {
     val state: StateFlow<RentState>
+    val isPaying: StateFlow<Boolean>
+    val payEffects: SharedFlow<RentPayEffect>
 
     fun setStartDate(date: String?)
 
@@ -52,10 +70,18 @@ interface RentViewModel {
     fun consumeNavigationEvent()
 
     fun onBookClick()
+
+    fun payCreatedBooking(
+        returnUrl: String,
+        failUrl: String,
+    )
+
+    fun requestNavigateToMyBookings()
 }
 
 class RentViewModelImpl(
     private val booking: Booking,
+    private val payment: Payment,
     private val storage: Storage,
     private val carId: String,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
@@ -66,6 +92,12 @@ class RentViewModelImpl(
 
     private val _state = MutableStateFlow<RentState>(RentState.Book())
     override val state: StateFlow<RentState> = _state.asStateFlow()
+
+    private val _isPaying = MutableStateFlow(false)
+    override val isPaying: StateFlow<Boolean> = _isPaying.asStateFlow()
+
+    private val _payEffects = MutableSharedFlow<RentPayEffect>(extraBufferCapacity = 1)
+    override val payEffects: SharedFlow<RentPayEffect> = _payEffects.asSharedFlow()
 
     override fun consumeNavigationEvent() {
         _state.value = RentState.Book()
@@ -87,7 +119,12 @@ class RentViewModelImpl(
                         }
                         else -> currentEnd
                     }
-                it.copy(startDate = date, endDate = endDate, showStartDateError = false)
+                it.copy(
+                    startDate = date,
+                    endDate = endDate,
+                    showStartDateError = false,
+                    pendingPaymentBookingId = null,
+                )
             } else {
                 it
             }
@@ -98,7 +135,7 @@ class RentViewModelImpl(
     override fun setEndDate(date: String?) {
         _state.update {
             if (it is RentState.Book) {
-                it.copy(endDate = date, showEndDateError = false)
+                it.copy(endDate = date, showEndDateError = false, pendingPaymentBookingId = null)
             } else {
                 it
             }
@@ -128,6 +165,7 @@ class RentViewModelImpl(
                     endDate = endDateValid,
                     showStartDateError = false,
                     showEndDateError = false,
+                    pendingPaymentBookingId = null,
                 )
             } else {
                 it
@@ -142,6 +180,7 @@ class RentViewModelImpl(
 
     override fun onBookClick() {
         val current = _state.value as? RentState.Book ?: return
+        if (current.pendingPaymentBookingId != null) return
         if (!storage.isLogined()) {
             _state.value =
                 RentState.NavigateToLogin(
@@ -188,8 +227,18 @@ class RentViewModelImpl(
                             endAt = end,
                         ),
                     )
-                }.onSuccess {
-                    _state.value = RentState.NavigateToMyBookings
+                }.onSuccess { dto ->
+                    _state.update { s ->
+                        if (s is RentState.Book) {
+                            s.copy(
+                                isCreating = false,
+                                createError = null,
+                                pendingPaymentBookingId = dto.id,
+                            )
+                        } else {
+                            s
+                        }
+                    }
                 }.onFailure { e ->
                     _state.update { s ->
                         if (s is RentState.Book) {
@@ -340,4 +389,36 @@ class RentViewModelImpl(
             val end = Instant.parse(endAt)
             (end - start).inWholeDays.toInt().coerceAtLeast(1)
         }.getOrElse { 1 }
+
+    override fun payCreatedBooking(
+        returnUrl: String,
+        failUrl: String,
+    ) {
+        val current = _state.value as? RentState.Book ?: return
+        val bookingId = current.pendingPaymentBookingId ?: return
+        if (bookingId.isBlank() || _isPaying.value) return
+        viewModelScope.launch {
+            _isPaying.value = true
+            try {
+                when (val result = payment.registerBookingPayment(bookingId, returnUrl, failUrl)) {
+                    is PayBookingResult.Redirect ->
+                        _payEffects.emit(RentPayEffect.OpenCheckout(result.url))
+                    is PayBookingResult.AlreadyPaid -> {
+                        val text =
+                            result.message?.takeIf { it.isNotBlank() }
+                                ?: "Оплата уже выполнена"
+                        _payEffects.emit(RentPayEffect.ShowInfo(text))
+                    }
+                    is PayBookingResult.Failed ->
+                        _payEffects.emit(RentPayEffect.ShowInfo(result.message))
+                }
+            } finally {
+                _isPaying.value = false
+            }
+        }
+    }
+
+    override fun requestNavigateToMyBookings() {
+        _state.value = RentState.NavigateToMyBookings
+    }
 }
