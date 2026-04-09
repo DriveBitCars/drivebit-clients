@@ -1,0 +1,41 @@
+name: Prerender Docker smoke
+
+on:
+  push:
+    branches: [trunk, main, master]
+    paths:
+      - "scripts/prerender-docker/**"
+      - ".github/workflows/prerender-docker-smoke.yml"
+  pull_request:
+    paths:
+      - "scripts/prerender-docker/**"
+      - ".github/workflows/prerender-docker-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: scripts/prerender-docker
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Docker compose up
+        run: docker compose up -d --build
+
+      - name: Wait for Chromium
+        run: sleep 15
+
+      - name: npm test (verify drivebit.ru via Prerender)
+        run: npm test
+
+      - name: Docker compose down
+        if: always()
+        run: docker compose down -v
