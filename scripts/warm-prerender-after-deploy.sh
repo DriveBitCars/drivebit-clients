@@ -7,7 +7,8 @@
 #   PRERENDER_SERVICE     — имя сервиса в compose (по умолчанию prerender)
 #   SITE_URL              — базовый URL сайта (по умолчанию https://drivebit.ru)
 #   WARM_EXTRA_URLS       — доп. URL через пробел (опционально)
-#   CURL_MAX_TIME         — таймаут curl в секундах (по умолчанию 120)
+#   CURL_MAX_TIME         — таймаут curl в секундах (по умолчанию 300)
+#   PRERENDER_READY_SEC   — пауза после restart Prerender перед прогревом (по умолчанию 15)
 #   BOT_UA                — User-Agent для прогрева (по умолчанию Googlebot)
 
 set -euo pipefail
@@ -20,26 +21,39 @@ fi
 PRERENDER_COMPOSE_DIR="${PRERENDER_COMPOSE_DIR:-/opt/drivebit-prerender}"
 PRERENDER_SERVICE="${PRERENDER_SERVICE:-prerender}"
 SITE_URL="${SITE_URL:-https://drivebit.ru}"
-CURL_MAX_TIME="${CURL_MAX_TIME:-120}"
+CURL_MAX_TIME="${CURL_MAX_TIME:-300}"
+PRERENDER_READY_SEC="${PRERENDER_READY_SEC:-15}"
 BOT_UA="${BOT_UA:-Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)}"
 
 echo "🔥 warm-prerender-after-deploy: SITE_URL=$SITE_URL"
 
+PRERENDER_RESTARTED=0
 if [ -d "$PRERENDER_COMPOSE_DIR" ] && [ -f "$PRERENDER_COMPOSE_DIR/docker-compose.yml" ] && command -v docker >/dev/null 2>&1; then
   echo "🔄 Restarting Prerender (clears in-memory cache) in $PRERENDER_COMPOSE_DIR ..."
   if (cd "$PRERENDER_COMPOSE_DIR" && docker compose restart "$PRERENDER_SERVICE"); then
     echo "✅ docker compose restart $PRERENDER_SERVICE ok"
+    PRERENDER_RESTARTED=1
   else
     echo "⚠️  docker compose restart failed; trying docker restart on running prerender container ..."
     id="$(docker ps -qf "name=${PRERENDER_SERVICE}" | head -1)"
     if [ -n "$id" ]; then
-      docker restart "$id" && echo "✅ docker restart $id ok" || echo "⚠️  docker restart failed (non-fatal)"
+      if docker restart "$id"; then
+        echo "✅ docker restart $id ok"
+        PRERENDER_RESTARTED=1
+      else
+        echo "⚠️  docker restart failed (non-fatal)"
+      fi
     else
       echo "⚠️  No prerender container found (non-fatal)"
     fi
   fi
 else
   echo "⚠️  Skip Prerender restart: missing $PRERENDER_COMPOSE_DIR/docker-compose.yml or docker (non-fatal)"
+fi
+
+if [ "$PRERENDER_RESTARTED" = "1" ] && [ "${SKIP_PRERENDER_READY_WAIT:-0}" != "1" ] && [ "${PRERENDER_READY_SEC:-0}" -gt 0 ] 2>/dev/null; then
+  echo "⏳ Waiting ${PRERENDER_READY_SEC}s for Prerender/Chromium after restart..."
+  sleep "$PRERENDER_READY_SEC"
 fi
 
 # CLEAR_NGINX_PRERENDER_CACHE=0 — не очищать дисковый кэш (актуально при ежедневном ночном прогреве warm-prerender-nightly.sh)

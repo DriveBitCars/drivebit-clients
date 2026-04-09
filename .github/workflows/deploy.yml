@@ -526,6 +526,7 @@ jobs:
           export SITE_URL="https://drivebit.ru"
           export PRERENDER_COMPOSE_DIR="/opt/drivebit-prerender"
           export PRERENDER_SERVICE="prerender"
+          export CURL_MAX_TIME="300"
           "$SCRIPT"
 
     - name: Notify deployment success

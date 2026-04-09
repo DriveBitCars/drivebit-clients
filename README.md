@@ -159,6 +159,8 @@ open iosApp/iosApp.xcodeproj
 
 Для путей **`/car/*.html`** и **`/prerender-bot.html`** в примере то же правило: **бот → 418 → Prerender**, человек → `try_files` к статике. В [`nginx-prerender.conf.example`](nginx-prerender.conf.example) в regex по-прежнему допускается устаревший URL `/prerender-bot-ru.html`, чтобы старые ссылки вели бота в Prerender.
 
+**Быстрый ответ боту** — когда nginx отдаёт **HIT** из `proxy_cache` (после прогрева или повторного захода). Первый MISS идёт в Chromium и может занимать **десятки секунд**; в примере задано **`proxy_cache_lock_timeout 300s`**, чтобы при одном MISS остальные боты ждали один рендер, а не дублировали нагрузку. На сервере примените тот же таймаут, если ещё стоит `5s`.
+
 **Ночной прогрев (раз в сутки):** workflow [`.github/workflows/prerender-nightly-warm.yml`](.github/workflows/prerender-nightly-warm.yml) (`cron`: `00:15 UTC` ≈ `03:15 MSK`; те же `SERVER_HOST` / `SERVER_USER` / `SERVER_SSH_KEY` / `SERVER_PORT`, что у деплоя). Расписание срабатывает с **default branch** репозитория. Ручной запуск: **Actions → Prerender nightly warm → Run workflow**. Скрипт: [`scripts/warm-prerender-nightly.sh`](scripts/warm-prerender-nightly.sh). Альтернатива — cron на сервере: [`scripts/cron-drivebit-prerender.example`](scripts/cron-drivebit-prerender.example) (после деплоя копии лежат в `/opt/drivebit-scripts/`). После деплоя: [`scripts/warm-prerender-after-deploy.sh`](scripts/warm-prerender-after-deploy.sh); при необходимости **`CLEAR_NGINX_PRERENDER_CACHE=0`**.
 
 Prerender: [`scripts/prerender-docker/README.md`](scripts/prerender-docker/README.md).

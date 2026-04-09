@@ -9,7 +9,7 @@ cd scripts/prerender-docker
 docker compose up -d --build
 ```
 
-Слушает только `127.0.0.1:3000` (см. `docker-compose.yml`). Nginx на хосте проксирует ботов на этот порт — см. `nginx-prerender.conf.example` в корне репозитория.
+Слушает только `127.0.0.1:3000` (см. `docker-compose.yml`). Nginx на хосте проксирует ботов на этот порт — см. `nginx-prerender.conf.example` в корне репозитория. Быстрый ответ боту даёт **дисковый `proxy_cache` nginx** (HIT); на боевом nginx держите **`proxy_cache_lock_timeout`** не меньше типичного времени рендера (в примере **300s**), иначе несколько MISS уйдут в Chromium параллельно.
 
 **YandexBot:** в примере nginx в `map $is_bot` есть `~*yandex` — такие запросы идут в Prerender наравне с Googlebot. Подробнее — раздел «Prerender для роботов» в [корневом README](../../README.md).
 
