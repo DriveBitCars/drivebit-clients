@@ -5,6 +5,7 @@ const CITY_ID = "158835";
 const PAGE_SIZE = 100;
 const OUTPUT = process.env.OUTPUT_PATH || "prerender-bot.html";
 const SITEMAP_FILENAME = process.env.SITEMAP_FILENAME || "sitemap.xml";
+const SITEMAP_MIRROR = process.env.SITEMAP_MIRROR || "";
 const CAR_DIR = process.env.CAR_DIR || "car";
 const BASE = process.env.SITE_BASE || "https://drivebit.ru";
 
@@ -416,12 +417,18 @@ async function main() {
 
     const html = buildHtml(cars);
     fs.writeFileSync(OUTPUT, html, "utf-8");
-    console.log(`Generated prerender-bot.html with ${cars.length} cars`);
+    console.log(`Generated ${path.basename(OUTPUT)} with ${cars.length} cars`);
 
     const sitemap = buildSitemap(cars);
     const sitemapPath = path.join(outputDir, SITEMAP_FILENAME);
     fs.writeFileSync(sitemapPath, sitemap, "utf-8");
     console.log(`Generated ${SITEMAP_FILENAME} with ${3 + cars.length} URLs`);
+
+    if (SITEMAP_MIRROR) {
+      const mirrorSitemapPath = path.join(outputDir, SITEMAP_MIRROR);
+      fs.writeFileSync(mirrorSitemapPath, sitemap, "utf-8");
+      console.log(`Generated ${SITEMAP_MIRROR} (same URLs as ${SITEMAP_FILENAME})`);
+    }
   } catch (err) {
     console.error("Error:", err.message);
     process.exit(1);

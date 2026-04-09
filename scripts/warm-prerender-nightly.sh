@@ -44,7 +44,6 @@ done
   echo "$SITE_URL/list-your-car"
   echo "$SITE_URL/list-your-car.html"
   echo "$SITE_URL/prerender-bot.html"
-  echo "$SITE_URL/prerender-bot-ru.html"
   for u in ${EXTRA_URLS:-}; do
     [ -n "$u" ] || continue
     echo "$u"

@@ -149,7 +149,7 @@ open iosApp/iosApp.xcodeproj
 
 ## 🔍 Prerender для роботов
 
-В деплое по-прежнему генерируются статические `car/{id}.html` и `prerender-bot*.html` (sitemap, SEO, ссылки). **Обычные пользователи** могут получать их с диска; **поисковые боты** в актуальном [`nginx-prerender.conf.example`](nginx-prerender.conf.example) должны получать **только HTML из Prerender в Docker** (`127.0.0.1:3000`), а не эти файлы напрямую.
+В деплое по-прежнему генерируются статические `car/{id}.html` и `prerender-bot.html` (плюс sitemap, SEO, ссылки). **Обычные пользователи** могут получать их с диска; **поисковые боты** в актуальном [`nginx-prerender.conf.example`](nginx-prerender.conf.example) должны получать **только HTML из Prerender в Docker** (`127.0.0.1:3000`), а не эти файлы напрямую.
 
 ### Googlebot и YandexBot
 
@@ -157,7 +157,7 @@ open iosApp/iosApp.xcodeproj
 
 **Нельзя** оставлять старую схему `map $bot_home_file` + `try_files $bot_home_file` для `/` — из‑за неё бот видит статический «Каталог Москва» с диска. Нужен **`return 418`** для бота и **`@prerender_bot`** → proxy на Prerender; ответы кэшируются в [`nginx-prerender-cache-http.conf.example`](nginx-prerender-cache-http.conf.example).
 
-Для путей **`/car/*.html`** и **`/prerender-bot*.html`** в примере то же правило: **бот → 418 → Prerender**, человек → `try_files` к статике.
+Для путей **`/car/*.html`** и **`/prerender-bot.html`** в примере то же правило: **бот → 418 → Prerender**, человек → `try_files` к статике. В [`nginx-prerender.conf.example`](nginx-prerender.conf.example) в regex по-прежнему допускается устаревший URL `/prerender-bot-ru.html`, чтобы старые ссылки вели бота в Prerender.
 
 **Ночной прогрев (раз в сутки):** workflow [`.github/workflows/prerender-nightly-warm.yml`](.github/workflows/prerender-nightly-warm.yml) (`cron`: `00:15 UTC` ≈ `03:15 MSK`; те же `SERVER_HOST` / `SERVER_USER` / `SERVER_SSH_KEY` / `SERVER_PORT`, что у деплоя). Расписание срабатывает с **default branch** репозитория. Ручной запуск: **Actions → Prerender nightly warm → Run workflow**. Скрипт: [`scripts/warm-prerender-nightly.sh`](scripts/warm-prerender-nightly.sh). Альтернатива — cron на сервере: [`scripts/cron-drivebit-prerender.example`](scripts/cron-drivebit-prerender.example) (после деплоя копии лежат в `/opt/drivebit-scripts/`). После деплоя: [`scripts/warm-prerender-after-deploy.sh`](scripts/warm-prerender-after-deploy.sh); при необходимости **`CLEAR_NGINX_PRERENDER_CACHE=0`**.
 
@@ -173,8 +173,8 @@ curl -sI -H "User-Agent: Mozilla/5.0 (compatible; Googlebot/2.1)" "https://drive
 # Человек — SPA из index.html
 curl -s -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0" "https://drivebit.ru/" | grep -o '<title>[^<]*'
 
-# Статические файлы в деплое (без бот-UA)
-curl -s "https://drivebit.ru/prerender-bot-ru.html" | head -5
+# Статический каталог в деплое (без бот-UA)
+curl -s "https://drivebit.ru/prerender-bot.html" | head -5
 ```
 
 ## 🔎 Swagger Discovery (Retride)
