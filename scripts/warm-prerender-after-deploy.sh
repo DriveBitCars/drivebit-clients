@@ -42,11 +42,14 @@ else
   echo "⚠️  Skip Prerender restart: missing $PRERENDER_COMPOSE_DIR/docker-compose.yml or docker (non-fatal)"
 fi
 
-if [ -d /var/cache/nginx/prerender ]; then
+# CLEAR_NGINX_PRERENDER_CACHE=0 — не очищать дисковый кэш (актуально при ежедневном ночном прогреве warm-prerender-nightly.sh)
+if [ "${CLEAR_NGINX_PRERENDER_CACHE:-1}" = "1" ] && [ -d /var/cache/nginx/prerender ]; then
   echo "🧹 Clearing nginx prerender proxy_cache: /var/cache/nginx/prerender"
   $SUDO_CMD rm -rf /var/cache/nginx/prerender/*
   echo "✅ Nginx prerender cache dir cleared"
-else
+elif [ "${CLEAR_NGINX_PRERENDER_CACHE:-1}" != "1" ]; then
+  echo "ℹ️  SKIP nginx prerender cache clear (CLEAR_NGINX_PRERENDER_CACHE=0)"
+elif [ ! -d /var/cache/nginx/prerender ]; then
   echo "ℹ️  /var/cache/nginx/prerender not present (nginx proxy_cache may be unused)"
 fi
 

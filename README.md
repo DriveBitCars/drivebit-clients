@@ -149,32 +149,32 @@ open iosApp/iosApp.xcodeproj
 
 ## 🔍 Prerender для роботов
 
-Боты получают статический HTML с каталогом машин. Для каждой машины генерируется отдельная страница в `car/{id}.html`. Пользователи получают SPA.
+В деплое по-прежнему генерируются статические `car/{id}.html` и `prerender-bot*.html` (sitemap, SEO, ссылки). **Обычные пользователи** могут получать их с диска; **поисковые боты** в актуальном [`nginx-prerender.conf.example`](nginx-prerender.conf.example) должны получать **только HTML из Prerender в Docker** (`127.0.0.1:3000`), а не эти файлы напрямую.
 
 ### Googlebot и YandexBot
 
-В [`nginx-prerender.conf.example`](nginx-prerender.conf.example) в `map $http_user_agent $is_bot` заданы правила для поисковых ботов, в том числе **`~*yandex`**.
+В `map $http_user_agent $is_bot` заданы в том числе **`~*yandex`**.
 
-**Главная `/`:** в актуальном примере для ботов отдаётся **статический** файл из деплоя (`prerender-bot-ru.html` для `drivebit.ru`, `prerender-bot.html` для `drivebit.my`) через `map $host$is_bot` и `try_files` — ответ **считан с диска**, без Chromium (приемлемо для краулеров). Остальные пути, где нет готового HTML, по-прежнему могут идти в динамический Prerender (`127.0.0.1:3000`).
+**Нельзя** оставлять старую схему `map $bot_home_file` + `try_files $bot_home_file` для `/` — из‑за неё бот видит статический «Каталог Москва» с диска. Нужен **`return 418`** для бота и **`@prerender_bot`** → proxy на Prerender; ответы кэшируются в [`nginx-prerender-cache-http.conf.example`](nginx-prerender-cache-http.conf.example).
 
-**In-memory кэш** Prerender (`prerender-memory-cache`) относится к сервису на :3000. Прогрев после деплоя ([`scripts/warm-prerender-after-deploy.sh`](scripts/warm-prerender-after-deploy.sh)) полезен для путей, которые реально проксируются в Prerender; для главной после включения статики в nginx критичен сам **деплой** файла `prerender-bot-ru.html`.
+Для путей **`/car/*.html`** и **`/prerender-bot*.html`** в примере то же правило: **бот → 418 → Prerender**, человек → `try_files` к статике.
+
+**Ночной прогрев (раз в сутки):** workflow [`.github/workflows/prerender-nightly-warm.yml`](.github/workflows/prerender-nightly-warm.yml) (`cron`: `00:15 UTC` ≈ `03:15 MSK`; те же `SERVER_HOST` / `SERVER_USER` / `SERVER_SSH_KEY` / `SERVER_PORT`, что у деплоя). Расписание срабатывает с **default branch** репозитория. Ручной запуск: **Actions → Prerender nightly warm → Run workflow**. Скрипт: [`scripts/warm-prerender-nightly.sh`](scripts/warm-prerender-nightly.sh). Альтернатива — cron на сервере: [`scripts/cron-drivebit-prerender.example`](scripts/cron-drivebit-prerender.example) (после деплоя копии лежат в `/opt/drivebit-scripts/`). После деплоя: [`scripts/warm-prerender-after-deploy.sh`](scripts/warm-prerender-after-deploy.sh); при необходимости **`CLEAR_NGINX_PRERENDER_CACHE=0`**.
+
+Prerender: [`scripts/prerender-docker/README.md`](scripts/prerender-docker/README.md).
 
 ### Проверка prerender через curl
 
 ```bash
-# Бот получает prerender (title: «Каталог Москва»)
-curl -s -H "User-Agent: Mozilla/5.0 (compatible; Googlebot/2.1)" "https://drivebit.ru/" | grep -o '<title>[^<]*'
-curl -s -H "User-Agent: Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)" "https://drivebit.ru/" | grep -o '<title>[^<]*'
+# Бот: HTML от Prerender (после выкладки nginx + работающий Docker на :3000).
+# Ожидайте заголовок X-Prerender-Nginx-Cache: MISS/HIT и title после рендера SPA (не обязательно «Каталог Москва»).
+curl -sI -H "User-Agent: Mozilla/5.0 (compatible; Googlebot/2.1)" "https://drivebit.ru/" | grep -iE 'HTTP/|x-prerender'
 
-# Человек получает SPA (title: «Дешевле проката на 40%»)
+# Человек — SPA из index.html
 curl -s -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0" "https://drivebit.ru/" | grep -o '<title>[^<]*'
 
-# Явно запросить prerender-страницу
-curl -s "https://drivebit.ru/prerender-bot.html" | head -20
-curl -s "https://drivebit.ru/prerender-bot-ru.html" | head -20
-
-# Страницы машин
-curl -s "https://drivebit.ru/car/dacc0a4f-7644-4373-acaa-dbbe41648ab4.html" | grep -o '<title>[^<]*'
+# Статические файлы в деплое (без бот-UA)
+curl -s "https://drivebit.ru/prerender-bot-ru.html" | head -5
 ```
 
 ## 🔎 Swagger Discovery (Retride)

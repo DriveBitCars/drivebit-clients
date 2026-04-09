@@ -73,6 +73,15 @@ data class CreateBookingRequest(
     val comment: String? = null,
 )
 
+fun BookingDTO.statusAllowsRenterPayment(): Boolean =
+    status.equals("Confirmed", ignoreCase = true)
+
+fun BookingDTO.isTerminalRenterBooking(): Boolean =
+    status.equals("Completed", ignoreCase = true) ||
+        status.equals("Cancelled", ignoreCase = true) ||
+        status.equals("Canceled", ignoreCase = true) ||
+        status.equals("Declined", ignoreCase = true)
+
 class BookingImpl(
     private val unauthorizedHttpClient: HttpClient,
     private val authorizedHttpClient: HttpClient,
