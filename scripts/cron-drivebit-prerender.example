@@ -1,0 +1,12 @@
+# Пример cron для ночного прогрева кэша Prerender (nginx proxy_cache на диске).
+# Скопируйте строку в /etc/cron.d/drivebit-prerender или crontab -e под root.
+#
+# Требуется: nginx с proxy_cache (см. nginx-prerender-cache-http.conf.example),
+#            контейнер Prerender на 127.0.0.1:3000,
+#            на сайте отдаются sitemap.xml / sitemap-ru.xml (деплой generate-prerender-bot.js).
+#
+# 03:15 каждый день — прогрев всех URL из sitemap под UA бота (заполняет дисковый кэш nginx).
+
+# 15 3 * * * root /opt/drivebit-clients/scripts/warm-prerender-nightly.sh >> /var/log/drivebit-prerender-nightly.log 2>&1
+
+# Если репозиторий в другом пути, задайте полный путь к скрипту после git pull / deploy.

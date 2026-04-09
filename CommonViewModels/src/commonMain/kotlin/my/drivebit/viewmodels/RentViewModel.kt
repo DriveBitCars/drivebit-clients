@@ -14,10 +14,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import my.drivebit.network.services.Booking
+import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CreateBookingRequest
 import my.drivebit.network.services.PayBookingResult
 import my.drivebit.network.services.Payment
+import my.drivebit.network.services.isTerminalRenterBooking
+import my.drivebit.network.services.statusAllowsRenterPayment
 import my.drivebit.shared.storage.Storage
 
 sealed interface RentPayEffect {
@@ -28,6 +31,14 @@ sealed interface RentPayEffect {
     data class ShowInfo(
         val text: String,
     ) : RentPayEffect
+}
+
+sealed interface PendingBookingPaymentUi {
+    data class AwaitingOwnerConfirmation(
+        val statusLabel: String,
+    ) : PendingBookingPaymentUi
+
+    data object ReadyToPay : PendingBookingPaymentUi
 }
 
 sealed interface RentState {
@@ -42,6 +53,7 @@ sealed interface RentState {
         val isCreating: Boolean = false,
         val createError: String? = null,
         val pendingPaymentBookingId: String? = null,
+        val pendingBookingPaymentUi: PendingBookingPaymentUi? = null,
     ) : RentState
 
     data object NavigateToMyBookings : RentState
@@ -77,6 +89,8 @@ interface RentViewModel {
     )
 
     fun requestNavigateToMyBookings()
+
+    fun refreshPendingBookingForCurrentSelection()
 }
 
 class RentViewModelImpl(
@@ -124,6 +138,7 @@ class RentViewModelImpl(
                     endDate = endDate,
                     showStartDateError = false,
                     pendingPaymentBookingId = null,
+                    pendingBookingPaymentUi = null,
                 )
             } else {
                 it
@@ -135,7 +150,12 @@ class RentViewModelImpl(
     override fun setEndDate(date: String?) {
         _state.update {
             if (it is RentState.Book) {
-                it.copy(endDate = date, showEndDateError = false, pendingPaymentBookingId = null)
+                it.copy(
+                    endDate = date,
+                    showEndDateError = false,
+                    pendingPaymentBookingId = null,
+                    pendingBookingPaymentUi = null,
+                )
             } else {
                 it
             }
@@ -166,6 +186,7 @@ class RentViewModelImpl(
                     showStartDateError = false,
                     showEndDateError = false,
                     pendingPaymentBookingId = null,
+                    pendingBookingPaymentUi = null,
                 )
             } else {
                 it
@@ -234,6 +255,7 @@ class RentViewModelImpl(
                                 isCreating = false,
                                 createError = null,
                                 pendingPaymentBookingId = dto.id,
+                                pendingBookingPaymentUi = pendingBookingPaymentUiFromDto(dto),
                             )
                         } else {
                             s
@@ -395,6 +417,7 @@ class RentViewModelImpl(
         failUrl: String,
     ) {
         val current = _state.value as? RentState.Book ?: return
+        if (current.pendingBookingPaymentUi !is PendingBookingPaymentUi.ReadyToPay) return
         val bookingId = current.pendingPaymentBookingId ?: return
         if (bookingId.isBlank() || _isPaying.value) return
         viewModelScope.launch {
@@ -421,4 +444,61 @@ class RentViewModelImpl(
     override fun requestNavigateToMyBookings() {
         _state.value = RentState.NavigateToMyBookings
     }
+
+    override fun refreshPendingBookingForCurrentSelection() {
+        val current = _state.value as? RentState.Book ?: return
+        val start = current.startDate?.takeIf { it.isNotBlank() } ?: return
+        val end = current.endDate?.takeIf { it.isNotBlank() } ?: return
+        if (!storage.isLogined()) return
+        viewModelScope.launch {
+            val list =
+                runCatching { booking.getMyAsRenter() }
+                    .getOrElse { return@launch }
+            val byId =
+                current.pendingPaymentBookingId?.let { pendingId ->
+                    list.find { it.id == pendingId }
+                }
+            val match =
+                byId
+                    ?: list.find { b ->
+                        b.carId == carId &&
+                            sameInstant(b.startAt, start) &&
+                            sameInstant(b.endAt, end) &&
+                            !b.isTerminalRenterBooking()
+                    }
+            _state.update { s ->
+                if (s !is RentState.Book) return@update s
+                when {
+                    match == null -> s
+                    match.isTerminalRenterBooking() ->
+                        s.copy(
+                            pendingPaymentBookingId = null,
+                            pendingBookingPaymentUi = null,
+                        )
+                    else ->
+                        s.copy(
+                            pendingPaymentBookingId = match.id,
+                            pendingBookingPaymentUi = pendingBookingPaymentUiFromDto(match),
+                        )
+                }
+            }
+        }
+    }
+
+    private fun pendingBookingPaymentUiFromDto(dto: BookingDTO): PendingBookingPaymentUi =
+        when {
+            dto.statusAllowsRenterPayment() -> PendingBookingPaymentUi.ReadyToPay
+            else ->
+                PendingBookingPaymentUi.AwaitingOwnerConfirmation(
+                    dto.statusTranslate?.takeIf { it.isNotBlank() } ?: dto.status,
+                )
+        }
+
+    private fun sameInstant(
+        a: String,
+        b: String,
+    ): Boolean =
+        runCatching {
+            Instant.parse(a.trim()) == Instant.parse(b.trim())
+        }.getOrDefault(false)
 }

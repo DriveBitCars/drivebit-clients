@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.browser.window
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -27,6 +28,7 @@ import my.drivebit.utils.addDays
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateTimeFieldViewModel
+import my.drivebit.viewmodels.PendingBookingPaymentUi
 import my.drivebit.viewmodels.RentPayEffect
 import my.drivebit.viewmodels.RentState
 import my.drivebit.viewmodels.RentViewModel
@@ -153,8 +155,27 @@ fun CarBook(
         )
     }
 
-    LaunchedEffect(isPaying) {
-        payButtonViewModel.setState(if (isPaying) ButtonState.Loading else ButtonState.Enabled)
+    LaunchedEffect(bookState.startDate, bookState.endDate) {
+        viewModel.refreshPendingBookingForCurrentSelection()
+    }
+
+    LaunchedEffect(bookState.pendingBookingPaymentUi) {
+        if (bookState.pendingBookingPaymentUi is PendingBookingPaymentUi.AwaitingOwnerConfirmation) {
+            while (true) {
+                delay(15_000)
+                viewModel.refreshPendingBookingForCurrentSelection()
+            }
+        }
+    }
+
+    LaunchedEffect(isPaying, bookState.pendingBookingPaymentUi) {
+        payButtonViewModel.setState(
+            when {
+                isPaying -> ButtonState.Loading
+                bookState.pendingBookingPaymentUi is PendingBookingPaymentUi.ReadyToPay -> ButtonState.Enabled
+                else -> ButtonState.Disabled
+            },
+        )
     }
     val startDateTimeState by startDateTimeViewModel.state.collectAsState()
     val endDateTimeState by endDateTimeViewModel.state.collectAsState()
@@ -297,30 +318,60 @@ fun CarBook(
                     viewModel.onBookClick()
                 },
             )
-            bookState.pendingPaymentBookingId?.let {
-                Span({
-                    style {
-                        display(DisplayStyle.Block)
-                        applyTypography(CSSTypography.Styles.body)
-                        fontSize(CSSTypography.FontSize.sm)
-                        color(CSSColors.Gray600)
-                        marginTop((-4).px)
+            if (bookState.pendingPaymentBookingId != null) {
+                when (val payUi = bookState.pendingBookingPaymentUi) {
+                    is PendingBookingPaymentUi.AwaitingOwnerConfirmation -> {
+                        Span({
+                            style {
+                                display(DisplayStyle.Block)
+                                applyTypography(CSSTypography.Styles.body)
+                                fontSize(CSSTypography.FontSize.sm)
+                                color(CSSColors.Gray600)
+                                marginTop((-4).px)
+                            }
+                        }) {
+                            Text("Бронирование создано. Ожидается подтверждение брони: ${payUi.statusLabel}.")
+                        }
                     }
-                }) {
-                    Text("Бронирование создано. Оплатите, чтобы подтвердить.")
-                }
-                ActionButton(
-                    viewModel = payButtonViewModel,
-                    enabledColor = CSSColors.Blue,
-                    text = "Оплатить",
-                    onClick = {
-                        val origin = window.location.origin
-                        viewModel.payCreatedBooking(
-                            returnUrl = "$origin/payment-success",
-                            failUrl = "$origin/payment-failure",
+                    is PendingBookingPaymentUi.ReadyToPay -> {
+                        Span({
+                            style {
+                                display(DisplayStyle.Block)
+                                applyTypography(CSSTypography.Styles.body)
+                                fontSize(CSSTypography.FontSize.sm)
+                                color(CSSColors.Gray600)
+                                marginTop((-4).px)
+                            }
+                        }) {
+                            Text("Бронирование подтверждено. Оплатите, чтобы продолжить.")
+                        }
+                        ActionButton(
+                            viewModel = payButtonViewModel,
+                            enabledColor = CSSColors.Blue,
+                            text = "Оплатить",
+                            onClick = {
+                                val origin = window.location.origin
+                                viewModel.payCreatedBooking(
+                                    returnUrl = "$origin/payment-success",
+                                    failUrl = "$origin/payment-failure",
+                                )
+                            },
                         )
-                    },
-                )
+                    }
+                    null -> {
+                        Span({
+                            style {
+                                display(DisplayStyle.Block)
+                                applyTypography(CSSTypography.Styles.body)
+                                fontSize(CSSTypography.FontSize.sm)
+                                color(CSSColors.Gray600)
+                                marginTop((-4).px)
+                            }
+                        }) {
+                            Text("Бронирование создано. Ожидается подтверждение брони.")
+                        }
+                    }
+                }
                 Div({
                     style {
                         width(100.percent)

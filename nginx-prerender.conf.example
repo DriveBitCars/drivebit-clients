@@ -1,19 +1,18 @@
-# Пример конфигурации Nginx для пререндеринга
-# Сохраните это в /etc/nginx/sites-available/drivebit-clients
-# map должен быть на уровне http (при include внутри http {} работает)
+# Nginx: боты всегда получают HTML от Prerender (Docker, 127.0.0.1:3000), не статику prerender-bot*.html.
 #
-# Ускорение повторных запросов ботов: proxy_cache для ответов Prerender.
-# В http { } один раз подключите зону кэша — см. nginx-prerender-cache-http.conf.example
-# (mkdir для /var/cache/nginx/prerender и include файла с proxy_cache_path).
+# ВАЖНО — уберите из боевого конфига устаревшую схему:
+#   map $host$is_bot $bot_home_file { ... }
+#   location = / { try_files $bot_home_file ... }
+# Иначе бот на / будет по-прежнему получать файл с диска, а не вывод Chromium.
 #
-# Динамический prerender: контейнер scripts/prerender-docker/
-# слушает 127.0.0.1:3000. Боты проксируются на Prerender (Headless Chrome), который
-# запрашивает ту же публичную страницу по $scheme://$host$request_uri.
-# Убедитесь, что с сервера/контейнера доступен этот URL (DNS, firewall).
+# Подключение:
+#   1) В http { } — include nginx-prerender-cache-http.conf (см. nginx-prerender-cache-http.conf.example)
+#   2) Prerender: scripts/prerender-docker/ → 127.0.0.1:3000
+#   3) Прогрев: scripts/warm-prerender-nightly.sh + cron
 #
-# Главная для ботов: CI кладёт prerender-bot(-ru).html в root — отдаём файл с диска
-# (миллисекунды). Динамический Prerender на :3000 остаётся для путей без статики.
-# map $host$is_bot: суффикс is_bot — 0 человек, 1 бот.
+# Как это работает: для бота return 418 → named location @prerender_bot → proxy_pass :3000.
+# Chromium в контейнере открывает публичный URL с обычным UA (не бот) → nginx отдаёт SPA/статику
+# «как человеку» → Prerender возвращает отрендеренный HTML → nginx кэширует (proxy_cache).
 
 map $http_user_agent $is_bot {
     default 0;
@@ -26,14 +25,6 @@ map $http_user_agent $is_bot {
     ~*spider 1;
 }
 
-map $host$is_bot $bot_home_file {
-    default /index.html;
-    drivebit.ru1 /prerender-bot-ru.html;
-    www.drivebit.ru1 /prerender-bot-ru.html;
-    drivebit.my1 /prerender-bot.html;
-    www.drivebit.my1 /prerender-bot.html;
-}
-
 server {
     listen 80;
     server_name your-domain.com;
@@ -42,18 +33,34 @@ server {
 
     error_page 418 = @prerender_bot;
 
-    # Сжатие
     gzip on;
     gzip_types text/html text/css application/javascript application/json;
 
-    # Кеширование статических файлов
+    # prerender-bot*.html: люди — файл с диска; боты — только через Prerender Docker
+    location ~* ^/prerender-bot(-ru)?\.html$ {
+        if ($is_bot) {
+            return 418;
+        }
+        try_files $uri =404;
+        expires 1d;
+        add_header Cache-Control "public, max-age=86400";
+    }
+
+    # car/*.html: люди — статика из деплоя; боты — HTML из Prerender (рендер SPA/страницы как в браузере)
+    location ~* ^/car/[^/]+\.html$ {
+        if ($is_bot) {
+            return 418;
+        }
+        try_files $uri /index.html;
+        expires 1d;
+        add_header Cache-Control "public, max-age=86400";
+    }
+
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
 
-    # Проксирование аватаров на внешний сервер
-    # /publicbct/avatars/... -> http://213.171.27.185:9000/publicbct/avatars/...
     location /publicbct/avatars/ {
         proxy_pass http://213.171.27.185:9000/publicbct/avatars/;
         proxy_set_header Host $host;
@@ -61,7 +68,6 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # Кеширование изображений
         proxy_cache_valid 200 1d;
         add_header Cache-Control "public, max-age=86400";
     }
@@ -74,12 +80,13 @@ server {
         try_files /login-by-mail.html /index.html;
     }
 
-    # Главная: люди — index.html; боты — статический prerender-bot*.html из деплоя (быстро)
     location = / {
-        try_files $bot_home_file =404;
+        if ($is_bot) {
+            return 418;
+        }
+        try_files /index.html =404;
     }
 
-    # Остальные пути: статика при наличии файла, иначе SPA; боты — Prerender
     location / {
         if ($is_bot) {
             return 418;
@@ -99,13 +106,14 @@ server {
         proxy_connect_timeout 30s;
         proxy_buffering on;
 
-        # Раскомментируйте после include зоны кэша в http {} (nginx-prerender-cache-http.conf.example):
-        # proxy_cache prerender_cache;
-        # proxy_cache_key "$scheme$host$request_uri";
-        # proxy_cache_valid 200 30m;
-        # proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
-        # proxy_cache_lock on;
-        # proxy_cache_lock_timeout 5s;
-        # add_header X-Prerender-Nginx-Cache $upstream_cache_status always;
+        proxy_cache prerender_cache;
+        proxy_cache_key "$scheme$host$request_uri";
+        proxy_cache_valid 200 7d;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        proxy_cache_lock on;
+        proxy_cache_lock_timeout 5s;
+        add_header X-Prerender-Nginx-Cache $upstream_cache_status always;
+
+        proxy_ignore_headers Set-Cookie;
     }
 }

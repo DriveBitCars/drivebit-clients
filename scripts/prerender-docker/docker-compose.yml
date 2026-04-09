@@ -12,8 +12,6 @@ services:
       CHROME_LOCATION: /usr/bin/chromium
       PAGE_LOAD_TIMEOUT: "60000"
       LOG_REQUESTS: "false"
-      CACHE_TTL: "600"
-      CACHE_MAXSIZE: "500"
     deploy:
       resources:
         limits:

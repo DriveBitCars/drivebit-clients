@@ -49,6 +49,7 @@ private class FakeStorage(
 
 private class FakeBooking(
     private val calculateResult: (CheckBookingAvailabilityRequest) -> CheckBookingAvailabilityResponse,
+    private val createStatus: String = "Pending",
 ) : Booking {
     var calculateCalls = mutableListOf<CheckBookingAvailabilityRequest>()
 
@@ -57,7 +58,7 @@ private class FakeBooking(
         return calculateResult(request)
     }
 
-    override suspend fun getMyAsRenter() = throw NotImplementedError()
+    override suspend fun getMyAsRenter() = emptyList<my.drivebit.network.services.BookingDTO>()
 
     override suspend fun getMyAsOwner() = throw NotImplementedError()
 
@@ -80,17 +81,23 @@ private class FakeBooking(
             startAt = request.startAt,
             endAt = request.endAt,
             totalAmount = 0.0,
-            status = "created",
+            status = createStatus,
+            statusTranslate = null,
             createdAt = "2025-02-16T10:00:00Z",
         )
 }
 
 private class FakePayment : Payment {
+    var registerCalls = 0
+
     override suspend fun registerBookingPayment(
         bookingId: String,
         returnUrl: String,
         failUrl: String,
-    ): PayBookingResult = PayBookingResult.Failed("unused in test")
+    ): PayBookingResult {
+        registerCalls++
+        return PayBookingResult.Failed("unused in test")
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -99,7 +106,10 @@ class RentViewModelTest {
     fun `onBookClick sets showStartDateError when startDate is null`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
-            val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1000.0) }
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1000.0) },
+                )
             val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
@@ -124,7 +134,10 @@ class RentViewModelTest {
     fun `onBookClick sets showEndDateError when endDate is null`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
-            val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1000.0) }
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1000.0) },
+                )
             val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
@@ -149,7 +162,10 @@ class RentViewModelTest {
     fun `onBookClick sets both errors when both dates are null`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
-            val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1000.0) }
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1000.0) },
+                )
             val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
@@ -172,7 +188,10 @@ class RentViewModelTest {
     fun `onBookClick clears errors when both dates are set`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
-            val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) }
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                )
             val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
@@ -192,6 +211,7 @@ class RentViewModelTest {
 
             val created = viewModel.state.value as RentState.Book
             assertEquals("booking-1", created.pendingPaymentBookingId)
+            assertTrue(created.pendingBookingPaymentUi is PendingBookingPaymentUi.AwaitingOwnerConfirmation)
             assertFalse(created.isCreating)
             assertFalse(created.showStartDateError)
             assertFalse(created.showEndDateError)
@@ -204,11 +224,107 @@ class RentViewModelTest {
         }
 
     @Test
+    fun `onBookClick sets ReadyToPay when create returns Confirmed`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                    createStatus = "Confirmed",
+                )
+            val storage = FakeStorage(isLoggedIn = true)
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = FakePayment(),
+                    storage = storage,
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2025-02-16T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2025-02-18T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.onBookClick()
+            advanceUntilIdle()
+
+            val created = viewModel.state.value as RentState.Book
+            assertEquals("booking-1", created.pendingPaymentBookingId)
+            assertTrue(created.pendingBookingPaymentUi is PendingBookingPaymentUi.ReadyToPay)
+        }
+
+    @Test
+    fun `payCreatedBooking does nothing when awaiting owner confirmation`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                )
+            val storage = FakeStorage(isLoggedIn = true)
+            val payment = FakePayment()
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = payment,
+                    storage = storage,
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2025-02-16T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2025-02-18T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.onBookClick()
+            advanceUntilIdle()
+            viewModel.payCreatedBooking("https://ok", "https://fail")
+            advanceUntilIdle()
+
+            assertEquals(0, payment.registerCalls)
+        }
+
+    @Test
+    fun `payCreatedBooking calls payment when ReadyToPay`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                    createStatus = "Confirmed",
+                )
+            val storage = FakeStorage(isLoggedIn = true)
+            val payment = FakePayment()
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = payment,
+                    storage = storage,
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2025-02-16T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2025-02-18T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.onBookClick()
+            advanceUntilIdle()
+            viewModel.payCreatedBooking("https://ok", "https://fail")
+            advanceUntilIdle()
+
+            assertEquals(1, payment.registerCalls)
+        }
+
+    @Test
     fun `totalAmount and middlePrice are calculated when dates are selected`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking =
-                FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 3000.0) }
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 3000.0) },
+                )
             val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
@@ -233,7 +349,10 @@ class RentViewModelTest {
     fun `middlePrice is totalAmount when single day rental`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
-            val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1500.0) }
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 1500.0) },
+                )
             val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
@@ -258,7 +377,10 @@ class RentViewModelTest {
     fun `onBookClick emits NavigateToLogin when not logged in`() =
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
-            val booking = FakeBooking { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) }
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                )
             val storage = FakeStorage(isLoggedIn = false)
             val viewModel =
                 RentViewModelImpl(
@@ -285,14 +407,14 @@ class RentViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking =
-                FakeBooking {
+                FakeBooking(calculateResult = {
                     CheckBookingAvailabilityResponse(
                         isAvailable = true,
                         estimatedPrice = 5400.0,
                         pricePerDay = 2700.0,
                         totalPrice = 5400.0,
                     )
-                }
+                })
             val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
@@ -318,7 +440,7 @@ class RentViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking =
-                FakeBooking {
+                FakeBooking(calculateResult = {
                     CheckBookingAvailabilityResponse(
                         isAvailable = true,
                         estimatedPrice = 3000.0,
@@ -326,7 +448,7 @@ class RentViewModelTest {
                         totalPrice = 3000.0,
                         estimatedDeposit = 10000.0,
                     )
-                }
+                })
             val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
@@ -351,7 +473,7 @@ class RentViewModelTest {
         runTest(StandardTestDispatcher()) {
             val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
             val booking =
-                FakeBooking {
+                FakeBooking(calculateResult = {
                     CheckBookingAvailabilityResponse(
                         isAvailable = true,
                         estimatedPrice = 5400.0,
@@ -359,7 +481,7 @@ class RentViewModelTest {
                         totalPrice = 5400.0,
                         estimatedDeposit = 0.0,
                     )
-                }
+                })
             val storage = FakeStorage(isLoggedIn = true)
             val viewModel =
                 RentViewModelImpl(
