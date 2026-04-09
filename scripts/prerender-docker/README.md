@@ -47,7 +47,7 @@ docker stats prerender-docker-prerender-1 --no-stream
 | `PAGE_LOAD_TIMEOUT` | Таймаут загрузки страницы (мс) |
 | `LOG_REQUESTS` | `true` для логов запросов |
 
-Каждый запрос к новому URL рендерится в Chromium (секунды). Дисковый кэш ответов для ботов настраивается в nginx (`proxy_cache`) — см. [`nginx-prerender-cache-http.conf.example`](../../nginx-prerender-cache-http.conf.example). Ночной прогрев по sitemap: [`../warm-prerender-nightly.sh`](../warm-prerender-nightly.sh), пример cron: [`../cron-drivebit-prerender.example`](../cron-drivebit-prerender.example).
+Каждый запрос к новому URL рендерится в Chromium (секунды). Дисковый кэш ответов для ботов настраивается в nginx (`proxy_cache`) — см. [`nginx-prerender-cache-http.conf.example`](../../nginx-prerender-cache-http.conf.example). Ночной прогрев по sitemap: GitHub Actions [`prerender-nightly-warm.yml`](../../.github/workflows/prerender-nightly-warm.yml) или скрипт [`../warm-prerender-nightly.sh`](../warm-prerender-nightly.sh) / cron [`../cron-drivebit-prerender.example`](../cron-drivebit-prerender.example).
 
 ## Инвалидация и прогрев после деплоя
 
