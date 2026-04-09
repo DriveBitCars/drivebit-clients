@@ -106,16 +106,15 @@ jobs:
         
         echo "✅ Cache-busting version added"
 
-    - name: Generate prerender-bot HTML, car pages, sitemap.xml and sitemap-ru.xml
+    - name: Generate prerender-bot.html, car pages, sitemap.xml and sitemap-ru.xml
       run: |
         OUT=composeApp/build/dist/js/productionExecutable
         OUTPUT_PATH=$OUT/prerender-bot.html \
         SITEMAP_FILENAME=sitemap.xml \
-        BOT_HTML_MIRROR=prerender-bot-ru.html \
         SITEMAP_MIRROR=sitemap-ru.xml \
         SITE_BASE=https://drivebit.ru \
         node scripts/generate-prerender-bot.js
-        ls -la "$OUT/prerender-bot.html" "$OUT/prerender-bot-ru.html" "$OUT/sitemap.xml" "$OUT/sitemap-ru.xml"
+        ls -la "$OUT/prerender-bot.html" "$OUT/sitemap.xml" "$OUT/sitemap-ru.xml"
 
     - name: Verify GitHub Secrets
       run: |
