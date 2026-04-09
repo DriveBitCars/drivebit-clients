@@ -6,7 +6,7 @@
 #   sudo mkdir -p /var/cache/nginx/prerender
 #   sudo chown -R www-data:www-data /var/cache/nginx/prerender
 #
-# inactive=8d — объекты остаются на диске до 8 дней без обращения; ночной прогрев обновляет популярные URL.
+# inactive=2d — файлы без обращения удаляются через 2 суток (свежесть ответа задаётся proxy_cache_valid 1d в server).
 # max_size — при большом каталоге машин увеличьте (например 2g–4g).
 
-proxy_cache_path /var/cache/nginx/prerender levels=1:2 keys_zone=prerender_cache:50m max_size=2g inactive=8d use_temp_path=off;
+proxy_cache_path /var/cache/nginx/prerender levels=1:2 keys_zone=prerender_cache:50m max_size=2g inactive=2d use_temp_path=off;

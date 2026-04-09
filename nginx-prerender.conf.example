@@ -16,6 +16,7 @@
 # Быстро для бота = в основном HIT по proxy_cache; MISS может занимать десятки секунд (Chromium).
 # proxy_cache_lock_timeout должен быть ≥ времени рендера, иначе несколько ботов на MISS одновременно
 # пойдут в Prerender параллельно и разгонят CPU/RAM.
+# proxy_cache_valid 1d — ответ считается свежим 24 ч, затем следующий запрос пойдёт в Prerender и обновит кэш.
 
 map $http_user_agent $is_bot {
     default 0;
@@ -111,7 +112,7 @@ server {
 
         proxy_cache prerender_cache;
         proxy_cache_key "$scheme$host$request_uri";
-        proxy_cache_valid 200 7d;
+        proxy_cache_valid 200 1d;
         proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
         proxy_cache_lock on;
         proxy_cache_lock_timeout 300s;
