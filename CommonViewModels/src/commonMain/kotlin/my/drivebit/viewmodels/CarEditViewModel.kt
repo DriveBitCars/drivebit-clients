@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
+import my.drivebit.network.services.CarInsuranceType
 
 sealed interface CarEditState {
     data object Loading : CarEditState
@@ -60,6 +61,8 @@ data class CarEditFormData(
     val dailyRate21Days: String = "",
     val deposit: String = "",
     val availableMileagePerDayKm: String = "",
+    val insurance: String? = null,
+    val insuranceTranslate: String? = null,
     val photos: List<my.drivebit.network.services.CarPhotoItem> = emptyList(),
 )
 
@@ -239,6 +242,8 @@ class CarEditViewModelImpl(
                     ?.takeIf { it > 0 }
                     ?.let { NumberFormatter.formatInt(it) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
+            insurance = car.insurance?.trim()?.takeIf { it.isNotEmpty() },
+            insuranceTranslate = car.insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() },
             photos = car.photos,
         )
     }
@@ -393,6 +398,7 @@ class CarEditViewModelImpl(
                         deposit = formData.deposit.takeIf { it.isNotBlank() }?.toIntOrNull(),
                         availableMileagePerDayKm =
                             formData.availableMileagePerDayKm.takeIf { it.isNotBlank() }?.toIntOrNull(),
+                        insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },
                         ParkingAssistances = emptyList(),
                         MultimediaSystemOptions = emptyList(),
                     )

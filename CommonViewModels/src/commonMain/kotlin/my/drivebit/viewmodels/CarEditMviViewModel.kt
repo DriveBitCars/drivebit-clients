@@ -14,6 +14,7 @@ import my.drivebit.network.services.CarAddress
 import my.drivebit.network.services.CarBrand
 import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
+import my.drivebit.network.services.CarInsuranceType
 import my.drivebit.network.services.CarModel
 import my.drivebit.repositories.EnumItem
 import my.drivebit.repositories.MyCarRepository
@@ -127,6 +128,10 @@ sealed interface CarEditIntent {
 
     data class UpdateAvailableMileagePerDayKm(
         val value: String,
+    ) : CarEditIntent
+
+    data class SelectInsurance(
+        val apiValue: String?,
     ) : CarEditIntent
 
     data class UpdateDescription(
@@ -433,6 +438,20 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.UpdateAvailableMileagePerDayKm -> {
                 updateFormData { it.copy(availableMileagePerDayKm = intent.value) }
             }
+            is CarEditIntent.SelectInsurance -> {
+                val v = intent.apiValue?.trim()?.takeIf { it.isNotEmpty() }
+                updateFormData {
+                    it.copy(
+                        insurance = v,
+                        insuranceTranslate =
+                            if (v == null || v in CarInsuranceType.knownApiValues) {
+                                null
+                            } else {
+                                it.insuranceTranslate
+                            },
+                    )
+                }
+            }
             is CarEditIntent.UpdateDescription -> {
                 updateFormData { it.copy(description = intent.value) }
             }
@@ -575,6 +594,7 @@ class CarEditMviViewModelImpl(
                         dailyRate21Days = dailyRate21DaysValue,
                         deposit = depositValue,
                         availableMileagePerDayKm = availableMileagePerDayKmValue,
+                        insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },
                         ParkingAssistances = emptyList(),
                         MultimediaSystemOptions = emptyList(),
                     )
@@ -786,6 +806,8 @@ class CarEditMviViewModelImpl(
                 car.dailyRate21Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             deposit = car.deposit?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
+            insurance = car.insurance?.trim()?.takeIf { it.isNotEmpty() },
+            insuranceTranslate = car.insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() },
             photos = car.photos,
         )
 }
