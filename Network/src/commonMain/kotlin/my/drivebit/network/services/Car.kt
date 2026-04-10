@@ -143,6 +143,8 @@ data class CarDetailResponse(
     val dailyRate21Days: Double? = null,
     val seatsCount: Int? = null,
     val availableMileagePerDayKm: Int? = null,
+    val insurance: String? = null,
+    val insuranceTranslate: String? = null,
     val deposit: Double? = null,
     val owner: String = "",
     val carBookings: List<CarBookingItem> = emptyList(),
@@ -184,6 +186,8 @@ data class CarDetailResponse(
     fun resolvedDailyRate(): Int = dailyRate?.toInt() ?: 0
 
     fun resolvedDeposit(): Int = deposit?.toInt() ?: 0
+
+    fun resolvedInsuranceDisplay(): String? = insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() }
 }
 
 @Serializable
@@ -246,6 +250,24 @@ data class CarAddress(
     val geoLon: Double? = null,
 )
 
+object CarInsuranceType {
+    const val OSAGO_INCLUDED = "OSAGO_Included"
+    const val OSAGO_UNLIMITED = "OSAGO_Unlimited"
+    const val KASKO_INCLUDED = "KASKO_Included"
+    const val KASKO_UNLIMITED = "KASKO_Unlimited"
+
+    val knownApiValues: Set<String> =
+        setOf(OSAGO_INCLUDED, OSAGO_UNLIMITED, KASKO_INCLUDED, KASKO_UNLIMITED)
+
+    val optionsForUi: List<Pair<String, String>> =
+        listOf(
+            OSAGO_INCLUDED to "ОСАГО включено",
+            OSAGO_UNLIMITED to "ОСАГО без лимита",
+            KASKO_INCLUDED to "КАСКО включено",
+            KASKO_UNLIMITED to "КАСКО без лимита",
+        )
+}
+
 @Serializable
 data class CarPhotoItem(
     val id: Int,
@@ -278,6 +300,7 @@ data class CarCreateRequest(
     val dailyRate21Days: Int? = null,
     val deposit: Int? = null,
     val availableMileagePerDayKm: Int? = null,
+    val insurance: String? = null,
     @SerialName("parkingAssistances") val ParkingAssistances: List<Int> = emptyList(),
     @SerialName("multimediaSystemOptions") val MultimediaSystemOptions: List<Int> = emptyList(),
 )

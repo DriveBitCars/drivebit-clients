@@ -92,6 +92,43 @@ fun CarRatesSection(car: CarDetailResponse) {
 }
 
 @Composable
+fun CarInsuranceSection(car: CarDetailResponse) {
+    val text = car.resolvedInsuranceDisplay() ?: return
+
+    Div({
+        style {
+            marginTop(16.px)
+            padding(16.px, 20.px)
+            property("background-color", CSSColors.WhiteString)
+            property("border-radius", "12px")
+            property("border", "1px solid ${CSSColors.Gray300String}")
+            property("box-sizing", "border-box")
+        }
+    }) {
+        Div({
+            style {
+                fontSize(CSSTypography.FontSize.sm)
+                fontWeight(CSSTypography.FontWeight.medium)
+                color(CSSColors.Black)
+                marginBottom(8.px)
+            }
+        }) {
+            Text("Страховка")
+        }
+        Div({
+            style {
+                fontSize(CSSTypography.FontSize.lg)
+                fontWeight(CSSTypography.FontWeight.normal)
+                color(CSSColors.Black)
+                property("line-height", "1.4")
+            }
+        }) {
+            Text(text)
+        }
+    }
+}
+
+@Composable
 fun CarDepositSection(car: CarDetailResponse) {
     val deposit = car.deposit?.takeIf { it > 0 }?.toInt() ?: return
 

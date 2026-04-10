@@ -15,6 +15,7 @@ import my.drivebit.network.parseResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class CarDetailResponseTest {
     @Test
@@ -126,6 +127,8 @@ class CarDetailResponseTest {
                     "seatsCount": 5,
                     "licensePlate": "K128CT",
                     "ValidAddressString": "Test Address",
+                    "insurance": "OSAGO_Included",
+                    "insuranceTranslate": "ОСАГО включено",
                     "photos": []
                 }
                 """.trimIndent()
@@ -172,5 +175,27 @@ class CarDetailResponseTest {
             assertEquals(5, result.seatsCount)
             assertEquals("K128CT", result.licensePlate)
             assertEquals("Test Address", result.ValidAddressString)
+            assertEquals("OSAGO_Included", result.insurance)
+            assertEquals("ОСАГО включено", result.insuranceTranslate)
+            assertEquals("ОСАГО включено", result.resolvedInsuranceDisplay())
         }
+
+    @Test
+    fun `resolvedInsuranceDisplay is null when insuranceTranslate is absent`() {
+        val car =
+            CarDetailResponse(
+                id = "x",
+                general =
+                    CarGeneral(
+                        brandName = "A",
+                        modelName = "B",
+                        vin = "",
+                        seats = 5,
+                        address = CarAddress(geoLat = 0.0, geoLon = 0.0),
+                    ),
+                insurance = "OSAGO_Included",
+                insuranceTranslate = null,
+            )
+        assertNull(car.resolvedInsuranceDisplay())
+    }
 }

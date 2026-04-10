@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.components.ActionButton
+import my.drivebit.components.CarInsuranceSelectField
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
 import my.drivebit.components.FormSection
@@ -454,6 +455,12 @@ fun CarEditPage() {
                                     }
                                 },
                                 numeric = true,
+                            )
+
+                            CarInsuranceSelectField(
+                                insurance = formData.insurance,
+                                insuranceTranslate = formData.insuranceTranslate,
+                                onSelect = { viewModel.handleIntent(CarEditIntent.SelectInsurance(it)) },
                             )
 
                             TextInputField(

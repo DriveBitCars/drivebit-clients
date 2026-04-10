@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarBook
 import my.drivebit.components.CarDepositSection
+import my.drivebit.components.CarInsuranceSection
 import my.drivebit.components.CarDescription
 import my.drivebit.components.CarLocationMap
 import my.drivebit.components.CarOwnerSection
@@ -231,6 +232,8 @@ private fun CarDetailInfoColumn(
         CarSpecsRow(car)
 
         CarDescription(description = car.general.description)
+
+        CarInsuranceSection(car)
 
         owner?.let { ownerInfo ->
             CarOwnerSection(
