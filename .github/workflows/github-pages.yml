@@ -75,8 +75,7 @@ jobs:
             echo "⚠️  list-your-car.html not found in root"
         fi
         
-        # SEO files (robots.txt, sitemap.xml) are automatically copied from composeApp/src/jsMain/resources/
-        echo "📄 SEO files should be automatically included from jsMain/resources/"
+        echo "📄 robots.txt and other jsMain/resources/ assets are included in the JS bundle output"
 
         # Verify index.html exists
         if [ ! -f "dist/index.html" ]; then

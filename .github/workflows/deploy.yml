@@ -106,16 +106,6 @@ jobs:
         
         echo "✅ Cache-busting version added"
 
-    - name: Generate prerender-bot.html, car pages, sitemap.xml and sitemap-ru.xml
-      run: |
-        OUT=composeApp/build/dist/js/productionExecutable
-        OUTPUT_PATH=$OUT/prerender-bot.html \
-        SITEMAP_FILENAME=sitemap.xml \
-        SITEMAP_MIRROR=sitemap-ru.xml \
-        SITE_BASE=https://drivebit.ru \
-        node scripts/generate-prerender-bot.js
-        ls -la "$OUT/prerender-bot.html" "$OUT/sitemap.xml" "$OUT/sitemap-ru.xml"
-
     - name: Verify GitHub Secrets
       run: |
         echo "🔍 Verifying GitHub Secrets..."
@@ -447,87 +437,6 @@ jobs:
           test -f /var/www/drivebit-clients/index.html || (echo "❌ index.html missing after upload" && exit 1)
           echo "📄 Page title from index.html:"
           grep -o '<title>[^<]*' -m1 /var/www/drivebit-clients/index.html || true
-
-    - name: Copy warm-prerender script to server
-      continue-on-error: true
-      uses: appleboy/scp-action@v1.0.0
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        port: ${{ secrets.SERVER_PORT || 22 }}
-        source: "scripts/warm-prerender-after-deploy.sh"
-        target: "/tmp/"
-        strip_components: 1
-
-    - name: Copy warm-prerender-nightly script to server
-      continue-on-error: true
-      uses: appleboy/scp-action@v1.0.0
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        port: ${{ secrets.SERVER_PORT || 22 }}
-        source: "scripts/warm-prerender-nightly.sh"
-        target: "/tmp/"
-        strip_components: 1
-
-    - name: Persist prerender warm scripts under /opt/drivebit-scripts
-      continue-on-error: true
-      uses: appleboy/ssh-action@v1.2.2
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        port: ${{ secrets.SERVER_PORT || 22 }}
-        script: |
-          set -e
-          if [ "${EUID:-$(id -u)}" -ne 0 ]; then SUDO_CMD="sudo"; else SUDO_CMD=""; fi
-          $SUDO_CMD mkdir -p /opt/drivebit-scripts
-          for name in warm-prerender-after-deploy.sh warm-prerender-nightly.sh; do
-            src=""
-            for p in "/tmp/$name" "/tmp/scripts/$name"; do
-              if [ -f "$p" ]; then src="$p"; break; fi
-            done
-            if [ -z "$src" ]; then
-              src=$(find /tmp -maxdepth 4 -name "$name" -type f 2>/dev/null | head -1)
-            fi
-            if [ -n "$src" ] && [ -f "$src" ]; then
-              $SUDO_CMD cp "$src" "/opt/drivebit-scripts/$name"
-              $SUDO_CMD chmod +x "/opt/drivebit-scripts/$name"
-              echo "✅ Installed /opt/drivebit-scripts/$name"
-            else
-              echo "⚠️  $name not found under /tmp (skip persist)"
-            fi
-          done
-
-    - name: Invalidate and warm Prerender cache
-      continue-on-error: true
-      uses: appleboy/ssh-action@v1.2.2
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        port: ${{ secrets.SERVER_PORT || 22 }}
-        script: |
-          set -e
-          SCRIPT=""
-          for p in /tmp/warm-prerender-after-deploy.sh /tmp/scripts/warm-prerender-after-deploy.sh; do
-            if [ -f "$p" ]; then SCRIPT="$p"; break; fi
-          done
-          if [ -z "$SCRIPT" ]; then
-            SCRIPT=$(find /tmp -maxdepth 4 -name 'warm-prerender-after-deploy.sh' -type f 2>/dev/null | head -1)
-          fi
-          if [ -z "$SCRIPT" ] || [ ! -f "$SCRIPT" ]; then
-            echo "❌ warm-prerender-after-deploy.sh not found under /tmp (check scp strip_components)"
-            exit 1
-          fi
-          chmod +x "$SCRIPT"
-          export SITE_URL="https://drivebit.ru"
-          export PRERENDER_COMPOSE_DIR="/opt/drivebit-prerender"
-          export PRERENDER_SERVICE="prerender"
-          export CURL_MAX_TIME="300"
-          "$SCRIPT"
 
     - name: Notify deployment success
       if: success()
