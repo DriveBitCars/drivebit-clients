@@ -73,8 +73,7 @@ data class CreateBookingRequest(
     val comment: String? = null,
 )
 
-fun BookingDTO.statusAllowsRenterPayment(): Boolean =
-    status.equals("Confirmed", ignoreCase = true)
+fun BookingDTO.statusAllowsRenterPayment(): Boolean = status.equals("Confirmed", ignoreCase = true)
 
 fun BookingDTO.isTerminalRenterBooking(): Boolean =
     status.equals("Completed", ignoreCase = true) ||
