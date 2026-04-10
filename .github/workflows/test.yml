@@ -147,36 +147,6 @@ jobs:
     - name: Quick iOS Simulator builds (all modules)
       run: ./gradlew compileKotlinIosSimulatorArm64 --no-daemon --stacktrace --parallel
 
-  prerender-check:
-    name: Prerender Bot HTML
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v5
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
-    - name: Generate prerender-bot.html
-      run: node scripts/generate-prerender-bot.js
-
-    - name: Verify output
-      run: |
-        test -f prerender-bot.html || (echo "prerender-bot.html not found" && exit 1)
-        test -s prerender-bot.html || (echo "prerender-bot.html is empty" && exit 1)
-        echo "Generated $(wc -c < prerender-bot.html) bytes"
-
-    - name: Upload prerender-bot.html
-      uses: actions/upload-artifact@v4
-      with:
-        name: prerender-bot
-        path: prerender-bot.html
-        retention-days: 7
-
   # Параллельная проверка модулей (каждый модуль - отдельная джоба)
   check-modules:
     name: Check ${{ matrix.module }}

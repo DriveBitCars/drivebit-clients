@@ -40,9 +40,3 @@ Disallow: /profile
 Disallow: /edit-name
 Disallow: /change-email
 Disallow: /change-phone
-
-Host: drivebit.ru
-
-Sitemap: https://drivebit.ru/sitemap.xml
-Sitemap: https://drivebit.ru/sitemap-ru.xml
-

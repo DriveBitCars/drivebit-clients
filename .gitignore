@@ -48,12 +48,6 @@ assets/
 # Compiled JS files
 composeApp.js
 
-# Generated prerender (created by scripts/generate-prerender-bot.js)
-prerender-bot.html
-/sitemap.xml
-/sitemap-ru.xml
-/car/
-
 # Owner passwords (create from owner-passwords.example.json)
 scripts/owner-passwords.json
 
