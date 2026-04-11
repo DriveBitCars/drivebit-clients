@@ -962,18 +962,6 @@
 
     <script>
         (function () {
-            var host = window.location.hostname;
-            var isLocal = host === "localhost" || host === "127.0.0.1" || host === "[::1]";
-            var force =
-                /(?:^|[?&])callibri=1(?:&|$)/.test(window.location.search) ||
-                (function () {
-                    try {
-                        return window.localStorage.getItem("drivebit_force_callibri") === "1";
-                    } catch (e) {
-                        return false;
-                    }
-                })();
-            if (isLocal && !force) return;
             function inject(attempt) {
                 if (document.querySelector('script[data-drivebit-callibri]')) return;
                 var s = document.createElement('script');
