@@ -555,123 +555,6 @@
             }
         }
 
-        .drivebit-app-footer-wrap {
-            display: block;
-            max-width: 1200px;
-            margin: 24px auto 0;
-            padding-left: 8px;
-            padding-right: 8px;
-            box-sizing: border-box;
-        }
-
-        body.drivebit-compose-booting .drivebit-app-footer-wrap {
-            display: none;
-        }
-
-        @media (min-width: 769px) {
-            .drivebit-app-footer-wrap {
-                padding-left: 40px;
-                padding-right: 40px;
-            }
-        }
-
-        .drivebit-app-footer {
-            box-sizing: border-box;
-            width: 100%;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 32px 8px;
-            background-color: #09052B;
-            border-radius: 24px;
-            color: #ffffff;
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, system-ui, sans-serif;
-        }
-
-        @media (min-width: 769px) {
-            .drivebit-app-footer {
-                padding: 32px 40px;
-            }
-        }
-
-        .drivebit-app-footer-phone {
-            display: block;
-            text-align: center;
-            font-size: 20px;
-            font-weight: 500;
-            line-height: 1.5;
-            color: #ffffff;
-            text-decoration: none;
-            transition: opacity 0.2s ease;
-        }
-
-        .drivebit-app-footer-phone:hover {
-            opacity: 0.85;
-        }
-
-        .drivebit-app-footer-desktop {
-            display: none;
-            align-items: center;
-            width: 80%;
-            max-width: 100%;
-            margin: 32px auto 0;
-        }
-
-        .drivebit-app-footer-desktop .drivebit-app-footer-cell-left {
-            flex: 1;
-            text-align: left;
-            font-size: 14px;
-            line-height: 1.5;
-            color: #ffffff;
-        }
-
-        .drivebit-app-footer-desktop .drivebit-app-footer-cell-center {
-            flex: 0 0 auto;
-        }
-
-        .drivebit-app-footer-desktop .drivebit-app-footer-cell-right {
-            flex: 1;
-            text-align: right;
-        }
-
-        @media (min-width: 769px) {
-            .drivebit-app-footer-desktop {
-                display: flex;
-            }
-
-            .drivebit-app-footer-mobile {
-                display: none !important;
-            }
-        }
-
-        .drivebit-app-footer-mobile {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-            margin-top: 32px;
-            text-align: center;
-            font-size: 16px;
-            line-height: 1.5;
-            color: #ffffff;
-        }
-
-        .drivebit-app-footer-link {
-            font-size: 14px;
-            line-height: 1.5;
-            color: #ffffff;
-            text-decoration: none;
-            transition: opacity 0.2s ease;
-        }
-
-        .drivebit-app-footer-mobile .drivebit-app-footer-link {
-            display: block;
-        }
-
-        .drivebit-app-footer-link:hover {
-            opacity: 0.85;
-        }
-
         .fallback-content {
             display: none;
         }
@@ -686,7 +569,7 @@
             background-color: #E0E0E6 !important;
         }
     </style>
-    <noscript><style>.fallback-content{display:block!important}body.drivebit-compose-booting .drivebit-app-footer-wrap{display:block!important}</style></noscript>
+    <noscript><style>.fallback-content{display:block!important}</style></noscript>
 
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
@@ -713,29 +596,9 @@
         })();
     </script>
 </head>
-<body class="drivebit-compose-booting">
+<body>
     <!-- Compose Web App Root -->
     <div id="root"></div>
-
-    <div class="drivebit-app-footer-wrap">
-        <footer class="drivebit-app-footer" id="drivebit-footer">
-            <a id="drivebit-footer-phone" class="drivebit-app-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
-            <div class="drivebit-app-footer-desktop">
-                <div class="drivebit-app-footer-cell-left">© DriveBit Аренда автомобилей от собственников</div>
-                <div class="drivebit-app-footer-cell-center">
-                    <a class="drivebit-app-footer-link" href="/offer">Оферта</a>
-                </div>
-                <div class="drivebit-app-footer-cell-right">
-                    <a class="drivebit-app-footer-link" href="/privacy">Политика конфиденциальности</a>
-                </div>
-            </div>
-            <div class="drivebit-app-footer-mobile">
-                <span>© DriveBit Аренда автомобилей от собственников</span>
-                <a class="drivebit-app-footer-link" href="/offer">Оферта</a>
-                <a class="drivebit-app-footer-link" href="/privacy">Политика конфиденциальности</a>
-            </div>
-        </footer>
-    </div>
 
     <!-- Fallback content - показывается если JS не загрузился -->
     <div class="fallback-content">
@@ -962,7 +825,7 @@
     </script>
 
     <!-- Основной JS скрипт -->
-    <script type="application/javascript" src="composeApp.js?v=4" onerror="document.body.classList.remove('drivebit-compose-booting')"></script>
+    <script type="application/javascript" src="composeApp.js?v=4"></script>
 
     <script>
         (function () {
