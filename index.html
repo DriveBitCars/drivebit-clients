@@ -564,6 +564,10 @@
             box-sizing: border-box;
         }
 
+        body.drivebit-compose-booting .drivebit-app-footer-wrap {
+            display: none;
+        }
+
         @media (min-width: 769px) {
             .drivebit-app-footer-wrap {
                 padding-left: 40px;
@@ -682,7 +686,7 @@
             background-color: #E0E0E6 !important;
         }
     </style>
-    <noscript><style>.fallback-content{display:block!important}</style></noscript>
+    <noscript><style>.fallback-content{display:block!important}body.drivebit-compose-booting .drivebit-app-footer-wrap{display:block!important}</style></noscript>
 
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
@@ -709,7 +713,7 @@
         })();
     </script>
 </head>
-<body>
+<body class="drivebit-compose-booting">
     <!-- Compose Web App Root -->
     <div id="root"></div>
 
@@ -958,7 +962,7 @@
     </script>
 
     <!-- Основной JS скрипт -->
-    <script type="application/javascript" src="composeApp.js?v=4"></script>
+    <script type="application/javascript" src="composeApp.js?v=4" onerror="document.body.classList.remove('drivebit-compose-booting')"></script>
 
     <script>
         (function () {
