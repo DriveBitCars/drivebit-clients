@@ -50,6 +50,8 @@ external interface Map {
         zoom: Number,
     )
 
+    fun invalidateSize(animate: Boolean? = definedExternally)
+
     fun remove()
 
     fun on(
@@ -155,6 +157,13 @@ actual fun MapView(
                 val tileLayer = Leaflet.tileLayer(tileLayerUrl, tileLayerOptions)
                 tileLayer.addTo(map)
 
+                window.setTimeout(
+                    {
+                        map.invalidateSize()
+                    },
+                    0,
+                )
+
                 mapContainer["moveTimeout"] = null
                 map.on("moveend") {
                     (mapContainer["moveTimeout"] as? Int)?.let { window.clearTimeout(it) }
@@ -191,6 +200,12 @@ actual fun MapView(
                     cameraPosition.location.longitude,
                 )
             map.setView(center, cameraPosition.zoom.toInt())
+            window.setTimeout(
+                {
+                    map.invalidateSize()
+                },
+                0,
+            )
         }
     }
 

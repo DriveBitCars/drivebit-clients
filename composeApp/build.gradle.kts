@@ -225,4 +225,7 @@ tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
 
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(rootProject.layout.projectDirectory.file("index.html"))
+    from(rootProject.layout.projectDirectory.dir("vendor")) {
+        into("vendor")
+    }
 }
