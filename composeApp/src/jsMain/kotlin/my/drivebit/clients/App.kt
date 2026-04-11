@@ -1,7 +1,11 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import kotlin.coroutines.resume
+import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.suspendCancellableCoroutine
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
 import my.drivebit.screens.AddressInputPage
@@ -58,9 +62,23 @@ import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
+private suspend fun awaitDoubleAnimationFrame() {
+    suspendCancellableCoroutine { continuation ->
+        window.requestAnimationFrame {
+            window.requestAnimationFrame {
+                continuation.resume(Unit)
+            }
+        }
+    }
+}
+
 @Composable
 @Suppress("FunctionName")
 actual fun App() {
+    LaunchedEffect(Unit) {
+        awaitDoubleAnimationFrame()
+        document.body?.classList?.remove("drivebit-compose-booting")
+    }
     KoinApplication(application = {
         modules(
             storageModule,
