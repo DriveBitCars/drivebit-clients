@@ -121,7 +121,11 @@ nginx -t
 systemctl reload nginx
 ```
 
+## Статика Web: один `index.html`
 
+Шаблон главной страницы лежит в **корне репозитория** (`index.html`). Gradle при сборке JS копирует его в ресурсы модуля `composeApp` (`jsProcessResources`), отдельного `composeApp/src/jsMain/resources/index.html` нет.
+
+В **nginx** для фронта важно, чтобы `root` (или `alias`) указывал на каталог **одной** выкладки, где совместно лежат `index.html`, `composeApp.js`, при необходимости wasm-файлы, `images/`, `vendor/` и т.д. Нельзя отдавать новый `composeApp.js` со старым `index.html` с другого пути.
 
 
 

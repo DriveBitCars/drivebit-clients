@@ -222,3 +222,7 @@ ktlint {
 tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
     duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
 }
+
+tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
+    from(rootProject.layout.projectDirectory.file("index.html"))
+}
