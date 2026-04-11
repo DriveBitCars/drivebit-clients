@@ -218,7 +218,7 @@ fun ProfileScreenPreview() {
                                 ProfileState.Success(
                                     UserGetResponse(
                                         id = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                                        phone = "+7(912)742-88-27",
+                                        phone = "+7(495) 877-50-51",
                                         firstName = "Anton",
                                         lastName = "B.",
                                         email = "user@example.com",

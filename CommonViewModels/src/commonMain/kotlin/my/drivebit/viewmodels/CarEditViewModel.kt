@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
-import my.drivebit.network.services.CarInsuranceType
 
 sealed interface CarEditState {
     data object Loading : CarEditState

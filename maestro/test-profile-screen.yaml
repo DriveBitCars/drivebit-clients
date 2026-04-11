@@ -14,7 +14,7 @@ appId: my.drivebit.clients
 - assertVisible: "Петрович"
 - assertVisible: "Иванов"
 - assertVisible: "Номер телефона"
-- assertVisible: "+7(912)742-88-27"
+- assertVisible: "+7(495) 877-50-51"
 - assertVisible: "Email адрес"
 - assertVisible: "ivan.ivanov@example.com"
 - assertVisible: "Присоединился: 2024-01-15T10:30:00Z"
