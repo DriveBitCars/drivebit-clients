@@ -10,7 +10,7 @@ class MockProfileViewModel(
         ProfileState.Success(
             UserGetResponse(
                 id = "mock-id-123",
-                phone = "+7(912)742-88-27",
+                phone = "+7(495) 877-50-51",
                 firstName = "Иван",
                 middleName = "Петрович",
                 lastName = "Иванов",
