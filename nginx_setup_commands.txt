@@ -35,8 +35,12 @@ sed -i '/^[[:space:]]*location \/[[:space:]]*{/i\
 # 5. Проверить и перезагрузить
 nginx -t && systemctl reload nginx && echo "✅ Готово!"
 
-
-
+# --- Единый index.html (Web) ---
+# Шаблон страницы только в корне репозитория: index.html
+# Gradle (:composeApp:jsProcessResources) копирует его в JS-ресурсы сборки.
+# В nginx директива root должна указывать на каталог деплоя, где одновременно лежат
+# index.html, composeApp.js (и при необходимости *.wasm), images/, vendor/ и т.д.
+# из одной и той же сборки, без подмешивания старого index.html и нового composeApp.js.
 
 
 
