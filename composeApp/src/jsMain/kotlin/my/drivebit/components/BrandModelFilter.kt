@@ -13,6 +13,7 @@ import my.drivebit.design.applyTypography
 import my.drivebit.viewmodels.CarBrandViewModel
 import my.drivebit.viewmodels.CarModelViewModel
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -23,6 +24,7 @@ fun BrandModelFilter(
     onBrandSelected: (brandId: Int, brandName: String) -> Unit,
     onModelSelected: (modelId: Int, modelName: String) -> Unit,
     onReset: () -> Unit,
+    onOk: () -> Unit,
 ) {
     val brandViewModel: CarBrandViewModel = koinInject()
     val modelViewModel: CarModelViewModel = koinInject()
@@ -90,6 +92,7 @@ fun BrandModelFilter(
                     modelViewModel.clearQuery()
                 },
                 onReset = onReset,
+                onOk = onOk,
             )
         }
     }
@@ -138,6 +141,78 @@ private fun BrandSelectionContent(
 }
 
 @Composable
+private fun ModelSelectionFooterButtons(
+    onReset: () -> Unit,
+    onOk: () -> Unit,
+) {
+    Row(
+        gap = 12.px,
+        alignItems = AlignItems.Center,
+    ) {
+        Button({
+            onClick { onReset() }
+            style {
+                flex(1)
+                padding(12.px, 24.px)
+                borderRadius(8.px)
+                backgroundColor(CSSColors.White)
+                border(1.px, LineStyle.Solid, CSSColors.Gray300)
+                color(CSSColors.Gray600)
+                cursor("pointer")
+                applyTypography(CSSTypography.Styles.button)
+                fontSize(CSSTypography.FontSize.base)
+                fontWeight(CSSTypography.FontWeight.medium)
+                property("transition", "all 0.2s ease")
+            }
+            onMouseEnter {
+                (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
+                    "background-color",
+                    CSSColors.Gray300String,
+                )
+            }
+            onMouseLeave {
+                (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
+                    "background-color",
+                    CSSColors.WhiteString,
+                )
+            }
+        }) {
+            Text("Сбросить")
+        }
+        Button({
+            onClick { onOk() }
+            style {
+                flex(1)
+                padding(12.px, 24.px)
+                borderRadius(8.px)
+                backgroundColor(CSSColors.Blue)
+                border(0.px)
+                color(CSSColors.White)
+                cursor("pointer")
+                applyTypography(CSSTypography.Styles.button)
+                fontSize(CSSTypography.FontSize.base)
+                fontWeight(CSSTypography.FontWeight.semibold)
+                property("transition", "background-color 0.2s ease")
+            }
+            onMouseEnter {
+                (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
+                    "background-color",
+                    CSSColors.BlueRedString,
+                )
+            }
+            onMouseLeave {
+                (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
+                    "background-color",
+                    CSSColors.BlueString,
+                )
+            }
+        }) {
+            Text("Ок")
+        }
+    }
+}
+
+@Composable
 private fun ModelSelectionContent(
     brandName: String,
     models: List<my.drivebit.network.services.CarModel>,
@@ -147,6 +222,7 @@ private fun ModelSelectionContent(
     onModelClick: (Pair<Int, String>) -> Unit,
     onBack: () -> Unit,
     onReset: () -> Unit,
+    onOk: () -> Unit,
 ) {
     Row(
         gap = 8.px,
@@ -195,7 +271,7 @@ private fun ModelSelectionContent(
         )
     }
 
-    FilterResetButton(onReset = onReset)
+    ModelSelectionFooterButtons(onReset = onReset, onOk = onOk)
 }
 
 @Composable

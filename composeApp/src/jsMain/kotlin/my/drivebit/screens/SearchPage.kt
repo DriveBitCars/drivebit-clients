@@ -301,6 +301,7 @@ fun SearchPage() {
                                                 viewModel.updateModel(null, null)
                                                 showBrandFilter = false
                                             },
+                                            onOk = { showBrandFilter = false },
                                         )
                                     }
                                 }
