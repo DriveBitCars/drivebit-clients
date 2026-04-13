@@ -10,7 +10,11 @@ import my.drivebit.network.parseResponse
 interface Dictionary {
     suspend fun getCarBrands(): List<CarBrand>
 
+    suspend fun getCarBrandsExisting(): List<CarBrand>
+
     suspend fun getCarModels(brandId: Int): List<CarModel>
+
+    suspend fun getCarModelsExisting(brandId: Int): List<CarModel>
 
     suspend fun searchCities(query: String): List<City>
 
@@ -123,8 +127,23 @@ class DictionaryImpl(
         return response.parseResponse()
     }
 
+    override suspend fun getCarBrandsExisting(): List<CarBrand> {
+        val url = "${DEFAULT_BASE_URL}Dictionary/cars/brands/existing"
+        val response = httpClient.get(url)
+        return response.parseResponse()
+    }
+
     override suspend fun getCarModels(brandId: Int): List<CarModel> {
         val url = "${DEFAULT_BASE_URL}Dictionary/cars/models-of-brand"
+        val response =
+            httpClient.get(url) {
+                parameter("brandId", brandId)
+            }
+        return response.parseResponse()
+    }
+
+    override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> {
+        val url = "${DEFAULT_BASE_URL}Dictionary/cars/models/existing"
         val response =
             httpClient.get(url) {
                 parameter("brandId", brandId)

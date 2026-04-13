@@ -37,7 +37,7 @@ fun BrandModelFilter(
     var modelQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        brandViewModel.loadBrands()
+        brandViewModel.loadBrands(existingInFleetOnly = true)
     }
 
     Column(
@@ -66,7 +66,7 @@ fun BrandModelFilter(
                     brandQuery = ""
                     brandViewModel.clearQuery()
                     onBrandSelected(brand.first, brand.second)
-                    modelViewModel.loadModels(brand.first)
+                    modelViewModel.loadModels(brand.first, existingInFleetOnly = true)
                 },
                 onReset = onReset,
             )

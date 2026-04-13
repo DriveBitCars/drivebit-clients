@@ -27,6 +27,10 @@ class CarBrandRepositoryTest {
 
                     override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
 
+                    override suspend fun getCarBrandsExisting(): List<CarBrand> = getCarBrands()
+
+                    override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> = getCarModels(brandId)
+
                     override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
 
                     override suspend fun searchCities(query: String): List<City> = emptyList()
@@ -46,6 +50,42 @@ class CarBrandRepositoryTest {
         }
 
     @Test
+    fun `should return success with existing fleet brands`() =
+        runTest {
+            val expectedBrands =
+                listOf(
+                    CarBrand(id = 1, name = "Toyota"),
+                    CarBrand(id = 2, name = "BMW"),
+                )
+            val fakeDictionary =
+                object : Dictionary {
+                    override suspend fun getCarBrands(): List<CarBrand> = emptyList()
+
+                    override suspend fun getCarBrandsExisting(): List<CarBrand> = expectedBrands
+
+                    override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
+
+                    override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> = getCarModels(brandId)
+
+                    override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
+
+                    override suspend fun searchCities(query: String): List<City> = emptyList()
+
+                    override suspend fun getAllCities(): List<City> = emptyList()
+
+                    override suspend fun getDocumentEnums(): DocumentEnumsResponse = throw NotImplementedError()
+
+                    override suspend fun getFiltersSuggested(): List<FilterSuggestion> = emptyList()
+                }
+            val repository = CarBrandRepositoryImpl(fakeDictionary)
+
+            val result = repository.getBrandsExistingInFleet()
+
+            assertTrue(result is ResultCarBrands.Success)
+            assertEquals(expectedBrands, (result as ResultCarBrands.Success).brands)
+        }
+
+    @Test
     fun `should return error on exception`() =
         runTest {
             val fakeDictionary =
@@ -53,6 +93,10 @@ class CarBrandRepositoryTest {
                     override suspend fun getCarBrands(): List<CarBrand> = throw Exception("Network error")
 
                     override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
+
+                    override suspend fun getCarBrandsExisting(): List<CarBrand> = getCarBrands()
+
+                    override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> = getCarModels(brandId)
 
                     override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
 
@@ -80,6 +124,10 @@ class CarBrandRepositoryTest {
                     override suspend fun getCarBrands(): List<CarBrand> = throw Exception()
 
                     override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
+
+                    override suspend fun getCarBrandsExisting(): List<CarBrand> = getCarBrands()
+
+                    override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> = getCarModels(brandId)
 
                     override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
 

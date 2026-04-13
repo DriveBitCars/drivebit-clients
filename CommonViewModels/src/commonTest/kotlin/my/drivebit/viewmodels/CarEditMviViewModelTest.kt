@@ -1050,6 +1050,8 @@ fun createMockCarBrandViewModel(
                 override suspend fun getBrands(): my.drivebit.repositories.ResultCarBrands =
                     my.drivebit.repositories.ResultCarBrands
                         .Success(emptyList())
+
+                override suspend fun getBrandsExistingInFleet(): my.drivebit.repositories.ResultCarBrands = getBrands()
             }
     val scope = coroutineScope ?: CoroutineScope(SupervisorJob())
     return CarBrandViewModel(mockRepository, scope)
@@ -1065,6 +1067,9 @@ fun createMockCarModelViewModel(
                 override suspend fun getModels(brandId: Int): my.drivebit.repositories.ResultCarModels =
                     my.drivebit.repositories.ResultCarModels
                         .Success(emptyList())
+
+                override suspend fun getExistingModels(brandId: Int): my.drivebit.repositories.ResultCarModels =
+                    getModels(brandId)
             }
     val scope = coroutineScope ?: CoroutineScope(SupervisorJob())
     return CarModelViewModel(mockRepository, scope)

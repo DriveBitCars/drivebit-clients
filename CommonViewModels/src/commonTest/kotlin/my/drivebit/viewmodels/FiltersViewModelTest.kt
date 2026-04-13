@@ -57,6 +57,12 @@ class MockDictionary : Dictionary {
     override suspend fun getCarModels(brandId: Int): List<my.drivebit.network.services.CarModel> =
         throw NotImplementedError("Not used in FiltersViewModel")
 
+    override suspend fun getCarBrandsExisting(): List<my.drivebit.network.services.CarBrand> =
+        throw NotImplementedError("Not used in FiltersViewModel")
+
+    override suspend fun getCarModelsExisting(brandId: Int): List<my.drivebit.network.services.CarModel> =
+        throw NotImplementedError("Not used in FiltersViewModel")
+
     override suspend fun searchCities(query: String): List<my.drivebit.network.services.City> =
         throw NotImplementedError("Not used in FiltersViewModel")
 

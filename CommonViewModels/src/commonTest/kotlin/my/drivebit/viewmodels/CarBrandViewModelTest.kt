@@ -19,6 +19,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(emptyList())
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -37,6 +39,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(expectedBrands)
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -54,6 +58,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Error(errorMessage)
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -76,6 +82,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(allBrands)
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -105,6 +113,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(allBrands)
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -126,6 +136,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(allBrands)
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -148,6 +160,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(emptyList())
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -160,6 +174,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(emptyList())
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -177,6 +193,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(allBrands)
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -202,6 +220,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(allBrands)
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 
@@ -229,6 +249,8 @@ class CarBrandViewModelTest {
             val fakeRepository =
                 object : CarBrandRepository {
                     override suspend fun getBrands(): ResultCarBrands = ResultCarBrands.Success(allBrands)
+
+                    override suspend fun getBrandsExistingInFleet(): ResultCarBrands = getBrands()
                 }
             val viewModel = CarBrandViewModel(fakeRepository, this)
 

@@ -39,6 +39,10 @@ class CarEnumsRepositoryTest {
 
                     override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
 
+                    override suspend fun getCarBrandsExisting(): List<CarBrand> = getCarBrands()
+
+                    override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> = getCarModels(brandId)
+
                     override suspend fun searchCities(query: String): List<City> = emptyList()
 
                     override suspend fun getAllCities(): List<City> = emptyList()
@@ -125,6 +129,10 @@ class CarEnumsRepositoryTest {
             override suspend fun getCarBrands(): List<CarBrand> = emptyList()
 
             override suspend fun getCarModels(brandId: Int): List<CarModel> = emptyList()
+
+            override suspend fun getCarBrandsExisting(): List<CarBrand> = getCarBrands()
+
+            override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> = getCarModels(brandId)
 
             override suspend fun searchCities(query: String): List<City> = emptyList()
 

@@ -31,7 +31,7 @@ fun CarBrandSelectionPage(
     var inputValue by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        viewModel.loadBrands()
+        viewModel.loadBrands(existingInFleetOnly = true)
     }
 
     PageWithLogo {

@@ -5,6 +5,8 @@ import my.drivebit.network.services.Dictionary
 
 interface CarBrandRepository {
     suspend fun getBrands(): ResultCarBrands
+
+    suspend fun getBrandsExistingInFleet(): ResultCarBrands
 }
 
 sealed interface ResultCarBrands {
@@ -23,6 +25,16 @@ class CarBrandRepositoryImpl(
     override suspend fun getBrands(): ResultCarBrands =
         runCatching {
             dictionary.getCarBrands()
+        }.fold(
+            onSuccess = { brands -> ResultCarBrands.Success(brands) },
+            onFailure = { exception ->
+                ResultCarBrands.Error(exception.message ?: "Unknown error")
+            },
+        )
+
+    override suspend fun getBrandsExistingInFleet(): ResultCarBrands =
+        runCatching {
+            dictionary.getCarBrandsExisting()
         }.fold(
             onSuccess = { brands -> ResultCarBrands.Success(brands) },
             onFailure = { exception ->
