@@ -10,6 +10,8 @@ import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.BodyTypeFilter
+import my.drivebit.components.Box
+import my.drivebit.components.BoxOverlay
 import my.drivebit.components.BrandModelFilter
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.Column
@@ -38,10 +40,8 @@ import my.drivebit.viewmodels.SearchPageDateViewModel
 import my.drivebit.viewmodels.SearchState
 import my.drivebit.viewmodels.SearchViewModel
 import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
-import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
@@ -216,160 +216,139 @@ fun SearchPage() {
                                 selectedText = seatsChipText,
                             )
                         }
-                        if (showPriceFilter) {
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    property("justify-content", "flex-start")
-                                    width(100.percent)
-                                }
-                            }) {
-                                PriceFilter(
-                                    minPrice = minPrice,
-                                    maxPrice = maxPrice,
-                                    resultsCount = currentState.totalCount,
-                                    onReset = {
-                                        minPrice.value = 0
-                                        maxPrice.value = 50000
-                                        viewModel.updateDailyRateMin(null)
-                                        viewModel.updateDailyRateMax(null)
-                                        showPriceFilter = false
-                                    },
-                                    onViewResults = {
-                                        viewModel.updateDailyRateMin(minPrice.value)
-                                        viewModel.updateDailyRateMax(maxPrice.value)
-                                        showPriceFilter = false
-                                    },
-                                )
-                            }
-                        }
-                        if (showBrandFilter) {
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    property("justify-content", "flex-start")
-                                    width(100.percent)
-                                }
-                            }) {
-                                BrandModelFilter(
-                                    onBrandSelected = { brandId, brandName ->
-                                        viewModel.updateBrand(brandId, brandName)
-                                        viewModel.updateModel(null, null)
-                                    },
-                                    onModelSelected = { modelId, modelName ->
-                                        viewModel.updateModel(modelId, modelName)
-                                        showBrandFilter = false
-                                    },
-                                    onReset = {
-                                        viewModel.updateBrand(null, null)
-                                        viewModel.updateModel(null, null)
-                                        showBrandFilter = false
-                                    },
-                                )
-                            }
-                        }
-                        if (showDriveTypeFilter) {
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    property("justify-content", "flex-start")
-                                    width(100.percent)
-                                }
-                            }) {
-                                DriveTypeFilter(
-                                    onDriveTypeSelected = { name, translate ->
-                                        viewModel.updateDriveType(name, translate)
-                                        showDriveTypeFilter = false
-                                    },
-                                    onReset = {
-                                        viewModel.updateDriveType(null, null)
-                                        showDriveTypeFilter = false
-                                    },
-                                )
-                            }
-                        }
-                        if (showBodyTypeFilter) {
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    property("justify-content", "flex-start")
-                                    width(100.percent)
-                                }
-                            }) {
-                                BodyTypeFilter(
-                                    onBodyTypeSelected = { name, translate ->
-                                        viewModel.updateBodyType(name, translate)
-                                        showBodyTypeFilter = false
-                                    },
-                                    onReset = {
-                                        viewModel.updateBodyType(null, null)
-                                        showBodyTypeFilter = false
-                                    },
-                                )
-                            }
-                        }
-                        if (showSeatsFilter) {
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    property("justify-content", "flex-start")
-                                    width(100.percent)
-                                }
-                            }) {
-                                SeatsFilter(
-                                    selectedSeatsMin = filterSeatsMin,
-                                    resultsCount = currentState.totalCount,
-                                    onSeatsMinSelected = { seatsMin ->
-                                        viewModel.updateSeatsMin(seatsMin)
-                                    },
-                                    onReset = {
-                                        viewModel.updateSeatsMin(null)
-                                        showSeatsFilter = false
-                                    },
-                                )
-                            }
-                        }
-                        if (currentState.cars.isNotEmpty()) {
-                            CarsGrid(
-                                cars = displayedCars,
-                                onCarClick = { car ->
-                                    val startDate = startDateByRepo ?: searchParams.first
-                                    val endDate = endDateByRepo ?: searchParams.second
-                                    val params = mutableListOf("id=${car.id.encodeUrlParameter()}")
-                                    dateToStartAtIso(startDate)?.let {
-                                        params.add("$START_AT=${it.encodeUrlParameter()}")
+                        Box(
+                            modifier = {
+                                property("min-height", "240px")
+                            },
+                            underneath = {
+                                if (currentState.cars.isNotEmpty()) {
+                                    CarsGrid(
+                                        cars = displayedCars,
+                                        onCarClick = { car ->
+                                            val startDate = startDateByRepo ?: searchParams.first
+                                            val endDate = endDateByRepo ?: searchParams.second
+                                            val params = mutableListOf("id=${car.id.encodeUrlParameter()}")
+                                            dateToStartAtIso(startDate)?.let {
+                                                params.add("$START_AT=${it.encodeUrlParameter()}")
+                                            }
+                                            dateToEndAtIso(endDate)?.let {
+                                                params.add("$END_AT=${it.encodeUrlParameter()}")
+                                            }
+                                            window.location.href = "/car-detail?${params.joinToString("&")}"
+                                        },
+                                    )
+                                    PaginationBar(
+                                        currentPage = paginationInfo.first,
+                                        totalPages = paginationInfo.second,
+                                        totalCount = paginationInfo.third,
+                                        pageSize = 9,
+                                        onPageChange = { viewModel.setPage(it) },
+                                    )
+                                } else {
+                                    Div({
+                                        style {
+                                            padding(40.px)
+                                            textAlign("center")
+                                        }
+                                    }) {
+                                        Span({
+                                            style {
+                                                applyTypography(CSSTypography.Styles.body)
+                                                fontSize(CSSTypography.FontSize.base)
+                                                color(CSSColors.Gray600)
+                                            }
+                                        }) {
+                                            Text("Автомобили не найдены")
+                                        }
                                     }
-                                    dateToEndAtIso(endDate)?.let {
-                                        params.add("$END_AT=${it.encodeUrlParameter()}")
-                                    }
-                                    window.location.href = "/car-detail?${params.joinToString("&")}"
-                                },
-                            )
-                            PaginationBar(
-                                currentPage = paginationInfo.first,
-                                totalPages = paginationInfo.second,
-                                totalCount = paginationInfo.third,
-                                pageSize = 9,
-                                onPageChange = { viewModel.setPage(it) },
-                            )
-                        } else {
-                            Div({
-                                style {
-                                    padding(40.px)
-                                    textAlign("center")
                                 }
-                            }) {
-                                Span({
-                                    style {
-                                        applyTypography(CSSTypography.Styles.body)
-                                        fontSize(CSSTypography.FontSize.base)
-                                        color(CSSColors.Gray600)
+                            },
+                            overlay = {
+                                if (showPriceFilter) {
+                                    BoxOverlay {
+                                        PriceFilter(
+                                            minPrice = minPrice,
+                                            maxPrice = maxPrice,
+                                            resultsCount = currentState.totalCount,
+                                            onReset = {
+                                                minPrice.value = 0
+                                                maxPrice.value = 50000
+                                                viewModel.updateDailyRateMin(null)
+                                                viewModel.updateDailyRateMax(null)
+                                                showPriceFilter = false
+                                            },
+                                            onViewResults = {
+                                                viewModel.updateDailyRateMin(minPrice.value)
+                                                viewModel.updateDailyRateMax(maxPrice.value)
+                                                showPriceFilter = false
+                                            },
+                                        )
                                     }
-                                }) {
-                                    Text("Автомобили не найдены")
                                 }
-                            }
-                        }
+                                if (showBrandFilter) {
+                                    BoxOverlay {
+                                        BrandModelFilter(
+                                            onBrandSelected = { brandId, brandName ->
+                                                viewModel.updateBrand(brandId, brandName)
+                                                viewModel.updateModel(null, null)
+                                            },
+                                            onModelSelected = { modelId, modelName ->
+                                                viewModel.updateModel(modelId, modelName)
+                                                showBrandFilter = false
+                                            },
+                                            onReset = {
+                                                viewModel.updateBrand(null, null)
+                                                viewModel.updateModel(null, null)
+                                                showBrandFilter = false
+                                            },
+                                        )
+                                    }
+                                }
+                                if (showDriveTypeFilter) {
+                                    BoxOverlay {
+                                        DriveTypeFilter(
+                                            onDriveTypeSelected = { name, translate ->
+                                                viewModel.updateDriveType(name, translate)
+                                                showDriveTypeFilter = false
+                                            },
+                                            onReset = {
+                                                viewModel.updateDriveType(null, null)
+                                                showDriveTypeFilter = false
+                                            },
+                                        )
+                                    }
+                                }
+                                if (showBodyTypeFilter) {
+                                    BoxOverlay {
+                                        BodyTypeFilter(
+                                            onBodyTypeSelected = { name, translate ->
+                                                viewModel.updateBodyType(name, translate)
+                                                showBodyTypeFilter = false
+                                            },
+                                            onReset = {
+                                                viewModel.updateBodyType(null, null)
+                                                showBodyTypeFilter = false
+                                            },
+                                        )
+                                    }
+                                }
+                                if (showSeatsFilter) {
+                                    BoxOverlay {
+                                        SeatsFilter(
+                                            selectedSeatsMin = filterSeatsMin,
+                                            resultsCount = currentState.totalCount,
+                                            onSeatsMinSelected = { seatsMin ->
+                                                viewModel.updateSeatsMin(seatsMin)
+                                            },
+                                            onReset = {
+                                                viewModel.updateSeatsMin(null)
+                                                showSeatsFilter = false
+                                            },
+                                        )
+                                    }
+                                }
+                            },
+                        )
                     }
                 }
             }
