@@ -25,10 +25,19 @@ class CarModelViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    fun loadModels(brandId: Int) {
+    fun loadModels(
+        brandId: Int,
+        existingInFleetOnly: Boolean = false,
+    ) {
         coroutineScope.launch {
             _error.value = null
-            when (val result = carModelRepository.getModels(brandId)) {
+            val result =
+                if (existingInFleetOnly) {
+                    carModelRepository.getExistingModels(brandId)
+                } else {
+                    carModelRepository.getModels(brandId)
+                }
+            when (result) {
                 is ResultCarModels.Success -> {
                     _allModels.value = result.models
                     filterModels(_query.value)

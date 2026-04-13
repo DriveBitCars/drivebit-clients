@@ -68,6 +68,10 @@ class MyCityRepositoryTest {
 
             override suspend fun getCarModels(brandId: Int): List<CarModel> = throw NotImplementedError()
 
+            override suspend fun getCarBrandsExisting(): List<CarBrand> = throw NotImplementedError()
+
+            override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> = throw NotImplementedError()
+
             override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
 
             override suspend fun searchCities(query: String): List<City> = searchResults[query] ?: emptyList()
@@ -261,6 +265,11 @@ class MyCityRepositoryTest {
 
                     override suspend fun getCarModels(brandId: Int): List<CarModel> = throw NotImplementedError()
 
+                    override suspend fun getCarBrandsExisting(): List<CarBrand> = throw NotImplementedError()
+
+                    override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> =
+                        throw NotImplementedError()
+
                     override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
 
                     override suspend fun searchCities(query: String): List<City> {
@@ -294,6 +303,11 @@ class MyCityRepositoryTest {
                     override suspend fun getCarBrands(): List<CarBrand> = throw NotImplementedError()
 
                     override suspend fun getCarModels(brandId: Int): List<CarModel> = throw NotImplementedError()
+
+                    override suspend fun getCarBrandsExisting(): List<CarBrand> = throw NotImplementedError()
+
+                    override suspend fun getCarModelsExisting(brandId: Int): List<CarModel> =
+                        throw NotImplementedError()
 
                     override suspend fun getCarEnums(): CarEnumsResponse = throw NotImplementedError()
 

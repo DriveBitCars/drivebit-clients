@@ -19,6 +19,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(emptyList())
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -38,6 +40,8 @@ class CarModelViewModelTest {
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels =
                         ResultCarModels.Success(expectedModels)
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -55,6 +59,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Error(errorMessage)
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -77,6 +83,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(allModels)
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -106,6 +114,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(allModels)
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -136,6 +146,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(allModels)
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -158,6 +170,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(emptyList())
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -170,6 +184,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(emptyList())
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -187,6 +203,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(allModels)
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -212,6 +230,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(allModels)
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -239,6 +259,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(allModels)
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 
@@ -261,6 +283,8 @@ class CarModelViewModelTest {
             val fakeRepository =
                 object : CarModelRepository {
                     override suspend fun getModels(brandId: Int): ResultCarModels = ResultCarModels.Success(allModels)
+
+                    override suspend fun getExistingModels(brandId: Int): ResultCarModels = getModels(brandId)
                 }
             val viewModel = CarModelViewModel(fakeRepository, this)
 

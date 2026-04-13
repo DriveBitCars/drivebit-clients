@@ -276,6 +276,12 @@ class CarSearchRepositoryTest {
         override suspend fun getCarModels(brandId: Int): List<my.drivebit.network.services.CarModel> =
             throw NotImplementedError()
 
+        override suspend fun getCarBrandsExisting(): List<my.drivebit.network.services.CarBrand> =
+            throw NotImplementedError()
+
+        override suspend fun getCarModelsExisting(brandId: Int): List<my.drivebit.network.services.CarModel> =
+            throw NotImplementedError()
+
         override suspend fun searchCities(query: String): List<City> = throw NotImplementedError()
 
         override suspend fun getAllCities(): List<City> = throw NotImplementedError()

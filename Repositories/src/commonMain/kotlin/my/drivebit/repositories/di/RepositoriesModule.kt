@@ -17,8 +17,8 @@ import my.drivebit.repositories.CarModelRepository
 import my.drivebit.repositories.CarModelRepositoryImpl
 import my.drivebit.repositories.CarSearchRepository
 import my.drivebit.repositories.CarSearchRepositoryImpl
-import my.drivebit.repositories.ChangePasswordRepositoryImpl
 import my.drivebit.repositories.ChangeEmailRepositoryImpl
+import my.drivebit.repositories.ChangePasswordRepositoryImpl
 import my.drivebit.repositories.ChangePhoneRepositoryImpl
 import my.drivebit.repositories.CityRepository
 import my.drivebit.repositories.CityRepositoryImpl
