@@ -1,6 +1,7 @@
 package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,15 @@ fun CitySelectionPage(mode: CitySelectionMode) {
                 is CitySelectionMode.ForMyCity -> SavedCityViewModelForMyCity(myCityRepository)
             }
         }
+
+    val browseAllCities = mode is CitySelectionMode.ForMyCity
+    LaunchedEffect(browseAllCities) {
+        if (browseAllCities) {
+            viewModel.enableBrowseAllCitiesMode()
+        } else {
+            viewModel.setSearchOnlyMode()
+        }
+    }
 
     val cities by viewModel.cities.collectAsState()
     val error by viewModel.error.collectAsState()
