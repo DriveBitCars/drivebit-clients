@@ -1,169 +1,107 @@
 # Deployment Guide
 
-This guide explains how to set up automatic deployment to Digital Ocean after merging pull requests.
+CI deploys the **Compose JS browser** build to a Linux host over SSH. Deploy is **atomic**: each run uploads to a new directory under `releases/`, then switches a `current` symlink and reloads nginx (no empty-site window).
 
 ## Prerequisites
 
-1. **Digital Ocean Droplet** with:
-   - Ubuntu/Debian server
-   - Nginx or Apache web server
-   - SSH access configured
+1. **Ubuntu/Debian** server with **nginx** and SSH access for the GitHub Actions user.
+2. **One-time layout** (see below): nginx SPA `root` must be **`/var/www/drivebit-clients/current`** (symlink), not the flat `/var/www/drivebit-clients` directory.
 
-2. **Domain name** (optional, can use IP address)
+## GitHub Secrets
 
-## GitHub Secrets Configuration
+**Repository → Settings → Secrets and variables → Actions**
 
-Go to your repository settings → Secrets and variables → Actions, and add these secrets:
+### Required
 
-### Required Secrets
+- `SERVER_HOST` — server IP or hostname (e.g. front VPS).
+- `SERVER_USER` — SSH user (often `root`).
+- `SERVER_SSH_KEY` — private key for that user.
 
-- `SERVER_HOST` - Your Digital Ocean server IP address or domain
-- `SERVER_USER` - SSH username (usually `root` or your user)
-- `SERVER_SSH_KEY` - Private SSH key for server access
+### Optional
 
-### Optional Secrets
+- `SERVER_PORT` — SSH port (default `22`).
+- `SERVER_DOMAIN` — used only in success log messages.
 
-- `SERVER_PORT` - SSH port (default: 22)
-- `SERVER_DOMAIN` - Your domain name (e.g., `app.yourdomain.com`)
+No extra secrets are required for atomic paths; `DEPLOY_ROOT` is fixed in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) as `/var/www/drivebit-clients`.
 
-## SSH Key Setup
+## Server layout (atomic)
 
-1. **Generate SSH key pair** (if you don't have one):
+```
+/var/www/drivebit-clients/
+  current -> releases/<run-id>   # symlink; nginx root points here
+  releases/
+    <github_run_id>-<run_attempt>/   # one directory per deploy
+    ...
+```
+
+Workflow steps:
+
+1. Create `releases/${{ github.run_id }}-${{ github.run_attempt }}/`.
+2. SCP build artifacts into that directory only (never delete the whole web root).
+3. Flatten nested `composeApp/build/...` if present; `chmod`/`chown` that directory.
+4. `ln -sfn releases/<id> /var/www/drivebit-clients/current` and `nginx -t` + `reload`.
+5. Prune: keep the active release plus the **5** newest other release directories (configurable later via repo variable if needed).
+
+## One-time migration (existing “flat” `/var/www/drivebit-clients`)
+
+If production still has `root /var/www/drivebit-clients` and files live **directly** in that directory:
+
+1. On the server, run the repo script (as root), or do the same by hand:
+
    ```bash
-   ssh-keygen -t rsa -b 4096 -C "github-actions@yourdomain.com"
+   sudo bash scripts/bootstrap-atomic-frontend.sh
    ```
 
-2. **Add public key to server**:
-   ```bash
-   ssh-copy-id -i ~/.ssh/id_rsa.pub user@your-server-ip
+   From a clone, copy the script to the server, or paste its commands. It moves loose files into `releases/bootstrap` and sets `current`.
+
+2. In every nginx `server` block that serves the SPA, set:
+
+   ```nginx
+   root /var/www/drivebit-clients/current;
    ```
 
-3. **Add private key to GitHub secrets**:
-   - Copy the private key content: `cat ~/.ssh/id_rsa`
-   - Add it as `SERVER_SSH_KEY` secret in GitHub
+3. `sudo nginx -t && sudo systemctl reload nginx`.
 
-## Server Preparation
+4. Point GitHub **`SERVER_HOST`** at this machine and run a release or **workflow_dispatch**.
 
-### Install Web Server
+Until step 2 is done, switching `current` will not change what nginx serves.
 
-**For Nginx:**
-```bash
-sudo apt update
-sudo apt install nginx
-sudo systemctl enable nginx
-sudo systemctl start nginx
-```
+## API upstream
 
-**For Apache:**
-```bash
-sudo apt update
-sudo apt install apache2
-sudo systemctl enable apache2
-sudo systemctl start apache2
-```
+If `location /api/` is missing, the workflow inserts `proxy_pass http://155.212.170.94:5000/;` (backend stays on that host). To use another upstream, add or edit `location /api/` in nginx on the front server and do not rely on the auto-inserted block.
 
-### Create Web Directory
-```bash
-sudo mkdir -p /var/www/drivebit-clients
-sudo chown -R $USER:$USER /var/www/drivebit-clients
-```
+## Triggers
 
-## How It Works
+- **Release published** (`release: published`), or  
+- **workflow_dispatch** (manual).
 
-1. **Trigger**: Deployment runs when:
-   - A new release is published on GitHub
-   - Release must be created manually or via automation
-   - This ensures only stable, tested versions are deployed
-
-2. **Build Process**:
-   - Builds JS distribution: `./gradlew :composeApp:jsBrowserDistribution`
-   - Creates production-ready web files
-
-3. **Deployment Process**:
-   - Creates backup of current deployment
-   - Copies new files to `/var/www/drivebit-clients`
-   - Configures web server (Nginx/Apache)
-   - Sets proper permissions
-
-4. **Web Server Configuration**:
-   - Serves static files
-   - Enables gzip compression
-   - Sets up caching for static assets
-   - Configures SPA routing (fallback to index.html)
-
-## Creating Releases
-
-### Manual Release Creation
-
-1. **Go to GitHub Releases**:
-   - Navigate to your repository on GitHub
-   - Click "Releases" → "Create a new release"
-
-2. **Fill Release Information**:
-   - **Tag version**: e.g., `v1.0.0`, `v1.2.3`
-   - **Release title**: e.g., "Version 1.0.0"
-   - **Description**: Describe changes and new features
-   - **Target**: Select the branch (usually `trunk`)
-
-3. **Publish Release**:
-   - Click "Publish release"
-   - This will automatically trigger deployment
-
-### Automated Release Creation
-
-You can also create releases programmatically:
+## Build (local or CI)
 
 ```bash
-# Create a release using GitHub CLI
-gh release create v1.0.0 --title "Version 1.0.0" --notes "Release notes here"
-
-# Or using git tags
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-## Manual Deployment
-
-To deploy manually (bypassing release trigger):
-
-```bash
-# Build the project
 ./gradlew :composeApp:jsBrowserDistribution
-
-# Copy files to server
-scp -r composeApp/build/dist/js/productionExecutable/* user@server:/var/www/drivebit-clients/
 ```
+
+Artifacts: `composeApp/build/dist/js/productionExecutable/`.
+
+## Manual copy (emergency)
+
+```bash
+REL=/var/www/drivebit-clients/releases/manual-$(date +%Y%m%d%H%M%S)
+ssh user@host "mkdir -p $REL"
+scp -r composeApp/build/dist/js/productionExecutable/* "user@host:$REL/"
+ssh user@host "cd /var/www/drivebit-clients && ln -sfn $REL current && sudo nginx -t && sudo systemctl reload nginx"
+```
+
+(`ln -sfn` target should be relative `releases/...` if you match CI; adjust to your layout.)
 
 ## Troubleshooting
 
-### Common Issues
+1. **404 or old site after deploy** — nginx `root` still without `/current`, or `current` broken symlink.
+2. **SSH failed** — check `SERVER_HOST`, key, firewall.
+3. **GitHub Actions** — open the failed job; the debug step prints `releases/`, `readlink current`, and the release dir for this run.
 
-1. **SSH Connection Failed**:
-   - Check `SERVER_HOST` and `SERVER_USER` secrets
-   - Verify SSH key is correct
-   - Ensure server allows SSH connections
+## Security
 
-2. **Permission Denied**:
-   - Check file permissions on server
-   - Ensure web server user has access to files
-
-3. **Web Server Not Serving Files**:
-   - Check web server configuration
-   - Verify files are in correct directory
-   - Check web server logs
-
-### Logs
-
-Check GitHub Actions logs for detailed error information:
-- Go to Actions tab in your repository
-- Click on the failed deployment
-- Review the logs for each step
-
-## Security Notes
-
-- Keep SSH keys secure
-- Use non-root user when possible
-- Regularly update server packages
-- Consider using HTTPS with Let's Encrypt
-- Monitor server logs for suspicious activity
-
+- Protect SSH keys; prefer deploy user with write access only under `/var/www/drivebit-clients`.
+- Use TLS (Let’s Encrypt) on nginx.
+- Review `location /api/` upstream and MinIO proxy headers for your environment.
