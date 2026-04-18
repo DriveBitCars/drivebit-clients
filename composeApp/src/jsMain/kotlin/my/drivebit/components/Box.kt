@@ -35,9 +35,7 @@ fun Box(
 }
 
 @Composable
-fun BoxOverlay(
-    content: @Composable () -> Unit,
-) {
+fun BoxOverlay(content: @Composable () -> Unit) {
     Div({
         style {
             position(Position.Absolute)
