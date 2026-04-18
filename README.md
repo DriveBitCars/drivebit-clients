@@ -203,9 +203,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Kotlin/WASM:** [Documentation](https://kotl.in/wasm/)
 - **Issues:** [GitHub Issues](https://github.com/AntonButov/drivebit-clients/issues)
 
+## Серверы
+
+- **Фронт (nginx):** `45.131.42.106` — конфиги скопированы с `155.212.170.94` (`/etc/nginx`, `/etc/letsencrypt`). Повторить перенос: `scripts/nginx-migrate-from-old-server.sh` (переменные `OLD_HOST`, `NEW_HOST`).
+- **Прежний хост с теми же nginx-конфигами:** `155.212.170.94` (не изменялся при копировании).
+
 ---
 
-**Built with ❤️ using Kotlin Multiplatform and Compose Multiplatform**# GitHub Pages Status: Tue Oct 14 19:59:42 MSK 2025
+**Built with ❤️ using Kotlin Multiplatform and Compose Multiplatform**
+
+# GitHub Pages Status: Tue Oct 14 19:59:42 MSK 2025
 
 # Force GitHub Pages update Wed Oct 15 11:40:34 MSK 2025
 
