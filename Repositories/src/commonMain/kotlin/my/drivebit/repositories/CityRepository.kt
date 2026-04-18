@@ -5,6 +5,8 @@ import my.drivebit.network.services.Dictionary
 
 interface CityRepository {
     suspend fun searchCities(query: String): ResultCities
+
+    suspend fun getAllCities(): ResultCities
 }
 
 sealed interface ResultCities {
@@ -23,6 +25,16 @@ class CityRepositoryImpl(
     override suspend fun searchCities(query: String): ResultCities =
         runCatching {
             dictionary.searchCities(query)
+        }.fold(
+            onSuccess = { cities -> ResultCities.Success(cities) },
+            onFailure = { exception ->
+                ResultCities.Error(exception.message ?: "Unknown error")
+            },
+        )
+
+    override suspend fun getAllCities(): ResultCities =
+        runCatching {
+            dictionary.getAllCities()
         }.fold(
             onSuccess = { cities -> ResultCities.Success(cities) },
             onFailure = { exception ->

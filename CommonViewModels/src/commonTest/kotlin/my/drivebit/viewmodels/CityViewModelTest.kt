@@ -20,6 +20,7 @@ private class FakeCityRepository : CityRepository {
     var errorMessage: String = "Error"
     var lastQuery: String? = null
     var callCount = 0
+    var getAllCallCount = 0
 
     override suspend fun searchCities(query: String): ResultCities {
         lastQuery = query
@@ -31,6 +32,19 @@ private class FakeCityRepository : CityRepository {
             listOf(
                 City(id = 1, name = "Москва"),
                 City(id = 2, name = "Московская область"),
+            ),
+        )
+    }
+
+    override suspend fun getAllCities(): ResultCities {
+        getAllCallCount++
+        if (shouldReturnError) {
+            return ResultCities.Error(errorMessage)
+        }
+        return ResultCities.Success(
+            listOf(
+                City(id = 10, name = "Казань", regionName = "Татарстан"),
+                City(id = 11, name = "Калининград", regionName = "Калининградская область"),
             ),
         )
     }
@@ -235,5 +249,60 @@ class CityViewModelTest {
             assertEquals("", viewModel.query.value)
             assertTrue(viewModel.cities.value.isEmpty())
             assertNull(viewModel.error.value)
+        }
+
+    @Test
+    fun `browse all mode loads catalog and filters locally by query`() =
+        runTest {
+            val testDispatcher = StandardTestDispatcher()
+            val testScope = CoroutineScope(SupervisorJob() + testDispatcher)
+            val fakeRepo = FakeCityRepository()
+            val viewModel =
+                CityViewModel(
+                    cityRepository = fakeRepo,
+                    coroutineScope = testScope,
+                    debounceTimeMs = 100,
+                )
+
+            viewModel.enableBrowseAllCitiesMode()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertEquals(1, fakeRepo.getAllCallCount)
+            assertEquals(2, viewModel.cities.value.size)
+            assertEquals("Казань", viewModel.cities.value[0].name)
+            assertEquals("Калининград", viewModel.cities.value[1].name)
+
+            viewModel.updateQuery("Калинин")
+            testDispatcher.scheduler.advanceTimeBy(100)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertEquals(1, viewModel.cities.value.size)
+            assertEquals("Калининград", viewModel.cities.value[0].name)
+            assertEquals(0, fakeRepo.callCount)
+        }
+
+    @Test
+    fun `clearQuery in browse all mode restores full catalog`() =
+        runTest {
+            val testDispatcher = StandardTestDispatcher()
+            val testScope = CoroutineScope(SupervisorJob() + testDispatcher)
+            val fakeRepo = FakeCityRepository()
+            val viewModel =
+                CityViewModel(
+                    cityRepository = fakeRepo,
+                    coroutineScope = testScope,
+                    debounceTimeMs = 100,
+                )
+
+            viewModel.enableBrowseAllCitiesMode()
+            testDispatcher.scheduler.advanceUntilIdle()
+            viewModel.updateQuery("Казань")
+            testDispatcher.scheduler.advanceTimeBy(100)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertEquals(1, viewModel.cities.value.size)
+
+            viewModel.clearQuery()
+
+            assertEquals(2, viewModel.cities.value.size)
         }
 }
