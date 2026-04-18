@@ -7,9 +7,11 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Digital Ocean
+    name: Deploy web (atomic)
     runs-on: ubuntu-latest
-    
+    env:
+      DEPLOY_ROOT: /var/www/drivebit-clients
+
     steps:
     - name: Checkout
       uses: actions/checkout@v5
@@ -145,7 +147,7 @@ jobs:
           echo "👤 Current user: $(whoami)"
           echo "🔑 User ID: $(id)"
 
-    - name: Prepare deployment directory (clean target)
+    - name: Prepare release directory (atomic deploy)
       uses: appleboy/ssh-action@v1.2.2
       with:
         host: ${{ secrets.SERVER_HOST }}
@@ -153,41 +155,24 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         script: |
-          set -e  # Exit on any error
-          echo "🚀 Preparing deployment directory..."
-          
-          # Check if running as root or with sudo
-          if [ "$EUID" -ne 0 ]; then
-            echo "⚠️  Not running as root, using sudo for system commands"
-            SUDO_CMD="sudo"
-          else
-            echo "✅ Running as root"
-            SUDO_CMD=""
+          set -e
+          DEPLOY_ROOT="${{ env.DEPLOY_ROOT }}"
+          RELEASE_NAME="${{ github.run_id }}-${{ github.run_attempt }}"
+          RELEASE_PATH="$DEPLOY_ROOT/releases/$RELEASE_NAME"
+          echo "Preparing atomic release: $RELEASE_PATH"
+          if [ "$EUID" -ne 0 ]; then SUDO_CMD="sudo"; else SUDO_CMD=""; fi
+          $SUDO_CMD mkdir -p "$DEPLOY_ROOT/releases"
+          $SUDO_CMD mkdir -p "$RELEASE_PATH"
+          if [ ! -e "$DEPLOY_ROOT/current" ]; then
+            $SUDO_CMD mkdir -p "$DEPLOY_ROOT/releases/placeholder"
+            echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Deploy pending</title></head><body></body></html>' | $SUDO_CMD tee "$DEPLOY_ROOT/releases/placeholder/index.html" >/dev/null
+            $SUDO_CMD ln -sfn releases/placeholder "$DEPLOY_ROOT/current"
           fi
-          
-          # Clear nginx cache
-          echo "🧹 Clearing nginx cache..."
+          echo "Clearing nginx cache..."
           $SUDO_CMD rm -rf /var/cache/nginx/* 2>/dev/null || true
           $SUDO_CMD rm -rf /tmp/nginx* 2>/dev/null || true
-          echo "✅ Nginx cache cleared"
-          
-          # Create backup of current deployment
-          if [ -d "/var/www/drivebit-clients" ]; then
-            echo "💾 Creating backup of current deployment..."
-            $SUDO_CMD cp -r /var/www/drivebit-clients /var/www/drivebit-clients.backup.$(date +%Y%m%d_%H%M%S)
-            echo "✅ Backup created successfully"
-            echo "🧹 Cleaning current deployment contents..."
-            $SUDO_CMD rm -rf /var/www/drivebit-clients/*
-            echo "✅ Cleaned"
-          else
-            echo "ℹ️  No existing deployment found, skipping backup"
-          fi
-          
-          # Create deployment directory if it doesn't exist
-          echo "📁 Creating deployment directory..."
-          $SUDO_CMD mkdir -p /var/www/drivebit-clients
-          $SUDO_CMD chown -R $USER:$USER /var/www/drivebit-clients
-          echo "✅ Deployment directory prepared"
+          $SUDO_CMD chown -R "$USER:$USER" "$DEPLOY_ROOT/releases" "$RELEASE_PATH" 2>/dev/null || $SUDO_CMD chown -R "$(id -u):$(id -g)" "$DEPLOY_ROOT/releases" "$RELEASE_PATH"
+          echo "Ready for upload to $RELEASE_PATH"
 
     - name: Verify files exist before copying
       run: |
@@ -213,7 +198,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         source: "composeApp/build/dist/js/productionExecutable/*"
-        target: "/var/www/drivebit-clients"
+        target: "${{ env.DEPLOY_ROOT }}/releases/${{ github.run_id }}-${{ github.run_attempt }}"
         strip_components: 0
         overwrite: true
 
@@ -226,7 +211,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         source: "composeApp/build/dist/js/productionExecutable/car"
-        target: "/var/www/drivebit-clients"
+        target: "${{ env.DEPLOY_ROOT }}/releases/${{ github.run_id }}-${{ github.run_attempt }}"
         strip_components: 0
         overwrite: true
 
@@ -239,7 +224,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         source: "index.html,list-your-car.html"
-        target: "/var/www/drivebit-clients"
+        target: "${{ env.DEPLOY_ROOT }}/releases/${{ github.run_id }}-${{ github.run_attempt }}"
         strip_components: 0
         overwrite: true
 
@@ -252,70 +237,55 @@ jobs:
         port: ${{ secrets.SERVER_PORT || 22 }}
         script: |
           set -e
-          echo "🔧 Fixing file structure..."
+          DEPLOY_ROOT="${{ env.DEPLOY_ROOT }}"
+          RELEASE_NAME="${{ github.run_id }}-${{ github.run_attempt }}"
+          R="$DEPLOY_ROOT/releases/$RELEASE_NAME"
+          echo "Fixing file structure under $R"
           if [ "$EUID" -ne 0 ]; then SUDO_CMD="sudo"; else SUDO_CMD=""; fi
           
-          echo "📁 Current structure before fixing:"
-          find /var/www/drivebit-clients -maxdepth 3 -type f -name "index.html" 2>/dev/null || echo "No index.html found"
-          find /var/www/drivebit-clients -maxdepth 3 -type d 2>/dev/null | head -10
+          echo "Structure before fixing:"
+          find "$R" -maxdepth 3 -type f -name "index.html" 2>/dev/null || echo "No index.html found"
           
-          # Move files from nested structure to root if needed
-          if [ -d "/var/www/drivebit-clients/composeApp/build/dist/js/productionExecutable" ]; then
-            echo "📁 Moving files from nested structure..."
-            # Move files one by one to handle existing directories
-            for file in /var/www/drivebit-clients/composeApp/build/dist/js/productionExecutable/*; do
+          if [ -d "$R/composeApp/build/dist/js/productionExecutable" ]; then
+            echo "Moving files from nested structure..."
+            for file in "$R/composeApp/build/dist/js/productionExecutable"/*; do
               if [ -f "$file" ]; then
-                $SUDO_CMD mv "$file" /var/www/drivebit-clients/ || echo "⚠️  Failed to move $file"
+                $SUDO_CMD mv "$file" "$R/" || echo "Failed to move $file"
               elif [ -d "$file" ]; then
-                # For directories, merge contents
                 dirname=$(basename "$file")
-                if [ -d "/var/www/drivebit-clients/$dirname" ]; then
-                  $SUDO_CMD cp -r "$file"/* /var/www/drivebit-clients/"$dirname"/ || echo "⚠️  Failed to copy $file"
+                if [ -d "$R/$dirname" ]; then
+                  $SUDO_CMD cp -r "$file"/* "$R/$dirname"/ || echo "Failed to copy $file"
                 else
-                  $SUDO_CMD mv "$file" /var/www/drivebit-clients/ || echo "⚠️  Failed to move $file"
+                  $SUDO_CMD mv "$file" "$R/" || echo "Failed to move $file"
                 fi
               fi
             done
-            $SUDO_CMD rm -rf /var/www/drivebit-clients/composeApp
-            echo "✅ Files moved to correct location"
+            $SUDO_CMD rm -rf "$R/composeApp"
+            echo "Nested tree flattened"
           else
-            echo "ℹ️  Files already in correct location"
+            echo "Files already at release root"
           fi
           
-          echo "📁 Structure after fixing:"
-          ls -la /var/www/drivebit-clients/ | head -20
+          ls -la "$R" | head -25
           
-          # Verify index.html exists - check multiple possible locations
-          if [ -f "/var/www/drivebit-clients/index.html" ]; then
-            echo "✅ index.html found in correct location"
-          elif [ -f "/var/www/drivebit-clients/composeApp/build/dist/js/productionExecutable/index.html" ]; then
-            echo "⚠️  index.html found in nested location, moving..."
-            $SUDO_CMD cp /var/www/drivebit-clients/composeApp/build/dist/js/productionExecutable/index.html /var/www/drivebit-clients/index.html
-            echo "✅ index.html moved to correct location"
+          if [ -f "$R/index.html" ]; then
+            echo "index.html OK"
+          elif [ -f "$R/composeApp/build/dist/js/productionExecutable/index.html" ]; then
+            $SUDO_CMD cp "$R/composeApp/build/dist/js/productionExecutable/index.html" "$R/index.html"
           else
-            echo "❌ index.html not found in any location!"
-            echo "🔍 Searching for index.html:"
-            find /var/www/drivebit-clients -name "index.html" 2>/dev/null || echo "No index.html found anywhere"
+            echo "index.html missing in $R"
+            find "$R" -name "index.html" 2>/dev/null || true
             exit 1
           fi
           
-          # Verify images directory exists (optional - images might be in resources)
-          if [ -d "/var/www/drivebit-clients/images" ]; then
-            echo "✅ images directory found"
-            echo "📸 Image files count: $(find /var/www/drivebit-clients/images -type f | wc -l)"
+          if [ -d "$R/images" ]; then
+            echo "images: $(find "$R/images" -type f | wc -l) files"
+          elif [ -d "$R/resources" ]; then
+            echo "resources present"
           else
-            echo "⚠️  images directory not found (checking if images are in resources)..."
-            if [ -d "/var/www/drivebit-clients/resources" ]; then
-              echo "✅ resources directory found (images might be here)"
-            else
-              echo "⚠️  Neither images nor resources directory found, but continuing..."
-            fi
+            echo "Optional: no images/resources dir"
           fi
-          
-          # List all directories to help debug
-          echo "📁 All directories in deployment:"
-          ls -la /var/www/drivebit-clients/ | head -20
-          
+          ls -la "$R" | head -20
 
     - name: Set file permissions
       uses: appleboy/ssh-action@v1.2.2
@@ -325,28 +295,52 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         script: |
-          set -e  # Exit on any error
-          echo "🔐 Setting file permissions..."
-          
-          # Check if running as root or with sudo
-          if [ "$EUID" -ne 0 ]; then
-            echo "⚠️  Not running as root, using sudo for system commands"
-            SUDO_CMD="sudo"
-          else
-            echo "✅ Running as root"
-            SUDO_CMD=""
+          set -e
+          DEPLOY_ROOT="${{ env.DEPLOY_ROOT }}"
+          RELEASE_NAME="${{ github.run_id }}-${{ github.run_attempt }}"
+          R="$DEPLOY_ROOT/releases/$RELEASE_NAME"
+          echo "chmod/chown on $R"
+          if [ "$EUID" -ne 0 ]; then SUDO_CMD="sudo"; else SUDO_CMD=""; fi
+          $SUDO_CMD chown -R "$USER:$USER" "$R" 2>/dev/null || $SUDO_CMD chown -R "$(id -u):$(id -g)" "$R"
+          $SUDO_CMD chmod -R u=rwX,go=rX "$R"
+          ls -la "$R" | head -20
+
+    - name: Activate release (symlink + prune + nginx reload)
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          set -e
+          DEPLOY_ROOT="${{ env.DEPLOY_ROOT }}"
+          RELEASE_NAME="${{ github.run_id }}-${{ github.run_attempt }}"
+          KEEP=5
+          if [ "$EUID" -ne 0 ]; then SUDO_CMD="sudo"; else SUDO_CMD=""; fi
+          test -d "$DEPLOY_ROOT/releases/$RELEASE_NAME" || (echo "Missing release dir" && exit 1)
+          test -f "$DEPLOY_ROOT/releases/$RELEASE_NAME/index.html" || (echo "Missing index.html" && exit 1)
+          cd "$DEPLOY_ROOT"
+          $SUDO_CMD ln -sfn "releases/$RELEASE_NAME" current
+          CURRENT_REAL=$($SUDO_CMD readlink -f "$DEPLOY_ROOT/current")
+          echo "Active release: $CURRENT_REAL"
+          if [ -d "$DEPLOY_ROOT/releases" ]; then
+            count=0
+            for d in $($SUDO_CMD ls -1t "$DEPLOY_ROOT/releases" 2>/dev/null); do
+              [ -d "$DEPLOY_ROOT/releases/$d" ] || continue
+              full="$DEPLOY_ROOT/releases/$d"
+              real=$($SUDO_CMD readlink -f "$full" 2>/dev/null || true)
+              [ "$real" = "$CURRENT_REAL" ] && continue
+              count=$((count + 1))
+              if [ "$count" -gt "$KEEP" ]; then
+                echo "Removing old release: $full"
+                $SUDO_CMD rm -rf "$full"
+              fi
+            done
           fi
-          
-          # Set proper permissions
-          echo "📋 Setting file permissions..."
-          $SUDO_CMD chown -R $USER:$USER /var/www/drivebit-clients
-          $SUDO_CMD chmod -R 755 /var/www/drivebit-clients
-          echo "✅ Permissions set successfully"
-          
-          # List deployed files
-          echo "📁 Deployed files:"
-          ls -la /var/www/drivebit-clients/
-          echo "✅ Deployment completed successfully!"
+          $SUDO_CMD nginx -t
+          $SUDO_CMD systemctl reload nginx
+          echo "Activated releases/$RELEASE_NAME"
 
     - name: Configure nginx API proxy
       continue-on-error: true
@@ -423,8 +417,7 @@ jobs:
           echo "🔄 Forcing nginx reload and cache clear..."
           $SUDO_CMD nginx -t
           $SUDO_CMD systemctl reload nginx
-          $SUDO_CMD systemctl restart nginx
-          echo "✅ Nginx restarted with fresh cache"
+          echo "Nginx reloaded (static compression conf)"
 
     - name: Verify deployed page title
       uses: appleboy/ssh-action@v1.2.2
@@ -434,15 +427,17 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         script: |
-          test -f /var/www/drivebit-clients/index.html || (echo "❌ index.html missing after upload" && exit 1)
-          echo "📄 Page title from index.html:"
-          grep -o '<title>[^<]*' -m1 /var/www/drivebit-clients/index.html || true
+          DEPLOY_ROOT="${{ env.DEPLOY_ROOT }}"
+          test -f "$DEPLOY_ROOT/current/index.html" || (echo "index.html missing under current" && exit 1)
+          echo "Page title from active release:"
+          grep -o '<title>[^<]*' -m1 "$DEPLOY_ROOT/current/index.html" || true
+          readlink -f "$DEPLOY_ROOT/current" || true
 
     - name: Notify deployment success
       if: success()
       run: |
         echo "✅ Fast web version deployed successfully!"
-        echo "📁 Files deployed to: /var/www/drivebit-clients/"
+        echo "📁 Active symlink: ${{ env.DEPLOY_ROOT }}/current → releases/${{ github.run_id }}-${{ github.run_attempt }}"
         echo "🌐 Fast web app is now live at: http://${{ secrets.SERVER_DOMAIN || secrets.SERVER_HOST }}/"
         echo "🚀 Loads 10x faster than WASM version!"
         echo "🔧 Nginx configured and serving the application"
@@ -456,18 +451,15 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         script: |
-          echo "🔍 Debugging deployment state..."
-          echo "📁 Contents of /var/www/drivebit-clients:"
-          ls -la /var/www/drivebit-clients/ || echo "Directory does not exist"
-          echo ""
-          echo "📄 Checking for index.html:"
-          test -f /var/www/drivebit-clients/index.html && echo "✅ index.html exists" || echo "❌ index.html missing"
-          echo ""
-          echo "📁 Checking for images:"
-          test -d /var/www/drivebit-clients/images && echo "✅ images directory exists" || echo "⚠️  images directory missing"
-          echo ""
-          echo "📁 Checking for resources:"
-          test -d /var/www/drivebit-clients/resources && echo "✅ resources directory exists" || echo "⚠️  resources directory missing"
+          DR="${{ env.DEPLOY_ROOT }}"
+          echo "Debugging atomic deploy..."
+          ls -la "$DR" || true
+          echo "current ->"; readlink "$DR/current" || true
+          echo "current resolved:"; readlink -f "$DR/current" || true
+          echo "releases:"; ls -la "$DR/releases" || true
+          R="$DR/releases/${{ github.run_id }}-${{ github.run_attempt }}"
+          echo "This run release dir $R:"; ls -la "$R" 2>/dev/null || true
+          test -f "$DR/current/index.html" && echo "current/index.html ok" || echo "current/index.html missing"
 
     - name: Notify deployment failure
       if: failure()
