@@ -48,19 +48,19 @@ class CarItemPhotosTest {
                             "photos": [
                                 {
                                     "id": 11,
-                                    "url": "http://api.drivebit.ru:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/28005139-1f22-497d-84d8-6cba79b978f0_c",
+                                    "url": "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/28005139-1f22-497d-84d8-6cba79b978f0_c",
                                     "uploadDate": "2026-01-04T19:23:58.147478Z",
                                     "carId": "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
                                 },
                                 {
                                     "id": 12,
-                                    "url": "http://api.drivebit.ru:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/c876fa26-2a58-4ec2-8b3a-82c84d0fef53_c",
+                                    "url": "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/c876fa26-2a58-4ec2-8b3a-82c84d0fef53_c",
                                     "uploadDate": "2026-01-04T19:24:26.05663Z",
                                     "carId": "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
                                 },
                                 {
                                     "id": 14,
-                                    "url": "http://api.drivebit.ru:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/4c39d7ba-f09f-4514-b80f-662024e56395_c",
+                                    "url": "http://155.212.170.94:9000/publicbct/cars/a575c0b1-3736-475f-a4a8-5a87cfbdb18a/4c39d7ba-f09f-4514-b80f-662024e56395_c",
                                     "uploadDate": "2026-01-04T20:07:05.060429Z",
                                     "carId": "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
                                 }
@@ -129,8 +129,8 @@ class CarItemPhotosTest {
                 "URL should contain correct path",
             )
             assertFalse(
-                photosFromGeneral[0].url.contains("api.drivebit.ru:9000"),
-                "URL should not contain direct MinIO host:port",
+                photosFromGeneral[0].url.contains("155.212.170.94:9000"),
+                "URL should not contain MinIO IP and port",
             )
 
             assertEquals(12, photosFromGeneral[1].id)
@@ -277,7 +277,7 @@ class CarItemPhotosTest {
                         "photos": [
                             {
                                 "id": 1,
-                                "url": "http://api.drivebit.ru:9000/publicbct/cars/top1.jpg",
+                                "url": "http://155.212.170.94:9000/publicbct/cars/top1.jpg",
                                 "uploadDate": "2026-01-04T19:23:58.147478Z",
                                 "carId": "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
                             }
@@ -294,13 +294,13 @@ class CarItemPhotosTest {
                             "photos": [
                                 {
                                     "id": 2,
-                                    "url": "http://api.drivebit.ru:9000/publicbct/cars/general1.jpg",
+                                    "url": "http://155.212.170.94:9000/publicbct/cars/general1.jpg",
                                     "uploadDate": "2026-01-04T19:24:26.05663Z",
                                     "carId": "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
                                 },
                                 {
                                     "id": 3,
-                                    "url": "http://api.drivebit.ru:9000/publicbct/cars/general2.jpg",
+                                    "url": "http://155.212.170.94:9000/publicbct/cars/general2.jpg",
                                     "uploadDate": "2026-01-04T20:07:05.060429Z",
                                     "carId": "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
                                 }
@@ -362,7 +362,7 @@ class CarItemPhotosTest {
                         "photos": [
                             {
                                 "id": 1,
-                                "url": "http://api.drivebit.ru:9000/publicbct/cars/top1.jpg",
+                                "url": "http://155.212.170.94:9000/publicbct/cars/top1.jpg",
                                 "uploadDate": "2026-01-04T19:23:58.147478Z",
                                 "carId": "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
                             }
@@ -379,7 +379,7 @@ class CarItemPhotosTest {
                             "photos": [
                                 {
                                     "id": 1,
-                                    "url": "http://api.drivebit.ru:9000/publicbct/cars/duplicate.jpg",
+                                    "url": "http://155.212.170.94:9000/publicbct/cars/duplicate.jpg",
                                     "uploadDate": "2026-01-04T19:24:26.05663Z",
                                     "carId": "a575c0b1-3736-475f-a4a8-5a87cfbdb18a"
                                 }

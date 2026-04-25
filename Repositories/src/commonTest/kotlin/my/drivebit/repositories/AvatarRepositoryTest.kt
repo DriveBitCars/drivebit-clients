@@ -142,7 +142,7 @@ class AvatarRepositoryTest {
             val photo =
                 FakePhoto().apply {
                     avatarUrl =
-                        "http://api.drivebit.ru:9000/publicbct/avatars/bf0ad237-da64-4542-8779-a803d6c7d3cc/283b4525-9c35-4267-b0c2-e325e6534d03_avatar.jpg"
+                        "http://155.212.170.94:9000/publicbct/avatars/bf0ad237-da64-4542-8779-a803d6c7d3cc/283b4525-9c35-4267-b0c2-e325e6534d03_avatar.jpg"
                 }
             val cachedRepository = TestCachedRepository(photo, storage)
             val repository = AvatarRepositoryImpl(photo, storage, cachedRepository)

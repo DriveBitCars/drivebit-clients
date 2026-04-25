@@ -7,9 +7,8 @@
 
 SSH_TARGET="${1:-root@143.198.69.242}"
 SSH_KEY=""
-API_UPSTREAM_HOST="${API_UPSTREAM_HOST:-api.drivebit.ru}"
-NEW_BACKEND="http://${API_UPSTREAM_HOST}:5000"
-MINIO_BACKEND="http://${API_UPSTREAM_HOST}:9000"
+NEW_BACKEND="http://155.212.170.94:5000"
+MINIO_BACKEND="http://155.212.170.94:9000"
 
 # Попытка найти SSH ключ
 if [ -f "$(dirname "$0")/id_rsa_api_drivebit" ]; then
@@ -102,9 +101,9 @@ if grep -q "^[[:space:]]*location /[[:space:]]*{" "$NGINX_CONFIG"; then
     # Создаем временный файл с блоками прокси
     cat > /tmp/nginx_proxies.conf << 'PROXY_BLOCKS'
     # Проксирование API на бэкенд
-    # /api/... -> http://api.drivebit.ru:5000/...
+    # /api/... -> http://155.212.170.94:5000/...
     location /api/ {
-        proxy_pass http://api.drivebit.ru:5000/;
+        proxy_pass http://155.212.170.94:5000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -121,10 +120,10 @@ if grep -q "^[[:space:]]*location /[[:space:]]*{" "$NGINX_CONFIG"; then
     }
 
     # Проксирование MinIO (publicbct) на внешний сервер
-    # /publicbct/... -> http://api.drivebit.ru:9000/publicbct/...
+    # /publicbct/... -> http://155.212.170.94:9000/publicbct/...
     location /publicbct/ {
-        proxy_pass http://api.drivebit.ru:9000/publicbct/;
-        proxy_set_header Host api.drivebit.ru:9000;
+        proxy_pass http://155.212.170.94:9000/publicbct/;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -140,10 +139,10 @@ if grep -q "^[[:space:]]*location /[[:space:]]*{" "$NGINX_CONFIG"; then
     }
 
     # Проксирование MinIO (privatebct) для presigned URL документов
-    # /privatebct/... -> http://api.drivebit.ru:9000/privatebct/...
+    # /privatebct/... -> http://155.212.170.94:9000/privatebct/...
     location /privatebct/ {
-        proxy_pass http://api.drivebit.ru:9000/privatebct/;
-        proxy_set_header Host api.drivebit.ru:9000;
+        proxy_pass http://155.212.170.94:9000/privatebct/;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -154,11 +153,11 @@ if grep -q "^[[:space:]]*location /[[:space:]]*{" "$NGINX_CONFIG"; then
     }
 
     # Проксирование аватаров (альтернативный путь)
-    # /avatar/... -> http://api.drivebit.ru:9000/publicbct/avatars/...
+    # /avatar/... -> http://155.212.170.94:9000/publicbct/avatars/...
     location /avatar/ {
         rewrite ^/avatar/(.*)$ /publicbct/avatars/$1 break;
-        proxy_pass http://api.drivebit.ru:9000;
-        proxy_set_header Host api.drivebit.ru:9000;
+        proxy_pass http://155.212.170.94:9000;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -184,9 +183,9 @@ else
     
     cat > /tmp/nginx_proxies.conf << 'PROXY_BLOCKS'
     # Проксирование API на бэкенд
-    # /api/... -> http://api.drivebit.ru:5000/...
+    # /api/... -> http://155.212.170.94:5000/...
     location /api/ {
-        proxy_pass http://api.drivebit.ru:5000/;
+        proxy_pass http://155.212.170.94:5000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -203,10 +202,10 @@ else
     }
 
     # Проксирование MinIO (publicbct) на внешний сервер
-    # /publicbct/... -> http://api.drivebit.ru:9000/publicbct/...
+    # /publicbct/... -> http://155.212.170.94:9000/publicbct/...
     location /publicbct/ {
-        proxy_pass http://api.drivebit.ru:9000/publicbct/;
-        proxy_set_header Host api.drivebit.ru:9000;
+        proxy_pass http://155.212.170.94:9000/publicbct/;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -222,10 +221,10 @@ else
     }
 
     # Проксирование MinIO (privatebct) для presigned URL документов
-    # /privatebct/... -> http://api.drivebit.ru:9000/privatebct/...
+    # /privatebct/... -> http://155.212.170.94:9000/privatebct/...
     location /privatebct/ {
-        proxy_pass http://api.drivebit.ru:9000/privatebct/;
-        proxy_set_header Host api.drivebit.ru:9000;
+        proxy_pass http://155.212.170.94:9000/privatebct/;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -236,11 +235,11 @@ else
     }
 
     # Проксирование аватаров (альтернативный путь)
-    # /avatar/... -> http://api.drivebit.ru:9000/publicbct/avatars/...
+    # /avatar/... -> http://155.212.170.94:9000/publicbct/avatars/...
     location /avatar/ {
         rewrite ^/avatar/(.*)$ /publicbct/avatars/$1 break;
-        proxy_pass http://api.drivebit.ru:9000;
-        proxy_set_header Host api.drivebit.ru:9000;
+        proxy_pass http://155.212.170.94:9000;
+        proxy_set_header Host 155.212.170.94:9000;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
