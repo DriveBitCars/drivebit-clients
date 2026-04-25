@@ -30,7 +30,8 @@ This is a Kotlin Multiplatform project for Drivebit mobile clients targeting And
 - iOS: Open `iosApp/` in Xcode
 
 ## Server Access
-- SSH: `ssh root@155.212.170.94`
+- Backend SSH: `ssh root@api.drivebit.ru` (DNS for API host)
+- Front (nginx): `ssh root@80.249.146.3`
 
 ## Verification Before Completion
 - Follow the **verification-before-completion** skill: no claims that work is complete, fixed, or passing without **fresh** command output and exit code

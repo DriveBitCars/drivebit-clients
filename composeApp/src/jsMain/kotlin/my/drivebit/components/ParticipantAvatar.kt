@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import my.drivebit.design.CSSColors
 import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.utils.extractPathFromApiUrl
+import my.drivebit.utils.isDirectMinioUrl
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -31,7 +32,7 @@ fun ParticipantAvatar(
             ?: avatarUrlByUserId[userId]?.takeIf { it.isNotBlank() }
     val avatarUrl =
         rawAvatarUrl?.let { raw ->
-            if (raw.contains("155.212.170.94")) extractPathFromApiUrl(raw) else raw
+            if (isDirectMinioUrl(raw)) extractPathFromApiUrl(raw) else raw
         }
 
     if (avatarUrl != null) {
