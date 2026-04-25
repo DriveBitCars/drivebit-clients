@@ -10,6 +10,11 @@ import my.drivebit.network.services.City
 import my.drivebit.network.services.Dictionary
 import my.drivebit.shared.storage.Storage
 
+object MyCityStorageKeys {
+    const val ID_KEY = "my_city_id"
+    const val NAME_KEY = "my_city_name"
+}
+
 interface MyCityRepository {
     suspend fun searchCities(query: String): List<City>
 
@@ -26,8 +31,6 @@ internal class MyCityRepositoryImpl(
     private val storage: Storage,
 ) : MyCityRepository {
     companion object {
-        const val SELECTED_CITY_ID_KEY = "my_city_id"
-        const val SELECTED_CITY_NAME_KEY = "my_city_name"
         private const val MOSCOW_NAME = "Москва"
     }
 
@@ -42,8 +45,8 @@ internal class MyCityRepositoryImpl(
     }
 
     private suspend fun loadSelectedCity(): City {
-        val selectedCityIdString = storage.getString(SELECTED_CITY_ID_KEY)
-        val selectedCityName = storage.getString(SELECTED_CITY_NAME_KEY)
+        val selectedCityIdString = storage.getString(MyCityStorageKeys.ID_KEY)
+        val selectedCityName = storage.getString(MyCityStorageKeys.NAME_KEY)
 
         if (selectedCityIdString.isEmpty()) {
             val moscow = findMoscow()
@@ -95,8 +98,8 @@ internal class MyCityRepositoryImpl(
         cityId: Int,
         cityName: String,
     ) {
-        storage.putString(SELECTED_CITY_ID_KEY, cityId.toString())
-        storage.putString(SELECTED_CITY_NAME_KEY, cityName)
+        storage.putString(MyCityStorageKeys.ID_KEY, cityId.toString())
+        storage.putString(MyCityStorageKeys.NAME_KEY, cityName)
         selectedCityFlow.value = City(id = cityId, name = cityName)
     }
 }

@@ -22,6 +22,8 @@ import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.START_AT
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.getUrlParameter
+import my.drivebit.shared.storage.Storage
+import my.drivebit.web.homePathHref
 import my.drivebit.viewmodels.AuthFormState
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.PasswordLoginViewModel
@@ -34,6 +36,7 @@ import org.koin.compose.koinInject
 
 @Composable
 fun LoginByPasswordPage() {
+    val storage: Storage = koinInject()
     val viewModel: PasswordLoginViewModel = koinInject()
     val uiState by viewModel.uiState.collectAsState()
     val returnCarId = getUrlParameter(RETURN_CAR_ID)
@@ -68,7 +71,7 @@ fun LoginByPasswordPage() {
                         if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
                         "/car-detail?${params.joinToString("&")}"
                     }
-                    else -> "/"
+                    else -> homePathHref(storage)
                 }
             window.location.href = targetPath
         }

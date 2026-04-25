@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.navigation.NavigationState
 import my.drivebit.viewmodels.MyCityViewModel
+import my.drivebit.web.isCityHomePath
 import org.koin.compose.koinInject
 
 @Composable
@@ -18,7 +19,7 @@ fun CityDisplay() {
     val cityName by myCityViewModel.myCity.collectAsState("")
 
     LaunchedEffect(currentPath) {
-        if (currentPath == "/" || currentPath.isEmpty()) {
+        if (isCityHomePath(currentPath)) {
             myCityViewModel.refresh()
         }
     }

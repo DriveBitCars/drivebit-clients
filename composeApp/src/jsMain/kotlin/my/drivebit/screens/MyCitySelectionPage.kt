@@ -2,6 +2,7 @@ package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.utils.cityNameToSlug
 
 @Composable
 fun MyCitySelectionPage() {
@@ -9,8 +10,8 @@ fun MyCitySelectionPage() {
     CitySelectionPage(
         mode =
             CitySelectionMode.ForMyCity(
-                onCitySelected = {
-                    navigationController?.navigateTo("/")
+                onCitySelected = { city ->
+                    navigationController?.navigateTo("/${cityNameToSlug(city.name)}")
                 },
             ),
     )
