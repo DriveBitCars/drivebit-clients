@@ -66,6 +66,13 @@ class CityPathRoutingTest {
         val urls =
             listOf(
                 "/moskva",
+                "/moskva/k-rodnym",
+                "/moskva/puteshestviya",
+                "/moskva/komandirovki",
+                "/moskva/za-gorod",
+                "/moskva/kanikuly",
+                "/moskva/pereezd",
+                "/moskva/meropriyatie",
                 "/zelenograd",
                 "/kaliningrad",
                 "/krasnogorsk",
