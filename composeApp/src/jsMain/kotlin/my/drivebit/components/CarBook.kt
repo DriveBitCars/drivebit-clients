@@ -459,6 +459,11 @@ private fun CarBookDateTimeField(
     val dateText = state.date?.let { formatDateForDisplay(it) } ?: "дата"
     val hourOptions = remember { carBookHourTimeOptionValues() }
     val timeSelectable = enabled && state.date != null
+    val visibleHourOptions =
+        filterCarBookHourOptionsForSelectedDate(
+            selectedDateIso = state.date,
+            allHours = hourOptions,
+        )
 
     Div({
         style {
@@ -569,15 +574,7 @@ private fun CarBookDateTimeField(
                     },
                 ) {
                     val current = state.time.orEmpty()
-                    Option(
-                        value = "",
-                        attrs = {
-                            if (current.isEmpty()) selected()
-                        },
-                    ) {
-                        Text("Час")
-                    }
-                    hourOptions.forEach { value ->
+                    visibleHourOptions.forEach { value ->
                         Option(
                             value = value,
                             attrs = {
@@ -587,7 +584,7 @@ private fun CarBookDateTimeField(
                             Text(value)
                         }
                     }
-                    if (current.isNotEmpty() && current !in hourOptions) {
+                    if (current.isNotEmpty() && current !in visibleHourOptions) {
                         Option(
                             value = current,
                             attrs = { selected() },
@@ -648,6 +645,29 @@ private fun carBookHourTimeOptionValues(): List<String> =
             "${h.toString().padStart(2, '0')}:00"
         }
     }
+
+private fun carBookOptionHourForFilter(value: String): Int =
+    when (value) {
+        "24:00" -> 24
+        else -> value.substringBefore(':').toIntOrNull() ?: -1
+    }
+
+private fun filterCarBookHourOptionsForSelectedDate(
+    selectedDateIso: String?,
+    allHours: List<String>,
+    tz: TimeZone = TimeZone.currentSystemDefault(),
+): List<String> {
+    val now = Clock.System.now()
+    val selected =
+        selectedDateIso
+            ?.take(10)
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            ?: return allHours
+    val today = now.toLocalDateTime(tz).date
+    if (selected != today) return allHours
+    val currentHour = now.toLocalDateTime(tz).hour
+    return allHours.filter { carBookOptionHourForFilter(it) > currentHour }
+}
 
 private fun localDateTimeFromDateAndTime(
     date: String,
