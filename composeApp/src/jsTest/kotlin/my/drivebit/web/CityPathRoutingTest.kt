@@ -35,6 +35,19 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun parseCityPath_stripsQueryAndReturnsNullForSearchWithParams() {
+        assertNull(parseCityPath("/search?startDate=2026-04-25&endDate=2026-04-30"))
+    }
+
+    @Test
+    fun parseCityPath_stripsQueryForCityRoot() {
+        assertEquals(
+            CityPathParts(citySlug = "moskva", filterSlug = null),
+            parseCityPath("/moskva?ref=home"),
+        )
+    }
+
+    @Test
     fun parseCityPath_returnsNullWhenTooManySegments() {
         val result = parseCityPath("/moskva/poblizosti/extra")
 

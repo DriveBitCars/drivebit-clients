@@ -9,12 +9,13 @@ class NavigationController(
 
     fun navigateTo(path: String) {
         window.history.pushState(null, "", path)
-        navigationState.updatePath(path)
+        // Query lives in location.search; pathname-only avoids city routing misparsing "/search?..." as a slug.
+        navigationState.updatePath(window.location.pathname)
     }
 
     fun replacePath(path: String) {
         window.history.replaceState(null, "", path)
-        navigationState.updatePath(path)
+        navigationState.updatePath(window.location.pathname)
     }
 
     fun goBack() {

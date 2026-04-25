@@ -67,7 +67,8 @@ data class CityPathParts(
  * - `/city-slug/filter-slug`
  */
 fun parseCityPath(pathname: String): CityPathParts? {
-    val trimmed = pathname.trim().removePrefix("/").removeSuffix("/")
+    val pathOnly = pathname.substringBefore('?').substringBefore('#')
+    val trimmed = pathOnly.trim().removePrefix("/").removeSuffix("/")
     if (trimmed.isEmpty()) return null
     val segments = trimmed.split('/').filter { it.isNotEmpty() }
     if (segments.size != 1 && segments.size != 2) return null
