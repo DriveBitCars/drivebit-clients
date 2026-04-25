@@ -15,6 +15,7 @@ import kotlinx.datetime.todayIn
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
+import my.drivebit.utils.addDays
 import my.drivebit.utils.addMonths
 import my.drivebit.utils.lastDayOfMonth
 import my.drivebit.viewmodels.DateFieldViewModel
@@ -28,6 +29,11 @@ fun DateRangeCalendarDialog(
     startDateViewModel: DateFieldViewModel,
     endDateViewModel: DateFieldViewModel,
     minDate: String? = null,
+    disabledDates: Set<String> = emptySet(),
+    /** Минимум дней после начала для даты окончания (1 = конец не раньше чем следующий день после начала). */
+    endMinOffsetDaysFromStart: Int = 0,
+    /** Если false, «Отмена» только закрывает диалог, не обнуляет выбранный диапазон (как в бронировании). */
+    clearRangeOnCancel: Boolean = true,
 ) {
     val startState by startDateViewModel.state.collectAsState()
     val endState by endDateViewModel.state.collectAsState()
@@ -55,30 +61,40 @@ fun DateRangeCalendarDialog(
     }
 
     val onDayClick: (LocalDate) -> Unit = { clicked ->
-        if (clicked >= minParsed) {
+        val dateStr = clicked.toIsoString()
+        if (clicked >= minParsed && dateStr !in disabledDates) {
             val start = parseIsoLocalDate(startState.date)
             val end = parseIsoLocalDate(endState.date)
             when {
                 start == null -> {
-                    startDateViewModel.setDate(clicked.toIsoString())
+                    startDateViewModel.setDate(dateStr)
                     endDateViewModel.setDate(null)
                 }
                 end == null -> {
                     when {
                         clicked < start -> {
-                            startDateViewModel.setDate(clicked.toIsoString())
+                            startDateViewModel.setDate(dateStr)
                             endDateViewModel.setDate(null)
                         }
                         clicked == start -> {
-                            endDateViewModel.setDate(null)
+                            if (endMinOffsetDaysFromStart <= 0) {
+                                endDateViewModel.setDate(null)
+                            }
                         }
                         else -> {
-                            endDateViewModel.setDate(clicked.toIsoString())
+                            if (endMinOffsetDaysFromStart > 0) {
+                                val minEnd = addDays(start, endMinOffsetDaysFromStart)
+                                if (clicked >= minEnd) {
+                                    endDateViewModel.setDate(dateStr)
+                                }
+                            } else {
+                                endDateViewModel.setDate(dateStr)
+                            }
                         }
                     }
                 }
                 else -> {
-                    startDateViewModel.setDate(clicked.toIsoString())
+                    startDateViewModel.setDate(dateStr)
                     endDateViewModel.setDate(null)
                 }
             }
@@ -132,6 +148,7 @@ fun DateRangeCalendarDialog(
             DateRangeCalendarMonth(
                 displayMonth = displayMonth,
                 minDate = minParsed,
+                disabledDates = disabledDates,
                 rangeStart = parseIsoLocalDate(startState.date),
                 rangeEnd = parseIsoLocalDate(endState.date),
                 onMonthChange = { displayMonth = it },
@@ -158,8 +175,10 @@ fun DateRangeCalendarDialog(
                         property("transition", "background-color 0.2s ease")
                     }
                     onClick {
-                        startDateViewModel.setDate(null)
-                        endDateViewModel.setDate(null)
+                        if (clearRangeOnCancel) {
+                            startDateViewModel.setDate(null)
+                            endDateViewModel.setDate(null)
+                        }
                         closeAll()
                     }
                     onMouseEnter {
@@ -215,6 +234,7 @@ fun DateRangeCalendarDialog(
 private fun DateRangeCalendarMonth(
     displayMonth: LocalDate,
     minDate: LocalDate,
+    disabledDates: Set<String>,
     rangeStart: LocalDate?,
     rangeEnd: LocalDate?,
     onMonthChange: (LocalDate) -> Unit,
@@ -357,7 +377,9 @@ private fun DateRangeCalendarMonth(
                         displayMonth.month,
                         day,
                     )
-                val isBeforeMin = cellDate < minDate
+                val cellDateStr = cellDate.toIsoString()
+                val isDisabledDate = disabledDates.contains(cellDateStr)
+                val isBeforeMin = cellDate < minDate || isDisabledDate
                 val isWeekend =
                     cellDate.dayOfWeek.ordinal == 5 ||
                         cellDate.dayOfWeek.ordinal == 6
