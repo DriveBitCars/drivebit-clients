@@ -154,41 +154,21 @@ fun DateRangeSelector(
         }
     }
 
-    if (startState.isCalendarOpen) {
-        DateFieldDialog(
-            label = "Дата начала",
-            viewModel = startDateViewModel,
-            onDateChanged = { date ->
-                val currentEndDate = endState.date
-                if (date != null && currentEndDate != null && date > currentEndDate) {
-                    endDateViewModel.setDate(null)
-                }
-            },
-        )
-    }
-
-    if (endState.isCalendarOpen) {
-        DateFieldDialog(
-            label = "Дата окончания",
-            viewModel = endDateViewModel,
-            minDate = startDate,
-            onDateChanged = { date ->
-                val currentStartDate = startState.date
-                if (date != null && currentStartDate != null && date < currentStartDate) {
-                    startDateViewModel.setDate(null)
-                }
-            },
+    if (startState.isCalendarOpen || endState.isCalendarOpen) {
+        DateRangeCalendarDialog(
+            startDateViewModel = startDateViewModel,
+            endDateViewModel = endDateViewModel,
         )
     }
 }
 
 @Composable
-private fun CalendarIconPurple(size: CSSSizeValue<out CSSUnit.px>) {
+private fun CalendarIconBlue(size: CSSSizeValue<out CSSUnit.px>) {
     Div({
         style {
             width(size)
             height(size)
-            property("background-color", "#ECE0FF")
+            backgroundColor(Blue)
             property("mask-image", "url(${ImagePaths.FILTER_MAIN_CALENDAR_SVG})")
             property("mask-size", "contain")
             property("mask-repeat", "no-repeat")
@@ -262,7 +242,7 @@ fun HeroDateRangeSelector(
                 label = if (compact) "с" else "Начало аренды",
                 viewModel = startDateViewModel,
             )
-            CalendarIconPurple(size = if (compact) 20.px else 24.px)
+            CalendarIconBlue(size = if (compact) 20.px else 24.px)
         }
 
         Div({
@@ -291,34 +271,14 @@ fun HeroDateRangeSelector(
                 viewModel = endDateViewModel,
                 minDate = startDate,
             )
-            CalendarIconPurple(size = if (compact) 20.px else 24.px)
+            CalendarIconBlue(size = if (compact) 20.px else 24.px)
         }
     }
 
-    if (startState.isCalendarOpen) {
-        DateFieldDialog(
-            label = "Дата начала",
-            viewModel = startDateViewModel,
-            onDateChanged = { date ->
-                val currentEndDate = endState.date
-                if (date != null && currentEndDate != null && date > currentEndDate) {
-                    endDateViewModel.setDate(null)
-                }
-            },
-        )
-    }
-
-    if (endState.isCalendarOpen) {
-        DateFieldDialog(
-            label = "Дата окончания",
-            viewModel = endDateViewModel,
-            minDate = startDate,
-            onDateChanged = { date ->
-                val currentStartDate = startState.date
-                if (date != null && currentStartDate != null && date < currentStartDate) {
-                    startDateViewModel.setDate(null)
-                }
-            },
+    if (startState.isCalendarOpen || endState.isCalendarOpen) {
+        DateRangeCalendarDialog(
+            startDateViewModel = startDateViewModel,
+            endDateViewModel = endDateViewModel,
         )
     }
 }
