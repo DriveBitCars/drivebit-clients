@@ -119,8 +119,8 @@ class MyCityRepositoryTest {
 
             repository.selectCity(2, "Санкт-Петербург")
 
-            val selectedCityId = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY)
-            val selectedCityName = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_NAME_KEY)
+            val selectedCityId = storage.getString(MyCityStorageKeys.ID_KEY)
+            val selectedCityName = storage.getString(MyCityStorageKeys.NAME_KEY)
             assertEquals("2", selectedCityId)
             assertEquals("Санкт-Петербург", selectedCityName)
         }
@@ -144,8 +144,8 @@ class MyCityRepositoryTest {
             assertNotNull(selectedCity)
             assertEquals(158830, selectedCity.id)
             assertEquals("Москва", selectedCity.name)
-            val savedCityId = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY)
-            val savedCityName = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_NAME_KEY)
+            val savedCityId = storage.getString(MyCityStorageKeys.ID_KEY)
+            val savedCityName = storage.getString(MyCityStorageKeys.NAME_KEY)
             assertEquals("158830", savedCityId)
             assertEquals("Москва", savedCityName)
         }
@@ -165,8 +165,8 @@ class MyCityRepositoryTest {
                         ),
                 )
             val storage = createTestStorage()
-            storage.putString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY, "3")
-            storage.putString(MyCityRepositoryImpl.SELECTED_CITY_NAME_KEY, "Калининград")
+            storage.putString(MyCityStorageKeys.ID_KEY, "3")
+            storage.putString(MyCityStorageKeys.NAME_KEY, "Калининград")
             val repository = MyCityRepositoryImpl(dictionary, storage)
 
             val selectedCity = repository.getSelectedCity.first()
@@ -190,13 +190,13 @@ class MyCityRepositoryTest {
             val storage = createTestStorage()
             val repository = MyCityRepositoryImpl(dictionary, storage)
 
-            val selectedCityBefore = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY)
+            val selectedCityBefore = storage.getString(MyCityStorageKeys.ID_KEY)
             assertEquals("", selectedCityBefore)
 
             val selectedCity = repository.getSelectedCity.first()
 
-            val selectedCityIdAfter = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY)
-            val selectedCityNameAfter = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_NAME_KEY)
+            val selectedCityIdAfter = storage.getString(MyCityStorageKeys.ID_KEY)
+            val selectedCityNameAfter = storage.getString(MyCityStorageKeys.NAME_KEY)
             assertEquals("158830", selectedCityIdAfter)
             assertEquals("Москва", selectedCityNameAfter)
             assertEquals(158830, selectedCity.id)
@@ -227,8 +227,8 @@ class MyCityRepositoryTest {
 
             assertEquals(158831, selectedCity.id)
             assertEquals("Санкт-Петербург", selectedCity.name)
-            val cityIdInStorage = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY)
-            val cityNameInStorage = storage.getString(MyCityRepositoryImpl.SELECTED_CITY_NAME_KEY)
+            val cityIdInStorage = storage.getString(MyCityStorageKeys.ID_KEY)
+            val cityNameInStorage = storage.getString(MyCityStorageKeys.NAME_KEY)
             assertEquals("158831", cityIdInStorage)
             assertEquals("Санкт-Петербург", cityNameInStorage)
         }
@@ -246,7 +246,7 @@ class MyCityRepositoryTest {
                         ),
                 )
             val storage = createTestStorage()
-            storage.putString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY, "999")
+            storage.putString(MyCityStorageKeys.ID_KEY, "999")
             val repository = MyCityRepositoryImpl(dictionary, storage)
 
             val selectedCity = repository.getSelectedCity.first()
@@ -329,8 +329,8 @@ class MyCityRepositoryTest {
                     override suspend fun getFiltersSuggested(): List<FilterSuggestion> = emptyList()
                 }
             val storage = createTestStorage()
-            storage.putString(MyCityRepositoryImpl.SELECTED_CITY_ID_KEY, "999")
-            storage.putString(MyCityRepositoryImpl.SELECTED_CITY_NAME_KEY, "")
+            storage.putString(MyCityStorageKeys.ID_KEY, "999")
+            storage.putString(MyCityStorageKeys.NAME_KEY, "")
             val repository = MyCityRepositoryImpl(dictionary, storage)
 
             val selectedCity = repository.getSelectedCity.first()

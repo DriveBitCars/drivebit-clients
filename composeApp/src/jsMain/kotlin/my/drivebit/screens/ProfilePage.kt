@@ -26,7 +26,9 @@ import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.components.UserAvatar
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.UserNameFormatter
+import my.drivebit.web.homePathHref
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.mapIso8601ToMonthYearString
 import my.drivebit.viewmodels.AvatarUploadState
@@ -93,10 +95,11 @@ private fun buildEditNameUrlParams(
 fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
     val state by viewModel.state.collectAsState()
     val navigationController = LocalNavigationController.current
+    val storage: Storage = koinInject()
 
     LaunchedEffect(state) {
         if (state is ProfileState.Error && (state as ProfileState.Error).message == "Не авторизован") {
-            window.location.href = "/"
+            window.location.href = homePathHref(storage)
         }
     }
 

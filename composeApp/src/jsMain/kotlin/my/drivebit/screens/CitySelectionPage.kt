@@ -15,6 +15,7 @@ import my.drivebit.components.StringList
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
+import my.drivebit.network.services.City
 import my.drivebit.repositories.MyCityRepository
 import my.drivebit.repositories.SelectedCityRepository
 import my.drivebit.viewmodels.CityViewModel
@@ -29,7 +30,7 @@ sealed interface CitySelectionMode {
     ) : CitySelectionMode
 
     data class ForMyCity(
-        val onCitySelected: () -> Unit,
+        val onCitySelected: (City) -> Unit,
     ) : CitySelectionMode
 }
 
@@ -83,7 +84,7 @@ fun CitySelectionPage(mode: CitySelectionMode) {
                                     savedCityViewModel.saveCity(it)
                                     when (mode) {
                                         is CitySelectionMode.ForCarCreation -> mode.onCitySelected()
-                                        is CitySelectionMode.ForMyCity -> mode.onCitySelected()
+                                        is CitySelectionMode.ForMyCity -> mode.onCitySelected(it)
                                     }
                                 }
                             },

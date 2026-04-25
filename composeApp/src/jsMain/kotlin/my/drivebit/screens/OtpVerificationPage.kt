@@ -19,6 +19,8 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.repositories.OtpResultRepository
+import my.drivebit.shared.storage.Storage
+import my.drivebit.web.homePathHref
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.NEW_LOGIN
@@ -43,6 +45,7 @@ import org.w3c.dom.HTMLInputElement
 
 @Composable
 fun OtpVerificationPage() {
+    val storage: Storage = koinInject()
     val navigationController = LocalNavigationController.current
     val otpResultParam = getUrlParameter(OTP_RESULT_PARAM)
     val otpResultType =
@@ -97,7 +100,7 @@ fun OtpVerificationPage() {
                                 if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
                                 "/car-detail?${params.joinToString("&")}"
                             }
-                            else -> "/"
+                            else -> homePathHref(storage)
                         }
                     window.location.href = targetPath
                 }

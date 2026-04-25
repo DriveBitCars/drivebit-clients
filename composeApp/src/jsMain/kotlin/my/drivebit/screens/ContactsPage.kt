@@ -3,6 +3,8 @@ package my.drivebit.screens
 import androidx.compose.runtime.Composable
 import kotlinx.browser.window
 import my.drivebit.components.AppWithHeader
+import my.drivebit.shared.storage.Storage
+import my.drivebit.web.homePathHref
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
@@ -11,9 +13,11 @@ import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
+import org.koin.compose.koinInject
 
 @Composable
 fun ContactsPage() {
+    val storage: Storage = koinInject()
     AppWithHeader {
         Div({
             style {
@@ -23,10 +27,10 @@ fun ContactsPage() {
             }
         }) {
             A(attrs = {
-                attr("href", "/")
+                attr("href", homePathHref(storage))
                 onClick {
                     it.preventDefault()
-                    window.location.href = "/"
+                    window.location.href = homePathHref(storage)
                 }
                 style {
                     applyTypography(CSSTypography.Styles.body)

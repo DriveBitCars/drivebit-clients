@@ -53,6 +53,7 @@ import my.drivebit.shared.storage.Storage
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.di.commonViewModelsModule
 import my.drivebit.web.di.webModule
+import my.drivebit.web.homePathHref
 import my.drivebit.web.login.loginWebModule
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
@@ -71,6 +72,7 @@ actual fun App() {
         )
     }) {
         Navigation { currentPath ->
+            val storage: Storage = koinInject()
             when {
                 currentPath.startsWith("/city-selection") -> {
                     CitySelectionPage(
@@ -101,54 +103,48 @@ actual fun App() {
                     LoginByPasswordPage()
                 }
                 currentPath.startsWith("/profile") -> {
-                    val storage: Storage = koinInject()
                     if (storage.isLogined()) {
                         ProfilePage()
                     } else {
-                        window.location.href = "/"
+                        window.location.href = homePathHref(storage)
                     }
                 }
                 currentPath.startsWith("/my-cars") -> {
                     MyCarsPage()
                 }
                 currentPath.startsWith("/my-bookings") -> {
-                    val storage: Storage = koinInject()
                     if (storage.isLogined()) {
                         MyBookingsPage()
                     } else {
-                        window.location.href = "/"
+                        window.location.href = homePathHref(storage)
                     }
                 }
                 currentPath.startsWith("/leave-review") -> {
-                    val storage: Storage = koinInject()
                     if (storage.isLogined()) {
                         LeaveReviewPage()
                     } else {
-                        window.location.href = "/"
+                        window.location.href = homePathHref(storage)
                     }
                 }
                 currentPath.startsWith("/my-deals") -> {
-                    val storage: Storage = koinInject()
                     if (storage.isLogined()) {
                         MyDealsPage()
                     } else {
-                        window.location.href = "/"
+                        window.location.href = homePathHref(storage)
                     }
                 }
                 currentPath.startsWith("/chats") -> {
-                    val storage: Storage = koinInject()
                     if (storage.isLogined()) {
                         ChatListPage()
                     } else {
-                        window.location.href = "/"
+                        window.location.href = homePathHref(storage)
                     }
                 }
                 currentPath.startsWith("/chat") -> {
-                    val storage: Storage = koinInject()
                     if (storage.isLogined()) {
                         ChatDetailPage()
                     } else {
-                        window.location.href = "/"
+                        window.location.href = homePathHref(storage)
                     }
                 }
                 currentPath.startsWith("/documents") -> {
@@ -178,7 +174,7 @@ actual fun App() {
                 currentPath.startsWith("/car-photos-upload") -> {
                     CarPhotosUploadPage(
                         onPhotosUploaded = {
-                            window.location.href = "/"
+                            window.location.href = homePathHref(storage)
                         },
                     )
                 }
