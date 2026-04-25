@@ -2,6 +2,12 @@ package my.drivebit.components
 
 import androidx.compose.runtime.Composable
 import my.drivebit.network.services.CarDetailResponse
+import my.drivebit.resources.ImagePaths.BACK_WHEEL_DRIVE_SVG
+import my.drivebit.resources.ImagePaths.FUEL_PUMP_SVG
+import my.drivebit.resources.ImagePaths.FUEL_SVG
+import my.drivebit.resources.ImagePaths.MANUAL_GEAR_SVG
+import my.drivebit.resources.ImagePaths.MENU_USER_SVG
+import my.drivebit.resources.ImagePaths.PATH_DISTANCE_SVG
 import my.drivebit.viewmodels.NumberFormatter
 import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.marginTop
@@ -18,7 +24,7 @@ fun CarSpecsRow(car: CarDetailResponse) {
         val seatsCount = car.resolvedSeatsCount()
         if (seatsCount > 0) {
             CarSpecChip(
-                iconPath = "images/menu/user.svg",
+                iconPath = MENU_USER_SVG,
                 text = "$seatsCount мест",
             )
         }
@@ -26,7 +32,7 @@ fun CarSpecsRow(car: CarDetailResponse) {
         val engineType = car.resolvedEngineTypeTranslate()
         if (engineType.isNotEmpty()) {
             CarSpecChip(
-                iconPath = "images/fuel-pump.svg",
+                iconPath = FUEL_PUMP_SVG,
                 text = engineType,
             )
         }
@@ -34,7 +40,7 @@ fun CarSpecsRow(car: CarDetailResponse) {
         val engineVolume = car.resolvedEngineVolume()
         if (engineVolume > 0) {
             CarSpecChip(
-                iconPath = "images/fuel.svg",
+                iconPath = FUEL_SVG,
                 text = "${NumberFormatter.formatDouble(engineVolume)} л",
             )
         }
@@ -42,7 +48,7 @@ fun CarSpecsRow(car: CarDetailResponse) {
         val driveType = car.resolvedDriveTypeTranslate()
         if (driveType.isNotEmpty()) {
             CarSpecChip(
-                iconPath = "images/back-wheel-drive.svg",
+                iconPath = BACK_WHEEL_DRIVE_SVG,
                 text = driveType,
             )
         }
@@ -50,7 +56,7 @@ fun CarSpecsRow(car: CarDetailResponse) {
         val transmissionType = car.chassis?.transmissionTranslate
         if (!transmissionType.isNullOrEmpty()) {
             CarSpecChip(
-                iconPath = "images/manual-gear.svg",
+                iconPath = MANUAL_GEAR_SVG,
                 text = transmissionType,
             )
         }
@@ -58,7 +64,7 @@ fun CarSpecsRow(car: CarDetailResponse) {
         val availableMileage = car.availableMileagePerDayKm
         if (availableMileage != null && availableMileage > 0) {
             CarSpecChip(
-                iconPath = "images/path-distance.svg",
+                iconPath = PATH_DISTANCE_SVG,
                 text = "${NumberFormatter.formatInt(availableMileage)} км/день",
             )
         }

@@ -1,3 +1,3 @@
 package my.drivebit.viewmodels
 
-val imageUrl = "images"
+val imageUrl = "/images"
