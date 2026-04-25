@@ -50,83 +50,52 @@ fun CarItemSmall(
         val currentPhotoUrl = allPhotos.getOrNull(safePhotoIndex)?.url
 
         if (!currentPhotoUrl.isNullOrEmpty()) {
-            if (isMobileViewport && allPhotos.size > 1) {
-                Div({
-                    style {
-                        width(100.percent)
-                        height(150.px)
-                        display(DisplayStyle.Flex)
-                        overflowX("auto")
-                        overflowY("hidden")
-                        property("scroll-snap-type", "x mandatory")
-                        property("-webkit-overflow-scrolling", "touch")
-                        property("scrollbar-width", "none")
-                    }
-                }) {
-                    allPhotos.forEach { photo ->
-                        Img(
-                            src = photo.url,
-                            attrs = {
-                                style {
-                                    width(100.percent)
-                                    minWidth(100.percent)
-                                    height(150.px)
-                                    property("object-fit", "cover")
-                                    property("scroll-snap-align", "start")
-                                    display(DisplayStyle.Block)
-                                    flexShrink(0)
-                                }
-                            },
-                        )
-                    }
+            Div({
+                onMouseEnter { isImageHovered = true }
+                onMouseLeave { isImageHovered = false }
+                style {
+                    width(100.percent)
+                    height(150.px)
+                    position(Position.Relative)
+                    overflow("hidden")
                 }
-            } else {
-                Div({
-                    onMouseEnter { isImageHovered = true }
-                    onMouseLeave { isImageHovered = false }
-                    style {
-                        width(100.percent)
-                        height(150.px)
-                        position(Position.Relative)
-                        overflow("hidden")
-                    }
-                }) {
-                    Img(
-                        src = currentPhotoUrl,
-                        attrs = {
-                            if (isMobileViewport) {
-                                onTouchStart { event ->
-                                    touchStartX = event.touches.item(0)?.clientX?.toDouble()
-                                }
-                                onTouchEnd { event ->
-                                    val startX = touchStartX
-                                    val endX = event.changedTouches.item(0)?.clientX?.toDouble()
-                                    if (startX != null && endX != null) {
-                                        val swipeDelta = startX - endX
-                                        val swipeThreshold = 40.0
-                                        when {
-                                            swipeDelta > swipeThreshold && safePhotoIndex < allPhotos.lastIndex -> {
-                                                currentPhotoIndex = safePhotoIndex + 1
-                                            }
+            }) {
+                Img(
+                    src = currentPhotoUrl,
+                    attrs = {
+                        if (isMobileViewport) {
+                            onTouchStart { event ->
+                                touchStartX = event.touches.item(0)?.clientX?.toDouble()
+                            }
+                            onTouchEnd { event ->
+                                val startX = touchStartX
+                                val endX = event.changedTouches.item(0)?.clientX?.toDouble()
+                                if (startX != null && endX != null) {
+                                    val swipeDelta = startX - endX
+                                    val swipeThreshold = 40.0
+                                    when {
+                                        swipeDelta > swipeThreshold && safePhotoIndex < allPhotos.lastIndex -> {
+                                            currentPhotoIndex = safePhotoIndex + 1
+                                        }
 
-                                            swipeDelta < -swipeThreshold && safePhotoIndex > 0 -> {
-                                                currentPhotoIndex = safePhotoIndex - 1
-                                            }
+                                        swipeDelta < -swipeThreshold && safePhotoIndex > 0 -> {
+                                            currentPhotoIndex = safePhotoIndex - 1
                                         }
                                     }
-                                    touchStartX = null
                                 }
+                                touchStartX = null
                             }
-                            style {
-                                width(100.percent)
-                                height(150.px)
-                                property("object-fit", "cover")
-                                display(DisplayStyle.Block)
-                            }
-                        },
-                    )
+                        }
+                        style {
+                            width(100.percent)
+                            height(150.px)
+                            property("object-fit", "cover")
+                            display(DisplayStyle.Block)
+                        }
+                    },
+                )
 
-                    if (allPhotos.size > 1 && isImageHovered) {
+                if (allPhotos.size > 1 && (isImageHovered || isMobileViewport)) {
                         Div({
                             onClick {
                                 it.stopPropagation()
@@ -190,27 +159,26 @@ fun CarItemSmall(
                         }) {
                             Text(">")
                         }
-                    }
+                }
 
-                    if (allPhotos.size > 1) {
-                        Div({
-                            style {
-                                position(Position.Absolute)
-                                bottom(8.px)
-                                left(50.percent)
-                                property("transform", "translateX(-50%)")
-                                backgroundColor(rgba(0, 0, 0, 0.55))
-                                color(CSSColors.White)
-                                borderRadius(12.px)
-                                padding(4.px, 8.px)
-                                fontSize(12.px)
-                                fontWeight("500")
-                                lineHeight("1")
-                                property("user-select", "none")
-                            }
-                        }) {
-                            Text("${safePhotoIndex + 1} / ${allPhotos.size}")
+                if (allPhotos.size > 1) {
+                    Div({
+                        style {
+                            position(Position.Absolute)
+                            bottom(8.px)
+                            left(50.percent)
+                            property("transform", "translateX(-50%)")
+                            backgroundColor(rgba(0, 0, 0, 0.55))
+                            color(CSSColors.White)
+                            borderRadius(12.px)
+                            padding(4.px, 8.px)
+                            fontSize(12.px)
+                            fontWeight("500")
+                            lineHeight("1")
+                            property("user-select", "none")
                         }
+                    }) {
+                        Text("${safePhotoIndex + 1} / ${allPhotos.size}")
                     }
                 }
             }
