@@ -156,18 +156,6 @@ fun SearchPage() {
                         }
                         Row(gap = 8.px) {
                             FilterChip(
-                                name = "Цена",
-                                onClick = {
-                                    showPriceFilter = !showPriceFilter
-                                    showBrandFilter = false
-                                    showDriveTypeFilter = false
-                                    showBodyTypeFilter = false
-                                    showSeatsFilter = false
-                                },
-                                isSelected = isPriceSelected,
-                                selectedText = priceText,
-                            )
-                            FilterChip(
                                 name = "Марка",
                                 onClick = {
                                     showBrandFilter = !showBrandFilter
@@ -214,6 +202,18 @@ fun SearchPage() {
                                 },
                                 isSelected = isSeatsSelected,
                                 selectedText = seatsChipText,
+                            )
+                            FilterChip(
+                                name = "Цена",
+                                onClick = {
+                                    showPriceFilter = !showPriceFilter
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                },
+                                isSelected = isPriceSelected,
+                                selectedText = priceText,
                             )
                         }
                         Box(
@@ -340,6 +340,7 @@ fun SearchPage() {
                                             resultsCount = currentState.totalCount,
                                             onSeatsMinSelected = { seatsMin ->
                                                 viewModel.updateSeatsMin(seatsMin)
+                                                showSeatsFilter = false
                                             },
                                             onReset = {
                                                 viewModel.updateSeatsMin(null)
