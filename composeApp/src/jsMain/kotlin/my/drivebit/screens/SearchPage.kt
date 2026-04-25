@@ -15,7 +15,6 @@ import my.drivebit.components.BoxOverlay
 import my.drivebit.components.BrandModelFilter
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.Column
-import my.drivebit.components.DateFieldDialog
 import my.drivebit.components.Divider
 import my.drivebit.components.DriveTypeFilter
 import my.drivebit.components.FilterChip
@@ -23,6 +22,7 @@ import my.drivebit.components.Loader
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.PriceFilter
 import my.drivebit.components.Row
+import my.drivebit.components.SearchDateRangeSelector
 import my.drivebit.components.SeatsFilter
 import my.drivebit.components.TextError
 import my.drivebit.design.CSSColors
@@ -34,7 +34,6 @@ import my.drivebit.utils.START_AT
 import my.drivebit.utils.dateToEndAtIso
 import my.drivebit.utils.dateToStartAtIso
 import my.drivebit.utils.encodeUrlParameter
-import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.SearchPageDateEndViewModel
 import my.drivebit.viewmodels.SearchPageDateViewModel
 import my.drivebit.viewmodels.SearchState
@@ -46,16 +45,12 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.padding
-import org.jetbrains.compose.web.css.paddingLeft
-import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
@@ -145,15 +140,15 @@ fun SearchPage() {
                 }
 
                 is SearchState.SearchResults -> {
+                    val searchPageDateViewModel: SearchPageDateViewModel = koinInject()
+                    val searchPageDateEndViewModel: SearchPageDateEndViewModel = koinInject()
                     Column(gap = 24.px) {
-                        Row(gap = 12.px) {
-                            SearchPageDateStart(
-                                startDate = searchParams.first,
-                            )
-                            SearchPageDateEnd(
-                                endDate = searchParams.second,
-                            )
-                        }
+                        SearchDateRangeSelector(
+                            startDate = searchParams.first,
+                            endDate = searchParams.second,
+                            onStartDateChanged = { date -> searchPageDateViewModel.set(date) },
+                            onEndDateChanged = { date -> searchPageDateEndViewModel.set(date) },
+                        )
                         Row(gap = 8.px) {
                             FilterChip(
                                 name = "Марка",
@@ -369,106 +364,3 @@ private fun rememberSearchParams(): Pair<String?, String?> {
     }
 }
 
-@Composable
-private fun SearchPageDateStart(startDate: String?) {
-    val searchPageDateViewModel: SearchPageDateViewModel = koinInject()
-    SearchPageDateField(
-        label = "Дата начала",
-        actionLabel = "c",
-        initialDate = startDate,
-        onDateChanged = { date -> date?.let(searchPageDateViewModel::set) },
-    )
-}
-
-@Composable
-private fun SearchPageDateEnd(endDate: String?) {
-    val searchPageDateEndViewModel: SearchPageDateEndViewModel = koinInject()
-    SearchPageDateField(
-        label = "Дата окончания",
-        actionLabel = "по",
-        initialDate = endDate,
-        onDateChanged = { date -> date?.let(searchPageDateEndViewModel::set) },
-    )
-}
-
-@Composable
-private fun SearchPageDateField(
-    label: String,
-    actionLabel: String,
-    initialDate: String?,
-    onDateChanged: (String?) -> Unit,
-) {
-    val dateFieldViewModel =
-        remember {
-            DateFieldViewModel(initialDate = initialDate)
-        }
-    LaunchedEffect(initialDate) {
-        dateFieldViewModel.setDate(initialDate)
-    }
-
-    val state by dateFieldViewModel.state.collectAsState()
-    val currentDate = state.date ?: "выберите даты"
-
-    Div({
-        style {
-            cursor("pointer")
-            marginBottom(12.px)
-        }
-        onClick {
-            dateFieldViewModel.openCalendar()
-        }
-    }) {
-        Row(
-            alignItems = AlignItems.Center,
-            gap = 6.px,
-        ) {
-            Column(gap = 4.px) {
-                Row {
-                    Span({
-                        style {
-                            applyTypography(CSSTypography.Styles.body)
-                            fontSize(CSSTypography.FontSize.base)
-                            fontWeight(CSSTypography.FontWeight.medium)
-                            color(CSSColors.Blue)
-                        }
-                    }) {
-                        Text(actionLabel)
-                    }
-                    Span({
-                        style {
-                            applyTypography(CSSTypography.Styles.body)
-                            fontSize(CSSTypography.FontSize.base)
-                            fontWeight(CSSTypography.FontWeight.medium)
-                            color(CSSColors.Gray600)
-                            paddingLeft(12.px)
-                        }
-                    }) {
-                        Text(currentDate)
-                    }
-
-                    Img(
-                        src = "/images/arrow-bottom.svg",
-                        alt = "arrow",
-                        attrs = {
-                            style {
-                                width(16.px)
-                                height(10.px)
-                                paddingTop(8.px)
-                            }
-                        },
-                    )
-                }
-                Divider(
-                    color = CSSColors.Gray300,
-                    thickness = 2.px,
-                )
-            }
-        }
-    }
-
-    DateFieldDialog(
-        label = label,
-        viewModel = dateFieldViewModel,
-        onDateChanged = onDateChanged,
-    )
-}
