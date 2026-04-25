@@ -27,6 +27,7 @@ import my.drivebit.utils.START_AT
 import my.drivebit.utils.addDays
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.viewmodels.ButtonState
+import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.DateTimeFieldViewModel
 import my.drivebit.viewmodels.PendingBookingPaymentUi
 import my.drivebit.viewmodels.RentPayEffect
@@ -147,9 +148,6 @@ fun CarBook(
         }
     }
 
-    val startDateTimeViewModel = remember { DateTimeFieldViewModel() }
-    val endDateTimeViewModel = remember { DateTimeFieldViewModel() }
-
     LaunchedEffect(bookState.isCreating, bookState.pendingPaymentBookingId) {
         buttonViewModel.setState(
             when {
@@ -182,8 +180,19 @@ fun CarBook(
             },
         )
     }
+
+    val startDateTimeViewModel = remember { DateTimeFieldViewModel() }
+    val endDateTimeViewModel = remember { DateTimeFieldViewModel() }
+    val bookRangeStartVm = remember { DateFieldViewModel() }
+    val bookRangeEndVm = remember { DateFieldViewModel() }
+
     val startDateTimeState by startDateTimeViewModel.state.collectAsState()
     val endDateTimeState by endDateTimeViewModel.state.collectAsState()
+    val bookRangeStartState by bookRangeStartVm.state.collectAsState()
+    val bookRangeEndState by bookRangeEndVm.state.collectAsState()
+
+    val rangeCalendarOpen =
+        bookRangeStartState.isCalendarOpen || bookRangeEndState.isCalendarOpen
 
     val endDateMinDate =
         startDateTimeState.date?.take(10)?.let { str ->
@@ -215,6 +224,7 @@ fun CarBook(
             startDateTimeViewModel.setTime(null)
         }
     }
+
     LaunchedEffect(bookState.endDate, startDateTimeState.time) {
         bookState.endDate?.let { iso ->
             runCatching {
@@ -237,6 +247,34 @@ fun CarBook(
         }
     }
 
+    LaunchedEffect(bookState.startDate, bookState.endDate, rangeCalendarOpen) {
+        if (rangeCalendarOpen) return@LaunchedEffect
+        val sd = bookingInstantToUiDate(bookState.startDate)
+        val ed = bookingInstantToUiDate(bookState.endDate)
+        if (sd != bookRangeStartState.date) bookRangeStartVm.setDate(sd)
+        if (ed != bookRangeEndState.date) bookRangeEndVm.setDate(ed)
+    }
+
+    LaunchedEffect(bookRangeStartState.date, startDateTimeState.time) {
+        val d = bookRangeStartState.date
+        val t = startDateTimeState.time ?: "10:00"
+        val target = if (d != null) formatStartAt(d, t) else null
+        if (target != bookState.startDate) viewModel.setStartDate(target)
+    }
+
+    LaunchedEffect(bookRangeEndState.date, endDateTimeState.time, startDateTimeState.time) {
+        val d = bookRangeEndState.date
+        val t = endDateTimeState.time ?: startDateTimeState.time ?: "10:00"
+        val target = if (d != null) formatEndAt(d, t) else null
+        if (target != bookState.endDate) viewModel.setEndDate(target)
+    }
+
+    val openBookRangeCalendar: () -> Unit = {
+        bookRangeStartVm.setDate(startDateTimeState.date)
+        bookRangeEndVm.setDate(endDateTimeState.date)
+        bookRangeStartVm.openCalendar()
+    }
+
     Div({
         style {
             flex(1)
@@ -255,6 +293,7 @@ fun CarBook(
                 actionLabel = "c",
                 viewModel = startDateTimeViewModel,
                 showError = bookState.showStartDateError,
+                onOpenDatePicker = openBookRangeCalendar,
                 onDateTimeChanged = { date, time ->
                     viewModel.setStartDate(if (date != null && time != null) formatStartAt(date, time) else null)
                 },
@@ -266,6 +305,7 @@ fun CarBook(
                 minDate = endDateMinDate,
                 showError = bookState.showEndDateError,
                 enabled = startDateTimeState.date != null,
+                onOpenDatePicker = openBookRangeCalendar,
                 onDateTimeChanged = { date, time ->
                     viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
                 },
@@ -414,38 +454,24 @@ fun CarBook(
         }
     }
 
-    if (startDateTimeState.isCalendarOpen) {
-        BookingDatePickerForDateTime(
-            label = "Дата начала",
-            viewModel = startDateTimeViewModel,
+    if (rangeCalendarOpen) {
+        DateRangeCalendarDialog(
+            startDateViewModel = bookRangeStartVm,
+            endDateViewModel = bookRangeEndVm,
             minDate =
                 Clock.System
                     .now()
                     .toString()
                     .take(10),
             disabledDates = disabledDates,
-            defaultTime = "10:00",
-            onDateTimeChanged = { date, time ->
-                viewModel.setStartDate(if (date != null && time != null) formatStartAt(date, time) else null)
-            },
-        )
-    }
-    if (endDateTimeState.isCalendarOpen) {
-        BookingDatePickerForDateTime(
-            label = "Дата окончания",
-            viewModel = endDateTimeViewModel,
-            minDate = endDateMinDate,
-            disabledDates = disabledDates,
-            defaultTime = startDateTimeState.time ?: "10:00",
-            onDateTimeChanged = { date, time ->
-                viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
-            },
+            endMinOffsetDaysFromStart = 1,
+            clearRangeOnCancel = false,
         )
     }
 }
 
 @Composable
-@Suppress("FunctionName")
+@Suppress("FunctionName", "UNUSED_PARAMETER")
 private fun CarBookDateTimeField(
     label: String,
     actionLabel: String,
@@ -453,6 +479,7 @@ private fun CarBookDateTimeField(
     minDate: String? = null,
     showError: Boolean,
     enabled: Boolean = true,
+    onOpenDatePicker: () -> Unit,
     onDateTimeChanged: (date: String?, time: String?) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
@@ -508,7 +535,7 @@ private fun CarBookDateTimeField(
                         property("transition", "background-color 0.2s ease")
                     }
                     onClick {
-                        if (enabled) viewModel.openCalendar()
+                        if (enabled) onOpenDatePicker()
                     }
                     onMouseEnter {
                         if (enabled) {
@@ -608,6 +635,13 @@ private fun CarBookDateTimeField(
         }
     }
 }
+
+private fun bookingInstantToUiDate(iso: String?): String? =
+    iso?.let { s ->
+        runCatching {
+            kotlinx.datetime.Instant.parse(s).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        }.getOrNull() ?: s.take(10).takeIf { it.length == 10 }
+    }
 
 private fun formatStartAt(
     date: String,
