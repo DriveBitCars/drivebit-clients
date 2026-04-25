@@ -33,12 +33,17 @@ import my.drivebit.viewmodels.RentPayEffect
 import my.drivebit.viewmodels.RentState
 import my.drivebit.viewmodels.RentViewModel
 import my.drivebit.viewmodels.createButtonViewModel
+import org.jetbrains.compose.web.attributes.disabled
+import org.jetbrains.compose.web.attributes.selected
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
+import org.jetbrains.compose.web.dom.Option
+import org.jetbrains.compose.web.dom.Select
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import kotlin.time.Duration.Companion.hours
+import org.w3c.dom.HTMLSelectElement
 
 @Composable
 @Suppress("FunctionName")
@@ -425,32 +430,12 @@ fun CarBook(
             },
         )
     }
-    if (startDateTimeState.isTimePickerOpen) {
-        BookingTimePickerDialog(
-            label = "Время начала",
-            viewModel = startDateTimeViewModel,
-            defaultTime = "10:00",
-            onDateTimeChanged = { date, time ->
-                viewModel.setStartDate(if (date != null && time != null) formatStartAt(date, time) else null)
-            },
-        )
-    }
     if (endDateTimeState.isCalendarOpen) {
         BookingDatePickerForDateTime(
             label = "Дата окончания",
             viewModel = endDateTimeViewModel,
             minDate = endDateMinDate,
             disabledDates = disabledDates,
-            defaultTime = startDateTimeState.time ?: "10:00",
-            onDateTimeChanged = { date, time ->
-                viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
-            },
-        )
-    }
-    if (endDateTimeState.isTimePickerOpen) {
-        BookingTimePickerDialog(
-            label = "Время окончания",
-            viewModel = endDateTimeViewModel,
             defaultTime = startDateTimeState.time ?: "10:00",
             onDateTimeChanged = { date, time ->
                 viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
@@ -472,7 +457,8 @@ private fun CarBookDateTimeField(
 ) {
     val state by viewModel.state.collectAsState()
     val dateText = state.date?.let { formatDateForDisplay(it) } ?: "дата"
-    val timeText = state.time ?: "время"
+    val hourOptions = remember { carBookHourTimeOptionValues() }
+    val timeSelectable = enabled && state.date != null
 
     Div({
         style {
@@ -557,53 +543,57 @@ private fun CarBookDateTimeField(
                         )
                     }
                 }
-                Div({
-                    style {
-                        cursor(if (enabled && state.date != null) "pointer" else "not-allowed")
-                        padding(4.px, 8.px)
-                        borderRadius(6.px)
-                        property("transition", "background-color 0.2s ease")
-                        if (state.date == null) property("opacity", "0.6")
-                    }
-                    onClick {
-                        if (enabled && state.date != null) viewModel.openTimePicker()
-                    }
-                    onMouseEnter {
-                        if (enabled && state.date != null) {
-                            (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
-                                "background-color",
-                                CSSColors.Gray300String,
-                            )
+                Select(
+                    attrs = {
+                        if (!timeSelectable) {
+                            disabled()
                         }
-                    }
-                    onMouseLeave {
-                        (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
-                            "background-color",
-                            "transparent",
-                        )
-                    }
-                }) {
-                    Row(alignItems = AlignItems.Center, gap = 4.px) {
-                        Span({
-                            style {
-                                applyTypography(CSSTypography.Styles.body)
-                                fontSize(CSSTypography.FontSize.base)
-                                fontWeight(CSSTypography.FontWeight.medium)
-                                color(if (state.time != null) CSSColors.Black else CSSColors.Gray600)
-                            }
-                        }) {
-                            Text(timeText)
+                        onChange { event ->
+                            val v = (event.target as HTMLSelectElement).value
+                            val picked = v.takeIf { it.isNotBlank() }
+                            viewModel.setTime(picked)
+                            onDateTimeChanged(state.date, picked)
                         }
-                        Img(
-                            src = "/images/arrow-bottom.svg",
-                            alt = "",
+                        style {
+                            minWidth(108.px)
+                            padding(6.px, 8.px)
+                            borderRadius(6.px)
+                            border(1.px, LineStyle.Solid, CSSColors.Gray300)
+                            applyTypography(CSSTypography.Styles.body)
+                            fontSize(CSSTypography.FontSize.sm)
+                            color(CSSColors.Black)
+                            property("background-color", CSSColors.WhiteString)
+                            cursor(if (timeSelectable) "pointer" else "not-allowed")
+                            if (!timeSelectable) property("opacity", "0.6")
+                        }
+                    },
+                ) {
+                    val current = state.time.orEmpty()
+                    Option(
+                        value = "",
+                        attrs = {
+                            if (current.isEmpty()) selected()
+                        },
+                    ) {
+                        Text("Час")
+                    }
+                    hourOptions.forEach { value ->
+                        Option(
+                            value = value,
                             attrs = {
-                                style {
-                                    width(12.px)
-                                    height(8.px)
-                                }
+                                if (current == value) selected()
                             },
-                        )
+                        ) {
+                            Text(value)
+                        }
+                    }
+                    if (current.isNotEmpty() && current !in hourOptions) {
+                        Option(
+                            value = current,
+                            attrs = { selected() },
+                        ) {
+                            Text(current)
+                        }
                     }
                 }
             }
@@ -632,7 +622,7 @@ private fun formatStartAt(
             .now()
             .toLocalDateTime(TimeZone.currentSystemDefault())
             .date
-    val localDateTime = LocalDateTime.parse("${date.take(10)}T$time:00")
+    val localDateTime = localDateTimeFromDateAndTime(date, time)
     val instant = localDateTime.toInstant(TimeZone.currentSystemDefault())
     return if (selectedDate == today) {
         val now = Clock.System.now()
@@ -646,8 +636,32 @@ private fun formatEndAt(
     date: String,
     time: String,
 ): String {
-    val localDateTime = LocalDateTime.parse("${date.take(10)}T$time:00")
+    val localDateTime = localDateTimeFromDateAndTime(date, time)
     return localDateTime.toInstant(TimeZone.currentSystemDefault()).toString()
+}
+
+private fun carBookHourTimeOptionValues(): List<String> =
+    (0..24).map { h ->
+        if (h == 24) {
+            "24:00"
+        } else {
+            "${h.toString().padStart(2, '0')}:00"
+        }
+    }
+
+private fun localDateTimeFromDateAndTime(
+    date: String,
+    time: String,
+): LocalDateTime {
+    val d = LocalDate.parse(date.take(10))
+    val t = time.trim()
+    if (t == "24:00" || t.startsWith("24:")) {
+        return LocalDateTime(d.year, d.month, d.day, 23, 59, 0, 0)
+    }
+    val parts = t.split(':')
+    val hh = parts.getOrNull(0)?.toIntOrNull() ?: 0
+    val mm = parts.getOrNull(1)?.toIntOrNull() ?: 0
+    return LocalDateTime(d.year, d.month, d.day, hh, mm, 0, 0)
 }
 
 private fun formatDateForDisplay(dateString: String): String {
