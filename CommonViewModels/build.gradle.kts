@@ -91,7 +91,7 @@ tasks.register("generateImageConstants") {
                                 .replace("-", "_")
                                 .replace(".", "_")
                                 .uppercase()
-                        val path = "images/$relativePath"
+                        val path = "/images/$relativePath"
                         appendLine("    const val $constantName = \"$path\"")
                     }
                 appendLine("}")
