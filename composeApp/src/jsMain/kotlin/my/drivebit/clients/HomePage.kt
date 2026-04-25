@@ -19,6 +19,7 @@ import my.drivebit.maps.MapView
 import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.maps.models.MapMarker
+import my.drivebit.navigation.NavigationState
 import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.START_AT
@@ -30,6 +31,10 @@ import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MapViewModel
+import my.drivebit.web.cityPathWithFilter
+import my.drivebit.web.filterTitleToPathSegment
+import my.drivebit.web.parseCitySlugFromPath
+import my.drivebit.web.parseFilterSlugFromCityPath
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
@@ -53,15 +58,21 @@ fun HomePage() {
     val carSearchViewModel: CarSearchViewModel = koinInject()
     val mainContentViewModel: MainContentViewModel = koinInject()
     val currentFiltersRepository: CurrentFiltersRepository = koinInject(named("main"))
+    val navigationState: NavigationState = koinInject()
 
     val state = filterViewModel.state.collectAsState()
+    val currentPath by navigationState.currentPath.collectAsState()
     val mapState = mapViewModel.state.collectAsState()
     val carSearchState = carSearchViewModel.state.collectAsState()
     val cars by mainContentViewModel.firstList.collectAsState()
     val displayedCars by mainContentViewModel.displayedCars.collectAsState()
     val paginationInfo by mainContentViewModel.paginationInfo.collectAsState()
     val filters = state.value.filters
-    val selected = state.value.selected
+    val selectedFromPath =
+        parseFilterSlugFromCityPath(currentPath)?.let { filterSlug ->
+            filters.firstOrNull { filterTitleToPathSegment(it.title) == filterSlug }?.title
+        }
+    val selected = selectedFromPath ?: state.value.selected
 
     val startDateViewModel: DateFieldViewModel = koinInject(named("startDate"))
     val endDateViewModel: DateFieldViewModel = koinInject(named("endDate"))
@@ -75,6 +86,12 @@ fun HomePage() {
 
     LaunchedEffect(endState.date) {
         currentFiltersRepository.updateEndDate(endState.date)
+    }
+
+    LaunchedEffect(selectedFromPath) {
+        if (selectedFromPath != null && selectedFromPath != state.value.selected) {
+            filterViewModel.onSelect(selectedFromPath)
+        }
     }
 
     AppWithHeader {
@@ -93,6 +110,15 @@ fun HomePage() {
                     filter = filter,
                     isSelected = filter.title == selected,
                     onClick = {
+                        parseCitySlugFromPath(currentPath)?.let { citySlug ->
+                            val effectiveTitle =
+                                if (filter.title != "Все" && filter.title == selected) "Все" else filter.title
+                            val targetPath = cityPathWithFilter(citySlug, effectiveTitle)
+                            if (targetPath != currentPath) {
+                                window.history.pushState(null, "", targetPath)
+                                navigationState.updatePath(targetPath)
+                            }
+                        }
                         filterViewModel.onSelect(filter.title)
                     },
                 )
