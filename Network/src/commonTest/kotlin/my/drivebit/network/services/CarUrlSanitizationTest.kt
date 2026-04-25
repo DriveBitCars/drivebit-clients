@@ -26,7 +26,7 @@ class CarUrlSanitizationTest {
                     "photos": [
                         {
                             "id": 1,
-                            "url": "http://155.212.170.94:9000/publicbct/cars/test.jpg",
+                            "url": "http://api.drivebit.ru:9000/publicbct/cars/test.jpg",
                             "uploadDate": "2025-01-01T00:00:00Z"
                         }
                     ],
@@ -42,7 +42,7 @@ class CarUrlSanitizationTest {
                         "photos": [
                             {
                                 "id": 2,
-                                "url": "http://155.212.170.94:9000/publicbct/cars/test2.jpg",
+                                "url": "http://api.drivebit.ru:9000/publicbct/cars/test2.jpg",
                                 "uploadDate": "2025-01-01T00:00:00Z"
                             }
                         ]
@@ -86,7 +86,7 @@ class CarUrlSanitizationTest {
                     "photos": [
                         {
                             "id": 1,
-                            "url": "https://155.212.170.94:9000/publicbct/avatars/test.jpg",
+                            "url": "https://api.drivebit.ru:9000/publicbct/avatars/test.jpg",
                             "uploadDate": "2025-01-01T00:00:00Z"
                         }
                     ]
@@ -177,7 +177,7 @@ class CarUrlSanitizationTest {
                             "photos": [
                                 {
                                     "id": 1,
-                                    "url": "http://155.212.170.94:9000/publicbct/cars/test.jpg",
+                                    "url": "http://api.drivebit.ru:9000/publicbct/cars/test.jpg",
                                     "uploadDate": "2025-01-01T00:00:00Z"
                                 }
                             ]
@@ -214,7 +214,7 @@ class CarUrlSanitizationTest {
                     .photos
                     .get(0)
                     .url
-            assertFalse(photoUrl.contains("155.212.170.94:9000"), "URL should not contain MinIO IP and port")
+            assertFalse(photoUrl.contains("api.drivebit.ru:9000"), "URL should not contain direct MinIO host:port")
         }
 
     @Test
@@ -227,7 +227,7 @@ class CarUrlSanitizationTest {
                     "photos": [
                         {
                             "id": 1,
-                            "url": "155.212.170.94:9000/publicbct/avatars/test.jpg",
+                            "url": "api.drivebit.ru:9000/publicbct/avatars/test.jpg",
                             "uploadDate": "2025-01-01T00:00:00Z"
                         }
                     ]

@@ -6,7 +6,8 @@
 
 SSH_TARGET="${1:-root@143.198.69.242}"
 SSH_KEY=""
-NEW_BACKEND="http://155.212.170.94:5000"
+API_UPSTREAM_HOST="${API_UPSTREAM_HOST:-api.drivebit.ru}"
+NEW_BACKEND="http://${API_UPSTREAM_HOST}:5000"
 
 # Попытка найти SSH ключ
 if [ -f "$(dirname "$0")/id_rsa_api_drivebit" ]; then
@@ -78,10 +79,10 @@ if grep -q "^[[:space:]]*location /[[:space:]]*{" "\$NGINX_CONFIG"; then
     # Вставляем перед location /
     sed -i '/^[[:space:]]*location \/[[:space:]]*{/i\
     # Проксирование API на новый бэкенд\
-    # /api/... -> http://155.212.170.94:5000/...\
+    # /api/... -> $NEW_BACKEND/...\
 
     location /api/ {\
-        proxy_pass http://155.212.170.94:5000/;\
+        proxy_pass ${NEW_BACKEND}/;\
         proxy_set_header Host \$host;\
         proxy_set_header X-Real-IP \$remote_addr;\
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\
@@ -101,9 +102,9 @@ else
     # Если location / не найден, добавляем в конец server блока
     sed -i '/^[[:space:]]*server[[:space:]]*{/a\
     # Проксирование API на новый бэкенд\
-    # /api/... -> http://155.212.170.94:5000/...\
+    # /api/... -> $NEW_BACKEND/...\
     location /api/ {\
-        proxy_pass http://155.212.170.94:5000/;\
+        proxy_pass ${NEW_BACKEND}/;\
         proxy_set_header Host \$host;\
         proxy_set_header X-Real-IP \$remote_addr;\
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\

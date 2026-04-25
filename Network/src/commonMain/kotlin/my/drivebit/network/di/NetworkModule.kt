@@ -37,8 +37,7 @@ import org.koin.dsl.module
 /**
  * Network module for Koin DI
  * API Base URL: https://drivebit.ru/api/
- * Backend Server: 155.212.170.94:5000
- * API Documentation: http://155.212.170.94:5000/swagger/index.html
+ * Backend upstream (DNS): api.drivebit.ru:5000 (see nginx proxy_pass)
  * Production API Documentation: https://drivebit.ru/api/swagger/index.html
  */
 val networkModule =

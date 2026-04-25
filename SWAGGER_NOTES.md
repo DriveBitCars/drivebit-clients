@@ -3,7 +3,7 @@
 ## Важно: Всегда проверяй Swagger перед реализацией API
 
 ### Ссылки на Swagger
-- **Backend Server (прямой доступ)**: http://155.212.170.94:5000/swagger/index.html
+- **Backend Server (прямой доступ по DNS)**: http://api.drivebit.ru:5000/swagger/index.html
 - **Production (через nginx)**: https://drivebit.ru/api/swagger/index.html
 
 ### Ключевые моменты:

@@ -1,7 +1,7 @@
 # Настройка Nginx для проксирования API на новый бэкенд
 
 ## Задача
-Настроить nginx на сервере `drivebit.ru` так, чтобы `https://drivebit.ru/api/` проксировал запросы на новый бэкенд `http://155.212.170.94:5000/`
+Настроить nginx на сервере `drivebit.ru` так, чтобы `https://drivebit.ru/api/` проксировал запросы на бэкенд `http://api.drivebit.ru:5000/` (имя хоста в DNS)
 
 ## Автоматическая настройка
 
@@ -42,9 +42,9 @@ cp "$NGINX_CONFIG" "${NGINX_CONFIG}.backup.$(date +%Y%m%d_%H%M%S)"
 
 ```nginx
 # Проксирование API на новый бэкенд
-# /api/... -> http://155.212.170.94:5000/...
+# /api/... -> http://api.drivebit.ru:5000/...
 location /api/ {
-    proxy_pass http://155.212.170.94:5000/;
+    proxy_pass http://api.drivebit.ru:5000/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -89,7 +89,7 @@ server {
     
     # Проксирование API на новый бэкенд
     location /api/ {
-        proxy_pass http://155.212.170.94:5000/;
+        proxy_pass http://api.drivebit.ru:5000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

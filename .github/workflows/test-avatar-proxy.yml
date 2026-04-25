@@ -124,5 +124,5 @@ jobs:
         echo "  ✓ /publicbct/avatar/{file} returns 200 or 404 (proxy working)"
         echo "  ✓ MinIO-specific headers are present"
         echo ""
-        echo "Nginx proxies /publicbct/avatar to MinIO backend (155.212.170.94:9000)"
+        echo "Nginx proxies /publicbct/avatar to MinIO backend (api.drivebit.ru:9000 via DNS)"
 
