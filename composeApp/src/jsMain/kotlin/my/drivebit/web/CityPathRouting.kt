@@ -1,5 +1,7 @@
 package my.drivebit.web
 
+import my.drivebit.utils.cityNameToSlug
+
 /**
  * First path segments handled by [my.drivebit.clients.App] — not city slugs.
  */
@@ -52,17 +54,59 @@ val RESERVED_FIRST_SEGMENTS: Set<String> =
         "car-detail",
     )
 
+private const val ALL_FILTER_TITLE = "Все"
+
+data class CityPathParts(
+    val citySlug: String,
+    val filterSlug: String? = null,
+)
+
 /**
- * Returns slug for a city home URL `/slug` when [pathname] is exactly one non-reserved segment.
+ * Parses city URL path:
+ * - `/city-slug`
+ * - `/city-slug/filter-slug`
  */
-fun parseCitySlugFromPath(pathname: String): String? {
+fun parseCityPath(pathname: String): CityPathParts? {
     val trimmed = pathname.trim().removePrefix("/").removeSuffix("/")
     if (trimmed.isEmpty()) return null
     val segments = trimmed.split('/').filter { it.isNotEmpty() }
-    if (segments.size != 1) return null
-    val seg = segments[0].lowercase()
-    if (seg in RESERVED_FIRST_SEGMENTS) return null
-    return seg
+    if (segments.size != 1 && segments.size != 2) return null
+    val citySlug = segments[0].lowercase()
+    if (citySlug in RESERVED_FIRST_SEGMENTS) return null
+    val filterSlug = segments.getOrNull(1)?.lowercase()
+    return CityPathParts(citySlug = citySlug, filterSlug = filterSlug)
+}
+
+/**
+ * Returns slug for a city home URL when first segment is a non-reserved city slug.
+ */
+fun parseCitySlugFromPath(pathname: String): String? = parseCityPath(pathname)?.citySlug
+
+/**
+ * Returns optional filter slug from city path `/city-slug/filter-slug`.
+ */
+fun parseFilterSlugFromCityPath(pathname: String): String? = parseCityPath(pathname)?.filterSlug
+
+/**
+ * Converts filter title into URL segment for city path.
+ * "Все" is represented by city root path without a filter segment.
+ */
+fun filterTitleToPathSegment(title: String): String? {
+    val normalized = title.trim()
+    if (normalized.isEmpty() || normalized == ALL_FILTER_TITLE) return null
+    return cityNameToSlug(normalized)
+}
+
+/**
+ * Builds path for city home + optional selected filter segment.
+ */
+fun cityPathWithFilter(citySlug: String, filterTitle: String): String {
+    val filterSegment = filterTitleToPathSegment(filterTitle)
+    return if (filterSegment == null) {
+        "/$citySlug"
+    } else {
+        "/$citySlug/$filterSegment"
+    }
 }
 
 fun isCityHomePath(pathname: String): Boolean {
