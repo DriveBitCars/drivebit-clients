@@ -382,7 +382,7 @@ jobs:
             echo "⚙️  Adding API proxy configuration..."
             # Create temporary file with API proxy config using printf
             TEMP_CONFIG=$(mktemp)
-            printf '    # API proxy to backend\n    location /api/ {\n        proxy_pass http://api.drivebit.ru:5000/;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n        add_header Access-Control-Allow-Origin * always;\n        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;\n        add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;\n        if ($request_method = OPTIONS) {\n            return 204;\n        }\n    }\n' > "$TEMP_CONFIG"
+            printf '    # API proxy to backend\n    location /api/ {\n        proxy_pass http://155.212.170.94:5000/;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n        add_header Access-Control-Allow-Origin * always;\n        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;\n        add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;\n        if ($request_method = OPTIONS) {\n            return 204;\n        }\n    }\n' > "$TEMP_CONFIG"
             # Insert before location / using sed with file read
             $SUDO_CMD sed -i "/^[[:space:]]*location \/[[:space:]]*{/r $TEMP_CONFIG" "$NGINX_CONFIG"
             rm -f "$TEMP_CONFIG"

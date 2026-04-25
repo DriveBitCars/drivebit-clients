@@ -4,9 +4,9 @@
 
 ## API Configuration
 
-- **Base URL (клиент)**: `https://drivebit.ru/api/` (`DEFAULT_BASE_URL` в коде)
-- **Upstream бэкенда (nginx / DNS)**: `api.drivebit.ru:5000`
-- **API Documentation (через nginx)**: https://drivebit.ru/api/swagger/index.html
+- **Base URL**: `https://api.drivebit.ru`
+- **Backend Server**: `155.212.170.94:5000`
+- **API Documentation**: [http://155.212.170.94:5000/swagger/index.html](http://155.212.170.94:5000/swagger/index.html)
 
 ## Структура
 

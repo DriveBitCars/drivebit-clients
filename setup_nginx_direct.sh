@@ -42,7 +42,7 @@ if grep -q "^[[:space:]]*location /[[:space:]]*{" "$NGINX_CONFIG"; then
     sed -i '/^[[:space:]]*location \/[[:space:]]*{/i\
     # Проксирование API на новый бэкенд\
     location /api/ {\
-        proxy_pass http://api.drivebit.ru:5000/;\
+        proxy_pass http://155.212.170.94:5000/;\
         proxy_set_header Host $host;\
         proxy_set_header X-Real-IP $remote_addr;\
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
@@ -54,7 +54,7 @@ else
     sed -i '/^[[:space:]]*server[[:space:]]*{/a\
     # Проксирование API на новый бэкенд\
     location /api/ {\
-        proxy_pass http://api.drivebit.ru:5000/;\
+        proxy_pass http://155.212.170.94:5000/;\
         proxy_set_header Host $host;\
         proxy_set_header X-Real-IP $remote_addr;\
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\

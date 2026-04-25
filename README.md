@@ -205,8 +205,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Серверы
 
-- **Фронт (nginx):** `80.249.146.3` — конфиги переносятся с предыдущего фронта (`/etc/nginx`, `/etc/letsencrypt`). Скрипт: `scripts/nginx-migrate-from-old-server.sh` (по умолчанию `OLD_HOST=root@45.131.42.106`, `NEW_HOST=root@80.249.146.3`; переопределяются переменными окружения).
-- **Прежний фронт:** `45.131.42.106`. Upstream API/MinIO: `api.drivebit.ru` (DNS).
+- **Фронт (nginx):** `45.131.42.106` — конфиги скопированы с `155.212.170.94` (`/etc/nginx`, `/etc/letsencrypt`). Повторить перенос: `scripts/nginx-migrate-from-old-server.sh` (переменные `OLD_HOST`, `NEW_HOST`).
+- **Прежний хост с теми же nginx-конфигами:** `155.212.170.94` (не изменялся при копировании).
 
 ---
 

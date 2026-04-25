@@ -13,7 +13,7 @@ CI deploys the **Compose JS browser** build to a Linux host over SSH. Deploy is 
 
 ### Required
 
-- `SERVER_HOST` — server IP or hostname (e.g. front VPS). After the 2026 front migration, set this to **`80.249.146.3`** (or the DNS name that points there).
+- `SERVER_HOST` — server IP or hostname (e.g. front VPS).
 - `SERVER_USER` — SSH user (often `root`).
 - `SERVER_SSH_KEY` — private key for that user.
 
@@ -68,7 +68,7 @@ Until step 2 is done, switching `current` will not change what nginx serves.
 
 ## API upstream
 
-If `location /api/` is missing, the workflow inserts `proxy_pass http://api.drivebit.ru:5000/;` (backend resolved via DNS). To use another upstream, add or edit `location /api/` in nginx on the front server and do not rely on the auto-inserted block.
+If `location /api/` is missing, the workflow inserts `proxy_pass http://155.212.170.94:5000/;` (backend stays on that host). To use another upstream, add or edit `location /api/` in nginx on the front server and do not rely on the auto-inserted block.
 
 ## Triggers
 

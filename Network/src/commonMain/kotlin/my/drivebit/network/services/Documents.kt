@@ -12,7 +12,6 @@ import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
 import my.drivebit.utils.extractPathFromApiUrl
-import my.drivebit.utils.isDirectMinioUrl
 
 interface Documents {
     suspend fun getDocuments(): List<Document>
@@ -83,7 +82,7 @@ class DocumentsImpl(
         val response = httpClient.get(url)
         val urlResponse: DocumentUrlResponse = response.parseResponse()
         val rawUrl = urlResponse.url
-        return if (isDirectMinioUrl(rawUrl)) extractPathFromApiUrl(rawUrl) else rawUrl
+        return if (rawUrl.contains("155.212.170.94")) extractPathFromApiUrl(rawUrl) else rawUrl
     }
 }
 

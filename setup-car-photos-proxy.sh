@@ -85,10 +85,10 @@ if grep -q "^[[:space:]]*location /[[:space:]]*{" "$NGINX_CONFIG"; then
     # Вставляем перед location /
     sed -i '/^[[:space:]]*location \/[[:space:]]*{/i\
     # Проксирование фотографий автомобилей на внешний сервер\
-    # /publicbct/... -> http://api.drivebit.ru:9000/publicbct/...\
+    # /publicbct/... -> http://155.212.170.94:9000/publicbct/...\
     location /publicbct/ {\
-        proxy_pass http://api.drivebit.ru:9000/publicbct/;\
-        proxy_set_header Host api.drivebit.ru:9000;\
+        proxy_pass http://155.212.170.94:9000/publicbct/;\
+        proxy_set_header Host 155.212.170.94:9000;\
         proxy_set_header X-Real-IP $remote_addr;\
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
         proxy_set_header X-Forwarded-Proto $scheme;\
@@ -107,10 +107,10 @@ else
     # Если location / не найден, добавляем в конец server блока
     sed -i '/^[[:space:]]*server[[:space:]]*{/a\
     # Проксирование фотографий автомобилей на внешний сервер\
-    # /publicbct/... -> http://api.drivebit.ru:9000/publicbct/...\
+    # /publicbct/... -> http://155.212.170.94:9000/publicbct/...\
     location /publicbct/ {\
-        proxy_pass http://api.drivebit.ru:9000/publicbct/;\
-        proxy_set_header Host api.drivebit.ru:9000;\
+        proxy_pass http://155.212.170.94:9000/publicbct/;\
+        proxy_set_header Host 155.212.170.94:9000;\
         proxy_set_header X-Real-IP $remote_addr;\
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
         proxy_set_header X-Forwarded-Proto $scheme;\
