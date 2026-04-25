@@ -40,3 +40,5 @@ Disallow: /profile
 Disallow: /edit-name
 Disallow: /change-email
 Disallow: /change-phone
+
+Sitemap: https://drivebit.ru/sitemap.xml

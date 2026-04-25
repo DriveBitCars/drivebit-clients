@@ -2,6 +2,7 @@ package my.drivebit.web
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class CityPathRoutingTest {
@@ -58,5 +59,21 @@ class CityPathRoutingTest {
     @Test
     fun cityPathWithFilter_nonAllFilterAppendsSlug() {
         assertEquals("/moskva/poblizosti", cityPathWithFilter("moskva", "Поблизости"))
+    }
+
+    @Test
+    fun parseCitySlugFromPath_supportedSitemapCityUrls() {
+        val urls =
+            listOf(
+                "/moskva",
+                "/zelenograd",
+                "/kaliningrad",
+                "/krasnogorsk",
+                "/lyubertsy",
+            )
+
+        urls.forEach { path ->
+            assertNotNull(parseCitySlugFromPath(path), "Expected city slug to be parsed for $path")
+        }
     }
 }
