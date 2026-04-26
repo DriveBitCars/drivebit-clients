@@ -83,6 +83,13 @@ object MetaTags {
                     path = "/payment-failure",
                     noindex = true,
                 ),
+            "/search/ai" to
+                PageMeta(
+                    title = "ИИ-поиск - DriveBit",
+                    description = "Умный поиск автомобилей в DriveBit.",
+                    path = "/search/ai",
+                    noindex = true,
+                ),
         )
 
     fun updateForPath(path: String) {
