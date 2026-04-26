@@ -28,6 +28,7 @@ import my.drivebit.components.TextError
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
+import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.START_AT
@@ -39,6 +40,10 @@ import my.drivebit.viewmodels.SearchPageDateViewModel
 import my.drivebit.viewmodels.SearchState
 import my.drivebit.viewmodels.SearchViewModel
 import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.border
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.fontSize
@@ -59,6 +64,7 @@ import org.w3c.dom.url.URLSearchParams
 
 @Composable
 fun SearchPage() {
+    val navigationController = LocalNavigationController.current!!
     val viewModel: SearchViewModel = koinInject()
     val state by viewModel.state.collectAsState()
     val displayedCars by viewModel.displayedCars.collectAsState()
@@ -210,6 +216,29 @@ fun SearchPage() {
                                 isSelected = isPriceSelected,
                                 selectedText = priceText,
                             )
+                            Div({
+                                onClick {
+                                    navigationController.navigateTo("/search/ai")
+                                }
+                                style {
+                                    padding(8.px, 12.px)
+                                    backgroundColor(CSSColors.Blue)
+                                    borderRadius(8.px)
+                                    border(1.px, LineStyle.Solid, CSSColors.Blue)
+                                    cursor("pointer")
+                                    property("transition", "all 0.2s ease")
+                                }
+                            }) {
+                                Span({
+                                    style {
+                                        fontSize(14.px)
+                                        color(CSSColors.White)
+                                        fontWeight("500")
+                                    }
+                                }) {
+                                    Text("ИИ-поиск")
+                                }
+                            }
                         }
                         Box(
                             modifier = {
