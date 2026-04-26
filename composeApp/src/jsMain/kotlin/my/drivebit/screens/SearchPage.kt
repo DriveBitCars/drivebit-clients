@@ -18,10 +18,10 @@ import my.drivebit.components.Column
 import my.drivebit.components.Divider
 import my.drivebit.components.DriveTypeFilter
 import my.drivebit.components.FilterChip
+import my.drivebit.components.FlowRow
 import my.drivebit.components.Loader
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.PriceFilter
-import my.drivebit.components.Row
 import my.drivebit.components.SearchDateRangeSelector
 import my.drivebit.components.SeatsFilter
 import my.drivebit.components.TextError
@@ -155,7 +155,7 @@ fun SearchPage() {
                             onStartDateChanged = { date -> searchPageDateViewModel.set(date) },
                             onEndDateChanged = { date -> searchPageDateEndViewModel.set(date) },
                         )
-                        Row(gap = 8.px) {
+                        FlowRow(gap = 8.px) {
                             FilterChip(
                                 name = "Марка",
                                 onClick = {
