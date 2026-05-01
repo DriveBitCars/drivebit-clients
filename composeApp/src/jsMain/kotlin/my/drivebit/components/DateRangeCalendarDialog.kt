@@ -34,6 +34,7 @@ fun DateRangeCalendarDialog(
     endMinOffsetDaysFromStart: Int = 0,
     /** Если false, «Отмена» только закрывает диалог, не обнуляет выбранный диапазон (как в бронировании). */
     clearRangeOnCancel: Boolean = true,
+    onConfirm: (() -> Unit)? = null,
 ) {
     val startState by startDateViewModel.state.collectAsState()
     val endState by endDateViewModel.state.collectAsState()
@@ -209,7 +210,10 @@ fun DateRangeCalendarDialog(
                         fontWeight(CSSTypography.FontWeight.semibold)
                         property("transition", "background-color 0.2s ease")
                     }
-                    onClick { closeAll() }
+                    onClick {
+                        closeAll()
+                        onConfirm?.invoke()
+                    }
                     onMouseEnter {
                         (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
                             "background-color",

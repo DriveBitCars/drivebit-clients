@@ -158,6 +158,7 @@ fun HeroBanner(
                                 startDateViewModel = startDateViewModel,
                                 endDateViewModel = endDateViewModel,
                                 compact = true,
+                                onRangeConfirmed = searchClick,
                             )
                         }
                         Div({
@@ -189,6 +190,7 @@ fun HeroBanner(
                                 startDateViewModel = startDateViewModel,
                                 endDateViewModel = endDateViewModel,
                                 compact = false,
+                                onRangeConfirmed = searchClick,
                             )
                         }
                         Div({

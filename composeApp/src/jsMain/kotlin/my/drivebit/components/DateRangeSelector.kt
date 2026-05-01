@@ -186,6 +186,7 @@ fun HeroDateRangeSelector(
     startDateViewModel: DateFieldViewModel,
     endDateViewModel: DateFieldViewModel,
     compact: Boolean = false,
+    onRangeConfirmed: (() -> Unit)? = null,
 ) {
     val startState by startDateViewModel.state.collectAsState()
     val endState by endDateViewModel.state.collectAsState()
@@ -279,6 +280,7 @@ fun HeroDateRangeSelector(
         DateRangeCalendarDialog(
             startDateViewModel = startDateViewModel,
             endDateViewModel = endDateViewModel,
+            onConfirm = onRangeConfirmed,
         )
     }
 }
