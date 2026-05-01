@@ -28,7 +28,6 @@ fun CarPhotosGalleryPage() {
             Div({
                 style {
                     width(100.percent)
-                    padding(20.px)
                     property("max-width", "1200px")
                     property("margin", "0 auto")
                 }
@@ -50,7 +49,6 @@ fun CarPhotosGalleryPage() {
         Div({
             style {
                 width(100.percent)
-                padding(20.px)
                 property("max-width", "1200px")
                 property("margin", "0 auto")
             }
