@@ -69,6 +69,13 @@ object MetaTags {
                     path = "/chat",
                     noindex = true,
                 ),
+            "/payment" to
+                PageMeta(
+                    title = "Оплата бронирования - DriveBit",
+                    description = "Оплата бронирования автомобиля в DriveBit.",
+                    path = "/payment",
+                    noindex = true,
+                ),
             "/payment-success" to
                 PageMeta(
                     title = "Оплата успешна - DriveBit",

@@ -26,6 +26,7 @@ val RESERVED_FIRST_SEGMENTS: Set<String> =
         "offer",
         "contacts",
         "privacy",
+        "payment",
         "payment-success",
         "payment-failure",
         "car-edit",
