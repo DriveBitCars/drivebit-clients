@@ -11,6 +11,8 @@ import my.drivebit.viewmodels.AddressSuggestViewModel
 import my.drivebit.viewmodels.AuthFormViewModel
 import my.drivebit.viewmodels.AvatarUploadViewModel
 import my.drivebit.viewmodels.AvatarUploadViewModelImpl
+import my.drivebit.viewmodels.BookingPaymentLinkViewModel
+import my.drivebit.viewmodels.BookingPaymentLinkViewModelImpl
 import my.drivebit.viewmodels.BodyTypeViewModel
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
@@ -212,6 +214,13 @@ val commonViewModelsModule: Module =
                 payment = get(),
                 chatId = chatId,
                 participantAvatarCache = get(),
+            )
+        }
+
+        factory<BookingPaymentLinkViewModel> { (bookingId: String) ->
+            BookingPaymentLinkViewModelImpl(
+                payment = get(),
+                bookingId = bookingId,
             )
         }
 

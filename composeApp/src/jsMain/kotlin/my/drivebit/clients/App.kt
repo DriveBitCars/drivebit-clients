@@ -39,6 +39,7 @@ import my.drivebit.screens.MyDealsPage
 import my.drivebit.screens.ContactsPage
 import my.drivebit.screens.OfferPage
 import my.drivebit.screens.OtpVerificationPage
+import my.drivebit.screens.BookingPaymentLinkPage
 import my.drivebit.screens.PaymentFailurePage
 import my.drivebit.screens.PaymentSuccessPage
 import my.drivebit.screens.PrivacyPage
@@ -165,6 +166,9 @@ actual fun App() {
                 }
                 currentPath.startsWith("/payment-failure") -> {
                     PaymentFailurePage()
+                }
+                currentPath.startsWith("/payment") -> {
+                    BookingPaymentLinkPage()
                 }
                 currentPath.startsWith("/car-edit") -> {
                     CarEditPage()
