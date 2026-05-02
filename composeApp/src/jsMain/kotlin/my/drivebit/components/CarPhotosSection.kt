@@ -28,11 +28,16 @@ fun CarPhotosSection(car: CarDetailResponse) {
             } else {
                 Row(
                     gap = 16.px,
+                    alignItems = AlignItems.FlexStart,
                     modifier = { width(100.percent) },
                 ) {
                     Column(
                         gap = 8.px,
-                        modifier = { flex(1) },
+                        modifier = {
+                            flex(1)
+                            minWidth(0.px)
+                            alignItems(AlignItems.FlexStart)
+                        },
                     ) {
                         CarMainPhoto(mainPhoto, car.id, allPhotos.isNotEmpty())
                     }
@@ -90,6 +95,15 @@ private fun isShowButton(
     return photoSize > 3
 }
 
+private fun StyleScope.carMainPhotoImgStyle() {
+    width(100.percent)
+    property("height", "auto")
+    property("max-width", "100%")
+    property("flex-shrink", "0")
+    display(DisplayStyle.Block)
+    borderRadius(8.px)
+}
+
 @Composable
 private fun CarMainPhoto(
     mainPhoto: CarPhotoItem?,
@@ -99,18 +113,17 @@ private fun CarMainPhoto(
     if (mainPhoto != null && mainPhoto.url.isNotEmpty()) {
         if (isClickable) {
             Div({
-                style { cursor("pointer") }
+                style {
+                    cursor("pointer")
+                    width(100.percent)
+                    display(DisplayStyle.Block)
+                }
                 onClick { window.location.href = "/car-photos-gallery?id=$carId" }
             }) {
                 Img(
                     src = mainPhoto.url,
                     attrs = {
-                        style {
-                            width(100.percent)
-                            height(400.px)
-                            property("object-fit", "cover")
-                            borderRadius(8.px)
-                        }
+                        style { carMainPhotoImgStyle() }
                     },
                 )
             }
@@ -118,12 +131,7 @@ private fun CarMainPhoto(
             Img(
                 src = mainPhoto.url,
                 attrs = {
-                    style {
-                        width(100.percent)
-                        height(400.px)
-                        property("object-fit", "cover")
-                        borderRadius(8.px)
-                    }
+                    style { carMainPhotoImgStyle() }
                 },
             )
         }
