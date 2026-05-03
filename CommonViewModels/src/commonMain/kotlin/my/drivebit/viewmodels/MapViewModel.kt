@@ -65,7 +65,10 @@ class MapViewModel(
         _state.update { it.copy(nearbyListPage = page.coerceAtLeast(0)) }
     }
 
-    fun syncNearbyListPageToTotalCount(totalCount: Int, pageSize: Int) {
+    fun syncNearbyListPageToTotalCount(
+        totalCount: Int,
+        pageSize: Int,
+    ) {
         if (totalCount <= 0) {
             if (_state.value.nearbyListPage != 0) {
                 _state.update { it.copy(nearbyListPage = 0) }

@@ -16,6 +16,7 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
+import my.drivebit.utils.AUTO_BOOK_AFTER_LOGIN
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.REDIRECT_PATH
 import my.drivebit.utils.RETURN_CAR_ID
@@ -69,6 +70,7 @@ fun LoginByPasswordPage() {
                         val params = mutableListOf("id=${returnCarId.encodeUrlParameter()}")
                         if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
                         if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
+                        params.add("$AUTO_BOOK_AFTER_LOGIN=1")
                         "/car-detail?${params.joinToString("&")}"
                     }
                     else -> homePathHref(storage)
