@@ -12,6 +12,7 @@ import my.drivebit.components.CarsGrid
 import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.HeroBanner
 import my.drivebit.components.MainPromoSections
+import my.drivebit.components.NearbyMapListSwitcher
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.filterButton
 import my.drivebit.design.CSSColors
@@ -31,6 +32,7 @@ import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MapViewModel
+import my.drivebit.viewmodels.NearbyLayoutMode
 import my.drivebit.web.cityPathWithFilter
 import my.drivebit.web.filterTitleToPathSegment
 import my.drivebit.web.parseCitySlugFromPath
@@ -50,6 +52,8 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
+
+private const val NEARBY_LIST_PAGE_SIZE = 9
 
 @Composable
 fun HomePage() {
@@ -127,6 +131,13 @@ fun HomePage() {
 
         when (selected) {
             "Поблизости" -> {
+                val nearbyLayout = mapState.value.nearbyLayoutMode
+                val nearbyListPage = mapState.value.nearbyListPage
+
+                LaunchedEffect(cars) {
+                    mapViewModel.syncNearbyListPageToTotalCount(cars.size, NEARBY_LIST_PAGE_SIZE)
+                }
+
                 val markers =
                     cars
                         .mapNotNull { car ->
@@ -147,26 +158,75 @@ fun HomePage() {
                             }
                         }
 
-                LaunchedEffect(cars) {
-                    mapViewModel.updateCameraPositionFromCars(cars)
+                LaunchedEffect(cars, nearbyLayout) {
+                    if (nearbyLayout == NearbyLayoutMode.Map) {
+                        mapViewModel.updateCameraPositionFromCars(cars)
+                    }
                 }
-                NearbyMapView(
-                    cameraPosition = mapState.value.cameraPosition,
-                    markers = markers,
-                    onMarkerClick = { marker ->
-                        val params = mutableListOf("id=${marker.id.encodeUrlParameter()}")
-                        dateToStartAtIso(startState.date)?.let {
-                            params.add("$START_AT=${it.encodeUrlParameter()}")
-                        }
-                        dateToEndAtIso(endState.date)?.let {
-                            params.add("$END_AT=${it.encodeUrlParameter()}")
-                        }
-                        window.location.href = "/car-detail?${params.joinToString("&")}"
-                    },
-                    onCameraMove = { position ->
-                        mapViewModel.updateCameraPosition(position)
-                    },
+
+                NearbyMapListSwitcher(
+                    mode = nearbyLayout,
+                    onModeChange = { mapViewModel.setNearbyLayoutMode(it) },
                 )
+
+                when (nearbyLayout) {
+                    NearbyLayoutMode.Map ->
+                        NearbyMapView(
+                            cameraPosition = mapState.value.cameraPosition,
+                            markers = markers,
+                            onMarkerClick = { marker ->
+                                val params = mutableListOf("id=${marker.id.encodeUrlParameter()}")
+                                dateToStartAtIso(startState.date)?.let {
+                                    params.add("$START_AT=${it.encodeUrlParameter()}")
+                                }
+                                dateToEndAtIso(endState.date)?.let {
+                                    params.add("$END_AT=${it.encodeUrlParameter()}")
+                                }
+                                window.location.href = "/car-detail?${params.joinToString("&")}"
+                            },
+                            onCameraMove = { position ->
+                                mapViewModel.updateCameraPosition(position)
+                            },
+                        )
+                    NearbyLayoutMode.List -> {
+                        val totalCount = cars.size
+                        val totalPages =
+                            if (totalCount == 0) {
+                                0
+                            } else {
+                                (totalCount + NEARBY_LIST_PAGE_SIZE - 1) / NEARBY_LIST_PAGE_SIZE
+                            }
+                        val pagedCars =
+                            cars.drop(nearbyListPage * NEARBY_LIST_PAGE_SIZE).take(NEARBY_LIST_PAGE_SIZE)
+                        Div({
+                            style {
+                                width(100.percent)
+                                marginTop(20.px)
+                            }
+                        }) {
+                            CarsGrid(
+                                cars = pagedCars,
+                                onCarClick = { car ->
+                                    val params = mutableListOf("id=${car.id.encodeUrlParameter()}")
+                                    dateToStartAtIso(startState.date)?.let {
+                                        params.add("$START_AT=${it.encodeUrlParameter()}")
+                                    }
+                                    dateToEndAtIso(endState.date)?.let {
+                                        params.add("$END_AT=${it.encodeUrlParameter()}")
+                                    }
+                                    window.location.href = "/car-detail?${params.joinToString("&")}"
+                                },
+                            )
+                            PaginationBar(
+                                currentPage = nearbyListPage,
+                                totalPages = totalPages,
+                                totalCount = totalCount,
+                                pageSize = NEARBY_LIST_PAGE_SIZE,
+                                onPageChange = { mapViewModel.setNearbyListPage(it) },
+                            )
+                        }
+                    }
+                }
             }
             else -> {
                 Div({
