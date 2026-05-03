@@ -13,8 +13,15 @@ import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.network.services.CarItem
 
+enum class NearbyLayoutMode {
+    Map,
+    List,
+}
+
 data class MapScreenState(
     val cameraPosition: MapCameraPosition = MapCameraPosition.default(),
+    val nearbyLayoutMode: NearbyLayoutMode = NearbyLayoutMode.Map,
+    val nearbyListPage: Int = 0,
 )
 
 class MapViewModel(
@@ -47,6 +54,32 @@ class MapViewModel(
                     cameraPosition = cameraPosition,
                 )
             }
+        }
+    }
+
+    fun setNearbyLayoutMode(mode: NearbyLayoutMode) {
+        _state.update { it.copy(nearbyLayoutMode = mode) }
+    }
+
+    fun setNearbyListPage(page: Int) {
+        _state.update { it.copy(nearbyListPage = page.coerceAtLeast(0)) }
+    }
+
+    fun syncNearbyListPageToTotalCount(
+        totalCount: Int,
+        pageSize: Int,
+    ) {
+        if (totalCount <= 0) {
+            if (_state.value.nearbyListPage != 0) {
+                _state.update { it.copy(nearbyListPage = 0) }
+            }
+            return
+        }
+        val totalPages = (totalCount + pageSize - 1) / pageSize
+        val maxPageIndex = (totalPages - 1).coerceAtLeast(0)
+        val clamped = _state.value.nearbyListPage.coerceIn(0, maxPageIndex)
+        if (clamped != _state.value.nearbyListPage) {
+            _state.update { it.copy(nearbyListPage = clamped) }
         }
     }
 

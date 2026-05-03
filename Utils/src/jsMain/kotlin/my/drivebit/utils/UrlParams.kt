@@ -28,6 +28,8 @@ const val END_AT = "endAt"
 
 const val REDIRECT_PATH = "redirect"
 
+const val AUTO_BOOK_AFTER_LOGIN = "autoBook"
+
 fun getUrlParameter(name: String): String {
     val queryString = window.location.search
     return getUrlParameterFromQueryString(queryString, name)
@@ -55,3 +57,18 @@ fun getUrlParameterFromPath(
 }
 
 fun String.encodeUrlParameter(): String = js("encodeURIComponent")(this) as String
+
+fun removeUrlQueryParam(name: String) {
+    val raw = window.location.search.removePrefix("?")
+    if (raw.isBlank()) return
+    val parts = raw.split("&")
+    val kept =
+        parts.filter { part ->
+            val key = part.substringBefore("=", part)
+            !key.equals(name, ignoreCase = true)
+        }
+    if (kept.size == parts.size) return
+    val newSearch = if (kept.isEmpty()) "" else "?${kept.joinToString("&")}"
+    val newUrl = window.location.pathname + newSearch + window.location.hash
+    window.history.replaceState(null, "", newUrl)
+}

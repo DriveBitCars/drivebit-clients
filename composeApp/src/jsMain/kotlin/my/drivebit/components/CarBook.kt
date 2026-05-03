@@ -7,7 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
@@ -21,11 +23,15 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.AUTO_BOOK_AFTER_LOGIN
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.START_AT
 import my.drivebit.utils.addDays
 import my.drivebit.utils.encodeUrlParameter
+import my.drivebit.utils.getUrlParameter
+import my.drivebit.utils.removeUrlQueryParam
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.DateTimeFieldViewModel
@@ -44,6 +50,7 @@ import org.jetbrains.compose.web.dom.Select
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import kotlin.time.Duration.Companion.hours
+import org.koin.compose.koinInject
 import org.w3c.dom.HTMLSelectElement
 
 @Composable
@@ -56,6 +63,7 @@ fun CarBook(
 ) {
     val state by viewModel.state.collectAsState()
     val isPaying by viewModel.isPaying.collectAsState()
+    val storage: Storage = koinInject()
     val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
     val payButtonViewModel = createButtonViewModel()
@@ -96,7 +104,15 @@ fun CarBook(
         }
     }
 
+    val autoBookAfterLogin =
+        remember {
+            getUrlParameter(AUTO_BOOK_AFTER_LOGIN).equals("1", ignoreCase = true) ||
+                getUrlParameter(AUTO_BOOK_AFTER_LOGIN).equals("true", ignoreCase = true)
+        }
+
     val bookState = state as? RentState.Book ?: return
+
+    var autoBookConsumed by remember { mutableStateOf(false) }
 
     LaunchedEffect(initialStartAt, initialEndAt) {
         when {
@@ -146,6 +162,28 @@ fun CarBook(
                 initialEndAt?.let { viewModel.setEndDate(it) }
             }
         }
+    }
+
+    LaunchedEffect(
+        autoBookAfterLogin,
+        autoBookConsumed,
+        bookState.startDate,
+        bookState.endDate,
+        bookState.showStartDateError,
+        bookState.showEndDateError,
+        bookState.pendingPaymentBookingId,
+        bookState.isCreating,
+    ) {
+        if (!autoBookAfterLogin || autoBookConsumed) return@LaunchedEffect
+        if (bookState.pendingPaymentBookingId != null) return@LaunchedEffect
+        if (bookState.isCreating) return@LaunchedEffect
+        if (!storage.isLogined()) return@LaunchedEffect
+        if (bookState.startDate.isNullOrBlank() || bookState.endDate.isNullOrBlank()) return@LaunchedEffect
+        if (bookState.showStartDateError || bookState.showEndDateError) return@LaunchedEffect
+        autoBookConsumed = true
+        removeUrlQueryParam(AUTO_BOOK_AFTER_LOGIN)
+        reachYandexGoalBron()
+        viewModel.onBookClick()
     }
 
     LaunchedEffect(bookState.isCreating, bookState.pendingPaymentBookingId) {

@@ -21,6 +21,7 @@ import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.shared.storage.Storage
 import my.drivebit.web.homePathHref
+import my.drivebit.utils.AUTO_BOOK_AFTER_LOGIN
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.IDENTIFIER
 import my.drivebit.utils.NEW_LOGIN
@@ -98,6 +99,7 @@ fun OtpVerificationPage() {
                                 val params = mutableListOf("id=${returnCarId.encodeUrlParameter()}")
                                 if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
                                 if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
+                                params.add("$AUTO_BOOK_AFTER_LOGIN=1")
                                 "/car-detail?${params.joinToString("&")}"
                             }
                             else -> homePathHref(storage)
