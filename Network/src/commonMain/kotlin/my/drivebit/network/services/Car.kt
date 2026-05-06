@@ -189,18 +189,47 @@ data class CarDetailResponse(
 
     fun resolvedInsuranceDisplay(): String? = insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() }
 
-    fun resolvedAddressDisplay(): String? =
-        ValidAddressString?.trim()?.takeIf { it.isNotEmpty() }
-            ?: general.address.run {
-                val parts =
-                    listOfNotNull(
-                        region,
-                        city,
-                        street,
-                        house?.takeIf { it != "None" },
-                    )
-                parts.joinToString(", ").takeIf { it.isNotBlank() }
+    fun resolvedAddressDisplay(): String? {
+        val fromValidAddress =
+            normalizeAddressParts(
+                ValidAddressString
+                    ?.split(",")
+                    ?.map { it.trim() }
+                    .orEmpty(),
+            )
+        if (fromValidAddress != null) {
+            return fromValidAddress
+        }
+
+        return general.address.run {
+            normalizeAddressParts(
+                listOfNotNull(
+                    region,
+                    city,
+                    street,
+                    house?.takeIf { it != "None" },
+                ),
+            )
+        }
+    }
+
+    private fun normalizeAddressParts(parts: List<String?>): String? {
+        val normalizedParts = mutableListOf<String>()
+        val seenParts = mutableSetOf<String>()
+        parts.forEach { rawPart ->
+            val part = rawPart?.trim().orEmpty()
+            if (part.isEmpty()) {
+                return@forEach
             }
+            val canonicalPart = part.lowercase()
+            if (canonicalPart == "none" || canonicalPart == "null" || canonicalPart in seenParts) {
+                return@forEach
+            }
+            seenParts += canonicalPart
+            normalizedParts += part
+        }
+        return normalizedParts.joinToString(", ").takeIf { it.isNotBlank() }
+    }
 }
 
 @Serializable
