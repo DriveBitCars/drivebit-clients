@@ -205,8 +205,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Серверы
 
-- **Фронт (nginx):** `45.131.42.106` — конфиги скопированы с `155.212.170.94` (`/etc/nginx`, `/etc/letsencrypt`). Повторить перенос: `scripts/nginx-migrate-from-old-server.sh` (переменные `OLD_HOST`, `NEW_HOST`).
-- **Прежний хост с теми же nginx-конфигами:** `155.212.170.94` (не изменялся при копировании).
+- **API для клиента (прод):** `https://drivebit.ru/api/` — базовый URL в коде (`Network` / `HttpClientFactory`).
+- **Бэкенд (REST + MinIO):** `157.22.252.70` — HTTP API порт **5000**, MinIO порт **9000**; Swagger напрямую: `http://157.22.252.70:5000/swagger/index.html`.
+- **Nginx (TLS и прокси под `drivebit.ru`):** текущий A-записи домена — `80.249.146.3`; upstream для `/api/`, `/publicbct/`, `/privatebct/` и т.п. указывает на **`157.22.252.70`** (см. `NGINX_API_PROXY_SETUP.md`, `CHECK_NGINX_API_PROXY.md`).
+- **`api.drivebit.ru`:** A-запись ведёт на бэкенд **`157.22.252.70`** (поддомен `api` в панели DNS). В приложении REST по-прежнему идёт на **`https://drivebit.ru/api/`**; это имя удобно для SSH, прямых ссылок и MinIO. Если нужен **`https://api.drivebit.ru`**, на этой машине должен быть TLS (например nginx/Certbot) для этого `server_name`.
+- **История / миграция nginx:** конфиги когда-либо копировались с `155.212.170.94`; повторить перенос целиком: `scripts/nginx-migrate-from-old-server.sh` (`OLD_HOST`, `NEW_HOST`). Ранее в README фигурировал фронт `45.131.42.106` как источник копии — актуальный фронт смотрите по DNS `drivebit.ru`.
 
 ---
 

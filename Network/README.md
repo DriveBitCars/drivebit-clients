@@ -4,9 +4,11 @@
 
 ## API Configuration
 
-- **Base URL**: `https://api.drivebit.ru`
-- **Backend Server**: `155.212.170.94:5000`
-- **API Documentation**: [http://155.212.170.94:5000/swagger/index.html](http://155.212.170.94:5000/swagger/index.html)
+- **Base URL (клиент):** `https://drivebit.ru/api/` — константа `DEFAULT_BASE_URL` в `HttpClientFactory.kt`.
+- **Бэкенд (upstream, прямой HTTP):** `157.22.252.70:5000`
+- **MinIO (upstream, прямой HTTP):** `157.22.252.70:9000`
+- **Swagger (прямой доступ к API):** [http://157.22.252.70:5000/swagger/index.html](http://157.22.252.70:5000/swagger/index.html)
+- **Swagger через nginx (прод):** [https://drivebit.ru/api/swagger/index.html](https://drivebit.ru/api/swagger/index.html)
 
 ## Структура
 
