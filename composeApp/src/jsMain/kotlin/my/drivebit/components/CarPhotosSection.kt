@@ -66,7 +66,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
                 }
             }
 
-            if (isShowButton(isMobile, allPhotos.size)) {
+            if (allPhotos.isNotEmpty()) {
                 Button({
                     style {
                         width(100.percent)
@@ -96,16 +96,6 @@ fun CarPhotosSection(car: CarDetailResponse) {
             }
         }
     }
-}
-
-private fun isShowButton(
-    isMobile: Boolean,
-    photoSize: Int,
-): Boolean {
-    if (isMobile) {
-        return photoSize > 1
-    }
-    return photoSize > 3
 }
 
 private fun StyleScope.carMainPhotoImgStyle() {
