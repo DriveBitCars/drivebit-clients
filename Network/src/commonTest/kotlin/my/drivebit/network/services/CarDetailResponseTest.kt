@@ -234,6 +234,50 @@ class CarDetailResponseTest {
     }
 
     @Test
+    fun `resolvedAddressDisplay removes duplicate parts from structured address`() {
+        val car =
+            CarDetailResponse(
+                id = "x",
+                general =
+                    CarGeneral(
+                        brandName = "A",
+                        modelName = "B",
+                        vin = "",
+                        seats = 5,
+                        address =
+                            CarAddress(
+                                region = "Москва",
+                                city = "Москва",
+                                street = "Перекопская",
+                                house = null,
+                                geoLat = 1.0,
+                                geoLon = 2.0,
+                            ),
+                    ),
+                ValidAddressString = null,
+            )
+        assertEquals("Москва, Перекопская", car.resolvedAddressDisplay())
+    }
+
+    @Test
+    fun `resolvedAddressDisplay removes duplicate parts from validAddressString`() {
+        val car =
+            CarDetailResponse(
+                id = "x",
+                general =
+                    CarGeneral(
+                        brandName = "A",
+                        modelName = "B",
+                        vin = "",
+                        seats = 5,
+                        address = CarAddress(geoLat = 1.0, geoLon = 2.0),
+                    ),
+                ValidAddressString = "Москва, Москва, Перекопская",
+            )
+        assertEquals("Москва, Перекопская", car.resolvedAddressDisplay())
+    }
+
+    @Test
     fun `resolvedInsuranceDisplay is null when insuranceTranslate is absent`() {
         val car =
             CarDetailResponse(
