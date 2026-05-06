@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
-import my.drivebit.network.services.CarAddress
 import my.drivebit.network.services.CarBrand
 import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
@@ -752,11 +751,6 @@ class CarEditMviViewModelImpl(
         }
     }
 
-    private fun buildAddressFromGeneral(addr: CarAddress): String? {
-        val parts = listOfNotNull(addr.region, addr.city, addr.street, addr.house?.takeIf { it != "None" })
-        return parts.joinToString(", ").takeIf { it.isNotBlank() }
-    }
-
     private fun updateFocusState(update: (CarEditMviState.Success) -> CarEditMviState.Success) {
         _state.update { currentState ->
             when (currentState) {
@@ -791,10 +785,7 @@ class CarEditMviViewModelImpl(
             trunkSize = car.resolvedTrunkSize(),
             trunkSizeTranslate = car.resolvedTrunkSizeTranslate() ?: "",
             trunkSizeSearch = car.resolvedTrunkSizeTranslate() ?: "",
-            address =
-                car.ValidAddressString
-                    ?: buildAddressFromGeneral(car.general.address)
-                    ?: "",
+            address = car.resolvedAddressDisplay() ?: "",
             description = car.general?.description ?: "",
             hourlyRate = NumberFormatter.formatInt(car.resolvedHourlyRate().takeIf { it > 0 }),
             dailyRate = NumberFormatter.formatInt(car.resolvedDailyRate().takeIf { it > 0 }),

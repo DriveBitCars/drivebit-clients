@@ -178,7 +178,60 @@ class CarDetailResponseTest {
             assertEquals("OSAGO_Included", result.insurance)
             assertEquals("ОСАГО включено", result.insuranceTranslate)
             assertEquals("ОСАГО включено", result.resolvedInsuranceDisplay())
+            assertEquals("Test Address", result.resolvedAddressDisplay())
         }
+
+    @Test
+    fun `resolvedAddressDisplay prefers validAddressString over structured parts`() {
+        val car =
+            CarDetailResponse(
+                id = "x",
+                general =
+                    CarGeneral(
+                        brandName = "A",
+                        modelName = "B",
+                        vin = "",
+                        seats = 5,
+                        address =
+                            CarAddress(
+                                region = "R",
+                                city = "C",
+                                street = "S",
+                                house = "1",
+                                geoLat = 0.0,
+                                geoLon = 0.0,
+                            ),
+                    ),
+                ValidAddressString = "From API",
+            )
+        assertEquals("From API", car.resolvedAddressDisplay())
+    }
+
+    @Test
+    fun `resolvedAddressDisplay builds from general address when ValidAddressString is absent`() {
+        val car =
+            CarDetailResponse(
+                id = "x",
+                general =
+                    CarGeneral(
+                        brandName = "A",
+                        modelName = "B",
+                        vin = "",
+                        seats = 5,
+                        address =
+                            CarAddress(
+                                region = "Ростовская обл.",
+                                city = "Ростов-на-Дону",
+                                street = "Жлобинский",
+                                house = "25",
+                                geoLat = 1.0,
+                                geoLon = 2.0,
+                            ),
+                    ),
+                ValidAddressString = null,
+            )
+        assertEquals("Ростовская обл., Ростов-на-Дону, Жлобинский, 25", car.resolvedAddressDisplay())
+    }
 
     @Test
     fun `resolvedInsuranceDisplay is null when insuranceTranslate is absent`() {
