@@ -338,7 +338,12 @@ jobs:
               fi
             done
           fi
-          if command -v nginx >/dev/null 2>&1; then NGINX_BIN="$(command -v nginx)"; elif [ -x /usr/sbin/nginx ]; then NGINX_BIN=/usr/sbin/nginx; else echo "nginx binary not found"; exit 1; fi
+          NGINX_BIN=""
+          for p in "$(command -v nginx 2>/dev/null || true)" /usr/sbin/nginx /usr/local/sbin/nginx /usr/local/nginx/sbin/nginx; do
+            [ -z "$p" ] && continue
+            if [ -f "$p" ]; then NGINX_BIN="$p"; break; fi
+          done
+          if [ -z "$NGINX_BIN" ]; then echo "nginx binary not found (install nginx or set path)"; exit 1; fi
           $SUDO_CMD "$NGINX_BIN" -t
           $SUDO_CMD systemctl reload nginx
           echo "Activated releases/$RELEASE_NAME"
@@ -392,7 +397,12 @@ jobs:
           
           # Test nginx config
           echo "🧪 Testing nginx configuration..."
-          if command -v nginx >/dev/null 2>&1; then NGINX_BIN="$(command -v nginx)"; elif [ -x /usr/sbin/nginx ]; then NGINX_BIN=/usr/sbin/nginx; else echo "nginx binary not found"; exit 1; fi
+          NGINX_BIN=""
+          for p in "$(command -v nginx 2>/dev/null || true)" /usr/sbin/nginx /usr/local/sbin/nginx /usr/local/nginx/sbin/nginx; do
+            [ -z "$p" ] && continue
+            if [ -f "$p" ]; then NGINX_BIN="$p"; break; fi
+          done
+          if [ -z "$NGINX_BIN" ]; then echo "nginx binary not found"; exit 1; fi
           $SUDO_CMD "$NGINX_BIN" -t || (echo "❌ Nginx config test failed!" && exit 1)
           
           # Reload nginx
@@ -417,7 +427,12 @@ jobs:
           
           # Force nginx to reload and clear caches
           echo "🔄 Forcing nginx reload and cache clear..."
-          if command -v nginx >/dev/null 2>&1; then NGINX_BIN="$(command -v nginx)"; elif [ -x /usr/sbin/nginx ]; then NGINX_BIN=/usr/sbin/nginx; else echo "nginx binary not found"; exit 1; fi
+          NGINX_BIN=""
+          for p in "$(command -v nginx 2>/dev/null || true)" /usr/sbin/nginx /usr/local/sbin/nginx /usr/local/nginx/sbin/nginx; do
+            [ -z "$p" ] && continue
+            if [ -f "$p" ]; then NGINX_BIN="$p"; break; fi
+          done
+          if [ -z "$NGINX_BIN" ]; then echo "nginx binary not found"; exit 1; fi
           $SUDO_CMD "$NGINX_BIN" -t
           $SUDO_CMD systemctl reload nginx
           echo "Nginx reloaded (static compression conf)"
