@@ -32,6 +32,7 @@ class MockCarServiceForMvi : Car {
     var shouldThrowErrorOnDelete = false
     var errorMessage = "Network error"
     var networkExceptionStatusCode: HttpStatusCode = HttpStatusCode.InternalServerError
+    var lastCreateOrUpdateRequest: CarCreateRequest? = null
 
     override suspend fun search(
         cityId: String,
@@ -98,6 +99,7 @@ class MockCarServiceForMvi : Car {
         request: CarCreateRequest,
         carId: String?,
     ): my.drivebit.network.services.CarResponse {
+        lastCreateOrUpdateRequest = request
         if (shouldThrowErrorOnSave) {
             if (shouldThrowNetworkException) {
                 throw NetworkException(networkExceptionStatusCode, errorMessage)
@@ -762,6 +764,23 @@ class CarEditMviViewModelTest {
             val finalState = viewModel.state.value
             assertIs<CarEditMviState.Success>(finalState)
             assertEquals("Failed to save car", finalState.saveError)
+        }
+
+    @Test
+    fun `SaveCar should send OSAGO unlimited insurance api value as is`() =
+        runTest(StandardTestDispatcher()) {
+            val mockCarService = MockCarServiceForMvi()
+            val viewModel = createCarEditMviViewModel(carService = mockCarService, carId = "test-car-id")
+
+            advanceUntilIdle()
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
+            advanceUntilIdle()
+            viewModel.handleIntent(CarEditIntent.SelectInsurance("OSAGO_Unlimited"))
+            advanceUntilIdle()
+            viewModel.handleIntent(CarEditIntent.SaveCar)
+            advanceUntilIdle()
+
+            assertEquals("OSAGO_Unlimited", mockCarService.lastCreateOrUpdateRequest?.insurance)
         }
 
     @Test
