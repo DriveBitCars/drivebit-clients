@@ -68,7 +68,7 @@ Until step 2 is done, switching `current` will not change what nginx serves.
 
 ## API upstream
 
-If `location /api/` is missing, the workflow inserts `proxy_pass http://155.212.170.94:5000/;` (backend stays on that host). To use another upstream, add or edit `location /api/` in nginx on the front server and do not rely on the auto-inserted block.
+If `location /api/` is missing, the workflow inserts `proxy_pass http://157.22.252.70:5000/;` (current production backend). To use another upstream, add or edit `location /api/` in nginx on the front server and do not rely on the auto-inserted block.
 
 ## Triggers
 
