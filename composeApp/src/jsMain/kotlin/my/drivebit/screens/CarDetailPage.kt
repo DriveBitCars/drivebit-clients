@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarBook
+import my.drivebit.components.CarDetailAddress
 import my.drivebit.components.CarDepositSection
 import my.drivebit.components.CarDescription
 import my.drivebit.components.CarInsuranceSection
@@ -194,6 +195,7 @@ private fun CarDetailContent(
         val carLon = car.general.address.geoLon
 
         if (carLat != null && carLon != null && carLat != 0.0 && carLon != 0.0) {
+            CarDetailAddress(car.resolvedAddressDisplay())
             CarLocationMap(car = car)
         }
     }

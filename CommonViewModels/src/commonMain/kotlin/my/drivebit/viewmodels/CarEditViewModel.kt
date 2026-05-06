@@ -201,7 +201,7 @@ class CarEditViewModelImpl(
             trunkSize = resolvedTrunkSize?.takeIf { it.isNotEmpty() },
             trunkSizeTranslate = resolvedTrunkSizeTranslate,
             trunkSizeSearch = resolvedTrunkSizeTranslate,
-            address = car.ValidAddressString ?: "",
+            address = car.resolvedAddressDisplay() ?: "",
             description = car.general.description ?: "",
             hourlyRate =
                 car.hourlyRate

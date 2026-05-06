@@ -134,7 +134,7 @@ data class CarDetailResponse(
     val engineVolume: Double? = null,
     val productionYear: Int? = null,
     val licensePlate: String? = null,
-    val ValidAddressString: String? = null,
+    @SerialName("validAddressString") @JsonNames("ValidAddressString") val ValidAddressString: String? = null,
     val hourlyRate: Double? = null,
     val dailyRate: Double? = null,
     val dailyRate4Days: Double? = null,
@@ -188,6 +188,19 @@ data class CarDetailResponse(
     fun resolvedDeposit(): Int = deposit?.toInt() ?: 0
 
     fun resolvedInsuranceDisplay(): String? = insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() }
+
+    fun resolvedAddressDisplay(): String? =
+        ValidAddressString?.trim()?.takeIf { it.isNotEmpty() }
+            ?: general.address.run {
+                val parts =
+                    listOfNotNull(
+                        region,
+                        city,
+                        street,
+                        house?.takeIf { it != "None" },
+                    )
+                parts.joinToString(", ").takeIf { it.isNotBlank() }
+            }
 }
 
 @Serializable

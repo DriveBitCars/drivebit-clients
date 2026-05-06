@@ -100,16 +100,24 @@ object MetaTags {
         )
 
     fun updateForPath(path: String) {
-        val pageMeta = pages[path] ?: pages["/"] ?: return
+        val normalizedPath = normalizePath(path)
+        val pageMeta =
+            pages[normalizedPath]
+                ?: PageMeta(
+                    title = DEFAULT_TITLE,
+                    description = DEFAULT_DESCRIPTION,
+                    path = normalizedPath,
+                )
 
         document.title = pageMeta.title
 
         updateMetaTag("description", pageMeta.description)
         updateMetaTag("og:title", pageMeta.title, property = true)
         updateMetaTag("og:description", pageMeta.description, property = true)
-        updateMetaTag("og:url", getFullUrl(path, includeQuery = true), property = true)
+        updateMetaTag("og:url", getFullUrl(pageMeta.path, includeQuery = true), property = true)
+        updateMetaTag("twitter:url", getFullUrl(pageMeta.path, includeQuery = true))
 
-        updateCanonicalUrl(getFullUrl(path, includeQuery = false))
+        updateCanonicalUrl(getFullUrl(pageMeta.path, includeQuery = false))
 
         if (pageMeta.noindex) {
             updateMetaTag("robots", "noindex, nofollow")
@@ -164,5 +172,12 @@ object MetaTags {
         val cleanPath = path.trimEnd('/').ifEmpty { "/" }
         val query = if (includeQuery) window.location.search else ""
         return "${window.location.protocol}//${window.location.host}$cleanPath$query"
+    }
+
+    private fun normalizePath(path: String): String {
+        val withoutQuery = path.substringBefore('?').substringBefore('#')
+        if (withoutQuery.isBlank()) return "/"
+        val normalized = if (withoutQuery.startsWith("/")) withoutQuery else "/$withoutQuery"
+        return normalized.trimEnd('/').ifEmpty { "/" }
     }
 }
