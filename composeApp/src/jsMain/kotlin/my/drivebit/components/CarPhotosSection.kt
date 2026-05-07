@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.window
-import org.w3c.dom.events.Event
 import my.drivebit.components.ResponsiveContainer
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.CarDetailResponse
@@ -18,6 +17,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.events.Event
 
 @Composable
 fun CarPhotosSection(car: CarDetailResponse) {
@@ -154,11 +154,19 @@ private fun CarMobileMainPhotoCarousel(
             attrs = {
                 if (photos.size > 1 && isMobileViewport) {
                     onTouchStart { event ->
-                        touchStartX = event.touches.item(0)?.clientX?.toDouble()
+                        touchStartX =
+                            event.touches
+                                .item(0)
+                                ?.clientX
+                                ?.toDouble()
                     }
                     onTouchEnd { event ->
                         val startX = touchStartX
-                        val endX = event.changedTouches.item(0)?.clientX?.toDouble()
+                        val endX =
+                            event.changedTouches
+                                .item(0)
+                                ?.clientX
+                                ?.toDouble()
                         if (startX != null && endX != null) {
                             val swipeDelta = startX - endX
                             val swipeThreshold = 40.0

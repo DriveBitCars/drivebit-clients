@@ -28,7 +28,6 @@ import my.drivebit.components.UserAvatar
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.UserNameFormatter
-import my.drivebit.web.homePathHref
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.mapIso8601ToMonthYearString
 import my.drivebit.viewmodels.AvatarUploadState
@@ -36,6 +35,7 @@ import my.drivebit.viewmodels.AvatarUploadViewModel
 import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
+import my.drivebit.web.homePathHref
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Input

@@ -509,4 +509,4 @@ private fun parseIsoLocalDate(value: String?): LocalDate? =
     value?.take(10)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
 private fun LocalDate.toIsoString(): String =
-    "${year}-${month.number.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}"
+    "$year-${month.number.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}"
