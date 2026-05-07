@@ -34,6 +34,12 @@ object MetaTags {
                     description = "Контактные данные и реквизиты DriveBit. Аренда автомобилей от собственников.",
                     path = "/contacts",
                 ),
+            "/moskva/poblizosti" to
+                PageMeta(
+                    title = "Аренда авто поблизости в Москве - DriveBit",
+                    description = "Найдите автомобили поблизости в Москве. Быстрая аренда у собственников, прозрачные условия и поддержка 24/7.",
+                    path = "/moskva/poblizosti",
+                ),
             "/login-by-phone" to
                 PageMeta(
                     title = "Вход по телефону - DriveBit",
