@@ -65,11 +65,19 @@ fun CarItemSmall(
                     attrs = {
                         if (isMobileViewport) {
                             onTouchStart { event ->
-                                touchStartX = event.touches.item(0)?.clientX?.toDouble()
+                                touchStartX =
+                                    event.touches
+                                        .item(0)
+                                        ?.clientX
+                                        ?.toDouble()
                             }
                             onTouchEnd { event ->
                                 val startX = touchStartX
-                                val endX = event.changedTouches.item(0)?.clientX?.toDouble()
+                                val endX =
+                                    event.changedTouches
+                                        .item(0)
+                                        ?.clientX
+                                        ?.toDouble()
                                 if (startX != null && endX != null) {
                                     val swipeDelta = startX - endX
                                     val swipeThreshold = 40.0
@@ -96,69 +104,69 @@ fun CarItemSmall(
                 )
 
                 if (allPhotos.size > 1 && (isImageHovered || isMobileViewport)) {
-                        Div({
-                            onClick {
-                                it.stopPropagation()
-                                if (safePhotoIndex > 0) {
-                                    currentPhotoIndex = safePhotoIndex - 1
-                                }
+                    Div({
+                        onClick {
+                            it.stopPropagation()
+                            if (safePhotoIndex > 0) {
+                                currentPhotoIndex = safePhotoIndex - 1
                             }
-                            style {
-                                position(Position.Absolute)
-                                left(8.px)
-                                top(50.percent)
-                                property("transform", "translateY(-50%)")
-                                width(32.px)
-                                height(32.px)
-                                borderRadius(50.percent)
-                                backgroundColor(rgba(0, 0, 0, 0.5))
-                                color(CSSColors.White)
-                                display(DisplayStyle.Flex)
-                                alignItems(AlignItems.Center)
-                                justifyContent(JustifyContent.Center)
-                                fontSize(18.px)
-                                cursor("pointer")
-                                property("user-select", "none")
-                                if (safePhotoIndex == 0) {
-                                    opacity(0.35)
-                                    cursor("default")
-                                }
-                            }
-                        }) {
-                            Text("<")
                         }
+                        style {
+                            position(Position.Absolute)
+                            left(8.px)
+                            top(50.percent)
+                            property("transform", "translateY(-50%)")
+                            width(32.px)
+                            height(32.px)
+                            borderRadius(50.percent)
+                            backgroundColor(rgba(0, 0, 0, 0.5))
+                            color(CSSColors.White)
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            justifyContent(JustifyContent.Center)
+                            fontSize(18.px)
+                            cursor("pointer")
+                            property("user-select", "none")
+                            if (safePhotoIndex == 0) {
+                                opacity(0.35)
+                                cursor("default")
+                            }
+                        }
+                    }) {
+                        Text("<")
+                    }
 
-                        Div({
-                            onClick {
-                                it.stopPropagation()
-                                if (safePhotoIndex < allPhotos.lastIndex) {
-                                    currentPhotoIndex = safePhotoIndex + 1
-                                }
+                    Div({
+                        onClick {
+                            it.stopPropagation()
+                            if (safePhotoIndex < allPhotos.lastIndex) {
+                                currentPhotoIndex = safePhotoIndex + 1
                             }
-                            style {
-                                position(Position.Absolute)
-                                right(8.px)
-                                top(50.percent)
-                                property("transform", "translateY(-50%)")
-                                width(32.px)
-                                height(32.px)
-                                borderRadius(50.percent)
-                                backgroundColor(rgba(0, 0, 0, 0.5))
-                                color(CSSColors.White)
-                                display(DisplayStyle.Flex)
-                                alignItems(AlignItems.Center)
-                                justifyContent(JustifyContent.Center)
-                                fontSize(18.px)
-                                cursor("pointer")
-                                property("user-select", "none")
-                                if (safePhotoIndex == allPhotos.lastIndex) {
-                                    opacity(0.35)
-                                    cursor("default")
-                                }
-                            }
-                        }) {
-                            Text(">")
                         }
+                        style {
+                            position(Position.Absolute)
+                            right(8.px)
+                            top(50.percent)
+                            property("transform", "translateY(-50%)")
+                            width(32.px)
+                            height(32.px)
+                            borderRadius(50.percent)
+                            backgroundColor(rgba(0, 0, 0, 0.5))
+                            color(CSSColors.White)
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            justifyContent(JustifyContent.Center)
+                            fontSize(18.px)
+                            cursor("pointer")
+                            property("user-select", "none")
+                            if (safePhotoIndex == allPhotos.lastIndex) {
+                                opacity(0.35)
+                                cursor("default")
+                            }
+                        }
+                    }) {
+                        Text(">")
+                    }
                 }
 
                 if (allPhotos.size > 1) {

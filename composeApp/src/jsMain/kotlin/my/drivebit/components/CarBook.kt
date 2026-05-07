@@ -49,9 +49,9 @@ import org.jetbrains.compose.web.dom.Option
 import org.jetbrains.compose.web.dom.Select
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
-import kotlin.time.Duration.Companion.hours
 import org.koin.compose.koinInject
 import org.w3c.dom.HTMLSelectElement
+import kotlin.time.Duration.Companion.hours
 
 @Composable
 @Suppress("FunctionName")
@@ -677,7 +677,11 @@ private fun CarBookDateTimeField(
 private fun bookingInstantToUiDate(iso: String?): String? =
     iso?.let { s ->
         runCatching {
-            kotlinx.datetime.Instant.parse(s).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+            kotlinx.datetime.Instant
+                .parse(s)
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+                .toString()
         }.getOrNull() ?: s.take(10).takeIf { it.length == 10 }
     }
 

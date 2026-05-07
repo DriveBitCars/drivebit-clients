@@ -102,7 +102,10 @@ fun filterTitleToPathSegment(title: String): String? {
 /**
  * Builds path for city home + optional selected filter segment.
  */
-fun cityPathWithFilter(citySlug: String, filterTitle: String): String {
+fun cityPathWithFilter(
+    citySlug: String,
+    filterTitle: String,
+): String {
     val filterSegment = filterTitleToPathSegment(filterTitle)
     return if (filterSegment == null) {
         "/$citySlug"

@@ -15,7 +15,6 @@ import my.drivebit.components.BoxOverlay
 import my.drivebit.components.BrandModelFilter
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.Column
-import my.drivebit.components.Divider
 import my.drivebit.components.DriveTypeFilter
 import my.drivebit.components.FilterChip
 import my.drivebit.components.FlowRow
@@ -39,17 +38,15 @@ import my.drivebit.viewmodels.SearchPageDateEndViewModel
 import my.drivebit.viewmodels.SearchPageDateViewModel
 import my.drivebit.viewmodels.SearchState
 import my.drivebit.viewmodels.SearchViewModel
-import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
-import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
@@ -392,4 +389,3 @@ private fun rememberSearchParams(): Pair<String?, String?> {
         startDate to endDate
     }
 }
-
