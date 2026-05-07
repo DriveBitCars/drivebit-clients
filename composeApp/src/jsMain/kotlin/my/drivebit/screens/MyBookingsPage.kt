@@ -70,6 +70,9 @@ fun MyBookingsPage() {
                                     onLeaveReview = {
                                         navigationController?.navigateTo("/leave-review?carId=${booking.carId}")
                                     },
+                                    onPay = {
+                                        navigationController?.navigateTo("/payment?bookingId=${booking.id}")
+                                    },
                                 )
                             }
                         }
@@ -84,6 +87,7 @@ fun MyBookingsPage() {
 private fun BookingItemCard(
     booking: BookingDTO,
     onLeaveReview: () -> Unit,
+    onPay: () -> Unit,
 ) {
     val ownerName = booking.ownerName?.takeIf { it.isNotBlank() } ?: "Владелец"
     val carName =
@@ -106,6 +110,7 @@ private fun BookingItemCard(
         }.getOrElse { booking.createdAt }
     val relativeTime = runCatching { formatRelativeTime(Instant.parse(booking.createdAt)) }.getOrElse { "" }
     val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
+    val canPay = booking.status.equals("Confirmed", ignoreCase = true)
 
     Column(
         gap = 16.px,
@@ -183,25 +188,45 @@ private fun BookingItemCard(
             }
         }
 
-        if (canLeaveReview) {
+        if (canPay || canLeaveReview) {
             Row(
                 justifyContent = JustifyContent.FlexStart,
+                gap = 8.px,
                 modifier = { width(100.percent) },
             ) {
-                Button({
-                    style {
-                        padding(8.px, 16.px)
-                        backgroundColor(CSSColors.Blue)
-                        color(CSSColors.White)
-                        border(0.px)
-                        borderRadius(8.px)
-                        fontSize(14.px)
-                        fontWeight("600")
-                        cursor("pointer")
+                if (canPay) {
+                    Button({
+                        style {
+                            padding(8.px, 16.px)
+                            backgroundColor(CSSColors.Blue)
+                            color(CSSColors.White)
+                            border(0.px)
+                            borderRadius(8.px)
+                            fontSize(14.px)
+                            fontWeight("600")
+                            cursor("pointer")
+                        }
+                        onClick { onPay() }
+                    }) {
+                        Text("Оплатить")
                     }
-                    onClick { onLeaveReview() }
-                }) {
-                    Text("Оставить отзыв")
+                }
+                if (canLeaveReview) {
+                    Button({
+                        style {
+                            padding(8.px, 16.px)
+                            backgroundColor(CSSColors.Blue)
+                            color(CSSColors.White)
+                            border(0.px)
+                            borderRadius(8.px)
+                            fontSize(14.px)
+                            fontWeight("600")
+                            cursor("pointer")
+                        }
+                        onClick { onLeaveReview() }
+                    }) {
+                        Text("Оставить отзыв")
+                    }
                 }
             }
         }
