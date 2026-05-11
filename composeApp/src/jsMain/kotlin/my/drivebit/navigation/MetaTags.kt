@@ -34,11 +34,59 @@ object MetaTags {
                     description = "Контактные данные и реквизиты DriveBit. Аренда автомобилей от собственников.",
                     path = "/contacts",
                 ),
+            "/moskva" to
+                PageMeta(
+                    title = "Аренда автомобилей в Москве - DriveBit",
+                    description = "Аренда авто в Москве у собственников. Дешевле проката, полная страховка и поддержка 24/7.",
+                    path = "/moskva",
+                ),
+            "/moskva/k-rodnym" to
+                PageMeta(
+                    title = "Аренда авто для поездки к родным в Москве - DriveBit",
+                    description = "Подберите автомобиль для поездки к родным в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
+                    path = "/moskva/k-rodnym",
+                ),
+            "/moskva/komandirovki" to
+                PageMeta(
+                    title = "Аренда авто для командировок в Москве - DriveBit",
+                    description = "Подберите автомобиль для командировки в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
+                    path = "/moskva/komandirovki",
+                ),
+            "/moskva/kanikuly" to
+                PageMeta(
+                    title = "Аренда авто на каникулы в Москве - DriveBit",
+                    description = "Подберите автомобиль на каникулы в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
+                    path = "/moskva/kanikuly",
+                ),
+            "/moskva/meropriyatie" to
+                PageMeta(
+                    title = "Аренда авто на мероприятие в Москве - DriveBit",
+                    description = "Подберите автомобиль на мероприятие в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
+                    path = "/moskva/meropriyatie",
+                ),
+            "/moskva/pereezd" to
+                PageMeta(
+                    title = "Аренда авто для переезда в Москве - DriveBit",
+                    description = "Подберите автомобиль для переезда в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
+                    path = "/moskva/pereezd",
+                ),
             "/moskva/poblizosti" to
                 PageMeta(
                     title = "Аренда авто поблизости в Москве - DriveBit",
                     description = "Найдите автомобили поблизости в Москве. Быстрая аренда у собственников, прозрачные условия и поддержка 24/7.",
                     path = "/moskva/poblizosti",
+                ),
+            "/moskva/puteshestviya" to
+                PageMeta(
+                    title = "Аренда авто для путешествий в Москве - DriveBit",
+                    description = "Подберите автомобиль для путешествий из Москвы. Аренда у собственников, прозрачные условия и поддержка 24/7.",
+                    path = "/moskva/puteshestviya",
+                ),
+            "/moskva/za-gorod" to
+                PageMeta(
+                    title = "Аренда авто за город в Москве - DriveBit",
+                    description = "Подберите автомобиль для поездки за город из Москвы. Аренда у собственников, прозрачные условия и поддержка 24/7.",
+                    path = "/moskva/za-gorod",
                 ),
             "/login-by-phone" to
                 PageMeta(
