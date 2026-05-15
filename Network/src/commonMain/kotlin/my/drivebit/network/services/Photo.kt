@@ -11,6 +11,7 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.consumeResponse
 import my.drivebit.network.parseResponse
 import my.drivebit.utils.extractPathFromApiUrl
 
@@ -163,6 +164,7 @@ class PhotoImpl(
 
     override suspend fun deleteCarPhoto(photoId: Int) {
         val url = "${DEFAULT_BASE_URL}Photo/$photoId"
-        httpClient.delete(url)
+        val response = httpClient.delete(url)
+        response.consumeResponse()
     }
 }
