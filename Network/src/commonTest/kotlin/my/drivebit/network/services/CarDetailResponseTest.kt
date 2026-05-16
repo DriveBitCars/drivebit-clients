@@ -260,6 +260,32 @@ class CarDetailResponseTest {
     }
 
     @Test
+    fun `resolvedAddressDisplay falls back to structured address when validAddressString has conflicting cities`() {
+        val car =
+            CarDetailResponse(
+                id = "x",
+                general =
+                    CarGeneral(
+                        brandName = "A",
+                        modelName = "B",
+                        vin = "",
+                        seats = 5,
+                        address =
+                            CarAddress(
+                                region = "Ростовская обл.",
+                                city = "Ростов-на-Дону",
+                                street = "Сосновая",
+                                house = "3Б",
+                                geoLat = 1.0,
+                                geoLon = 2.0,
+                            ),
+                    ),
+                ValidAddressString = "Москва, Ростов-на-Дону, Сосновая, 3Б",
+            )
+        assertEquals("Ростовская обл., Ростов-на-Дону, Сосновая, 3Б", car.resolvedAddressDisplay())
+    }
+
+    @Test
     fun `resolvedAddressDisplay removes duplicate parts from validAddressString`() {
         val car =
             CarDetailResponse(
