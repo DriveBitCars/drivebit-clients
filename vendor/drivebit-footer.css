@@ -63,6 +63,10 @@
     flex: 0 0 auto;
 }
 
+.drivebit-footer-link--cookies {
+    flex: 0 0 auto;
+}
+
 .drivebit-footer-link--privacy {
     flex: 1;
     text-align: right;
@@ -94,6 +98,11 @@
 
     .drivebit-footer-link {
         display: block;
+        text-align: center;
+    }
+
+    .drivebit-footer-link--cookies {
+        flex: none;
         text-align: center;
     }
 

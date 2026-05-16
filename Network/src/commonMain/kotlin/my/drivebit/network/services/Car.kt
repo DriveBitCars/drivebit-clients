@@ -109,6 +109,38 @@ data class CarBookingItem(
     val endAt: String,
 )
 
+private val addressMajorCityMarkers: List<Pair<String, List<String>>> =
+    listOf(
+        "moscow" to listOf("москва"),
+        "spb" to listOf("санкт-петербург", "петербург"),
+        "rostov" to listOf("ростов-на-дону"),
+        "kazan" to listOf("казань"),
+        "novosibirsk" to listOf("новосибирск"),
+        "ekaterinburg" to listOf("екатеринбург"),
+        "nizhny" to listOf("нижний новгород"),
+        "samara" to listOf("самара"),
+        "krasnodar" to listOf("краснодар"),
+        "voronezh" to listOf("воронеж"),
+    )
+
+private fun hasConflictingMajorCities(parts: List<String>): Boolean = distinctMajorCitiesInParts(parts).size > 1
+
+private fun distinctMajorCitiesInParts(parts: List<String>): Set<String> {
+    val found = mutableSetOf<String>()
+    parts.forEach { rawPart ->
+        val part = rawPart.trim().lowercase()
+        if (part.isEmpty()) {
+            return@forEach
+        }
+        addressMajorCityMarkers.forEach { (key, markers) ->
+            if (markers.any { marker -> part == marker || part.contains(marker) }) {
+                found += key
+            }
+        }
+    }
+    return found
+}
+
 @Serializable
 data class CarDetailResponse(
     val id: String,
@@ -193,28 +225,28 @@ data class CarDetailResponse(
     fun resolvedInsuranceDisplay(): String? = insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() }
 
     fun resolvedAddressDisplay(): String? {
-        val fromValidAddress =
-            normalizeAddressParts(
-                ValidAddressString
-                    ?.split(",")
-                    ?.map { it.trim() }
-                    .orEmpty(),
-            )
-        if (fromValidAddress != null) {
+        val validAddressParts =
+            ValidAddressString
+                ?.split(",")
+                ?.map { it.trim() }
+                .orEmpty()
+        val fromValidAddress = normalizeAddressParts(validAddressParts)
+        if (fromValidAddress != null && !hasConflictingMajorCities(validAddressParts)) {
             return fromValidAddress
         }
 
-        return general.address.run {
-            normalizeAddressParts(
-                listOfNotNull(
-                    region,
-                    city,
-                    street,
-                    house?.takeIf { it != "None" },
-                ),
-            )
-        }
+        return general.address.resolvedStructuredDisplay()
     }
+
+    private fun CarAddress.resolvedStructuredDisplay(): String? =
+        normalizeAddressParts(
+            listOfNotNull(
+                region,
+                city,
+                street,
+                house?.takeIf { it != "None" },
+            ),
+        )
 
     private fun normalizeAddressParts(parts: List<String?>): String? {
         val normalizedParts = mutableListOf<String>()
@@ -349,6 +381,67 @@ data class CarCreateRequest(
     @SerialName("parkingAssistances") val ParkingAssistances: List<Int> = emptyList(),
     @SerialName("multimediaSystemOptions") val MultimediaSystemOptions: List<Int> = emptyList(),
 )
+
+@Serializable
+data class UpdateCarRequest(
+    val carId: String,
+    @SerialName("validAddressString") val validAddressString: String? = null,
+    val licensePlate: String? = null,
+    val year: Int? = null,
+    val hourlyRate: Double? = null,
+    val dailyRate: Double? = null,
+    val dailyRate4Days: Double? = null,
+    val dailyRate7Days: Double? = null,
+    val dailyRate14Days: Double? = null,
+    val dailyRate21Days: Double? = null,
+    val deposit: Double? = null,
+    val availableMileagePerDayKm: Int? = null,
+    val description: String? = null,
+    val mileage: Int? = null,
+    val horsePower: Float? = null,
+    val engineVolume: Double? = null,
+    val insurance: String? = null,
+    val bodyType: String? = null,
+    val engineType: String? = null,
+    val transmissionType: String? = null,
+    val driveType: String? = null,
+    val steeringWheelSide: String? = null,
+    val seatsHeating: String? = null,
+    val seatsVentilation: String? = null,
+    val seatsMassage: String? = null,
+    val climateControl: String? = null,
+    val driveAssistants: String? = null,
+    val acousticSystem: String? = null,
+    val alarmSystem: String? = null,
+    val carRoofType: String? = null,
+    val trunkSize: String? = null,
+    val color: String? = null,
+    @SerialName("parkingAssistances") val parkingAssistances: List<String>? = null,
+    @SerialName("multimediaSystemOptions") val multimediaSystemOptions: List<String>? = null,
+)
+
+fun CarCreateRequest.toUpdateCarRequest(resolvedCarId: String): UpdateCarRequest =
+    UpdateCarRequest(
+        carId = resolvedCarId,
+        validAddressString = ValidAddressString,
+        licensePlate = licensePlate,
+        year = year,
+        hourlyRate = hourlyRate?.toDouble(),
+        dailyRate = dailyRate?.toDouble(),
+        dailyRate4Days = dailyRate4Days?.toDouble(),
+        dailyRate7Days = dailyRate7Days?.toDouble(),
+        dailyRate14Days = dailyRate14Days?.toDouble(),
+        dailyRate21Days = dailyRate21Days?.toDouble(),
+        deposit = deposit?.toDouble(),
+        availableMileagePerDayKm = availableMileagePerDayKm,
+        description = description,
+        engineVolume = engineVolume,
+        insurance = insurance?.takeIf { it in CarInsuranceType.knownApiValues },
+        bodyType = bodyType,
+        engineType = engineType,
+        driveType = driveType,
+        trunkSize = trunkSize,
+    )
 
 @Serializable
 data class CarResponse(
@@ -498,7 +591,7 @@ class CarImpl(
                 httpClient.put(url) {
                     parameter("carId", carId)
                     contentType(ContentType.Application.Json)
-                    setBody(request)
+                    setBody(request.toUpdateCarRequest(carId))
                 }
             } else {
                 httpClient.post(url) {
@@ -506,6 +599,12 @@ class CarImpl(
                     setBody(request)
                 }
             }
+        if (!response.status.isSuccess()) {
+            throw my.drivebit.network.NetworkException(
+                response.status,
+                response.bodyAsText().takeIf { it.isNotBlank() } ?: "Ошибка сохранения автомобиля",
+            )
+        }
         val bodyString = response.bodyAsText()
         return if (bodyString.isBlank()) {
             CarResponse(id = carId ?: request.id)

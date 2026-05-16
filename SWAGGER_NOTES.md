@@ -22,5 +22,8 @@
    - Сверь структуру ответа
 
 4. **Car create/update (PUT/POST `/Car/my`)**:
-   - Клиент отправляет поле года как `year` (camelCase) в теле запроса. Если год не сохраняется после PUT — бэкенд не маппит/не сохраняет это поле: в обработчике PUT нужно обновлять сущность автомобиля полем `year` из DTO запроса (например, в `general.year` или аналоге в БД).
+   - POST принимает `CreateCarRequest`, PUT — **`UpdateCarRequest`** (другая схема: `carId` в теле, без `id`/`modelId`/`seats`, `additionalProperties: false`).
+   - `insurance` — enum `InsuranceTypeEnum`: `OSAGO_Included`, `OSAGO_Unlimited`, `KASKO_Included`, `KASKO_Unlimited`.
+   - Клиент для PUT маппит `CarCreateRequest` → `UpdateCarRequest` в `Car.kt`.
+   - Поле года в теле: `year` (camelCase).
 
