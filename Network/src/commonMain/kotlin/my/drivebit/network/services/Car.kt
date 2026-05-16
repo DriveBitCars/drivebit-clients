@@ -15,7 +15,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
-import my.drivebit.network.consumeResponse
 import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
 import my.drivebit.utils.extractPathFromApiUrl

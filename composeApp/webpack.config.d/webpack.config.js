@@ -9,7 +9,7 @@ config.devServer.liveReload = true;
 config.devServer.proxy = [
     {
         context: ['/avatar'],
-        target: 'http://155.212.170.94:9000',
+        target: 'http://157.22.252.70:9000',
         pathRewrite: {
             '^/avatar': '/publicbct/avatars',
         },
@@ -19,7 +19,7 @@ config.devServer.proxy = [
     },
     {
         context: ['/publicbct'],
-        target: 'http://155.212.170.94:9000',
+        target: 'http://157.22.252.70:9000',
         changeOrigin: true,
         secure: false,
         logLevel: 'debug',

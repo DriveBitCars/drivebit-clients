@@ -1,0 +1,26 @@
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#root {
+    flex: 1 0 auto;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+html.drivebit-js body:not(.drivebit-app-ready) .drivebit-seo-shell,
+html.drivebit-js body:not(.drivebit-app-ready) .drivebit-footer-shell {
+    visibility: hidden;
+}
+
+html.drivebit-js body.drivebit-app-ready .drivebit-seo-shell,
+html.drivebit-js body.drivebit-app-ready .drivebit-footer-shell {
+    visibility: visible;
+}
