@@ -178,6 +178,8 @@ object MetaTags {
         } else {
             removeMetaTag("robots")
         }
+
+        SeoBlocks.updateForPath(normalizedPath)
     }
 
     private fun updateMetaTag(
