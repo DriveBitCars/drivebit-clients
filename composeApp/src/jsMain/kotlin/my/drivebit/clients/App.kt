@@ -44,7 +44,9 @@ import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.BookingPaymentLinkPage
 import my.drivebit.screens.PaymentFailurePage
 import my.drivebit.screens.PaymentSuccessPage
+import my.drivebit.screens.CookiesPage
 import my.drivebit.screens.PrivacyPage
+import my.drivebit.components.CookieConsentBanner
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.ProductionYearInputPage
 import my.drivebit.screens.ProfilePage
@@ -78,6 +80,7 @@ actual fun App() {
         SideEffect {
             document.body?.classList?.add("drivebit-app-ready")
         }
+        CookieConsentBanner()
         Navigation { currentPath ->
             val storage: Storage = koinInject()
             when {
@@ -165,6 +168,9 @@ actual fun App() {
                 }
                 currentPath.startsWith("/privacy") -> {
                     PrivacyPage()
+                }
+                currentPath.startsWith("/cookies") -> {
+                    CookiesPage()
                 }
                 currentPath.startsWith("/payment-success") -> {
                     PaymentSuccessPage()
