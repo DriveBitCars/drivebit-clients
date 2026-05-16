@@ -39,6 +39,9 @@ interface Car {
         brandId: Int? = null,
         modelId: Int? = null,
         driveTypes: List<String>? = null,
+        geoLat: Double? = null,
+        geoLon: Double? = null,
+        radiusKm: Double? = null,
         page: Int = 1,
         pageSize: Int = 9,
     ): CarSearchResponse
@@ -408,6 +411,9 @@ class CarImpl(
         brandId: Int?,
         modelId: Int?,
         driveTypes: List<String>?,
+        geoLat: Double?,
+        geoLon: Double?,
+        radiusKm: Double?,
         page: Int,
         pageSize: Int,
     ): CarSearchResponse {
@@ -416,6 +422,11 @@ class CarImpl(
             httpClient.get(url) {
                 parameter("page", page)
                 parameter("pageSize", pageSize)
+                if (geoLat != null && geoLon != null && radiusKm != null) {
+                    parameter("GeoLat", geoLat)
+                    parameter("GeoLon", geoLon)
+                    parameter("RadiusKm", radiusKm)
+                }
                 dateFrom?.let { parameter("BookingStart", it) }
                 dateTo?.let { parameter("BookingEnd", it) }
                 availableMileagePerDayKmMin?.let { parameter("AvailableMileagePerDayKmMin", it) }

@@ -6,6 +6,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 interface CurrentFiltersRepository {
+    companion object {
+        const val DEFAULT_NEARBY_RADIUS_KM = 10
+    }
+
     val currentTaskShortName: Flow<String?>
     val startState: Flow<String?>
     val endState: Flow<String?>
@@ -28,9 +32,19 @@ interface CurrentFiltersRepository {
     val yearMax: Flow<Int?>
     val seatsMax: Flow<Int?>
     val availableMileagePerDayKmMin: Flow<Int?>
+    val nearbySearchLat: Flow<Double?>
+    val nearbySearchLon: Flow<Double?>
+    val nearbyRadiusKm: Flow<Int>
     val currentPage: Flow<Int>
 
     fun setPage(page: Int)
+
+    fun updateNearbySearchCenter(
+        lat: Double,
+        lon: Double,
+    )
+
+    fun updateNearbyRadiusKm(km: Int)
 
     fun updateCurrentTask(shortName: String)
 
@@ -110,6 +124,9 @@ internal class CurrentFiltersRepositoryImpl(
         private const val YEAR_MAX_KEY = "filter_year_max"
         private const val SEATS_MAX_KEY = "filter_seats_max"
         private const val AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY = "filter_available_mileage_per_day_km_min"
+        private const val NEARBY_SEARCH_LAT_KEY = "nearby_search_lat"
+        private const val NEARBY_SEARCH_LON_KEY = "nearby_search_lon"
+        private const val NEARBY_RADIUS_KM_KEY = "nearby_radius_km"
     }
 
     private fun key(name: String): String = if (keyPrefix != null) "${keyPrefix}_$name" else name
@@ -136,6 +153,9 @@ internal class CurrentFiltersRepositoryImpl(
     private val yearMaxState = MutableStateFlow<Int?>(null)
     private val seatsMaxState = MutableStateFlow<Int?>(null)
     private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
+    private val nearbySearchLatState = MutableStateFlow<Double?>(null)
+    private val nearbySearchLonState = MutableStateFlow<Double?>(null)
+    private val nearbyRadiusKmState = MutableStateFlow(CurrentFiltersRepository.DEFAULT_NEARBY_RADIUS_KM)
     private val currentPageState = MutableStateFlow(0)
 
     init {
@@ -204,6 +224,16 @@ internal class CurrentFiltersRepositoryImpl(
 
         val savedAvailableMileage = settings.getInt(key(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY), -1)
         availableMileagePerDayKmMinState.value = if (savedAvailableMileage < 0) null else savedAvailableMileage
+
+        val savedNearbyLat = settings.getStringOrNullIfEmpty(key(NEARBY_SEARCH_LAT_KEY))?.toDoubleOrNull()
+        nearbySearchLatState.value = savedNearbyLat
+
+        val savedNearbyLon = settings.getStringOrNullIfEmpty(key(NEARBY_SEARCH_LON_KEY))?.toDoubleOrNull()
+        nearbySearchLonState.value = savedNearbyLon
+
+        val savedRadius = settings.getInt(key(NEARBY_RADIUS_KM_KEY), -1)
+        nearbyRadiusKmState.value =
+            if (savedRadius > 0) savedRadius else CurrentFiltersRepository.DEFAULT_NEARBY_RADIUS_KM
     }
 
     override val currentTaskShortName: Flow<String?> = currentTaskShortNameState.asStateFlow()
@@ -228,6 +258,9 @@ internal class CurrentFiltersRepositoryImpl(
     override val yearMax: Flow<Int?> = yearMaxState.asStateFlow()
     override val seatsMax: Flow<Int?> = seatsMaxState.asStateFlow()
     override val availableMileagePerDayKmMin: Flow<Int?> = availableMileagePerDayKmMinState.asStateFlow()
+    override val nearbySearchLat: Flow<Double?> = nearbySearchLatState.asStateFlow()
+    override val nearbySearchLon: Flow<Double?> = nearbySearchLonState.asStateFlow()
+    override val nearbyRadiusKm: Flow<Int> = nearbyRadiusKmState.asStateFlow()
     override val currentPage: Flow<Int> = currentPageState.asStateFlow()
 
     override fun setPage(page: Int) {
@@ -441,6 +474,23 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(key(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY))
         }
         availableMileagePerDayKmMinState.value = value
+        currentPageState.value = 0
+    }
+
+    override fun updateNearbySearchCenter(
+        lat: Double,
+        lon: Double,
+    ) {
+        settings.putString(key(NEARBY_SEARCH_LAT_KEY), lat.toString())
+        settings.putString(key(NEARBY_SEARCH_LON_KEY), lon.toString())
+        nearbySearchLatState.value = lat
+        nearbySearchLonState.value = lon
+        currentPageState.value = 0
+    }
+
+    override fun updateNearbyRadiusKm(km: Int) {
+        settings.putInt(key(NEARBY_RADIUS_KM_KEY), km)
+        nearbyRadiusKmState.value = km
         currentPageState.value = 0
     }
 }

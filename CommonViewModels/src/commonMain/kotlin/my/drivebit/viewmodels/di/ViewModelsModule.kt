@@ -121,6 +121,7 @@ val commonViewModelsModule: Module =
         factory {
             MapViewModel(
                 locationManager = get(),
+                currentFiltersRepository = get(named("main")),
             )
         }
 

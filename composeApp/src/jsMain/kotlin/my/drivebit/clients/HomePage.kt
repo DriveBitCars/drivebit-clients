@@ -13,6 +13,7 @@ import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.HeroBanner
 import my.drivebit.components.MainPromoSections
 import my.drivebit.components.NearbyMapListSwitcher
+import my.drivebit.components.NearbyRadiusSelector
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.filterButton
 import my.drivebit.design.CSSColors
@@ -47,6 +48,8 @@ import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.P
+import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
@@ -131,6 +134,12 @@ fun HomePage() {
             "Поблизости" -> {
                 val nearbyLayout = mapState.value.nearbyLayoutMode
                 val nearbyListPage = mapState.value.nearbyListPage
+                val nearbyRadiusKm = mapState.value.nearbyRadiusKm
+                val usedFallbackCenter = mapState.value.usedFallbackCenter
+
+                LaunchedEffect(selected) {
+                    mapViewModel.initializeNearbySearch()
+                }
 
                 LaunchedEffect(cars) {
                     mapViewModel.syncNearbyListPageToTotalCount(cars.size, NEARBY_LIST_PAGE_SIZE)
@@ -166,6 +175,23 @@ fun HomePage() {
                     mode = nearbyLayout,
                     onModeChange = { mapViewModel.setNearbyLayoutMode(it) },
                 )
+
+                NearbyRadiusSelector(
+                    selectedRadiusKm = nearbyRadiusKm,
+                    onRadiusChange = { mapViewModel.setNearbyRadiusKm(it) },
+                )
+
+                if (usedFallbackCenter) {
+                    P({
+                        style {
+                            marginTop(8.px)
+                            property("color", "#666")
+                            property("font-size", "14px")
+                        }
+                    }) {
+                        Text("Геолокация недоступна — показаны авто рядом с Москвой")
+                    }
+                }
 
                 when (nearbyLayout) {
                     NearbyLayoutMode.Map ->

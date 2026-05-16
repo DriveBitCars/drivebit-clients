@@ -101,6 +101,9 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     private val yearMaxState = MutableStateFlow<Int?>(null)
     private val seatsMaxState = MutableStateFlow<Int?>(null)
     private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
+    private val nearbySearchLatState = MutableStateFlow<Double?>(null)
+    private val nearbySearchLonState = MutableStateFlow<Double?>(null)
+    private val nearbyRadiusKmState = MutableStateFlow(CurrentFiltersRepository.DEFAULT_NEARBY_RADIUS_KM)
     private val currentPageState = MutableStateFlow(0)
 
     override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
@@ -125,10 +128,25 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
     override val yearMax = yearMaxState.asStateFlow()
     override val seatsMax = seatsMaxState.asStateFlow()
     override val availableMileagePerDayKmMin = availableMileagePerDayKmMinState.asStateFlow()
+    override val nearbySearchLat = nearbySearchLatState.asStateFlow()
+    override val nearbySearchLon = nearbySearchLonState.asStateFlow()
+    override val nearbyRadiusKm = nearbyRadiusKmState.asStateFlow()
     override val currentPage = currentPageState.asStateFlow()
 
     override fun setPage(page: Int) {
         currentPageState.value = page.coerceAtLeast(0)
+    }
+
+    override fun updateNearbySearchCenter(
+        lat: Double,
+        lon: Double,
+    ) {
+        nearbySearchLatState.value = lat
+        nearbySearchLonState.value = lon
+    }
+
+    override fun updateNearbyRadiusKm(km: Int) {
+        nearbyRadiusKmState.value = km
     }
 
     override fun updateCurrentTask(shortName: String) {

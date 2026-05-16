@@ -41,6 +41,9 @@ class CarSearchRepositoryTest {
         var searchBrandId: Int? = null
         var searchModelId: Int? = null
         var searchDriveTypes: List<String>? = null
+        var searchGeoLat: Double? = null
+        var searchGeoLon: Double? = null
+        var searchRadiusKm: Double? = null
         var searchPage: Int = 1
         var searchPageSize: Int = 9
         var searchResult: CarSearchResponse = CarSearchResponse(emptyList())
@@ -64,6 +67,9 @@ class CarSearchRepositoryTest {
             brandId: Int?,
             modelId: Int?,
             driveTypes: List<String>?,
+            geoLat: Double?,
+            geoLon: Double?,
+            radiusKm: Double?,
             page: Int,
             pageSize: Int,
         ): CarSearchResponse {
@@ -71,6 +77,9 @@ class CarSearchRepositoryTest {
                 throw Exception(errorMessage)
             }
             searchCityId = cityId
+            searchGeoLat = geoLat
+            searchGeoLon = geoLon
+            searchRadiusKm = radiusKm
             searchDateFrom = dateFrom
             searchDateTo = dateTo
             searchAvailableMileagePerDayKmMin = availableMileagePerDayKmMin
@@ -149,6 +158,9 @@ class CarSearchRepositoryTest {
         private val yearMaxState = MutableStateFlow<Int?>(null)
         private val seatsMaxState = MutableStateFlow<Int?>(null)
         private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
+        private val nearbySearchLatState = MutableStateFlow<Double?>(null)
+        private val nearbySearchLonState = MutableStateFlow<Double?>(null)
+        private val nearbyRadiusKmState = MutableStateFlow(CurrentFiltersRepository.DEFAULT_NEARBY_RADIUS_KM)
         private val currentPageState = MutableStateFlow(0)
 
         override val currentTaskShortName = currentTaskShortNameState.asStateFlow()
@@ -173,10 +185,25 @@ class CarSearchRepositoryTest {
         override val yearMax = yearMaxState.asStateFlow()
         override val seatsMax = seatsMaxState.asStateFlow()
         override val availableMileagePerDayKmMin = availableMileagePerDayKmMinState.asStateFlow()
+        override val nearbySearchLat = nearbySearchLatState.asStateFlow()
+        override val nearbySearchLon = nearbySearchLonState.asStateFlow()
+        override val nearbyRadiusKm = nearbyRadiusKmState.asStateFlow()
         override val currentPage = currentPageState.asStateFlow()
 
         override fun setPage(page: Int) {
             currentPageState.value = page.coerceAtLeast(0)
+        }
+
+        override fun updateNearbySearchCenter(
+            lat: Double,
+            lon: Double,
+        ) {
+            nearbySearchLatState.value = lat
+            nearbySearchLonState.value = lon
+        }
+
+        override fun updateNearbyRadiusKm(km: Int) {
+            nearbyRadiusKmState.value = km
         }
 
         override fun updateCurrentTask(shortName: String) {
@@ -345,6 +372,35 @@ class CarSearchRepositoryTest {
             assertEquals(2, result.cars.size)
             assertEquals("BMW", result.cars[0].general.brandName)
             assertEquals("Audi", result.cars[1].general.brandName)
+        }
+
+    @Test
+    fun `should pass geo params when nearby filter and center is set`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            mockCarService.searchResult = CarSearchResponse(emptyList())
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+            mockCurrentFiltersRepository.updateCurrentTask("Поблизости")
+            mockCurrentFiltersRepository.updateNearbySearchCenter(55.75, 37.62)
+            mockCurrentFiltersRepository.updateNearbyRadiusKm(25)
+            val mockDictionary = MockDictionary()
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    dictionary = mockDictionary,
+                )
+
+            repository.searchCarsByUserCity.first()
+
+            assertEquals("158830", mockCarService.searchCityId)
+            assertEquals(55.75, mockCarService.searchGeoLat)
+            assertEquals(37.62, mockCarService.searchGeoLon)
+            assertEquals(25.0, mockCarService.searchRadiusKm)
+            assertEquals(100, mockCarService.searchPageSize)
         }
 
     @Test
