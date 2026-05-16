@@ -109,6 +109,38 @@ data class CarBookingItem(
     val endAt: String,
 )
 
+private val addressMajorCityMarkers: List<Pair<String, List<String>>> =
+    listOf(
+        "moscow" to listOf("москва"),
+        "spb" to listOf("санкт-петербург", "петербург"),
+        "rostov" to listOf("ростов-на-дону"),
+        "kazan" to listOf("казань"),
+        "novosibirsk" to listOf("новосибирск"),
+        "ekaterinburg" to listOf("екатеринбург"),
+        "nizhny" to listOf("нижний новгород"),
+        "samara" to listOf("самара"),
+        "krasnodar" to listOf("краснодар"),
+        "voronezh" to listOf("воронеж"),
+    )
+
+private fun hasConflictingMajorCities(parts: List<String>): Boolean = distinctMajorCitiesInParts(parts).size > 1
+
+private fun distinctMajorCitiesInParts(parts: List<String>): Set<String> {
+    val found = mutableSetOf<String>()
+    parts.forEach { rawPart ->
+        val part = rawPart.trim().lowercase()
+        if (part.isEmpty()) {
+            return@forEach
+        }
+        addressMajorCityMarkers.forEach { (key, markers) ->
+            if (markers.any { marker -> part == marker || part.contains(marker) }) {
+                found += key
+            }
+        }
+    }
+    return found
+}
+
 @Serializable
 data class CarDetailResponse(
     val id: String,
@@ -232,40 +264,6 @@ data class CarDetailResponse(
             normalizedParts += part
         }
         return normalizedParts.joinToString(", ").takeIf { it.isNotBlank() }
-    }
-
-    private companion object {
-        private val majorCityMarkers: List<Pair<String, List<String>>> =
-            listOf(
-                "moscow" to listOf("москва"),
-                "spb" to listOf("санкт-петербург", "петербург"),
-                "rostov" to listOf("ростов-на-дону"),
-                "kazan" to listOf("казань"),
-                "novosibirsk" to listOf("новосибирск"),
-                "ekaterinburg" to listOf("екатеринбург"),
-                "nizhny" to listOf("нижний новгород"),
-                "samara" to listOf("самара"),
-                "krasnodar" to listOf("краснодар"),
-                "voronezh" to listOf("воронеж"),
-            )
-
-        fun hasConflictingMajorCities(parts: List<String>): Boolean = distinctMajorCitiesInParts(parts).size > 1
-
-        private fun distinctMajorCitiesInParts(parts: List<String>): Set<String> {
-            val found = mutableSetOf<String>()
-            parts.forEach { rawPart ->
-                val part = rawPart.trim().lowercase()
-                if (part.isEmpty()) {
-                    return@forEach
-                }
-                majorCityMarkers.forEach { (key, markers) ->
-                    if (markers.any { marker -> part == marker || part.contains(marker) }) {
-                        found += key
-                    }
-                }
-            }
-            return found
-        }
     }
 }
 
