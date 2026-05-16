@@ -51,6 +51,9 @@ class MockCarServiceForMvi : Car {
         brandId: Int?,
         modelId: Int?,
         driveTypes: List<String>?,
+        geoLat: Double?,
+        geoLon: Double?,
+        radiusKm: Double?,
         page: Int,
         pageSize: Int,
     ) = throw NotImplementedError()

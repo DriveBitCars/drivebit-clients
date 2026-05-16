@@ -12,6 +12,7 @@ import my.drivebit.maps.LocationManager
 import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.network.services.CarItem
+import my.drivebit.repositories.CurrentFiltersRepository
 
 enum class NearbyLayoutMode {
     Map,
@@ -22,39 +23,61 @@ data class MapScreenState(
     val cameraPosition: MapCameraPosition = MapCameraPosition.default(),
     val nearbyLayoutMode: NearbyLayoutMode = NearbyLayoutMode.Map,
     val nearbyListPage: Int = 0,
+    val nearbyRadiusKm: Int = CurrentFiltersRepository.DEFAULT_NEARBY_RADIUS_KM,
+    val usedFallbackCenter: Boolean = false,
 )
 
 class MapViewModel(
     private val locationManager: LocationManager,
+    private val currentFiltersRepository: CurrentFiltersRepository,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
     private val viewModelScope = coroutineScope
 
-    private val _state = MutableStateFlow(MapScreenState())
+    private val _state =
+        MutableStateFlow(
+            MapScreenState(
+                nearbyRadiusKm = CurrentFiltersRepository.DEFAULT_NEARBY_RADIUS_KM,
+            ),
+        )
 
     val state: StateFlow<MapScreenState>
         get() = _state.asStateFlow()
 
-    fun requestLocationForNearbyFilter() {
+    init {
+        viewModelScope.launch {
+            currentFiltersRepository.nearbyRadiusKm.collect { km ->
+                _state.update { it.copy(nearbyRadiusKm = km) }
+            }
+        }
+    }
+
+    fun initializeNearbySearch() {
         viewModelScope.launch {
             val location = locationManager.getCurrentLocation()
-
-            val cameraPosition =
-                if (location != null) {
-                    MapCameraPosition(
-                        location = location,
-                        zoom = 10f,
-                    )
-                } else {
-                    MapCameraPosition.default()
-                }
-
+            val center = location ?: Location.moscow()
+            val usedFallback = location == null
+            currentFiltersRepository.updateNearbySearchCenter(
+                lat = center.latitude,
+                lon = center.longitude,
+            )
             _state.update {
                 it.copy(
-                    cameraPosition = cameraPosition,
+                    cameraPosition =
+                        MapCameraPosition(
+                            location = center,
+                            zoom = 10f,
+                        ),
+                    usedFallbackCenter = usedFallback,
+                    nearbyListPage = 0,
                 )
             }
         }
+    }
+
+    fun setNearbyRadiusKm(km: Int) {
+        currentFiltersRepository.updateNearbyRadiusKm(km)
+        _state.update { it.copy(nearbyRadiusKm = km, nearbyListPage = 0) }
     }
 
     fun setNearbyLayoutMode(mode: NearbyLayoutMode) {

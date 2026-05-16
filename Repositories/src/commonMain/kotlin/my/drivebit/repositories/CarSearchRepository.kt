@@ -92,7 +92,19 @@ internal class CarSearchRepositoryImpl(
             Pair(mainFilters, extraFilters)
         }.combine(currentFiltersRepository.currentPage) { filtersPair, page ->
             Triple(filtersPair.first, filtersPair.second, page)
-        }.flatMapLatest { (mainFilters, extraFilters, page) ->
+        }.combine(
+            combine(
+                currentFiltersRepository.nearbySearchLat,
+                currentFiltersRepository.nearbySearchLon,
+                currentFiltersRepository.nearbyRadiusKm,
+            ) { lat, lon, radiusKm ->
+                Triple(lat, lon, radiusKm)
+            },
+        ) { filtersTriple, nearbyParams ->
+            Pair(filtersTriple, nearbyParams)
+        }.flatMapLatest { (filtersTriple, nearbyParams) ->
+            val (mainFilters, extraFilters, page) = filtersTriple
+            val (nearbyLat, nearbyLon, nearbyRadiusKm) = nearbyParams
             val (quadruple, priceRange, brandModelDriveBodySeats) = mainFilters
             val brandId = brandModelDriveBodySeats.first
             val modelId = brandModelDriveBodySeats.second
@@ -130,6 +142,11 @@ internal class CarSearchRepositoryImpl(
                         Pair(page, PAGE_SIZE)
                     }
 
+                val useNearbyGeo =
+                    currentTaskShortName == "Поблизости" &&
+                        nearbyLat != null &&
+                        nearbyLon != null
+
                 val result =
                     carService.search(
                         cityId = selectedCity.id.toString(),
@@ -148,6 +165,9 @@ internal class CarSearchRepositoryImpl(
                         brandId = brandId,
                         modelId = modelId,
                         driveTypes = driveTypeName?.let { listOf(it) },
+                        geoLat = if (useNearbyGeo) nearbyLat else null,
+                        geoLon = if (useNearbyGeo) nearbyLon else null,
+                        radiusKm = if (useNearbyGeo) nearbyRadiusKm.toDouble() else null,
                         page = effectivePage + 1,
                         pageSize = effectivePageSize,
                     )
