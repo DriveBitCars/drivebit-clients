@@ -29,11 +29,7 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.repositories.CurrentFiltersRepository
-import my.drivebit.utils.END_AT
-import my.drivebit.utils.START_AT
-import my.drivebit.utils.dateToEndAtIso
-import my.drivebit.utils.dateToStartAtIso
-import my.drivebit.utils.encodeUrlParameter
+import my.drivebit.web.navigateToCarDetail
 import my.drivebit.viewmodels.SearchPageDateEndViewModel
 import my.drivebit.viewmodels.SearchPageDateViewModel
 import my.drivebit.viewmodels.SearchState
@@ -246,16 +242,12 @@ fun SearchPage() {
                                     CarsGrid(
                                         cars = displayedCars,
                                         onCarClick = { car ->
-                                            val startDate = startDateByRepo ?: searchParams.first
-                                            val endDate = endDateByRepo ?: searchParams.second
-                                            val params = mutableListOf("id=${car.id.encodeUrlParameter()}")
-                                            dateToStartAtIso(startDate)?.let {
-                                                params.add("$START_AT=${it.encodeUrlParameter()}")
-                                            }
-                                            dateToEndAtIso(endDate)?.let {
-                                                params.add("$END_AT=${it.encodeUrlParameter()}")
-                                            }
-                                            window.location.href = "/car-detail?${params.joinToString("&")}"
+                                            navigateToCarDetail(
+                                                carId = car.id,
+                                                startDate = startDateByRepo ?: searchParams.first,
+                                                endDate = endDateByRepo ?: searchParams.second,
+                                                navigationController = navigationController,
+                                            )
                                         },
                                     )
                                     PaginationBar(

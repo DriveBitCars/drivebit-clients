@@ -34,6 +34,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css"/>
+        <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
+
     <script src="/vendor/leaflet/leaflet.js"></script>
 
     <script type="application/ld+json">
@@ -471,61 +475,6 @@
             box-shadow: 0 12px 30px rgba(255, 255, 255, 0.2);
         }
 
-        /* Footer */
-        footer {
-            background-color: #1f2937;
-            color: #f8f9fa;
-            padding: 60px 0 20px;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 48px;
-            margin-bottom: 48px;
-        }
-
-        .footer-column h3 {
-            font-size: 1.3rem;
-            margin-bottom: 24px;
-            color: white;
-            font-weight: 600;
-        }
-
-        .footer-column p {
-            color: #d1d5db;
-            line-height: 1.6;
-            margin-bottom: 24px;
-            font-size: 15px;
-        }
-
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column ul li {
-            margin-bottom: 12px;
-        }
-
-        .footer-column ul li a {
-            color: #d1d5db;
-            text-decoration: none;
-            transition: color 0.3s ease;
-            font-size: 15px;
-        }
-
-        .footer-column ul li a:hover {
-            color: white;
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 40px;
-            border-top: 1px solid #374151;
-            color: #9ca3af;
-            font-size: 14px;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .header-content {
@@ -593,8 +542,29 @@
     </script>
 </head>
 <body>
+    <script src="/vendor/drivebit-app-ready.js"></script>
+
     <!-- Compose Web App Root -->
     <div id="root"></div>
+
+    <div class="drivebit-seo-shell">
+        <section class="drivebit-seo-text" aria-label="Аренда автомобилей DriveBit">
+            <h2>Аренда автомобилей от собственников</h2>
+            <p>DriveBit — сервис P2P-аренды: вы берёте машину напрямую у владельца без переплаты прокату. На сайте можно подобрать авто для поездки по России и за границу, оформить бронирование онлайн и получить поддержку 24/7.</p>
+            <p>Среди популярных запросов — аренда авто для путешествий, поездки в другой город, аренда внедорожника в Москве и машины для дальних маршрутов. Сравните предложения собственников, выберите даты и забронируйте подходящий автомобиль.</p>
+        </section>
+    </div>
+
+    <div class="drivebit-footer-shell">
+        <footer class="drivebit-site-footer">
+            <a class="drivebit-footer-phone" id="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
+            <div class="drivebit-footer-bottom">
+                <span class="drivebit-footer-copy">© DriveBit Аренда автомобилей от собственников</span>
+                <a class="drivebit-footer-link drivebit-footer-link--offer" href="/offer">Оферта</a>
+                <a class="drivebit-footer-link drivebit-footer-link--privacy" href="/privacy">Политика конфиденциальности</a>
+            </div>
+        </footer>
+    </div>
 
     <!-- Fallback content - показывается если JS не загрузился -->
     <div class="fallback-content">
@@ -742,37 +712,6 @@
                 <a href="#catalog" class="btn">Найти автомобиль</a>
             </div>
         </section>
-
-        <!-- Footer -->
-        <footer>
-            <div class="container">
-                <div class="footer-content">
-                    <div class="footer-column">
-                        <h3>DriveBit</h3>
-                        <p>Сервис P2P аренды автомобилей. Дешевле, чем в прокате.</p>
-                    </div>
-                    <div class="footer-column">
-                        <h3>Навигация</h3>
-                        <ul>
-                            <li><a href="#">Главная</a></li>
-                            <li><a href="#catalog">Каталог</a></li>
-                            <li><a href="#how-it-works">Как это работает</a></li>
-                            <li><a href="#for-owners">Для владельцев</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-column">
-                        <h3>Контакты</h3>
-                        <ul>
-                            <li><a href="/contacts">Реквизиты и связь</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="copyright">
-                    <p>© 2025 DriveBit. Все права защищены.</p>
-                </div>
-            </div>
-        </footer>
-    </div>
 
     <script>
         // Установка минимальной даты

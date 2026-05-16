@@ -91,7 +91,6 @@ fun AppWithHeader(content: @Composable () -> Unit) {
                     content()
                 }
             }
-            Footer()
         }
     }
 }

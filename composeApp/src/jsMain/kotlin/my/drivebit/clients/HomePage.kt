@@ -20,13 +20,10 @@ import my.drivebit.maps.MapView
 import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.maps.models.MapMarker
+import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.navigation.NavigationState
+import my.drivebit.web.navigateToCarDetail
 import my.drivebit.repositories.CurrentFiltersRepository
-import my.drivebit.utils.END_AT
-import my.drivebit.utils.START_AT
-import my.drivebit.utils.dateToEndAtIso
-import my.drivebit.utils.dateToStartAtIso
-import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.viewmodels.CarSearchViewModel
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.FiltersViewModel
@@ -63,6 +60,7 @@ fun HomePage() {
     val mainContentViewModel: MainContentViewModel = koinInject()
     val currentFiltersRepository: CurrentFiltersRepository = koinInject(named("main"))
     val navigationState: NavigationState = koinInject()
+    val navigationController = LocalNavigationController.current
 
     val state = filterViewModel.state.collectAsState()
     val currentPath by navigationState.currentPath.collectAsState()
@@ -175,14 +173,12 @@ fun HomePage() {
                             cameraPosition = mapState.value.cameraPosition,
                             markers = markers,
                             onMarkerClick = { marker ->
-                                val params = mutableListOf("id=${marker.id.encodeUrlParameter()}")
-                                dateToStartAtIso(startState.date)?.let {
-                                    params.add("$START_AT=${it.encodeUrlParameter()}")
-                                }
-                                dateToEndAtIso(endState.date)?.let {
-                                    params.add("$END_AT=${it.encodeUrlParameter()}")
-                                }
-                                window.location.href = "/car-detail?${params.joinToString("&")}"
+                                navigateToCarDetail(
+                                    carId = marker.id,
+                                    startDate = startState.date,
+                                    endDate = endState.date,
+                                    navigationController = navigationController,
+                                )
                             },
                             onCameraMove = { position ->
                                 mapViewModel.updateCameraPosition(position)
@@ -207,14 +203,12 @@ fun HomePage() {
                             CarsGrid(
                                 cars = pagedCars,
                                 onCarClick = { car ->
-                                    val params = mutableListOf("id=${car.id.encodeUrlParameter()}")
-                                    dateToStartAtIso(startState.date)?.let {
-                                        params.add("$START_AT=${it.encodeUrlParameter()}")
-                                    }
-                                    dateToEndAtIso(endState.date)?.let {
-                                        params.add("$END_AT=${it.encodeUrlParameter()}")
-                                    }
-                                    window.location.href = "/car-detail?${params.joinToString("&")}"
+                                    navigateToCarDetail(
+                                        carId = car.id,
+                                        startDate = startState.date,
+                                        endDate = endState.date,
+                                        navigationController = navigationController,
+                                    )
                                 },
                             )
                             PaginationBar(
@@ -238,14 +232,12 @@ fun HomePage() {
                     CarsGrid(
                         cars = displayedCars,
                         onCarClick = { car ->
-                            val params = mutableListOf("id=${car.id.encodeUrlParameter()}")
-                            dateToStartAtIso(startState.date)?.let {
-                                params.add("$START_AT=${it.encodeUrlParameter()}")
-                            }
-                            dateToEndAtIso(endState.date)?.let {
-                                params.add("$END_AT=${it.encodeUrlParameter()}")
-                            }
-                            window.location.href = "/car-detail?${params.joinToString("&")}"
+                            navigateToCarDetail(
+                                carId = car.id,
+                                startDate = startState.date,
+                                endDate = endState.date,
+                                navigationController = navigationController,
+                            )
                         },
                     )
                     PaginationBar(

@@ -25,17 +25,19 @@ fun CarItemSmall(
     var touchStartX by remember { mutableStateOf<Double?>(null) }
     val isMobileViewport = window.innerWidth <= 768
 
+    val openCarDetails = onClick
+
     Column(
         modifier = {
             borderRadius(8.px)
             overflow("hidden")
             backgroundColor(CSSColors.White)
-            onClick?.let {
+            if (openCarDetails != null) {
                 cursor("pointer")
             }
         },
         attrs = {
-            onClick?.let { handler ->
+            openCarDetails?.let { handler ->
                 onClick { handler() }
             }
         },
