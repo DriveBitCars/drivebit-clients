@@ -5,12 +5,19 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.ValidationErrorResponse
+import my.drivebit.network.collectErrorMessages
 import my.drivebit.network.consumeResponse
+import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
 
 interface Booking {
@@ -26,7 +33,22 @@ interface Booking {
 
     suspend fun declineAsOwner(bookingId: String)
 
-    suspend fun getContract(bookingId: String): BookingContractDownloadDto
+    suspend fun getContract(bookingId: String): GetBookingContractResult
+}
+
+sealed class GetBookingContractResult {
+    data class Success(
+        val contract: BookingContractDownloadDto,
+    ) : GetBookingContractResult()
+
+    data class DataIncomplete(
+        val message: String,
+        val reasons: List<String>,
+    ) : GetBookingContractResult()
+
+    data class Failed(
+        val message: String,
+    ) : GetBookingContractResult()
 }
 
 @Serializable
@@ -73,6 +95,13 @@ data class CreateBookingRequest(
     val startAt: String,
     val endAt: String,
     val comment: String? = null,
+)
+
+@Serializable
+data class BookingContractUnavailableDto(
+    val errorCode: String? = null,
+    val message: String? = null,
+    val reasons: List<String> = emptyList(),
 )
 
 @Serializable
@@ -146,9 +175,63 @@ class BookingImpl(
         response.consumeResponse()
     }
 
-    override suspend fun getContract(bookingId: String): BookingContractDownloadDto {
+    override suspend fun getContract(bookingId: String): GetBookingContractResult {
         val url = "${DEFAULT_BASE_URL}Booking/$bookingId/contract"
         val response = authorizedHttpClient.get(url)
-        return response.parseResponse()
+        val bodyString = response.bodyAsText()
+        return when {
+            response.status.isSuccess() -> {
+                val contract =
+                    runCatching {
+                        defaultJson.decodeFromString(BookingContractDownloadDto.serializer(), bodyString)
+                    }.getOrElse {
+                        return GetBookingContractResult.Failed("Не удалось разобрать ответ сервера")
+                    }
+                GetBookingContractResult.Success(contract)
+            }
+            response.status == HttpStatusCode.UnprocessableEntity -> {
+                val unavailable =
+                    runCatching {
+                        defaultJson.decodeFromString(BookingContractUnavailableDto.serializer(), bodyString)
+                    }.getOrElse {
+                        return GetBookingContractResult.Failed(
+                            extractBookingContractErrorMessage(bodyString, defaultJson),
+                        )
+                    }
+                GetBookingContractResult.DataIncomplete(
+                    message =
+                        unavailable.message?.takeIf { it.isNotBlank() }
+                            ?: "Невозможно скачать договор: не заполнены обязательные данные.",
+                    reasons = unavailable.reasons.filter { it.isNotBlank() },
+                )
+            }
+            else ->
+                GetBookingContractResult.Failed(extractBookingContractErrorMessage(bodyString, defaultJson))
+        }
     }
+}
+
+private fun extractBookingContractErrorMessage(
+    bodyString: String,
+    json: Json,
+): String {
+    val trimmedBody = bodyString.trim()
+    return runCatching {
+        if (trimmedBody.startsWith("{") && trimmedBody.endsWith("}")) {
+            val errorResponse = json.decodeFromString(ValidationErrorResponse.serializer(), trimmedBody)
+            val errorMessages = errorResponse.errors?.collectErrorMessages().orEmpty()
+            when {
+                !errorResponse.message.isNullOrBlank() -> errorResponse.message
+                errorMessages.isNotEmpty() -> errorMessages.joinToString(". ")
+                errorResponse.detail != null -> errorResponse.detail
+                errorResponse.error != null -> errorResponse.error
+                errorResponse.title != null -> errorResponse.title
+                else -> trimmedBody.trim('"').trim()
+            }
+        } else {
+            trimmedBody.trim('"').trim()
+        }
+    }.getOrElse {
+        trimmedBody.trim('"').trim()
+    }.ifBlank { "Не удалось загрузить договор" }
 }

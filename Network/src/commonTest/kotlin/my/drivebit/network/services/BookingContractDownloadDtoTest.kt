@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import my.drivebit.network.parseResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 
 class BookingContractDownloadDtoTest {
     @Test
@@ -36,9 +37,39 @@ class BookingContractDownloadDtoTest {
                 }
             val booking = BookingImpl(HttpClient(mockEngine), HttpClient(mockEngine))
             val result = booking.getContract(bookingId)
-            assertEquals(42L, result.contractNumber)
-            assertEquals("contract.docx", result.fileName)
-            assertEquals("https://minio.example/contract.docx", result.downloadUrl)
+            val success = assertIs<GetBookingContractResult.Success>(result)
+            assertEquals(42L, success.contract.contractNumber)
+            assertEquals("contract.docx", success.contract.fileName)
+            assertEquals("https://minio.example/contract.docx", success.contract.downloadUrl)
+        }
+
+    @Test
+    fun `getContract returns DataIncomplete when 422`() =
+        runTest {
+            val bookingId = "550e8400-e29b-41d4-a716-446655440000"
+            val mockEngine =
+                MockEngine {
+                    respond(
+                        content =
+                            """
+                            {
+                              "errorCode": "CONTRACT_DATA_INCOMPLETE",
+                              "message": "Невозможно скачать договор: не заполнены обязательные данные.",
+                              "reasons": [
+                                "Не заполнены паспортные данные арендатора.",
+                                "Не указаны данные СТС автомобиля."
+                              ]
+                            }
+                            """.trimIndent(),
+                        status = HttpStatusCode.UnprocessableEntity,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+            val booking = BookingImpl(HttpClient(mockEngine), HttpClient(mockEngine))
+            val result = booking.getContract(bookingId)
+            val incomplete = assertIs<GetBookingContractResult.DataIncomplete>(result)
+            assertEquals(2, incomplete.reasons.size)
+            assertEquals("Не заполнены паспортные данные арендатора.", incomplete.reasons[0])
         }
 
     @Test

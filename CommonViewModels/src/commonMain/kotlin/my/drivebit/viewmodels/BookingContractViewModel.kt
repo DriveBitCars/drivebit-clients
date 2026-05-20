@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingContractDownloadDto
+import my.drivebit.network.services.GetBookingContractResult
 import my.drivebit.utils.safeLaunchWithErrorHandler
 
 sealed interface BookingContractUiState {
@@ -21,6 +22,7 @@ sealed interface BookingContractUiState {
 
     data class Error(
         val message: String,
+        val reasons: List<String> = emptyList(),
     ) : BookingContractUiState
 }
 
@@ -63,8 +65,18 @@ class BookingContractViewModelImpl(
                 )
             },
         ) {
-            val contract = booking.getContract(bookingId)
-            _uiState.value = BookingContractUiState.Ready(contract)
+            when (val result = booking.getContract(bookingId)) {
+                is GetBookingContractResult.Success ->
+                    _uiState.value = BookingContractUiState.Ready(result.contract)
+                is GetBookingContractResult.DataIncomplete ->
+                    _uiState.value =
+                        BookingContractUiState.Error(
+                            message = result.message,
+                            reasons = result.reasons,
+                        )
+                is GetBookingContractResult.Failed ->
+                    _uiState.value = BookingContractUiState.Error(message = result.message)
+            }
         }
     }
 }

@@ -6,13 +6,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.browser.window
+import my.drivebit.components.ActionButton
 import my.drivebit.components.AppWithHeader
+import my.drivebit.components.Column
 import my.drivebit.components.Loader
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
+import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.REDIRECT_PATH
 import my.drivebit.utils.encodeUrlParameter
@@ -24,8 +27,10 @@ import my.drivebit.viewmodels.BookingContractViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.Ul
 import org.koin.compose.currentKoinScope
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -33,18 +38,16 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun DownloadBookingContractPage() {
     val storage: Storage = koinInject()
+    val navigationController = LocalNavigationController.current
     val bookingId = getUrlParameter("bookingId").trim()
 
     if (bookingId.isBlank()) {
         AppWithHeader {
-            Div({
-                style {
-                    padding(24.px)
-                    property("max-width", "560px")
-                    property("margin", "0 auto")
-                }
-            }) {
-                TextError("В ссылке не указан номер бронирования (параметр bookingId).")
+            ContractPageContainer {
+                ContractErrorContent(
+                    message = "В ссылке не указан номер бронирования (параметр bookingId).",
+                    onBack = { navigateBackFromContract(navigationController) },
+                )
             }
         }
         return
@@ -93,13 +96,7 @@ fun DownloadBookingContractPage() {
     }
 
     AppWithHeader {
-        Div({
-            style {
-                padding(24.px)
-                property("max-width", "560px")
-                property("margin", "0 auto")
-            }
-        }) {
+        ContractPageContainer {
             when (val state = uiState) {
                 BookingContractUiState.Idle,
                 BookingContractUiState.Loading,
@@ -178,10 +175,85 @@ fun DownloadBookingContractPage() {
                         }
                     }
                 }
-                is BookingContractUiState.Error -> {
-                    TextError(state.message)
+                is BookingContractUiState.Error ->
+                    ContractErrorContent(
+                        message = state.message,
+                        reasons = state.reasons,
+                        onBack = { navigateBackFromContract(navigationController) },
+                    )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContractPageContainer(content: @Composable () -> Unit) {
+    Div({
+        style {
+            padding(24.px)
+            property("max-width", "560px")
+            property("margin", "0 auto")
+        }
+    }) {
+        content()
+    }
+}
+
+@Composable
+private fun ContractErrorContent(
+    message: String,
+    reasons: List<String> = emptyList(),
+    onBack: () -> Unit,
+) {
+    Column(gap = 16.px) {
+        TextError(message)
+        if (reasons.isNotEmpty()) {
+            P({
+                style {
+                    applyTypography(CSSTypography.Styles.body)
+                    color(CSSColors.Gray600)
+                    fontWeight(CSSTypography.FontWeight.semibold)
+                    property("margin", "0")
+                }
+            }) {
+                Text("Что нужно заполнить:")
+            }
+            Ul({
+                style {
+                    property("margin", "0")
+                    paddingLeft(20.px)
+                    color(CSSColors.Gray600)
+                    applyTypography(CSSTypography.Styles.body)
+                    lineHeight("1.6")
+                }
+            }) {
+                reasons.forEach { reason ->
+                    Li {
+                        Text(reason)
+                    }
                 }
             }
         }
+        Div({
+            style {
+                width(100.percent)
+                maxWidth(280.px)
+                marginTop(8.px)
+            }
+        }) {
+            ActionButton(
+                enabledColor = CSSColors.Blue,
+                text = "Назад",
+                onClick = onBack,
+            )
+        }
+    }
+}
+
+private fun navigateBackFromContract(navigationController: my.drivebit.navigation.NavigationController?) {
+    if (navigationController != null) {
+        navigationController.goBack()
+    } else {
+        window.location.href = "/my-bookings"
     }
 }
