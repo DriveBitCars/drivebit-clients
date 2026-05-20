@@ -25,6 +25,8 @@ interface Booking {
     suspend fun confirmAsOwner(bookingId: String)
 
     suspend fun declineAsOwner(bookingId: String)
+
+    suspend fun getContract(bookingId: String): BookingContractDownloadDto
 }
 
 @Serializable
@@ -73,7 +75,22 @@ data class CreateBookingRequest(
     val comment: String? = null,
 )
 
+@Serializable
+data class BookingContractDownloadDto(
+    @JsonNames("contractNumber", "contract_number") val contractNumber: Long,
+    val fileName: String,
+    @JsonNames("downloadUrl", "download_url") val downloadUrl: String,
+    @JsonNames("urlExpiresAt", "url_expires_at") val urlExpiresAt: String,
+    @JsonNames("generatedAt", "generated_at") val generatedAt: String,
+)
+
 fun BookingDTO.statusAllowsRenterPayment(): Boolean = status.equals("Confirmed", ignoreCase = true)
+
+fun BookingDTO.statusAllowsContractDownload(): Boolean =
+    status.equals("Confirmed", ignoreCase = true) ||
+        status.equals("Paid", ignoreCase = true) ||
+        status.equals("Active", ignoreCase = true) ||
+        status.equals("Completed", ignoreCase = true)
 
 fun BookingDTO.isTerminalRenterBooking(): Boolean =
     status.equals("Completed", ignoreCase = true) ||
@@ -127,5 +144,11 @@ class BookingImpl(
         val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/decline"
         val response = authorizedHttpClient.put(url) { }
         response.consumeResponse()
+    }
+
+    override suspend fun getContract(bookingId: String): BookingContractDownloadDto {
+        val url = "${DEFAULT_BASE_URL}Booking/$bookingId/contract"
+        val response = authorizedHttpClient.get(url)
+        return response.parseResponse()
     }
 }

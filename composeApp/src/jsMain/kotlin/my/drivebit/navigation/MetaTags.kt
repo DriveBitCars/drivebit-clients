@@ -130,6 +130,13 @@ object MetaTags {
                     path = "/payment",
                     noindex = true,
                 ),
+            "/download-booking-contract" to
+                PageMeta(
+                    title = "Договор аренды - DriveBit",
+                    description = "Скачивание договора аренды в DriveBit.",
+                    path = "/download-booking-contract",
+                    noindex = true,
+                ),
             "/payment-success" to
                 PageMeta(
                     title = "Оплата успешна - DriveBit",
