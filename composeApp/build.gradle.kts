@@ -227,8 +227,13 @@ tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
     duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
 }
 
-tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
+tasks.register<Exec>("generateMoskvaSeoSnapshots") {
     dependsOn("syncSeoLandingHtml")
+    commandLine("python3", rootProject.file("scripts/generate_moskva_seo.py").absolutePath)
+}
+
+tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
+    dependsOn("generateMoskvaSeoSnapshots")
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.dir("vendor")) {
         into("vendor")
@@ -291,11 +296,18 @@ tasks.register("syncSeoLandingHtml") {
             val start = text.indexOf("<motion.div class=\"drivebit-seo-shell\">")
                 .takeIf { it >= 0 }
                 ?: text.indexOf("<div class=\"drivebit-seo-shell\">")
+            val generatedStart = text.indexOf("<!-- drivebit-seo-generated-start -->", start)
             val footerStart = text.indexOf("<div class=\"drivebit-footer-shell\">", start)
-            if (start < 0 || footerStart < 0) {
+            val replaceEnd =
+                when {
+                    generatedStart >= 0 -> generatedStart
+                    footerStart >= 0 -> footerStart
+                    else -> -1
+                }
+            if (start < 0 || replaceEnd < 0) {
                 error("SEO shell markers not found in ${file.path}")
             }
-            file.writeText(text.substring(0, start) + shell + text.substring(footerStart), Charsets.UTF_8)
+            file.writeText(text.substring(0, start) + shell + text.substring(replaceEnd), Charsets.UTF_8)
         }
     }
 }

@@ -64,11 +64,33 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
 
+    - name: Generate Moscow SEO snapshots
+      run: python3 scripts/generate_moskva_seo.py
+
     - name: Clean build cache
       run: ./gradlew clean --no-daemon
 
     - name: Build JS distribution (fast web version)
       run: ./gradlew :composeApp:jsBrowserDistribution --no-daemon
+
+    - name: Verify Moscow SEO pages in dist
+      run: |
+        set -e
+        DIST="composeApp/build/dist/js/productionExecutable"
+        test -f "$DIST/moskva/poblizosti/index.html"
+        grep -q 'ItemList' "$DIST/moskva/poblizosti/index.html"
+        grep -q 'drivebit-seo-cars' "$DIST/moskva/poblizosti/index.html"
+        grep -q 'drivebit-seo-nav' "$DIST/moskva/kanikuly/index.html"
+        for slug in "" k-rodnym kanikuly komandirovki za-gorod pereezd meropriyatie poblizosti puteshestviya; do
+          if [ -z "$slug" ]; then
+            page="$DIST/moskva/index.html"
+          else
+            page="$DIST/moskva/$slug/index.html"
+          fi
+          test -f "$page"
+          grep -q 'ItemList' "$page"
+        done
+        echo "Moscow SEO landing pages OK"
 
     - name: Show built index.html title
       run: |

@@ -24,3 +24,8 @@ html.drivebit-js body.drivebit-app-ready .drivebit-seo-shell,
 html.drivebit-js body.drivebit-app-ready .drivebit-footer-shell {
     visibility: visible;
 }
+
+html.drivebit-js body.drivebit-app-ready .drivebit-seo-nav,
+html.drivebit-js body.drivebit-app-ready .drivebit-seo-cars {
+    display: none;
+}
