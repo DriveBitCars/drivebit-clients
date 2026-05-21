@@ -8,6 +8,8 @@ data class SeoLandingBlock(
     val ariaLabel: String,
     val h2: String,
     val paragraphs: List<String>,
+    val title: String? = null,
+    val description: String? = null,
 )
 
 object SeoLandingBlocks {

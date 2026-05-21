@@ -33,20 +33,401 @@
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
 
     <script src="/vendor/leaflet/leaflet.js"></script>
-
+    <!-- drivebit-seo-jsonld -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "DriveBit",
+          "item": "https://drivebit.ru/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Москва",
+          "item": "https://drivebit.ru/moskva"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Все авто в Москве",
+          "item": "https://drivebit.ru/moskva"
+        }
+      ]
+    },
+    {
+      "@type": "AutoRental",
+      "name": "DriveBit — Все авто в Москве",
+      "url": "https://drivebit.ru/moskva",
+      "areaServed": "Москва",
+      "provider": {
+        "@type": "Organization",
+        "name": "DriveBit",
+        "url": "https://drivebit.ru"
+      }
+    },
+    {
+      "@type": "ItemList",
+      "name": "Аренда внедорожника в Москве без водителя",
+      "numberOfItems": 12,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "item": {
+            "@type": "Product",
+            "name": "Skoda Octavia",
+            "url": "https://drivebit.ru/car-detail?id=ce391c08-e930-4230-8060-58319fc3bf90",
+            "image": "https://drivebit.ru/publicbct/cars/ce391c08-e930-4230-8060-58319fc3bf90/545f4202-9077-456f-9369-2f129582d49d_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 2550,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=ce391c08-e930-4230-8060-58319fc3bf90"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "item": {
+            "@type": "Product",
+            "name": "Kia Rio",
+            "url": "https://drivebit.ru/car-detail?id=b1f185a7-d1b5-409c-90a7-68507b5057ee",
+            "image": "https://drivebit.ru/publicbct/cars/b1f185a7-d1b5-409c-90a7-68507b5057ee/bb490742-1c7f-40aa-adde-d3e01eab1b80_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 1650,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=b1f185a7-d1b5-409c-90a7-68507b5057ee"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "item": {
+            "@type": "Product",
+            "name": "Volkswagen Polo",
+            "url": "https://drivebit.ru/car-detail?id=3fc48a7c-8753-4e36-84f9-c173fc4a58e2",
+            "image": "https://drivebit.ru/publicbct/cars/3fc48a7c-8753-4e36-84f9-c173fc4a58e2/6522ffcd-6738-409d-9f04-ee7df8ea629c_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 1850,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=3fc48a7c-8753-4e36-84f9-c173fc4a58e2"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "item": {
+            "@type": "Product",
+            "name": "Skoda Octavia",
+            "url": "https://drivebit.ru/car-detail?id=0478b90e-1e55-402f-be14-1f747e38c993",
+            "image": "https://drivebit.ru/publicbct/cars/0478b90e-1e55-402f-be14-1f747e38c993/3ebb4a22-096a-499c-a63f-ef1d3766f404_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 1999,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=0478b90e-1e55-402f-be14-1f747e38c993"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "item": {
+            "@type": "Product",
+            "name": "Hyundai Solaris",
+            "url": "https://drivebit.ru/car-detail?id=24d93fbd-f70f-49af-9945-a70589ac9aa0",
+            "image": "https://drivebit.ru/publicbct/cars/24d93fbd-f70f-49af-9945-a70589ac9aa0/8075fce5-44dc-4056-bd4d-69eb808c6995_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 1500,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=24d93fbd-f70f-49af-9945-a70589ac9aa0"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "item": {
+            "@type": "Product",
+            "name": "Haval Jolion",
+            "url": "https://drivebit.ru/car-detail?id=dec9fae5-c0d2-47de-91b7-e480e1eb8314",
+            "image": "https://drivebit.ru/publicbct/cars/dec9fae5-c0d2-47de-91b7-e480e1eb8314/5e5bfe99-4af7-4253-af6a-a9241d506c2d_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 1950,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=dec9fae5-c0d2-47de-91b7-e480e1eb8314"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "item": {
+            "@type": "Product",
+            "name": "Skoda Octavia",
+            "url": "https://drivebit.ru/car-detail?id=52207ab5-a0a5-483e-ba8b-545d9a9d7dff",
+            "image": "https://drivebit.ru/publicbct/cars/52207ab5-a0a5-483e-ba8b-545d9a9d7dff/2634d42a-d9d6-4122-8c9f-bf5c96319f6b_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 1440,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=52207ab5-a0a5-483e-ba8b-545d9a9d7dff"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "item": {
+            "@type": "Product",
+            "name": "Skoda Octavia",
+            "url": "https://drivebit.ru/car-detail?id=7f2e3327-6c7d-464a-af5f-3dd48d3c7e23",
+            "image": "https://drivebit.ru/publicbct/cars/7f2e3327-6c7d-464a-af5f-3dd48d3c7e23/0381999a-f04c-410e-b630-9bf85b5fbd08_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 1440,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=7f2e3327-6c7d-464a-af5f-3dd48d3c7e23"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 9,
+          "item": {
+            "@type": "Product",
+            "name": "Skoda Octavia",
+            "url": "https://drivebit.ru/car-detail?id=0007b30e-7b88-4329-b78a-ce963536221e",
+            "image": "https://drivebit.ru/publicbct/cars/0007b30e-7b88-4329-b78a-ce963536221e/7bc6a8b7-95ec-43a3-a3f0-e0851f35c063_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 1440,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=0007b30e-7b88-4329-b78a-ce963536221e"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 10,
+          "item": {
+            "@type": "Product",
+            "name": "Москвич 3",
+            "url": "https://drivebit.ru/car-detail?id=38a55c65-9b23-4e70-9e38-3e1f82583650",
+            "image": "https://drivebit.ru/publicbct/cars/38a55c65-9b23-4e70-9e38-3e1f82583650/74b8f21d-5b58-423e-b208-659ec6f3656e_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 2099,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=38a55c65-9b23-4e70-9e38-3e1f82583650"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 11,
+          "item": {
+            "@type": "Product",
+            "name": "Москвич 3",
+            "url": "https://drivebit.ru/car-detail?id=17f8b21b-625f-44eb-8ea6-95f2b8ba62ac",
+            "image": "https://drivebit.ru/publicbct/cars/17f8b21b-625f-44eb-8ea6-95f2b8ba62ac/84e7a652-01ac-499c-8962-e1d3c9b4fb21_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 2099,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=17f8b21b-625f-44eb-8ea6-95f2b8ba62ac"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 12,
+          "item": {
+            "@type": "Product",
+            "name": "Москвич 3",
+            "url": "https://drivebit.ru/car-detail?id=4e8b2ed7-e56d-469a-a678-9773438af387",
+            "image": "https://drivebit.ru/publicbct/cars/4e8b2ed7-e56d-469a-a678-9773438af387/ba78f713-6613-4aaf-8fe7-b68d1658b2c1_compressed.jpg",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "RUB",
+              "price": 2099,
+              "availability": "https://schema.org/InStock",
+              "url": "https://drivebit.ru/car-detail?id=4e8b2ed7-e56d-469a-a678-9773438af387"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+    </script>
 </head>
 <body>
     <script src="/vendor/drivebit-app-ready.js"></script>
 
     <div id="root"></div>
 
-            <div class="drivebit-seo-shell">
+                                                    <div class="drivebit-seo-shell">
         <section class="drivebit-seo-text" aria-label="Аренда внедорожника в Москве">
             <h2>Аренда внедорожника в Москве без водителя</h2>
             <p>На DriveBit можно взять внедорожник в аренду в Москве у частных владельцев: аренда внедорожника, аренда внедорожников без водителя, аренда авто-внедорожник и варианты «аренда внедорожника в Москве недорого». Цены обычно ниже, чем в классическом прокате.</p>
             <p>Подберите кроссовер или полноразмерный SUV под поездку за город, на дачу или в путешествие. Укажите даты, сравните машины по цене и комплектации и забронируйте онлайн.</p>
         </section>
     </div>
+
+<!-- drivebit-seo-generated-start -->
+    <nav class="drivebit-seo-nav" aria-label="Аренда авто в Москве по целям поездки">
+        <ul>
+            <li><a href="/moskva" aria-current="page">Все авто в Москве</a></li>
+            <li><a href="/moskva/k-rodnym">К родным</a></li>
+            <li><a href="/moskva/kanikuly">Каникулы</a></li>
+            <li><a href="/moskva/komandirovki">Командировки</a></li>
+            <li><a href="/moskva/meropriyatie">Мероприятие</a></li>
+            <li><a href="/moskva/pereezd">Переезд</a></li>
+            <li><a href="/moskva/poblizosti">Поблизости</a></li>
+            <li><a href="/moskva/puteshestviya">Путешествия</a></li>
+            <li><a href="/moskva/za-gorod">За город</a></li>
+        </ul>
+    </nav>
+    <div class="drivebit-seo-cars">
+        <h2 class="drivebit-seo-cars-heading">Автомобили — Все авто в Москве</h2>
+        <div class="drivebit-seo-cars-grid">
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=ce391c08-e930-4230-8060-58319fc3bf90">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/ce391c08-e930-4230-8060-58319fc3bf90/545f4202-9077-456f-9369-2f129582d49d_compressed.jpg" alt="Skoda Octavia 2019" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Skoda Octavia</h3>
+                <p class="drivebit-seo-car-meta">2019 · Москва</p>
+                <p class="drivebit-seo-car-price">2550₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=b1f185a7-d1b5-409c-90a7-68507b5057ee">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/b1f185a7-d1b5-409c-90a7-68507b5057ee/bb490742-1c7f-40aa-adde-d3e01eab1b80_compressed.jpg" alt="Kia Rio 2014" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Kia Rio</h3>
+                <p class="drivebit-seo-car-meta">2014 · Москва</p>
+                <p class="drivebit-seo-car-price">1650₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=3fc48a7c-8753-4e36-84f9-c173fc4a58e2">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/3fc48a7c-8753-4e36-84f9-c173fc4a58e2/6522ffcd-6738-409d-9f04-ee7df8ea629c_compressed.jpg" alt="Volkswagen Polo 2019" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Volkswagen Polo</h3>
+                <p class="drivebit-seo-car-meta">2019 · Москва</p>
+                <p class="drivebit-seo-car-price">1850₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=0478b90e-1e55-402f-be14-1f747e38c993">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/0478b90e-1e55-402f-be14-1f747e38c993/3ebb4a22-096a-499c-a63f-ef1d3766f404_compressed.jpg" alt="Skoda Octavia 2020" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Skoda Octavia</h3>
+                <p class="drivebit-seo-car-meta">2020 · Москва</p>
+                <p class="drivebit-seo-car-price">1999₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=24d93fbd-f70f-49af-9945-a70589ac9aa0">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/24d93fbd-f70f-49af-9945-a70589ac9aa0/8075fce5-44dc-4056-bd4d-69eb808c6995_compressed.jpg" alt="Hyundai Solaris 2014" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Hyundai Solaris</h3>
+                <p class="drivebit-seo-car-meta">2014 · Москва</p>
+                <p class="drivebit-seo-car-price">1500₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=dec9fae5-c0d2-47de-91b7-e480e1eb8314">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/dec9fae5-c0d2-47de-91b7-e480e1eb8314/5e5bfe99-4af7-4253-af6a-a9241d506c2d_compressed.jpg" alt="Haval Jolion 2022" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Haval Jolion</h3>
+                <p class="drivebit-seo-car-meta">2022 · Москва</p>
+                <p class="drivebit-seo-car-price">1950₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=52207ab5-a0a5-483e-ba8b-545d9a9d7dff">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/52207ab5-a0a5-483e-ba8b-545d9a9d7dff/2634d42a-d9d6-4122-8c9f-bf5c96319f6b_compressed.jpg" alt="Skoda Octavia 2015" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Skoda Octavia</h3>
+                <p class="drivebit-seo-car-meta">2015 · Москва</p>
+                <p class="drivebit-seo-car-price">1440₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=7f2e3327-6c7d-464a-af5f-3dd48d3c7e23">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/7f2e3327-6c7d-464a-af5f-3dd48d3c7e23/0381999a-f04c-410e-b630-9bf85b5fbd08_compressed.jpg" alt="Skoda Octavia 2015" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Skoda Octavia</h3>
+                <p class="drivebit-seo-car-meta">2015 · Москва</p>
+                <p class="drivebit-seo-car-price">1440₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=0007b30e-7b88-4329-b78a-ce963536221e">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/0007b30e-7b88-4329-b78a-ce963536221e/7bc6a8b7-95ec-43a3-a3f0-e0851f35c063_compressed.jpg" alt="Skoda Octavia 2015" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Skoda Octavia</h3>
+                <p class="drivebit-seo-car-meta">2015 · Москва</p>
+                <p class="drivebit-seo-car-price">1440₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=38a55c65-9b23-4e70-9e38-3e1f82583650">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/38a55c65-9b23-4e70-9e38-3e1f82583650/74b8f21d-5b58-423e-b208-659ec6f3656e_compressed.jpg" alt="Москвич 3 2023" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Москвич 3</h3>
+                <p class="drivebit-seo-car-meta">2023 · Москва</p>
+                <p class="drivebit-seo-car-price">2099₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=17f8b21b-625f-44eb-8ea6-95f2b8ba62ac">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/17f8b21b-625f-44eb-8ea6-95f2b8ba62ac/84e7a652-01ac-499c-8962-e1d3c9b4fb21_compressed.jpg" alt="Москвич 3 2023" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Москвич 3</h3>
+                <p class="drivebit-seo-car-meta">2023 · Москва</p>
+                <p class="drivebit-seo-car-price">2099₽ / сутки</p>
+            </a>
+        </article>
+        <article class="drivebit-seo-car-card">
+            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=4e8b2ed7-e56d-469a-a678-9773438af387">
+                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/4e8b2ed7-e56d-469a-a678-9773438af387/ba78f713-6613-4aaf-8fe7-b68d1658b2c1_compressed.jpg" alt="Москвич 3 2023" loading="lazy" width="320" height="200">
+                <h3 class="drivebit-seo-car-title">Москвич 3</h3>
+                <p class="drivebit-seo-car-meta">2023 · Москва</p>
+                <p class="drivebit-seo-car-price">2099₽ / сутки</p>
+            </a>
+        </article>
+        </div>
+    </div>
+<!-- drivebit-seo-generated-end -->
+
+
+
+
+
+
+
+
+
+
+
+
 
 <div class="drivebit-footer-shell">
         <footer class="drivebit-site-footer">

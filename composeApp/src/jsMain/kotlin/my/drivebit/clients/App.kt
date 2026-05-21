@@ -42,6 +42,7 @@ import my.drivebit.screens.ContactsPage
 import my.drivebit.screens.OfferPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.BookingPaymentLinkPage
+import my.drivebit.screens.DownloadBookingContractPage
 import my.drivebit.screens.PaymentFailurePage
 import my.drivebit.screens.PaymentSuccessPage
 import my.drivebit.screens.CookiesPage
@@ -177,6 +178,13 @@ actual fun App() {
                 }
                 currentPath.startsWith("/payment-failure") -> {
                     PaymentFailurePage()
+                }
+                currentPath.startsWith("/download-booking-contract") -> {
+                    if (storage.isLogined()) {
+                        DownloadBookingContractPage()
+                    } else {
+                        window.location.href = homePathHref(storage)
+                    }
                 }
                 currentPath.startsWith("/payment") -> {
                     BookingPaymentLinkPage()

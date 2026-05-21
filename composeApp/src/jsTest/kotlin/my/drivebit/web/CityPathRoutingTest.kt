@@ -35,6 +35,12 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun parseCityPath_returnsNullForDownloadBookingContract() {
+        assertNull(parseCityPath("/download-booking-contract"))
+        assertNull(parseCityPath("/download-booking-contract?bookingId=abc"))
+    }
+
+    @Test
     fun parseCityPath_stripsQueryAndReturnsNullForSearchWithParams() {
         assertNull(parseCityPath("/search?startDate=2026-04-25&endDate=2026-04-30"))
     }

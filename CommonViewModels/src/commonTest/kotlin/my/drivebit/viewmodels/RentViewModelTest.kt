@@ -66,6 +66,9 @@ private class FakeBooking(
 
     override suspend fun declineAsOwner(bookingId: String) {}
 
+    override suspend fun getContract(bookingId: String): my.drivebit.network.services.GetBookingContractResult =
+        throw NotImplementedError()
+
     override suspend fun createAsRenter(request: my.drivebit.network.services.CreateBookingRequest) =
         my.drivebit.network.services.BookingDTO(
             id = "booking-1",

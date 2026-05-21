@@ -28,8 +28,12 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.navigation.NavigationState
 import my.drivebit.repositories.CurrentFiltersRepository
+import my.drivebit.web.BrandSlugResolver
 import my.drivebit.web.navigateToCarDetail
+import my.drivebit.web.parseSearchBrandSlugFromPath
+import my.drivebit.web.searchPathForBrandName
 import my.drivebit.viewmodels.SearchPageDateEndViewModel
 import my.drivebit.viewmodels.SearchPageDateViewModel
 import my.drivebit.viewmodels.SearchState
@@ -58,6 +62,8 @@ import org.w3c.dom.url.URLSearchParams
 @Composable
 fun SearchPage() {
     val navigationController = LocalNavigationController.current!!
+    val navigationState: NavigationState = koinInject()
+    val brandSlugResolver: BrandSlugResolver = koinInject()
     val viewModel: SearchViewModel = koinInject()
     val state by viewModel.state.collectAsState()
     val displayedCars by viewModel.displayedCars.collectAsState()
@@ -73,6 +79,17 @@ fun SearchPage() {
     val filterSeatsMin by currentFiltersRepository.seatsMin.collectAsState(null)
     val startDateByRepo by currentFiltersRepository.startState.collectAsState(null)
     val endDateByRepo by currentFiltersRepository.endState.collectAsState(null)
+    val currentPath by navigationState.currentPath.collectAsState()
+    val brandSlugFromPath = parseSearchBrandSlugFromPath(currentPath)
+
+    LaunchedEffect(brandSlugFromPath) {
+        val slug = brandSlugFromPath ?: return@LaunchedEffect
+        val brand = brandSlugResolver.resolve(slug) ?: return@LaunchedEffect
+        if (filterBrandName != brand.name) {
+            viewModel.updateBrand(brand.id, brand.name)
+            viewModel.updateModel(null, null)
+        }
+    }
 
     LaunchedEffect(searchParams.first, searchParams.second) {
         searchParams.first?.let { currentFiltersRepository.updateStartDate(it) }
@@ -304,6 +321,12 @@ fun SearchPage() {
                                             onBrandSelected = { brandId, brandName ->
                                                 viewModel.updateBrand(brandId, brandName)
                                                 viewModel.updateModel(null, null)
+                                                val targetPath = searchPathForBrandName(brandName)
+                                                if (currentPath != targetPath) {
+                                                    val query = window.location.search
+                                                    window.history.pushState(null, "", "$targetPath$query")
+                                                    navigationState.updatePath(targetPath)
+                                                }
                                             },
                                             onModelSelected = { modelId, modelName ->
                                                 viewModel.updateModel(modelId, modelName)
@@ -313,6 +336,11 @@ fun SearchPage() {
                                                 viewModel.updateBrand(null, null)
                                                 viewModel.updateModel(null, null)
                                                 showBrandFilter = false
+                                                if (brandSlugFromPath != null) {
+                                                    val query = window.location.search
+                                                    window.history.pushState(null, "", "/search$query")
+                                                    navigationState.updatePath("/search")
+                                                }
                                             },
                                             onOk = { showBrandFilter = false },
                                         )

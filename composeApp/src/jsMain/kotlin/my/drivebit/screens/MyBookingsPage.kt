@@ -18,6 +18,7 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.statusAllowsContractDownload
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
@@ -73,6 +74,11 @@ fun MyBookingsPage() {
                                     onPay = {
                                         navigationController?.navigateTo("/payment?bookingId=${booking.id}")
                                     },
+                                    onDownloadContract = {
+                                        navigationController?.navigateTo(
+                                            "/download-booking-contract?bookingId=${booking.id}",
+                                        )
+                                    },
                                 )
                             }
                         }
@@ -88,6 +94,7 @@ private fun BookingItemCard(
     booking: BookingDTO,
     onLeaveReview: () -> Unit,
     onPay: () -> Unit,
+    onDownloadContract: () -> Unit,
 ) {
     val ownerName = booking.ownerName?.takeIf { it.isNotBlank() } ?: "Владелец"
     val carName =
@@ -111,6 +118,7 @@ private fun BookingItemCard(
     val relativeTime = runCatching { formatRelativeTime(Instant.parse(booking.createdAt)) }.getOrElse { "" }
     val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
     val canPay = booking.status.equals("Confirmed", ignoreCase = true)
+    val canDownloadContract = booking.statusAllowsContractDownload()
 
     Column(
         gap = 16.px,
@@ -188,7 +196,7 @@ private fun BookingItemCard(
             }
         }
 
-        if (canPay || canLeaveReview) {
+        if (canPay || canLeaveReview || canDownloadContract) {
             Row(
                 justifyContent = JustifyContent.FlexStart,
                 gap = 8.px,
@@ -209,6 +217,23 @@ private fun BookingItemCard(
                         onClick { onPay() }
                     }) {
                         Text("Оплатить")
+                    }
+                }
+                if (canDownloadContract) {
+                    Button({
+                        style {
+                            padding(8.px, 16.px)
+                            backgroundColor(CSSColors.Blue)
+                            color(CSSColors.White)
+                            border(0.px)
+                            borderRadius(8.px)
+                            fontSize(14.px)
+                            fontWeight("600")
+                            cursor("pointer")
+                        }
+                        onClick { onDownloadContract() }
+                    }) {
+                        Text("Договор")
                     }
                 }
                 if (canLeaveReview) {
