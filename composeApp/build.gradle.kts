@@ -230,10 +230,20 @@ tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
 tasks.register<Exec>("generateMoskvaSeoSnapshots") {
     dependsOn("syncSeoLandingHtml")
     commandLine("python3", rootProject.file("scripts/generate_moskva_seo.py").absolutePath)
+    environment("DRIVEBIT_API_BASE", "http://157.22.252.70:5000")
+}
+
+tasks.register<Exec>("generateSearchBrandSeoSnapshots") {
+    commandLine("python3", rootProject.file("scripts/generate_search_brand_seo.py").absolutePath)
+    environment("DRIVEBIT_API_BASE", "http://157.22.252.70:5000")
+}
+
+tasks.register("generateAllSeoSnapshots") {
+    dependsOn("generateMoskvaSeoSnapshots", "generateSearchBrandSeoSnapshots")
 }
 
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
-    dependsOn("generateMoskvaSeoSnapshots")
+    dependsOn("generateAllSeoSnapshots")
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.dir("vendor")) {
         into("vendor")

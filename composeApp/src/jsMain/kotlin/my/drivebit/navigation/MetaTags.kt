@@ -151,6 +151,12 @@ object MetaTags {
                     path = "/payment-failure",
                     noindex = true,
                 ),
+            "/search" to
+                PageMeta(
+                    title = "Поиск автомобилей - DriveBit",
+                    description = "Расширенный поиск аренды автомобилей в Москве по марке, цене, типу кузова и приводу.",
+                    path = "/search",
+                ),
             "/search/ai" to
                 PageMeta(
                     title = "ИИ-поиск - DriveBit",
@@ -162,13 +168,22 @@ object MetaTags {
 
     fun updateForPath(path: String) {
         val normalizedPath = normalizePath(path)
+        val seoBlock = SeoLandingBlocks.blockForPath(normalizedPath)
         val pageMeta =
             pages[normalizedPath]
-                ?: PageMeta(
-                    title = DEFAULT_TITLE,
-                    description = DEFAULT_DESCRIPTION,
-                    path = normalizedPath,
-                )
+                ?: if (seoBlock?.title != null) {
+                    PageMeta(
+                        title = seoBlock.title,
+                        description = seoBlock.description ?: DEFAULT_DESCRIPTION,
+                        path = normalizedPath,
+                    )
+                } else {
+                    PageMeta(
+                        title = DEFAULT_TITLE,
+                        description = DEFAULT_DESCRIPTION,
+                        path = normalizedPath,
+                    )
+                }
 
         document.title = pageMeta.title
 

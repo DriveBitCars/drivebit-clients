@@ -65,7 +65,10 @@ jobs:
       run: chmod +x ./gradlew
 
     - name: Generate Moscow SEO snapshots
-      run: python3 scripts/generate_moskva_seo.py
+      run: DRIVEBIT_API_BASE=http://157.22.252.70:5000 python3 scripts/generate_moskva_seo.py
+
+    - name: Generate search brand SEO pages
+      run: DRIVEBIT_API_BASE=http://157.22.252.70:5000 python3 scripts/generate_search_brand_seo.py
 
     - name: Clean build cache
       run: ./gradlew clean --no-daemon
@@ -91,6 +94,10 @@ jobs:
           grep -q 'ItemList' "$page"
         done
         echo "Moscow SEO landing pages OK"
+        test -f "$DIST/search/bmw/index.html"
+        grep -q 'ItemList' "$DIST/search/bmw/index.html"
+        grep -q 'drivebit-seo-text' "$DIST/search/bmw/index.html"
+        echo "Search brand SEO pages OK"
 
     - name: Show built index.html title
       run: |
