@@ -222,15 +222,17 @@ object MetaTags {
                     )
                 }
 
+        val canonicalPath = seoCanonicalPath(lookupPath, pageMeta.path)
+
         document.title = pageMeta.title
 
         updateMetaTag("description", pageMeta.description)
         updateMetaTag("og:title", pageMeta.title, property = true)
         updateMetaTag("og:description", pageMeta.description, property = true)
-        updateMetaTag("og:url", getFullUrl(pageMeta.path, includeQuery = true), property = true)
-        updateMetaTag("twitter:url", getFullUrl(pageMeta.path, includeQuery = true))
+        updateMetaTag("og:url", getFullUrl(canonicalPath, includeQuery = true), property = true)
+        updateMetaTag("twitter:url", getFullUrl(canonicalPath, includeQuery = true))
 
-        updateCanonicalUrl(getFullUrl(pageMeta.path, includeQuery = false))
+        updateCanonicalUrl(getFullUrl(canonicalPath, includeQuery = false))
 
         if (pageMeta.noindex) {
             updateMetaTag("robots", "noindex, nofollow")
@@ -240,6 +242,16 @@ object MetaTags {
 
         SeoBlocks.updateForPath(lookupPath)
     }
+
+    private fun seoCanonicalPath(
+        lookupPath: String,
+        pagePath: String,
+    ): String =
+        if (lookupPath == "/" || lookupPath.isEmpty()) {
+            "/moskva"
+        } else {
+            pagePath
+        }
 
     private fun cityPageMeta(
         lookupPath: String,

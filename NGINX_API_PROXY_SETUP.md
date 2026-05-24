@@ -96,13 +96,26 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
     
+    # SEO: корень не индексируем отдельно — канонический URL /moskva
+    location = / {
+        return 301 https://drivebit.ru/moskva;
+    }
+
     # Статические файлы
     location / {
-        root /var/www/drivebit-clients;
+        root /var/www/drivebit-clients/current;
         try_files $uri $uri/ /index.html;
     }
 }
 ```
+
+На сервере один раз (или при деплое через `scripts/setup-nginx-seo-root-redirect.sh`):
+
+```bash
+sudo bash scripts/setup-nginx-seo-root-redirect.sh
+```
+
+Блок `location = /` должен быть **перед** `location /`.
 
 ## Проверка после настройки
 

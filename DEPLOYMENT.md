@@ -70,6 +70,16 @@ Until step 2 is done, switching `current` will not change what nginx serves.
 
 If `location /api/` is missing, the workflow inserts `proxy_pass http://157.22.252.70:5000/;` (current production backend). To use another upstream, add or edit `location /api/` in nginx on the front server and do not rely on the auto-inserted block.
 
+## SEO: главная `/` → `/moskva`
+
+Чтобы Яндекс не видел дубль `https://drivebit.ru/` и `https://drivebit.ru/moskva`:
+
+1. В nginx перед `location /`: `location = / { return 301 https://drivebit.ru/moskva; }` — скрипт `scripts/setup-nginx-seo-root-redirect.sh` (деплой добавляет блок автоматически).
+2. В sitemap только `/moskva`, не `/`.
+3. В корневом `index.html` — `rel="canonical"` на `/moskva` (на случай отдачи без редиректа).
+
+После выкладки в Вебмастере: переобход `/` и `/moskva`.
+
 ## Triggers
 
 - **Release published** (`release: published`), or  

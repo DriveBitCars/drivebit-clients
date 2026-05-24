@@ -398,6 +398,17 @@ jobs:
           $SUDO_CMD cp "$NGINX_CONFIG" "${NGINX_CONFIG}.backup.$(date +%Y%m%d_%H%M%S)"
           
           # Check if API proxy already exists
+          if grep -q 'location = /' "$NGINX_CONFIG" && grep -q 'return 301.*moskva' "$NGINX_CONFIG"; then
+            echo "✅ SEO root redirect / → /moskva already exists"
+          else
+            echo "⚙️  Adding SEO root redirect (location = / → /moskva)..."
+            TEMP_ROOT=$(mktemp)
+            printf '    # SEO: canonical home URL (avoid duplicate / vs /moskva)\n    location = / {\n        return 301 https://drivebit.ru/moskva;\n    }\n' > "$TEMP_ROOT"
+            $SUDO_CMD sed -i "/^[[:space:]]*location \/[[:space:]]*{/r $TEMP_ROOT" "$NGINX_CONFIG"
+            rm -f "$TEMP_ROOT"
+            echo "✅ SEO root redirect added"
+          fi
+
           if grep -q "location /api/" "$NGINX_CONFIG"; then
             echo "✅ API proxy configuration already exists"
           else
