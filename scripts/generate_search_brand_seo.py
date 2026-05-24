@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Build /search/{brand} static SEO pages, landing-blocks.json entries, and sitemap URLs."""
+"""Build /search/{brand} static SEO pages and landing-blocks.json entries."""
 
 from __future__ import annotations
 
 import html
 import json
 import os
-import re
 import subprocess
 import sys
 import urllib.parse
@@ -15,8 +14,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BLOCKS_FILE = ROOT / "composeApp" / "seo" / "landing-blocks.json"
 RESOURCES = ROOT / "composeApp" / "src" / "jsMain" / "resources"
-SITEMAP_FILE = RESOURCES / "sitemap.xml"
-
 API_BASE = os.environ.get("DRIVEBIT_API_BASE", "https://drivebit.ru/api").rstrip("/")
 SITE_BASE = "https://drivebit.ru"
 PAGE_SIZE = 12
@@ -281,7 +278,7 @@ def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, js
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
     <meta name="description" content="{description}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, follow">
     <meta name="yandex-verification" content="c19b1a1a78585234" />
     <link rel="canonical" href="{page_url}">
 
@@ -340,32 +337,6 @@ def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, js
 </body>
 </html>
 """
-
-
-def update_sitemap(paths: list[str]) -> None:
-    existing = SITEMAP_FILE.read_text(encoding="utf-8") if SITEMAP_FILE.exists() else ""
-    kept = []
-    for line in existing.splitlines():
-        if "/search/" in line and "drivebit.ru/search/" in line:
-            continue
-        kept.append(line)
-    body = "\n".join(kept)
-    if "</urlset>" not in body:
-        body = (
-            '<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-            "</urlset>\n"
-        )
-    entries = []
-    for path in sorted(paths):
-        loc = f"{SITE_BASE}{path}"
-        entries.append(
-            f"  <url>\n    <loc>{loc}</loc>\n"
-            f"    <changefreq>daily</changefreq>\n    <priority>0.75</priority>\n  </url>"
-        )
-    insert = "\n".join(entries) + "\n"
-    updated = body.replace("</urlset>", insert + "</urlset>")
-    SITEMAP_FILE.write_text(updated, encoding="utf-8")
 
 
 def main() -> int:
@@ -438,8 +409,6 @@ def main() -> int:
         json.dumps(blocks, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    update_sitemap([path for path, _, _, _ in published])
-
     if errors:
         for err in errors:
             print(f"WARN {err}", file=sys.stderr)

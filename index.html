@@ -21,6 +21,66 @@
     <meta name="twitter:description" content="Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7.">
     <meta name="twitter:image" content="https://drivebit.ru/images/logos/logo.png">
 
+    <script>
+        (function () {
+            var pages = {
+                "/offer": {
+                    title: "Оферта - DriveBit",
+                    description: "Публичная оферта сервиса аренды автомобилей DriveBit. Условия аренды и сдачи авто.",
+                    path: "/offer"
+                },
+                "/privacy": {
+                    title: "Политика конфиденциальности - DriveBit",
+                    description: "Политика обработки персональных данных сервиса аренды автомобилей DriveBit.",
+                    path: "/privacy"
+                },
+                "/cookies": {
+                    title: "Политика cookies - DriveBit",
+                    description: "Информация об использовании файлов cookies на сайте DriveBit.",
+                    path: "/cookies"
+                },
+                "/contacts": {
+                    title: "Контакты - DriveBit",
+                    description: "Контактные данные и реквизиты DriveBit. Аренда автомобилей от собственников.",
+                    path: "/contacts"
+                },
+                "/car-detail": {
+                    title: "Карточка автомобиля - DriveBit",
+                    description: "Подробная информация об автомобиле для аренды на DriveBit.",
+                    path: "/car-detail",
+                    noindex: true
+                }
+            };
+            var path = location.pathname.replace(/\/$/, "") || "/";
+            if (path.indexOf("/car-detail") === 0) path = "/car-detail";
+            var page = pages[path];
+            if (!page) return;
+            document.title = page.title;
+            function setMeta(name, content, property) {
+                var selector = property ? "meta[property='" + name + "']" : "meta[name='" + name + "']";
+                var meta = document.querySelector(selector);
+                if (meta) meta.setAttribute("content", content);
+            }
+            setMeta("description", page.description);
+            setMeta("og:title", page.title, true);
+            setMeta("og:description", page.description, true);
+            setMeta("twitter:title", page.title);
+            setMeta("twitter:description", page.description);
+            if (page.path) {
+                var canonical = document.querySelector("link[rel='canonical']");
+                if (!canonical) {
+                    canonical = document.createElement("link");
+                    canonical.setAttribute("rel", "canonical");
+                    document.head.appendChild(canonical);
+                }
+                canonical.setAttribute("href", "https://drivebit.ru" + page.path);
+            }
+            if (page.noindex) {
+                var robots = document.querySelector("meta[name='robots']");
+                if (robots) robots.setAttribute("content", "noindex, nofollow");
+            }
+        })();
+    </script>
 
     <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="/images/logos/turo_logo.svg">

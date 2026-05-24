@@ -1,8 +1,8 @@
 User-agent: *
 Allow: /
-Allow: /car/
-Allow: /car-detail
 
+Disallow: /car/
+Disallow: /car-detail
 Disallow: /login-by-phone
 Disallow: /login-by-mail
 Disallow: /signup
