@@ -2,6 +2,12 @@ package my.drivebit.navigation
 
 import kotlinx.browser.document
 import kotlinx.browser.window
+import my.drivebit.repositories.MyCityStorageKeys
+import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.heroBannerPageTitle
+import my.drivebit.utils.resolveCityNameForMeta
+import my.drivebit.web.filterTitleFromPathSegment
+import my.drivebit.web.parseCityPath
 
 object MetaTags {
     private const val HOME_TITLE = "DriveBit - Аренда автомобилей от собственников | Дешевле проката на 40%"
@@ -192,12 +198,16 @@ object MetaTags {
                 ),
         )
 
-    fun updateForPath(path: String) {
+    fun updateForPath(
+        path: String,
+        storage: Storage? = null,
+    ) {
         val normalizedPath = normalizePath(path)
         val lookupPath = if (normalizedPath.startsWith("/car-detail")) "/car-detail" else normalizedPath
         val seoBlock = SeoLandingBlocks.blockForPath(lookupPath)
         val pageMeta =
-            pages[lookupPath]
+            cityPageMeta(lookupPath, storage, seoBlock)
+                ?: pages[lookupPath]
                 ?: if (seoBlock?.title != null) {
                     PageMeta(
                         title = seoBlock.title,
@@ -229,6 +239,28 @@ object MetaTags {
         }
 
         SeoBlocks.updateForPath(lookupPath)
+    }
+
+    private fun cityPageMeta(
+        lookupPath: String,
+        storage: Storage?,
+        seoBlock: SeoLandingBlock?,
+    ): PageMeta? {
+        val cityPath = parseCityPath(lookupPath) ?: return null
+        val storedCityName =
+            storage?.getString(MyCityStorageKeys.NAME_KEY, "").orEmpty()
+        val cityName = resolveCityNameForMeta(cityPath.citySlug, storedCityName)
+        val filterTitle = filterTitleFromPathSegment(cityPath.filterSlug)
+        val title = heroBannerPageTitle(cityName, filterTitle)
+        val description =
+            pages[lookupPath]?.description
+                ?: seoBlock?.description
+                ?: HOME_DESCRIPTION
+        return PageMeta(
+            title = title,
+            description = description,
+            path = lookupPath,
+        )
     }
 
     private fun updateMetaTag(

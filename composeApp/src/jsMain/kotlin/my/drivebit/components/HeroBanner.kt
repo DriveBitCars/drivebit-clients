@@ -11,6 +11,7 @@ import my.drivebit.utils.heroBannerHeadline
 import my.drivebit.viewmodels.DateFieldViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 
@@ -102,7 +103,7 @@ fun HeroBanner(
                         justifyContent(JustifyContent.Center)
                     }
                 }) {
-                    Div({
+                    H1({
                         style {
                             applyTypography(CSSTypography.Styles.body)
                             fontSize(if (isMobile) 28.px else 48.px)
@@ -110,6 +111,7 @@ fun HeroBanner(
                             color(CSSColors.White)
                             textAlign("center")
                             lineHeight("1.2")
+                            margin(0.px)
                             marginBottom(if (isMobile) 12.px else 20.px)
                         }
                     }) {
