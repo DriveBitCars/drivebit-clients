@@ -101,6 +101,25 @@ fun filterTitleToPathSegment(title: String): String? {
     return cityNameToSlug(normalized)
 }
 
+private val KNOWN_FILTER_TITLES =
+    listOf(
+        "Поблизости",
+        "Путешествия",
+        "За город",
+        "К родным",
+        "Командировки",
+        "Каникулы",
+        "Мероприятие",
+        "Переезд",
+    )
+
+fun filterTitleFromPathSegment(filterSlug: String?): String {
+    if (filterSlug.isNullOrBlank()) return ALL_FILTER_TITLE
+    val normalized = filterSlug.lowercase()
+    return KNOWN_FILTER_TITLES.firstOrNull { filterTitleToPathSegment(it) == normalized }
+        ?: ALL_FILTER_TITLE
+}
+
 /**
  * Builds path for city home + optional selected filter segment.
  */

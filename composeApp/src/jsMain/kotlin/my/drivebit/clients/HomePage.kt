@@ -30,6 +30,7 @@ import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MapViewModel
+import my.drivebit.viewmodels.MyCityViewModel
 import my.drivebit.viewmodels.NearbyLayoutMode
 import my.drivebit.web.cityPathWithFilter
 import my.drivebit.web.filterTitleToPathSegment
@@ -81,6 +82,8 @@ fun HomePage() {
 
     val startDateViewModel: DateFieldViewModel = koinInject(named("startDate"))
     val endDateViewModel: DateFieldViewModel = koinInject(named("endDate"))
+    val myCityViewModel: MyCityViewModel = koinInject()
+    val cityName by myCityViewModel.myCity.collectAsState(initial = "")
 
     val startState by startDateViewModel.state.collectAsState()
     val endState by endDateViewModel.state.collectAsState()
@@ -104,6 +107,8 @@ fun HomePage() {
         selectedFilter?.let { filter ->
             HeroBanner(
                 backgroundIconUrl = filter.backgroundIcon,
+                cityName = cityName,
+                filterTitle = selected,
                 startDateViewModel = startDateViewModel,
                 endDateViewModel = endDateViewModel,
             )

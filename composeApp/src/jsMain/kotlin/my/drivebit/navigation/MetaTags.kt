@@ -2,10 +2,17 @@ package my.drivebit.navigation
 
 import kotlinx.browser.document
 import kotlinx.browser.window
+import my.drivebit.repositories.MyCityStorageKeys
+import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.heroBannerPageTitle
+import my.drivebit.utils.resolveCityNameForMeta
+import my.drivebit.web.filterTitleFromPathSegment
+import my.drivebit.web.parseCityPath
 
 object MetaTags {
-    private const val DEFAULT_TITLE = "DriveBit - Аренда автомобилей"
-    private const val DEFAULT_DESCRIPTION = "Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7."
+    private const val HOME_TITLE = "DriveBit - Аренда автомобилей от собственников | Дешевле проката на 40%"
+    private const val HOME_DESCRIPTION =
+        "Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7."
 
     data class PageMeta(
         val title: String,
@@ -18,8 +25,8 @@ object MetaTags {
         mapOf(
             "/" to
                 PageMeta(
-                    title = "DriveBit - Аренда автомобилей",
-                    description = "Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7.",
+                    title = HOME_TITLE,
+                    description = HOME_DESCRIPTION,
                     path = "/",
                 ),
             "/list-your-car" to
@@ -33,6 +40,24 @@ object MetaTags {
                     title = "Контакты - DriveBit",
                     description = "Контактные данные и реквизиты DriveBit. Аренда автомобилей от собственников.",
                     path = "/contacts",
+                ),
+            "/offer" to
+                PageMeta(
+                    title = "Оферта - DriveBit",
+                    description = "Публичная оферта сервиса аренды автомобилей DriveBit. Условия аренды и сдачи авто.",
+                    path = "/offer",
+                ),
+            "/privacy" to
+                PageMeta(
+                    title = "Политика конфиденциальности - DriveBit",
+                    description = "Политика обработки персональных данных сервиса аренды автомобилей DriveBit.",
+                    path = "/privacy",
+                ),
+            "/cookies" to
+                PageMeta(
+                    title = "Политика cookies - DriveBit",
+                    description = "Информация об использовании файлов cookies на сайте DriveBit.",
+                    path = "/cookies",
                 ),
             "/moskva" to
                 PageMeta(
@@ -164,24 +189,36 @@ object MetaTags {
                     path = "/search/ai",
                     noindex = true,
                 ),
+            "/car-detail" to
+                PageMeta(
+                    title = "Карточка автомобиля - DriveBit",
+                    description = "Подробная информация об автомобиле для аренды на DriveBit.",
+                    path = "/car-detail",
+                    noindex = true,
+                ),
         )
 
-    fun updateForPath(path: String) {
+    fun updateForPath(
+        path: String,
+        storage: Storage? = null,
+    ) {
         val normalizedPath = normalizePath(path)
-        val seoBlock = SeoLandingBlocks.blockForPath(normalizedPath)
+        val lookupPath = if (normalizedPath.startsWith("/car-detail")) "/car-detail" else normalizedPath
+        val seoBlock = SeoLandingBlocks.blockForPath(lookupPath)
         val pageMeta =
-            pages[normalizedPath]
+            cityPageMeta(lookupPath, storage, seoBlock)
+                ?: pages[lookupPath]
                 ?: if (seoBlock?.title != null) {
                     PageMeta(
                         title = seoBlock.title,
-                        description = seoBlock.description ?: DEFAULT_DESCRIPTION,
-                        path = normalizedPath,
+                        description = seoBlock.description ?: HOME_DESCRIPTION,
+                        path = lookupPath,
                     )
                 } else {
                     PageMeta(
-                        title = DEFAULT_TITLE,
-                        description = DEFAULT_DESCRIPTION,
-                        path = normalizedPath,
+                        title = HOME_TITLE,
+                        description = HOME_DESCRIPTION,
+                        path = lookupPath,
                     )
                 }
 
@@ -201,7 +238,29 @@ object MetaTags {
             removeMetaTag("robots")
         }
 
-        SeoBlocks.updateForPath(normalizedPath)
+        SeoBlocks.updateForPath(lookupPath)
+    }
+
+    private fun cityPageMeta(
+        lookupPath: String,
+        storage: Storage?,
+        seoBlock: SeoLandingBlock?,
+    ): PageMeta? {
+        val cityPath = parseCityPath(lookupPath) ?: return null
+        val storedCityName =
+            storage?.getString(MyCityStorageKeys.NAME_KEY, "").orEmpty()
+        val cityName = resolveCityNameForMeta(cityPath.citySlug, storedCityName)
+        val filterTitle = filterTitleFromPathSegment(cityPath.filterSlug)
+        val title = heroBannerPageTitle(cityName, filterTitle)
+        val description =
+            pages[lookupPath]?.description
+                ?: seoBlock?.description
+                ?: HOME_DESCRIPTION
+        return PageMeta(
+            title = title,
+            description = description,
+            path = lookupPath,
+        )
     }
 
     private fun updateMetaTag(

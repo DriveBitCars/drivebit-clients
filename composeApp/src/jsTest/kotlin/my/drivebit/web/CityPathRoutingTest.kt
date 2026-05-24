@@ -81,6 +81,19 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun filterTitleFromPathSegment_mapsKnownFilters() {
+        assertEquals("Все", filterTitleFromPathSegment(null))
+        assertEquals("Поблизости", filterTitleFromPathSegment("poblizosti"))
+        assertEquals("Путешествия", filterTitleFromPathSegment("puteshestviya"))
+        assertEquals("За город", filterTitleFromPathSegment("za-gorod"))
+    }
+
+    @Test
+    fun filterTitleFromPathSegment_unknownSlugDefaultsToAll() {
+        assertEquals("Все", filterTitleFromPathSegment("unknown-filter"))
+    }
+
+    @Test
     fun parseCitySlugFromPath_supportedSitemapCityUrls() {
         val urls =
             listOf(
