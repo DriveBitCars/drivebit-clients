@@ -28,7 +28,7 @@ import org.koin.compose.koinInject
 
 @Composable
 fun LicensePlateInputPage(
-    onLicensePlateEntered: () -> Unit = {},
+    onLicensePlateEntered: (carId: String) -> Unit = {},
     onMissingPassport: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
@@ -52,14 +52,14 @@ fun LicensePlateInputPage(
     )
 
     LaunchedEffect(createCarState) {
-        when (createCarState) {
+        when (val current = createCarState) {
             CreateCarFromDailyRateState.MissingPassport -> {
                 createCarViewModel.reset()
                 onMissingPassport()
             }
             is CreateCarFromDailyRateState.Success -> {
                 createCarViewModel.reset()
-                onLicensePlateEntered()
+                onLicensePlateEntered(current.carId)
             }
             else -> Unit
         }

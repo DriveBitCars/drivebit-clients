@@ -24,9 +24,12 @@ private class FakeDocuments : Documents {
         fileName: String,
         contentType: String,
         documentType: String,
+        carId: String?,
     ): Document = throw NotImplementedError()
 
     override suspend fun getDocumentUrl(documentId: Int): String = throw NotImplementedError()
+
+    override suspend fun deleteDocument(documentId: Int) = Unit
 }
 
 private class FakeCarEnumsRepository : CarEnumsRepository {

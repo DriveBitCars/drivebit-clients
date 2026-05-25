@@ -24,5 +24,12 @@ config.devServer.proxy = [
         secure: false,
         logLevel: 'debug',
     },
+    {
+        context: ['/privatebct'],
+        target: 'http://157.22.252.70:9000',
+        changeOrigin: true,
+        secure: false,
+        logLevel: 'debug',
+    },
 ];
 

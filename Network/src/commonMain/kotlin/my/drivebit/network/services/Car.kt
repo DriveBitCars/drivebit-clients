@@ -178,6 +178,7 @@ data class CarDetailResponse(
     val dailyRate21Days: Double? = null,
     val seatsCount: Int? = null,
     val availableMileagePerDayKm: Int? = null,
+    @SerialName("stsSeriesNumber") val stsSeriesNumber: String? = null,
     val insurance: String? = null,
     val insuranceTranslate: String? = null,
     val deposit: Double? = null,

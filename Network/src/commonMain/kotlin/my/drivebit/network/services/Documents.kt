@@ -3,16 +3,19 @@ package my.drivebit.network.services
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
+import my.drivebit.network.consumeResponse
 import my.drivebit.network.parseResponse
-import my.drivebit.utils.extractPathFromApiUrl
-import my.drivebit.utils.isDirectMinioUrl
+import my.drivebit.utils.resolveMinioImageUrlForBrowser
 
 interface Documents {
     suspend fun getDocuments(): List<Document>
@@ -22,15 +25,21 @@ interface Documents {
         fileName: String,
         contentType: String,
         documentType: String,
+        carId: String? = null,
     ): Document
 
     suspend fun getDocumentUrl(documentId: Int): String
+
+    suspend fun deleteDocument(documentId: Int)
 }
 
 @Serializable
 data class Document(
     val id: Int,
     val fileName: String? = null,
+    @SerialName("carId")
+    @JsonNames("carId", "CarId")
+    val carId: String? = null,
     val type: String? = null,
     val status: String? = null,
     val validationResults: String? = null,
@@ -55,6 +64,7 @@ class DocumentsImpl(
         fileName: String,
         contentType: String,
         documentType: String,
+        carId: String?,
     ): Document {
         val url = "${DEFAULT_BASE_URL}Documents/upload"
         val response =
@@ -63,6 +73,7 @@ class DocumentsImpl(
                     MultiPartFormDataContent(
                         formData {
                             append("Type", documentType)
+                            carId?.takeIf { it.isNotBlank() }?.let { append("CarId", it) }
                             append(
                                 "file",
                                 fileBytes,
@@ -82,8 +93,13 @@ class DocumentsImpl(
         val url = "${DEFAULT_BASE_URL}Documents/$documentId/temporary-link"
         val response = httpClient.get(url)
         val urlResponse: DocumentUrlResponse = response.parseResponse()
-        val rawUrl = urlResponse.url
-        return if (isDirectMinioUrl(rawUrl)) extractPathFromApiUrl(rawUrl) else rawUrl
+        return resolveMinioImageUrlForBrowser(urlResponse.url) ?: urlResponse.url
+    }
+
+    override suspend fun deleteDocument(documentId: Int) {
+        val url = "${DEFAULT_BASE_URL}Documents/$documentId"
+        val response = httpClient.delete(url)
+        response.consumeResponse()
     }
 }
 

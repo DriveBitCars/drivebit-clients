@@ -30,6 +30,8 @@ import my.drivebit.viewmodels.CarMenuViewModelImpl
 import my.drivebit.viewmodels.CarModelViewModel
 import my.drivebit.viewmodels.CarPhotosViewModel
 import my.drivebit.viewmodels.CarPhotosViewModelImpl
+import my.drivebit.viewmodels.CarStsDocumentsViewModel
+import my.drivebit.viewmodels.CarStsDocumentsViewModelImpl
 import my.drivebit.viewmodels.CarSearchViewModel
 import my.drivebit.viewmodels.CarSearchViewModelImpl
 import my.drivebit.viewmodels.ChatDetailViewModel
@@ -404,6 +406,14 @@ val commonViewModelsModule: Module =
         factory<DocumentsViewModel> {
             DocumentsViewModelImpl(
                 documents = get(),
+            )
+        }
+
+        factory<CarStsDocumentsViewModel> { (carId: String) ->
+            CarStsDocumentsViewModelImpl(
+                carId = carId,
+                documents = get(),
+                car = get(),
             )
         }
 

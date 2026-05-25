@@ -463,6 +463,8 @@ fun CarEditPage() {
                                 onSelect = { viewModel.handleIntent(CarEditIntent.SelectInsurance(it)) },
                             )
 
+                            CarStsDocumentsSection(carId = currentState.carId)
+
                             TextInputField(
                                 label = "Доступный пробег в день (км)",
                                 value = formData.availableMileagePerDayKm,

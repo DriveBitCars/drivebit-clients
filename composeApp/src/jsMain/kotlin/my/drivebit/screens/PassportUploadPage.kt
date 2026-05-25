@@ -35,7 +35,10 @@ import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 
 @Composable
-fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
+fun PassportUploadPage(
+    onPassportUploaded: () -> Unit = {},
+    onCarCreated: (carId: String) -> Unit = { onPassportUploaded() },
+) {
     val viewModel: PassportUploadViewModel = koinInject()
     val state by viewModel.state.collectAsState()
     val buttonViewModel = createButtonViewModel()
@@ -71,7 +74,7 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
     }
 
     LaunchedEffect(state) {
-        when (state) {
+        when (val current = state) {
             is PassportUploadState.Success -> {
                 if (autoCreate == "1") {
                     viewModel.createCar()
@@ -82,7 +85,7 @@ fun PassportUploadPage(onPassportUploaded: () -> Unit = {}) {
             }
             is PassportUploadState.CarCreated -> {
                 viewModel.reset()
-                onPassportUploaded()
+                onCarCreated(current.carId)
             }
             else -> Unit
         }

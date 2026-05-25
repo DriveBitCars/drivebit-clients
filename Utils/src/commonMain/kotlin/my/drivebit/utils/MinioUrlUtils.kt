@@ -19,3 +19,12 @@ fun extractPathFromApiUrl(apiUrl: String): String {
     val pathStart = apiUrl.indexOf('/', portIndex + 4)
     return if (pathStart >= 0) apiUrl.substring(pathStart) else apiUrl
 }
+
+/** Same-origin path for MinIO URLs (keeps presigned query string). Use in image src behind /privatebct/ nginx or dev proxy. */
+fun resolveMinioImageUrlForBrowser(rawUrl: String?): String? {
+    val trimmed = rawUrl?.trim().orEmpty()
+    if (trimmed.isEmpty()) {
+        return null
+    }
+    return if (isDirectMinioUrl(trimmed)) extractPathFromApiUrl(trimmed) else trimmed
+}
