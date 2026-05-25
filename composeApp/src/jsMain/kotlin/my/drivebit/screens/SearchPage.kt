@@ -17,12 +17,17 @@ import my.drivebit.components.CarsGrid
 import my.drivebit.components.Column
 import my.drivebit.components.DriveTypeFilter
 import my.drivebit.components.FilterChip
+import my.drivebit.components.FiltersResetChip
 import my.drivebit.components.FlowRow
 import my.drivebit.components.Loader
+import my.drivebit.components.MileageFilter
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.PriceFilter
 import my.drivebit.components.SearchDateRangeSelector
 import my.drivebit.components.SeatsFilter
+import my.drivebit.components.YEAR_FILTER_MIN
+import my.drivebit.components.YearFilter
+import my.drivebit.components.currentCalendarYear
 import my.drivebit.components.TextError
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
@@ -68,7 +73,8 @@ fun SearchPage() {
     val state by viewModel.state.collectAsState()
     val displayedCars by viewModel.displayedCars.collectAsState()
     val paginationInfo by viewModel.paginationInfo.collectAsState()
-    val searchParams = rememberSearchParams()
+    var locationSearch by remember { mutableStateOf(window.location.search) }
+    val searchParams = rememberSearchParams(locationSearch)
     val currentFiltersRepository: CurrentFiltersRepository = koinInject(named("search"))
     val dailyRateMin by currentFiltersRepository.dailyRateMin.collectAsState(null)
     val dailyRateMax by currentFiltersRepository.dailyRateMax.collectAsState(null)
@@ -77,6 +83,9 @@ fun SearchPage() {
     val filterDriveTypeTranslate by currentFiltersRepository.driveTypeTranslate.collectAsState(null)
     val filterBodyTypeTranslate by currentFiltersRepository.bodyTypeTranslate.collectAsState(null)
     val filterSeatsMin by currentFiltersRepository.seatsMin.collectAsState(null)
+    val filterYearMin by currentFiltersRepository.yearMin.collectAsState(null)
+    val filterYearMax by currentFiltersRepository.yearMax.collectAsState(null)
+    val filterMileageMin by currentFiltersRepository.availableMileagePerDayKmMin.collectAsState(null)
     val startDateByRepo by currentFiltersRepository.startState.collectAsState(null)
     val endDateByRepo by currentFiltersRepository.endState.collectAsState(null)
     val currentPath by navigationState.currentPath.collectAsState()
@@ -101,8 +110,12 @@ fun SearchPage() {
     var showDriveTypeFilter by remember { mutableStateOf(false) }
     var showBodyTypeFilter by remember { mutableStateOf(false) }
     var showSeatsFilter by remember { mutableStateOf(false) }
+    var showYearFilter by remember { mutableStateOf(false) }
+    var showMileageFilter by remember { mutableStateOf(false) }
     val minPrice = remember { mutableStateOf(dailyRateMin ?: 0) }
     val maxPrice = remember { mutableStateOf(dailyRateMax ?: 50000) }
+    val minYear = remember { mutableStateOf(filterYearMin ?: YEAR_FILTER_MIN) }
+    val maxYear = remember { mutableStateOf(filterYearMax ?: currentCalendarYear()) }
 
     LaunchedEffect(dailyRateMin) {
         dailyRateMin?.let { minPrice.value = it }
@@ -110,6 +123,14 @@ fun SearchPage() {
 
     LaunchedEffect(dailyRateMax) {
         dailyRateMax?.let { maxPrice.value = it }
+    }
+
+    LaunchedEffect(filterYearMin) {
+        filterYearMin?.let { minYear.value = it }
+    }
+
+    LaunchedEffect(filterYearMax) {
+        filterYearMax?.let { maxYear.value = it }
     }
 
     val isPriceSelected = dailyRateMin != null || dailyRateMax != null
@@ -132,6 +153,29 @@ fun SearchPage() {
     val isBodyTypeSelected = filterBodyTypeTranslate != null
     val isSeatsSelected = filterSeatsMin != null
     val seatsChipText = filterSeatsMin?.let { "$it или более" }
+    val isYearSelected = filterYearMin != null || filterYearMax != null
+    val yearChipText =
+        if (isYearSelected) {
+            "${filterYearMin ?: YEAR_FILTER_MIN} — ${filterYearMax ?: currentCalendarYear()}"
+        } else {
+            null
+        }
+    val isMileageSelected = filterMileageMin != null
+    val mileageChipText = filterMileageMin?.let { "от $it км/день" }
+    val hasDatesSelected =
+        startDateByRepo != null ||
+            endDateByRepo != null ||
+            searchParams.first != null ||
+            searchParams.second != null
+    val hasAnyFilter =
+        isPriceSelected ||
+            isBrandSelected ||
+            isDriveTypeSelected ||
+            isBodyTypeSelected ||
+            isSeatsSelected ||
+            isYearSelected ||
+            isMileageSelected ||
+            hasDatesSelected
 
     AppWithHeader {
         Div({
@@ -160,8 +204,8 @@ fun SearchPage() {
                     val searchPageDateEndViewModel: SearchPageDateEndViewModel = koinInject()
                     Column(gap = 24.px) {
                         SearchDateRangeSelector(
-                            startDate = searchParams.first,
-                            endDate = searchParams.second,
+                            startDate = startDateByRepo ?: searchParams.first,
+                            endDate = endDateByRepo ?: searchParams.second,
                             onStartDateChanged = { date -> searchPageDateViewModel.set(date) },
                             onEndDateChanged = { date -> searchPageDateEndViewModel.set(date) },
                         )
@@ -174,6 +218,8 @@ fun SearchPage() {
                                     showDriveTypeFilter = false
                                     showBodyTypeFilter = false
                                     showSeatsFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
                                 },
                                 isSelected = isBrandSelected,
                                 selectedText = brandChipText,
@@ -186,6 +232,8 @@ fun SearchPage() {
                                     showBrandFilter = false
                                     showBodyTypeFilter = false
                                     showSeatsFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
                                 },
                                 isSelected = isDriveTypeSelected,
                                 selectedText = filterDriveTypeTranslate,
@@ -198,6 +246,8 @@ fun SearchPage() {
                                     showBrandFilter = false
                                     showDriveTypeFilter = false
                                     showSeatsFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
                                 },
                                 isSelected = isBodyTypeSelected,
                                 selectedText = filterBodyTypeTranslate,
@@ -210,9 +260,39 @@ fun SearchPage() {
                                     showBrandFilter = false
                                     showDriveTypeFilter = false
                                     showBodyTypeFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
                                 },
                                 isSelected = isSeatsSelected,
                                 selectedText = seatsChipText,
+                            )
+                            FilterChip(
+                                name = "Год выпуска",
+                                onClick = {
+                                    showYearFilter = !showYearFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                    showMileageFilter = false
+                                },
+                                isSelected = isYearSelected,
+                                selectedText = yearChipText,
+                            )
+                            FilterChip(
+                                name = "Километраж",
+                                onClick = {
+                                    showMileageFilter = !showMileageFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                    showYearFilter = false
+                                },
+                                isSelected = isMileageSelected,
+                                selectedText = mileageChipText,
                             )
                             FilterChip(
                                 name = "Цена",
@@ -222,32 +302,38 @@ fun SearchPage() {
                                     showDriveTypeFilter = false
                                     showBodyTypeFilter = false
                                     showSeatsFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
                                 },
                                 isSelected = isPriceSelected,
                                 selectedText = priceText,
                             )
-                            Div({
-                                onClick {
-                                    navigationController.navigateTo("/search/ai")
-                                }
-                                style {
-                                    padding(8.px, 12.px)
-                                    backgroundColor(CSSColors.Blue)
-                                    borderRadius(8.px)
-                                    border(1.px, LineStyle.Solid, CSSColors.Blue)
-                                    cursor("pointer")
-                                    property("transition", "all 0.2s ease")
-                                }
-                            }) {
-                                Span({
-                                    style {
-                                        fontSize(14.px)
-                                        color(CSSColors.White)
-                                        fontWeight("500")
-                                    }
-                                }) {
-                                    Text("ИИ-поиск")
-                                }
+                            if (hasAnyFilter) {
+                                FiltersResetChip(
+                                    onClick = {
+                                        showPriceFilter = false
+                                        showBrandFilter = false
+                                        showDriveTypeFilter = false
+                                        showBodyTypeFilter = false
+                                        showSeatsFilter = false
+                                        showYearFilter = false
+                                        showMileageFilter = false
+                                        minPrice.value = 0
+                                        maxPrice.value = 50000
+                                        minYear.value = YEAR_FILTER_MIN
+                                        maxYear.value = currentCalendarYear()
+                                        viewModel.resetAllFilters()
+                                        searchPageDateViewModel.set(null)
+                                        searchPageDateEndViewModel.set(null)
+                                        val targetPath =
+                                            if (brandSlugFromPath != null) "/search" else window.location.pathname
+                                        window.history.pushState(null, "", targetPath)
+                                        locationSearch = ""
+                                        if (brandSlugFromPath != null) {
+                                            navigationState.updatePath("/search")
+                                        }
+                                    },
+                                )
                             }
                         }
                         Box(
@@ -390,6 +476,41 @@ fun SearchPage() {
                                         )
                                     }
                                 }
+                                if (showYearFilter) {
+                                    BoxOverlay {
+                                        YearFilter(
+                                            minYear = minYear,
+                                            maxYear = maxYear,
+                                            onReset = {
+                                                minYear.value = YEAR_FILTER_MIN
+                                                maxYear.value = currentCalendarYear()
+                                                viewModel.updateYearMin(null)
+                                                viewModel.updateYearMax(null)
+                                                showYearFilter = false
+                                            },
+                                            onViewResults = {
+                                                viewModel.updateYearMin(minYear.value)
+                                                viewModel.updateYearMax(maxYear.value)
+                                                showYearFilter = false
+                                            },
+                                        )
+                                    }
+                                }
+                                if (showMileageFilter) {
+                                    BoxOverlay {
+                                        MileageFilter(
+                                            selectedMileageMin = filterMileageMin,
+                                            onMileageMinSelected = { mileageMin ->
+                                                viewModel.updateAvailableMileagePerDayKmMin(mileageMin)
+                                                showMileageFilter = false
+                                            },
+                                            onReset = {
+                                                viewModel.updateAvailableMileagePerDayKmMin(null)
+                                                showMileageFilter = false
+                                            },
+                                        )
+                                    }
+                                }
                             },
                         )
                     }
@@ -400,10 +521,9 @@ fun SearchPage() {
 }
 
 @Composable
-private fun rememberSearchParams(): Pair<String?, String?> {
-    val search = window.location.search
-    return remember(search) {
-        val params = URLSearchParams(search)
+private fun rememberSearchParams(locationSearch: String): Pair<String?, String?> {
+    return remember(locationSearch) {
+        val params = URLSearchParams(locationSearch)
         val startDate = params.get("startDate")
         val endDate = params.get("endDate")
         startDate to endDate

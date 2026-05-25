@@ -2,6 +2,7 @@ package my.drivebit.components
 
 import androidx.compose.runtime.Composable
 import my.drivebit.design.CSSColors
+import my.drivebit.design.CSSTypography
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
@@ -49,5 +50,50 @@ fun FilterChip(
                 }
             },
         )
+    }
+}
+
+private const val RESET_CHIP_BG = "rgba(41, 98, 255, 0.12)"
+private const val RESET_CHIP_BG_HOVER = "rgba(41, 98, 255, 0.22)"
+
+@Composable
+fun FiltersResetChip(onClick: () -> Unit) {
+    Row(
+        gap = 8.px,
+        alignItems = AlignItems.Center,
+        modifier = {
+            padding(8.px, 14.px)
+            property("background-color", RESET_CHIP_BG)
+            borderRadius(8.px)
+            border(1.px, LineStyle.Solid, CSSColors.Blue)
+            cursor("pointer")
+            property("transition", "all 0.2s ease")
+            property("box-shadow", "0 1px 2px rgba(41, 98, 255, 0.15)")
+        },
+        attrs = {
+            onClick { onClick() }
+            onMouseEnter {
+                (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                    "background-color",
+                    RESET_CHIP_BG_HOVER,
+                )
+            }
+            onMouseLeave {
+                (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                    "background-color",
+                    RESET_CHIP_BG,
+                )
+            }
+        },
+    ) {
+        Span({
+            style {
+                fontSize(14.px)
+                color(CSSColors.Blue)
+                fontWeight(CSSTypography.FontWeight.semibold)
+            }
+        }) {
+            Text("Сбросить")
+        }
     }
 }

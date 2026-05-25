@@ -182,13 +182,6 @@ object MetaTags {
                     description = "Расширенный поиск аренды автомобилей в Москве по марке, цене, типу кузова и приводу.",
                     path = "/search",
                 ),
-            "/search/ai" to
-                PageMeta(
-                    title = "ИИ-поиск - DriveBit",
-                    description = "Умный поиск автомобилей в DriveBit.",
-                    path = "/search/ai",
-                    noindex = true,
-                ),
             "/car-detail" to
                 PageMeta(
                     title = "Карточка автомобиля - DriveBit",
