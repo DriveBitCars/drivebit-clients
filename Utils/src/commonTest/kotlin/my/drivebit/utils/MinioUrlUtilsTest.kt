@@ -40,4 +40,15 @@ class MinioUrlUtilsTest {
         assertEquals(u, extractPathFromApiUrl(u))
         assertFalse(isDirectMinioUrl(u))
     }
+
+    @Test
+    fun resolveMinioImageUrlForBrowser_keepsPresignedQueryOnPrivatePath() {
+        val u =
+            "http://157.22.252.70:9000/privatebct/documents/user/file.jpg" +
+                "?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Signature=abc"
+        assertEquals(
+            "/privatebct/documents/user/file.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Signature=abc",
+            resolveMinioImageUrlForBrowser(u),
+        )
+    }
 }

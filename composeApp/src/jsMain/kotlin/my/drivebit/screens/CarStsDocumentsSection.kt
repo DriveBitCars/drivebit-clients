@@ -8,28 +8,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import my.drivebit.components.CenteredFormContainer
-import my.drivebit.components.FormSection
 import my.drivebit.components.Loader
 import my.drivebit.components.NoPhotoPlaceholder
-import my.drivebit.components.PageHeader
-import my.drivebit.components.PageWithLogo
 import my.drivebit.components.TextError
-import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.Document
 import my.drivebit.network.services.Documents
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.readAsBytes
 import my.drivebit.utils.resolveMinioImageUrlForBrowser
-import my.drivebit.viewmodels.DocumentsState
-import my.drivebit.viewmodels.DocumentsViewModel
+import my.drivebit.viewmodels.CarStsDocumentTypes
+import my.drivebit.viewmodels.CarStsDocumentsState
+import my.drivebit.viewmodels.CarStsDocumentsViewModel
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
@@ -38,21 +33,110 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.koin.compose.currentKoinScope
 import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 
-private data class DocumentSlotConfig(
+private data class StsSlotConfig(
     val documentType: String,
     val title: String,
 )
 
-private val DOCUMENT_SLOTS =
+private val STS_SLOTS =
     listOf(
-        DocumentSlotConfig("PassportMainPageRus", "Первая страница паспорта"),
-        DocumentSlotConfig("PassportSecondaryPageRus", "Вторая страница паспорта"),
-        DocumentSlotConfig("DriverLicense", "Водительское удостоверение"),
+        StsSlotConfig(CarStsDocumentTypes.FRONT, "Лицевая сторона СТС"),
+        StsSlotConfig(CarStsDocumentTypes.BACK, "Оборотная сторона СТС"),
     )
 
-private fun findDocumentByType(
+@Composable
+fun CarStsDocumentsSection(carId: String) {
+    val koinScope = currentKoinScope()
+    val viewModel: CarStsDocumentsViewModel =
+        remember(carId) {
+            koinScope.get { parametersOf(carId) }
+        }
+
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(carId) {
+        viewModel.load()
+    }
+
+    Div({
+        style {
+            marginTop(8.px)
+            marginBottom(8.px)
+            fontSize(18.px)
+            fontWeight("600")
+            color(CSSColors.Black)
+        }
+    }) {
+        Text("Свидетельство о регистрации (СТС)")
+    }
+
+    when (val currentState = state) {
+        is CarStsDocumentsState.Idle,
+        is CarStsDocumentsState.Loading,
+        -> Loader()
+
+        is CarStsDocumentsState.Error -> {
+            TextError(currentState.message)
+        }
+
+        is CarStsDocumentsState.Uploading -> {
+            currentState.stsSeriesNumber?.let { sts ->
+                StsSeriesNumberHint(sts)
+            }
+            renderStsSlots(
+                documents = currentState.documents,
+                uploadingType = currentState.documentType,
+                viewModel = viewModel,
+            )
+        }
+
+        is CarStsDocumentsState.Success -> {
+            currentState.stsSeriesNumber?.let { sts ->
+                StsSeriesNumberHint(sts)
+            }
+            renderStsSlots(
+                documents = currentState.documents,
+                uploadingType = null,
+                viewModel = viewModel,
+            )
+        }
+    }
+}
+
+@Composable
+private fun StsSeriesNumberHint(stsSeriesNumber: String) {
+    Div({
+        style {
+            marginBottom(12.px)
+            fontSize(14.px)
+            color(CSSColors.Gray600)
+        }
+    }) {
+        Text("Серия и номер СТС: $stsSeriesNumber")
+    }
+}
+
+@Composable
+private fun renderStsSlots(
+    documents: List<Document>,
+    uploadingType: String?,
+    viewModel: CarStsDocumentsViewModel,
+) {
+    STS_SLOTS.forEach { slot ->
+        StsDocumentSlot(
+            slotConfig = slot,
+            document = findStsDocumentByType(documents, slot.documentType),
+            isUploading = uploadingType == slot.documentType,
+            viewModel = viewModel,
+        )
+    }
+}
+
+private fun findStsDocumentByType(
     documents: List<Document>,
     type: String,
 ): Document? =
@@ -60,129 +144,17 @@ private fun findDocumentByType(
         .filter { it.type == type }
         .maxByOrNull { it.uploadDate ?: "" }
 
-private fun getStatusLabel(status: String?): String =
-    when (status) {
-        "Validated" -> "Одобрен"
-        "Pending" -> "Ожидает"
-        "UnderReview" -> "На проверке"
-        "Rejected" -> "Отклонён"
-        "Expired" -> "Просрочен"
-        else -> "Не загружен"
-    }
-
-private fun getStatusColor(status: String?) =
-    when (status) {
-        "Validated" -> CSSColors.Green
-        "Rejected" -> CSSColors.Red
-        else -> CSSColors.Gray600
-    }
-
-private fun canReupload(document: Document?): Boolean {
+private fun canReuploadSts(document: Document?): Boolean {
     if (document == null) return true
     return document.status != "Validated"
 }
 
 @Composable
-private fun renderDocumentSlots(
-    documents: List<Document>,
-    uploadingType: String?,
-    viewModel: DocumentsViewModel,
-) {
-    Div({
-        style {
-            marginBottom(24.px)
-            fontSize(18.px)
-            fontWeight("600")
-            color(CSSColors.Black)
-        }
-    }) {
-        Text("Паспорт")
-    }
-    DOCUMENT_SLOTS.take(2).forEach { slot ->
-        DocumentSlot(
-            slotConfig = slot,
-            document = findDocumentByType(documents, slot.documentType),
-            isUploading = uploadingType == slot.documentType,
-            viewModel = viewModel,
-        )
-    }
-    Div({
-        style {
-            marginTop(32.px)
-            marginBottom(24.px)
-            fontSize(18.px)
-            fontWeight("600")
-            color(CSSColors.Black)
-        }
-    }) {
-        Text("Водительское удостоверение")
-    }
-    DOCUMENT_SLOTS.last().let { slot ->
-        DocumentSlot(
-            slotConfig = slot,
-            document = findDocumentByType(documents, slot.documentType),
-            isUploading = uploadingType == slot.documentType,
-            viewModel = viewModel,
-        )
-    }
-}
-
-@Composable
-fun DocumentsPage() {
-    val viewModel: DocumentsViewModel = koinInject()
-    val state by viewModel.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.load()
-    }
-
-    PageWithLogo {
-        CenteredFormContainer {
-            PageHeader {
-                TextSmartHeader("Мои документы")
-            }
-
-            FormSection {
-                when (val currentState = state) {
-                    is DocumentsState.Idle -> {
-                        Loader()
-                    }
-
-                    is DocumentsState.Loading -> {
-                        Loader()
-                    }
-
-                    is DocumentsState.Uploading -> {
-                        renderDocumentSlots(
-                            documents = currentState.documents,
-                            uploadingType = currentState.documentType,
-                            viewModel = viewModel,
-                        )
-                    }
-
-                    is DocumentsState.Error -> {
-                        TextError(currentState.message)
-                    }
-
-                    is DocumentsState.Success -> {
-                        renderDocumentSlots(
-                            documents = currentState.documents,
-                            uploadingType = null,
-                            viewModel = viewModel,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DocumentSlot(
-    slotConfig: DocumentSlotConfig,
+private fun StsDocumentSlot(
+    slotConfig: StsSlotConfig,
     document: Document?,
     isUploading: Boolean,
-    viewModel: DocumentsViewModel,
+    viewModel: CarStsDocumentsViewModel,
 ) {
     val doc = document
     val documentsService: Documents = koinInject()
@@ -202,14 +174,15 @@ private fun DocumentSlot(
                 documentsService.getDocumentUrl(doc.id)
             }.onSuccess { url ->
                 documentPreviewUrl = url
-            }.onFailure { /* ignore - will show placeholder */ }
+            }
         } else {
             documentPreviewUrl = null
         }
     }
-    val fileInputId = remember { "doc-upload-${slotConfig.documentType}-${kotlin.random.Random.nextInt()}" }
+
+    val fileInputId = remember { "sts-upload-${slotConfig.documentType}-${kotlin.random.Random.nextInt()}" }
     val status = doc?.status
-    val showUpload = canReupload(document)
+    val showUpload = canReuploadSts(document)
 
     DisposableEffect(fileInputId) {
         val inputElement = kotlinx.browser.document.getElementById(fileInputId) as? org.w3c.dom.HTMLInputElement
@@ -263,10 +236,10 @@ private fun DocumentSlot(
             Span({
                 style {
                     fontSize(14.px)
-                    color(getStatusColor(status))
+                    color(stsStatusColor(status))
                 }
             }) {
-                Text(getStatusLabel(status))
+                Text(stsStatusLabel(status))
             }
         }
 
@@ -333,7 +306,7 @@ private fun DocumentSlot(
             }
         }
 
-        if (errorMessage != null) {
+        errorMessage?.let { message ->
             Div({
                 style {
                     marginBottom(8.px)
@@ -341,7 +314,7 @@ private fun DocumentSlot(
                     color(CSSColors.Red)
                 }
             }) {
-                Text(errorMessage ?: "")
+                Text(message)
             }
         }
 
@@ -392,13 +365,30 @@ private fun DocumentSlot(
                     color(CSSColors.Gray600)
                 }
             }) {
-                Text("Загружено: ${formatDate(uploadDate)}")
+                Text("Загружено: ${formatStsDate(uploadDate)}")
             }
         }
     }
 }
 
-private fun formatDate(dateString: String): String =
+private fun stsStatusLabel(status: String?): String =
+    when (status) {
+        "Validated" -> "Одобрен"
+        "Pending" -> "Ожидает"
+        "UnderReview" -> "На проверке"
+        "Rejected" -> "Отклонён"
+        "Expired" -> "Просрочен"
+        else -> "Не загружен"
+    }
+
+private fun stsStatusColor(status: String?) =
+    when (status) {
+        "Validated" -> CSSColors.Green
+        "Rejected" -> CSSColors.Red
+        else -> CSSColors.Gray600
+    }
+
+private fun formatStsDate(dateString: String): String =
     runCatching {
         mapIso8601ToDateString(dateString)
     }.getOrDefault(dateString)

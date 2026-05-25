@@ -10,6 +10,7 @@ import my.drivebit.screens.AddressInputPage
 import my.drivebit.screens.BodyTypeSelectionPage
 import my.drivebit.screens.CarBrandSelectionPage
 import my.drivebit.screens.CarEditPage
+import my.drivebit.screens.CarStsUploadPage
 import my.drivebit.screens.CarModelSelectionPage
 import my.drivebit.screens.CarPhotosPage
 import my.drivebit.screens.CarPhotosUploadPage
@@ -224,10 +225,13 @@ actual fun App() {
                         },
                     )
                 }
+                currentPath.startsWith("/car-sts-upload") -> {
+                    CarStsUploadPage()
+                }
                 currentPath.startsWith("/license-plate-input") -> {
                     LicensePlateInputPage(
-                        onLicensePlateEntered = {
-                            window.location.href = "/my-cars"
+                        onLicensePlateEntered = { carId ->
+                            window.location.href = "/car-sts-upload?carId=$carId"
                         },
                         onMissingPassport = {
                             window.location.href = "/passport-upload?autoCreate=1"
@@ -366,6 +370,9 @@ actual fun App() {
                     PassportUploadPage(
                         onPassportUploaded = {
                             window.location.href = "/my-cars"
+                        },
+                        onCarCreated = { carId ->
+                            window.location.href = "/car-sts-upload?carId=$carId"
                         },
                     )
                 }

@@ -81,11 +81,13 @@ class DocumentsViewModelImpl(
         contentType: String,
     ) {
         viewModelScope.launch {
-            val currentDocs =
-                (_state.value as? DocumentsState.Success)?.documents ?: emptyList()
+            val currentDocs = currentDocumentsList()
             _state.update { DocumentsState.Uploading(documentType, currentDocs) }
 
             runCatching {
+                findLatestDocumentByType(currentDocs, documentType)?.let { existing ->
+                    documents.deleteDocument(existing.id)
+                }
                 documents.uploadDocument(
                     fileBytes = fileBytes,
                     fileName = fileName,
@@ -105,4 +107,19 @@ class DocumentsViewModelImpl(
             }
         }
     }
+
+    private fun currentDocumentsList(): List<Document> =
+        when (val current = _state.value) {
+            is DocumentsState.Success -> current.documents
+            is DocumentsState.Uploading -> current.documents
+            else -> emptyList()
+        }
+
+    private fun findLatestDocumentByType(
+        documents: List<Document>,
+        type: String,
+    ): Document? =
+        documents
+            .filter { it.type == type }
+            .maxByOrNull { it.uploadDate ?: "" }
 }
