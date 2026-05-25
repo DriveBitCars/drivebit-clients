@@ -140,7 +140,11 @@ class CarStsDocumentsViewModelImpl(
 
     private suspend fun loadStsSeriesNumber(): String? =
         runCatching {
-            car.getCar(carId).stsSeriesNumber?.trim()?.takeIf { it.isNotEmpty() }
+            car
+                .getCar(carId)
+                .stsSeriesNumber
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
         }.getOrNull()
 
     private fun currentDocumentsList(): List<Document> =
