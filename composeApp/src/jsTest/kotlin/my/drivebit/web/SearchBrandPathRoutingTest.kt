@@ -18,11 +18,6 @@ class SearchBrandPathRoutingTest {
     }
 
     @Test
-    fun parseSearchBrandSlug_returnsNullForAiSearch() {
-        assertNull(parseSearchBrandSlugFromPath("/search/ai"))
-    }
-
-    @Test
     fun searchPathForBrandName_buildsSlugPath() {
         assertEquals("/search/bmw", searchPathForBrandName("BMW"))
         assertEquals("/search/mercedes-benz", searchPathForBrandName("Mercedes-Benz"))

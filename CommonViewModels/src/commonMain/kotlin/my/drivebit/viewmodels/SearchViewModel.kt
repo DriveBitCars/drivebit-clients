@@ -86,6 +86,8 @@ interface SearchViewModel {
     fun updateSeatsMax(value: Int?)
 
     fun updateAvailableMileagePerDayKmMin(value: Int?)
+
+    fun resetAllFilters()
 }
 
 class SearchViewModelImpl(
@@ -230,6 +232,24 @@ class SearchViewModelImpl(
 
     override fun updateAvailableMileagePerDayKmMin(value: Int?) {
         currentFiltersRepository.updateAvailableMileagePerDayKmMin(value)
+    }
+
+    override fun resetAllFilters() {
+        currentFiltersRepository.updateDailyRateMin(null)
+        currentFiltersRepository.updateDailyRateMax(null)
+        currentFiltersRepository.updateBrand(null, null)
+        currentFiltersRepository.updateModel(null, null)
+        currentFiltersRepository.updateDriveType(null, null)
+        currentFiltersRepository.updateBodyType(null, null)
+        currentFiltersRepository.updateSeatsMin(null)
+        currentFiltersRepository.updateEngineType(null, null)
+        currentFiltersRepository.updateColor(null, null)
+        currentFiltersRepository.updateYearMin(null)
+        currentFiltersRepository.updateYearMax(null)
+        currentFiltersRepository.updateSeatsMax(null)
+        currentFiltersRepository.updateAvailableMileagePerDayKmMin(null)
+        currentFiltersRepository.updateStartDate(null)
+        currentFiltersRepository.updateEndDate(null)
     }
 
     override fun setPage(page: Int) {

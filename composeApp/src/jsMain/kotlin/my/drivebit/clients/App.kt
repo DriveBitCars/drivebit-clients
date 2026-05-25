@@ -52,7 +52,6 @@ import my.drivebit.components.CookieConsentBanner
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.ProductionYearInputPage
 import my.drivebit.screens.ProfilePage
-import my.drivebit.screens.AiSearchPage
 import my.drivebit.screens.SearchPage
 import my.drivebit.screens.SeatsCountInputPage
 import my.drivebit.screens.DescriptionInputPage
@@ -375,9 +374,6 @@ actual fun App() {
                             window.location.href = "/car-sts-upload?carId=$carId"
                         },
                     )
-                }
-                currentPath.startsWith("/search/ai") -> {
-                    AiSearchPage()
                 }
                 currentPath.startsWith("/search") -> {
                     SearchPage()

@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -113,6 +114,34 @@ class SearchViewModelTest {
             assertIs<SearchState.SearchResults>(viewModel.state.value)
             val refreshedState = viewModel.state.value as SearchState.SearchResults
             assertEquals(0, refreshedState.cars.size)
+        }
+
+    @Test
+    fun `resetAllFilters clears all repository filters`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val repository = MockSearchCarSearchRepository()
+            val filters = MockCurrentFiltersRepository()
+            val viewModel =
+                SearchViewModelImpl(
+                    carSearchRepository = repository,
+                    currentFiltersRepository = filters,
+                    coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
+                )
+
+            viewModel.updateDailyRateMin(1000)
+            viewModel.updateBrand(1, "BMW")
+            viewModel.updateYearMin(2020)
+            viewModel.updateAvailableMileagePerDayKmMin(150)
+
+            viewModel.resetAllFilters()
+
+            assertEquals(null, filters.dailyRateMin.first())
+            assertEquals(null, filters.brandName.first())
+            assertEquals(null, filters.yearMin.first())
+            assertEquals(null, filters.availableMileagePerDayKmMin.first())
+            assertEquals(null, filters.startState.first())
+            assertEquals(null, filters.endState.first())
         }
 }
 
