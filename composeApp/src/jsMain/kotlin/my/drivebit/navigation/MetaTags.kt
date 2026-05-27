@@ -4,6 +4,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.repositories.MyCityStorageKeys
 import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.cityPageDescription
 import my.drivebit.utils.heroBannerPageTitle
 import my.drivebit.utils.resolveCityNameForMeta
 import my.drivebit.web.filterTitleFromPathSegment
@@ -223,6 +224,8 @@ object MetaTags {
         updateMetaTag("og:title", pageMeta.title, property = true)
         updateMetaTag("og:description", pageMeta.description, property = true)
         updateMetaTag("og:url", getFullUrl(canonicalPath, includeQuery = true), property = true)
+        updateMetaTag("twitter:title", pageMeta.title)
+        updateMetaTag("twitter:description", pageMeta.description)
         updateMetaTag("twitter:url", getFullUrl(canonicalPath, includeQuery = true))
 
         updateCanonicalUrl(getFullUrl(canonicalPath, includeQuery = false))
@@ -260,7 +263,7 @@ object MetaTags {
         val description =
             pages[lookupPath]?.description
                 ?: seoBlock?.description
-                ?: HOME_DESCRIPTION
+                ?: cityPageDescription(cityName, filterTitle)
         return PageMeta(
             title = title,
             description = description,

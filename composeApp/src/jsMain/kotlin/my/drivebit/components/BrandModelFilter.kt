@@ -51,6 +51,7 @@ fun BrandModelFilter(
             property("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.1)")
             width(400.px)
             property("max-width", "90vw")
+            property("box-sizing", "border-box")
         },
     ) {
         if (selectedBrandId == null) {

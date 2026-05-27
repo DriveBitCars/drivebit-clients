@@ -69,9 +69,30 @@ class CityDeclensionUtilsTest {
     }
 
     @Test
+    fun cityPageDescription_defaultFilter_usesCityInPrepositional() {
+        assertEquals(
+            "Аренда авто в Зеленограде у собственников. Дешевле проката, полная страховка и поддержка 24/7.",
+            cityPageDescription("Зеленоград", "Все"),
+        )
+        assertEquals(
+            "Аренда авто в Москве у собственников. Дешевле проката, полная страховка и поддержка 24/7.",
+            cityPageDescription("Москва", "Все"),
+        )
+    }
+
+    @Test
+    fun cityPageDescription_travelFilter_usesGenitive() {
+        assertEquals(
+            "Подберите автомобиль для путешествий из Москвы. Аренда у собственников, прозрачные условия и поддержка 24/7.",
+            cityPageDescription("Москва", "Путешествия"),
+        )
+    }
+
+    @Test
     fun cityNameFromSlug_resolvesKnownCities() {
         assertEquals("Москва", cityNameFromSlug("moskva"))
         assertEquals("Казань", cityNameFromSlug("kazan"))
+        assertEquals("Зеленоград", cityNameFromSlug("zelenograd"))
     }
 
     @Test

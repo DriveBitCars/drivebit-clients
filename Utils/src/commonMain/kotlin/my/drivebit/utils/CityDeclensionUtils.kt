@@ -48,6 +48,11 @@ private val CITY_FORMS: Map<String, Pair<String, String>> =
         "Астрахань" to ("Астрахани" to "Астрахани"),
         "Крым" to ("Крыму" to "Крыма"),
         "Севастополь" to ("Севастополе" to "Севастополя"),
+        "Зеленоград" to ("Зеленограде" to "Зеленограда"),
+        "Люберцы" to ("Люберцах" to "Люберец"),
+        "Серпухов" to ("Серпухове" to "Серпухова"),
+        "Ростовка" to ("Ростовке" to "Ростовки"),
+        "Минеральные Воды" to ("Минеральных Водах" to "Минеральных Вод"),
     )
 
 fun heroBannerHeadline(
@@ -70,6 +75,42 @@ fun heroBannerPageTitle(
     cityName: String,
     filterTitle: String,
 ): String = "${heroBannerHeadline(cityName, filterTitle)} - DriveBit"
+
+private const val CITY_FILTER_RENT_SUFFIX =
+    "Аренда у собственников, прозрачные условия и поддержка 24/7."
+
+private const val DEFAULT_CITY_PAGE_DESCRIPTION =
+    "Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7."
+
+fun cityPageDescription(
+    cityName: String,
+    filterTitle: String,
+): String {
+    val trimmedCity = cityName.trim()
+    if (trimmedCity.isEmpty()) return DEFAULT_CITY_PAGE_DESCRIPTION
+    val prep = cityInPrepositional(trimmedCity)
+    val gen = cityInGenitive(trimmedCity)
+    return when (filterTitle) {
+        "К родным" ->
+            "Подберите автомобиль для поездки к родным в $prep. $CITY_FILTER_RENT_SUFFIX"
+        "Командировки" ->
+            "Подберите автомобиль для командировки в $prep. $CITY_FILTER_RENT_SUFFIX"
+        "Каникулы" ->
+            "Подберите автомобиль на каникулы в $prep. $CITY_FILTER_RENT_SUFFIX"
+        "Мероприятие" ->
+            "Подберите автомобиль на мероприятие в $prep. $CITY_FILTER_RENT_SUFFIX"
+        "Переезд" ->
+            "Подберите автомобиль для переезда в $prep. $CITY_FILTER_RENT_SUFFIX"
+        "Поблизости" ->
+            "Найдите автомобили поблизости в $prep. Быстрая аренда у собственников, прозрачные условия и поддержка 24/7."
+        "Путешествия" ->
+            "Подберите автомобиль для путешествий из $gen. $CITY_FILTER_RENT_SUFFIX"
+        "За город" ->
+            "Подберите автомобиль для поездки за город из $gen. $CITY_FILTER_RENT_SUFFIX"
+        else ->
+            "Аренда авто в $prep у собственников. Дешевле проката, полная страховка и поддержка 24/7."
+    }
+}
 
 fun cityNameFromSlug(slug: String): String? {
     val normalized = slug.trim().lowercase()

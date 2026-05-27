@@ -24,6 +24,7 @@
     <meta name="twitter:image" content="https://drivebit.ru/images/logos/logo.png">
     <meta name="twitter:url" content="https://drivebit.ru/moskva">
 
+    <script src="/vendor/city-meta-bootstrap.js"></script>
     <script>
         (function () {
             var pages = {
@@ -57,6 +58,9 @@
             var path = location.pathname.replace(/\/$/, "") || "/";
             if (path.indexOf("/car-detail") === 0) path = "/car-detail";
             var page = pages[path];
+            if (!page && window.drivebitCityPageMeta) {
+                page = window.drivebitCityPageMeta(path);
+            }
             if (!page) return;
             document.title = page.title;
             function setMeta(name, content, property) {
@@ -610,7 +614,7 @@
     <!-- Compose Web App Root -->
     <div id="root"></div>
 
-                                                                                    <div class="drivebit-seo-shell">
+                                                                                        <div class="drivebit-seo-shell">
         <section class="drivebit-seo-text" aria-label="Аренда автомобилей DriveBit">
             <h2>Аренда автомобилей от собственников</h2>
             <p>DriveBit — сервис P2P-аренды: вы берёте машину напрямую у владельца без переплаты прокату. На сайте можно подобрать авто для поездки по России и за границу, оформить бронирование онлайн и получить поддержку 24/7.</p>

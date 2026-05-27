@@ -21,6 +21,7 @@ import my.drivebit.components.FiltersResetChip
 import my.drivebit.components.FlowRow
 import my.drivebit.components.Loader
 import my.drivebit.components.MileageFilter
+import my.drivebit.components.mileageFilterLabelForMin
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.PriceFilter
 import my.drivebit.components.SearchDateRangeSelector
@@ -161,7 +162,7 @@ fun SearchPage() {
             null
         }
     val isMileageSelected = filterMileageMin != null
-    val mileageChipText = filterMileageMin?.let { "от $it км/день" }
+    val mileageChipText = mileageFilterLabelForMin(filterMileageMin)
     val hasDatesSelected =
         startDateByRepo != null ||
             endDateByRepo != null ||
