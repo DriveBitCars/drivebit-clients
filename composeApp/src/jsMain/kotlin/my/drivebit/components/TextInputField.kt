@@ -47,7 +47,7 @@ fun TextInputField(
             else -> inputType
         }
 
-    Column(gap = 12.px) {
+    Column(gap = 12.px, modifier = { width(100.percent) }) {
         Span({
             style {
                 applyTypography(CSSTypography.Styles.body)
@@ -64,9 +64,7 @@ fun TextInputField(
                 style {
                     position(Position.Relative)
                     width(100.percent)
-                    if (fitContainerWidth) {
-                        property("box-sizing", "border-box")
-                    }
+                    property("box-sizing", "border-box")
                 }
             }) {
                 Input(
@@ -104,9 +102,8 @@ fun TextInputField(
                             padding(12.px, 16.px)
                             paddingRight(48.px)
                             width(100.percent)
-                            if (fitContainerWidth) {
-                                property("box-sizing", "border-box")
-                            }
+                            property("box-sizing", "border-box")
+                            property("max-width", "100%")
                         }
                     },
                 )
@@ -176,9 +173,8 @@ fun TextInputField(
                         borderRadius(8.px)
                         padding(12.px, 16.px)
                         width(100.percent)
-                        if (fitContainerWidth) {
-                            property("box-sizing", "border-box")
-                        }
+                        property("box-sizing", "border-box")
+                        property("max-width", "100%")
                     }
                 },
             )

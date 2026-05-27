@@ -14,12 +14,16 @@ import org.jetbrains.compose.web.dom.Text
 
 private val mileageOptionsKm =
     listOf(
-        100 to "100 км/день или более",
-        150 to "150 км/день или более",
-        200 to "200 км/день или более",
-        250 to "250 км/день или более",
-        300 to "300 км/день или более",
+        200 to "200 и более",
+        250 to "250 и более",
+        300 to "300 и более",
+        301 to "больше 300",
     )
+
+fun mileageFilterLabelForMin(min: Int?): String? =
+    min?.let { value ->
+        mileageOptionsKm.firstOrNull { it.first == value }?.second
+    }
 
 @Composable
 fun MileageFilter(
