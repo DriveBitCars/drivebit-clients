@@ -2,7 +2,6 @@ package my.drivebit.repositories
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
@@ -88,10 +87,10 @@ internal class MyCityRepositoryImpl(
 
     override val getSelectedCity: Flow<City> =
         flow {
-            if (selectedCityFlow.value == null) {
+            if (_selectedCityFlow.value == null) {
                 loadSelectedCity()
             }
-            emitAll(selectedCityFlow.asStateFlow().filterNotNull())
+            emitAll(_selectedCityFlow.filterNotNull())
         }
 
     override fun selectCity(

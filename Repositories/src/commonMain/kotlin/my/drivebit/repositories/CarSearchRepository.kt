@@ -2,6 +2,7 @@ package my.drivebit.repositories
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -33,6 +34,8 @@ interface CarSearchRepository {
     val currentPage: Flow<Int>
 
     fun setPage(page: Int)
+
+    fun refreshSearch()
 }
 
 internal class CarSearchRepositoryImpl(
@@ -41,10 +44,13 @@ internal class CarSearchRepositoryImpl(
     private val currentFiltersRepository: CurrentFiltersRepository,
     private val dictionary: Dictionary,
 ) : CarSearchRepository {
+    private val searchRefreshNonce = MutableStateFlow(0)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override val searchCarsByUserCity: Flow<CarSearchResponse> =
         combine(
             myCityRepository.getSelectedCity,
+            searchRefreshNonce,
             currentFiltersRepository.currentTaskShortName,
             currentFiltersRepository.startState,
             currentFiltersRepository.endState,
@@ -57,16 +63,16 @@ internal class CarSearchRepositoryImpl(
             currentFiltersRepository.seatsMin,
         ) { values ->
             val selectedCity = values[0] as City
-            val currentTaskShortName = values[1] as String?
-            val startDate = values[2] as String?
-            val endDate = values[3] as String?
-            val dailyRateMin = values[4] as Int?
-            val dailyRateMax = values[5] as Int?
-            val brandId = values[6] as Int?
-            val modelId = values[7] as Int?
-            val driveTypeName = values[8] as String?
-            val bodyTypeName = values[9] as String?
-            val seatsMin = values[10] as Int?
+            val currentTaskShortName = values[2] as String?
+            val startDate = values[3] as String?
+            val endDate = values[4] as String?
+            val dailyRateMin = values[5] as Int?
+            val dailyRateMax = values[6] as Int?
+            val brandId = values[7] as Int?
+            val modelId = values[8] as Int?
+            val driveTypeName = values[9] as String?
+            val bodyTypeName = values[10] as String?
+            val seatsMin = values[11] as Int?
             Triple(
                 Quadruple(selectedCity, currentTaskShortName, startDate, endDate),
                 Pair(dailyRateMin, dailyRateMax),
@@ -180,5 +186,9 @@ internal class CarSearchRepositoryImpl(
 
     override fun setPage(page: Int) {
         currentFiltersRepository.setPage(page)
+    }
+
+    override fun refreshSearch() {
+        searchRefreshNonce.value++
     }
 }

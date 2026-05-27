@@ -52,6 +52,7 @@ class MainContentViewModelImpl(
             )
 
     override fun refresh() {
+        carSearchRepository.refreshSearch()
     }
 
     override fun setPage(page: Int) {
