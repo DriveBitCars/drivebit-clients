@@ -274,7 +274,7 @@ data class CarGeneral(
     val modelName: String,
     val year: Int? = null,
     val licensePlate: String? = null,
-    val vin: String,
+    val vin: String? = null,
     val seats: Int,
     val mileage: Int? = null,
     val description: String? = null,

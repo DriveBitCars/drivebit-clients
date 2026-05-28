@@ -34,6 +34,8 @@ class MockCarSearchRepository : CarSearchRepository {
         kotlinx.coroutines.flow.flowOf(0)
 
     override fun setPage(page: Int) {}
+
+    override fun refreshSearch() {}
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

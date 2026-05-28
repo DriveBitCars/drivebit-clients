@@ -426,4 +426,84 @@ class CarItemPhotosTest {
             assertEquals(1, photosFromTopLevel[0].id, "Top level photo should have id=1")
             assertEquals(1, photosFromGeneral[0].id, "General photo should have id=1 (duplicate)")
         }
+
+    @Test
+    fun `search should deserialize CarItem when general vin is null`() =
+        runTest {
+            val apiResponse =
+                """
+                {
+                    "items": [
+                        {
+                            "id": "b553c8a1-9c60-4bc3-b874-2d0bb9db7725",
+                            "dailyRate": 1,
+                            "general": {
+                                "brandName": "Geely",
+                                "modelName": "MK",
+                                "year": 2013,
+                                "licensePlate": "E450MY102",
+                                "vin": null,
+                                "seats": 0,
+                                "photos": [
+                                    {
+                                        "id": 8,
+                                        "url": "http://155.212.170.94:9000/publicbct/cars/b553c8a1-9c60-4bc3-b874-2d0bb9db7725/photo.jpg",
+                                        "uploadDate": "2026-01-03T12:00:16.756263Z",
+                                        "carId": "b553c8a1-9c60-4bc3-b874-2d0bb9db7725"
+                                    }
+                                ],
+                                "address": {
+                                    "city": "Уфа",
+                                    "geoLat": 54.789566,
+                                    "geoLon": 56.037617
+                                }
+                            }
+                        }
+                    ],
+                    "page": 1,
+                    "pageSize": 9,
+                    "totalCount": 1,
+                    "totalPages": 1
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = apiResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json(
+                            Json {
+                                ignoreUnknownKeys = true
+                                isLenient = true
+                                encodeDefaults = false
+                            },
+                        )
+                    }
+                }
+
+            val carService = CarImpl(httpClient)
+            val result = carService.search(cityId = "158836", page = 1, pageSize = 9)
+
+            assertEquals(1, result.cars.size)
+            assertEquals(
+                "Geely",
+                result.cars
+                    .first()
+                    .general.brandName,
+            )
+            assertEquals(
+                null,
+                result.cars
+                    .first()
+                    .general.vin,
+            )
+        }
 }

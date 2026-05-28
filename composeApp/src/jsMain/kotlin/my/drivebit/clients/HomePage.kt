@@ -34,6 +34,7 @@ import my.drivebit.viewmodels.MyCityViewModel
 import my.drivebit.viewmodels.NearbyLayoutMode
 import my.drivebit.web.cityPathWithFilter
 import my.drivebit.web.filterTitleToPathSegment
+import my.drivebit.web.isCityHomePath
 import my.drivebit.web.parseCitySlugFromPath
 import my.drivebit.web.parseFilterSlugFromCityPath
 import org.jetbrains.compose.web.css.Position
@@ -99,6 +100,12 @@ fun HomePage() {
     LaunchedEffect(selectedFromPath) {
         if (selectedFromPath != null && selectedFromPath != state.value.selected) {
             filterViewModel.onSelect(selectedFromPath)
+        }
+    }
+
+    LaunchedEffect(currentPath, cityName) {
+        if (isCityHomePath(currentPath) && cityName.isNotEmpty()) {
+            mainContentViewModel.refresh()
         }
     }
 
