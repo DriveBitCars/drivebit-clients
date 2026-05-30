@@ -3,11 +3,15 @@ package my.drivebit.components
 import androidx.compose.runtime.Composable
 import kotlinx.browser.window
 import my.drivebit.design.CSSColors
+import my.drivebit.network.services.contractDownloadPagePath
+import my.drivebit.network.services.extractBookingIdFromContractDownloadUrl
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Text
 
 private const val DEALS_LINK_PHRASE = "Ожидается ваше подтверждение."
+private const val CONTRACT_LINK_LABEL = "Скачать договор аренды"
+private const val CONTRACT_LINK_PREFIX = "$CONTRACT_LINK_LABEL: "
 
 @Composable
 fun MessageTextWithDealsLink(
@@ -16,32 +20,77 @@ fun MessageTextWithDealsLink(
 ) {
     if (text.isBlank()) return
 
-    if (text.contains(DEALS_LINK_PHRASE)) {
-        val before = text.substringBefore(DEALS_LINK_PHRASE)
-        val after = text.substringAfter(DEALS_LINK_PHRASE)
+    val contractBookingId = extractBookingIdFromContractDownloadUrl(text)
+    when {
+        text.contains(DEALS_LINK_PHRASE) -> {
+            val before = text.substringBefore(DEALS_LINK_PHRASE)
+            val after = text.substringAfter(DEALS_LINK_PHRASE)
 
-        if (before.isNotBlank()) {
-            Text(before)
-        }
-        A(attrs = {
-            attr("href", "/my-deals")
-            onClick { event ->
-                event.preventDefault()
-                if (stopPropagation) event.stopPropagation()
-                window.location.href = "/my-deals"
+            if (before.isNotBlank()) {
+                MessageTextWithDealsLink(before.trimEnd(), stopPropagation)
             }
-            style {
-                color(CSSColors.Blue)
-                property("text-decoration", "underline")
-                cursor("pointer")
+            InlineLink(
+                href = "/my-deals",
+                label = DEALS_LINK_PHRASE,
+                stopPropagation = stopPropagation,
+            )
+            if (after.isNotBlank()) {
+                MessageTextWithDealsLink(after.trimStart(), stopPropagation)
             }
-        }) {
-            Text(DEALS_LINK_PHRASE)
         }
-        if (after.isNotBlank()) {
-            Text(after)
+        contractBookingId != null && text.contains(CONTRACT_LINK_PREFIX) -> {
+            val before = text.substringBefore(CONTRACT_LINK_PREFIX)
+            if (before.isNotBlank()) {
+                Text(before.trimEnd())
+            }
+            InlineLink(
+                href = contractDownloadPagePath(contractBookingId),
+                label = CONTRACT_LINK_LABEL,
+                stopPropagation = stopPropagation,
+            )
         }
-    } else {
-        Text(text)
+        contractBookingId != null -> {
+            val match = contractDownloadUrlRegex.find(text) ?: return Text(text)
+            val before = text.substring(0, match.range.first)
+            val after = text.substring(match.range.last + 1)
+            if (before.isNotBlank()) {
+                Text(before)
+            }
+            InlineLink(
+                href = contractDownloadPagePath(contractBookingId),
+                label = CONTRACT_LINK_LABEL,
+                stopPropagation = stopPropagation,
+            )
+            if (after.isNotBlank()) {
+                Text(after)
+            }
+        }
+        else -> Text(text)
+    }
+}
+
+private val contractDownloadUrlRegex =
+    Regex("""(?:https?://(?:www\.)?drivebit\.ru)?/download-booking-contract\?bookingId=[0-9a-fA-F-]{36}""")
+
+@Composable
+private fun InlineLink(
+    href: String,
+    label: String,
+    stopPropagation: Boolean,
+) {
+    A(attrs = {
+        attr("href", href)
+        onClick { event ->
+            event.preventDefault()
+            if (stopPropagation) event.stopPropagation()
+            window.location.href = href
+        }
+        style {
+            color(CSSColors.Blue)
+            property("text-decoration", "underline")
+            cursor("pointer")
+        }
+    }) {
+        Text(label)
     }
 }

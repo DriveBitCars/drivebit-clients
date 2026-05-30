@@ -29,6 +29,7 @@ enum class ActionTypeEnum {
     LeaveReviewForRenter,
     LeaveReviewForCar,
     ConfirmBooking,
+    DownloadContract,
 }
 
 object ActionTypeEnumSerializer : KSerializer<ActionTypeEnum> {
@@ -219,6 +220,24 @@ data class SendMessageRequest(
     val text: String? = null,
 )
 
+private val contractDownloadUrlRegex =
+    Regex("""(?:https?://(?:www\.)?drivebit\.ru)?/download-booking-contract\?bookingId=([0-9a-fA-F-]{36})""")
+
+fun extractBookingIdFromContractDownloadUrl(text: String): String? =
+    contractDownloadUrlRegex
+        .find(text)
+        ?.groupValues
+        ?.getOrNull(1)
+        ?.takeIf { it.isNotBlank() }
+
+fun contractDownloadPagePath(bookingId: String): String = "/download-booking-contract?bookingId=$bookingId"
+
+fun contractDownloadPageUrl(bookingId: String): String = "https://drivebit.ru${contractDownloadPagePath(bookingId)}"
+
+fun leaveReviewPagePath(carId: String): String = "/leave-review?carId=$carId"
+
+fun leaveReviewPageUrl(carId: String): String = "https://drivebit.ru${leaveReviewPagePath(carId)}"
+
 fun MessageDto.payBookingIdForAction(): String? {
     if (!isSystemMessage) return null
     val booking =
@@ -233,6 +252,86 @@ fun MessageDto.payBookingIdForAction(): String? {
     }
     if (systemMessageType == SystemMessageType.PaymentRequest) {
         return booking
+    }
+    return null
+}
+
+fun MessageDto.contractBookingIdForAction(): String? {
+    if (!isSystemMessage) return null
+    val bookingFromMessage =
+        messageActionBlock?.actionParameters?.get("bookingId")?.takeIf { it.isNotBlank() }
+            ?: bookingId?.takeIf { it.isNotBlank() }
+    when (messageActionBlock?.actionType) {
+        ActionTypeEnum.DownloadContract -> return bookingFromMessage
+        else -> {}
+    }
+    return text?.let(::extractBookingIdFromContractDownloadUrl)
+}
+
+private fun MessageDto.bookingIdFromActionOrMessage(): String? =
+    messageActionBlock?.actionParameters?.get("bookingId")?.takeIf { it.isNotBlank() }
+        ?: bookingId?.takeIf { it.isNotBlank() }
+
+fun MessageDto.leaveReviewCarIdForAction(bookingById: Map<String, BookingDTO> = emptyMap()): String? {
+    if (!isSystemMessage) return null
+
+    messageActionBlock
+        ?.actionParameters
+        ?.get("carId")
+        ?.takeIf { it.isNotBlank() }
+        ?.let { return it }
+
+    val isCarReviewAction =
+        when (messageActionBlock?.actionType) {
+            ActionTypeEnum.LeaveReviewForCar -> true
+            ActionTypeEnum.LeaveReviewForRenter -> false
+            else ->
+                systemMessageType == SystemMessageType.BookingCompleted &&
+                    text.orEmpty().contains("об аренде", ignoreCase = true)
+        }
+    if (!isCarReviewAction) return null
+
+    val bookingKey = bookingIdFromActionOrMessage() ?: return null
+    return bookingById[bookingKey]?.carId?.takeIf { it.isNotBlank() }
+}
+
+fun MessageDto.shouldShowLeaveReviewForRenter(): Boolean {
+    if (!isSystemMessage) return false
+    when (messageActionBlock?.actionType) {
+        ActionTypeEnum.LeaveReviewForRenter -> return true
+        ActionTypeEnum.LeaveReviewForCar -> return false
+        else -> {}
+    }
+    return systemMessageType == SystemMessageType.BookingCompleted &&
+        text.orEmpty().contains("об арендаторе", ignoreCase = true)
+}
+
+fun MessageDto.isLeaveReviewForCarAction(): Boolean {
+    if (!isSystemMessage) return false
+    when (messageActionBlock?.actionType) {
+        ActionTypeEnum.LeaveReviewForCar -> return true
+        ActionTypeEnum.LeaveReviewForRenter -> return false
+        else -> {}
+    }
+    return systemMessageType == SystemMessageType.BookingCompleted &&
+        text.orEmpty().contains("об аренде", ignoreCase = true)
+}
+
+fun MessageDto.leaveReviewBookingIdForAction(): String? {
+    if (!isSystemMessage) return null
+    when (messageActionBlock?.actionType) {
+        ActionTypeEnum.LeaveReviewForCar,
+        ActionTypeEnum.LeaveReviewForRenter,
+        -> return bookingIdFromActionOrMessage()
+        else -> {}
+    }
+    if (systemMessageType == SystemMessageType.BookingCompleted &&
+        (
+            text.orEmpty().contains("об аренде", ignoreCase = true) ||
+                text.orEmpty().contains("об арендаторе", ignoreCase = true)
+        )
+    ) {
+        return bookingIdFromActionOrMessage()
     }
     return null
 }

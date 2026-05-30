@@ -112,4 +112,57 @@ class CityDeclensionUtilsTest {
             heroBannerHeadline("Казань", "Путешествия"),
         )
     }
+
+    @Test
+    fun isSeoOptimizedPage_whitelist() {
+        assertEquals(true, isSeoOptimizedPage("moskva", null))
+        assertEquals(true, isSeoOptimizedPage("moskva", "puteshestviya"))
+        assertEquals(true, isSeoOptimizedPage("moskva", "za-gorod"))
+        assertEquals(true, isSeoOptimizedPage("moskva", "poblizosti"))
+        assertEquals(true, isSeoOptimizedPage("krasnogorsk", null))
+        assertEquals(false, isSeoOptimizedPage("moskva", "kanikuly"))
+        assertEquals(false, isSeoOptimizedPage("kazan", null))
+    }
+
+    @Test
+    fun seoPageMeta_goldenFivePages() {
+        assertEquals(
+            "Аренда авто у частных владельцев в Москве",
+            seoPageHeadline("Москва", "Все"),
+        )
+        assertEquals(
+            "Аренда авто у частных владельцев в Москве через сервис DriveBit",
+            seoPageTitle("Москва", "Все"),
+        )
+        assertEquals(
+            "Аренда авто для путешествий по России из Москвы через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+            seoPageDescription("Москва", "Путешествия"),
+        )
+        assertEquals(
+            "Аренда авто на карте в Москве - аренда автомобиля поблизости через сервис DriveBit",
+            seoPageTitle("Москва", "Поблизости"),
+        )
+        assertEquals(
+            "Аренда авто у частных владельцев в Красногорске через сервис DriveBit",
+            seoPageTitle("Красногорск", "Все"),
+        )
+    }
+
+    @Test
+    fun pageTitle_legacyUnchangedForNonWhitelist() {
+        assertEquals(
+            "Арендуй авто у частных владельцев в Москве - DriveBit",
+            pageTitle("moskva", "kanikuly", "Москва", "Каникулы"),
+        )
+        assertEquals(
+            "Аренда авто у частных владельцев в Москве через сервис DriveBit",
+            pageTitle("moskva", null, "Москва", "Все"),
+        )
+    }
+
+    @Test
+    fun cityInPrepositional_krasnogorsk() {
+        assertEquals("Красногорске", cityInPrepositional("Красногорск"))
+        assertEquals("Красногорска", cityInGenitive("Красногорск"))
+    }
 }

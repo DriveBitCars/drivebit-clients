@@ -19,6 +19,12 @@ interface Payment {
         returnUrl: String,
         failUrl: String,
     ): PayBookingResult
+
+    suspend fun registerBookingPrepayment(
+        bookingId: String,
+        returnUrl: String,
+        failUrl: String,
+    ): PayBookingResult
 }
 
 sealed class PayBookingResult {
@@ -52,46 +58,79 @@ class PaymentImpl(
         bookingId: String,
         returnUrl: String,
         failUrl: String,
-    ): PayBookingResult {
-        val response =
-            httpClient.post("${DEFAULT_BASE_URL}Payment/booking/$bookingId/pay") {
-                parameter("returnUrl", returnUrl)
-                parameter("failUrl", failUrl)
-            }
-        val bodyString = response.bodyAsText()
-        return when {
-            response.status == HttpStatusCode.OK -> {
-                val dto =
-                    runCatching {
-                        defaultJson.decodeFromString(RegisterPaymentResponse.serializer(), bodyString)
-                    }.getOrElse {
-                        return PayBookingResult.Failed("Не удалось разобрать ответ оплаты")
-                    }
-                val url = dto.paymentUrl?.takeIf { it.isNotBlank() }
-                if (url != null) {
-                    PayBookingResult.Redirect(url)
-                } else {
-                    PayBookingResult.Failed("Пустая ссылка на оплату")
+    ): PayBookingResult =
+        httpClient.registerBookingCheckout(
+            path = "${DEFAULT_BASE_URL}Payment/booking/$bookingId/pay",
+            returnUrl = returnUrl,
+            failUrl = failUrl,
+        )
+
+    override suspend fun registerBookingPrepayment(
+        bookingId: String,
+        returnUrl: String,
+        failUrl: String,
+    ): PayBookingResult =
+        httpClient.registerBookingCheckout(
+            path = "${DEFAULT_BASE_URL}Payment/booking/$bookingId/prepay",
+            returnUrl = returnUrl,
+            failUrl = failUrl,
+        )
+}
+
+suspend fun Payment.checkoutBooking(
+    bookingId: String,
+    kind: BookingCheckoutKind,
+    returnUrl: String,
+    failUrl: String,
+): PayBookingResult =
+    when (kind) {
+        BookingCheckoutKind.Prepayment -> registerBookingPrepayment(bookingId, returnUrl, failUrl)
+        BookingCheckoutKind.FullOrBalance -> registerBookingPayment(bookingId, returnUrl, failUrl)
+    }
+
+private suspend fun HttpClient.registerBookingCheckout(
+    path: String,
+    returnUrl: String,
+    failUrl: String,
+): PayBookingResult {
+    val response =
+        post(path) {
+            parameter("returnUrl", returnUrl)
+            parameter("failUrl", failUrl)
+        }
+    val bodyString = response.bodyAsText()
+    return when {
+        response.status == HttpStatusCode.OK -> {
+            val dto =
+                runCatching {
+                    defaultJson.decodeFromString(RegisterPaymentResponse.serializer(), bodyString)
+                }.getOrElse {
+                    return PayBookingResult.Failed("Не удалось разобрать ответ оплаты")
                 }
+            val url = dto.paymentUrl?.takeIf { it.isNotBlank() }
+            if (url != null) {
+                PayBookingResult.Redirect(url)
+            } else {
+                PayBookingResult.Failed("Пустая ссылка на оплату")
             }
-            response.status.value == 208 -> {
-                val msg =
-                    runCatching {
-                        defaultJson.decodeFromString(PaymentAlreadyReportedBody.serializer(), bodyString).message
-                    }.getOrNull()
-                PayBookingResult.AlreadyPaid(message = msg)
-            }
-            !response.status.isSuccess() -> {
-                PayBookingResult.Failed(extractErrorMessage(bodyString, defaultJson))
-            }
-            else -> {
-                PayBookingResult.Failed("Неожиданный ответ сервера: ${response.status}")
-            }
+        }
+        response.status.value == 208 -> {
+            val msg =
+                runCatching {
+                    defaultJson.decodeFromString(PaymentAlreadyReportedBody.serializer(), bodyString).message
+                }.getOrNull()
+            PayBookingResult.AlreadyPaid(message = msg)
+        }
+        !response.status.isSuccess() -> {
+            PayBookingResult.Failed(extractPaymentErrorMessage(bodyString, defaultJson))
+        }
+        else -> {
+            PayBookingResult.Failed("Неожиданный ответ сервера: ${response.status}")
         }
     }
 }
 
-private fun extractErrorMessage(
+private fun extractPaymentErrorMessage(
     bodyString: String,
     json: Json,
 ): String {

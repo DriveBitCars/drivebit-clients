@@ -49,11 +49,17 @@ fun DailyRateInputPage(
         val saved = carDataRepository.getDailyRate21Days()
         mutableStateOf(saved?.toString() ?: "")
     }
+    var prepaymentPercent by remember {
+        val saved = carDataRepository.getPrepaymentPercent()
+        mutableStateOf(saved?.toString() ?: "")
+    }
     var localError by remember { mutableStateOf<String?>(null) }
 
     val error = localError
 
-    val isValid = dailyRate.toIntOrNull()?.let { it >= 0 } == true
+    val isValid =
+        dailyRate.toIntOrNull()?.let { it >= 0 } == true &&
+            (prepaymentPercent.isBlank() || prepaymentPercent.toIntOrNull()?.let { it in 0..100 } == true)
 
     buttonViewModel.setState(
         if (isValid) ButtonState.Enabled else ButtonState.Disabled,
@@ -129,6 +135,18 @@ fun DailyRateInputPage(
                     numeric = true,
                 )
 
+                TextInputField(
+                    label = "Предоплата (%)",
+                    value = prepaymentPercent,
+                    onValueChange = { newValue ->
+                        if (newValue.isEmpty() || newValue.toIntOrNull()?.let { it in 0..100 } == true) {
+                            prepaymentPercent = newValue
+                            localError = null
+                        }
+                    },
+                    numeric = true,
+                )
+
                 if (error != null) {
                     TextError(error ?: "Произошла ошибка")
                 }
@@ -155,6 +173,9 @@ fun DailyRateInputPage(
                                     carDataRepository.saveDailyRate7Days(parseRate(dailyRate7Days))
                                     carDataRepository.saveDailyRate14Days(parseRate(dailyRate14Days))
                                     carDataRepository.saveDailyRate21Days(parseRate(dailyRate21Days))
+                                    carDataRepository.savePrepaymentPercent(
+                                        prepaymentPercent.takeIf { it.isNotBlank() }?.toIntOrNull()?.coerceIn(0, 100),
+                                    )
                                     onNavigateToLicensePlate()
                                 } else {
                                     localError = "Введите корректное значение"

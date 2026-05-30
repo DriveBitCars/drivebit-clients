@@ -457,6 +457,17 @@ fun CarEditPage() {
                                 numeric = true,
                             )
 
+                            TextInputField(
+                                label = "Предоплата (%)",
+                                value = formData.prepaymentPercent,
+                                onValueChange = { newValue ->
+                                    if (newValue.isEmpty() || newValue.toIntOrNull()?.let { it in 0..100 } == true) {
+                                        viewModel.handleIntent(CarEditIntent.UpdatePrepaymentPercent(newValue))
+                                    }
+                                },
+                                numeric = true,
+                            )
+
                             CarInsuranceSelectField(
                                 insurance = formData.insurance,
                                 insuranceTranslate = formData.insuranceTranslate,
@@ -494,6 +505,13 @@ fun CarEditPage() {
                                     text = "Управление фотографиями",
                                     onClick = {
                                         window.location.href = "/car-photos?carId=${currentState.carId}"
+                                    },
+                                )
+                                ActionButton(
+                                    enabledColor = CSSColors.Blue,
+                                    text = "Календарь доступности",
+                                    onClick = {
+                                        window.location.href = "/car-availability?carId=${currentState.carId}"
                                     },
                                 )
                                 ActionButton(

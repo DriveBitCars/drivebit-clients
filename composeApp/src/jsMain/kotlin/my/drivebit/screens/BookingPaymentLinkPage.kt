@@ -15,6 +15,7 @@ import my.drivebit.design.applyTypography
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.REDIRECT_PATH
 import my.drivebit.utils.encodeUrlParameter
+import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.BookingPaymentLinkUiState
 import my.drivebit.viewmodels.BookingPaymentLinkViewModel
@@ -85,10 +86,16 @@ fun BookingPaymentLinkPage() {
     val uiState by viewModel.uiState.collectAsState()
 
     val origin = window.location.origin.trimEnd('/')
-    LaunchedEffect(bookingId) {
+    val checkoutKind =
+        when (getUrlParameter("mode").trim().lowercase()) {
+            "prepay", "prepayment" -> BookingCheckoutKind.Prepayment
+            else -> BookingCheckoutKind.FullOrBalance
+        }
+    LaunchedEffect(bookingId, checkoutKind) {
         viewModel.startCheckout(
             returnUrl = "$origin/payment-success",
             failUrl = "$origin/payment-failure",
+            kind = checkoutKind,
         )
     }
 

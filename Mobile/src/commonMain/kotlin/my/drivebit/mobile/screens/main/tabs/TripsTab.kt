@@ -19,21 +19,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import kotlinx.coroutines.delay
 import my.drivebit.mobile.screens.main.LeaveReviewScreen
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.contractDownloadPageUrl
+import my.drivebit.network.services.prepaymentButtonLabel
+import my.drivebit.network.services.renterFullOrBalanceAmountRub
+import my.drivebit.network.services.renterFullOrBalancePaymentLabel
+import my.drivebit.network.services.statusAllowsContractDownload
+import my.drivebit.network.services.statusAllowsRenterPayment
 import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.DrivebitTheme
+import my.drivebit.viewmodels.ChatPayEffect
 import my.drivebit.viewmodels.MyBookingsAsRenterViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
+
+private const val MOBILE_PAYMENT_SUCCESS_URL = "https://drivebit.ru/payment-success"
+private const val MOBILE_PAYMENT_FAIL_URL = "https://drivebit.ru/payment-failure"
 
 object TripsTab : Tab {
     override val options: TabOptions
@@ -53,6 +68,26 @@ object TripsTab : Tab {
         val bookings by viewModel.bookings.collectAsState()
         val isLoading by viewModel.isLoading.collectAsState()
         val error by viewModel.error.collectAsState()
+        val isPaying by viewModel.isPaying.collectAsState()
+        val uriHandler = LocalUriHandler.current
+        var payInfo by remember { mutableStateOf<String?>(null) }
+
+        LaunchedEffect(Unit) {
+            viewModel.payEffects.collect { effect ->
+                when (effect) {
+                    is ChatPayEffect.OpenCheckout -> uriHandler.openUri(effect.url)
+                    is ChatPayEffect.ShowInfo -> payInfo = effect.text
+                }
+            }
+        }
+
+        LaunchedEffect(payInfo) {
+            val msg = payInfo
+            if (msg != null) {
+                delay(6_000)
+                payInfo = null
+            }
+        }
 
         LaunchedEffect(Unit) {
             viewModel.loadBookings()
@@ -69,6 +104,14 @@ object TripsTab : Tab {
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
+            payInfo?.let { info ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = info,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
             when {
                 isLoading -> {
@@ -102,8 +145,26 @@ object TripsTab : Tab {
                         items(bookings, key = { it.id }) { booking ->
                             BookingItemCard(
                                 booking = booking,
+                                isPaying = isPaying,
                                 onLeaveReview = {
                                     navigator.push(LeaveReviewScreen(carId = booking.carId))
+                                },
+                                onPay = {
+                                    viewModel.payBooking(
+                                        bookingId = booking.id,
+                                        returnUrl = MOBILE_PAYMENT_SUCCESS_URL,
+                                        failUrl = MOBILE_PAYMENT_FAIL_URL,
+                                    )
+                                },
+                                onPrepay = {
+                                    viewModel.prepayBooking(
+                                        bookingId = booking.id,
+                                        returnUrl = MOBILE_PAYMENT_SUCCESS_URL,
+                                        failUrl = MOBILE_PAYMENT_FAIL_URL,
+                                    )
+                                },
+                                onDownloadContract = {
+                                    uriHandler.openUri(contractDownloadPageUrl(booking.id))
                                 },
                             )
                         }
@@ -117,7 +178,11 @@ object TripsTab : Tab {
 @Composable
 internal fun BookingItemCard(
     booking: BookingDTO,
+    isPaying: Boolean = false,
     onLeaveReview: () -> Unit,
+    onPay: () -> Unit = {},
+    onPrepay: () -> Unit = {},
+    onDownloadContract: () -> Unit = {},
 ) {
     val carName =
         listOfNotNull(booking.carBrandName, booking.carModelName)
@@ -126,6 +191,11 @@ internal fun BookingItemCard(
             .ifBlank { "Автомобиль" }
     val dateRange = "${booking.startAt.take(10)} — ${booking.endAt.take(10)}"
     val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
+    val canPay = booking.statusAllowsRenterPayment()
+    val canDownloadContract = booking.statusAllowsContractDownload()
+    val fullPaymentLabel =
+        "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
+    val showActions = canPay || booking.canPayPrepayment || canLeaveReview || canDownloadContract
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -154,13 +224,44 @@ internal fun BookingItemCard(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (canLeaveReview) {
+            if (showActions) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = onLeaveReview,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Оставить отзыв")
+                if (booking.canPayPrepayment) {
+                    Button(
+                        onClick = onPrepay,
+                        enabled = !isPaying,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(if (isPaying) "Загрузка…" else booking.prepaymentButtonLabel())
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                if (canPay) {
+                    Button(
+                        onClick = onPay,
+                        enabled = !isPaying,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(if (isPaying) "Загрузка…" else fullPaymentLabel)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                if (canDownloadContract) {
+                    Button(
+                        onClick = onDownloadContract,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Договор")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                if (canLeaveReview) {
+                    Button(
+                        onClick = onLeaveReview,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Оставить отзыв")
+                    }
                 }
             }
         }

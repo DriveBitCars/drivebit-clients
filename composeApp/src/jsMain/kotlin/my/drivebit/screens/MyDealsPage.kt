@@ -17,7 +17,9 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyGray
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
+import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.statusAllowsContractDownload
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
@@ -32,6 +34,7 @@ import org.koin.compose.koinInject
 @Composable
 fun MyDealsPage() {
     val viewModel: MyBookingsAsOwnerViewModel = koinInject()
+    val navigationController = LocalNavigationController.current
     val bookings by viewModel.bookings.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
@@ -74,6 +77,11 @@ fun MyDealsPage() {
                                     isActionInProgress = booking.id in actionInProgress,
                                     onConfirm = { viewModel.confirmBooking(booking.id) },
                                     onDecline = { viewModel.declineBooking(booking.id) },
+                                    onDownloadContract = {
+                                        navigationController?.navigateTo(
+                                            "/download-booking-contract?bookingId=${booking.id}",
+                                        )
+                                    },
                                 )
                             }
                         }
@@ -90,6 +98,7 @@ private fun DealItemCard(
     isActionInProgress: Boolean,
     onConfirm: () -> Unit,
     onDecline: () -> Unit,
+    onDownloadContract: () -> Unit,
 ) {
     val renterName = booking.renterName?.takeIf { it.isNotBlank() } ?: "Арендатор"
     val carName =
@@ -114,6 +123,7 @@ private fun DealItemCard(
     val canConfirmOrDecline =
         booking.status.equals("Pending", ignoreCase = true) ||
             booking.status.equals("AwaitingOwnerConfirmation", ignoreCase = true)
+    val canDownloadContract = booking.statusAllowsContractDownload()
 
     Column(
         gap = 16.px,
@@ -188,6 +198,29 @@ private fun DealItemCard(
                 }
             }) {
                 Text("${booking.statusTranslate?.takeIf { it.isNotBlank() } ?: booking.status}: $statusDateTime")
+            }
+        }
+
+        if (canDownloadContract) {
+            Row(
+                gap = 8.px,
+                modifier = { width(100.percent) },
+            ) {
+                Button({
+                    style {
+                        padding(8.px, 16.px)
+                        backgroundColor(CSSColors.Blue)
+                        color(CSSColors.White)
+                        border(0.px)
+                        borderRadius(8.px)
+                        fontSize(14.px)
+                        fontWeight("600")
+                        cursor("pointer")
+                    }
+                    onClick { onDownloadContract() }
+                }) {
+                    Text("Договор")
+                }
             }
         }
 

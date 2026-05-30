@@ -35,6 +35,7 @@ import my.drivebit.utils.removeUrlQueryParam
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.DateTimeFieldViewModel
+import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.viewmodels.PendingBookingPaymentUi
 import my.drivebit.viewmodels.RentPayEffect
 import my.drivebit.viewmodels.RentState
@@ -428,13 +429,29 @@ fun CarBook(
                         }) {
                             Text("Бронирование подтверждено. Оплатите, чтобы продолжить.")
                         }
+                        if (payUi.canPayPrepayment) {
+                            ActionButton(
+                                viewModel = payButtonViewModel,
+                                enabledColor = CSSColors.Blue,
+                                text = payUi.prepaymentButtonLabel,
+                                onClick = {
+                                    val origin = window.location.origin
+                                    viewModel.payCreatedBooking(
+                                        kind = BookingCheckoutKind.Prepayment,
+                                        returnUrl = "$origin/payment-success",
+                                        failUrl = "$origin/payment-failure",
+                                    )
+                                },
+                            )
+                        }
                         ActionButton(
                             viewModel = payButtonViewModel,
                             enabledColor = CSSColors.Blue,
-                            text = "Оплатить",
+                            text = payUi.fullPaymentLabel,
                             onClick = {
                                 val origin = window.location.origin
                                 viewModel.payCreatedBooking(
+                                    kind = BookingCheckoutKind.FullOrBalance,
                                     returnUrl = "$origin/payment-success",
                                     failUrl = "$origin/payment-failure",
                                 )

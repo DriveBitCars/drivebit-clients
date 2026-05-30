@@ -10,11 +10,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.Document
+import my.drivebit.network.services.DocumentUploadType
 import my.drivebit.network.services.Documents
 
 object CarStsDocumentTypes {
-    const val FRONT = "VehicleRegistrationFrontRus"
-    const val BACK = "VehicleRegistrationBackRus"
+    const val FRONT = DocumentUploadType.VehicleRegistrationFrontRus
+    const val BACK = DocumentUploadType.VehicleRegistrationBackRus
 
     val all = setOf(FRONT, BACK)
 }

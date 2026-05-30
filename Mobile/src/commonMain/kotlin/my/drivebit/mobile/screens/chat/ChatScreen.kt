@@ -32,8 +32,18 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
+import my.drivebit.mobile.screens.main.LeaveReviewScreen
+import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.MessageDto
+import my.drivebit.network.services.contractBookingIdForAction
+import my.drivebit.network.services.contractDownloadPageUrl
+import my.drivebit.network.services.isLeaveReviewForCarAction
+import my.drivebit.network.services.leaveReviewCarIdForAction
 import my.drivebit.network.services.payBookingIdForAction
+import my.drivebit.network.services.prepaymentButtonLabel
+import my.drivebit.network.services.renterFullOrBalanceAmountRub
+import my.drivebit.network.services.renterFullOrBalancePaymentLabel
+import my.drivebit.network.services.shouldShowLeaveReviewForRenter
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
 import my.drivebit.utils.mapIso8601ToTimeString
@@ -61,6 +71,7 @@ data class ChatScreen(
         val isLoading by viewModel.isLoading.collectAsState()
         val error by viewModel.error.collectAsState()
         val isPaying by viewModel.isPaying.collectAsState()
+        val bookingPaymentById by viewModel.bookingPaymentById.collectAsState()
         var messageText by remember { mutableStateOf("") }
         var payInfo by remember { mutableStateOf<String?>(null) }
         val uriHandler = LocalUriHandler.current
@@ -128,16 +139,32 @@ data class ChatScreen(
                                     .PaddingValues(16.dp),
                         ) {
                             items(messages.reversed()) { message ->
+                                val bookingIdForPay = message.payBookingIdForAction()
                                 MessageBubble(
                                     message = message,
                                     participantId = chatDetail?.participant?.id,
+                                    bookingForPay = bookingIdForPay?.let { bookingPaymentById[it] },
+                                    bookingById = bookingPaymentById,
                                     isPaying = isPaying,
+                                    onPrepayBooking = { bookingId ->
+                                        viewModel.prepayBooking(
+                                            bookingId = bookingId,
+                                            returnUrl = MOBILE_PAYMENT_SUCCESS_URL,
+                                            failUrl = MOBILE_PAYMENT_FAIL_URL,
+                                        )
+                                    },
                                     onPayBooking = { bookingId ->
                                         viewModel.payBooking(
                                             bookingId = bookingId,
                                             returnUrl = MOBILE_PAYMENT_SUCCESS_URL,
                                             failUrl = MOBILE_PAYMENT_FAIL_URL,
                                         )
+                                    },
+                                    onLeaveReviewForCar = { carId ->
+                                        navigator.push(LeaveReviewScreen(carId = carId))
+                                    },
+                                    onLeaveReviewForRenter = {
+                                        uriHandler.openUri("https://drivebit.ru/my-deals")
                                     },
                                 )
                             }
@@ -186,8 +213,13 @@ data class ChatScreen(
 private fun MessageBubble(
     message: MessageDto,
     participantId: String? = null,
+    bookingForPay: BookingDTO? = null,
+    bookingById: Map<String, BookingDTO> = emptyMap(),
     isPaying: Boolean = false,
+    onPrepayBooking: (String) -> Unit = {},
     onPayBooking: (String) -> Unit = {},
+    onLeaveReviewForCar: (String) -> Unit = {},
+    onLeaveReviewForRenter: () -> Unit = {},
 ) {
     val senderId = message.sender?.id
     val isOwnMessage = participantId != null && senderId != null && senderId != participantId
@@ -217,6 +249,10 @@ private fun MessageBubble(
             )
         } else {
             val bookingIdForPay = message.payBookingIdForAction()
+            val bookingIdForContract = message.contractBookingIdForAction()
+            val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
+            val showReviewForCar = message.isLeaveReviewForCarAction()
+            val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -227,12 +263,51 @@ private fun MessageBubble(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (bookingIdForPay != null) {
+                    val fullPayLabel =
+                        bookingForPay?.let { booking ->
+                            "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
+                        } ?: if (isPaying) "Загрузка…" else "Оплатить"
+                    if (bookingForPay?.canPayPrepayment == true) {
+                        Button(
+                            onClick = { onPrepayBooking(bookingIdForPay) },
+                            enabled = !isPaying,
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) {
+                            Text(if (isPaying) "Загрузка…" else bookingForPay.prepaymentButtonLabel())
+                        }
+                    }
                     Button(
                         onClick = { onPayBooking(bookingIdForPay) },
                         enabled = !isPaying,
                         modifier = Modifier.padding(top = 8.dp),
                     ) {
-                        Text(if (isPaying) "Загрузка…" else "Оплатить")
+                        Text(fullPayLabel)
+                    }
+                }
+                if (bookingIdForContract != null) {
+                    val uriHandler = LocalUriHandler.current
+                    Button(
+                        onClick = { uriHandler.openUri(contractDownloadPageUrl(bookingIdForContract)) },
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Text("Скачать договор")
+                    }
+                }
+                if (showReviewForCar) {
+                    Button(
+                        onClick = { reviewCarId?.let(onLeaveReviewForCar) },
+                        enabled = reviewCarId != null,
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Text(if (reviewCarId != null) "Оставить отзыв" else "Загрузка…")
+                    }
+                }
+                if (showReviewForRenter) {
+                    Button(
+                        onClick = onLeaveReviewForRenter,
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Text("Оставить отзыв об арендаторе")
                     }
                 }
             }

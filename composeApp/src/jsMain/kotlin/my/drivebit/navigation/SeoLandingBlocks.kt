@@ -4,12 +4,27 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
+data class SeoContentTable(
+    val headers: List<String>,
+    val rows: List<List<String>>,
+)
+
+@Serializable
+data class SeoContentSection(
+    val heading: String,
+    val paragraphs: List<String> = emptyList(),
+    val bullets: List<String> = emptyList(),
+    val table: SeoContentTable? = null,
+)
+
+@Serializable
 data class SeoLandingBlock(
     val ariaLabel: String,
     val h2: String,
     val paragraphs: List<String>,
     val title: String? = null,
     val description: String? = null,
+    val sections: List<SeoContentSection>? = null,
 )
 
 object SeoLandingBlocks {
@@ -28,30 +43,67 @@ object SeoLandingBlocks {
 
     fun blockForPath(path: String): SeoLandingBlock? = blocksByPath()[normalizePath(path)]
 
-    fun renderShell(block: SeoLandingBlock): String {
-        val paragraphsHtml =
-            block.paragraphs.joinToString("") { paragraph ->
-                "<p>${escapeHtml(paragraph)}</p>"
-            }
-        return """    <div class="drivebit-seo-shell">
+    fun renderShell(block: SeoLandingBlock): String =
+        """    <div class="drivebit-seo-shell">
         <section class="drivebit-seo-text" aria-label="${escapeHtml(block.ariaLabel)}">
-            <h2>${escapeHtml(block.h2)}</h2>
-            $paragraphsHtml
+            ${renderSectionInnerHtml(block)}
         </section>
     </div>
 
 """
-    }
 
     fun renderSectionInnerHtml(block: SeoLandingBlock): String =
         buildString {
-            append("<h2>")
-            append(escapeHtml(block.h2))
-            append("</h2>")
-            block.paragraphs.forEach { paragraph ->
-                append("<p>")
-                append(escapeHtml(paragraph))
-                append("</p>")
+            val sections = block.sections
+            if (sections.isNullOrEmpty()) {
+                append("<h2>")
+                append(escapeHtml(block.h2))
+                append("</h2>")
+                block.paragraphs.forEach { paragraph ->
+                    append("<p>")
+                    append(escapeHtml(paragraph))
+                    append("</p>")
+                }
+            } else {
+                sections.forEach { section ->
+                    append("<h2>")
+                    append(escapeHtml(section.heading))
+                    append("</h2>")
+                    section.paragraphs.forEach { paragraph ->
+                        append("<p>")
+                        append(escapeHtml(paragraph))
+                        append("</p>")
+                    }
+                    if (section.bullets.isNotEmpty()) {
+                        append("<ul>")
+                        section.bullets.forEach { bullet ->
+                            append("<li>")
+                            append(escapeHtml(bullet))
+                            append("</li>")
+                        }
+                        append("</ul>")
+                    }
+                    section.table?.let { table ->
+                        append("<table>")
+                        append("<thead><tr>")
+                        table.headers.forEach { header ->
+                            append("<th>")
+                            append(escapeHtml(header))
+                            append("</th>")
+                        }
+                        append("</tr></thead><tbody>")
+                        table.rows.forEach { row ->
+                            append("<tr>")
+                            row.forEach { cell ->
+                                append("<td>")
+                                append(escapeHtml(cell))
+                                append("</td>")
+                            }
+                            append("</tr>")
+                        }
+                        append("</tbody></table>")
+                    }
+                }
             }
         }
 

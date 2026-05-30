@@ -7,7 +7,7 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
-import my.drivebit.utils.heroBannerHeadline
+import my.drivebit.utils.pageHeadline
 import my.drivebit.viewmodels.DateFieldViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
@@ -19,6 +19,8 @@ import org.jetbrains.compose.web.dom.Text
 fun HeroBanner(
     backgroundIconUrl: String,
     cityName: String,
+    citySlug: String,
+    filterSlug: String?,
     filterTitle: String,
     startDateViewModel: DateFieldViewModel,
     endDateViewModel: DateFieldViewModel,
@@ -44,7 +46,6 @@ fun HeroBanner(
         Div({
             style {
                 width(100.percent)
-                minHeight(if (isMobile) 360.px else 442.px)
                 borderRadius(30.px)
                 overflow("hidden")
                 position(Position.Relative)
@@ -81,11 +82,8 @@ fun HeroBanner(
 
             Div({
                 style {
-                    position(Position.Absolute)
-                    top(0.px)
-                    left(0.px)
-                    right(0.px)
-                    bottom(0.px)
+                    position(Position.Relative)
+                    property("z-index", "1")
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Column)
                     alignItems(AlignItems.Center)
@@ -99,8 +97,6 @@ fun HeroBanner(
                         display(DisplayStyle.Flex)
                         flexDirection(FlexDirection.Column)
                         alignItems(AlignItems.Center)
-                        flex(1)
-                        justifyContent(JustifyContent.Center)
                     }
                 }) {
                     H1({
@@ -115,7 +111,7 @@ fun HeroBanner(
                             marginBottom(if (isMobile) 12.px else 20.px)
                         }
                     }) {
-                        Text(heroBannerHeadline(cityName, filterTitle))
+                        Text(pageHeadline(citySlug, filterSlug, cityName, filterTitle))
                     }
 
                     Div({

@@ -43,6 +43,10 @@ interface CarDataRepository {
 
     fun getDailyRate21Days(): Int?
 
+    fun savePrepaymentPercent(percent: Int?)
+
+    fun getPrepaymentPercent(): Int?
+
     fun saveMonthlyRate(rate: Int)
 
     fun getMonthlyRate(): Int?
@@ -68,6 +72,7 @@ internal class CarDataRepositoryImpl(
         private const val DAILY_RATE_7_DAYS_KEY = "car_daily_rate_7_days"
         private const val DAILY_RATE_14_DAYS_KEY = "car_daily_rate_14_days"
         private const val DAILY_RATE_21_DAYS_KEY = "car_daily_rate_21_days"
+        private const val PREPAYMENT_PERCENT_KEY = "car_prepayment_percent"
         private const val MONTHLY_RATE_KEY = "car_monthly_rate"
         private const val DESCRIPTION_KEY = "car_description"
     }
@@ -175,6 +180,19 @@ internal class CarDataRepositoryImpl(
         return if (rate < 0) null else rate
     }
 
+    override fun savePrepaymentPercent(percent: Int?) {
+        if (percent != null && percent in 0..100) {
+            settings.putInt(PREPAYMENT_PERCENT_KEY, percent)
+        } else {
+            settings.remove(PREPAYMENT_PERCENT_KEY)
+        }
+    }
+
+    override fun getPrepaymentPercent(): Int? {
+        val percent = settings.getInt(PREPAYMENT_PERCENT_KEY, -1)
+        return if (percent < 0) null else percent
+    }
+
     override fun saveMonthlyRate(rate: Int) {
         settings.putInt(MONTHLY_RATE_KEY, rate)
     }
@@ -201,6 +219,7 @@ internal class CarDataRepositoryImpl(
         settings.remove(DAILY_RATE_7_DAYS_KEY)
         settings.remove(DAILY_RATE_14_DAYS_KEY)
         settings.remove(DAILY_RATE_21_DAYS_KEY)
+        settings.remove(PREPAYMENT_PERCENT_KEY)
         settings.remove(MONTHLY_RATE_KEY)
         settings.remove(DESCRIPTION_KEY)
     }

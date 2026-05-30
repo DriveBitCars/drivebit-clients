@@ -27,6 +27,8 @@ interface Booking {
 
     suspend fun getMyAsOwner(): List<BookingDTO>
 
+    suspend fun getById(bookingId: String): BookingDTO
+
     suspend fun createAsRenter(request: CreateBookingRequest): BookingDTO
 
     suspend fun confirmAsOwner(bookingId: String)
@@ -66,6 +68,10 @@ data class CheckBookingAvailabilityResponse(
     @JsonNames("pricePerDay", "price_per_day") val pricePerDay: Double? = null,
     @JsonNames("totalPrice", "total_price") val totalPrice: Double? = null,
     @JsonNames("estimatedDeposit", "estimated_deposit") val estimatedDeposit: Double? = null,
+    @JsonNames("prepaymentPercent", "prepayment_percent") val prepaymentPercent: Double? = null,
+    @JsonNames("estimatedPrepayment", "estimated_prepayment") val estimatedPrepayment: Double? = null,
+    @JsonNames("balanceDueAmount", "balance_due_amount") val balanceDueAmount: Double? = null,
+    @JsonNames("prepaymentAvailable", "prepayment_available") val prepaymentAvailable: Boolean = false,
 )
 
 @Serializable
@@ -74,6 +80,7 @@ data class BookingDTO(
     val carId: String,
     val carBrandName: String? = null,
     val carModelName: String? = null,
+    val carLicensePlate: String? = null,
     val renterId: String,
     val renterName: String? = null,
     val renterPhone: String? = null,
@@ -83,11 +90,53 @@ data class BookingDTO(
     val startAt: String,
     val endAt: String,
     val totalAmount: Double,
+    val deposit: Double = 0.0,
+    @JsonNames("totalAmountWithDeposit", "total_amount_with_deposit") val totalAmountWithDeposit: Double = 0.0,
+    @JsonNames("prepaymentPercent", "prepayment_percent") val prepaymentPercent: Double = 0.0,
+    @JsonNames("prepaymentAmount", "prepayment_amount") val prepaymentAmount: Double = 0.0,
+    @JsonNames("remainingRentalAmount", "remaining_rental_amount") val remainingRentalAmount: Double = 0.0,
+    @JsonNames("balanceDueAmount", "balance_due_amount") val balanceDueAmount: Double = 0.0,
+    @JsonNames("prepaymentPaidAt", "prepayment_paid_at") val prepaymentPaidAt: String? = null,
+    @JsonNames("prepaymentAvailable", "prepayment_available") val prepaymentAvailable: Boolean = false,
+    @JsonNames("canPayPrepayment", "can_pay_prepayment") val canPayPrepayment: Boolean = false,
+    @JsonNames("dailyRate", "daily_rate") val dailyRate: Double = 0.0,
     val status: String,
     val statusTranslate: String? = null,
     val createdAt: String,
     val comment: String? = null,
 )
+
+enum class BookingCheckoutKind {
+    Prepayment,
+    FullOrBalance,
+}
+
+fun BookingDTO.statusAllowsRenterPayment(): Boolean = status.equals("Confirmed", ignoreCase = true)
+
+fun BookingDTO.renterFullOrBalanceAmountRub(): Int {
+    val amount =
+        if (prepaymentPaidAt != null) {
+            balanceDueAmount
+        } else if (totalAmountWithDeposit > 0) {
+            totalAmountWithDeposit
+        } else {
+            totalAmount + deposit
+        }
+    return amount.roundToRubles()
+}
+
+fun BookingDTO.renterFullOrBalancePaymentLabel(): String =
+    if (prepaymentPaidAt != null) {
+        "Оплатить остаток"
+    } else {
+        "Оплатить полностью"
+    }
+
+fun BookingDTO.prepaymentAmountRub(): Int = prepaymentAmount.roundToRubles()
+
+fun BookingDTO.prepaymentButtonLabel(): String = "Предоплата (${prepaymentAmountRub()} ₽)"
+
+private fun Double.roundToRubles(): Int = kotlin.math.round(this).toInt()
 
 @Serializable
 data class CreateBookingRequest(
@@ -112,8 +161,6 @@ data class BookingContractDownloadDto(
     @JsonNames("urlExpiresAt", "url_expires_at") val urlExpiresAt: String,
     @JsonNames("generatedAt", "generated_at") val generatedAt: String,
 )
-
-fun BookingDTO.statusAllowsRenterPayment(): Boolean = status.equals("Confirmed", ignoreCase = true)
 
 fun BookingDTO.statusAllowsContractDownload(): Boolean =
     status.equals("Confirmed", ignoreCase = true) ||
@@ -149,6 +196,12 @@ class BookingImpl(
 
     override suspend fun getMyAsOwner(): List<BookingDTO> {
         val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/list"
+        val response = authorizedHttpClient.get(url)
+        return response.parseResponse()
+    }
+
+    override suspend fun getById(bookingId: String): BookingDTO {
+        val url = "${DEFAULT_BASE_URL}Booking/$bookingId"
         val response = authorizedHttpClient.get(url)
         return response.parseResponse()
     }

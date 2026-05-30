@@ -59,6 +59,7 @@ internal class CreateCarRepositoryImpl(
                     dailyRate7Days = carDataRepository.getDailyRate7Days(),
                     dailyRate14Days = carDataRepository.getDailyRate14Days(),
                     dailyRate21Days = carDataRepository.getDailyRate21Days(),
+                    prepaymentPercent = carDataRepository.getPrepaymentPercent(),
                     ParkingAssistances = emptyList(),
                     MultimediaSystemOptions = emptyList(),
                 )

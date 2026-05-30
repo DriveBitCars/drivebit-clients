@@ -18,7 +18,11 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.renterFullOrBalanceAmountRub
+import my.drivebit.network.services.renterFullOrBalancePaymentLabel
+import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.statusAllowsContractDownload
+import my.drivebit.network.services.statusAllowsRenterPayment
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
@@ -74,6 +78,11 @@ fun MyBookingsPage() {
                                     onPay = {
                                         navigationController?.navigateTo("/payment?bookingId=${booking.id}")
                                     },
+                                    onPrepay = {
+                                        navigationController?.navigateTo(
+                                            "/payment?bookingId=${booking.id}&mode=prepay",
+                                        )
+                                    },
                                     onDownloadContract = {
                                         navigationController?.navigateTo(
                                             "/download-booking-contract?bookingId=${booking.id}",
@@ -94,6 +103,7 @@ private fun BookingItemCard(
     booking: BookingDTO,
     onLeaveReview: () -> Unit,
     onPay: () -> Unit,
+    onPrepay: () -> Unit,
     onDownloadContract: () -> Unit,
 ) {
     val ownerName = booking.ownerName?.takeIf { it.isNotBlank() } ?: "Владелец"
@@ -117,8 +127,10 @@ private fun BookingItemCard(
         }.getOrElse { booking.createdAt }
     val relativeTime = runCatching { formatRelativeTime(Instant.parse(booking.createdAt)) }.getOrElse { "" }
     val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
-    val canPay = booking.status.equals("Confirmed", ignoreCase = true)
+    val canPay = booking.statusAllowsRenterPayment()
     val canDownloadContract = booking.statusAllowsContractDownload()
+    val fullPaymentLabel =
+        "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
 
     Column(
         gap = 16.px,
@@ -196,12 +208,29 @@ private fun BookingItemCard(
             }
         }
 
-        if (canPay || canLeaveReview || canDownloadContract) {
+        if (canPay || booking.canPayPrepayment || canLeaveReview || canDownloadContract) {
             Row(
                 justifyContent = JustifyContent.FlexStart,
                 gap = 8.px,
                 modifier = { width(100.percent) },
             ) {
+                if (booking.canPayPrepayment) {
+                    Button({
+                        style {
+                            padding(8.px, 16.px)
+                            backgroundColor(CSSColors.Blue)
+                            color(CSSColors.White)
+                            border(0.px)
+                            borderRadius(8.px)
+                            fontSize(14.px)
+                            fontWeight("600")
+                            cursor("pointer")
+                        }
+                        onClick { onPrepay() }
+                    }) {
+                        Text(booking.prepaymentButtonLabel())
+                    }
+                }
                 if (canPay) {
                     Button({
                         style {
@@ -216,7 +245,7 @@ private fun BookingItemCard(
                         }
                         onClick { onPay() }
                     }) {
-                        Text("Оплатить")
+                        Text(fullPaymentLabel)
                     }
                 }
                 if (canDownloadContract) {

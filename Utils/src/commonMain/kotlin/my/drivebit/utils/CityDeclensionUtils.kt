@@ -53,7 +53,106 @@ private val CITY_FORMS: Map<String, Pair<String, String>> =
         "Серпухов" to ("Серпухове" to "Серпухова"),
         "Ростовка" to ("Ростовке" to "Ростовки"),
         "Минеральные Воды" to ("Минеральных Водах" to "Минеральных Вод"),
+        "Красногорск" to ("Красногорске" to "Красногорска"),
     )
+
+const val SEO_PAGE_DESCRIPTION_SUFFIX =
+    ". Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!"
+
+const val SEO_PAGE_TITLE_SUFFIX = " через сервис DriveBit"
+
+private val SEO_OPTIMIZED_CITY_SLUGS = setOf("moskva", "krasnogorsk")
+
+private val SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS =
+    setOf(
+        "puteshestviya",
+        "za-gorod",
+        "poblizosti",
+    )
+
+fun isSeoOptimizedPage(
+    citySlug: String,
+    filterSlug: String?,
+): Boolean {
+    val normalizedCity = citySlug.trim().lowercase()
+    val normalizedFilter = filterSlug?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
+    return when {
+        normalizedCity == "moskva" && normalizedFilter == null -> true
+        normalizedCity == "moskva" && normalizedFilter in SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS -> true
+        normalizedCity == "krasnogorsk" && normalizedFilter == null -> true
+        else -> false
+    }
+}
+
+fun seoPageHeadline(
+    cityName: String,
+    filterTitle: String,
+): String {
+    val trimmedCity = cityName.trim()
+    if (trimmedCity.isEmpty()) return "Аренда авто у частных владельцев"
+    val prep = cityInPrepositional(trimmedCity)
+    val gen = cityInGenitive(trimmedCity)
+    return when (filterTitle) {
+        "Путешествия" -> "Аренда авто для путешествий по России из $gen"
+        "За город" -> "Аренда авто для поездки в другой город из $gen"
+        "Поблизости" -> "Аренда авто на карте в $prep"
+        else -> "Аренда авто у частных владельцев в $prep"
+    }
+}
+
+fun seoPageTitle(
+    cityName: String,
+    filterTitle: String,
+): String {
+    val headline = seoPageHeadline(cityName, filterTitle)
+    return if (filterTitle == "Поблизости") {
+        val prep = cityInPrepositional(cityName.trim())
+        "Аренда авто на карте в $prep - аренда автомобиля поблизости$SEO_PAGE_TITLE_SUFFIX"
+    } else {
+        "$headline$SEO_PAGE_TITLE_SUFFIX"
+    }
+}
+
+fun seoPageDescription(
+    cityName: String,
+    filterTitle: String,
+): String = "${seoPageTitle(cityName, filterTitle)}$SEO_PAGE_DESCRIPTION_SUFFIX"
+
+fun pageHeadline(
+    citySlug: String,
+    filterSlug: String?,
+    cityName: String,
+    filterTitle: String,
+): String =
+    if (isSeoOptimizedPage(citySlug, filterSlug)) {
+        seoPageHeadline(cityName, filterTitle)
+    } else {
+        heroBannerHeadline(cityName, filterTitle)
+    }
+
+fun pageTitle(
+    citySlug: String,
+    filterSlug: String?,
+    cityName: String,
+    filterTitle: String,
+): String =
+    if (isSeoOptimizedPage(citySlug, filterSlug)) {
+        seoPageTitle(cityName, filterTitle)
+    } else {
+        heroBannerPageTitle(cityName, filterTitle)
+    }
+
+fun pageDescription(
+    citySlug: String,
+    filterSlug: String?,
+    cityName: String,
+    filterTitle: String,
+): String =
+    if (isSeoOptimizedPage(citySlug, filterSlug)) {
+        seoPageDescription(cityName, filterTitle)
+    } else {
+        cityPageDescription(cityName, filterTitle)
+    }
 
 fun heroBannerHeadline(
     cityName: String,

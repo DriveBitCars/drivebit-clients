@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.network.services.PayBookingResult
 import my.drivebit.network.services.Payment
 
@@ -31,6 +32,7 @@ interface BookingPaymentLinkViewModel {
     fun startCheckout(
         returnUrl: String,
         failUrl: String,
+        kind: BookingCheckoutKind = BookingCheckoutKind.FullOrBalance,
     )
 }
 
@@ -47,6 +49,7 @@ class BookingPaymentLinkViewModelImpl(
     override fun startCheckout(
         returnUrl: String,
         failUrl: String,
+        kind: BookingCheckoutKind,
     ) {
         if (bookingId.isBlank()) {
             _uiState.value = BookingPaymentLinkUiState.FinishedWithMessage("Не указан номер бронирования")
@@ -56,7 +59,15 @@ class BookingPaymentLinkViewModelImpl(
         _uiState.value = BookingPaymentLinkUiState.Loading
         payJob =
             coroutineScope.launch {
-                when (val result = payment.registerBookingPayment(bookingId, returnUrl, failUrl)) {
+                when (
+                    val result =
+                        when (kind) {
+                            BookingCheckoutKind.Prepayment ->
+                                payment.registerBookingPrepayment(bookingId, returnUrl, failUrl)
+                            BookingCheckoutKind.FullOrBalance ->
+                                payment.registerBookingPayment(bookingId, returnUrl, failUrl)
+                        }
+                ) {
                     is PayBookingResult.Redirect ->
                         _uiState.value = BookingPaymentLinkUiState.OpenCheckout(result.url)
                     is PayBookingResult.AlreadyPaid -> {

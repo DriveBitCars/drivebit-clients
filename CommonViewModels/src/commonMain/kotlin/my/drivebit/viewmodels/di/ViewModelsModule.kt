@@ -18,6 +18,8 @@ import my.drivebit.viewmodels.BookingPaymentLinkViewModel
 import my.drivebit.viewmodels.BookingPaymentLinkViewModelImpl
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
+import my.drivebit.viewmodels.CarAvailabilityViewModel
+import my.drivebit.viewmodels.CarAvailabilityViewModelImpl
 import my.drivebit.viewmodels.CarBrandViewModel
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarDetailViewModelImpl
@@ -216,6 +218,7 @@ val commonViewModelsModule: Module =
         factory<ChatDetailViewModel> { (chatId: String) ->
             ChatDetailViewModelImpl(
                 chat = get(),
+                booking = get(),
                 payment = get(),
                 chatId = chatId,
                 participantAvatarCache = get(),
@@ -339,6 +342,7 @@ val commonViewModelsModule: Module =
         single<MyBookingsAsRenterViewModel> {
             MyBookingsAsRenterViewModelImpl(
                 booking = get(),
+                payment = get(),
             )
         }
 
@@ -378,6 +382,13 @@ val commonViewModelsModule: Module =
         factory<CarPhotosViewModel> {
             CarPhotosViewModelImpl(
                 photoService = get(),
+            )
+        }
+
+        factory<CarAvailabilityViewModel> { (carId: String) ->
+            CarAvailabilityViewModelImpl(
+                carId = carId,
+                carAvailability = get(),
             )
         }
 
