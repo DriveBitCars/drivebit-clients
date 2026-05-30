@@ -66,14 +66,19 @@ class DocumentsImpl(
         documentType: String,
         carId: String?,
     ): Document {
-        val url = "${DEFAULT_BASE_URL}Documents/upload"
+        val uploadPath = DocumentUploadType.uploadPath(documentType)
+        val url = "${DEFAULT_BASE_URL}Documents/$uploadPath"
         val response =
             httpClient.post(url) {
                 setBody(
                     MultiPartFormDataContent(
                         formData {
-                            append("Type", documentType)
-                            carId?.takeIf { it.isNotBlank() }?.let { append("CarId", it) }
+                            if (DocumentUploadType.requiresCarId(documentType)) {
+                                val resolvedCarId =
+                                    carId?.takeIf { it.isNotBlank() }
+                                        ?: error("CarId is required for STS documents")
+                                append("CarId", resolvedCarId)
+                            }
                             append(
                                 "file",
                                 fileBytes,

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Document
+import my.drivebit.network.services.DocumentUploadType
 import my.drivebit.network.services.Documents
 import my.drivebit.repositories.CarDataRepository
 import my.drivebit.repositories.CreateCarRepository
@@ -77,7 +78,7 @@ class PassportUploadViewModelImpl(
                     fileBytes = fileBytes,
                     fileName = fileName,
                     contentType = contentType,
-                    documentType = "PassportMainPageRus",
+                    documentType = DocumentUploadType.PassportMainPageRus,
                 )
             }.onSuccess { doc ->
                 _state.update { PassportUploadState.Success(doc) }

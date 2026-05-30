@@ -24,6 +24,7 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.Document
+import my.drivebit.network.services.DocumentUploadType
 import my.drivebit.network.services.Documents
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.readAsBytes
@@ -47,9 +48,10 @@ private data class DocumentSlotConfig(
 
 private val DOCUMENT_SLOTS =
     listOf(
-        DocumentSlotConfig("PassportMainPageRus", "Первая страница паспорта"),
-        DocumentSlotConfig("PassportSecondaryPageRus", "Вторая страница паспорта"),
-        DocumentSlotConfig("DriverLicense", "Водительское удостоверение"),
+        DocumentSlotConfig(DocumentUploadType.PassportMainPageRus, "Первая страница паспорта"),
+        DocumentSlotConfig(DocumentUploadType.PassportSecondaryPageRus, "Вторая страница паспорта"),
+        DocumentSlotConfig(DocumentUploadType.DriverLicense, "Водительское удостоверение (лицевая сторона)"),
+        DocumentSlotConfig(DocumentUploadType.DriverLicenseBack, "Водительское удостоверение (обратная сторона)"),
     )
 
 private fun findDocumentByType(
@@ -117,7 +119,7 @@ private fun renderDocumentSlots(
     }) {
         Text("Водительское удостоверение")
     }
-    DOCUMENT_SLOTS.last().let { slot ->
+    DOCUMENT_SLOTS.drop(2).forEach { slot ->
         DocumentSlot(
             slotConfig = slot,
             document = findDocumentByType(documents, slot.documentType),
