@@ -36,7 +36,7 @@ class BookingPrepaymentTest {
     }
 
     @Test
-    fun prepaymentButtonLabel_showsPercentFromApi() {
+    fun prepaymentButtonLabel_showsAmountFromApi() {
         val booking =
             booking(
                 prepaymentPercent = 30.0,
@@ -44,7 +44,7 @@ class BookingPrepaymentTest {
                 canPayPrepayment = true,
             )
 
-        assertEquals("Предоплата 30%", booking.prepaymentButtonLabel())
+        assertEquals("Предоплата (3000 ₽)", booking.prepaymentButtonLabel())
     }
 
     @Test

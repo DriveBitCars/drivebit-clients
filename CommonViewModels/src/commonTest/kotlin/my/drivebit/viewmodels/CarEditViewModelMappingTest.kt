@@ -38,6 +38,7 @@ class CarEditViewModelMappingTest {
                     ValidAddressString = "Test Address",
                     availableMileagePerDayKm = 200,
                     deposit = 5000.0,
+                    prepaymentPercent = 10.0,
                     photos =
                         listOf(
                             CarPhotoItem(
@@ -74,6 +75,7 @@ class CarEditViewModelMappingTest {
             assertEquals("5", formData.seatsCount)
             assertEquals("200", formData.availableMileagePerDayKm)
             assertEquals("5000", formData.deposit)
+            assertEquals("10", formData.prepaymentPercent)
             assertEquals("Test Address", formData.address)
             assertEquals(1, formData.photos.size)
             assertEquals("https://example.com/photo.jpg", formData.photos[0].url)

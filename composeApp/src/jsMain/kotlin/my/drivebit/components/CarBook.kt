@@ -433,7 +433,7 @@ fun CarBook(
                             ActionButton(
                                 viewModel = payButtonViewModel,
                                 enabledColor = CSSColors.Blue,
-                                text = "Предоплата ${payUi.prepaymentPercent.toInt()}%",
+                                text = payUi.prepaymentButtonLabel,
                                 onClick = {
                                     val origin = window.location.origin
                                     viewModel.payCreatedBooking(

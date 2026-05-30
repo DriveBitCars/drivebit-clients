@@ -457,6 +457,17 @@ fun CarEditPage() {
                                 numeric = true,
                             )
 
+                            TextInputField(
+                                label = "Предоплата (%)",
+                                value = formData.prepaymentPercent,
+                                onValueChange = { newValue ->
+                                    if (newValue.isEmpty() || newValue.toIntOrNull()?.let { it in 0..100 } == true) {
+                                        viewModel.handleIntent(CarEditIntent.UpdatePrepaymentPercent(newValue))
+                                    }
+                                },
+                                numeric = true,
+                            )
+
                             CarInsuranceSelectField(
                                 insurance = formData.insurance,
                                 insuranceTranslate = formData.insuranceTranslate,

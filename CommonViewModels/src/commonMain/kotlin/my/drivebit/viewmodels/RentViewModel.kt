@@ -21,6 +21,7 @@ import my.drivebit.network.services.CreateBookingRequest
 import my.drivebit.network.services.PayBookingResult
 import my.drivebit.network.services.Payment
 import my.drivebit.network.services.isTerminalRenterBooking
+import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.statusAllowsRenterPayment
@@ -43,7 +44,7 @@ sealed interface PendingBookingPaymentUi {
 
     data class ReadyToPay(
         val canPayPrepayment: Boolean = false,
-        val prepaymentPercent: Double = 0.0,
+        val prepaymentButtonLabel: String = "Предоплата",
         val fullPaymentLabel: String = "Оплатить",
         val fullOrBalanceAmountRub: Int = 0,
     ) : PendingBookingPaymentUi
@@ -508,7 +509,7 @@ class RentViewModelImpl(
             dto.statusAllowsRenterPayment() ->
                 PendingBookingPaymentUi.ReadyToPay(
                     canPayPrepayment = dto.canPayPrepayment,
-                    prepaymentPercent = dto.prepaymentPercent,
+                    prepaymentButtonLabel = dto.prepaymentButtonLabel(),
                     fullPaymentLabel =
                         "${dto.renterFullOrBalancePaymentLabel()} (${dto.renterFullOrBalanceAmountRub()} ₽)",
                     fullOrBalanceAmountRub = dto.renterFullOrBalanceAmountRub(),

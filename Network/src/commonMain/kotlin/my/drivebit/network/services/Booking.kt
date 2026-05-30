@@ -132,7 +132,9 @@ fun BookingDTO.renterFullOrBalancePaymentLabel(): String =
         "Оплатить полностью"
     }
 
-fun BookingDTO.prepaymentButtonLabel(): String = "Предоплата ${prepaymentPercent.toInt()}%"
+fun BookingDTO.prepaymentAmountRub(): Int = prepaymentAmount.roundToRubles()
+
+fun BookingDTO.prepaymentButtonLabel(): String = "Предоплата (${prepaymentAmountRub()} ₽)"
 
 private fun Double.roundToRubles(): Int = kotlin.math.round(this).toInt()
 
