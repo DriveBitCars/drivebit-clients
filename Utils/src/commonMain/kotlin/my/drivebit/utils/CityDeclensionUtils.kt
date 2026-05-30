@@ -221,9 +221,10 @@ fun resolveCityNameForMeta(
     citySlug: String,
     storedCityName: String,
 ): String {
+    cityNameFromSlug(citySlug)?.let { return it }
     val trimmedStored = storedCityName.trim()
     if (trimmedStored.isNotEmpty()) return trimmedStored
-    return cityNameFromSlug(citySlug) ?: DEFAULT_CITY_NAME
+    return DEFAULT_CITY_NAME
 }
 
 fun cityInPrepositional(nominative: String): String = cityForms(nominative).first

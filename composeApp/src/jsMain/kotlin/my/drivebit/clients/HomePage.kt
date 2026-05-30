@@ -33,8 +33,11 @@ import my.drivebit.viewmodels.MapViewModel
 import my.drivebit.viewmodels.MyCityViewModel
 import my.drivebit.viewmodels.NearbyLayoutMode
 import my.drivebit.web.cityPathWithFilter
+import my.drivebit.web.filterTitleFromPathSegment
 import my.drivebit.web.filterTitleToPathSegment
 import my.drivebit.web.isCityHomePath
+import my.drivebit.resources.ImagePaths.SEARCHBACKGROUND_CAR0_JPG
+import my.drivebit.utils.resolveCityNameForMeta
 import my.drivebit.web.parseCitySlugFromPath
 import my.drivebit.web.parseFilterSlugFromCityPath
 import org.jetbrains.compose.web.css.Position
@@ -79,7 +82,8 @@ fun HomePage() {
         parseFilterSlugFromCityPath(currentPath)?.let { filterSlug ->
             filters.firstOrNull { filterTitleToPathSegment(it.title) == filterSlug }?.title
         }
-    val selected = selectedFromPath ?: state.value.selected
+    val urlFilterTitle = filterTitleFromPathSegment(parseFilterSlugFromCityPath(currentPath))
+    val selected = selectedFromPath ?: urlFilterTitle
 
     val startDateViewModel: DateFieldViewModel = koinInject(named("startDate"))
     val endDateViewModel: DateFieldViewModel = koinInject(named("endDate"))
@@ -103,6 +107,13 @@ fun HomePage() {
         }
     }
 
+    LaunchedEffect(currentPath) {
+        val pathFilter = parseFilterSlugFromCityPath(currentPath)
+        if (pathFilter == null && state.value.selected != "Все") {
+            filterViewModel.onSelect("Все")
+        }
+    }
+
     LaunchedEffect(currentPath, cityName) {
         if (isCityHomePath(currentPath) && cityName.isNotEmpty()) {
             mainContentViewModel.refresh()
@@ -110,24 +121,26 @@ fun HomePage() {
     }
 
     AppWithHeader {
-        val selectedFilter = filters.find { it.title == selected }
-        selectedFilter?.let { filter ->
-            HeroBanner(
-                backgroundIconUrl = filter.backgroundIcon,
-                cityName = cityName,
-                citySlug = parseCitySlugFromPath(currentPath).orEmpty(),
-                filterSlug = parseFilterSlugFromCityPath(currentPath),
-                filterTitle = selected,
-                startDateViewModel = startDateViewModel,
-                endDateViewModel = endDateViewModel,
-            )
-        }
+        val citySlug = parseCitySlugFromPath(currentPath).orEmpty()
+        val filterSlug = parseFilterSlugFromCityPath(currentPath)
+        val heroCityName = resolveCityNameForMeta(citySlug, cityName)
+        val heroFilterTitle = filterTitleFromPathSegment(filterSlug)
+        val heroFilter = filters.find { it.title == heroFilterTitle }
+        HeroBanner(
+            backgroundIconUrl = heroFilter?.backgroundIcon ?: SEARCHBACKGROUND_CAR0_JPG,
+            cityName = heroCityName,
+            citySlug = citySlug,
+            filterSlug = filterSlug,
+            filterTitle = heroFilterTitle,
+            startDateViewModel = startDateViewModel,
+            endDateViewModel = endDateViewModel,
+        )
 
         FilterButtonsRow {
             filters.forEach { filter ->
                 filterButton(
                     filter = filter,
-                    isSelected = filter.title == selected,
+                    isSelected = filter.title == urlFilterTitle,
                     onClick = {
                         parseCitySlugFromPath(currentPath)?.let { citySlug ->
                             val effectiveTitle =

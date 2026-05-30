@@ -26,14 +26,10 @@
     <link rel="icon" type="image/svg+xml" href="/images/logos/turo_logo.svg">
     <link rel="alternate icon" href="/images/logos/turo_logo.svg">
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
-    <link rel="preload" href="/composeApp.js?v=4" as="script">
-    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css"/>
-        <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-city-page.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
-
-    <script src="/vendor/leaflet/leaflet.js"></script>
-    <!-- drivebit-seo-jsonld -->
     <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -287,30 +283,48 @@
 }
     </script>
 </head>
-<body>
-    <script src="/vendor/drivebit-app-ready.js"></script>
+<body class="drivebit-static-city-page">
+    <header class="drivebit-static-header">
+        <div class="drivebit-static-header-inner">
+            <a class="drivebit-static-logo" href="/moskva">
+                <img src="/images/logos/logo.png" alt="DriveBit" width="120" height="32">
+            </a>
+            <nav class="drivebit-static-header-nav" aria-label="Основная навигация">
+                <a href="/search">Поиск</a>
+                <a href="/list-your-car">Сдать авто</a>
+            </nav>
+            <a class="drivebit-city-link" href="/my-city-selection">Москва</a>
+            <a class="drivebit-login-link" href="/login-by-phone">Войти</a>
+        </div>
+    </header>
 
-    <div id="root"></div>
-            <div class="drivebit-seo-shell">
-        <section class="drivebit-seo-text" aria-label="Аренда авто на карте в Москве">
-            <h2>Аренда авто на карте в Москве</h2>
-            <p>Ищете машину рядом с домом или офисом? На DriveBit доступны запросы «аренда авто на карте», «аренда автомобиля на карте», «аренда авто поблизости» и «арендовать автомобиль у дома» в Москве.</p>
-            <p>Откройте карту, выберите автомобиль рядом с вами и забронируйте у частного владельца. Условия прозрачные, поддержка DriveBit — 24/7.</p>
-        </section>
-    </div>
+    <main class="drivebit-city-main">
+    <section class="drivebit-hero">
+        <img class="drivebit-hero-bg" src="/images/searchbackground/car1.jpg" alt="">
+        <div class="drivebit-hero-overlay"></div>
+        <div class="drivebit-hero-content">
+            <h1>Аренда авто на карте в Москве</h1>
+            <p class="drivebit-hero-tagline">Чистые и ухоженные машины с низким пробегом</p>
+            <p class="drivebit-hero-sub">Дешевле каршеринга</p>
+            <form class="drivebit-hero-search" action="/search" method="get">
+                <input type="date" name="startDate" aria-label="Дата начала">
+                <input type="date" name="endDate" aria-label="Дата окончания">
+                <button type="submit">Найти автомобиль</button>
+            </form>
+        </div>
+    </section>
 
-<!-- drivebit-seo-generated-start -->
-    <nav class="drivebit-seo-nav" aria-label="Аренда авто в Москве по целям поездки">
+    <nav class="drivebit-city-filters" aria-label="Фильтры аренды">
         <ul>
-            <li><a href="/moskva">Все авто в Москве</a></li>
-            <li><a href="/moskva/k-rodnym">К родным</a></li>
-            <li><a href="/moskva/kanikuly">Каникулы</a></li>
-            <li><a href="/moskva/komandirovki">Командировки</a></li>
-            <li><a href="/moskva/meropriyatie">Мероприятие</a></li>
-            <li><a href="/moskva/pereezd">Переезд</a></li>
+            <li><a href="/moskva">Все</a></li>
             <li><a href="/moskva/poblizosti" aria-current="page">Поблизости</a></li>
             <li><a href="/moskva/puteshestviya">Путешествия</a></li>
             <li><a href="/moskva/za-gorod">За город</a></li>
+            <li><a href="/moskva/k-rodnym">К родным</a></li>
+            <li><a href="/moskva/komandirovki">Командировки</a></li>
+            <li><a href="/moskva/kanikuly">Каникулы</a></li>
+            <li><a href="/moskva/meropriyatie">Мероприятие</a></li>
+            <li><a href="/moskva/pereezd">Переезд</a></li>
         </ul>
     </nav>
     <div class="drivebit-seo-cars">
@@ -414,43 +428,20 @@
         </article>
         </div>
     </div>
-<!-- drivebit-seo-generated-end -->
+
+    </main>
+    <div class="drivebit-seo-shell">
+        <section class="drivebit-seo-text" aria-label="Аренда авто на карте в Москве">
+            <h2>Аренда авто на карте в Москве</h2>
+            <p>Ищете машину рядом с домом или офисом? На DriveBit доступны запросы «аренда авто на карте», «аренда автомобиля на карте», «аренда авто поблизости» и «арендовать автомобиль у дома» в Москве.</p>
+            <p>Откройте карту, выберите автомобиль рядом с вами и забронируйте у частного владельца. Условия прозрачные, поддержка DriveBit — 24/7.</p>
+        </section>
+    </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="drivebit-footer-shell">
+    <div class="drivebit-footer-shell">
         <footer class="drivebit-site-footer">
-            <a class="drivebit-footer-phone" id="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
+            <a class="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
             <div class="drivebit-footer-bottom">
                 <span class="drivebit-footer-copy">© DriveBit Аренда автомобилей от собственников</span>
                 <a class="drivebit-footer-link drivebit-footer-link--offer" href="/offer">Оферта</a>
@@ -460,6 +451,6 @@
         </footer>
     </div>
 
-    <script type="application/javascript" src="/composeApp.js?v=4"></script>
+    <script src="/vendor/drivebit-hero-search.js"></script>
 </body>
 </html>

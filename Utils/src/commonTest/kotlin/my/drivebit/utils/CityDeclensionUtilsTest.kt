@@ -96,8 +96,10 @@ class CityDeclensionUtilsTest {
     }
 
     @Test
-    fun resolveCityNameForMeta_prefersStoredName() {
-        assertEquals("Калининград", resolveCityNameForMeta("moskva", "Калининград"))
+    fun resolveCityNameForMeta_prefersSlugWhenKnown() {
+        assertEquals("Москва", resolveCityNameForMeta("moskva", "Калининград"))
+        assertEquals("Красногорск", resolveCityNameForMeta("krasnogorsk", "Москва"))
+        assertEquals("Калининград", resolveCityNameForMeta("unknown-slug", "Калининград"))
         assertEquals("Москва", resolveCityNameForMeta("moskva", ""))
     }
 

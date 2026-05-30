@@ -26,14 +26,10 @@
     <link rel="icon" type="image/svg+xml" href="/images/logos/turo_logo.svg">
     <link rel="alternate icon" href="/images/logos/turo_logo.svg">
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
-    <link rel="preload" href="/composeApp.js?v=4" as="script">
-    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css"/>
-        <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-city-page.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
-
-    <script src="/vendor/leaflet/leaflet.js"></script>
-    <!-- drivebit-seo-jsonld -->
     <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -287,28 +283,48 @@
 }
     </script>
 </head>
-<body>
-    <script src="/vendor/drivebit-app-ready.js"></script>
+<body class="drivebit-static-city-page">
+    <header class="drivebit-static-header">
+        <div class="drivebit-static-header-inner">
+            <a class="drivebit-static-logo" href="/moskva">
+                <img src="/images/logos/logo.png" alt="DriveBit" width="120" height="32">
+            </a>
+            <nav class="drivebit-static-header-nav" aria-label="Основная навигация">
+                <a href="/search">Поиск</a>
+                <a href="/list-your-car">Сдать авто</a>
+            </nav>
+            <a class="drivebit-city-link" href="/my-city-selection">Москва</a>
+            <a class="drivebit-login-link" href="/login-by-phone">Войти</a>
+        </div>
+    </header>
 
-    <div id="root"></div>
-            <div class="drivebit-seo-shell">
-        <section class="drivebit-seo-text" aria-label="Аренда авто для путешествий по России">
-            <h2>Аренда авто для путешествий по России из Москвы</h2>
-        </section>
-    </div>
+    <main class="drivebit-city-main">
+    <section class="drivebit-hero">
+        <img class="drivebit-hero-bg" src="/images/searchbackground/car2.jpg" alt="">
+        <div class="drivebit-hero-overlay"></div>
+        <div class="drivebit-hero-content">
+            <h1>Аренда авто для путешествий по России из Москвы</h1>
+            <p class="drivebit-hero-tagline">Чистые и ухоженные машины с низким пробегом</p>
+            <p class="drivebit-hero-sub">Дешевле каршеринга</p>
+            <form class="drivebit-hero-search" action="/search" method="get">
+                <input type="date" name="startDate" aria-label="Дата начала">
+                <input type="date" name="endDate" aria-label="Дата окончания">
+                <button type="submit">Найти автомобиль</button>
+            </form>
+        </div>
+    </section>
 
-<!-- drivebit-seo-generated-start -->
-    <nav class="drivebit-seo-nav" aria-label="Аренда авто в Москве по целям поездки">
+    <nav class="drivebit-city-filters" aria-label="Фильтры аренды">
         <ul>
-            <li><a href="/moskva">Все авто в Москве</a></li>
-            <li><a href="/moskva/k-rodnym">К родным</a></li>
-            <li><a href="/moskva/kanikuly">Каникулы</a></li>
-            <li><a href="/moskva/komandirovki">Командировки</a></li>
-            <li><a href="/moskva/meropriyatie">Мероприятие</a></li>
-            <li><a href="/moskva/pereezd">Переезд</a></li>
+            <li><a href="/moskva">Все</a></li>
             <li><a href="/moskva/poblizosti">Поблизости</a></li>
             <li><a href="/moskva/puteshestviya" aria-current="page">Путешествия</a></li>
             <li><a href="/moskva/za-gorod">За город</a></li>
+            <li><a href="/moskva/k-rodnym">К родным</a></li>
+            <li><a href="/moskva/komandirovki">Командировки</a></li>
+            <li><a href="/moskva/kanikuly">Каникулы</a></li>
+            <li><a href="/moskva/meropriyatie">Мероприятие</a></li>
+            <li><a href="/moskva/pereezd">Переезд</a></li>
         </ul>
     </nav>
     <div class="drivebit-seo-cars">
@@ -412,43 +428,88 @@
         </article>
         </div>
     </div>
-<!-- drivebit-seo-generated-end -->
+
+    </main>
+    <div class="drivebit-seo-shell">
+        <section class="drivebit-seo-text" aria-label="Аренда авто для путешествий по России">
+            <h2>Аренда авто для путешествий по России из Москвы</h2>
+            <p>Поездка на арендованном автомобиле — это свобода передвижения без привязки к расписанию поездов и автобусов. Не нужно искать билеты, подстраиваться под рейсы самолётов или договариваться с водителем такси. Достаточно взять автомобиль у частного владельца через DriveBit — и отправиться в любую точку страны: на море, по Золотому кольцу или в соседний город на выходные.</p>
+            <p>На DriveBit собраны предложения частных владельцев для поездок по России на любой срок — от нескольких дней до нескольких месяцев. Сравните машины разных марок и классов, выберите подходящую по цене, комплектации и условиям пробега.</p>
+            <h2>Почему путешествие на арендованном авто — удобный выбор</h2>
+            <p>Самостоятельная поездка на машине даёт несколько ощутимых преимуществ перед общественным транспортом.</p>
+            <ul>
+                <li>Вы сами решаете, когда выезжать и где останавливаться — без оглядки на расписание.</li>
+                <li>Комфорт в пути: кондиционер, просторный салон и багажник для вещей, особенно если едете с семьёй.</li>
+                <li>Часто аренда авто у собственника оказывается выгоднее билетов на всю семью, а на длительных маршрутах экономия заметнее.</li>
+            </ul>
+            <h2>Какой автомобиль выбрать для поездки</h2>
+            <p>Выбор машины зависит от маршрута, количества пассажиров и объёма багажа. На DriveBit можно подобрать авто под любую задачу — от компактного седана до минивэна.</p>
+            <table>
+                <thead><tr>
+                    <th>Класс авто</th>
+                    <th>Примеры моделей</th>
+                    <th>Пассажиров</th>
+                    <th>Для каких поездок</th>
+                </tr></thead>
+                <tbody>
+                    <tr>
+                        <td>Эконом</td>
+                        <td>Kia Rio, Hyundai Solaris</td>
+                        <td>4</td>
+                        <td>Город, короткие маршруты</td>
+                    </tr>
+                    <tr>
+                        <td>Комфорт</td>
+                        <td>Skoda Octavia, Toyota Camry</td>
+                        <td>4–5</td>
+                        <td>Дальние поездки, отпуск</td>
+                    </tr>
+                    <tr>
+                        <td>Бизнес</td>
+                        <td>Mercedes-Benz, BMW, Audi</td>
+                        <td>4–5</td>
+                        <td>Деловые, представительские</td>
+                    </tr>
+                    <tr>
+                        <td>Кроссовер</td>
+                        <td>Haval, Chery, Renault Duster</td>
+                        <td>5</td>
+                        <td>Смешанные дороги, природа</td>
+                    </tr>
+                    <tr>
+                        <td>Минивэн</td>
+                        <td>Hyundai Starex, Mercedes Vito</td>
+                        <td>6–8</td>
+                        <td>Семейные, групповые</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h2>Популярные направления из Москвы</h2>
+            <p>Арендовать авто в Москве для поездки по России можно практически в любом направлении. Вот маршруты, которые чаще всего выбирают арендаторы на DriveBit.</p>
+            <ul>
+                <li>Золотое кольцо — Суздаль, Владимир, Ярославль, Кострома: несколько городов за одну поездку без экскурсионного автобуса.</li>
+                <li>Поездка на море — Сочи, Анапа, Крым: свободно перемещайтесь между курортами, согласовав пробег с владельцем.</li>
+                <li>Санкт-Петербург и Карелия — трасса М-11 и поездки на природу в одном маршруте.</li>
+                <li>Ростов-на-Дону, Краснодар и юг России — удобно для длительных поездок в тёплые регионы.</li>
+            </ul>
+            <h2>Условия аренды на DriveBit</h2>
+            <p>DriveBit — сервис P2P-аренды: вы бронируете автомобиль у частного владельца, а условия, страховка и поддержка прозрачно указаны в карточке авто и при оформлении.</p>
+            <ul>
+                <li>Паспорт гражданина РФ и действующее водительское удостоверение.</li>
+                <li>Возраст и стаж вождения — по правилам сервиса и требованиям владельца.</li>
+                <li>Оплата и бронирование онлайн; поддержка DriveBit 24/7.</li>
+            </ul>
+            <h2>На что обратить внимание перед поездкой</h2>
+            <p>Перед выездом проверьте комплектацию, состояние автомобиля при передаче и согласуйте с владельцем лимит пробега для дальних маршрутов. Заранее спланируйте маршрут и расход топлива — так поездка пройдёт спокойнее.</p>
+            <h2>Как арендовать автомобиль быстро и просто</h2>
+            <p>Выберите машину на DriveBit, укажите даты поездки и забронируйте онлайн. Сравните предложения собственников по цене и условиям — и отправляйтесь в путешествие по России с комфортом и без переплаты классическому прокату.</p>
+        </section>
+    </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="drivebit-footer-shell">
+    <div class="drivebit-footer-shell">
         <footer class="drivebit-site-footer">
-            <a class="drivebit-footer-phone" id="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
+            <a class="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
             <div class="drivebit-footer-bottom">
                 <span class="drivebit-footer-copy">© DriveBit Аренда автомобилей от собственников</span>
                 <a class="drivebit-footer-link drivebit-footer-link--offer" href="/offer">Оферта</a>
@@ -458,6 +519,6 @@
         </footer>
     </div>
 
-    <script type="application/javascript" src="/composeApp.js?v=4"></script>
+    <script src="/vendor/drivebit-hero-search.js"></script>
 </body>
 </html>
