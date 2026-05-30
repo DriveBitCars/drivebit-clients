@@ -44,7 +44,6 @@ fun HeroBanner(
         Div({
             style {
                 width(100.percent)
-                minHeight(if (isMobile) 360.px else 442.px)
                 borderRadius(30.px)
                 overflow("hidden")
                 position(Position.Relative)
@@ -81,11 +80,8 @@ fun HeroBanner(
 
             Div({
                 style {
-                    position(Position.Absolute)
-                    top(0.px)
-                    left(0.px)
-                    right(0.px)
-                    bottom(0.px)
+                    position(Position.Relative)
+                    property("z-index", "1")
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Column)
                     alignItems(AlignItems.Center)
@@ -99,8 +95,6 @@ fun HeroBanner(
                         display(DisplayStyle.Flex)
                         flexDirection(FlexDirection.Column)
                         alignItems(AlignItems.Center)
-                        flex(1)
-                        justifyContent(JustifyContent.Center)
                     }
                 }) {
                     H1({
