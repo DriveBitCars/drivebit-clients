@@ -508,6 +508,13 @@ fun CarEditPage() {
                                     },
                                 )
                                 ActionButton(
+                                    enabledColor = CSSColors.Blue,
+                                    text = "Календарь доступности",
+                                    onClick = {
+                                        window.location.href = "/car-availability?carId=${currentState.carId}"
+                                    },
+                                )
+                                ActionButton(
                                     enabledColor = CSSColors.Red,
                                     text = "Удалить",
                                     onClick = {

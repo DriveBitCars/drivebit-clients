@@ -34,6 +34,7 @@ fun SearchDateRangeSelector(
     onEndDateChanged: (String?) -> Unit,
     disabledDates: Set<String> = emptySet(),
     endMinOffsetDaysFromStart: Int = 0,
+    clearRangeOnCancel: Boolean = true,
 ) {
     val startViewModel = remember { DateFieldViewModel(initialDate = startDate) }
     val endViewModel = remember { DateFieldViewModel(initialDate = endDate) }
@@ -69,6 +70,7 @@ fun SearchDateRangeSelector(
             endDateViewModel = endViewModel,
             disabledDates = disabledDates,
             endMinOffsetDaysFromStart = endMinOffsetDaysFromStart,
+            clearRangeOnCancel = clearRangeOnCancel,
         )
     }
 }

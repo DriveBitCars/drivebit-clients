@@ -12,6 +12,7 @@ import my.drivebit.screens.CarBrandSelectionPage
 import my.drivebit.screens.CarEditPage
 import my.drivebit.screens.CarStsUploadPage
 import my.drivebit.screens.CarModelSelectionPage
+import my.drivebit.screens.CarAvailabilityPage
 import my.drivebit.screens.CarPhotosPage
 import my.drivebit.screens.CarPhotosUploadPage
 import my.drivebit.screens.CarDetailPage
@@ -204,6 +205,9 @@ actual fun App() {
                 }
                 currentPath.startsWith("/car-photos") -> {
                     CarPhotosPage()
+                }
+                currentPath.startsWith("/car-availability") -> {
+                    CarAvailabilityPage()
                 }
                 currentPath.startsWith("/edit-name") -> {
                     EditNamePage(currentPath)

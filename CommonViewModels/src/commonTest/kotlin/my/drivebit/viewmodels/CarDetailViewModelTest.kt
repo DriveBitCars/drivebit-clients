@@ -217,12 +217,22 @@ class MockCarAvailabilityForDetail : CarAvailability {
     var blocks: List<CarAvailabilityBlock> = emptyList()
     var shouldThrow: Boolean = false
 
-    override suspend fun getBlocks(carId: String): List<CarAvailabilityBlock> {
+    override suspend fun getBlocks(
+        carId: String,
+        from: String?,
+        to: String?,
+    ): List<CarAvailabilityBlock> {
         if (shouldThrow) {
             throw Exception("blocks request failed")
         }
         return blocks
     }
+
+    override suspend fun createBlock(
+        request: my.drivebit.network.services.CreateAvailabilityBlockRequest,
+    ): CarAvailabilityBlock = throw NotImplementedError()
+
+    override suspend fun deleteBlock(blockId: String): Unit = throw NotImplementedError()
 }
 
 class MockReviewForDetail : Review {
