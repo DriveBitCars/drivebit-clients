@@ -340,6 +340,7 @@ val commonViewModelsModule: Module =
         single<MyBookingsAsRenterViewModel> {
             MyBookingsAsRenterViewModelImpl(
                 booking = get(),
+                payment = get(),
             )
         }
 
