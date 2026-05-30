@@ -32,14 +32,18 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
+import my.drivebit.mobile.screens.main.LeaveReviewScreen
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.MessageDto
 import my.drivebit.network.services.contractBookingIdForAction
 import my.drivebit.network.services.contractDownloadPageUrl
+import my.drivebit.network.services.isLeaveReviewForCarAction
+import my.drivebit.network.services.leaveReviewCarIdForAction
 import my.drivebit.network.services.payBookingIdForAction
 import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
+import my.drivebit.network.services.shouldShowLeaveReviewForRenter
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
 import my.drivebit.utils.mapIso8601ToTimeString
@@ -140,6 +144,7 @@ data class ChatScreen(
                                     message = message,
                                     participantId = chatDetail?.participant?.id,
                                     bookingForPay = bookingIdForPay?.let { bookingPaymentById[it] },
+                                    bookingById = bookingPaymentById,
                                     isPaying = isPaying,
                                     onPrepayBooking = { bookingId ->
                                         viewModel.prepayBooking(
@@ -154,6 +159,12 @@ data class ChatScreen(
                                             returnUrl = MOBILE_PAYMENT_SUCCESS_URL,
                                             failUrl = MOBILE_PAYMENT_FAIL_URL,
                                         )
+                                    },
+                                    onLeaveReviewForCar = { carId ->
+                                        navigator.push(LeaveReviewScreen(carId = carId))
+                                    },
+                                    onLeaveReviewForRenter = {
+                                        uriHandler.openUri("https://drivebit.ru/my-deals")
                                     },
                                 )
                             }
@@ -203,9 +214,12 @@ private fun MessageBubble(
     message: MessageDto,
     participantId: String? = null,
     bookingForPay: BookingDTO? = null,
+    bookingById: Map<String, BookingDTO> = emptyMap(),
     isPaying: Boolean = false,
     onPrepayBooking: (String) -> Unit = {},
     onPayBooking: (String) -> Unit = {},
+    onLeaveReviewForCar: (String) -> Unit = {},
+    onLeaveReviewForRenter: () -> Unit = {},
 ) {
     val senderId = message.sender?.id
     val isOwnMessage = participantId != null && senderId != null && senderId != participantId
@@ -236,6 +250,9 @@ private fun MessageBubble(
         } else {
             val bookingIdForPay = message.payBookingIdForAction()
             val bookingIdForContract = message.contractBookingIdForAction()
+            val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
+            val showReviewForCar = message.isLeaveReviewForCarAction()
+            val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -274,6 +291,23 @@ private fun MessageBubble(
                         modifier = Modifier.padding(top = 8.dp),
                     ) {
                         Text("Скачать договор")
+                    }
+                }
+                if (showReviewForCar) {
+                    Button(
+                        onClick = { reviewCarId?.let(onLeaveReviewForCar) },
+                        enabled = reviewCarId != null,
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Text(if (reviewCarId != null) "Оставить отзыв" else "Загрузка…")
+                    }
+                }
+                if (showReviewForRenter) {
+                    Button(
+                        onClick = onLeaveReviewForRenter,
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Text("Оставить отзыв об арендаторе")
                     }
                 }
             }

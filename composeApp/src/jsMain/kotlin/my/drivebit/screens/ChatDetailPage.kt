@@ -24,10 +24,14 @@ import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.MessageDto
 import my.drivebit.network.services.contractBookingIdForAction
 import my.drivebit.network.services.contractDownloadPagePath
+import my.drivebit.network.services.isLeaveReviewForCarAction
+import my.drivebit.network.services.leaveReviewCarIdForAction
+import my.drivebit.network.services.leaveReviewPagePath
 import my.drivebit.network.services.payBookingIdForAction
 import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
+import my.drivebit.network.services.shouldShowLeaveReviewForRenter
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.viewmodels.ButtonState
@@ -159,6 +163,7 @@ fun ChatDetailPage() {
                                         participantName = chatDetail?.participant?.name,
                                         participantAvatarUrl = chatDetail?.participant?.avatar,
                                         bookingForPay = bookingIdForPay?.let { bookingPaymentById[it] },
+                                        bookingById = bookingPaymentById,
                                         isPaying = isPaying,
                                         onPrepayBooking = { bookingId ->
                                             val origin = window.location.origin
@@ -255,6 +260,7 @@ private fun MessageBubble(
     participantName: String? = null,
     participantAvatarUrl: String? = null,
     bookingForPay: BookingDTO? = null,
+    bookingById: Map<String, BookingDTO> = emptyMap(),
     isPaying: Boolean = false,
     onPrepayBooking: (String) -> Unit = {},
     onPayBooking: (String) -> Unit = {},
@@ -274,10 +280,24 @@ private fun MessageBubble(
     if (isSystemMessage) {
         val bookingIdForPay = message.payBookingIdForAction()
         val bookingIdForContract = message.contractBookingIdForAction()
+        val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
+        val showReviewForCar = message.isLeaveReviewForCarAction()
+        val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
         val payButtonVm = createButtonViewModel()
         val contractButtonVm = createButtonViewModel()
+        val reviewCarButtonVm = createButtonViewModel()
+        val reviewRenterButtonVm = createButtonViewModel()
         LaunchedEffect(isPaying) {
             payButtonVm.setState(if (isPaying) ButtonState.Loading else ButtonState.Enabled)
+        }
+        LaunchedEffect(reviewCarId) {
+            reviewCarButtonVm.setState(
+                when {
+                    reviewCarId != null -> ButtonState.Enabled
+                    showReviewForCar -> ButtonState.Loading
+                    else -> ButtonState.Disabled
+                },
+            )
         }
         Div({
             style {
@@ -330,6 +350,42 @@ private fun MessageBubble(
                             viewModel = contractButtonVm,
                             onClick = {
                                 window.location.href = contractDownloadPagePath(bookingIdForContract)
+                            },
+                        )
+                    }
+                }
+                if (showReviewForCar) {
+                    Div({
+                        style {
+                            width(100.percent)
+                            maxWidth(280.px)
+                        }
+                    }) {
+                        ActionButton(
+                            text = if (reviewCarId != null) "Оставить отзыв" else "Загрузка…",
+                            enabledColor = CSSColors.Blue,
+                            viewModel = reviewCarButtonVm,
+                            onClick = {
+                                reviewCarId?.let { carId ->
+                                    window.location.href = leaveReviewPagePath(carId)
+                                }
+                            },
+                        )
+                    }
+                }
+                if (showReviewForRenter) {
+                    Div({
+                        style {
+                            width(100.percent)
+                            maxWidth(280.px)
+                        }
+                    }) {
+                        ActionButton(
+                            text = "Оставить отзыв об арендаторе",
+                            enabledColor = CSSColors.Blue,
+                            viewModel = reviewRenterButtonVm,
+                            onClick = {
+                                window.location.href = "/my-deals"
                             },
                         )
                     }

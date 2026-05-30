@@ -21,6 +21,7 @@ import my.drivebit.network.services.PayBookingResult
 import my.drivebit.network.services.Payment
 import my.drivebit.network.services.SendMessageRequest
 import my.drivebit.network.services.checkoutBooking
+import my.drivebit.network.services.leaveReviewBookingIdForAction
 import my.drivebit.network.services.payBookingIdForAction
 import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.utils.safeLaunchWithErrorHandler
@@ -202,7 +203,14 @@ class ChatDetailViewModelImpl(
     }
 
     private fun refreshBookingsForPayActions(messages: List<MessageDto>) {
-        val bookingIds = messages.mapNotNull { it.payBookingIdForAction() }.distinct()
+        val bookingIds =
+            messages
+                .flatMap { message ->
+                    listOfNotNull(
+                        message.payBookingIdForAction(),
+                        message.leaveReviewBookingIdForAction(),
+                    )
+                }.distinct()
         if (bookingIds.isEmpty()) return
 
         coroutineScope.launch {
