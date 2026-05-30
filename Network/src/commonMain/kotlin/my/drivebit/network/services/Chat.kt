@@ -29,6 +29,7 @@ enum class ActionTypeEnum {
     LeaveReviewForRenter,
     LeaveReviewForCar,
     ConfirmBooking,
+    DownloadContract,
 }
 
 object ActionTypeEnumSerializer : KSerializer<ActionTypeEnum> {
@@ -219,6 +220,20 @@ data class SendMessageRequest(
     val text: String? = null,
 )
 
+private val contractDownloadUrlRegex =
+    Regex("""(?:https?://(?:www\.)?drivebit\.ru)?/download-booking-contract\?bookingId=([0-9a-fA-F-]{36})""")
+
+fun extractBookingIdFromContractDownloadUrl(text: String): String? =
+    contractDownloadUrlRegex
+        .find(text)
+        ?.groupValues
+        ?.getOrNull(1)
+        ?.takeIf { it.isNotBlank() }
+
+fun contractDownloadPagePath(bookingId: String): String = "/download-booking-contract?bookingId=$bookingId"
+
+fun contractDownloadPageUrl(bookingId: String): String = "https://drivebit.ru${contractDownloadPagePath(bookingId)}"
+
 fun MessageDto.payBookingIdForAction(): String? {
     if (!isSystemMessage) return null
     val booking =
@@ -235,6 +250,18 @@ fun MessageDto.payBookingIdForAction(): String? {
         return booking
     }
     return null
+}
+
+fun MessageDto.contractBookingIdForAction(): String? {
+    if (!isSystemMessage) return null
+    val bookingFromMessage =
+        messageActionBlock?.actionParameters?.get("bookingId")?.takeIf { it.isNotBlank() }
+            ?: bookingId?.takeIf { it.isNotBlank() }
+    when (messageActionBlock?.actionType) {
+        ActionTypeEnum.DownloadContract -> return bookingFromMessage
+        else -> {}
+    }
+    return text?.let(::extractBookingIdFromContractDownloadUrl)
 }
 
 class ChatImpl(

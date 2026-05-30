@@ -21,6 +21,8 @@ import my.drivebit.components.TextError
 import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.MessageDto
+import my.drivebit.network.services.contractBookingIdForAction
+import my.drivebit.network.services.contractDownloadPagePath
 import my.drivebit.network.services.payBookingIdForAction
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.mapIso8601ToTimeString
@@ -254,7 +256,9 @@ private fun MessageBubble(
 
     if (isSystemMessage) {
         val bookingIdForPay = message.payBookingIdForAction()
+        val bookingIdForContract = message.contractBookingIdForAction()
         val payButtonVm = createButtonViewModel()
+        val contractButtonVm = createButtonViewModel()
         LaunchedEffect(isPaying) {
             payButtonVm.setState(if (isPaying) ButtonState.Loading else ButtonState.Enabled)
         }
@@ -286,6 +290,23 @@ private fun MessageBubble(
                             enabledColor = CSSColors.Blue,
                             viewModel = payButtonVm,
                             onClick = { onPayBooking(bookingIdForPay) },
+                        )
+                    }
+                }
+                if (bookingIdForContract != null) {
+                    Div({
+                        style {
+                            width(100.percent)
+                            maxWidth(280.px)
+                        }
+                    }) {
+                        ActionButton(
+                            text = "Скачать договор",
+                            enabledColor = CSSColors.Blue,
+                            viewModel = contractButtonVm,
+                            onClick = {
+                                window.location.href = contractDownloadPagePath(bookingIdForContract)
+                            },
                         )
                     }
                 }

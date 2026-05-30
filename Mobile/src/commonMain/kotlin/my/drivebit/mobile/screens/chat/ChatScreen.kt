@@ -33,6 +33,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import my.drivebit.network.services.MessageDto
+import my.drivebit.network.services.contractBookingIdForAction
+import my.drivebit.network.services.contractDownloadPageUrl
 import my.drivebit.network.services.payBookingIdForAction
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
@@ -217,6 +219,7 @@ private fun MessageBubble(
             )
         } else {
             val bookingIdForPay = message.payBookingIdForAction()
+            val bookingIdForContract = message.contractBookingIdForAction()
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -233,6 +236,15 @@ private fun MessageBubble(
                         modifier = Modifier.padding(top = 8.dp),
                     ) {
                         Text(if (isPaying) "Загрузка…" else "Оплатить")
+                    }
+                }
+                if (bookingIdForContract != null) {
+                    val uriHandler = LocalUriHandler.current
+                    Button(
+                        onClick = { uriHandler.openUri(contractDownloadPageUrl(bookingIdForContract)) },
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Text("Скачать договор")
                     }
                 }
             }
