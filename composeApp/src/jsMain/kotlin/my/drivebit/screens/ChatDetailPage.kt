@@ -20,10 +20,14 @@ import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
+import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.MessageDto
 import my.drivebit.network.services.contractBookingIdForAction
 import my.drivebit.network.services.contractDownloadPagePath
 import my.drivebit.network.services.payBookingIdForAction
+import my.drivebit.network.services.prepaymentButtonLabel
+import my.drivebit.network.services.renterFullOrBalanceAmountRub
+import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.viewmodels.ButtonState
@@ -74,6 +78,7 @@ fun ChatDetailPage() {
     val error by viewModel.error.collectAsState()
     val isSending by viewModel.isSending.collectAsState()
     val isPaying by viewModel.isPaying.collectAsState()
+    val bookingPaymentById by viewModel.bookingPaymentById.collectAsState()
 
     LaunchedEffect(chatId) {
         viewModel.payEffects.collect { effect ->
@@ -147,12 +152,22 @@ fun ChatDetailPage() {
                         }) {
                             Column(gap = 12.px, modifier = { width(100.percent) }) {
                                 messages.forEach { message ->
+                                    val bookingIdForPay = message.payBookingIdForAction()
                                     MessageBubble(
                                         message = message,
                                         participantId = chatDetail?.participant?.id,
                                         participantName = chatDetail?.participant?.name,
                                         participantAvatarUrl = chatDetail?.participant?.avatar,
+                                        bookingForPay = bookingIdForPay?.let { bookingPaymentById[it] },
                                         isPaying = isPaying,
+                                        onPrepayBooking = { bookingId ->
+                                            val origin = window.location.origin
+                                            viewModel.prepayBooking(
+                                                bookingId = bookingId,
+                                                returnUrl = "$origin/payment-success",
+                                                failUrl = "$origin/payment-failure",
+                                            )
+                                        },
                                         onPayBooking = { bookingId ->
                                             val origin = window.location.origin
                                             viewModel.payBooking(
@@ -239,7 +254,9 @@ private fun MessageBubble(
     participantId: String? = null,
     participantName: String? = null,
     participantAvatarUrl: String? = null,
+    bookingForPay: BookingDTO? = null,
     isPaying: Boolean = false,
+    onPrepayBooking: (String) -> Unit = {},
     onPayBooking: (String) -> Unit = {},
 ) {
     val isSystemMessage = message.isSystemMessage
@@ -279,14 +296,21 @@ private fun MessageBubble(
             ) {
                 MessageTextWithDealsLink(text = text.ifBlank { "Системное сообщение" })
                 if (bookingIdForPay != null) {
-                    Div({
-                        style {
-                            width(100.percent)
-                            maxWidth(280.px)
+                    val fullPayLabel =
+                        bookingForPay?.let { booking ->
+                            "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
+                        } ?: "Оплатить"
+                    Column(gap = 8.px, modifier = { width(100.percent); maxWidth(280.px) }) {
+                        if (bookingForPay?.canPayPrepayment == true) {
+                            ActionButton(
+                                text = bookingForPay.prepaymentButtonLabel(),
+                                enabledColor = CSSColors.Blue,
+                                viewModel = payButtonVm,
+                                onClick = { onPrepayBooking(bookingIdForPay) },
+                            )
                         }
-                    }) {
                         ActionButton(
-                            text = "Оплатить",
+                            text = fullPayLabel,
                             enabledColor = CSSColors.Blue,
                             viewModel = payButtonVm,
                             onClick = { onPayBooking(bookingIdForPay) },

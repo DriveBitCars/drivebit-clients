@@ -11,12 +11,17 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import my.drivebit.network.services.Booking
+import my.drivebit.network.services.BookingCheckoutKind
+import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.Chat
 import my.drivebit.network.services.ChatDetailDto
 import my.drivebit.network.services.MessageDto
 import my.drivebit.network.services.PayBookingResult
 import my.drivebit.network.services.Payment
 import my.drivebit.network.services.SendMessageRequest
+import my.drivebit.network.services.checkoutBooking
+import my.drivebit.network.services.payBookingIdForAction
 import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.utils.safeLaunchWithErrorHandler
 
@@ -33,6 +38,7 @@ sealed interface ChatPayEffect {
 interface ChatDetailViewModel {
     val chatDetail: StateFlow<ChatDetailDto?>
     val messages: StateFlow<List<MessageDto>>
+    val bookingPaymentById: StateFlow<Map<String, BookingDTO>>
     val isLoading: StateFlow<Boolean>
     val error: StateFlow<String?>
     val isSending: StateFlow<Boolean>
@@ -54,10 +60,17 @@ interface ChatDetailViewModel {
         returnUrl: String,
         failUrl: String,
     )
+
+    fun prepayBooking(
+        bookingId: String,
+        returnUrl: String,
+        failUrl: String,
+    )
 }
 
 class ChatDetailViewModelImpl(
     private val chat: Chat,
+    private val booking: Booking,
     private val payment: Payment,
     private val chatId: String,
     private val participantAvatarCache: ParticipantAvatarCache,
@@ -68,6 +81,9 @@ class ChatDetailViewModelImpl(
 
     private val _messages = MutableStateFlow<List<MessageDto>>(emptyList())
     override val messages: StateFlow<List<MessageDto>> = _messages.asStateFlow()
+
+    private val _bookingPaymentById = MutableStateFlow<Map<String, BookingDTO>>(emptyMap())
+    override val bookingPaymentById: StateFlow<Map<String, BookingDTO>> = _bookingPaymentById.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -121,7 +137,9 @@ class ChatDetailViewModelImpl(
             },
         ) {
             val result = chat.getMessages(chatId, limit = 50)
-            _messages.value = (result.messages ?: emptyList()).sortedBy { it.createdAt }
+            val loaded = (result.messages ?: emptyList()).sortedBy { it.createdAt }
+            _messages.value = loaded
+            refreshBookingsForPayActions(loaded)
         }
     }
 
@@ -162,11 +180,53 @@ class ChatDetailViewModelImpl(
         returnUrl: String,
         failUrl: String,
     ) {
+        checkoutBooking(
+            bookingId = bookingId,
+            kind = BookingCheckoutKind.FullOrBalance,
+            returnUrl = returnUrl,
+            failUrl = failUrl,
+        )
+    }
+
+    override fun prepayBooking(
+        bookingId: String,
+        returnUrl: String,
+        failUrl: String,
+    ) {
+        checkoutBooking(
+            bookingId = bookingId,
+            kind = BookingCheckoutKind.Prepayment,
+            returnUrl = returnUrl,
+            failUrl = failUrl,
+        )
+    }
+
+    private fun refreshBookingsForPayActions(messages: List<MessageDto>) {
+        val bookingIds = messages.mapNotNull { it.payBookingIdForAction() }.distinct()
+        if (bookingIds.isEmpty()) return
+
+        coroutineScope.launch {
+            bookingIds.forEach { bookingId ->
+                runCatching { booking.getById(bookingId) }
+                    .getOrNull()
+                    ?.let { dto ->
+                        _bookingPaymentById.update { current -> current + (bookingId to dto) }
+                    }
+            }
+        }
+    }
+
+    private fun checkoutBooking(
+        bookingId: String,
+        kind: BookingCheckoutKind,
+        returnUrl: String,
+        failUrl: String,
+    ) {
         if (bookingId.isBlank() || _isPaying.value) return
         coroutineScope.launch {
             _isPaying.value = true
             try {
-                when (val result = payment.registerBookingPayment(bookingId, returnUrl, failUrl)) {
+                when (val result = payment.checkoutBooking(bookingId, kind, returnUrl, failUrl)) {
                     is PayBookingResult.Redirect ->
                         _payEffects.emit(ChatPayEffect.OpenCheckout(result.url))
                     is PayBookingResult.AlreadyPaid -> {
@@ -176,8 +236,9 @@ class ChatDetailViewModelImpl(
                         _payEffects.emit(ChatPayEffect.ShowInfo(text))
                         runCatching {
                             val refreshed = chat.getMessages(chatId, limit = 50)
-                            _messages.value =
-                                (refreshed.messages ?: emptyList()).sortedBy { it.createdAt }
+                            val loaded = (refreshed.messages ?: emptyList()).sortedBy { it.createdAt }
+                            _messages.value = loaded
+                            refreshBookingsForPayActions(loaded)
                         }
                     }
                     is PayBookingResult.Failed ->

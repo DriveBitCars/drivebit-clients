@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.drivebit.network.services.Booking
+import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CheckBookingAvailabilityResponse
 import my.drivebit.network.services.PayBookingResult
@@ -62,6 +63,9 @@ private class FakeBooking(
 
     override suspend fun getMyAsOwner() = throw NotImplementedError()
 
+    override suspend fun getById(bookingId: String): my.drivebit.network.services.BookingDTO =
+        throw NotImplementedError()
+
     override suspend fun confirmAsOwner(bookingId: String) {}
 
     override suspend fun declineAsOwner(bookingId: String) {}
@@ -92,6 +96,7 @@ private class FakeBooking(
 
 private class FakePayment : Payment {
     var registerCalls = 0
+    var prepayCalls = 0
 
     override suspend fun registerBookingPayment(
         bookingId: String,
@@ -99,6 +104,15 @@ private class FakePayment : Payment {
         failUrl: String,
     ): PayBookingResult {
         registerCalls++
+        return PayBookingResult.Failed("unused in test")
+    }
+
+    override suspend fun registerBookingPrepayment(
+        bookingId: String,
+        returnUrl: String,
+        failUrl: String,
+    ): PayBookingResult {
+        prepayCalls++
         return PayBookingResult.Failed("unused in test")
     }
 }
@@ -282,7 +296,7 @@ class RentViewModelTest {
             advanceUntilIdle()
             viewModel.onBookClick()
             advanceUntilIdle()
-            viewModel.payCreatedBooking("https://ok", "https://fail")
+            viewModel.payCreatedBooking(BookingCheckoutKind.FullOrBalance, "https://ok", "https://fail")
             advanceUntilIdle()
 
             assertEquals(0, payment.registerCalls)
@@ -314,7 +328,7 @@ class RentViewModelTest {
             advanceUntilIdle()
             viewModel.onBookClick()
             advanceUntilIdle()
-            viewModel.payCreatedBooking("https://ok", "https://fail")
+            viewModel.payCreatedBooking(BookingCheckoutKind.FullOrBalance, "https://ok", "https://fail")
             advanceUntilIdle()
 
             assertEquals(1, payment.registerCalls)

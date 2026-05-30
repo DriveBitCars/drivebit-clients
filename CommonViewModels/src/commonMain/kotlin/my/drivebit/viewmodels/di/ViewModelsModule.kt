@@ -216,6 +216,7 @@ val commonViewModelsModule: Module =
         factory<ChatDetailViewModel> { (chatId: String) ->
             ChatDetailViewModelImpl(
                 chat = get(),
+                booking = get(),
                 payment = get(),
                 chatId = chatId,
                 participantAvatarCache = get(),

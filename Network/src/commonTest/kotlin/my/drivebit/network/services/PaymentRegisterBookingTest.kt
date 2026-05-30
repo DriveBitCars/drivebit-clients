@@ -83,4 +83,28 @@ class PaymentRegisterBookingTest {
             val failed = assertIs<PayBookingResult.Failed>(result)
             assertEquals("Нельзя оплатить", failed.message)
         }
+
+    @Test
+    fun `registerBookingPrepayment hits prepay endpoint`() =
+        runTest {
+            val bookingId = "550e8400-e29b-41d4-a716-446655440000"
+            val mockEngine =
+                MockEngine { request ->
+                    assertTrue(request.url.encodedPath.endsWith("/prepay"))
+                    respond(
+                        content = """{"paymentUrl":"https://pay.example/prepay"}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+            val payment = PaymentImpl(HttpClient(mockEngine))
+            val result =
+                payment.registerBookingPrepayment(
+                    bookingId = bookingId,
+                    returnUrl = "https://example.com/ok",
+                    failUrl = "https://example.com/fail",
+                )
+            val redirect = assertIs<PayBookingResult.Redirect>(result)
+            assertEquals("https://pay.example/prepay", redirect.url)
+        }
 }

@@ -14,12 +14,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import my.drivebit.network.services.Booking
+import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CreateBookingRequest
 import my.drivebit.network.services.PayBookingResult
 import my.drivebit.network.services.Payment
 import my.drivebit.network.services.isTerminalRenterBooking
+import my.drivebit.network.services.renterFullOrBalanceAmountRub
+import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.statusAllowsRenterPayment
 import my.drivebit.shared.storage.Storage
 
@@ -38,7 +41,12 @@ sealed interface PendingBookingPaymentUi {
         val statusLabel: String,
     ) : PendingBookingPaymentUi
 
-    data object ReadyToPay : PendingBookingPaymentUi
+    data class ReadyToPay(
+        val canPayPrepayment: Boolean = false,
+        val prepaymentPercent: Double = 0.0,
+        val fullPaymentLabel: String = "Оплатить",
+        val fullOrBalanceAmountRub: Int = 0,
+    ) : PendingBookingPaymentUi
 }
 
 sealed interface RentState {
@@ -84,6 +92,7 @@ interface RentViewModel {
     fun onBookClick()
 
     fun payCreatedBooking(
+        kind: BookingCheckoutKind,
         returnUrl: String,
         failUrl: String,
     )
@@ -413,6 +422,7 @@ class RentViewModelImpl(
         }.getOrElse { 1 }
 
     override fun payCreatedBooking(
+        kind: BookingCheckoutKind,
         returnUrl: String,
         failUrl: String,
     ) {
@@ -423,7 +433,15 @@ class RentViewModelImpl(
         viewModelScope.launch {
             _isPaying.value = true
             try {
-                when (val result = payment.registerBookingPayment(bookingId, returnUrl, failUrl)) {
+                when (
+                    val result =
+                        when (kind) {
+                            BookingCheckoutKind.Prepayment ->
+                                payment.registerBookingPrepayment(bookingId, returnUrl, failUrl)
+                            BookingCheckoutKind.FullOrBalance ->
+                                payment.registerBookingPayment(bookingId, returnUrl, failUrl)
+                        }
+                ) {
                     is PayBookingResult.Redirect ->
                         _payEffects.emit(RentPayEffect.OpenCheckout(result.url))
                     is PayBookingResult.AlreadyPaid -> {
@@ -487,7 +505,14 @@ class RentViewModelImpl(
 
     private fun pendingBookingPaymentUiFromDto(dto: BookingDTO): PendingBookingPaymentUi =
         when {
-            dto.statusAllowsRenterPayment() -> PendingBookingPaymentUi.ReadyToPay
+            dto.statusAllowsRenterPayment() ->
+                PendingBookingPaymentUi.ReadyToPay(
+                    canPayPrepayment = dto.canPayPrepayment,
+                    prepaymentPercent = dto.prepaymentPercent,
+                    fullPaymentLabel =
+                        "${dto.renterFullOrBalancePaymentLabel()} (${dto.renterFullOrBalanceAmountRub()} ₽)",
+                    fullOrBalanceAmountRub = dto.renterFullOrBalanceAmountRub(),
+                )
             else ->
                 PendingBookingPaymentUi.AwaitingOwnerConfirmation(
                     dto.statusTranslate?.takeIf { it.isNotBlank() } ?: dto.status,
