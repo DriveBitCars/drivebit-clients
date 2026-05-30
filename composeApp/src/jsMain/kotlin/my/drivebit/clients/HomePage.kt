@@ -115,6 +115,8 @@ fun HomePage() {
             HeroBanner(
                 backgroundIconUrl = filter.backgroundIcon,
                 cityName = cityName,
+                citySlug = parseCitySlugFromPath(currentPath).orEmpty(),
+                filterSlug = parseFilterSlugFromCityPath(currentPath),
                 filterTitle = selected,
                 startDateViewModel = startDateViewModel,
                 endDateViewModel = endDateViewModel,

@@ -1,0 +1,209 @@
+(function () {
+    var CITY_SLUGS = {
+        "kaliningrad": "Калининград",
+        "krasnogorsk": "Красногорск",
+        "lyubertsy": "Люберцы",
+        "avtodoroga-moskva-astrahany-selo-sheremetevo": "Автодорога Москва-Астрахань (село Шереметьево)",
+        "zelenograd": "Зеленоград",
+        "moskva": "Москва",
+        "rostov-na-donu": "Ростов-на-Дону",
+        "rostovka": "Ростовка",
+        "ufa": "Уфа",
+        "ekaterinburg": "Екатеринбург",
+        "mineralnye-vody": "Минеральные Воды",
+        "serpuhov": "Серпухов"
+    };
+    var CITY_FORMS = {
+        "Москва": [
+            "Москве",
+            "Москвы"
+        ],
+        "Красногорск": [
+            "Красногорске",
+            "Красногорска"
+        ],
+        "Зеленоград": [
+            "Зеленограде",
+            "Зеленограда"
+        ],
+        "Люберцы": [
+            "Люберцах",
+            "Люберец"
+        ],
+        "Минеральные Воды": [
+            "Минеральных Водах",
+            "Минеральных Вод"
+        ]
+    };
+    var FILTER_SLUGS = {
+        "poblizosti": "Поблизости",
+        "puteshestviya": "Путешествия",
+        "za-gorod": "За город",
+        "k-rodnym": "К родным",
+        "komandirovki": "Командировки",
+        "kanikuly": "Каникулы",
+        "meropriyatie": "Мероприятие",
+        "pereezd": "Переезд"
+    };
+    var GENITIVE_FILTERS = ["Путешествия", "За город"];
+    var SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS = ["puteshestviya", "za-gorod", "poblizosti"];
+    var SEO_PAGE_TITLE_SUFFIX = " через сервис DriveBit";
+    var SEO_PAGE_DESCRIPTION_SUFFIX = ". Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!";
+    var RESERVED = ["city-selection", "my-city-selection", "list-your-car", "verify-otp", "login-by-phone", "login-by-mail", "login-by-password", "signup", "profile", "my-cars", "my-bookings", "leave-review", "my-deals", "chats", "chat", "documents", "offer", "contacts", "privacy", "cookies", "payment", "payment-success", "payment-failure", "download-booking-contract", "car-edit", "car-sts-upload", "car-photos-gallery", "car-photos-upload", "car-photos", "edit-name", "change-email", "change-phone", "change-password", "address-input", "license-plate-input", "car-brand-selection", "car-model-selection", "body-type-selection", "drive-type-selection", "engine-type-selection", "engine-volume-input", "production-year-input", "seats-count-input", "trunk-size-selection", "daily-rate-input", "description-input", "passport-upload", "search", "car-detail"];
+    var CITY_FILTER_RENT_SUFFIX = "Аренда у собственников, прозрачные условия и поддержка 24/7.";
+    var DEFAULT_CITY_PAGE_DESCRIPTION = "Аренда автомобилей от собственников. Дешевле проката на 40%. Полная страховка. Поддержка 24/7.";
+
+    function cityForms(name) {
+        var key = (name || "").trim();
+        if (CITY_FORMS[key]) return CITY_FORMS[key];
+        if (!key) return ["", ""];
+        var last = key.slice(-1);
+        var stem;
+        if (key.slice(-2) === "ия") {
+            stem = key.slice(0, -2);
+            return [stem + "ии", stem + "ии"];
+        }
+        if (last === "а") {
+            stem = key.slice(0, -1);
+            return [stem + "е", stem + "ы"];
+        }
+        if (last === "я") {
+            stem = key.slice(0, -1);
+            return [stem + "е", stem + "и"];
+        }
+        if (last === "ь") {
+            stem = key.slice(0, -1);
+            return [stem + "и", stem + "и"];
+        }
+        if (last === "й") {
+            stem = key.slice(0, -1);
+            return [stem + "е", stem + "я"];
+        }
+        return [key + "е", key.slice(0, -1) + "а"];
+    }
+
+    function filterTitleFromSlug(filterSlug) {
+        if (!filterSlug) return "Все";
+        return FILTER_SLUGS[filterSlug.toLowerCase()] || "Все";
+    }
+
+    function isSeoOptimizedPage(citySlug, filterSlug) {
+        var city = (citySlug || "").trim().toLowerCase();
+        var filter = filterSlug ? filterSlug.trim().toLowerCase() : null;
+        if (city === "moskva" && !filter) return true;
+        if (city === "moskva" && SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS.indexOf(filter) >= 0) return true;
+        if (city === "krasnogorsk" && !filter) return true;
+        return false;
+    }
+
+    function seoPageHeadline(cityName, filterTitle) {
+        var trimmedCity = (cityName || "").trim();
+        if (!trimmedCity) return "Аренда авто у частных владельцев";
+        var forms = cityForms(trimmedCity);
+        var prep = forms[0];
+        var gen = forms[1];
+        switch (filterTitle) {
+            case "Путешествия":
+                return "Аренда авто для путешествий по России из " + gen;
+            case "За город":
+                return "Аренда авто для поездки в другой город из " + gen;
+            case "Поблизости":
+                return "Аренда авто на карте в " + prep;
+            default:
+                return "Аренда авто у частных владельцев в " + prep;
+        }
+    }
+
+    function seoPageTitle(cityName, filterTitle) {
+        var headline = seoPageHeadline(cityName, filterTitle);
+        if (filterTitle === "Поблизости") {
+            var prep = cityForms((cityName || "").trim())[0];
+            return "Аренда авто на карте в " + prep + " - аренда автомобиля поблизости" + SEO_PAGE_TITLE_SUFFIX;
+        }
+        return headline + SEO_PAGE_TITLE_SUFFIX;
+    }
+
+    function seoPageDescription(cityName, filterTitle) {
+        return seoPageTitle(cityName, filterTitle) + SEO_PAGE_DESCRIPTION_SUFFIX;
+    }
+
+    function cityPageDescription(cityName, filterTitle) {
+        var trimmedCity = (cityName || "").trim();
+        if (!trimmedCity) return DEFAULT_CITY_PAGE_DESCRIPTION;
+        var forms = cityForms(trimmedCity);
+        var prep = forms[0];
+        var gen = forms[1];
+        switch (filterTitle) {
+            case "К родным":
+                return "Подберите автомобиль для поездки к родным в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
+            case "Командировки":
+                return "Подберите автомобиль для командировки в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
+            case "Каникулы":
+                return "Подберите автомобиль на каникулы в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
+            case "Мероприятие":
+                return "Подберите автомобиль на мероприятие в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
+            case "Переезд":
+                return "Подберите автомобиль для переезда в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
+            case "Поблизости":
+                return "Найдите автомобили поблизости в " + prep + ". Быстрая аренда у собственников, прозрачные условия и поддержка 24/7.";
+            case "Путешествия":
+                return "Подберите автомобиль для путешествий из " + gen + ". " + CITY_FILTER_RENT_SUFFIX;
+            case "За город":
+                return "Подберите автомобиль для поездки за город из " + gen + ". " + CITY_FILTER_RENT_SUFFIX;
+            default:
+                return "Аренда авто в " + prep + " у собственников. Дешевле проката, полная страховка и поддержка 24/7.";
+        }
+    }
+
+    function heroBannerHeadline(cityName, filterTitle) {
+        var base = "Арендуй авто у частных владельцев";
+        var trimmedCity = (cityName || "").trim();
+        if (!trimmedCity) return base;
+        var forms = cityForms(trimmedCity);
+        var phrase = GENITIVE_FILTERS.indexOf(filterTitle) >= 0
+            ? "из " + forms[1]
+            : "в " + forms[0];
+        return base + " " + phrase;
+    }
+
+    function pageTitle(citySlug, filterSlug, cityName, filterTitle) {
+        if (isSeoOptimizedPage(citySlug, filterSlug)) {
+            return seoPageTitle(cityName, filterTitle);
+        }
+        return heroBannerHeadline(cityName, filterTitle) + " - DriveBit";
+    }
+
+    function pageDescription(citySlug, filterSlug, cityName, filterTitle) {
+        if (isSeoOptimizedPage(citySlug, filterSlug)) {
+            return seoPageDescription(cityName, filterTitle);
+        }
+        return cityPageDescription(cityName, filterTitle);
+    }
+
+    function parseCityPath(pathname) {
+        var trimmed = (pathname || "").replace(/\/$/, "").replace(/^\//, "");
+        if (!trimmed) return null;
+        var segments = trimmed.split("/").filter(Boolean);
+        if (segments.length !== 1 && segments.length !== 2) return null;
+        var citySlug = segments[0].toLowerCase();
+        if (RESERVED.indexOf(citySlug) >= 0) return null;
+        return {
+            citySlug: citySlug,
+            filterSlug: segments[1] ? segments[1].toLowerCase() : null
+        };
+    }
+
+    window.drivebitCityPageMeta = function (pathname) {
+        var cityPath = parseCityPath(pathname);
+        if (!cityPath) return null;
+        var cityName = CITY_SLUGS[cityPath.citySlug];
+        if (!cityName) return null;
+        var filterTitle = filterTitleFromSlug(cityPath.filterSlug);
+        var path = "/" + cityPath.citySlug + (cityPath.filterSlug ? "/" + cityPath.filterSlug : "");
+        return {
+            title: pageTitle(cityPath.citySlug, cityPath.filterSlug, cityName, filterTitle),
+            description: pageDescription(cityPath.citySlug, cityPath.filterSlug, cityName, filterTitle),
+            path: path
+        };
+    };
+})();

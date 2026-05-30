@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class SeoBlocksTest {
     @Test
@@ -34,6 +35,26 @@ class SeoBlocksTest {
         assertEquals("Аренда авто для поездки в Крым и на каникулы", kanikuly.h2)
     }
 
+    @Test
+    fun renderSectionInnerHtml_rendersSectionsTableAndBullets() {
+        val block =
+            SeoLandingBlocks.parseBlocksJson(PUTESHESTVIYA_FIXTURE_JSON)["/moskva/puteshestviya"]!!
+        val html = SeoLandingBlocks.renderSectionInnerHtml(block)
+        assertTrue(html.contains("<h2>Почему путешествие"))
+        assertTrue(html.contains("<ul>"))
+        assertTrue(html.contains("<table>"))
+        assertTrue(html.contains("<th>Класс авто</th>"))
+        assertTrue(html.contains("<td>Минивэн</td>"))
+    }
+
+    @Test
+    fun parseBlocksJson_krasnogorskBlockExists() {
+        val blocks = SeoLandingBlocks.parseBlocksJson(KRASNOGORSK_FIXTURE_JSON)
+        val block = blocks["/krasnogorsk"]
+        assertNotNull(block)
+        assertEquals("Аренда авто у частных владельцев в Красногорске", block.h2)
+    }
+
     private companion object {
         val FIXTURE_JSON =
             """
@@ -52,6 +73,45 @@ class SeoBlocksTest {
                 "ariaLabel": "Аренда авто для командировок",
                 "h2": "Аренда авто для командировки и поездки в другой город",
                 "paragraphs": ["c1", "c2"]
+              }
+            }
+            """.trimIndent()
+
+        val PUTESHESTVIYA_FIXTURE_JSON =
+            """
+            {
+              "/moskva/puteshestviya": {
+                "ariaLabel": "Аренда авто для путешествий по России",
+                "h2": "Аренда авто для путешествий по России из Москвы",
+                "paragraphs": [],
+                "sections": [
+                  {
+                    "heading": "Аренда авто для путешествий по России из Москвы",
+                    "paragraphs": ["intro"]
+                  },
+                  {
+                    "heading": "Почему путешествие на арендованном авто — удобный выбор",
+                    "bullets": ["one", "two"]
+                  },
+                  {
+                    "heading": "Какой автомобиль выбрать для поездки",
+                    "table": {
+                      "headers": ["Класс авто", "Примеры моделей"],
+                      "rows": [["Минивэн", "Hyundai Starex"]]
+                    }
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+
+        val KRASNOGORSK_FIXTURE_JSON =
+            """
+            {
+              "/krasnogorsk": {
+                "ariaLabel": "Аренда авто в Красногорске",
+                "h2": "Аренда авто у частных владельцев в Красногорске",
+                "paragraphs": ["p1", "p2"]
               }
             }
             """.trimIndent()

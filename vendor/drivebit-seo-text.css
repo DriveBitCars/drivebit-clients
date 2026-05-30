@@ -30,6 +30,36 @@
     margin-bottom: 0;
 }
 
+.drivebit-seo-text ul {
+    margin: 0 0 12px;
+    padding-left: 1.25rem;
+}
+
+.drivebit-seo-text li {
+    margin-bottom: 6px;
+}
+
+.drivebit-seo-text table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 16px;
+    font-size: 14px;
+}
+
+.drivebit-seo-text th,
+.drivebit-seo-text td {
+    border: 1px solid #e2e2e8;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.drivebit-seo-text th {
+    background: #f4f4f8;
+    font-weight: 600;
+    color: #09052b;
+}
+
 .drivebit-seo-nav {
     max-width: 1200px;
     width: 100%;
