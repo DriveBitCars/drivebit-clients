@@ -1,4 +1,4 @@
-package my.drivebit.components
+package my.drivebit.shell
 
 import androidx.compose.runtime.Composable
 

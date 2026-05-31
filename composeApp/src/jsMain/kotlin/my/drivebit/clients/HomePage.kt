@@ -7,7 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.browser.document
 import kotlinx.browser.window
-import my.drivebit.components.AppWithHeader
+import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.HeroBanner

@@ -10,7 +10,7 @@ import my.drivebit.components.ButtonContainer
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
 import my.drivebit.components.PageHeader
-import my.drivebit.components.PageWithLogo
+import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.TermsConsentCheckbox
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField
