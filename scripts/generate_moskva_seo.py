@@ -483,7 +483,7 @@ def main() -> int:
             text = ensure_nearby_app_script(text)
         else:
             text = strip_leaflet(text)
-            text = ensure_compose_app_script(text)
+            text = strip_compose_app_script(text)
         html_path.write_text(text, encoding="utf-8")
         print(f"OK {path} ({len(cars)} cars) -> {html_path.relative_to(ROOT)}")
 

@@ -7,10 +7,11 @@ const cases = [
   {
     name: "home-moskva",
     path: "/moskva",
-    expectScript: "composeApp.js",
-    expectNotScript: "nearbyApp.js",
+    expectNotScript: "composeApp.js",
     ready: async (page) => {
-      await page.waitForSelector('div.universal-button:has-text("Поблизости")', { timeout: 60000 });
+      await page.waitForSelector(".drivebit-seo-cars", { timeout: 60000 });
+      const count = await page.locator(".drivebit-seo-car-card").count();
+      if (count === 0) throw new Error("no static car cards on /moskva");
     },
   },
   {
@@ -76,12 +77,14 @@ for (const testCase of cases) {
       Array.from(document.querySelectorAll("script[src]")).map((s) => s.getAttribute("src") || ""),
     );
 
-    const hasExpected = scripts.some((s) => s.includes(testCase.expectScript));
+    const hasExpected = testCase.expectScript
+      ? scripts.some((s) => s.includes(testCase.expectScript))
+      : true;
     const hasForbidden = testCase.expectNotScript
       ? scripts.some((s) => s.includes(testCase.expectNotScript))
       : false;
 
-    if (!hasExpected) {
+    if (testCase.expectScript && !hasExpected) {
       throw new Error(`missing script ${testCase.expectScript}; got ${scripts.join(", ")}`);
     }
     if (hasForbidden) {
@@ -107,8 +110,8 @@ for (const testCase of cases) {
   let detail = "";
   try {
     await page.goto(`${base}/moskva`, { waitUntil: "domcontentloaded", timeout: 120000 });
-    await page.waitForSelector('div.universal-button:has-text("Поблизости")', { timeout: 60000 });
-    await page.locator('div.universal-button', { hasText: "Поблизости" }).first().click();
+    await page.waitForSelector(".drivebit-seo-nav a[href='/moskva/poblizosti']", { timeout: 60000 });
+    await page.locator(".drivebit-seo-nav a[href='/moskva/poblizosti']").first().click();
     await page.waitForURL("**/moskva/poblizosti**", { timeout: 30000 });
     await page.waitForSelector(".leaflet-container", { timeout: 60000 });
     const scripts = await page.evaluate(() =>
