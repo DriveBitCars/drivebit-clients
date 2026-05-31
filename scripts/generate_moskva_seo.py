@@ -27,12 +27,7 @@ COMPOSE_APP_PRELOAD = '    <link rel="preload" href="/composeApp.js?v=4" as="scr
 COMPOSE_APP_SCRIPT = (
     '    <script type="application/javascript" src="/composeApp.js?v=4"></script>\n'
 )
-MAIN_PROMO_FRAGMENT = (ROOT / "composeApp" / "seo" / "main-promo.fragment.html").read_text(
-    encoding="utf-8"
-)
-PROMO_CSS = '    <link rel="stylesheet" href="/vendor/drivebit-main-promo.css"/>'
 GENERATED_END = "<!-- drivebit-seo-generated-end -->"
-JSON_LD_MARKER = "<!-- drivebit-seo-jsonld -->"
 
 PATH_TO_HTML: dict[str, Path] = {
     "/moskva": RESOURCES / "moskva" / "index.html",
@@ -238,119 +233,6 @@ def render_cars_shell(cars: list[dict], h2: str) -> str:
 """
 
 
-def build_json_ld(path: str, block: dict, cars: list[dict]) -> dict:
-    page_url = f"{SITE_BASE}{path}"
-    nav_label = block.get("navLabel") or block.get("h2", "Москва")
-    items = []
-    for idx, car in enumerate(cars, start=1):
-        general = car.get("general") or {}
-        brand = general.get("brandName") or ""
-        model = general.get("modelName") or ""
-        name = " ".join(p for p in (brand, model) if p).strip() or "Автомобиль"
-        car_id = car.get("id") or ""
-        price = min_daily_price(car)
-        photos = general.get("photos") or []
-        image = sanitize_photo_url((photos[0] or {}).get("url") if photos else None)
-        product = {
-            "@type": "Product",
-            "name": name,
-            "url": f"{SITE_BASE}/car-detail?id={car_id}",
-            "image": image,
-            "offers": {
-                "@type": "Offer",
-                "priceCurrency": "RUB",
-                "price": price or 0,
-                "availability": "https://schema.org/InStock",
-                "url": f"{SITE_BASE}/car-detail?id={car_id}",
-            },
-        }
-        items.append(
-            {
-                "@type": "ListItem",
-                "position": idx,
-                "item": product,
-            }
-        )
-
-    graph = [
-        {
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                {
-                    "@type": "ListItem",
-                    "position": 1,
-                    "name": "DriveBit",
-                    "item": f"{SITE_BASE}/",
-                },
-                {
-                    "@type": "ListItem",
-                    "position": 2,
-                    "name": "Москва",
-                    "item": f"{SITE_BASE}/moskva",
-                },
-                {
-                    "@type": "ListItem",
-                    "position": 3,
-                    "name": nav_label,
-                    "item": page_url,
-                },
-            ],
-        },
-        {
-            "@type": "AutoRental",
-            "name": f"DriveBit — {nav_label}",
-            "url": page_url,
-            "areaServed": "Москва",
-            "provider": {"@type": "Organization", "name": "DriveBit", "url": SITE_BASE},
-        },
-        {
-            "@type": "ItemList",
-            "name": block.get("h2", nav_label),
-            "numberOfItems": len(items),
-            "itemListElement": items,
-        },
-    ]
-    return {"@context": "https://schema.org", "@graph": graph}
-
-
-def inject_json_ld(html_text: str, graph: dict) -> str:
-    script = (
-        f'    <script type="application/ld+json">\n'
-        f"{json.dumps(graph, ensure_ascii=False, indent=2)}\n"
-        f"    </script>\n"
-    )
-    block = f"    {JSON_LD_MARKER}\n{script}"
-    if JSON_LD_MARKER in html_text:
-        pattern = re.compile(
-            rf"\s*{re.escape(JSON_LD_MARKER)}.*?</script>\s*",
-            re.DOTALL,
-        )
-        return pattern.sub("\n" + block, html_text, count=1)
-    return html_text.replace("</head>", block + "</head>", 1)
-
-
-def ensure_main_promo(html_text: str) -> str:
-    if "<!-- drivebit-main-promo-start -->" in html_text:
-        return html_text
-    if PROMO_CSS not in html_text:
-        html_text = html_text.replace(
-            'href="/vendor/drivebit-seo-text.css"/>',
-            'href="/vendor/drivebit-seo-text.css"/>\n' + PROMO_CSS,
-            1,
-        )
-    footer_idx = html_text.find('<div class="drivebit-footer-shell">')
-    if footer_idx < 0:
-        raise RuntimeError("drivebit-footer-shell marker not found")
-    generated_end = html_text.find(GENERATED_END)
-    if generated_end >= 0:
-        line_end = html_text.find("\n", generated_end)
-        insert_at = (line_end + 1) if line_end >= 0 else generated_end
-    else:
-        insert_at = footer_idx
-    block = MAIN_PROMO_FRAGMENT if MAIN_PROMO_FRAGMENT.endswith("\n") else MAIN_PROMO_FRAGMENT + "\n"
-    return html_text[:insert_at] + block + html_text[insert_at:]
-
-
 def ensure_compose_app_script(html_text: str) -> str:
     if 'src="/composeApp.js' in html_text:
         return html_text
@@ -362,10 +244,10 @@ def ensure_compose_app_script(html_text: str) -> str:
 
 
 def inject_generated_body(html_text: str, generated: str) -> str:
-    wrapped = f"\n{GENERATED_START}\n{generated}{GENERATED_END}\n\n"
+    wrapped = f"{GENERATED_START}\n{generated}{GENERATED_END}\n"
     if GENERATED_START in html_text:
         pattern = re.compile(
-            rf"\n?{re.escape(GENERATED_START)}.*?{re.escape(GENERATED_END)}\n?",
+            rf"{re.escape(GENERATED_START)}.*?{re.escape(GENERATED_END)}",
             re.DOTALL,
         )
         return pattern.sub(wrapped, html_text, count=1)
@@ -410,12 +292,9 @@ def main() -> int:
         nav = render_nav(blocks, path)
         cars_html = render_cars_shell(cars, f"Автомобили — {block.get('navLabel') or block.get('h2', '')}")
         generated = nav + cars_html
-        graph = build_json_ld(path, block, cars)
 
         text = html_path.read_text(encoding="utf-8")
         text = inject_generated_body(text, generated)
-        text = inject_json_ld(text, graph)
-        text = ensure_main_promo(text)
         text = ensure_compose_app_script(text)
         html_path.write_text(text, encoding="utf-8")
         print(f"OK {path} ({len(cars)} cars) -> {html_path.relative_to(ROOT)}")

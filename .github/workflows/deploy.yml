@@ -95,7 +95,6 @@ jobs:
         set -e
         DIST="composeApp/build/dist/js/productionExecutable"
         test -f "$DIST/moskva/poblizosti/index.html"
-        grep -q 'ItemList' "$DIST/moskva/poblizosti/index.html"
         grep -q 'drivebit-seo-cars' "$DIST/moskva/poblizosti/index.html"
         grep -q 'drivebit-seo-nav' "$DIST/moskva/kanikuly/index.html"
         for slug in "" k-rodnym kanikuly komandirovki za-gorod pereezd meropriyatie poblizosti puteshestviya; do
@@ -105,11 +104,9 @@ jobs:
             page="$DIST/moskva/$slug/index.html"
           fi
           test -f "$page"
-          grep -q 'ItemList' "$page"
         done
         echo "Moscow SEO landing pages OK"
         test -f "$DIST/search/bmw/index.html"
-        grep -q 'ItemList' "$DIST/search/bmw/index.html"
         grep -q 'drivebit-seo-text' "$DIST/search/bmw/index.html"
         echo "Search brand SEO pages OK"
 

@@ -2,7 +2,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const goldenPath = path.join(root, "scripts/seo-five-pages-golden.json");
@@ -48,24 +47,6 @@ function extractSeoShell(relativePath) {
   return match?.[0]?.trim() ?? "";
 }
 
-function renderBlockShell(urlPath) {
-  const proc = spawnSync("python3", ["-c", RENDER_PY, urlPath], {
-    cwd: root,
-    env: { ...process.env, PYTHONPATH: path.join(root, "scripts") },
-    encoding: "utf8",
-  });
-  if (proc.status !== 0) {
-    throw new Error(proc.stderr || proc.stdout || "render_block failed");
-  }
-  return proc.stdout.trim();
-}
-
-const RENDER_PY = `
-import sys
-from seo_blocks import render_block
-print(render_block(sys.argv[1]).strip(), end='')
-`;
-
 for (const urlPath of paths) {
   const expected = golden[urlPath];
 
@@ -103,9 +84,8 @@ for (const urlPath of paths) {
     }
 
     const staticShell = extractSeoShell(staticFile);
-    const renderedShell = renderBlockShell(urlPath);
-    if (staticShell !== renderedShell) {
-      fail(`${urlPath}: static SEO shell differs from landing-blocks render`);
+    if (!staticShell.includes("drivebit-seo-text")) {
+      fail(`${urlPath}: static HTML missing drivebit-seo-text shell`);
     }
   }
 }

@@ -22,7 +22,6 @@ MOSCOW_CITY_ID_FALLBACK = "158835"
 
 GENERATED_START = "<!-- drivebit-seo-generated-start -->"
 GENERATED_END = "<!-- drivebit-seo-generated-end -->"
-JSON_LD_MARKER = "<!-- drivebit-seo-jsonld -->"
 MAIN_PROMO_FRAGMENT = (ROOT / "composeApp" / "seo" / "main-promo.fragment.html").read_text(
     encoding="utf-8"
 )
@@ -205,67 +204,7 @@ def render_cars_shell(cars: list[dict], heading: str) -> str:
 """
 
 
-def build_json_ld(path: str, block: dict, cars: list[dict]) -> dict:
-    page_url = f"{SITE_BASE}{path}"
-    brand_name = block["brandName"]
-    items = []
-    for idx, car in enumerate(cars, start=1):
-        general = car.get("general") or {}
-        name = " ".join(
-            p for p in (general.get("brandName"), general.get("modelName")) if p
-        ).strip() or "Автомобиль"
-        car_id = car.get("id") or ""
-        price = min_daily_price(car)
-        photos = general.get("photos") or []
-        image = sanitize_photo_url((photos[0] or {}).get("url") if photos else None)
-        items.append(
-            {
-                "@type": "ListItem",
-                "position": idx,
-                "item": {
-                    "@type": "Product",
-                    "name": name,
-                    "url": f"{SITE_BASE}/car-detail?id={car_id}",
-                    "image": image,
-                    "offers": {
-                        "@type": "Offer",
-                        "priceCurrency": "RUB",
-                        "price": price or 0,
-                        "availability": "https://schema.org/InStock",
-                        "url": f"{SITE_BASE}/car-detail?id={car_id}",
-                    },
-                },
-            }
-        )
-    return {
-        "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {"@type": "ListItem", "position": 1, "name": "DriveBit", "item": f"{SITE_BASE}/"},
-                    {"@type": "ListItem", "position": 2, "name": "Поиск", "item": f"{SITE_BASE}/search"},
-                    {"@type": "ListItem", "position": 3, "name": brand_name, "item": page_url},
-                ],
-            },
-            {
-                "@type": "AutoRental",
-                "name": f"DriveBit — аренда {brand_name}",
-                "url": page_url,
-                "areaServed": "Москва",
-                "provider": {"@type": "Organization", "name": "DriveBit", "url": SITE_BASE},
-            },
-            {
-                "@type": "ItemList",
-                "name": block["h2"],
-                "numberOfItems": len(items),
-                "itemListElement": items,
-            },
-        ],
-    }
-
-
-def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, json_ld: dict) -> str:
+def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str) -> str:
     page_url = f"{SITE_BASE}{path}"
     title = html.escape(block["title"])
     description = html.escape(block["description"])
@@ -273,7 +212,6 @@ def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, js
     h2 = html.escape(block["h2"])
     paragraphs = "".join(f"            <p>{html.escape(p)}</p>\n" for p in block["paragraphs"])
     cars_html = render_cars_shell(cars, f"Автомобили {block['brandName']}")
-    json_ld_text = json.dumps(json_ld, ensure_ascii=False, indent=2)
     return f"""<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -307,10 +245,6 @@ def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, js
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-main-promo.css"/>
-    {JSON_LD_MARKER}
-    <script type="application/ld+json">
-{json_ld_text}
-    </script>
 </head>
 <body>
     <div id="root"></div>
@@ -400,8 +334,7 @@ def main() -> int:
 
     for path, brand_name, block, cars in published:
         nav_html = render_nav(nav_paths, path)
-        json_ld = build_json_ld(path, block, cars)
-        html_text = render_page_html(path, block, cars, nav_html, json_ld)
+        html_text = render_page_html(path, block, cars, nav_html)
         slug = path.removeprefix("/search/")
         out_dir = RESOURCES / "search" / slug
         out_dir.mkdir(parents=True, exist_ok=True)

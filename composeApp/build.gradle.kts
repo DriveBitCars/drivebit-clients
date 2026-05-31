@@ -1,7 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-import groovy.json.JsonSlurper
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
@@ -229,7 +227,6 @@ tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
 }
 
 tasks.register<Exec>("generateMoskvaSeoSnapshots") {
-    dependsOn("syncSeoLandingHtml")
     commandLine("python3", rootProject.file("scripts/generate_moskva_seo.py").absolutePath)
     environment("DRIVEBIT_API_BASE", "http://157.22.252.70:5000")
 }
@@ -250,7 +247,6 @@ val needsCarDetailDevBundle =
     }
 
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
-    dependsOn("generateAllSeoSnapshots")
     if (needsCarDetailDevBundle) {
         dependsOn(":carDetailApp:jsBrowserDevelopmentWebpack")
     } else {
@@ -277,92 +273,4 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
 
 tasks.named("jsBrowserDevelopmentRun").configure {
     dependsOn(":carDetailApp:jsBrowserDevelopmentWebpack")
-}
-
-val seoLandingHtmlTargets =
-    mapOf(
-        "/" to rootProject.layout.projectDirectory.file("index.html"),
-        "/moskva" to layout.projectDirectory.file("src/jsMain/resources/moskva/index.html"),
-        "/moskva/k-rodnym" to layout.projectDirectory.file("src/jsMain/resources/moskva/k-rodnym/index.html"),
-        "/moskva/kanikuly" to layout.projectDirectory.file("src/jsMain/resources/moskva/kanikuly/index.html"),
-        "/moskva/komandirovki" to layout.projectDirectory.file("src/jsMain/resources/moskva/komandirovki/index.html"),
-        "/moskva/meropriyatie" to layout.projectDirectory.file("src/jsMain/resources/moskva/meropriyatie/index.html"),
-        "/moskva/pereezd" to layout.projectDirectory.file("src/jsMain/resources/moskva/pereezd/index.html"),
-        "/moskva/poblizosti" to layout.projectDirectory.file("src/jsMain/resources/moskva/poblizosti/index.html"),
-        "/moskva/puteshestviya" to layout.projectDirectory.file("src/jsMain/resources/moskva/puteshestviya/index.html"),
-        "/moskva/za-gorod" to layout.projectDirectory.file("src/jsMain/resources/moskva/za-gorod/index.html"),
-    )
-
-tasks.register("syncSeoLandingHtml") {
-    val blocksFile = layout.projectDirectory.file("seo/landing-blocks.json")
-    inputs.file(blocksFile)
-    seoLandingHtmlTargets.values.forEach { outputs.file(it) }
-
-    doLast {
-        val blocks =
-            JsonSlurper().parse(blocksFile.asFile) as Map<String, Map<String, Any>>
-        seoLandingHtmlTargets.forEach { (path, htmlFile) ->
-            val block =
-                blocks[path]
-                    ?: error("Missing SEO block for path $path in ${blocksFile.asFile}")
-            val aria = block["ariaLabel"] as String
-            val h2 = block["h2"] as String
-            @Suppress("UNCHECKED_CAST")
-            val paragraphs = block["paragraphs"] as List<String>
-            val shell =
-                buildString {
-                    append("    <div class=\"drivebit-seo-shell\">\n")
-                    append("        <section class=\"drivebit-seo-text\" aria-label=\"")
-                    append(aria.replace("\"", "&quot;"))
-                    append("\">\n")
-                    append("            <h2>")
-                    append(h2)
-                    append("</h2>\n")
-                    paragraphs.forEach { paragraph ->
-                        append("            <p>")
-                        append(paragraph)
-                        append("</p>\n")
-                    }
-                    append("        </section>\n")
-                    append("    </div>\n\n")
-                }
-
-            val file = htmlFile.asFile
-            var text = file.readText(Charsets.UTF_8)
-            val shellStart = text.indexOf("<motion.div class=\"drivebit-seo-shell\">")
-                .takeIf { it >= 0 }
-                ?: text.indexOf("<div class=\"drivebit-seo-shell\">")
-            if (shellStart >= 0) {
-                val shellEnd = text.indexOf("</div>", shellStart)
-                val shellCloseEnd =
-                    if (shellEnd >= 0) {
-                        text.indexOf("\n", shellEnd).let { if (it >= 0) it + 1 else shellEnd + 6 }
-                    } else {
-                        -1
-                    }
-                if (shellCloseEnd < 0) {
-                    error("SEO shell closing tag not found in ${file.path}")
-                }
-                text = text.substring(0, shellStart) + text.substring(shellCloseEnd)
-            }
-
-            val promoEnd = text.indexOf("<!-- drivebit-main-promo-end -->")
-            val insertAt =
-                if (promoEnd >= 0) {
-                    text.indexOf('\n', promoEnd).let { if (it >= 0) it + 1 else promoEnd }
-                } else {
-                    val generatedStart = text.indexOf("<!-- drivebit-seo-generated-start -->")
-                    val footerStart = text.indexOf("<div class=\"drivebit-footer-shell\">")
-                    when {
-                        generatedStart >= 0 -> generatedStart
-                        footerStart >= 0 -> footerStart
-                        else -> -1
-                    }
-                }
-            if (insertAt < 0) {
-                error("SEO shell insert markers not found in ${file.path}")
-            }
-            file.writeText(text.substring(0, insertAt) + shell + text.substring(insertAt), Charsets.UTF_8)
-        }
-    }
 }

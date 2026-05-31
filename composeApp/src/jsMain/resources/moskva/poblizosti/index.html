@@ -34,259 +34,6 @@
     <link rel="stylesheet" href="/vendor/drivebit-main-promo.css"/>
 
     <script src="/vendor/leaflet/leaflet.js"></script>
-    <!-- drivebit-seo-jsonld -->
-    <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "DriveBit",
-          "item": "https://drivebit.ru/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Москва",
-          "item": "https://drivebit.ru/moskva"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Поблизости",
-          "item": "https://drivebit.ru/moskva/poblizosti"
-        }
-      ]
-    },
-    {
-      "@type": "AutoRental",
-      "name": "DriveBit — Поблизости",
-      "url": "https://drivebit.ru/moskva/poblizosti",
-      "areaServed": "Москва",
-      "provider": {
-        "@type": "Organization",
-        "name": "DriveBit",
-        "url": "https://drivebit.ru"
-      }
-    },
-    {
-      "@type": "ItemList",
-      "name": "Аренда авто на карте в Москве",
-      "numberOfItems": 12,
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "item": {
-            "@type": "Product",
-            "name": "Volkswagen Polo",
-            "url": "https://drivebit.ru/car-detail?id=b9558994-c4d2-4f57-b23c-db1daad30cd7",
-            "image": "https://drivebit.ru/publicbct/cars/b9558994-c4d2-4f57-b23c-db1daad30cd7/748f5266-5246-43fe-94e2-770d878ebb30_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 2000,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=b9558994-c4d2-4f57-b23c-db1daad30cd7"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "item": {
-            "@type": "Product",
-            "name": "Renault Duster",
-            "url": "https://drivebit.ru/car-detail?id=83342dab-a9b8-48d7-bcb9-6c68de0045fc",
-            "image": "https://drivebit.ru/publicbct/cars/83342dab-a9b8-48d7-bcb9-6c68de0045fc/2c0bda8f-eb8f-4d16-ab79-a2a3730b7877_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 1990,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=83342dab-a9b8-48d7-bcb9-6c68de0045fc"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "item": {
-            "@type": "Product",
-            "name": "Volvo S90",
-            "url": "https://drivebit.ru/car-detail?id=4997bda2-1522-429b-ab4b-e1ca907f32c0",
-            "image": "https://drivebit.ru/publicbct/cars/4997bda2-1522-429b-ab4b-e1ca907f32c0/1797b2a5-08f7-4c78-a2ff-e1402eb5a81e_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 7920,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=4997bda2-1522-429b-ab4b-e1ca907f32c0"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
-          "item": {
-            "@type": "Product",
-            "name": "Exeed TXL",
-            "url": "https://drivebit.ru/car-detail?id=98d039f7-2cb1-480f-a018-ad0c8325eb01",
-            "image": "https://drivebit.ru/publicbct/cars/98d039f7-2cb1-480f-a018-ad0c8325eb01/84dbb603-ba77-4dc6-ba73-6779caa714c1_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 7920,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=98d039f7-2cb1-480f-a018-ad0c8325eb01"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 5,
-          "item": {
-            "@type": "Product",
-            "name": "Lexus CT",
-            "url": "https://drivebit.ru/car-detail?id=3efed342-353d-45a6-831b-6cb784eab636",
-            "image": "https://drivebit.ru/publicbct/cars/3efed342-353d-45a6-831b-6cb784eab636/682d35ba-5e5c-490d-99ff-1b92b16c030a_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 4400,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=3efed342-353d-45a6-831b-6cb784eab636"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 6,
-          "item": {
-            "@type": "Product",
-            "name": "Kia Optima",
-            "url": "https://drivebit.ru/car-detail?id=a6d092fa-cbc6-4576-90dc-080dcfec6f3b",
-            "image": "https://drivebit.ru/publicbct/cars/a6d092fa-cbc6-4576-90dc-080dcfec6f3b/682a3167-8525-41b3-b644-bf2556fdf911_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 4800,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=a6d092fa-cbc6-4576-90dc-080dcfec6f3b"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 7,
-          "item": {
-            "@type": "Product",
-            "name": "Volvo S90",
-            "url": "https://drivebit.ru/car-detail?id=21a3beae-e643-4ac8-990a-e2694cf76f7c",
-            "image": "https://drivebit.ru/publicbct/cars/21a3beae-e643-4ac8-990a-e2694cf76f7c/383e9818-8c50-418c-a661-f24de696b89f_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 7920,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=21a3beae-e643-4ac8-990a-e2694cf76f7c"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 8,
-          "item": {
-            "@type": "Product",
-            "name": "Kia Optima",
-            "url": "https://drivebit.ru/car-detail?id=68a1c688-57d3-4bc5-a15e-f03ad003965c",
-            "image": "https://drivebit.ru/publicbct/cars/68a1c688-57d3-4bc5-a15e-f03ad003965c/4e75b105-78d0-4d18-98b1-33349a92eb68_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 4800,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=68a1c688-57d3-4bc5-a15e-f03ad003965c"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 9,
-          "item": {
-            "@type": "Product",
-            "name": "Kia Sorento",
-            "url": "https://drivebit.ru/car-detail?id=b35910fa-2472-4c24-bdb9-25fd26a50c77",
-            "image": "https://drivebit.ru/publicbct/cars/b35910fa-2472-4c24-bdb9-25fd26a50c77/8137f929-0424-42ca-b248-4858f718fdd4_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 5920,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=b35910fa-2472-4c24-bdb9-25fd26a50c77"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 10,
-          "item": {
-            "@type": "Product",
-            "name": "Chery Arrizo 8",
-            "url": "https://drivebit.ru/car-detail?id=7002d1e1-3af1-47b3-a2c3-65df03082328",
-            "image": "https://drivebit.ru/publicbct/cars/7002d1e1-3af1-47b3-a2c3-65df03082328/92df8ea1-7c16-4208-81f9-4ca2ef51437f_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 6400,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=7002d1e1-3af1-47b3-a2c3-65df03082328"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 11,
-          "item": {
-            "@type": "Product",
-            "name": "BMW 3 серии",
-            "url": "https://drivebit.ru/car-detail?id=686f2766-2b23-4906-93d9-cce49fdb5232",
-            "image": "https://drivebit.ru/publicbct/cars/686f2766-2b23-4906-93d9-cce49fdb5232/b5ba47fe-922d-43c9-b53b-6f86039c6f5d_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 7200,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=686f2766-2b23-4906-93d9-cce49fdb5232"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 12,
-          "item": {
-            "@type": "Product",
-            "name": "Exeed TXL",
-            "url": "https://drivebit.ru/car-detail?id=6ebd4b91-5948-4cb9-8644-687a1dc05aec",
-            "image": "https://drivebit.ru/publicbct/cars/6ebd4b91-5948-4cb9-8644-687a1dc05aec/3e6edd2a-068d-4500-9eed-8e076cf30d16_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 7920,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=6ebd4b91-5948-4cb9-8644-687a1dc05aec"
-            }
-          }
-        }
-      ]
-    }
-  ]
-}
-    </script>
 </head>
 <body>
 
@@ -408,25 +155,7 @@
     </div>
 <!-- drivebit-seo-generated-end -->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!-- drivebit-main-promo-start -->
+<!-- drivebit-main-promo-start -->
     <div class="drivebit-main-promo" aria-label="Преимущества DriveBit">
         <section class="drivebit-promo-card drivebit-promo-card--why">
             <div class="drivebit-promo-why-layout">
@@ -480,7 +209,7 @@
         </section>
     </div>
     <!-- drivebit-main-promo-end -->
-    <div class="drivebit-seo-shell">
+<div class="drivebit-seo-shell">
         <section class="drivebit-seo-text" aria-label="Аренда авто на карте в Москве">
             <h2>Аренда авто на карте в Москве</h2>
             <p>Ищете машину рядом с домом или офисом? На DriveBit доступны запросы «аренда авто на карте», «аренда автомобиля на карте», «аренда авто поблизости» и «арендовать автомобиль у дома» в Москве.</p>
@@ -488,6 +217,9 @@
         </section>
     </div>
 
+    
+    
+    
     
     
     
@@ -550,7 +282,8 @@
 
 
 
-        <div class="drivebit-footer-shell">
+
+<div class="drivebit-footer-shell">
         <footer class="drivebit-site-footer">
             <a class="drivebit-footer-phone" id="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
             <div class="drivebit-footer-bottom">
