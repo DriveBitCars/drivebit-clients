@@ -92,6 +92,21 @@ external interface TileLayer {
     fun addTo(map: Map): TileLayer
 }
 
+private var leafletMarkerIconsConfigured = false
+
+private fun configureLeafletMarkerIcons() {
+    if (leafletMarkerIconsConfigured || !js("typeof L !== 'undefined'").unsafeCast<Boolean>()) {
+        return
+    }
+    val iconOptions = js("{}").unsafeCast<Json>()
+    iconOptions.asDynamic().iconUrl = "/vendor/leaflet/images/marker-icon.png"
+    iconOptions.asDynamic().iconRetinaUrl = "/vendor/leaflet/images/marker-icon-2x.png"
+    iconOptions.asDynamic().shadowUrl = "/vendor/leaflet/images/marker-shadow.png"
+    val iconDefault = js("L.Icon.Default").unsafeCast<dynamic>()
+    iconDefault.asDynamic().mergeOptions(iconOptions)
+    leafletMarkerIconsConfigured = true
+}
+
 @Composable
 actual fun MapView(
     modifier: Modifier,
@@ -120,6 +135,7 @@ actual fun MapView(
     SideEffect {
         val container = document.getElementById(mapId) as? HTMLElement
         if (container != null && js("typeof L !== 'undefined'").unsafeCast<Boolean>()) {
+            configureLeafletMarkerIcons()
             val existingMap = mapContainer["map"] as? Map
             if (existingMap == null) {
                 val mapOptions = js("{}").unsafeCast<Json>()

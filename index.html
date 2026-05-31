@@ -47,16 +47,9 @@
                     title: "Контакты - DriveBit",
                     description: "Контактные данные и реквизиты DriveBit. Аренда автомобилей от собственников.",
                     path: "/contacts"
-                },
-                "/car-detail": {
-                    title: "Карточка автомобиля - DriveBit",
-                    description: "Подробная информация об автомобиле для аренды на DriveBit.",
-                    path: "/car-detail",
-                    noindex: true
                 }
             };
             var path = location.pathname.replace(/\/$/, "") || "/";
-            if (path.indexOf("/car-detail") === 0) path = "/car-detail";
             var page = pages[path];
             if (!page && window.drivebitCityPageMeta) {
                 page = window.drivebitCityPageMeta(path);
@@ -614,6 +607,20 @@
     <div id="root"></div>
 
                                                                                                                                         
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
