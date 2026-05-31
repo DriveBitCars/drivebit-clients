@@ -302,7 +302,7 @@ def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, js
     <link rel="icon" type="image/svg+xml" href="/images/logos/turo_logo.svg">
     <link rel="alternate icon" href="/images/logos/turo_logo.svg">
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
-    <link rel="preload" href="/searchApp.js?v=4" as="script">
+    <link rel="preload" href="/composeApp.js?v=4" as="script">
     <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
@@ -336,7 +336,7 @@ def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, js
         </footer>
     </div>
 
-    <script type="application/javascript" src="/searchApp.js?v=4"></script>
+    <script type="application/javascript" src="/composeApp.js?v=4"></script>
 </body>
 </html>
 """
