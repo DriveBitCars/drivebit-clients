@@ -302,22 +302,41 @@ tasks.register("syncSeoLandingHtml") {
                 }
 
             val file = htmlFile.asFile
-            val text = file.readText(Charsets.UTF_8)
-            val start = text.indexOf("<motion.div class=\"drivebit-seo-shell\">")
+            var text = file.readText(Charsets.UTF_8)
+            val shellStart = text.indexOf("<motion.div class=\"drivebit-seo-shell\">")
                 .takeIf { it >= 0 }
                 ?: text.indexOf("<div class=\"drivebit-seo-shell\">")
-            val generatedStart = text.indexOf("<!-- drivebit-seo-generated-start -->", start)
-            val footerStart = text.indexOf("<div class=\"drivebit-footer-shell\">", start)
-            val replaceEnd =
-                when {
-                    generatedStart >= 0 -> generatedStart
-                    footerStart >= 0 -> footerStart
-                    else -> -1
+            if (shellStart >= 0) {
+                val shellEnd = text.indexOf("</div>", shellStart)
+                val shellCloseEnd =
+                    if (shellEnd >= 0) {
+                        text.indexOf("\n", shellEnd).let { if (it >= 0) it + 1 else shellEnd + 6 }
+                    } else {
+                        -1
+                    }
+                if (shellCloseEnd < 0) {
+                    error("SEO shell closing tag not found in ${file.path}")
                 }
-            if (start < 0 || replaceEnd < 0) {
-                error("SEO shell markers not found in ${file.path}")
+                text = text.substring(0, shellStart) + text.substring(shellCloseEnd)
             }
-            file.writeText(text.substring(0, start) + shell + text.substring(replaceEnd), Charsets.UTF_8)
+
+            val promoEnd = text.indexOf("<!-- drivebit-main-promo-end -->")
+            val insertAt =
+                if (promoEnd >= 0) {
+                    text.indexOf('\n', promoEnd).let { if (it >= 0) it + 1 else promoEnd }
+                } else {
+                    val generatedStart = text.indexOf("<!-- drivebit-seo-generated-start -->")
+                    val footerStart = text.indexOf("<div class=\"drivebit-footer-shell\">")
+                    when {
+                        generatedStart >= 0 -> generatedStart
+                        footerStart >= 0 -> footerStart
+                        else -> -1
+                    }
+                }
+            if (insertAt < 0) {
+                error("SEO shell insert markers not found in ${file.path}")
+            }
+            file.writeText(text.substring(0, insertAt) + shell + text.substring(insertAt), Charsets.UTF_8)
         }
     }
 }

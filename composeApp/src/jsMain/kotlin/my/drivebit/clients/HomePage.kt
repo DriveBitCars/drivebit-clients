@@ -11,7 +11,6 @@ import my.drivebit.components.AppWithHeader
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.FilterButtonsRow
 import my.drivebit.components.HeroBanner
-import my.drivebit.components.MainPromoSections
 import my.drivebit.components.NearbyMapListSwitcher
 import my.drivebit.components.NearbyRadiusSelector
 import my.drivebit.components.PaginationBar
@@ -290,7 +289,6 @@ fun HomePage() {
                 }
             }
         }
-        MainPromoSections()
     }
 }
 
