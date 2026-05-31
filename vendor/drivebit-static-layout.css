@@ -48,9 +48,3 @@ body {
 .drivebit-footer-shell {
     flex-shrink: 0;
 }
-
-/* Hide static SEO duplicates once Compose has mounted in #root */
-body:has(#root:not(:empty)) .drivebit-seo-nav,
-body:has(#root:not(:empty)) .drivebit-seo-cars {
-    display: none;
-}

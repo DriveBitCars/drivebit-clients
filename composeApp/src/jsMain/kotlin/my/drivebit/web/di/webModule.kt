@@ -1,6 +1,5 @@
 package my.drivebit.web.di
 
-import my.drivebit.maps.di.mapsModule
 import my.drivebit.navigation.NavigationState
 import my.drivebit.network.di.networkModule
 import my.drivebit.network.services.Dictionary
@@ -11,7 +10,6 @@ import org.koin.dsl.module
 val webModule =
     module {
         includes(networkModule)
-        includes(mapsModule)
         single { NavigationState() }
         single { CitySlugResolver(get<Dictionary>()) }
         single { BrandSlugResolver(get<Dictionary>()) }

@@ -1,6 +1,7 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
@@ -27,7 +28,6 @@ import my.drivebit.screens.DriveTypeSelectionPage
 import my.drivebit.screens.EditNamePage
 import my.drivebit.screens.EngineTypeSelectionPage
 import my.drivebit.screens.EngineVolumeInputPage
-// import my.drivebit.screens.HourlyRateInputPage
 import my.drivebit.screens.LicensePlateInputPage
 import my.drivebit.screens.LeaveReviewPage
 import my.drivebit.screens.ListYourCarPage
@@ -49,7 +49,6 @@ import my.drivebit.components.CookieConsentBanner
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.ProductionYearInputPage
 import my.drivebit.screens.ProfilePage
-import my.drivebit.screens.SearchPage
 import my.drivebit.screens.SeatsCountInputPage
 import my.drivebit.screens.DescriptionInputPage
 import my.drivebit.screens.TrunkSizeSelectionPage
@@ -59,6 +58,7 @@ import my.drivebit.viewmodels.di.commonViewModelsModule
 import my.drivebit.web.di.webModule
 import my.drivebit.web.homePathHref
 import my.drivebit.web.login.loginWebModule
+import my.drivebit.web.parseCitySlugFromPath
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
@@ -234,13 +234,6 @@ actual fun App() {
                         },
                     )
                 }
-                // currentPath == "/win-code-input" -> {
-                //     WinCodeInputPage(
-                //         onWinCodeEntered = {
-                //             window.location.href = "/car-brand-selection"
-                //         },
-                //     )
-                // }
                 currentPath.startsWith("/car-brand-selection") -> {
                     CarBrandSelectionPage(
                         onBrandSelected = { brandId ->
@@ -332,13 +325,6 @@ actual fun App() {
                         },
                     )
                 }
-                // currentPath == "/hourly-rate-input" -> {
-                //     HourlyRateInputPage(
-                //         onHourlyRateEntered = {
-                //             window.location.href = "/daily-rate-input"
-                //         },
-                //     )
-                // }
                 currentPath.startsWith("/daily-rate-input") -> {
                     DailyRateInputPage(
                         onNavigateToLicensePlate = {
@@ -369,13 +355,20 @@ actual fun App() {
                         },
                     )
                 }
-                currentPath.startsWith("/search") -> {
-                    SearchPage()
-                }
                 else -> {
-                    HomePage()
+                    when {
+                        currentPath.startsWith("/search") -> RedirectToIsolatedApp()
+                        parseCitySlugFromPath(currentPath) != null -> RedirectToIsolatedApp()
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RedirectToIsolatedApp() {
+    LaunchedEffect(Unit) {
+        window.location.replace(window.location.pathname + window.location.search)
     }
 }

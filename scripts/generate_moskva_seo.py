@@ -27,6 +27,12 @@ COMPOSE_APP_PRELOAD = '    <link rel="preload" href="/composeApp.js?v=4" as="scr
 COMPOSE_APP_SCRIPT = (
     '    <script type="application/javascript" src="/composeApp.js?v=4"></script>\n'
 )
+NEARBY_APP_PRELOAD = '    <link rel="preload" href="/nearbyApp.js?v=4" as="script">\n'
+NEARBY_APP_SCRIPT = (
+    '    <script type="application/javascript" src="/nearbyApp.js?v=4"></script>\n'
+)
+LEAFLET_CSS = '    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css"/>\n'
+LEAFLET_SCRIPT = '    <script src="/vendor/leaflet/leaflet.js"></script>\n'
 MAIN_PROMO_FRAGMENT = (ROOT / "composeApp" / "seo" / "main-promo.fragment.html").read_text(
     encoding="utf-8"
 )
@@ -351,6 +357,50 @@ def ensure_main_promo(html_text: str) -> str:
     return html_text[:insert_at] + block + html_text[insert_at:]
 
 
+def strip_leaflet(html_text: str) -> str:
+    html_text = re.sub(
+        r'\s*<link rel="stylesheet" href="/vendor/leaflet/[^"]+"/>?\s*',
+        "\n",
+        html_text,
+    )
+    html_text = re.sub(
+        r'\s*<script src="/vendor/leaflet/[^"]+"></script>\s*',
+        "\n",
+        html_text,
+    )
+    return html_text
+
+
+def ensure_leaflet(html_text: str) -> str:
+    has_css = "/vendor/leaflet/leaflet.css" in html_text
+    has_js = 'src="/vendor/leaflet/leaflet.js"' in html_text
+    if has_css and has_js:
+        return html_text
+    anchor = '    <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>'
+    if not has_css:
+        if anchor in html_text:
+            html_text = html_text.replace(anchor, LEAFLET_CSS + anchor, 1)
+        else:
+            html_text = html_text.replace("</head>", LEAFLET_CSS + "</head>", 1)
+    if not has_js:
+        html_text = html_text.replace("</head>", LEAFLET_SCRIPT + "</head>", 1)
+    return html_text
+
+
+def strip_compose_app_script(html_text: str) -> str:
+    html_text = re.sub(
+        r'\s*<link rel="preload" href="/composeApp\.js[^"]*" as="script">\s*',
+        "\n",
+        html_text,
+    )
+    html_text = re.sub(
+        r'\s*<script type="application/javascript" src="/composeApp\.js[^"]*"[^>]*>\s*</script>\s*',
+        "\n",
+        html_text,
+    )
+    return html_text
+
+
 def ensure_compose_app_script(html_text: str) -> str:
     if 'src="/composeApp.js' in html_text:
         return html_text
@@ -358,6 +408,17 @@ def ensure_compose_app_script(html_text: str) -> str:
         html_text = html_text.replace("</head>", COMPOSE_APP_PRELOAD + "</head>", 1)
     if "</body>" in html_text:
         return html_text.replace("</body>", COMPOSE_APP_SCRIPT + "</body>", 1)
+    raise RuntimeError("</body> not found")
+
+
+def ensure_nearby_app_script(html_text: str) -> str:
+    html_text = strip_compose_app_script(html_text)
+    if 'src="/nearbyApp.js' in html_text:
+        return html_text
+    if NEARBY_APP_PRELOAD.strip() not in html_text:
+        html_text = html_text.replace("</head>", NEARBY_APP_PRELOAD + "</head>", 1)
+    if "</body>" in html_text:
+        return html_text.replace("</body>", NEARBY_APP_SCRIPT + "</body>", 1)
     raise RuntimeError("</body> not found")
 
 
@@ -416,7 +477,13 @@ def main() -> int:
         text = inject_generated_body(text, generated)
         text = inject_json_ld(text, graph)
         text = ensure_main_promo(text)
-        text = ensure_compose_app_script(text)
+        if path == "/moskva/poblizosti":
+            text = strip_compose_app_script(text)
+            text = ensure_leaflet(text)
+            text = ensure_nearby_app_script(text)
+        else:
+            text = strip_leaflet(text)
+            text = strip_compose_app_script(text)
         html_path.write_text(text, encoding="utf-8")
         print(f"OK {path} ({len(cars)} cars) -> {html_path.relative_to(ROOT)}")
 
