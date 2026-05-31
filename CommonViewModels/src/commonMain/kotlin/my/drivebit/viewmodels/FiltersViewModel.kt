@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Dictionary
@@ -65,15 +64,6 @@ class FiltersViewModel(
 
     init {
         loadFilters()
-        loadSelectedFilter()
-    }
-
-    private fun loadSelectedFilter() {
-        viewModelScope.launch {
-            val shortName = currentFiltersRepository.currentTaskShortName.first()
-            val selectedFilter = shortName ?: "Все"
-            _state.update { it.copy(selected = selectedFilter) }
-        }
     }
 
     private fun loadFilters() {

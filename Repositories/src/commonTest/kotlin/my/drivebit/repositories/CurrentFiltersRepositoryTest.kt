@@ -123,7 +123,7 @@ class CurrentFiltersRepositoryTest {
         }
 
     @Test
-    fun `should persist currentTaskShortName across repository instances`() =
+    fun `should not persist currentTaskShortName across repository instances`() =
         runTest {
             val settings = InMemorySettings()
             val firstRepository = CurrentFiltersRepositoryImpl(settings)
@@ -134,7 +134,7 @@ class CurrentFiltersRepositoryTest {
             val secondRepository = CurrentFiltersRepositoryImpl(settings)
             val result = secondRepository.currentTaskShortName.first()
 
-            assertEquals(testShortName, result)
+            assertNull(result)
         }
 
     @Test
