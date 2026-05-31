@@ -1,0 +1,221 @@
+.drivebit-main-promo {
+    max-width: 1200px;
+    width: 100%;
+    margin: 20px auto 0;
+    padding: 0 40px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.drivebit-promo-card {
+    width: 100%;
+    padding: 24px 32px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+}
+
+.drivebit-promo-card--why {
+    background: #e3f2fd;
+}
+
+.drivebit-promo-card--earn {
+    background: #ffffff;
+}
+
+.drivebit-promo-why-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    align-items: stretch;
+}
+
+.drivebit-promo-why-left {
+    flex: 1;
+    min-width: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.drivebit-promo-heading-title {
+    display: block;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #000;
+    margin: 0 0 100px;
+}
+
+.drivebit-promo-heading-subtitle {
+    display: block;
+    font-size: 24px;
+    line-height: 1.35;
+    color: #000;
+    margin: 0;
+}
+
+.drivebit-promo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 20px;
+    background: #2962ff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-decoration: none;
+    cursor: pointer;
+    width: 292px;
+    height: 90px;
+    max-width: 100%;
+}
+
+.drivebit-promo-advantages {
+    flex: 2;
+    min-width: 250px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 68px;
+    column-gap: 40px;
+}
+
+.drivebit-promo-chip {
+    height: 150px;
+    width: 100%;
+    max-width: 330px;
+    perspective: 1000px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.drivebit-promo-chip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+}
+
+.drivebit-promo-chip:hover .drivebit-promo-chip-inner,
+.drivebit-promo-chip:focus-within .drivebit-promo-chip-inner {
+    transform: rotateY(180deg);
+}
+
+.drivebit-promo-chip-face {
+    position: absolute;
+    inset: 0;
+    padding: 14px 18px;
+    border-radius: 20px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.drivebit-promo-chip-face--front {
+    background: #09052b;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.drivebit-promo-chip-face--back {
+    background: #fff;
+    color: #000;
+    font-size: 14px;
+    line-height: 1.4;
+    transform: rotateY(180deg);
+    overflow-y: auto;
+}
+
+.drivebit-promo-earn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.drivebit-promo-earn-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #000;
+}
+
+.drivebit-promo-earn-text {
+    margin: 0;
+    max-width: 480px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #6b7280;
+}
+
+.drivebit-promo-earn .drivebit-promo-btn {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 280px;
+}
+
+@media (max-width: 768px) {
+    .drivebit-main-promo {
+        padding: 0 20px;
+    }
+
+    .drivebit-promo-card {
+        padding: 16px 8px;
+    }
+
+    .drivebit-promo-why-layout {
+        flex-direction: column;
+    }
+
+    .drivebit-promo-heading-title {
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+
+    .drivebit-promo-heading-subtitle {
+        font-size: 20px;
+    }
+
+    .drivebit-promo-btn {
+        width: 100%;
+        height: 72px;
+        font-size: 14px;
+    }
+
+    .drivebit-promo-advantages {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 0;
+    }
+
+    .drivebit-promo-chip {
+        height: 120px;
+        max-width: none;
+    }
+
+    .drivebit-promo-chip-face--front {
+        font-size: 18px;
+    }
+
+    .drivebit-promo-earn-title {
+        font-size: 20px;
+    }
+}
