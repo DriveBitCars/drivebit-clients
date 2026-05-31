@@ -8,12 +8,20 @@ class NavigationController(
     fun getCurrentPath(): String = window.location.pathname
 
     fun navigateTo(path: String) {
+        if (shouldLeaveCarDetailApp(path)) {
+            window.location.href = path
+            return
+        }
         window.history.pushState(null, "", path)
         // Query lives in location.search; pathname-only avoids city routing misparsing "/search?..." as a slug.
         navigationState.updatePath(window.location.pathname)
     }
 
     fun replacePath(path: String) {
+        if (shouldLeaveCarDetailApp(path)) {
+            window.location.replace(path)
+            return
+        }
         window.history.replaceState(null, "", path)
         navigationState.updatePath(window.location.pathname)
     }
@@ -25,4 +33,12 @@ class NavigationController(
     fun goForward() {
         window.history.forward()
     }
+}
+
+private fun isCarDetailAppPath(path: String): Boolean =
+    path.startsWith("/car-detail") || path.startsWith("/car-photos-gallery")
+
+private fun shouldLeaveCarDetailApp(targetPath: String): Boolean {
+    val currentPath = window.location.pathname
+    return isCarDetailAppPath(currentPath) && !isCarDetailAppPath(targetPath)
 }

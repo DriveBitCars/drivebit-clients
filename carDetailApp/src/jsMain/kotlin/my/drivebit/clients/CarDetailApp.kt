@@ -1,6 +1,7 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.components.CookieConsentBanner
 import my.drivebit.navigation.Navigation
@@ -35,9 +36,16 @@ fun CarDetailApp() {
                     CarDetailPage()
                 }
                 else -> {
-                    window.location.href = "/"
+                    RedirectToMainApp(currentPath)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RedirectToMainApp(currentPath: String) {
+    LaunchedEffect(currentPath) {
+        window.location.href = "/"
     }
 }

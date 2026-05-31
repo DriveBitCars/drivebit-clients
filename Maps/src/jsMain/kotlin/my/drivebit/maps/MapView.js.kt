@@ -42,6 +42,8 @@ external object Leaflet {
         urlTemplate: String,
         options: Json = definedExternally,
     ): TileLayer
+
+    fun icon(options: Json): dynamic
 }
 
 external interface Map {
@@ -94,14 +96,28 @@ external interface TileLayer {
 
 private var leafletMarkerIconsConfigured = false
 
+private fun createLeafletMarkerIcon(): dynamic {
+    val origin = window.location.origin
+    val iconOptions = js("{}").unsafeCast<Json>()
+    iconOptions.asDynamic().iconUrl = "$origin/vendor/leaflet/images/marker-icon.png"
+    iconOptions.asDynamic().iconRetinaUrl = "$origin/vendor/leaflet/images/marker-icon-2x.png"
+    iconOptions.asDynamic().shadowUrl = "$origin/vendor/leaflet/images/marker-shadow.png"
+    iconOptions.asDynamic().iconSize = arrayOf<Any>(25, 41)
+    iconOptions.asDynamic().iconAnchor = arrayOf<Any>(12, 41)
+    iconOptions.asDynamic().popupAnchor = arrayOf<Any>(0, -41)
+    return Leaflet.icon(iconOptions)
+}
+
 private fun configureLeafletMarkerIcons() {
     if (leafletMarkerIconsConfigured || !js("typeof L !== 'undefined'").unsafeCast<Boolean>()) {
         return
     }
+    js("delete L.Icon.Default.prototype._getIconUrl")
+    val origin = window.location.origin
     val iconOptions = js("{}").unsafeCast<Json>()
-    iconOptions.asDynamic().iconUrl = "/vendor/leaflet/images/marker-icon.png"
-    iconOptions.asDynamic().iconRetinaUrl = "/vendor/leaflet/images/marker-icon-2x.png"
-    iconOptions.asDynamic().shadowUrl = "/vendor/leaflet/images/marker-shadow.png"
+    iconOptions.asDynamic().iconUrl = "$origin/vendor/leaflet/images/marker-icon.png"
+    iconOptions.asDynamic().iconRetinaUrl = "$origin/vendor/leaflet/images/marker-icon-2x.png"
+    iconOptions.asDynamic().shadowUrl = "$origin/vendor/leaflet/images/marker-shadow.png"
     val iconDefault = js("L.Icon.Default").unsafeCast<dynamic>()
     iconDefault.mergeOptions(iconOptions)
     leafletMarkerIconsConfigured = true
@@ -237,7 +253,9 @@ actual fun MapView(
                         marker.location.latitude,
                         marker.location.longitude,
                     )
-                val leafletMarker = Leaflet.marker(markerLatLng, js("{}").unsafeCast<Json>())
+                val markerOptions = js("{}").unsafeCast<Json>()
+                markerOptions.asDynamic().icon = createLeafletMarkerIcon()
+                val leafletMarker = Leaflet.marker(markerLatLng, markerOptions)
                 leafletMarker.addTo(map)
 
                 if (marker.title != null) {
