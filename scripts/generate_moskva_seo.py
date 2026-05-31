@@ -23,6 +23,10 @@ MOSCOW_GEO = (55.7558, 37.6173)
 NEARBY_RADIUS_KM = 50
 
 GENERATED_START = "<!-- drivebit-seo-generated-start -->"
+COMPOSE_APP_PRELOAD = '    <link rel="preload" href="/composeApp.js?v=4" as="script">\n'
+COMPOSE_APP_SCRIPT = (
+    '    <script type="application/javascript" src="/composeApp.js?v=4"></script>\n'
+)
 GENERATED_END = "<!-- drivebit-seo-generated-end -->"
 JSON_LD_MARKER = "<!-- drivebit-seo-jsonld -->"
 
@@ -321,6 +325,16 @@ def inject_json_ld(html_text: str, graph: dict) -> str:
     return html_text.replace("</head>", block + "</head>", 1)
 
 
+def ensure_compose_app_script(html_text: str) -> str:
+    if 'src="/composeApp.js' in html_text:
+        return html_text
+    if COMPOSE_APP_PRELOAD.strip() not in html_text:
+        html_text = html_text.replace("</head>", COMPOSE_APP_PRELOAD + "</head>", 1)
+    if "</body>" in html_text:
+        return html_text.replace("</body>", COMPOSE_APP_SCRIPT + "</body>", 1)
+    raise RuntimeError("</body> not found")
+
+
 def inject_generated_body(html_text: str, generated: str) -> str:
     wrapped = f"\n{GENERATED_START}\n{generated}{GENERATED_END}\n\n"
     if GENERATED_START in html_text:
@@ -373,6 +387,7 @@ def main() -> int:
         text = html_path.read_text(encoding="utf-8")
         text = inject_generated_body(text, generated)
         text = inject_json_ld(text, graph)
+        text = ensure_compose_app_script(text)
         html_path.write_text(text, encoding="utf-8")
         print(f"OK {path} ({len(cars)} cars) -> {html_path.relative_to(ROOT)}")
 

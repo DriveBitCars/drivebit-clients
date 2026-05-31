@@ -9,23 +9,48 @@ body {
     flex-direction: column;
 }
 
+/* Compose mount area — hero placeholder + loader until app renders */
 #root {
-    flex: 1 0 auto;
-    min-height: 100vh;
+    flex: 0 0 auto;
     box-sizing: border-box;
+    position: relative;
 }
 
-html.drivebit-js body:not(.drivebit-app-ready) .drivebit-seo-shell,
-html.drivebit-js body:not(.drivebit-app-ready) .drivebit-footer-shell {
-    visibility: hidden;
+#root:empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: min(420px, 55vh);
+    background: linear-gradient(to bottom, rgba(9, 5, 43, 0.12), rgba(9, 5, 43, 0.04));
 }
 
-html.drivebit-js body.drivebit-app-ready .drivebit-seo-shell,
-html.drivebit-js body.drivebit-app-ready .drivebit-footer-shell {
-    visibility: visible;
+#root:empty::before {
+    content: "";
+    width: 44px;
+    height: 44px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: drivebit-spin 0.75s linear infinite;
 }
 
-html.drivebit-js body.drivebit-app-ready .drivebit-seo-nav,
-html.drivebit-js body.drivebit-app-ready .drivebit-seo-cars {
+#root:not(:empty) {
+    flex: 1 0 auto;
+    width: 100%;
+}
+
+@keyframes drivebit-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.drivebit-footer-shell {
+    flex-shrink: 0;
+}
+
+/* Hide static SEO duplicates once Compose has mounted in #root */
+body:has(#root:not(:empty)) .drivebit-seo-nav,
+body:has(#root:not(:empty)) .drivebit-seo-cars {
     display: none;
 }

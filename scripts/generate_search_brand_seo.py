@@ -309,8 +309,6 @@ def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, js
     </script>
 </head>
 <body>
-    <script src="/vendor/drivebit-app-ready.js"></script>
-
     <div id="root"></div>
 
     <div class="drivebit-seo-shell">
