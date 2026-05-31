@@ -1,6 +1,7 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
@@ -49,7 +50,6 @@ import my.drivebit.components.CookieConsentBanner
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.ProductionYearInputPage
 import my.drivebit.screens.ProfilePage
-import my.drivebit.screens.SearchPage
 import my.drivebit.screens.SeatsCountInputPage
 import my.drivebit.screens.DescriptionInputPage
 import my.drivebit.screens.TrunkSizeSelectionPage
@@ -369,13 +369,21 @@ actual fun App() {
                         },
                     )
                 }
-                currentPath.startsWith("/search") -> {
-                    SearchPage()
-                }
                 else -> {
-                    HomePage()
+                    if (currentPath.startsWith("/search")) {
+                        RedirectToSearchApp()
+                    } else {
+                        HomePage()
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RedirectToSearchApp() {
+    LaunchedEffect(Unit) {
+        window.location.replace(window.location.pathname + window.location.search)
     }
 }
