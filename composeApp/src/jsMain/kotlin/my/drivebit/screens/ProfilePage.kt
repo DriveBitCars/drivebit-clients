@@ -18,7 +18,7 @@ import my.drivebit.components.ErrorContainer
 import my.drivebit.components.LinkButton
 import my.drivebit.components.Loader
 import my.drivebit.components.PageContainer
-import my.drivebit.components.PageWithLogo
+import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.RowSpaceBetween
 import my.drivebit.components.Spacer
 import my.drivebit.components.TextError

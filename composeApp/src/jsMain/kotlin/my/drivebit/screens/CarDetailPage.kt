@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import my.drivebit.components.AppWithHeader
+import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.CarBook
 import my.drivebit.components.CarDepositSection
 import my.drivebit.components.CarDescription

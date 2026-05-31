@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import my.drivebit.components.AppWithHeader
+import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
 import my.drivebit.components.TextError

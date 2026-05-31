@@ -164,6 +164,7 @@ jobs:
           - CommonViewModels
           - Network
           - Maps
+          - WebShell
           - composeApp
 
     steps:

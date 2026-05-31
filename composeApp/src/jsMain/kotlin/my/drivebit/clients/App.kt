@@ -1,8 +1,6 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
@@ -79,9 +77,6 @@ actual fun App() {
             commonViewModelsModule,
         )
     }) {
-        SideEffect {
-            document.body?.classList?.add("drivebit-app-ready")
-        }
         CookieConsentBanner()
         Navigation { currentPath ->
             val storage: Storage = koinInject()

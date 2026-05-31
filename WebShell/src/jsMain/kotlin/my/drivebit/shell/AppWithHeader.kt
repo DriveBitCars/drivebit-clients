@@ -1,8 +1,17 @@
-package my.drivebit.components
+package my.drivebit.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import kotlinx.browser.window
+import my.drivebit.components.AppContainer
+import my.drivebit.components.ButterMenu
+import my.drivebit.components.CityDisplay
+import my.drivebit.components.HeaderNav
+import my.drivebit.components.HeaderRow
+import my.drivebit.components.Logo
+import my.drivebit.components.MenuUserButton
+import my.drivebit.components.ResponsiveContainer
+import my.drivebit.components.Row
 import my.drivebit.design.CSSColors
 import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.ButterViewModel

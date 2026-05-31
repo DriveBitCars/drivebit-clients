@@ -60,7 +60,7 @@ console.log(
   JSON.stringify(
     {
       ok,
-      ufa: { hasGeely: ufaHasGeely, carRequests: ufaCars, composeReady: ufaState.bodyClass.includes("drivebit-app-ready"), rootKids: ufaState.rootKids },
+      ufa: { hasGeely: ufaHasGeely, carRequests: ufaCars, composeReady: ufaState.rootKids > 0, rootKids: ufaState.rootKids },
       moscow: { path: moscowState.path, carRequestsAfterSwitch: moscowCarsAfterSwitch, hasCars: moscowHasCars },
       errors: errors.slice(0, 5),
     },

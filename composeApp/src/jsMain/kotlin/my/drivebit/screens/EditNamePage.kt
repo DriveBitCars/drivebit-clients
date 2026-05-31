@@ -9,7 +9,7 @@ import my.drivebit.components.ActionButton
 import my.drivebit.components.Column
 import my.drivebit.components.ErrorContainer
 import my.drivebit.components.PageContainer
-import my.drivebit.components.PageWithLogo
+import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.RowButtons
 import my.drivebit.components.TextError
 import my.drivebit.components.TextInputField

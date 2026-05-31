@@ -11,7 +11,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import my.drivebit.components.ActionButton
-import my.drivebit.components.AppWithHeader
+import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
 import my.drivebit.components.MessageTextWithDealsLink

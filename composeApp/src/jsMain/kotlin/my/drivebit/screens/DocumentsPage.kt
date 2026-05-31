@@ -19,7 +19,7 @@ import my.drivebit.components.FormSection
 import my.drivebit.components.Loader
 import my.drivebit.components.NoPhotoPlaceholder
 import my.drivebit.components.PageHeader
-import my.drivebit.components.PageWithLogo
+import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors

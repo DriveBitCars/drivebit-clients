@@ -2,7 +2,7 @@ package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
 import kotlinx.browser.window
-import my.drivebit.components.AppWithHeader
+import my.drivebit.shell.AppWithHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography

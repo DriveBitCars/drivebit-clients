@@ -23,6 +23,14 @@ MOSCOW_GEO = (55.7558, 37.6173)
 NEARBY_RADIUS_KM = 50
 
 GENERATED_START = "<!-- drivebit-seo-generated-start -->"
+COMPOSE_APP_PRELOAD = '    <link rel="preload" href="/composeApp.js?v=4" as="script">\n'
+COMPOSE_APP_SCRIPT = (
+    '    <script type="application/javascript" src="/composeApp.js?v=4"></script>\n'
+)
+MAIN_PROMO_FRAGMENT = (ROOT / "composeApp" / "seo" / "main-promo.fragment.html").read_text(
+    encoding="utf-8"
+)
+PROMO_CSS = '    <link rel="stylesheet" href="/vendor/drivebit-main-promo.css"/>'
 GENERATED_END = "<!-- drivebit-seo-generated-end -->"
 JSON_LD_MARKER = "<!-- drivebit-seo-jsonld -->"
 
@@ -321,6 +329,38 @@ def inject_json_ld(html_text: str, graph: dict) -> str:
     return html_text.replace("</head>", block + "</head>", 1)
 
 
+def ensure_main_promo(html_text: str) -> str:
+    if "<!-- drivebit-main-promo-start -->" in html_text:
+        return html_text
+    if PROMO_CSS not in html_text:
+        html_text = html_text.replace(
+            'href="/vendor/drivebit-seo-text.css"/>',
+            'href="/vendor/drivebit-seo-text.css"/>\n' + PROMO_CSS,
+            1,
+        )
+    footer_idx = html_text.find('<div class="drivebit-footer-shell">')
+    if footer_idx < 0:
+        raise RuntimeError("drivebit-footer-shell marker not found")
+    generated_end = html_text.find(GENERATED_END)
+    if generated_end >= 0:
+        line_end = html_text.find("\n", generated_end)
+        insert_at = (line_end + 1) if line_end >= 0 else generated_end
+    else:
+        insert_at = footer_idx
+    block = MAIN_PROMO_FRAGMENT if MAIN_PROMO_FRAGMENT.endswith("\n") else MAIN_PROMO_FRAGMENT + "\n"
+    return html_text[:insert_at] + block + html_text[insert_at:]
+
+
+def ensure_compose_app_script(html_text: str) -> str:
+    if 'src="/composeApp.js' in html_text:
+        return html_text
+    if COMPOSE_APP_PRELOAD.strip() not in html_text:
+        html_text = html_text.replace("</head>", COMPOSE_APP_PRELOAD + "</head>", 1)
+    if "</body>" in html_text:
+        return html_text.replace("</body>", COMPOSE_APP_SCRIPT + "</body>", 1)
+    raise RuntimeError("</body> not found")
+
+
 def inject_generated_body(html_text: str, generated: str) -> str:
     wrapped = f"\n{GENERATED_START}\n{generated}{GENERATED_END}\n\n"
     if GENERATED_START in html_text:
@@ -329,10 +369,12 @@ def inject_generated_body(html_text: str, generated: str) -> str:
             re.DOTALL,
         )
         return pattern.sub(wrapped, html_text, count=1)
+    promo_idx = html_text.find("<!-- drivebit-main-promo-start -->")
     footer_idx = html_text.find('<div class="drivebit-footer-shell">')
     if footer_idx < 0:
         raise RuntimeError("drivebit-footer-shell marker not found")
-    return html_text[:footer_idx] + wrapped + html_text[footer_idx:]
+    insert_at = promo_idx if promo_idx >= 0 else footer_idx
+    return html_text[:insert_at] + wrapped + html_text[insert_at:]
 
 
 def main() -> int:
@@ -373,6 +415,8 @@ def main() -> int:
         text = html_path.read_text(encoding="utf-8")
         text = inject_generated_body(text, generated)
         text = inject_json_ld(text, graph)
+        text = ensure_main_promo(text)
+        text = ensure_compose_app_script(text)
         html_path.write_text(text, encoding="utf-8")
         print(f"OK {path} ({len(cars)} cars) -> {html_path.relative_to(ROOT)}")
 

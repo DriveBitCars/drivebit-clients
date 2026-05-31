@@ -14,7 +14,7 @@ import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
 import my.drivebit.components.InputField
 import my.drivebit.components.PageHeader
-import my.drivebit.components.PageWithLogo
+import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.TermsConsentCheckbox
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader

@@ -3,7 +3,7 @@ package my.drivebit.screens
 import androidx.compose.runtime.Composable
 import kotlinx.browser.window
 import my.drivebit.components.ActionButton
-import my.drivebit.components.AppWithHeader
+import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.Column
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography

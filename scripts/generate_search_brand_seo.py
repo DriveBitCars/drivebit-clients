@@ -23,6 +23,9 @@ MOSCOW_CITY_ID_FALLBACK = "158835"
 GENERATED_START = "<!-- drivebit-seo-generated-start -->"
 GENERATED_END = "<!-- drivebit-seo-generated-end -->"
 JSON_LD_MARKER = "<!-- drivebit-seo-jsonld -->"
+MAIN_PROMO_FRAGMENT = (ROOT / "composeApp" / "seo" / "main-promo.fragment.html").read_text(
+    encoding="utf-8"
+)
 
 TRANSLIT = {
     "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "yo",
@@ -303,24 +306,24 @@ def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, js
     <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-main-promo.css"/>
     {JSON_LD_MARKER}
     <script type="application/ld+json">
 {json_ld_text}
     </script>
 </head>
 <body>
-    <script src="/vendor/drivebit-app-ready.js"></script>
-
     <div id="root"></div>
 
+{GENERATED_START}
+{nav_html}{cars_html}{GENERATED_END}
+{MAIN_PROMO_FRAGMENT}
     <div class="drivebit-seo-shell">
         <section class="drivebit-seo-text" aria-label="{aria}">
             <h2>{h2}</h2>
 {paragraphs}        </section>
     </div>
 
-{GENERATED_START}
-{nav_html}{cars_html}{GENERATED_END}
 <div class="drivebit-footer-shell">
         <footer class="drivebit-site-footer">
             <a class="drivebit-footer-phone" id="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
