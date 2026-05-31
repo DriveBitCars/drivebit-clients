@@ -102,7 +102,6 @@ internal class CurrentFiltersRepositoryImpl(
     private val keyPrefix: String? = null,
 ) : CurrentFiltersRepository {
     companion object {
-        private const val CURRENT_TASK_SHORT_NAME_KEY = "current_task_short_name"
         private const val START_DATE_KEY = "start_date"
         private const val END_DATE_KEY = "end_date"
         private const val DAILY_RATE_MIN_KEY = "daily_rate_min"
@@ -159,9 +158,6 @@ internal class CurrentFiltersRepositoryImpl(
     private val currentPageState = MutableStateFlow(0)
 
     init {
-        val savedTaskShortName = settings.getStringOrNullIfEmpty(key(CURRENT_TASK_SHORT_NAME_KEY))
-        currentTaskShortNameState.value = savedTaskShortName
-
         val savedStartDate = settings.getStringOrNullIfEmpty(START_DATE_KEY)
         startStateFlow.value = savedStartDate
 
@@ -268,7 +264,6 @@ internal class CurrentFiltersRepositoryImpl(
     }
 
     override fun updateCurrentTask(shortName: String) {
-        settings.putString(key(CURRENT_TASK_SHORT_NAME_KEY), shortName)
         currentTaskShortNameState.value = shortName
         currentPageState.value = 0
     }

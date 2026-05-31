@@ -25,10 +25,12 @@
             script.async = true;
             script.onload = function () {
                 if (typeof window.L !== "undefined") {
+                    delete window.L.Icon.Default.prototype._getIconUrl;
+                    var origin = window.location.origin;
                     window.L.Icon.Default.mergeOptions({
-                        iconUrl: "/vendor/leaflet/images/marker-icon.png",
-                        iconRetinaUrl: "/vendor/leaflet/images/marker-icon-2x.png",
-                        shadowUrl: "/vendor/leaflet/images/marker-shadow.png",
+                        iconUrl: origin + "/vendor/leaflet/images/marker-icon.png",
+                        iconRetinaUrl: origin + "/vendor/leaflet/images/marker-icon-2x.png",
+                        shadowUrl: origin + "/vendor/leaflet/images/marker-shadow.png",
                     });
                     resolve(window.L);
                 } else {
