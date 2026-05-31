@@ -103,7 +103,7 @@ private fun configureLeafletMarkerIcons() {
     iconOptions.asDynamic().iconRetinaUrl = "/vendor/leaflet/images/marker-icon-2x.png"
     iconOptions.asDynamic().shadowUrl = "/vendor/leaflet/images/marker-shadow.png"
     val iconDefault = js("L.Icon.Default").unsafeCast<dynamic>()
-    iconDefault.asDynamic().mergeOptions(iconOptions)
+    iconDefault.mergeOptions(iconOptions)
     leafletMarkerIconsConfigured = true
 }
 
