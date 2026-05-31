@@ -19,8 +19,6 @@ import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 
 private val PromoBlueBg: CSSColorValue = Color("#E3F2FD")
-private val PromoChipBlue: CSSColorValue = Color("#4338CA")
-private val PromoRectButtonBlue: CSSColorValue = Color("#2962FF")
 
 @Composable
 fun MainPromoSections() {
