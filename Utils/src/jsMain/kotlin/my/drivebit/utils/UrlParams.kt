@@ -30,6 +30,8 @@ const val REDIRECT_PATH = "redirect"
 
 const val AUTO_BOOK_AFTER_LOGIN = "autoBook"
 
+const val PHOTOS = "photos"
+
 fun getUrlParameter(name: String): String {
     val queryString = window.location.search
     return getUrlParameterFromQueryString(queryString, name)
@@ -38,14 +40,31 @@ fun getUrlParameter(name: String): String {
 fun getUrlParameterFromQueryString(
     queryString: String,
     name: String,
-): String {
+): String = getUrlParametersFromQueryString(queryString, name).firstOrNull() ?: ""
+
+fun getUrlParameters(name: String): List<String> = getUrlParametersFromQueryString(window.location.search, name)
+
+fun getUrlParametersFromQueryString(
+    queryString: String,
+    name: String,
+): List<String> {
     val params =
         queryString
-            .substring(1)
+            .removePrefix("?")
             .split("&")
-    return params.find { it.startsWith("$name=") }?.substringAfter("$name=")?.let {
-        js("decodeURIComponent")(it) as String
-    } ?: ""
+            .filter { it.isNotBlank() }
+    return params
+        .filter { it.startsWith("$name=") }
+        .map { part ->
+            js("decodeURIComponent")(part.substringAfter("$name=")) as String
+        }
+}
+
+fun buildCarPhotosGalleryUrl(photoUrls: List<String>): String {
+    val urls = photoUrls.filter { it.isNotBlank() }
+    if (urls.isEmpty()) return "/car-photos-gallery"
+    val query = urls.joinToString("&") { "$PHOTOS=${it.encodeUrlParameter()}" }
+    return "/car-photos-gallery?$query"
 }
 
 fun getUrlParameterFromPath(

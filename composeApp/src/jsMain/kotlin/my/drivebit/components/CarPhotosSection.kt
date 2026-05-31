@@ -11,6 +11,7 @@ import my.drivebit.components.ResponsiveContainer
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarPhotoItem
+import my.drivebit.utils.buildCarPhotosGalleryUrl
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -24,6 +25,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
     val photosFromGeneral = car.general?.photos ?: emptyList()
     val photosFromTopLevel = car.photos
     val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
+    val galleryPhotoUrls = allPhotos.mapNotNull { it.url.takeIf { url -> url.isNotBlank() } }
     val mainPhoto = allPhotos.firstOrNull()
     val thumbnailPhotos = allPhotos.drop(1).take(3)
 
@@ -34,8 +36,8 @@ fun CarPhotosSection(car: CarDetailResponse) {
             if (isMobile) {
                 val mobilePhotos = allPhotos.filter { it.url.isNotBlank() }
                 CarMobileMainPhotoCarousel(
-                    carId = car.id,
                     photos = mobilePhotos,
+                    galleryPhotoUrls = galleryPhotoUrls,
                     galleryClickEnabled = allPhotos.isNotEmpty(),
                 )
             } else {
@@ -52,7 +54,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
                             alignItems(AlignItems.FlexStart)
                         },
                     ) {
-                        CarMainPhoto(mainPhoto, car.id, allPhotos.isNotEmpty())
+                        CarMainPhoto(mainPhoto, galleryPhotoUrls, allPhotos.isNotEmpty())
                     }
 
                     Column(
@@ -60,7 +62,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
                         modifier = { width(200.px) },
                     ) {
                         thumbnailPhotos.forEach { photo ->
-                            CarThumbnail(photo, car.id, allPhotos.isNotEmpty())
+                            CarThumbnail(photo, galleryPhotoUrls, allPhotos.isNotEmpty())
                         }
                     }
                 }
@@ -81,7 +83,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
                         gap(8.px)
                     }
                     onClick {
-                        window.location.href = "/car-photos-gallery?id=${car.id}"
+                        window.location.href = buildCarPhotosGalleryUrl(galleryPhotoUrls)
                     }
                 }) {
                     Span({
@@ -109,13 +111,13 @@ private fun StyleScope.carMainPhotoImgStyle() {
 
 @Composable
 private fun CarMobileMainPhotoCarousel(
-    carId: String,
     photos: List<CarPhotoItem>,
+    galleryPhotoUrls: List<String>,
     galleryClickEnabled: Boolean,
 ) {
     var isImageHovered by remember { mutableStateOf(false) }
     var isMobileViewport by remember { mutableStateOf(window.innerWidth <= 768) }
-    var currentPhotoIndex by remember(carId) { mutableStateOf(0) }
+    var currentPhotoIndex by remember(galleryPhotoUrls) { mutableStateOf(0) }
     var touchStartX by remember { mutableStateOf<Double?>(null) }
 
     DisposableEffect(Unit) {
@@ -185,7 +187,7 @@ private fun CarMobileMainPhotoCarousel(
                 }
                 if (galleryClickEnabled) {
                     onClick {
-                        window.location.href = "/car-photos-gallery?id=$carId"
+                        window.location.href = buildCarPhotosGalleryUrl(galleryPhotoUrls)
                     }
                 }
                 style {
@@ -292,7 +294,7 @@ private fun CarMobileMainPhotoCarousel(
 @Composable
 private fun CarMainPhoto(
     mainPhoto: CarPhotoItem?,
-    carId: String,
+    galleryPhotoUrls: List<String>,
     isClickable: Boolean,
 ) {
     if (mainPhoto != null && mainPhoto.url.isNotEmpty()) {
@@ -303,7 +305,7 @@ private fun CarMainPhoto(
                     width(100.percent)
                     display(DisplayStyle.Block)
                 }
-                onClick { window.location.href = "/car-photos-gallery?id=$carId" }
+                onClick { window.location.href = buildCarPhotosGalleryUrl(galleryPhotoUrls) }
             }) {
                 Img(
                     src = mainPhoto.url,
@@ -328,7 +330,7 @@ private fun CarMainPhoto(
 @Composable
 private fun CarThumbnail(
     photo: CarPhotoItem,
-    carId: String,
+    galleryPhotoUrls: List<String>,
     isClickable: Boolean,
 ) {
     Div({
@@ -337,7 +339,7 @@ private fun CarThumbnail(
             if (isClickable) cursor("pointer")
         }
         if (isClickable) {
-            onClick { window.location.href = "/car-photos-gallery?id=$carId" }
+            onClick { window.location.href = buildCarPhotosGalleryUrl(galleryPhotoUrls) }
         }
     }) {
         Img(
