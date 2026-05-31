@@ -124,6 +124,7 @@ kotlin {
             implementation(project(":Repositories"))
             implementation(project(":UI-Components"))
             implementation(project(":Utils"))
+            implementation(project(":Maps"))
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koinComposeViewmodelJs)
@@ -242,7 +243,7 @@ tasks.register("generateAllSeoSnapshots") {
     dependsOn("generateMoskvaSeoSnapshots", "generateSearchBrandSeoSnapshots")
 }
 
-val needsIsolatedAppDevBundle =
+val needsCarDetailDevBundle =
     gradle.startParameter.taskNames.any {
         it.contains("jsBrowserDevelopmentRun", ignoreCase = true) ||
             (it.contains("composeApp", ignoreCase = true) && it.contains("Development", ignoreCase = true))
@@ -250,14 +251,10 @@ val needsIsolatedAppDevBundle =
 
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     dependsOn("generateAllSeoSnapshots")
-    if (needsIsolatedAppDevBundle) {
+    if (needsCarDetailDevBundle) {
         dependsOn(":carDetailApp:jsBrowserDevelopmentWebpack")
-        dependsOn(":nearbyApp:jsBrowserDevelopmentWebpack")
-        dependsOn(":searchApp:jsBrowserDevelopmentWebpack")
     } else {
         dependsOn(":carDetailApp:jsBrowserProductionWebpack")
-        dependsOn(":nearbyApp:jsBrowserProductionWebpack")
-        dependsOn(":searchApp:jsBrowserProductionWebpack")
     }
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.dir("vendor")) {
@@ -268,7 +265,7 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     }
     from(project(":carDetailApp").layout.projectDirectory.dir("src/jsMain/resources"))
     val carDetailWebpackDir =
-        if (needsIsolatedAppDevBundle) {
+        if (needsCarDetailDevBundle) {
             project(":carDetailApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
         } else {
             project(":carDetailApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
@@ -276,31 +273,10 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(carDetailWebpackDir) {
         include("carDetail.js", "carDetail.js.map")
     }
-    val nearbyAppWebpackDir =
-        if (needsIsolatedAppDevBundle) {
-            project(":nearbyApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
-        } else {
-            project(":nearbyApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
-        }
-    from(nearbyAppWebpackDir) {
-        include("nearbyApp.js", "nearbyApp.js.map")
-    }
-    from(project(":searchApp").layout.projectDirectory.dir("src/jsMain/resources"))
-    val searchAppWebpackDir =
-        if (needsIsolatedAppDevBundle) {
-            project(":searchApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
-        } else {
-            project(":searchApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
-        }
-    from(searchAppWebpackDir) {
-        include("searchApp.js", "searchApp.js.map")
-    }
 }
 
 tasks.named("jsBrowserDevelopmentRun").configure {
     dependsOn(":carDetailApp:jsBrowserDevelopmentWebpack")
-    dependsOn(":nearbyApp:jsBrowserDevelopmentWebpack")
-    dependsOn(":searchApp:jsBrowserDevelopmentWebpack")
 }
 
 val seoLandingHtmlTargets =
