@@ -165,6 +165,8 @@ jobs:
           - Network
           - Maps
           - WebShell
+          - DrivebitWeb
+          - carDetailApp
           - composeApp
 
     steps:

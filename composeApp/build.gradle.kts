@@ -243,8 +243,19 @@ tasks.register("generateAllSeoSnapshots") {
     dependsOn("generateMoskvaSeoSnapshots", "generateSearchBrandSeoSnapshots")
 }
 
+val needsCarDetailDevBundle =
+    gradle.startParameter.taskNames.any {
+        it.contains("jsBrowserDevelopmentRun", ignoreCase = true) ||
+            (it.contains("composeApp", ignoreCase = true) && it.contains("Development", ignoreCase = true))
+    }
+
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     dependsOn("generateAllSeoSnapshots")
+    if (needsCarDetailDevBundle) {
+        dependsOn(":carDetailApp:jsBrowserDevelopmentWebpack")
+    } else {
+        dependsOn(":carDetailApp:jsBrowserProductionWebpack")
+    }
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.dir("vendor")) {
         into("vendor")
@@ -252,6 +263,20 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(layout.projectDirectory.file("seo/landing-blocks.json")) {
         into("seo")
     }
+    from(project(":carDetailApp").layout.projectDirectory.dir("src/jsMain/resources"))
+    val carDetailWebpackDir =
+        if (needsCarDetailDevBundle) {
+            project(":carDetailApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
+        } else {
+            project(":carDetailApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
+        }
+    from(carDetailWebpackDir) {
+        include("carDetail.js", "carDetail.js.map")
+    }
+}
+
+tasks.named("jsBrowserDevelopmentRun").configure {
+    dependsOn(":carDetailApp:jsBrowserDevelopmentWebpack")
 }
 
 val seoLandingHtmlTargets =

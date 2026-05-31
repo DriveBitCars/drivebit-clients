@@ -1,5 +1,11 @@
 config.devServer = config.devServer || {};
-config.devServer.historyApiFallback = true;
+config.devServer.historyApiFallback = {
+    rewrites: [
+        { from: /^\/car-detail/, to: '/car-detail/index.html' },
+        { from: /^\/car-photos-gallery/, to: '/car-photos-gallery/index.html' },
+    ],
+    index: '/index.html',
+};
 config.devServer.open = false;
 config.devServer.port = process.env.PORT ? parseInt(process.env.PORT, 10) : 'auto';
 config.devServer.hot = true;

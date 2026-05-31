@@ -13,10 +13,8 @@ import my.drivebit.screens.CarModelSelectionPage
 import my.drivebit.screens.CarAvailabilityPage
 import my.drivebit.screens.CarPhotosPage
 import my.drivebit.screens.CarPhotosUploadPage
-import my.drivebit.screens.CarDetailPage
 import my.drivebit.screens.ChatDetailPage
 import my.drivebit.screens.ChatListPage
-import my.drivebit.screens.CarPhotosGalleryPage
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePasswordPage
 import my.drivebit.screens.ChangePhonePage
@@ -187,9 +185,6 @@ actual fun App() {
                 }
                 currentPath.startsWith("/car-edit") -> {
                     CarEditPage()
-                }
-                currentPath.startsWith("/car-photos-gallery") -> {
-                    CarPhotosGalleryPage()
                 }
                 currentPath.startsWith("/car-photos-upload") -> {
                     CarPhotosUploadPage(
@@ -376,9 +371,6 @@ actual fun App() {
                 }
                 currentPath.startsWith("/search") -> {
                     SearchPage()
-                }
-                currentPath.startsWith("/car-detail") -> {
-                    CarDetailPage()
                 }
                 else -> {
                     HomePage()

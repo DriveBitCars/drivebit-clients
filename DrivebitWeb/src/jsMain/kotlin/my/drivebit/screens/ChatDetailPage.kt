@@ -1,0 +1,455 @@
+package my.drivebit.screens
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.browser.document
+import kotlinx.browser.window
+import kotlinx.coroutines.delay
+import my.drivebit.components.ActionButton
+import my.drivebit.shell.AppWithHeader
+import my.drivebit.components.Column
+import my.drivebit.components.Loader
+import my.drivebit.components.MessageTextWithDealsLink
+import my.drivebit.components.ParticipantAvatar
+import my.drivebit.components.Row
+import my.drivebit.components.TextError
+import my.drivebit.components.ToolbarBackArrow
+import my.drivebit.design.CSSColors
+import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.MessageDto
+import my.drivebit.network.services.contractBookingIdForAction
+import my.drivebit.network.services.contractDownloadPagePath
+import my.drivebit.network.services.isLeaveReviewForCarAction
+import my.drivebit.network.services.leaveReviewCarIdForAction
+import my.drivebit.network.services.leaveReviewPagePath
+import my.drivebit.network.services.payBookingIdForAction
+import my.drivebit.network.services.prepaymentButtonLabel
+import my.drivebit.network.services.renterFullOrBalanceAmountRub
+import my.drivebit.network.services.renterFullOrBalancePaymentLabel
+import my.drivebit.network.services.shouldShowLeaveReviewForRenter
+import my.drivebit.utils.getUrlParameter
+import my.drivebit.utils.mapIso8601ToTimeString
+import my.drivebit.viewmodels.ButtonState
+import my.drivebit.viewmodels.ChatDetailViewModel
+import my.drivebit.viewmodels.ChatPayEffect
+import my.drivebit.viewmodels.UnreadMessagesViewModel
+import my.drivebit.viewmodels.createButtonViewModel
+import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.attributes.disabled
+import org.jetbrains.compose.web.attributes.placeholder
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Input
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
+import org.koin.compose.currentKoinScope
+import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
+
+@Composable
+fun ChatDetailPage() {
+    val chatId = getUrlParameter("id")
+    val unreadMessagesViewModel: UnreadMessagesViewModel = koinInject()
+    val hasUnread by unreadMessagesViewModel.hasUnread.collectAsState()
+
+    if (chatId.isBlank()) {
+        AppWithHeader {
+            Div({
+                style {
+                    width(100.percent)
+                    padding(20.px)
+                }
+            }) {
+                TextError("Не указан ID чата")
+            }
+        }
+        return
+    }
+
+    val koinScope = currentKoinScope()
+    val viewModel: ChatDetailViewModel =
+        remember(chatId) {
+            koinScope.get<ChatDetailViewModel>(parameters = { parametersOf(chatId) })
+        }
+    val chatDetail by viewModel.chatDetail.collectAsState()
+    val messages by viewModel.messages.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val isSending by viewModel.isSending.collectAsState()
+    val isPaying by viewModel.isPaying.collectAsState()
+    val bookingPaymentById by viewModel.bookingPaymentById.collectAsState()
+
+    LaunchedEffect(chatId) {
+        viewModel.payEffects.collect { effect ->
+            when (effect) {
+                is ChatPayEffect.OpenCheckout -> {
+                    window.location.href = effect.url
+                }
+                is ChatPayEffect.ShowInfo -> {
+                    window.alert(effect.text)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(chatId) {
+        viewModel.loadChat()
+        viewModel.loadMessages()
+    }
+
+    LaunchedEffect(chatId) {
+        while (true) {
+            delay(10_000)
+            viewModel.loadMessages()
+        }
+    }
+
+    LaunchedEffect(hasUnread) {
+        if (hasUnread) {
+            viewModel.loadMessages()
+        }
+    }
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            delay(100)
+            (document.getElementById("chat-messages-scroll") as? org.w3c.dom.HTMLElement)?.let { el ->
+                el.scrollTop = el.scrollHeight.toDouble()
+            }
+        }
+    }
+
+    var messageText by remember { mutableStateOf("") }
+
+    AppWithHeader {
+        Column(modifier = { width(100.percent) }) {
+            ToolbarBackArrow(
+                title = chatDetail?.participant?.name?.takeIf { it.isNotBlank() } ?: "Чат",
+                onBackClick = { window.location.href = "/chats" },
+            )
+
+            when {
+                isLoading && messages.isEmpty() -> Loader()
+                error != null -> TextError(error ?: "Ошибка")
+                else -> {
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
+                            flex(1)
+                            maxHeight(70.vh)
+                            property("overflow", "hidden")
+                        }
+                    }) {
+                        Div({
+                            attr("id", "chat-messages-scroll")
+                            style {
+                                flex(1)
+                                property("overflow-y", "auto")
+                                padding(16.px)
+                            }
+                        }) {
+                            Column(gap = 12.px, modifier = { width(100.percent) }) {
+                                messages.forEach { message ->
+                                    val bookingIdForPay = message.payBookingIdForAction()
+                                    MessageBubble(
+                                        message = message,
+                                        participantId = chatDetail?.participant?.id,
+                                        participantName = chatDetail?.participant?.name,
+                                        participantAvatarUrl = chatDetail?.participant?.avatar,
+                                        bookingForPay = bookingIdForPay?.let { bookingPaymentById[it] },
+                                        bookingById = bookingPaymentById,
+                                        isPaying = isPaying,
+                                        onPrepayBooking = { bookingId ->
+                                            val origin = window.location.origin
+                                            viewModel.prepayBooking(
+                                                bookingId = bookingId,
+                                                returnUrl = "$origin/payment-success",
+                                                failUrl = "$origin/payment-failure",
+                                            )
+                                        },
+                                        onPayBooking = { bookingId ->
+                                            val origin = window.location.origin
+                                            viewModel.payBooking(
+                                                bookingId = bookingId,
+                                                returnUrl = "$origin/payment-success",
+                                                failUrl = "$origin/payment-failure",
+                                            )
+                                        },
+                                    )
+                                }
+                            }
+                        }
+
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                flexDirection(FlexDirection.Row)
+                                alignItems(AlignItems.Center)
+                                gap(8.px)
+                                padding(16.px)
+                                width(100.percent)
+                                maxWidth(100.percent)
+                                property("box-sizing", "border-box")
+                            }
+                        }) {
+                            Input(InputType.Text) {
+                                value(messageText)
+                                onInput { messageText = it.target.value }
+                                onKeyDown { event ->
+                                    if (event.key == "Enter") {
+                                        event.preventDefault()
+                                        if (messageText.isNotBlank()) {
+                                            viewModel.sendMessage(messageText.trim())
+                                            messageText = ""
+                                        }
+                                    }
+                                }
+                                placeholder("Введите сообщение...")
+                                style {
+                                    flex(1)
+                                    minWidth(0.px)
+                                    width(100.percent)
+                                    property("box-sizing", "border-box")
+                                    padding(12.px)
+                                    property("border", "1px solid ${CSSColors.Gray300}")
+                                    borderRadius(8.px)
+                                    fontSize(14.px)
+                                }
+                            }
+                            org.jetbrains.compose.web.dom.Button({
+                                if (isSending) disabled()
+                                onClick {
+                                    if (messageText.isNotBlank()) {
+                                        viewModel.sendMessage(messageText.trim())
+                                        messageText = ""
+                                    }
+                                }
+                                style {
+                                    flexShrink(0)
+                                    padding(12.px, 16.px)
+                                    backgroundColor(CSSColors.Blue)
+                                    color(CSSColors.White)
+                                    property("border", "none")
+                                    borderRadius(8.px)
+                                    cursor("pointer")
+                                    fontSize(14.px)
+                                    fontWeight("600")
+                                    whiteSpace("nowrap")
+                                }
+                            }) {
+                                Text(if (isSending) "..." else "Отправить")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MessageBubble(
+    message: MessageDto,
+    participantId: String? = null,
+    participantName: String? = null,
+    participantAvatarUrl: String? = null,
+    bookingForPay: BookingDTO? = null,
+    bookingById: Map<String, BookingDTO> = emptyMap(),
+    isPaying: Boolean = false,
+    onPrepayBooking: (String) -> Unit = {},
+    onPayBooking: (String) -> Unit = {},
+) {
+    val isSystemMessage = message.isSystemMessage
+    val senderId = message.sender?.id
+    val isOwnMessage = participantId != null && senderId != null && senderId != participantId
+    val senderName =
+        when {
+            isSystemMessage -> ""
+            isOwnMessage -> "Вы"
+            else -> message.sender?.name?.takeIf { it.isNotBlank() } ?: ""
+        }
+    val text = message.text?.takeIf { it.isNotBlank() } ?: ""
+    val timeStr = runCatching { mapIso8601ToTimeString(message.createdAt) }.getOrElse { "" }
+
+    if (isSystemMessage) {
+        val bookingIdForPay = message.payBookingIdForAction()
+        val bookingIdForContract = message.contractBookingIdForAction()
+        val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
+        val showReviewForCar = message.isLeaveReviewForCarAction()
+        val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
+        val payButtonVm = createButtonViewModel()
+        val contractButtonVm = createButtonViewModel()
+        val reviewCarButtonVm = createButtonViewModel()
+        val reviewRenterButtonVm = createButtonViewModel()
+        LaunchedEffect(isPaying) {
+            payButtonVm.setState(if (isPaying) ButtonState.Loading else ButtonState.Enabled)
+        }
+        LaunchedEffect(reviewCarId) {
+            reviewCarButtonVm.setState(
+                when {
+                    reviewCarId != null -> ButtonState.Enabled
+                    showReviewForCar -> ButtonState.Loading
+                    else -> ButtonState.Disabled
+                },
+            )
+        }
+        Div({
+            style {
+                padding(8.px)
+                textAlign("center")
+                color(CSSColors.Gray600)
+                fontSize(13.px)
+            }
+        }) {
+            Column(
+                gap = 8.px,
+                modifier = {
+                    width(100.percent)
+                    alignItems(AlignItems.Center)
+                },
+            ) {
+                MessageTextWithDealsLink(text = text.ifBlank { "Системное сообщение" })
+                if (bookingIdForPay != null) {
+                    val fullPayLabel =
+                        bookingForPay?.let { booking ->
+                            "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
+                        } ?: "Оплатить"
+                    Column(gap = 8.px, modifier = { width(100.percent); maxWidth(280.px) }) {
+                        if (bookingForPay?.canPayPrepayment == true) {
+                            ActionButton(
+                                text = bookingForPay.prepaymentButtonLabel(),
+                                enabledColor = CSSColors.Blue,
+                                viewModel = payButtonVm,
+                                onClick = { onPrepayBooking(bookingIdForPay) },
+                            )
+                        }
+                        ActionButton(
+                            text = fullPayLabel,
+                            enabledColor = CSSColors.Blue,
+                            viewModel = payButtonVm,
+                            onClick = { onPayBooking(bookingIdForPay) },
+                        )
+                    }
+                }
+                if (bookingIdForContract != null) {
+                    Div({
+                        style {
+                            width(100.percent)
+                            maxWidth(280.px)
+                        }
+                    }) {
+                        ActionButton(
+                            text = "Скачать договор",
+                            enabledColor = CSSColors.Blue,
+                            viewModel = contractButtonVm,
+                            onClick = {
+                                window.location.href = contractDownloadPagePath(bookingIdForContract)
+                            },
+                        )
+                    }
+                }
+                if (showReviewForCar) {
+                    Div({
+                        style {
+                            width(100.percent)
+                            maxWidth(280.px)
+                        }
+                    }) {
+                        ActionButton(
+                            text = if (reviewCarId != null) "Оставить отзыв" else "Загрузка…",
+                            enabledColor = CSSColors.Blue,
+                            viewModel = reviewCarButtonVm,
+                            onClick = {
+                                reviewCarId?.let { carId ->
+                                    window.location.href = leaveReviewPagePath(carId)
+                                }
+                            },
+                        )
+                    }
+                }
+                if (showReviewForRenter) {
+                    Div({
+                        style {
+                            width(100.percent)
+                            maxWidth(280.px)
+                        }
+                    }) {
+                        ActionButton(
+                            text = "Оставить отзыв об арендаторе",
+                            enabledColor = CSSColors.Blue,
+                            viewModel = reviewRenterButtonVm,
+                            onClick = {
+                                window.location.href = "/my-deals"
+                            },
+                        )
+                    }
+                }
+            }
+        }
+        return
+    }
+
+    val showOpponentAvatar = !isOwnMessage && participantId != null
+
+    Div({
+        style {
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Row)
+            alignItems(AlignItems.FlexStart)
+            gap(12.px)
+            property("max-width", "100%")
+        }
+    }) {
+        if (showOpponentAvatar) {
+            ParticipantAvatar(
+                userId = participantId,
+                name = participantName?.takeIf { it.isNotBlank() } ?: "Собеседник",
+                initialAvatarUrl = participantAvatarUrl,
+                size = 40.px,
+            )
+        }
+        Div({
+            style {
+                padding(12.px)
+                borderRadius(12.px)
+                property("max-width", "80%")
+            }
+        }) {
+            Column(gap = 4.px) {
+                if (senderName.isNotBlank()) {
+                    Span({
+                        style {
+                            fontSize(12.px)
+                            color(CSSColors.Gray600)
+                            fontWeight("600")
+                        }
+                    }) {
+                        Text(senderName)
+                    }
+                }
+                Span({
+                    style {
+                        fontSize(14.px)
+                        color(CSSColors.Black)
+                    }
+                }) {
+                    MessageTextWithDealsLink(text = text)
+                }
+                Span({
+                    style {
+                        fontSize(11.px)
+                        color(CSSColors.Gray600)
+                    }
+                }) {
+                    Text(timeStr)
+                }
+            }
+        }
+    }
+}

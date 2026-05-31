@@ -74,7 +74,21 @@ jobs:
       run: ./gradlew clean --no-daemon
 
     - name: Build JS distribution (fast web version)
-      run: ./gradlew :composeApp:jsBrowserDistribution --no-daemon
+      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution --no-daemon
+
+    - name: Merge car detail bundle into main dist
+      run: |
+        set -e
+        DIST="composeApp/build/dist/js/productionExecutable"
+        CARDET="carDetailApp/build/dist/js/productionExecutable"
+        cp "$CARDET/carDetail.js" "$DIST/"
+        cp "$CARDET/carDetail.js.map" "$DIST/" 2>/dev/null || true
+        cp -r "$CARDET/car-detail" "$DIST/"
+        cp -r "$CARDET/car-photos-gallery" "$DIST/"
+        test -f "$DIST/car-detail/index.html"
+        test -f "$DIST/car-photos-gallery/index.html"
+        test -f "$DIST/carDetail.js"
+        echo "car-detail bundle merged OK"
 
     - name: Verify Moscow SEO pages in dist
       run: |
@@ -127,6 +141,10 @@ jobs:
         
         # Update composeApp.js version in index.html (preload and script)
         sed -i "s/composeApp\.js?v=[0-9]*/composeApp.js?v=$TIMESTAMP/g" composeApp/build/dist/js/productionExecutable/index.html
+
+        # Update carDetail.js version in car-detail shells
+        sed -i "s/carDetail\.js?v=[0-9]*/carDetail.js?v=$TIMESTAMP/g" composeApp/build/dist/js/productionExecutable/car-detail/index.html
+        sed -i "s/carDetail\.js?v=[0-9]*/carDetail.js?v=$TIMESTAMP/g" composeApp/build/dist/js/productionExecutable/car-photos-gallery/index.html
         
         # Rename JS files with timestamp
         cd composeApp/build/dist/js/productionExecutable

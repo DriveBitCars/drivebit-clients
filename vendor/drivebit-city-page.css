@@ -1,0 +1,194 @@
+body.drivebit-static-city-page {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #09052b;
+    background: #fff;
+}
+
+.drivebit-static-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid #e8e8ee;
+}
+
+.drivebit-static-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+}
+
+.drivebit-static-logo img {
+    display: block;
+    height: 32px;
+    width: auto;
+}
+
+.drivebit-static-header-nav {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+}
+
+.drivebit-static-header-nav a,
+.drivebit-city-link,
+.drivebit-login-link {
+    color: #09052b;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.drivebit-login-link {
+    margin-left: auto;
+    padding: 8px 16px;
+    border: 1.5px solid #09052b;
+    border-radius: 8px;
+}
+
+.drivebit-city-main {
+    flex: 1;
+}
+
+.drivebit-hero {
+    position: relative;
+    min-height: 360px;
+    max-height: 520px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drivebit-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.drivebit-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(9, 5, 43, 0.5), rgba(9, 5, 43, 0.7));
+}
+
+.drivebit-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 40px;
+    text-align: center;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.drivebit-hero-content h1 {
+    margin: 0 0 12px;
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.drivebit-hero-tagline {
+    margin: 0 0 8px;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-weight: 500;
+}
+
+.drivebit-hero-sub {
+    margin: 0 0 20px;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.drivebit-hero-search {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.drivebit-hero-search input[type="date"] {
+    padding: 10px 12px;
+    border: 1px solid #e2e2e8;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #09052b;
+    min-width: 0;
+}
+
+.drivebit-hero-search button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #09052b;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.drivebit-city-filters {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    box-sizing: border-box;
+}
+
+.drivebit-city-filters ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.drivebit-city-filters a {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid #e2e2e8;
+    border-radius: 999px;
+    color: #09052b;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.drivebit-city-filters a:hover,
+.drivebit-city-filters a[aria-current="page"] {
+    border-color: #09052b;
+    background: #f4f4f8;
+}
+
+@media (max-width: 640px) {
+    .drivebit-static-header-inner {
+        padding: 10px 16px;
+    }
+
+    .drivebit-hero {
+        min-height: 300px;
+    }
+
+    .drivebit-hero-search {
+        grid-template-columns: 1fr;
+    }
+
+    .drivebit-city-filters {
+        padding: 12px 16px;
+    }
+}
