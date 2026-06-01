@@ -10,6 +10,8 @@
     var TOKEN_KEY = "auth_token";
     var CITY_NAME_KEY = "my_city_name";
     var DEFAULT_CITY = "Москва";
+    var DEFAULT_AVATAR_PATH = "/images/menu/user.svg";
+    var MINIO_HOST_PORT_RE = /(?:https?:\/\/)?[^/?#]+:9000/i;
     var POLL_MS = 30000;
     var MOBILE_BP = 768;
     var REDIRECT_PARAM = "redirect";
@@ -51,6 +53,16 @@
 
     var menuOpen = false;
     var pollTimer = null;
+
+    var CITY_NAMES = [
+        "Москва", "Санкт-Петербург", "Санкт Петербург", "Казань", "Нижний Новгород",
+        "Екатеринбург", "Новосибирск", "Краснодар", "Сочи", "Ростов-на-Дону", "Владивосток",
+        "Калининград", "Йошкар-Ола", "Уфа", "Самара", "Челябинск", "Омск", "Красноярск",
+        "Воронеж", "Пермь", "Волгоград", "Тюмень", "Иркутск", "Хабаровск", "Ярославль",
+        "Тула", "Рязань", "Белгород", "Сургут", "Мурманск", "Владимир", "Тверь", "Калуга",
+        "Смоленск", "Псков", "Астрахань", "Крым", "Севастополь", "Зеленоград", "Люберцы",
+        "Серпухов", "Ростовка", "Минеральные Воды", "Красногорск"
+    ];
 
     function cityNameToSlug(name) {
         var lower = (name || "").trim().toLowerCase();
@@ -135,6 +147,30 @@
         window.dispatchEvent(new PopStateEvent("popstate"));
     }
 
+    function isDirectMinioUrl(url) {
+        return MINIO_HOST_PORT_RE.test(url || "");
+    }
+
+    function extractPathFromApiUrl(apiUrl) {
+        if (!isDirectMinioUrl(apiUrl)) {
+            return apiUrl;
+        }
+        var portIndex = apiUrl.indexOf(":9000");
+        if (portIndex < 0) {
+            return apiUrl;
+        }
+        var pathStart = apiUrl.indexOf("/", portIndex + 4);
+        return pathStart >= 0 ? apiUrl.substring(pathStart) : apiUrl;
+    }
+
+    function resolveAvatarSrc(rawUrl) {
+        var trimmed = (rawUrl || "").trim();
+        if (!trimmed) {
+            return DEFAULT_AVATAR_PATH;
+        }
+        return extractPathFromApiUrl(trimmed);
+    }
+
     function apiFetch(path, options) {
         var headers = { Accept: "application/json" };
         var token = getToken();
@@ -160,10 +196,31 @@
         logo.setAttribute("href", homePathHref());
     }
 
+    function cityNameFromSlug(slug) {
+        if (!slug) return null;
+        var normalized = slug.toLowerCase();
+        for (var i = 0; i < CITY_NAMES.length; i++) {
+            if (cityNameToSlug(CITY_NAMES[i]) === normalized) {
+                return CITY_NAMES[i];
+            }
+        }
+        return null;
+    }
+
+    function resolveCityDisplayName() {
+        var stored = (localStorage.getItem(CITY_NAME_KEY) || "").trim();
+        if (stored) return stored;
+        var slug = parseCitySlugFromPath(window.location.pathname);
+        if (slug) {
+            return cityNameFromSlug(slug) || DEFAULT_CITY;
+        }
+        return "";
+    }
+
     function updateCity() {
         var el = document.getElementById("drivebit-header-city");
         if (!el) return;
-        var name = (localStorage.getItem(CITY_NAME_KEY) || "").trim();
+        var name = resolveCityDisplayName();
         if (!name) {
             el.hidden = true;
             return;
@@ -279,10 +336,23 @@
             });
     }
 
+    function showAvatar(img, src) {
+        img.src = src;
+        img.hidden = false;
+    }
+
+    function hideAvatar(img) {
+        img.removeAttribute("src");
+        img.hidden = true;
+    }
+
     function refreshAvatar() {
         var img = document.getElementById("drivebit-header-avatar");
-        if (!img || !isLogined()) {
-            if (img) img.hidden = true;
+        if (!img) {
+            return Promise.resolve();
+        }
+        if (!isLogined()) {
+            hideAvatar(img);
             return Promise.resolve();
         }
         return apiFetch("Photo/avatar/my")
@@ -291,16 +361,10 @@
                 return r.json();
             })
             .then(function (data) {
-                var url = data && data.url;
-                if (url) {
-                    img.src = url;
-                    img.hidden = false;
-                } else {
-                    img.hidden = true;
-                }
+                showAvatar(img, resolveAvatarSrc(data && data.url));
             })
             .catch(function () {
-                img.hidden = true;
+                showAvatar(img, DEFAULT_AVATAR_PATH);
             });
     }
 
@@ -428,8 +492,14 @@
 
         window.addEventListener("resize", updateMobileNavVisibility);
         window.addEventListener("drivebit-auth-changed", refreshAll);
+        window.addEventListener("storage", function (e) {
+            if (e.key === TOKEN_KEY || e.key === CITY_NAME_KEY) {
+                refreshAll();
+            }
+        });
         window.addEventListener("popstate", function () {
             updateLogo();
+            updateCity();
         });
     }
 

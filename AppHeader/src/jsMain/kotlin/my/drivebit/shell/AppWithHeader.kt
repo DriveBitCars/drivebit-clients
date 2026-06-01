@@ -2,6 +2,7 @@ package my.drivebit.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import kotlinx.browser.window
 import my.drivebit.components.AppContainer
 import my.drivebit.components.ButterMenu
@@ -24,11 +25,33 @@ import org.koin.compose.koinInject
 
 @Composable
 fun StandaloneAppHeader() {
+    if (hasStaticHtmlHeaderShell()) {
+        HtmlUnreadBannerSync()
+        StandaloneAppHeaderCompose()
+        return
+    }
     ResponsiveContainer { isMobile ->
         AppContainer(isMobile = isMobile) {
             AppHeaderChrome(isMobile = isMobile)
         }
     }
+}
+
+@Composable
+private fun StandaloneAppHeaderCompose() {
+    val butterViewModel: ButterViewModel = koinInject()
+    Div({
+        style {
+            display(DisplayStyle.Flex)
+            alignItems(AlignItems.Center)
+            gap(12.px)
+            property("position", "relative")
+        }
+    }) {
+        CityDisplay()
+        MenuUserButton(butterViewModel::onClick)
+    }
+    ButterMenu()
 }
 
 @Composable

@@ -1,3 +1,11 @@
+:root {
+    --drivebit-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --drivebit-city-color: #6b46c1;
+    --drivebit-nav-color: #000;
+    --drivebit-header-max: 1200px;
+    --drivebit-header-pad-x: 40px;
+}
+
 .drivebit-unread-banner {
     display: block;
     background: #000;
@@ -8,6 +16,7 @@
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
+    font-family: var(--drivebit-font);
 }
 
 .drivebit-unread-banner[hidden] {
@@ -19,14 +28,14 @@
     top: 0;
     z-index: 100;
     background: #fff;
-    border-bottom: 1px solid #e8e8ee;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: var(--drivebit-font);
+    flex-shrink: 0;
 }
 
 .drivebit-app-header-inner {
-    max-width: 1200px;
+    max-width: var(--drivebit-header-max);
     margin: 0 auto;
-    padding: 12px 40px;
+    padding: 12px var(--drivebit-header-pad-x);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -53,16 +62,19 @@
 .drivebit-header-nav {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 20px;
     flex: 1;
+    min-width: 0;
 }
 
 .drivebit-header-nav a {
-    color: #000;
+    color: var(--drivebit-nav-color);
     text-decoration: none;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .drivebit-header-nav a:hover {
@@ -74,14 +86,23 @@
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
+    position: relative;
+}
+
+#drivebit-header-compose {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 40px;
 }
 
 .drivebit-header-city {
-    color: #000;
+    color: var(--drivebit-city-color);
     text-decoration: none;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .drivebit-header-city:hover {
@@ -96,6 +117,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 26px;
+    height: 26px;
     padding: 0;
     border: none;
     background: transparent;
@@ -120,14 +143,15 @@
 }
 
 .drivebit-header-nav-mobile {
-    max-width: 1200px;
+    max-width: var(--drivebit-header-max);
     margin: 0 auto 8px;
-    padding: 0 40px 12px;
+    padding: 0 var(--drivebit-header-pad-x) 12px;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 8px;
     box-sizing: border-box;
+    font-family: var(--drivebit-font);
 }
 
 .drivebit-header-nav-mobile[hidden] {
@@ -135,10 +159,14 @@
 }
 
 .drivebit-header-nav-mobile a {
-    color: #000;
+    color: var(--drivebit-nav-color);
     text-decoration: none;
     font-size: 16px;
     font-weight: 500;
+}
+
+.drivebit-header-nav-mobile a:hover {
+    text-decoration: underline;
 }
 
 .drivebit-butter-overlay {
@@ -166,6 +194,7 @@
     z-index: 1000;
     padding: 8px;
     box-sizing: border-box;
+    font-family: var(--drivebit-font);
 }
 
 .drivebit-butter-menu[hidden] {
@@ -200,17 +229,21 @@
 #root .drivebit-app-main {
     position: relative;
     box-sizing: border-box;
-    max-width: 1200px;
+    max-width: var(--drivebit-header-max);
     margin: 0 auto;
     min-width: 320px;
     width: 100%;
-    padding: 20px 40px 40px;
-    font-family: system-ui, -apple-system, sans-serif;
+    padding: 20px var(--drivebit-header-pad-x) 40px;
+    font-family: var(--drivebit-font);
 }
 
 @media (max-width: 768px) {
+    :root {
+        --drivebit-header-pad-x: 16px;
+    }
+
     .drivebit-app-header-inner {
-        padding: 12px 8px;
+        padding: 12px var(--drivebit-header-pad-x);
     }
 
     #drivebit-header-nav-desktop {
@@ -222,12 +255,12 @@
     }
 
     .drivebit-header-nav-mobile {
-        padding: 0 8px 12px;
+        padding: 0 var(--drivebit-header-pad-x) 12px;
     }
 
     #root.drivebit-app-main,
     #root .drivebit-app-main {
-        padding: 8px 8px 16px;
+        padding: 8px var(--drivebit-header-pad-x) 16px;
     }
 
     .drivebit-butter-menu {

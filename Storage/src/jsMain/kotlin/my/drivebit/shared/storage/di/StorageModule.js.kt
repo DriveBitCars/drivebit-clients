@@ -2,6 +2,7 @@ package my.drivebit.shared.storage.di
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.StorageSettings
+import my.drivebit.shared.storage.AuthNotifyingStorage
 import my.drivebit.shared.storage.Storage
 import my.drivebit.shared.storage.StorageImpl
 import org.koin.core.module.Module
@@ -13,6 +14,6 @@ actual val storageModule: Module =
             StorageSettings()
         }
         single<Storage> {
-            StorageImpl(get())
+            AuthNotifyingStorage(StorageImpl(get()))
         }
     }

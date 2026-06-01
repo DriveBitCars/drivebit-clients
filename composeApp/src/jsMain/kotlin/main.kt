@@ -6,8 +6,8 @@ import org.jetbrains.compose.web.renderComposable
 
 fun main() {
     ensureWebKoinStarted()
-    if (document.getElementById("drivebit-app-header") != null) {
-        renderComposable(rootElementId = "drivebit-app-header") {
+    document.getElementById("drivebit-header-compose")?.let { mount ->
+        renderComposable(rootElementId = mount.id) {
             AppHeaderRoot()
         }
     }

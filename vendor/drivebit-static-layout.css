@@ -21,7 +21,6 @@ body {
     box-sizing: border-box;
 }
 
-#drivebit-app-header .app-container,
 #root .app-container {
     max-width: var(--drivebit-page-max);
     margin-left: auto;
