@@ -1,29 +1,21 @@
     <!-- drivebit-app-header-start -->
-    <a id="drivebit-unread-banner" class="drivebit-unread-banner" href="/chats" hidden>У Вас есть непрочитанные сообщения</a>
     <header id="drivebit-app-header" class="drivebit-app-header">
+        <a id="drivebit-unread-banner" class="drivebit-unread-banner" href="/chats" aria-live="polite">У Вас есть непрочитанные сообщения</a>
         <div class="drivebit-app-header-inner">
-            <a id="drivebit-header-logo" class="drivebit-header-logo" href="/moskva">
+            <a class="drivebit-header-logo" href="/moskva">
                 <img src="/images/logos/turo_logo.svg" alt="Drive bit Logo" width="120" height="40" class="turo-logo">
             </a>
             <nav id="drivebit-header-nav-desktop" class="drivebit-header-nav" aria-label="Основная навигация">
-                <a href="/search" data-drivebit-nav="/search">Аренда авто</a>
-                <a href="/list-your-car.html" id="drivebit-nav-list-car" data-drivebit-nav-list-car>Сдать авто</a>
-                <a href="/contacts" data-drivebit-nav="/contacts">Контакты</a>
+                <a href="/search">Аренда авто</a>
+                <a href="/list-your-car.html">Сдать авто</a>
+                <a href="/contacts">Контакты</a>
             </nav>
-            <div class="drivebit-header-actions">
-                <a id="drivebit-header-city" class="drivebit-header-city" href="/my-city-selection" hidden></a>
-                <button type="button" id="drivebit-header-menu-btn" class="drivebit-header-menu-btn" aria-label="Меню" aria-expanded="false" aria-controls="drivebit-butter-menu">
-                    <img src="/images/menu/burger.svg" alt="" width="26" height="26">
-                    <img id="drivebit-header-avatar" class="drivebit-header-avatar" alt="" width="26" height="26" hidden>
-                </button>
-            </div>
+            <div id="drivebit-header-compose" class="drivebit-header-actions"></div>
         </div>
     </header>
-    <nav id="drivebit-header-nav-mobile" class="drivebit-header-nav-mobile" aria-label="Основная навигация" hidden>
-        <a href="/search" data-drivebit-nav="/search">Аренда авто</a>
-        <a href="/list-your-car.html" data-drivebit-nav-list-car>Сдать авто</a>
-        <a href="/contacts" data-drivebit-nav="/contacts">Контакты</a>
+    <nav id="drivebit-header-nav-mobile" class="drivebit-header-nav-mobile" aria-label="Основная навигация">
+        <a href="/search">Аренда авто</a>
+        <a href="/list-your-car.html">Сдать авто</a>
+        <a href="/contacts">Контакты</a>
     </nav>
-    <div id="drivebit-butter-overlay" class="drivebit-butter-overlay" hidden></div>
-    <nav id="drivebit-butter-menu" class="drivebit-butter-menu" hidden aria-label="Меню"></nav>
     <!-- drivebit-app-header-end -->

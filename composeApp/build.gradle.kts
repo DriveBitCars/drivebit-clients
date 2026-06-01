@@ -116,6 +116,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(libs.kotlinx.serialization.json)
             implementation(project(":WebShell"))
+            implementation(project(":AppHeader"))
             implementation(project(":Storage"))
             implementation(project(":CommonViewModels"))
             implementation(project(":Network"))

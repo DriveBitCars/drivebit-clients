@@ -5,27 +5,16 @@ import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.components.CookieConsentBanner
 import my.drivebit.navigation.Navigation
-import my.drivebit.repositories.di.repositoriesModule
 import my.drivebit.screens.CarDetailPage
 import my.drivebit.screens.CarPhotosGalleryPage
-import my.drivebit.shared.storage.di.storageModule
-import my.drivebit.viewmodels.di.commonViewModelsModule
-import my.drivebit.web.di.webModule
-import my.drivebit.web.login.loginWebModule
-import org.koin.compose.KoinApplication
+import my.drivebit.shell.MountWebShell
+import my.drivebit.web.koin.WebKoinHost
 
 @Composable
 @Suppress("FunctionName")
 fun CarDetailApp() {
-    KoinApplication(application = {
-        modules(
-            storageModule,
-            repositoriesModule,
-            webModule,
-            loginWebModule,
-            commonViewModelsModule,
-        )
-    }) {
+    WebKoinHost {
+        MountWebShell()
         CookieConsentBanner()
         Navigation { currentPath ->
             when {

@@ -26,9 +26,10 @@
     <link rel="icon" type="image/svg+xml" href="/images/logos/turo_logo.svg">
     <link rel="alternate icon" href="/images/logos/turo_logo.svg">
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
-    <link rel="preload" href="/composeApp.js?v=4" as="script">
+<link rel="preload" href="/composeApp.js?v=4" as="script">
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css"/>
         <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-header.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-main-promo.css"/>
@@ -36,11 +37,35 @@
     <script src="/vendor/leaflet/leaflet.js"></script>
 </head>
 <body>
+    <!-- drivebit-app-header-start -->
+    <header id="drivebit-app-header" class="drivebit-app-header">
+        <a id="drivebit-unread-banner" class="drivebit-unread-banner" href="/chats" aria-live="polite">У Вас есть непрочитанные сообщения</a>
+        <div class="drivebit-app-header-inner">
+            <a class="drivebit-header-logo" href="/moskva">
+                <img src="/images/logos/turo_logo.svg" alt="Drive bit Logo" width="120" height="40" class="turo-logo">
+            </a>
+            <nav id="drivebit-header-nav-desktop" class="drivebit-header-nav" aria-label="Основная навигация">
+                <a href="/search">Аренда авто</a>
+                <a href="/list-your-car.html">Сдать авто</a>
+                <a href="/contacts">Контакты</a>
+            </nav>
+            <div id="drivebit-header-compose" class="drivebit-header-actions"></div>
+        </div>
+    </header>
+    <nav id="drivebit-header-nav-mobile" class="drivebit-header-nav-mobile" aria-label="Основная навигация">
+        <a href="/search">Аренда авто</a>
+        <a href="/list-your-car.html">Сдать авто</a>
+        <a href="/contacts">Контакты</a>
+    </nav>
+    <!-- drivebit-app-header-end -->
+
+
 
     <div id="root"></div>
 <!-- drivebit-seo-generated-start -->
 <div class="drivebit-seo-loader" role="status" aria-live="polite" aria-label="Загрузка"></div>
 <!-- drivebit-seo-generated-end -->
+
 
 
 <!-- drivebit-main-promo-start -->
@@ -181,7 +206,5 @@
             </div>
         </footer>
     </div>
-
-    <script type="application/javascript" src="/composeApp.js?v=4"></script>
-</body>
+<script type="application/javascript" src="/composeApp.js?v=4"></script></body>
 </html>

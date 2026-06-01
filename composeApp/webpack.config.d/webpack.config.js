@@ -1,6 +1,7 @@
 config.devServer = config.devServer || {};
 config.devServer.historyApiFallback = {
     rewrites: [
+        { from: /^\/contacts\/?$/, to: '/contacts/index.html' },
         { from: /^\/car-detail/, to: '/car-detail/index.html' },
         { from: /^\/car-photos-gallery/, to: '/car-photos-gallery/index.html' },
     ],

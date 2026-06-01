@@ -1,3 +1,9 @@
+:root {
+    --drivebit-page-max: 1200px;
+    --drivebit-page-pad-x: 40px;
+    --drivebit-page-pad-x-mobile: 16px;
+}
+
 html {
     height: 100%;
 }
@@ -7,6 +13,19 @@ body {
     min-height: 100%;
     display: flex;
     flex-direction: column;
+}
+
+#drivebit-app-header,
+#root {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#root .app-container {
+    max-width: var(--drivebit-page-max);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
 }
 
 /* Compose mount area — hero placeholder + loader until app renders */

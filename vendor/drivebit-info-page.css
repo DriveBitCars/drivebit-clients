@@ -1,0 +1,80 @@
+body.drivebit-static-info-page {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #1a1a1a;
+}
+
+body.drivebit-static-info-page #root {
+    display: none !important;
+}
+
+.drivebit-info-page {
+    box-sizing: border-box;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px var(--drivebit-page-pad-x, 40px) 48px;
+    flex: 1 0 auto;
+    width: 100%;
+}
+
+.drivebit-info-page__back {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #2962ff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.drivebit-info-page__back:hover {
+    text-decoration: underline;
+}
+
+.drivebit-info-page h1 {
+    margin: 0 0 24px;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.drivebit-info-page h2 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.drivebit-info-page p {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+.drivebit-info-page p:last-child {
+    margin-bottom: 0;
+}
+
+.drivebit-info-page p.drivebit-info-page__tight {
+    margin-bottom: 4px;
+}
+
+.drivebit-info-page p.drivebit-info-page__section-end {
+    margin-bottom: 24px;
+}
+
+.drivebit-info-page a {
+    color: #2962ff;
+    text-decoration: none;
+}
+
+.drivebit-info-page a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .drivebit-info-page {
+        padding-left: var(--drivebit-page-pad-x-mobile, 16px);
+        padding-right: var(--drivebit-page-pad-x-mobile, 16px);
+    }
+}

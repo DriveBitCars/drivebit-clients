@@ -18,6 +18,10 @@ fun CityDisplay() {
     val currentPath by navigationState.currentPath.collectAsState()
     val cityName by myCityViewModel.myCity.collectAsState("")
 
+    LaunchedEffect(Unit) {
+        myCityViewModel.refresh()
+    }
+
     LaunchedEffect(currentPath) {
         if (isCityHomePath(currentPath)) {
             myCityViewModel.refresh()

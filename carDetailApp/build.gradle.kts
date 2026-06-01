@@ -18,6 +18,7 @@ kotlin {
     sourceSets {
         jsMain.dependencies {
             implementation(project(":DrivebitWeb"))
+            implementation(project(":AppHeader"))
             implementation(project(":Storage"))
             implementation(project(":Repositories"))
             implementation(project(":CommonViewModels"))

@@ -15,13 +15,14 @@ import org.jetbrains.compose.web.dom.Div
 @Composable
 fun Divider(
     color: CSSColorValue = CSSColors.Gray300,
-    thickness: CSSSizeValue<*> = 1.px,
+    thickness: CSSSizeValue<*>? = null,
     marginTop: CSSSizeValue<*>? = null,
 ) {
+    val lineThickness = thickness ?: 1.px
     Div({
         style {
             width(100.percent)
-            height(thickness)
+            height(lineThickness)
             backgroundColor(color)
             marginTop?.let { marginTop(it) }
         }

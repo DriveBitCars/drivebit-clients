@@ -88,13 +88,14 @@
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
 
     <!-- Preload critical resources (version must match script src for preload to be used) -->
-    <link rel="preload" href="/composeApp.js?v=4" as="script">
+<link rel="preload" href="/composeApp.js?v=4" as="script">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css"/>
         <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-header.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
 
@@ -602,8 +603,30 @@
     </script>
 </head>
 <body>
+    <!-- drivebit-app-header-start -->
+    <header id="drivebit-app-header" class="drivebit-app-header">
+        <a id="drivebit-unread-banner" class="drivebit-unread-banner" href="/chats" aria-live="polite">У Вас есть непрочитанные сообщения</a>
+        <div class="drivebit-app-header-inner">
+            <a class="drivebit-header-logo" href="/moskva">
+                <img src="/images/logos/turo_logo.svg" alt="Drive bit Logo" width="120" height="40" class="turo-logo">
+            </a>
+            <nav id="drivebit-header-nav-desktop" class="drivebit-header-nav" aria-label="Основная навигация">
+                <a href="/search">Аренда авто</a>
+                <a href="/list-your-car.html">Сдать авто</a>
+                <a href="/contacts">Контакты</a>
+            </nav>
+            <div id="drivebit-header-compose" class="drivebit-header-actions"></div>
+        </div>
+    </header>
+    <nav id="drivebit-header-nav-mobile" class="drivebit-header-nav-mobile" aria-label="Основная навигация">
+        <a href="/search">Аренда авто</a>
+        <a href="/list-your-car.html">Сдать авто</a>
+        <a href="/contacts">Контакты</a>
+    </nav>
+    <!-- drivebit-app-header-end -->
 
-    <!-- Compose Web App Root -->
+
+
     <div id="root"></div>
 
                                                                                                                                         
@@ -837,9 +860,7 @@
             }
         })();
     </script>
-
-    <!-- Основной JS скрипт -->
-    <script type="application/javascript" src="/composeApp.js?v=4"></script>
+<script type="application/javascript" src="/composeApp.js?v=4"></script>
 
     <script>
         (function () {
@@ -863,6 +884,5 @@
             if (document.readyState === 'complete') schedule();
             else window.addEventListener('load', schedule);
         })();
-    </script>
-</body>
+    </script></body>
 </html>

@@ -6,10 +6,6 @@ import my.drivebit.utils.cityNameToSlug
 
 private const val MOSCOW_NAME = "Москва"
 
-/**
- * Maps URL slug → [City] using [Dictionary.getAllCities]. On slug collision, the city with the
- * smaller [City.id] wins.
- */
 class CitySlugResolver(
     private val dictionary: Dictionary,
 ) {
