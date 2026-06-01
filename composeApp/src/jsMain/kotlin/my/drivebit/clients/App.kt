@@ -1,6 +1,7 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.navigation.Navigation
 import my.drivebit.repositories.di.repositoriesModule
@@ -34,7 +35,6 @@ import my.drivebit.screens.ListYourCarPage
 import my.drivebit.screens.LoginPage
 import my.drivebit.screens.LoginByPasswordPage
 import my.drivebit.screens.MyBookingsPage
-import my.drivebit.screens.MyCarsPage
 import my.drivebit.screens.MyDealsPage
 import my.drivebit.screens.ContactsPage
 import my.drivebit.screens.OfferPage
@@ -115,7 +115,7 @@ actual fun App() {
                     }
                 }
                 currentPath.startsWith("/my-cars") -> {
-                    MyCarsPage()
+                    RedirectToMyCarsBundle()
                 }
                 currentPath.startsWith("/my-bookings") -> {
                     if (storage.isLogined()) {
@@ -377,5 +377,12 @@ actual fun App() {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RedirectToMyCarsBundle() {
+    LaunchedEffect(Unit) {
+        window.location.replace("/my-cars/")
     }
 }

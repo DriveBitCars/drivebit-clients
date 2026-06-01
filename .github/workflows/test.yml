@@ -167,6 +167,7 @@ jobs:
           - WebShell
           - DrivebitWeb
           - carDetailApp
+          - myCarsApp
           - composeApp
 
     steps:

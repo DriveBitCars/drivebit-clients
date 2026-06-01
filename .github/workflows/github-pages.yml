@@ -41,10 +41,10 @@ jobs:
     - name: Build JS distribution
       run: |
         echo "🔨 Building JS distribution..."
-        ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution --no-daemon --stacktrace || exit 1
+        ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution --no-daemon --stacktrace || exit 1
         echo "✅ Build completed"
 
-    - name: Merge car detail bundle into main dist
+    - name: Merge split bundles into main dist
       run: |
         set -e
         DIST="composeApp/build/dist/js/productionExecutable"
@@ -54,7 +54,12 @@ jobs:
         cp -r "$CARDET/car-photos-gallery" "$DIST/"
         test -f "$DIST/car-detail/index.html"
         test -f "$DIST/carDetail.js"
-        echo "car-detail bundle merged OK"
+        MYCARS="myCarsApp/build/dist/js/productionExecutable"
+        cp "$MYCARS/myCars.js" "$DIST/"
+        cp -r "$MYCARS/my-cars" "$DIST/"
+        test -f "$DIST/my-cars/index.html"
+        test -f "$DIST/myCars.js"
+        echo "split bundles merged OK"
 
     - name: Prepare dist directory
       run: |

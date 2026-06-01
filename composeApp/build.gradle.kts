@@ -240,17 +240,23 @@ tasks.register("generateAllSeoSnapshots") {
     dependsOn("generateMoskvaSeoSnapshots", "generateSearchBrandSeoSnapshots")
 }
 
-val needsCarDetailDevBundle =
+val needsSplitBundleDevWebpack =
     gradle.startParameter.taskNames.any {
         it.contains("jsBrowserDevelopmentRun", ignoreCase = true) ||
             (it.contains("composeApp", ignoreCase = true) && it.contains("Development", ignoreCase = true))
     }
 
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
-    if (needsCarDetailDevBundle) {
-        dependsOn(":carDetailApp:jsBrowserDevelopmentWebpack")
+    if (needsSplitBundleDevWebpack) {
+        dependsOn(
+            ":carDetailApp:jsBrowserDevelopmentWebpack",
+            ":myCarsApp:jsBrowserDevelopmentWebpack",
+        )
     } else {
-        dependsOn(":carDetailApp:jsBrowserProductionWebpack")
+        dependsOn(
+            ":carDetailApp:jsBrowserProductionWebpack",
+            ":myCarsApp:jsBrowserProductionWebpack",
+        )
     }
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.dir("vendor")) {
@@ -260,8 +266,9 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
         into("seo")
     }
     from(project(":carDetailApp").layout.projectDirectory.dir("src/jsMain/resources"))
+    from(project(":myCarsApp").layout.projectDirectory.dir("src/jsMain/resources"))
     val carDetailWebpackDir =
-        if (needsCarDetailDevBundle) {
+        if (needsSplitBundleDevWebpack) {
             project(":carDetailApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
         } else {
             project(":carDetailApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
@@ -269,8 +276,20 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(carDetailWebpackDir) {
         include("carDetail.js", "carDetail.js.map")
     }
+    val myCarsWebpackDir =
+        if (needsSplitBundleDevWebpack) {
+            project(":myCarsApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
+        } else {
+            project(":myCarsApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
+        }
+    from(myCarsWebpackDir) {
+        include("myCars.js", "myCars.js.map")
+    }
 }
 
 tasks.named("jsBrowserDevelopmentRun").configure {
-    dependsOn(":carDetailApp:jsBrowserDevelopmentWebpack")
+    dependsOn(
+        ":carDetailApp:jsBrowserDevelopmentWebpack",
+        ":myCarsApp:jsBrowserDevelopmentWebpack",
+    )
 }
