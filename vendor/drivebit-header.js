@@ -240,7 +240,7 @@
             if (hasCars) {
                 items.push({ text: "Мои авто", icon: ICONS.car, path: "/my-cars" });
             } else {
-                items.push({ text: "Сдать авто", icon: ICONS.car, path: "/list-your-car" });
+                items.push({ text: "Сдать авто", icon: ICONS.car, href: listYourCarHref() });
             }
             items.push({
                 text: "Выйти",
@@ -346,7 +346,7 @@
         document.querySelectorAll("[data-drivebit-nav-list-car]").forEach(function (el) {
             el.addEventListener("click", function (e) {
                 var href = el.getAttribute("href") || listYourCarHref();
-                if (href.indexOf("/login-by-phone") === 0 || href.indexOf("/list-your-car") === 0) {
+                if (href.indexOf("/login-by-phone") === 0 || href.indexOf("/list-your-car.html") === 0) {
                     if (shouldUseFullPageNavigation(href.split("?")[0])) return;
                     e.preventDefault();
                     window.location.href = href;

@@ -8,7 +8,7 @@ class NavigationController(
     fun getCurrentPath(): String = window.location.pathname
 
     fun navigateTo(path: String) {
-        if (shouldLeaveCarDetailApp(path)) {
+        if (shouldUseFullPageNavigation(path)) {
             window.location.href = path
             return
         }
@@ -18,7 +18,7 @@ class NavigationController(
     }
 
     fun replacePath(path: String) {
-        if (shouldLeaveCarDetailApp(path)) {
+        if (shouldUseFullPageNavigation(path)) {
             window.location.replace(path)
             return
         }
@@ -35,10 +35,14 @@ class NavigationController(
     }
 }
 
-private fun isCarDetailAppPath(path: String): Boolean =
-    path.startsWith("/car-detail") || path.startsWith("/car-photos-gallery")
+private fun isSplitBundlePath(path: String): Boolean =
+    path.startsWith("/car-detail") ||
+        path.startsWith("/car-photos-gallery") ||
+        isOwnerCarBundlePath(path)
 
-private fun shouldLeaveCarDetailApp(targetPath: String): Boolean {
+private fun shouldUseFullPageNavigation(targetPath: String): Boolean {
     val currentPath = window.location.pathname
-    return isCarDetailAppPath(currentPath) && !isCarDetailAppPath(targetPath)
+    val currentIsSplit = isSplitBundlePath(currentPath)
+    val targetIsSplit = isSplitBundlePath(targetPath)
+    return currentIsSplit != targetIsSplit
 }
