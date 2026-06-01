@@ -4,7 +4,5 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun PageWithLogo(content: @Composable () -> Unit) {
-    AppWithHeader {
-        content()
-    }
+    AppWithHeader(content)
 }

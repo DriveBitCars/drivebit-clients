@@ -74,7 +74,7 @@ jobs:
       run: ./gradlew clean --no-daemon
 
     - name: Build JS distribution (fast web version)
-      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :appHeaderApp:jsBrowserDistribution --no-daemon
+      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution --no-daemon
 
     - name: Merge split bundles into main dist
       run: |
@@ -100,10 +100,6 @@ jobs:
           test -f "$DIST/$route/index.html"
         done
         test -f "$DIST/myCars.js"
-        HEADER="appHeaderApp/build/dist/js/productionExecutable"
-        cp "$HEADER/appHeader.js" "$DIST/"
-        cp "$HEADER/appHeader.js.map" "$DIST/" 2>/dev/null || true
-        test -f "$DIST/appHeader.js"
         echo "split bundles merged OK"
 
     - name: Verify Moscow SEO pages in dist

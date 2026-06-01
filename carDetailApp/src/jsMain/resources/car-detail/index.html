@@ -36,6 +36,27 @@
     <script src="/vendor/leaflet/leaflet.js"></script>
 </head>
 <body>
+<!-- drivebit-app-header-start -->
+    <a id="drivebit-unread-banner" class="drivebit-unread-banner" href="/chats" hidden>У Вас есть непрочитанные сообщения</a>
+    <header id="drivebit-app-header" class="drivebit-app-header">
+        <div class="drivebit-app-header-inner">
+            <a class="drivebit-header-logo" href="/moskva">
+                <img src="/images/logos/turo_logo.svg" alt="Drive bit Logo" width="120" height="40" class="turo-logo">
+            </a>
+            <nav id="drivebit-header-nav-desktop" class="drivebit-header-nav" aria-label="Основная навигация">
+                <a href="/search">Аренда авто</a>
+                <a href="/list-your-car.html">Сдать авто</a>
+                <a href="/contacts">Контакты</a>
+            </nav>
+            <div id="drivebit-header-compose" class="drivebit-header-actions"></div>
+        </div>
+    </header>
+    <nav id="drivebit-header-nav-mobile" class="drivebit-header-nav-mobile" aria-label="Основная навигация">
+        <a href="/search">Аренда авто</a>
+        <a href="/list-your-car.html">Сдать авто</a>
+        <a href="/contacts">Контакты</a>
+    </nav>
+    <!-- drivebit-app-header-end -->
 <div id="root"></div>
 
     <div class="drivebit-footer-shell">

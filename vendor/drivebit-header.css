@@ -24,9 +24,7 @@
 }
 
 .drivebit-app-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: relative;
     background: #fff;
     font-family: var(--drivebit-font);
     flex-shrink: 0;

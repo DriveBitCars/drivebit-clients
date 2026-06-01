@@ -19,6 +19,8 @@ kotlin {
             implementation(project(":Storage"))
             implementation(project(":CommonViewModels"))
             implementation(project(":Repositories"))
+            implementation(project(":Network"))
+            implementation(project(":Maps"))
             implementation(project(":UI-Components"))
             implementation(project(":Utils"))
             implementation(libs.koin.core)

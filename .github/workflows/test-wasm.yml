@@ -78,7 +78,7 @@ jobs:
     - name: Build JS Browser Distribution
       env:
         NODE_OPTIONS: --max-old-space-size=4096
-      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :appHeaderApp:jsBrowserDistribution --no-daemon --stacktrace --no-parallel --no-build-cache
+      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution --no-daemon --stacktrace --no-parallel --no-build-cache
 
     - name: Check JS bundles for skiko references
       run: |

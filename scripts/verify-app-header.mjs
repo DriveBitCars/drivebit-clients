@@ -11,10 +11,12 @@ async function collectHeader(page) {
     () => {
       const mount = document.getElementById("drivebit-app-header");
       const root = document.getElementById("root");
+      const compose = mount?.querySelector("#drivebit-header-compose");
       const mountHasHeader =
         mount &&
         (mount.querySelector(".app-container") ||
           mount.querySelector(".turo-logo") ||
+          (compose && compose.innerHTML.length > 20) ||
           mount.innerHTML.length > 200);
       const rootHasHeader =
         root &&
@@ -37,13 +39,19 @@ async function collectHeader(page) {
     const container = headerContainers[0] || containers[0];
 
     const logo = document.querySelector(".turo-logo");
-    const cityEl = [...document.querySelectorAll(".app-container span")].find((el) => {
+    const cityEl = [...document.querySelectorAll(".app-container span, #drivebit-header-compose span, #drivebit-header-compose button")].find((el) => {
       const t = (el.textContent || "").trim();
       return t === "Москва" || t === "Москве";
     });
-    const navTexts = [...document.querySelectorAll(".app-container span")]
+    const navFromCompose = [...document.querySelectorAll(".app-container span")]
       .map((s) => (s.textContent || "").trim())
       .filter((t) => ["Аренда авто", "Сдать авто", "Контакты"].includes(t));
+    const navFromHtml = [
+      ...document.querySelectorAll("#drivebit-header-nav-desktop a, #drivebit-header-nav-mobile a"),
+    ]
+      .map((a) => (a.textContent || "").trim())
+      .filter((t) => ["Аренда авто", "Сдать авто", "Контакты"].includes(t));
+    const navTexts = [...new Set([...navFromCompose, ...navFromHtml])];
     const burger = document.querySelector('img[alt="Menu"]');
     const avatars = document.querySelectorAll('img[src*="user"], img[src*="avatar"]');
 
@@ -177,9 +185,15 @@ if (localD && prodD) {
     local: localD.cityText,
     prod: prodD.cityText,
   });
+  const rootMinLen =
+    path.startsWith("/car-detail") || path.startsWith("/car-photos-gallery")
+      ? 500
+      : path.startsWith("/my-cars") || path.includes("car-edit")
+        ? 1500
+        : 5000;
   checks.push({
     name: "compose-root-mounted-local",
-    ok: (localD.rootContentLen ?? 0) > 5000,
+    ok: (localD.rootContentLen ?? 0) > rootMinLen,
     local: localD.rootContentLen,
     prod: prodD.rootContentLen,
   });

@@ -277,13 +277,11 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
         dependsOn(
             ":carDetailApp:jsBrowserDevelopmentWebpack",
             ":myCarsApp:jsBrowserDevelopmentWebpack",
-            ":appHeaderApp:jsBrowserDevelopmentWebpack",
         )
     } else {
         dependsOn(
             ":carDetailApp:jsBrowserProductionWebpack",
             ":myCarsApp:jsBrowserProductionWebpack",
-            ":appHeaderApp:jsBrowserProductionWebpack",
         )
     }
     dependsOn(":myCarsApp:jsProcessResources")
@@ -319,21 +317,11 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(myCarsWebpackDir) {
         include("myCars.js", "myCars.js.map")
     }
-    val appHeaderWebpackDir =
-        if (needsSplitBundleDevWebpack) {
-            project(":appHeaderApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
-        } else {
-            project(":appHeaderApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
-        }
-    from(appHeaderWebpackDir) {
-        include("appHeader.js", "appHeader.js.map")
-    }
 }
 
 tasks.named("jsBrowserDevelopmentRun").configure {
     dependsOn(
         ":carDetailApp:jsBrowserDevelopmentWebpack",
         ":myCarsApp:jsBrowserDevelopmentWebpack",
-        ":appHeaderApp:jsBrowserDevelopmentWebpack",
     )
 }
