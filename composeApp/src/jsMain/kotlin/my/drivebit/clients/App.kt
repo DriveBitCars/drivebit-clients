@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.navigation.Navigation
 import my.drivebit.navigation.isOwnerCarBundlePath
-import my.drivebit.repositories.di.repositoriesModule
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePasswordPage
 import my.drivebit.screens.ChangePhonePage
@@ -32,27 +31,15 @@ import my.drivebit.components.CookieConsentBanner
 import my.drivebit.screens.ProfilePage
 import my.drivebit.screens.SearchPage
 import my.drivebit.shared.storage.Storage
-import my.drivebit.shared.storage.di.storageModule
-import my.drivebit.viewmodels.di.commonViewModelsModule
-import my.drivebit.web.di.webModule
 import my.drivebit.web.homePathHref
-import my.drivebit.web.login.loginWebModule
-import org.koin.compose.KoinApplication
+import my.drivebit.web.koin.WebKoinHost
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
 @Composable
 @Suppress("FunctionName")
 actual fun App() {
-    KoinApplication(application = {
-        modules(
-            storageModule,
-            repositoriesModule,
-            webModule,
-            loginWebModule,
-            commonViewModelsModule,
-        )
-    }) {
+    WebKoinHost {
         CookieConsentBanner()
         Navigation { currentPath ->
             val storage: Storage = koinInject()
@@ -173,6 +160,7 @@ actual fun App() {
         }
     }
 }
+
 
 @Composable
 private fun RedirectToListYourCarHtml() {

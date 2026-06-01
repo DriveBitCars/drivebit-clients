@@ -88,7 +88,7 @@
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
 
     <!-- Preload critical resources (version must match script src for preload to be used) -->
-    <link rel="preload" href="/composeApp.js?v=4" as="script">
+<link rel="preload" href="/composeApp.js?v=4" as="script">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -602,8 +602,7 @@
     </script>
 </head>
 <body>
-
-    <!-- Compose Web App Root -->
+    <div id="drivebit-app-header"></div>
     <div id="root"></div>
 
                                                                                                                                         
@@ -837,9 +836,7 @@
             }
         })();
     </script>
-
-    <!-- Основной JS скрипт -->
-    <script type="application/javascript" src="/composeApp.js?v=4"></script>
+<script type="application/javascript" src="/composeApp.js?v=4"></script>
 
     <script>
         (function () {
@@ -863,6 +860,5 @@
             if (document.readyState === 'complete') schedule();
             else window.addEventListener('load', schedule);
         })();
-    </script>
-</body>
+    </script></body>
 </html>
