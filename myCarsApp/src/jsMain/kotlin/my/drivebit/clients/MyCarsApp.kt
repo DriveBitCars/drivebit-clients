@@ -7,6 +7,7 @@ import my.drivebit.components.CookieConsentBanner
 import my.drivebit.navigation.Navigation
 import my.drivebit.navigation.isOwnerCarBundlePath
 import my.drivebit.shared.storage.Storage
+import my.drivebit.shell.MountWebShell
 import my.drivebit.web.koin.WebKoinHost
 import org.koin.compose.koinInject
 
@@ -14,6 +15,7 @@ import org.koin.compose.koinInject
 @Suppress("FunctionName")
 fun MyCarsApp() {
     WebKoinHost {
+        MountWebShell()
         CookieConsentBanner()
         Navigation { currentPath ->
             val storage: Storage = koinInject()

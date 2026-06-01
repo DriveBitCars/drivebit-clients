@@ -7,16 +7,17 @@ import org.jetbrains.compose.web.dom.Img
 @Composable
 fun UserAvatar(
     src: String,
-    size: CSSLengthOrPercentageValue = 200.px,
+    size: CSSLengthOrPercentageValue? = null,
     alt: String = "User",
 ) {
+    val avatarSize = size ?: 200.px
     Img(
         src = src,
         alt = alt,
         attrs = {
             style {
-                width(size)
-                height(size)
+                width(avatarSize)
+                height(avatarSize)
                 borderRadius(50.percent)
                 property("object-fit", "cover")
                 property("object-position", "top")

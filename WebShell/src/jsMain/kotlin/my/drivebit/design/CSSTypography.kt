@@ -10,16 +10,15 @@ object CSSTypography {
     // Основной шрифт
     val FontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif"
 
-    // Размеры шрифтов в пикселях
     object FontSize {
-        val xs = 12.px
-        val sm = 14.px
-        val base = 16.px
-        val lg = 18.px
-        val xl = 20.px
-        val xxl = 24.px
-        val xxxl = 32.px
-        val xxxxl = 42.px
+        val xs: CSSSizeValue<CSSUnit.px> get() = 12.px
+        val sm: CSSSizeValue<CSSUnit.px> get() = 14.px
+        val base: CSSSizeValue<CSSUnit.px> get() = 16.px
+        val lg: CSSSizeValue<CSSUnit.px> get() = 18.px
+        val xl: CSSSizeValue<CSSUnit.px> get() = 20.px
+        val xxl: CSSSizeValue<CSSUnit.px> get() = 24.px
+        val xxxl: CSSSizeValue<CSSUnit.px> get() = 32.px
+        val xxxxl: CSSSizeValue<CSSUnit.px> get() = 42.px
     }
 
     // Веса шрифтов

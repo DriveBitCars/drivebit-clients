@@ -8,19 +8,34 @@
 
 .drivebit-unread-banner {
     display: block;
-    background: #000;
-    color: #fff;
-    padding: 8px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    max-height: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: #fff;
+    color: transparent;
     text-align: center;
     text-decoration: none;
-    cursor: pointer;
-    font-size: 14px;
+    font-size: 0;
+    line-height: 0;
     font-weight: 500;
     font-family: var(--drivebit-font);
+    pointer-events: none;
+    box-sizing: border-box;
 }
 
-.drivebit-unread-banner[hidden] {
-    display: none !important;
+.drivebit-unread-banner--visible {
+    max-height: none;
+    min-height: 0;
+    padding: 8px var(--drivebit-header-pad-x);
+    font-size: 14px;
+    line-height: 1.25;
+    background: #000;
+    color: #fff;
+    pointer-events: auto;
+    cursor: pointer;
 }
 
 .drivebit-app-header {
@@ -31,6 +46,7 @@
 }
 
 .drivebit-app-header-inner {
+    width: 100%;
     max-width: var(--drivebit-header-max);
     margin: 0 auto;
     padding: 12px var(--drivebit-header-pad-x);
@@ -40,6 +56,16 @@
     gap: 16px;
     box-sizing: border-box;
     min-width: 320px;
+}
+
+.drivebit-app-header--unread-visible .drivebit-app-header-inner {
+    padding-top: 0;
+    align-items: center;
+}
+
+.drivebit-app-header--unread-visible .drivebit-header-logo {
+    line-height: 0;
+    display: flex;
 }
 
 .drivebit-header-logo {

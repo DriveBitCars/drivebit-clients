@@ -10,7 +10,6 @@ import my.drivebit.screens.ChangePasswordPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.ChatDetailPage
 import my.drivebit.screens.ChatListPage
-import my.drivebit.screens.ContactsPage
 import my.drivebit.screens.CookiesPage
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.DownloadBookingContractPage
@@ -31,6 +30,8 @@ import my.drivebit.components.CookieConsentBanner
 import my.drivebit.screens.ProfilePage
 import my.drivebit.screens.SearchPage
 import my.drivebit.shared.storage.Storage
+import my.drivebit.shell.MountWebShell
+import my.drivebit.shell.isStaticHtmlShellPath
 import my.drivebit.web.homePathHref
 import my.drivebit.web.koin.WebKoinHost
 import org.koin.compose.koinInject
@@ -40,6 +41,7 @@ import org.koin.core.qualifier.named
 @Suppress("FunctionName")
 actual fun App() {
     WebKoinHost {
+        MountWebShell()
         CookieConsentBanner()
         Navigation { currentPath ->
             val storage: Storage = koinInject()
@@ -113,9 +115,6 @@ actual fun App() {
                 currentPath.startsWith("/offer") -> {
                     OfferPage()
                 }
-                currentPath.startsWith("/contacts") -> {
-                    ContactsPage()
-                }
                 currentPath.startsWith("/privacy") -> {
                     PrivacyPage()
                 }
@@ -154,7 +153,9 @@ actual fun App() {
                     SearchPage()
                 }
                 else -> {
-                    HomePage()
+                    if (!isStaticHtmlShellPath(currentPath)) {
+                        HomePage()
+                    }
                 }
             }
         }

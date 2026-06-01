@@ -38,6 +38,4 @@ fun PageContentShell(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun AppWithHeader(content: @Composable () -> Unit) {
-    PageContentShell(content)
-}
+fun AppWithHeader(content: @Composable () -> Unit) = PageContentShell(content)

@@ -6,7 +6,7 @@ import org.jetbrains.compose.web.dom.Div
 
 @Composable
 fun HeaderRow(
-    marginBottom: CSSSizeValue<out CSSUnit.px> = 20.px,
+    marginBottom: CSSSizeValue<out CSSUnit.px>,
     content: @Composable () -> Unit,
 ) {
     Div({

@@ -7,12 +7,14 @@ import my.drivebit.components.CookieConsentBanner
 import my.drivebit.navigation.Navigation
 import my.drivebit.screens.CarDetailPage
 import my.drivebit.screens.CarPhotosGalleryPage
+import my.drivebit.shell.MountWebShell
 import my.drivebit.web.koin.WebKoinHost
 
 @Composable
 @Suppress("FunctionName")
 fun CarDetailApp() {
     WebKoinHost {
+        MountWebShell()
         CookieConsentBanner()
         Navigation { currentPath ->
             when {
