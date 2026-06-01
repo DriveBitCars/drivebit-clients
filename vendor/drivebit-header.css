@@ -1,0 +1,244 @@
+.drivebit-unread-banner {
+    display: block;
+    background: #000;
+    color: #fff;
+    padding: 8px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.drivebit-unread-banner[hidden] {
+    display: none !important;
+}
+
+.drivebit-app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid #e8e8ee;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.drivebit-app-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-sizing: border-box;
+    min-width: 320px;
+}
+
+.drivebit-header-logo {
+    cursor: pointer;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+
+.drivebit-header-logo .turo-logo {
+    width: 120px;
+    height: 40px;
+    max-width: 120px;
+    max-height: 40px;
+    object-fit: contain;
+    display: block;
+}
+
+.drivebit-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+}
+
+.drivebit-header-nav a {
+    color: #000;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.drivebit-header-nav a:hover {
+    text-decoration: underline;
+}
+
+.drivebit-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.drivebit-header-city {
+    color: #000;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.drivebit-header-city:hover {
+    text-decoration: underline;
+}
+
+.drivebit-header-city[hidden] {
+    display: none !important;
+}
+
+.drivebit-header-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+}
+
+.drivebit-header-menu-btn img {
+    display: block;
+}
+
+.drivebit-header-avatar {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.drivebit-header-avatar[hidden] {
+    display: none !important;
+}
+
+.drivebit-header-nav-mobile {
+    max-width: 1200px;
+    margin: 0 auto 8px;
+    padding: 0 40px 12px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    box-sizing: border-box;
+}
+
+.drivebit-header-nav-mobile[hidden] {
+    display: none !important;
+}
+
+.drivebit-header-nav-mobile a {
+    color: #000;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.drivebit-butter-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: transparent;
+}
+
+.drivebit-butter-overlay[hidden] {
+    display: none !important;
+}
+
+.drivebit-butter-menu {
+    position: fixed;
+    top: 72px;
+    right: 36px;
+    width: 280px;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.drivebit-butter-menu[hidden] {
+    display: none !important;
+}
+
+.drivebit-butter-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    color: #000;
+    font-size: 14px;
+}
+
+.drivebit-butter-item:hover {
+    background: #f3f4f6;
+}
+
+.drivebit-butter-item img {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+#root.drivebit-app-main,
+#root .drivebit-app-main {
+    position: relative;
+    box-sizing: border-box;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-width: 320px;
+    width: 100%;
+    padding: 20px 40px 40px;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+@media (max-width: 768px) {
+    .drivebit-app-header-inner {
+        padding: 12px 8px;
+    }
+
+    #drivebit-header-nav-desktop {
+        display: none;
+    }
+
+    .drivebit-header-nav-mobile:not([hidden]) {
+        display: flex;
+    }
+
+    .drivebit-header-nav-mobile {
+        padding: 0 8px 12px;
+    }
+
+    #root.drivebit-app-main,
+    #root .drivebit-app-main {
+        padding: 8px 8px 16px;
+    }
+
+    .drivebit-butter-menu {
+        right: 8px;
+        left: 8px;
+        width: auto;
+    }
+}
+
+@media (min-width: 769px) {
+    .drivebit-header-nav-mobile {
+        display: none !important;
+    }
+}

@@ -34,399 +34,16 @@
     <link rel="stylesheet" href="/vendor/drivebit-main-promo.css"/>
 
     <script src="/vendor/leaflet/leaflet.js"></script>
-    <!-- drivebit-seo-jsonld -->
-    <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "DriveBit",
-          "item": "https://drivebit.ru/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Москва",
-          "item": "https://drivebit.ru/moskva"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Командировки",
-          "item": "https://drivebit.ru/moskva/komandirovki"
-        }
-      ]
-    },
-    {
-      "@type": "AutoRental",
-      "name": "DriveBit — Командировки",
-      "url": "https://drivebit.ru/moskva/komandirovki",
-      "areaServed": "Москва",
-      "provider": {
-        "@type": "Organization",
-        "name": "DriveBit",
-        "url": "https://drivebit.ru"
-      }
-    },
-    {
-      "@type": "ItemList",
-      "name": "Аренда авто для командировки и поездки в другой город",
-      "numberOfItems": 12,
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "item": {
-            "@type": "Product",
-            "name": "Volkswagen Polo",
-            "url": "https://drivebit.ru/car-detail?id=b9558994-c4d2-4f57-b23c-db1daad30cd7",
-            "image": "https://drivebit.ru/publicbct/cars/b9558994-c4d2-4f57-b23c-db1daad30cd7/748f5266-5246-43fe-94e2-770d878ebb30_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 2000,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=b9558994-c4d2-4f57-b23c-db1daad30cd7"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "item": {
-            "@type": "Product",
-            "name": "Renault Duster",
-            "url": "https://drivebit.ru/car-detail?id=83342dab-a9b8-48d7-bcb9-6c68de0045fc",
-            "image": "https://drivebit.ru/publicbct/cars/83342dab-a9b8-48d7-bcb9-6c68de0045fc/2c0bda8f-eb8f-4d16-ab79-a2a3730b7877_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 1990,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=83342dab-a9b8-48d7-bcb9-6c68de0045fc"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "item": {
-            "@type": "Product",
-            "name": "Nissan Terrano",
-            "url": "https://drivebit.ru/car-detail?id=724e4509-2a90-4a04-b29a-a00b5c43728b",
-            "image": "https://drivebit.ru/publicbct/cars/724e4509-2a90-4a04-b29a-a00b5c43728b/c82679ba-ac9d-4301-a888-b16e57ca22e8_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 2160,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=724e4509-2a90-4a04-b29a-a00b5c43728b"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
-          "item": {
-            "@type": "Product",
-            "name": "Audi Q3",
-            "url": "https://drivebit.ru/car-detail?id=48e5978a-455f-49d9-9359-3ff7a4609ae1",
-            "image": "https://drivebit.ru/publicbct/cars/48e5978a-455f-49d9-9359-3ff7a4609ae1/9a0a8695-9777-4e00-b053-1e3a3cfefd95_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 2999,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=48e5978a-455f-49d9-9359-3ff7a4609ae1"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 5,
-          "item": {
-            "@type": "Product",
-            "name": "Skoda Yeti",
-            "url": "https://drivebit.ru/car-detail?id=253bf19c-f602-4314-b760-a1deef8bfeec",
-            "image": "https://drivebit.ru/publicbct/cars/253bf19c-f602-4314-b760-a1deef8bfeec/b80ba441-9956-440a-b02e-5fd39eeef5b5_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 2160,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=253bf19c-f602-4314-b760-a1deef8bfeec"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 6,
-          "item": {
-            "@type": "Product",
-            "name": "Kia Sportage",
-            "url": "https://drivebit.ru/car-detail?id=af5ed76c-e532-441f-a5ea-a9ddd5f31907",
-            "image": "https://drivebit.ru/publicbct/cars/af5ed76c-e532-441f-a5ea-a9ddd5f31907/d756bbec-7d6b-4c78-804d-35c28376c98c_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 2160,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=af5ed76c-e532-441f-a5ea-a9ddd5f31907"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 7,
-          "item": {
-            "@type": "Product",
-            "name": "Renault Duster",
-            "url": "https://drivebit.ru/car-detail?id=69befe04-e6a2-472b-8734-2ed6e6b5b06d",
-            "image": "https://drivebit.ru/publicbct/cars/69befe04-e6a2-472b-8734-2ed6e6b5b06d/f91d69d2-fb50-4290-af12-00070fcb1433_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 2160,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=69befe04-e6a2-472b-8734-2ed6e6b5b06d"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 8,
-          "item": {
-            "@type": "Product",
-            "name": "Renault Duster",
-            "url": "https://drivebit.ru/car-detail?id=75cfadf2-72aa-4c9f-b697-ce264370a094",
-            "image": "https://drivebit.ru/publicbct/cars/75cfadf2-72aa-4c9f-b697-ce264370a094/bc6ea27c-c4fa-457a-9bdd-3a9508923132_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 2160,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=75cfadf2-72aa-4c9f-b697-ce264370a094"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 9,
-          "item": {
-            "@type": "Product",
-            "name": "BMW X1",
-            "url": "https://drivebit.ru/car-detail?id=3bb114c3-24b5-4fa1-9b8f-89591ee87f94",
-            "image": "https://drivebit.ru/publicbct/cars/3bb114c3-24b5-4fa1-9b8f-89591ee87f94/96eccbc3-a4c0-484e-aaea-dba452381c69_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 2800,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=3bb114c3-24b5-4fa1-9b8f-89591ee87f94"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 10,
-          "item": {
-            "@type": "Product",
-            "name": "Kia Ceed",
-            "url": "https://drivebit.ru/car-detail?id=6f8e0c73-77d6-4ced-8004-4b356583e0ca",
-            "image": "https://drivebit.ru/publicbct/cars/6f8e0c73-77d6-4ced-8004-4b356583e0ca/ca52f6aa-b803-4fd6-aff9-fc0159dd320e_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 1799,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=6f8e0c73-77d6-4ced-8004-4b356583e0ca"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 11,
-          "item": {
-            "@type": "Product",
-            "name": "Kia Rio",
-            "url": "https://drivebit.ru/car-detail?id=faf14e5e-977c-4592-bdbd-34b04e5d2746",
-            "image": "https://drivebit.ru/publicbct/cars/faf14e5e-977c-4592-bdbd-34b04e5d2746/26b6ada9-f7c6-433d-a509-ae3ebe466a58_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 1750,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=faf14e5e-977c-4592-bdbd-34b04e5d2746"
-            }
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 12,
-          "item": {
-            "@type": "Product",
-            "name": "Volkswagen Polo",
-            "url": "https://drivebit.ru/car-detail?id=3fc48a7c-8753-4e36-84f9-c173fc4a58e2",
-            "image": "https://drivebit.ru/publicbct/cars/3fc48a7c-8753-4e36-84f9-c173fc4a58e2/6522ffcd-6738-409d-9f04-ee7df8ea629c_compressed.jpg",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "RUB",
-              "price": 1850,
-              "availability": "https://schema.org/InStock",
-              "url": "https://drivebit.ru/car-detail?id=3fc48a7c-8753-4e36-84f9-c173fc4a58e2"
-            }
-          }
-        }
-      ]
-    }
-  ]
-}
-    </script>
 </head>
 <body>
 
     <div id="root"></div>
 <!-- drivebit-seo-generated-start -->
-    <nav class="drivebit-seo-nav" aria-label="Аренда авто в Москве по целям поездки">
-        <ul>
-            <li><a href="/moskva">Все авто в Москве</a></li>
-            <li><a href="/moskva/k-rodnym">К родным</a></li>
-            <li><a href="/moskva/kanikuly">Каникулы</a></li>
-            <li><a href="/moskva/komandirovki" aria-current="page">Командировки</a></li>
-            <li><a href="/moskva/meropriyatie">Мероприятие</a></li>
-            <li><a href="/moskva/pereezd">Переезд</a></li>
-            <li><a href="/moskva/poblizosti">Поблизости</a></li>
-            <li><a href="/moskva/puteshestviya">Путешествия</a></li>
-            <li><a href="/moskva/za-gorod">За город</a></li>
-        </ul>
-    </nav>
-    <div class="drivebit-seo-cars">
-        <h2 class="drivebit-seo-cars-heading">Автомобили — Командировки</h2>
-        <div class="drivebit-seo-cars-grid">
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=b9558994-c4d2-4f57-b23c-db1daad30cd7">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/b9558994-c4d2-4f57-b23c-db1daad30cd7/748f5266-5246-43fe-94e2-770d878ebb30_compressed.jpg" alt="Volkswagen Polo 2019" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Volkswagen Polo</h3>
-                <p class="drivebit-seo-car-meta">2019 · Москва</p>
-                <p class="drivebit-seo-car-price">2000₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=83342dab-a9b8-48d7-bcb9-6c68de0045fc">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/83342dab-a9b8-48d7-bcb9-6c68de0045fc/2c0bda8f-eb8f-4d16-ab79-a2a3730b7877_compressed.jpg" alt="Renault Duster 2013" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Renault Duster</h3>
-                <p class="drivebit-seo-car-meta">2013 · Москва</p>
-                <p class="drivebit-seo-car-price">1990₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=724e4509-2a90-4a04-b29a-a00b5c43728b">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/724e4509-2a90-4a04-b29a-a00b5c43728b/c82679ba-ac9d-4301-a888-b16e57ca22e8_compressed.jpg" alt="Nissan Terrano 2015" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Nissan Terrano</h3>
-                <p class="drivebit-seo-car-meta">2015 · Москва</p>
-                <p class="drivebit-seo-car-price">2160₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=48e5978a-455f-49d9-9359-3ff7a4609ae1">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/48e5978a-455f-49d9-9359-3ff7a4609ae1/9a0a8695-9777-4e00-b053-1e3a3cfefd95_compressed.jpg" alt="Audi Q3 2012" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Audi Q3</h3>
-                <p class="drivebit-seo-car-meta">2012 · Москва</p>
-                <p class="drivebit-seo-car-price">2999₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=253bf19c-f602-4314-b760-a1deef8bfeec">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/253bf19c-f602-4314-b760-a1deef8bfeec/b80ba441-9956-440a-b02e-5fd39eeef5b5_compressed.jpg" alt="Skoda Yeti 2012" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Skoda Yeti</h3>
-                <p class="drivebit-seo-car-meta">2012 · Москва</p>
-                <p class="drivebit-seo-car-price">2160₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=af5ed76c-e532-441f-a5ea-a9ddd5f31907">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/af5ed76c-e532-441f-a5ea-a9ddd5f31907/d756bbec-7d6b-4c78-804d-35c28376c98c_compressed.jpg" alt="Kia Sportage 2011" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Kia Sportage</h3>
-                <p class="drivebit-seo-car-meta">2011 · Москва</p>
-                <p class="drivebit-seo-car-price">2160₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=69befe04-e6a2-472b-8734-2ed6e6b5b06d">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/69befe04-e6a2-472b-8734-2ed6e6b5b06d/f91d69d2-fb50-4290-af12-00070fcb1433_compressed.jpg" alt="Renault Duster 2016" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Renault Duster</h3>
-                <p class="drivebit-seo-car-meta">2016 · Москва</p>
-                <p class="drivebit-seo-car-price">2160₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=75cfadf2-72aa-4c9f-b697-ce264370a094">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/75cfadf2-72aa-4c9f-b697-ce264370a094/bc6ea27c-c4fa-457a-9bdd-3a9508923132_compressed.jpg" alt="Renault Duster 2016" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Renault Duster</h3>
-                <p class="drivebit-seo-car-meta">2016 · Москва</p>
-                <p class="drivebit-seo-car-price">2160₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=3bb114c3-24b5-4fa1-9b8f-89591ee87f94">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/3bb114c3-24b5-4fa1-9b8f-89591ee87f94/96eccbc3-a4c0-484e-aaea-dba452381c69_compressed.jpg" alt="BMW X1 2010" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">BMW X1</h3>
-                <p class="drivebit-seo-car-meta">2010 · Москва</p>
-                <p class="drivebit-seo-car-price">2800₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=6f8e0c73-77d6-4ced-8004-4b356583e0ca">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/6f8e0c73-77d6-4ced-8004-4b356583e0ca/ca52f6aa-b803-4fd6-aff9-fc0159dd320e_compressed.jpg" alt="Kia Ceed 2010" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Kia Ceed</h3>
-                <p class="drivebit-seo-car-meta">2010 · Москва</p>
-                <p class="drivebit-seo-car-price">1799₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=faf14e5e-977c-4592-bdbd-34b04e5d2746">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/faf14e5e-977c-4592-bdbd-34b04e5d2746/26b6ada9-f7c6-433d-a509-ae3ebe466a58_compressed.jpg" alt="Kia Rio 2018" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Kia Rio</h3>
-                <p class="drivebit-seo-car-meta">2018 · Москва</p>
-                <p class="drivebit-seo-car-price">1750₽ / сутки</p>
-            </a>
-        </article>
-        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="https://drivebit.ru/car-detail?id=3fc48a7c-8753-4e36-84f9-c173fc4a58e2">
-                <img class="drivebit-seo-car-image" src="https://drivebit.ru/publicbct/cars/3fc48a7c-8753-4e36-84f9-c173fc4a58e2/6522ffcd-6738-409d-9f04-ee7df8ea629c_compressed.jpg" alt="Volkswagen Polo 2019" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">Volkswagen Polo</h3>
-                <p class="drivebit-seo-car-meta">2019 · Москва</p>
-                <p class="drivebit-seo-car-price">1850₽ / сутки</p>
-            </a>
-        </article>
-        </div>
-    </div>
+<div class="drivebit-seo-loader" role="status" aria-live="polite" aria-label="Загрузка"></div>
 <!-- drivebit-seo-generated-end -->
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!-- drivebit-main-promo-start -->
+<!-- drivebit-main-promo-start -->
     <div class="drivebit-main-promo" aria-label="Преимущества DriveBit">
         <section class="drivebit-promo-card drivebit-promo-card--why">
             <div class="drivebit-promo-why-layout">
@@ -480,7 +97,7 @@
         </section>
     </div>
     <!-- drivebit-main-promo-end -->
-    <div class="drivebit-seo-shell">
+<div class="drivebit-seo-shell">
         <section class="drivebit-seo-text" aria-label="Аренда авто для командировок">
             <h2>Аренда авто для командировки и поездки в другой город</h2>
             <p>Командировка в другой город удобнее на личном авто, чем на такси между вокзалами. На DriveBit подберёте седан или кроссовер у собственника в Москве: аренда авто для поездки в другой город, аренда машины для командировки и аренда автомобиля для деловой поездки.</p>
@@ -488,6 +105,9 @@
         </section>
     </div>
 
+    
+    
+    
     
     
     
@@ -549,7 +169,8 @@
 
 
 
-        <div class="drivebit-footer-shell">
+
+<div class="drivebit-footer-shell">
         <footer class="drivebit-site-footer">
             <a class="drivebit-footer-phone" id="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
             <div class="drivebit-footer-bottom">

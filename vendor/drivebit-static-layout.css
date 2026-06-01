@@ -24,7 +24,8 @@ body {
     background: linear-gradient(to bottom, rgba(9, 5, 43, 0.12), rgba(9, 5, 43, 0.04));
 }
 
-#root:empty::before {
+#root:empty::before,
+.drivebit-seo-loader::before {
     content: "";
     width: 44px;
     height: 44px;
@@ -32,6 +33,23 @@ body {
     border-top-color: #2563eb;
     border-radius: 50%;
     animation: drivebit-spin 0.75s linear infinite;
+}
+
+.drivebit-seo-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: min(420px, 55vh);
+    background: linear-gradient(to bottom, rgba(9, 5, 43, 0.12), rgba(9, 5, 43, 0.04));
+}
+
+body:has(.drivebit-seo-loader) #root:empty {
+    min-height: 0;
+    background: none;
+}
+
+body:has(.drivebit-seo-loader) #root:empty::before {
+    display: none;
 }
 
 #root:not(:empty) {
@@ -49,8 +67,7 @@ body {
     flex-shrink: 0;
 }
 
-/* Hide static SEO duplicates once Compose has mounted in #root */
-body:has(#root:not(:empty)) .drivebit-seo-nav,
-body:has(#root:not(:empty)) .drivebit-seo-cars {
+/* Hide static placeholder once Compose has mounted in #root */
+body:has(#root:not(:empty)) .drivebit-seo-loader {
     display: none;
 }

@@ -8,7 +8,6 @@ import json
 import os
 import subprocess
 import sys
-import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,13 +15,14 @@ BLOCKS_FILE = ROOT / "composeApp" / "seo" / "landing-blocks.json"
 RESOURCES = ROOT / "composeApp" / "src" / "jsMain" / "resources"
 API_BASE = os.environ.get("DRIVEBIT_API_BASE", "https://drivebit.ru/api").rstrip("/")
 SITE_BASE = "https://drivebit.ru"
-PAGE_SIZE = 12
 MOSCOW_NAME = "Москва"
 MOSCOW_CITY_ID_FALLBACK = "158835"
 
 GENERATED_START = "<!-- drivebit-seo-generated-start -->"
 GENERATED_END = "<!-- drivebit-seo-generated-end -->"
-JSON_LD_MARKER = "<!-- drivebit-seo-jsonld -->"
+LOADER_FRAGMENT = (ROOT / "composeApp" / "seo" / "page-loader.fragment.html").read_text(
+    encoding="utf-8"
+).strip()
 MAIN_PROMO_FRAGMENT = (ROOT / "composeApp" / "seo" / "main-promo.fragment.html").read_text(
     encoding="utf-8"
 )
@@ -60,7 +60,7 @@ def name_to_slug(name: str) -> str:
 
 def http_get_json(url: str, retries: int = 3) -> object:
     last_error: Exception | None = None
-    for attempt in range(retries):
+    for _attempt in range(retries):
         try:
             out = subprocess.check_output(
                 [
@@ -78,42 +78,6 @@ def http_get_json(url: str, retries: int = 3) -> object:
         except (subprocess.CalledProcessError, json.JSONDecodeError) as exc:
             last_error = exc
     raise RuntimeError(f"Failed to fetch {url}") from last_error
-
-
-def append_query(url: str, params: list[tuple[str, str]]) -> str:
-    if not params:
-        return url
-    sep = "&" if "?" in url else "?"
-    return url + sep + urllib.parse.urlencode(params)
-
-
-def sanitize_photo_url(raw: str | None) -> str:
-    if not raw:
-        return f"{SITE_BASE}/images/logos/logo.png"
-    if raw.startswith("/publicbct/"):
-        return f"{SITE_BASE}{raw}"
-    if "/publicbct/" in raw:
-        return f"{SITE_BASE}/publicbct/{raw.split('/publicbct/', 1)[1]}"
-    return f"{SITE_BASE}/publicbct/{raw.lstrip('/')}"
-
-
-def min_daily_price(car: dict) -> int | None:
-    rates = [
-        car.get("dailyRate"),
-        car.get("dailyRate4Days"),
-        car.get("dailyRate7Days"),
-        car.get("dailyRate14Days"),
-        car.get("dailyRate21Days"),
-    ]
-    vals = [int(r) for r in rates if isinstance(r, (int, float)) and r > 0]
-    return min(vals) if vals else None
-
-
-def find_moscow_city_id(cities: list[dict]) -> str:
-    for city in cities:
-        if (city.get("name") or "").strip() == MOSCOW_NAME:
-            return str(city["id"])
-    raise RuntimeError("Moscow city id not found")
 
 
 def build_seo_block(brand_name: str, slug: str) -> dict:
@@ -147,133 +111,13 @@ def build_seo_block(brand_name: str, slug: str) -> dict:
     }
 
 
-def fetch_cars(city_id: str, brand_id: int) -> list[dict]:
-    url = append_query(
-        f"{API_BASE}/Car/list/filtered/{city_id}",
-        [("page", "1"), ("pageSize", str(PAGE_SIZE)), ("BrandId", str(brand_id))],
-    )
-    data = http_get_json(url)
-    if not isinstance(data, dict):
-        raise RuntimeError(f"Unexpected response from {url}")
-    return data.get("items") or []
-
-
-def render_nav(paths: list[tuple[str, str]], current_path: str) -> str:
-    lines = [
-        '    <nav class="drivebit-seo-nav" aria-label="Аренда по маркам автомобилей">',
-        "        <ul>",
-    ]
-    for path, label in paths:
-        active = ' aria-current="page"' if path == current_path else ""
-        lines.append(f'            <li><a href="{path}"{active}>{html.escape(label)}</a></li>')
-    lines.extend(["        </ul>", "    </nav>", ""])
-    return "\n".join(lines)
-
-
-def render_car_card(car: dict) -> str:
-    general = car.get("general") or {}
-    brand = general.get("brandName") or ""
-    model = general.get("modelName") or ""
-    year = general.get("year") or car.get("year")
-    title = " ".join(p for p in (brand, model) if p).strip() or "Автомобиль"
-    price = min_daily_price(car)
-    price_text = f"{price}₽ / сутки" if price else "Цена по запросу"
-    car_id = car.get("id") or ""
-    detail_url = f"{SITE_BASE}/car-detail?id={urllib.parse.quote(str(car_id))}"
-    photos = general.get("photos") or car.get("photos") or []
-    photo_url = sanitize_photo_url((photos[0] or {}).get("url") if photos else None)
-    city = (general.get("address") or {}).get("city") or "Москва"
-    alt = html.escape(f"{title} {year or ''}".strip())
-    return f"""        <article class="drivebit-seo-car-card">
-            <a class="drivebit-seo-car-link" href="{html.escape(detail_url)}">
-                <img class="drivebit-seo-car-image" src="{html.escape(photo_url)}" alt="{alt}" loading="lazy" width="320" height="200">
-                <h3 class="drivebit-seo-car-title">{html.escape(title)}</h3>
-                <p class="drivebit-seo-car-meta">{html.escape(str(year) if year else "")} · {html.escape(city)}</p>
-                <p class="drivebit-seo-car-price">{html.escape(price_text)}</p>
-            </a>
-        </article>"""
-
-
-def render_cars_shell(cars: list[dict], heading: str) -> str:
-    cards = "\n".join(render_car_card(car) for car in cars)
-    return f"""    <div class="drivebit-seo-cars">
-        <h2 class="drivebit-seo-cars-heading">{html.escape(heading)}</h2>
-        <div class="drivebit-seo-cars-grid">
-{cards}
-        </div>
-    </div>
-"""
-
-
-def build_json_ld(path: str, block: dict, cars: list[dict]) -> dict:
-    page_url = f"{SITE_BASE}{path}"
-    brand_name = block["brandName"]
-    items = []
-    for idx, car in enumerate(cars, start=1):
-        general = car.get("general") or {}
-        name = " ".join(
-            p for p in (general.get("brandName"), general.get("modelName")) if p
-        ).strip() or "Автомобиль"
-        car_id = car.get("id") or ""
-        price = min_daily_price(car)
-        photos = general.get("photos") or []
-        image = sanitize_photo_url((photos[0] or {}).get("url") if photos else None)
-        items.append(
-            {
-                "@type": "ListItem",
-                "position": idx,
-                "item": {
-                    "@type": "Product",
-                    "name": name,
-                    "url": f"{SITE_BASE}/car-detail?id={car_id}",
-                    "image": image,
-                    "offers": {
-                        "@type": "Offer",
-                        "priceCurrency": "RUB",
-                        "price": price or 0,
-                        "availability": "https://schema.org/InStock",
-                        "url": f"{SITE_BASE}/car-detail?id={car_id}",
-                    },
-                },
-            }
-        )
-    return {
-        "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {"@type": "ListItem", "position": 1, "name": "DriveBit", "item": f"{SITE_BASE}/"},
-                    {"@type": "ListItem", "position": 2, "name": "Поиск", "item": f"{SITE_BASE}/search"},
-                    {"@type": "ListItem", "position": 3, "name": brand_name, "item": page_url},
-                ],
-            },
-            {
-                "@type": "AutoRental",
-                "name": f"DriveBit — аренда {brand_name}",
-                "url": page_url,
-                "areaServed": "Москва",
-                "provider": {"@type": "Organization", "name": "DriveBit", "url": SITE_BASE},
-            },
-            {
-                "@type": "ItemList",
-                "name": block["h2"],
-                "numberOfItems": len(items),
-                "itemListElement": items,
-            },
-        ],
-    }
-
-
-def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, json_ld: dict) -> str:
+def render_page_html(path: str, block: dict) -> str:
     page_url = f"{SITE_BASE}{path}"
     title = html.escape(block["title"])
     description = html.escape(block["description"])
     aria = html.escape(block["ariaLabel"])
     h2 = html.escape(block["h2"])
     paragraphs = "".join(f"            <p>{html.escape(p)}</p>\n" for p in block["paragraphs"])
-    cars_html = render_cars_shell(cars, f"Автомобили {block['brandName']}")
-    json_ld_text = json.dumps(json_ld, ensure_ascii=False, indent=2)
     return f"""<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -307,16 +151,13 @@ def render_page_html(path: str, block: dict, cars: list[dict], nav_html: str, js
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-main-promo.css"/>
-    {JSON_LD_MARKER}
-    <script type="application/ld+json">
-{json_ld_text}
-    </script>
 </head>
 <body>
     <div id="root"></div>
 
 {GENERATED_START}
-{nav_html}{cars_html}{GENERATED_END}
+{LOADER_FRAGMENT}
+{GENERATED_END}
 {MAIN_PROMO_FRAGMENT}
     <div class="drivebit-seo-shell">
         <section class="drivebit-seo-text" aria-label="{aria}">
@@ -361,66 +202,38 @@ def main() -> int:
         ],
     }
 
-    try:
-        cities = http_get_json(f"{API_BASE}/Dictionary/cities/all")
-        city_id = find_moscow_city_id(cities)
-    except RuntimeError:
-        city_id = MOSCOW_CITY_ID_FALLBACK
-        print(f"WARN using fallback Moscow city id {city_id}", file=sys.stderr)
     brands = http_get_json(f"{API_BASE}/Dictionary/cars/brands/existing")
     if not isinstance(brands, list):
         raise RuntimeError("brands/existing returned non-list")
 
-    published: list[tuple[str, str, dict, list[dict]]] = []
-    errors: list[str] = []
-
+    published = 0
     for brand in brands:
         brand_id = int(brand["id"])
         brand_name = str(brand["name"])
         slug = name_to_slug(brand_name)
         path = f"/search/{slug}"
 
-        try:
-            cars = fetch_cars(city_id, brand_id)
-        except Exception as exc:
-            errors.append(f"{path}: {exc}")
-            continue
-
-        if not cars:
-            continue
-
         block = build_seo_block(brand_name, slug)
         block["brandId"] = brand_id
         blocks[path] = block
-        published.append((path, brand_name, block, cars))
 
-    nav_paths = [("/search", "Все марки")] + [
-        (path, name) for path, name, _, _ in sorted(published, key=lambda item: item[1].lower())
-    ]
-
-    for path, brand_name, block, cars in published:
-        nav_html = render_nav(nav_paths, path)
-        json_ld = build_json_ld(path, block, cars)
-        html_text = render_page_html(path, block, cars, nav_html, json_ld)
-        slug = path.removeprefix("/search/")
+        html_text = render_page_html(path, block)
         out_dir = RESOURCES / "search" / slug
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(html_text, encoding="utf-8")
-        print(f"OK {path} ({len(cars)} cars)")
+        published += 1
+        print(f"OK {path}")
 
     BLOCKS_FILE.write_text(
         json.dumps(blocks, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    if errors:
-        for err in errors:
-            print(f"WARN {err}", file=sys.stderr)
 
-    if not published:
+    if published == 0:
         print("ERROR: no brand pages generated", file=sys.stderr)
         return 1
 
-    print(f"Published {len(published)} brand search pages")
+    print(f"Published {published} brand search pages")
     return 0
 
 
