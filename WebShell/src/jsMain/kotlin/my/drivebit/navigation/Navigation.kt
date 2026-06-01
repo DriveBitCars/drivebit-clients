@@ -38,7 +38,7 @@ class NavigationController(
 private fun isSplitBundlePath(path: String): Boolean =
     path.startsWith("/car-detail") ||
         path.startsWith("/car-photos-gallery") ||
-        path.startsWith("/my-cars")
+        isOwnerCarBundlePath(path)
 
 private fun shouldUseFullPageNavigation(targetPath: String): Boolean {
     val currentPath = window.location.pathname

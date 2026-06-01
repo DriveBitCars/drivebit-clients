@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import kotlinx.browser.window
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.viewmodels.ButterModel
@@ -79,7 +80,7 @@ fun ButterMenu() {
                                 "Сдать авто" ->
                                     item.copy(onClick = {
                                         butterViewModel.close()
-                                        navigationController?.navigateTo("/list-your-car")
+                                        window.location.href = "/list-your-car.html"
                                     })
                                 "Мои авто" ->
                                     item.copy(onClick = {

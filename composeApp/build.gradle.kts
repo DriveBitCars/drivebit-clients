@@ -246,6 +246,31 @@ val needsSplitBundleDevWebpack =
             (it.contains("composeApp", ignoreCase = true) && it.contains("Development", ignoreCase = true))
     }
 
+val ownerCarShellRoutes =
+    listOf(
+        "my-cars",
+        "car-edit",
+        "car-photos-upload",
+        "car-photos",
+        "car-availability",
+        "city-selection",
+        "address-input",
+        "car-sts-upload",
+        "license-plate-input",
+        "car-brand-selection",
+        "car-model-selection",
+        "body-type-selection",
+        "drive-type-selection",
+        "engine-type-selection",
+        "engine-volume-input",
+        "production-year-input",
+        "seats-count-input",
+        "trunk-size-selection",
+        "daily-rate-input",
+        "description-input",
+        "passport-upload",
+    )
+
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     if (needsSplitBundleDevWebpack) {
         dependsOn(
@@ -258,7 +283,9 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
             ":myCarsApp:jsBrowserProductionWebpack",
         )
     }
+    dependsOn(":myCarsApp:jsProcessResources")
     from(rootProject.layout.projectDirectory.file("index.html"))
+    from(rootProject.layout.projectDirectory.file("list-your-car.html"))
     from(rootProject.layout.projectDirectory.dir("vendor")) {
         into("vendor")
     }
@@ -266,7 +293,11 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
         into("seo")
     }
     from(project(":carDetailApp").layout.projectDirectory.dir("src/jsMain/resources"))
-    from(project(":myCarsApp").layout.projectDirectory.dir("src/jsMain/resources"))
+    ownerCarShellRoutes.forEach { route ->
+        from(project(":myCarsApp").layout.buildDirectory.dir("processedResources/js/main/$route")) {
+            into(route)
+        }
+    }
     val carDetailWebpackDir =
         if (needsSplitBundleDevWebpack) {
             project(":carDetailApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")

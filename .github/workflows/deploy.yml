@@ -91,8 +91,14 @@ jobs:
         MYCARS="myCarsApp/build/dist/js/productionExecutable"
         cp "$MYCARS/myCars.js" "$DIST/"
         cp "$MYCARS/myCars.js.map" "$DIST/" 2>/dev/null || true
-        cp -r "$MYCARS/my-cars" "$DIST/"
-        test -f "$DIST/my-cars/index.html"
+        for route in my-cars car-edit address-input car-sts-upload passport-upload city-selection; do
+          if [ -d "$MYCARS/$route" ]; then
+            cp -r "$MYCARS/$route" "$DIST/"
+          fi
+        done
+        for route in my-cars car-edit address-input car-sts-upload passport-upload city-selection; do
+          test -f "$DIST/$route/index.html"
+        done
         test -f "$DIST/myCars.js"
         echo "split bundles merged OK"
 
@@ -148,7 +154,9 @@ jobs:
         # Update carDetail.js version in car-detail shells
         sed -i "s/carDetail\.js?v=[0-9]*/carDetail.js?v=$TIMESTAMP/g" composeApp/build/dist/js/productionExecutable/car-detail/index.html
         sed -i "s/carDetail\.js?v=[0-9]*/carDetail.js?v=$TIMESTAMP/g" composeApp/build/dist/js/productionExecutable/car-photos-gallery/index.html
-        sed -i "s/myCars\.js?v=[0-9]*/myCars.js?v=$TIMESTAMP/g" composeApp/build/dist/js/productionExecutable/my-cars/index.html
+        find composeApp/build/dist/js/productionExecutable -name index.html -print0 | \
+          xargs -0 grep -l 'myCars\.js' | \
+          xargs -r sed -i "s/myCars\.js?v=[0-9]*/myCars.js?v=$TIMESTAMP/g"
         
         # Rename JS files with timestamp
         cd composeApp/build/dist/js/productionExecutable

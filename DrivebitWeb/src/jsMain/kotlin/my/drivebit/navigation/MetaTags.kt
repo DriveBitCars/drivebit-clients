@@ -30,12 +30,6 @@ object MetaTags {
                     description = HOME_DESCRIPTION,
                     path = "/",
                 ),
-            "/list-your-car" to
-                PageMeta(
-                    title = "Сдать авто в аренду - DriveBit",
-                    description = "Сдавайте свой автомобиль в аренду и зарабатывайте до 40% больше, чем в прокате. Полная страховка, поддержка 24/7.",
-                    path = "/list-your-car",
-                ),
             "/contacts" to
                 PageMeta(
                     title = "Контакты - DriveBit",
