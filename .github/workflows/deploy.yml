@@ -95,8 +95,8 @@ jobs:
         set -e
         DIST="composeApp/build/dist/js/productionExecutable"
         test -f "$DIST/moskva/poblizosti/index.html"
-        grep -q 'drivebit-seo-cars' "$DIST/moskva/poblizosti/index.html"
-        grep -q 'drivebit-seo-nav' "$DIST/moskva/kanikuly/index.html"
+        grep -q 'drivebit-seo-loader' "$DIST/moskva/poblizosti/index.html"
+        grep -q 'drivebit-seo-generated-start' "$DIST/moskva/kanikuly/index.html"
         for slug in "" k-rodnym kanikuly komandirovki za-gorod pereezd meropriyatie poblizosti puteshestviya; do
           if [ -z "$slug" ]; then
             page="$DIST/moskva/index.html"

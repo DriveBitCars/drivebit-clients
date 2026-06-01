@@ -183,20 +183,6 @@ object MetaTags {
                     description = "Расширенный поиск аренды автомобилей в Москве по марке, цене, типу кузова и приводу.",
                     path = "/search",
                 ),
-            "/car-detail" to
-                PageMeta(
-                    title = "Карточка автомобиля - DriveBit",
-                    description = "Подробная информация об автомобиле для аренды на DriveBit.",
-                    path = "/car-detail",
-                    noindex = true,
-                ),
-            "/car-photos-gallery" to
-                PageMeta(
-                    title = "Фотографии автомобиля - DriveBit",
-                    description = "Фотографии автомобиля для аренды на DriveBit.",
-                    path = "/car-photos-gallery",
-                    noindex = true,
-                ),
         )
 
     fun updateForPath(
@@ -204,12 +190,7 @@ object MetaTags {
         storage: Storage? = null,
     ) {
         val normalizedPath = normalizePath(path)
-        val lookupPath =
-            when {
-                normalizedPath.startsWith("/car-detail") -> "/car-detail"
-                normalizedPath.startsWith("/car-photos-gallery") -> "/car-photos-gallery"
-                else -> normalizedPath
-            }
+        val lookupPath = normalizedPath
         val seoBlock = SeoLandingBlocks.blockForPath(lookupPath)
         val pageMeta =
             cityPageMeta(lookupPath, storage, seoBlock)
