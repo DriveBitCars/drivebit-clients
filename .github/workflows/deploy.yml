@@ -64,12 +64,6 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
 
-    - name: Generate Moscow SEO snapshots
-      run: DRIVEBIT_API_BASE=http://157.22.252.70:5000 python3 scripts/generate_moskva_seo.py
-
-    - name: Generate search brand SEO pages
-      run: DRIVEBIT_API_BASE=http://157.22.252.70:5000 python3 scripts/generate_search_brand_seo.py
-
     - name: Clean build cache
       run: ./gradlew clean --no-daemon
 
@@ -119,7 +113,7 @@ jobs:
         DIST="composeApp/build/dist/js/productionExecutable"
         test -f "$DIST/moskva/poblizosti/index.html"
         grep -q 'drivebit-seo-loader' "$DIST/moskva/poblizosti/index.html"
-        grep -q 'drivebit-seo-generated-start' "$DIST/moskva/kanikuly/index.html"
+        grep -q 'src="/composeApp.js' "$DIST/moskva/kanikuly/index.html"
         for slug in "" k-rodnym kanikuly komandirovki za-gorod pereezd meropriyatie poblizosti puteshestviya; do
           if [ -z "$slug" ]; then
             page="$DIST/moskva/index.html"
