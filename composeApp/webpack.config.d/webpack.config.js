@@ -9,6 +9,8 @@ config.devServer.historyApiFallback = {
         { from: /^\/payment-failure\/?$/, to: '/payment-failure/index.html' },
         { from: /^\/car-detail/, to: '/car-detail/index.html' },
         { from: /^\/car-photos-gallery/, to: '/car-photos-gallery/index.html' },
+        { from: /^\/chats\/?$/, to: '/chats/index.html' },
+        { from: /^\/chat\/?$/, to: '/chat/index.html' },
     ],
     index: '/index.html',
 };

@@ -4,12 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.navigation.Navigation
+import my.drivebit.navigation.isChatBundlePath
 import my.drivebit.navigation.isOwnerCarBundlePath
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePasswordPage
 import my.drivebit.screens.ChangePhonePage
-import my.drivebit.screens.ChatDetailPage
-import my.drivebit.screens.ChatListPage
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.DownloadBookingContractPage
 import my.drivebit.screens.EditNamePage
@@ -52,6 +51,9 @@ actual fun App() {
                 isOwnerCarBundlePath(currentPath) -> {
                     RedirectToOwnerCarBundle()
                 }
+                isChatBundlePath(currentPath) -> {
+                    RedirectToChatBundle()
+                }
                 currentPath.startsWith("/my-city-selection") -> {
                     MyCitySelectionPage()
                 }
@@ -91,20 +93,6 @@ actual fun App() {
                 currentPath.startsWith("/my-deals") -> {
                     if (storage.isLogined()) {
                         MyDealsPage()
-                    } else {
-                        window.location.href = homePathHref(storage)
-                    }
-                }
-                currentPath.startsWith("/chats") -> {
-                    if (storage.isLogined()) {
-                        ChatListPage()
-                    } else {
-                        window.location.href = homePathHref(storage)
-                    }
-                }
-                currentPath.startsWith("/chat") -> {
-                    if (storage.isLogined()) {
-                        ChatDetailPage()
                     } else {
                         window.location.href = homePathHref(storage)
                     }
@@ -155,6 +143,15 @@ private fun RedirectToListYourCarHtml() {
 
 @Composable
 private fun RedirectToOwnerCarBundle() {
+    LaunchedEffect(Unit) {
+        val path = window.location.pathname
+        val normalizedPath = if (path.endsWith("/")) path else "$path/"
+        window.location.replace(normalizedPath + window.location.search + window.location.hash)
+    }
+}
+
+@Composable
+private fun RedirectToChatBundle() {
     LaunchedEffect(Unit) {
         val path = window.location.pathname
         val normalizedPath = if (path.endsWith("/")) path else "$path/"
