@@ -86,25 +86,14 @@
     <link rel="icon" type="image/svg+xml" href="/images/logos/turo_logo.svg">
     <link rel="alternate icon" href="/images/logos/turo_logo.svg">
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
+    <link rel="stylesheet" href="/vendor/drivebit-fonts.css"/>
 
-    <!-- Preload critical resources (version must match script src for preload to be used) -->
-<link rel="preload" href="/composeApp.js?v=4" as="script">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="preload" href="/images/searchbackground/car0.jpg" as="image"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css"/>
-        <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-city-page.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-header.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-seo-text.css"/>
-
-    <script src="/vendor/leaflet/leaflet.js"></script>
 
     <script type="application/ld+json">
     {
@@ -145,7 +134,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
         }
 
         body {
@@ -581,31 +570,7 @@
         }
     </style>
     <noscript><style>.fallback-content{display:block!important}</style></noscript>
-
-    <!-- Yandex.Metrika counter -->
-    <script type="text/javascript">
-        (function(m,e,t,r,i,k,a){
-            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-            m[i].l=1*new Date();
-            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=105947907', 'ym');
-
-        ym(105947907, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
-    </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/105947907" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-    <!-- /Yandex.Metrika counter -->
-    <script>
-        (function () {
-            var host = window.location.hostname;
-            var isLocal = host === "localhost" || host === "127.0.0.1";
-            if (isLocal) return;
-            var jivoScript = document.createElement("script");
-            jivoScript.src = "//code.jivo.ru/widget/MWoBzLXYYF";
-            jivoScript.async = true;
-            document.head.appendChild(jivoScript);
-        })();
-    </script>
+    <script src="/vendor/drivebit-third-party-deferred.js" defer></script>
 </head>
 <body>
     <!-- drivebit-app-header-start -->
@@ -937,31 +902,9 @@
             }
         })();
     </script>
-<script type="application/javascript" src="/composeApp.js?v=4"></script>
-
-    <script>
-        (function () {
-            function inject(attempt) {
-                if (document.querySelector('script[data-drivebit-callibri]')) return;
-                var s = document.createElement('script');
-                s.src = 'https://cdn.callibri.ru/callibri.js';
-                s.type = 'text/javascript';
-                s.charset = 'utf-8';
-                s.async = true;
-                s.setAttribute('data-drivebit-callibri', '1');
-                s.onerror = function () {
-                    s.remove();
-                    if ((attempt || 0) < 1) setTimeout(function () { inject((attempt || 0) + 1); }, 3000);
-                };
-                document.body.appendChild(s);
-            }
-            function schedule() {
-                setTimeout(function () { inject(0); }, 0);
-            }
-            if (document.readyState === 'complete') schedule();
-            else window.addEventListener('load', schedule);
-        })();
-    </script>    <script src="/vendor/drivebit-hero-search.js" defer></script>
+    <script src="/vendor/drivebit-leaflet-loader.js" defer></script>
+    <script type="application/javascript" src="/composeApp.js?v=4" defer></script>
+    <script src="/vendor/drivebit-hero-search.js" defer></script>
     <script src="/vendor/drivebit-filters.js" defer></script>
 </body>
 </html>

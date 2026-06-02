@@ -227,20 +227,6 @@ tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
     duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
 }
 
-tasks.register<Exec>("generateMoskvaSeoSnapshots") {
-    commandLine("python3", rootProject.file("scripts/generate_moskva_seo.py").absolutePath)
-    environment("DRIVEBIT_API_BASE", "http://157.22.252.70:5000")
-}
-
-tasks.register<Exec>("generateSearchBrandSeoSnapshots") {
-    commandLine("python3", rootProject.file("scripts/generate_search_brand_seo.py").absolutePath)
-    environment("DRIVEBIT_API_BASE", "http://157.22.252.70:5000")
-}
-
-tasks.register("generateAllSeoSnapshots") {
-    dependsOn("generateMoskvaSeoSnapshots", "generateSearchBrandSeoSnapshots")
-}
-
 val needsSplitBundleDevWebpack =
     gradle.startParameter.taskNames.any {
         it.contains("jsBrowserDevelopmentRun", ignoreCase = true) ||
