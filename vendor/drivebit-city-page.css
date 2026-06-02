@@ -261,14 +261,6 @@ body:has(#drivebit-hero-static) .drivebit-seo-loader {
     min-height: 0;
 }
 
-body:has(#drivebit-hero-static) .drivebit-main-promo {
-    display: none;
-}
-
-body:has(#drivebit-hero-static):has(#root:not(:empty)) .drivebit-main-promo {
-    display: block;
-}
-
 body:has(#drivebit-hero-static) #root:not(:empty) .app-container {
     padding-top: 0;
 }
