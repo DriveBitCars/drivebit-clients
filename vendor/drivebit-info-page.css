@@ -31,10 +31,29 @@ body.drivebit-static-info-page #root {
 }
 
 .drivebit-info-page h1 {
-    margin: 0 0 24px;
+    margin: 0 0 8px;
     font-size: 24px;
     font-weight: 600;
     line-height: 1.3;
+}
+
+.drivebit-info-page__subtitle {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #5f6368;
+}
+
+.drivebit-info-page__legal-text {
+    margin: 0;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #1a1a1a;
 }
 
 .drivebit-info-page h2 {

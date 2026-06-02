@@ -10,7 +10,6 @@ import my.drivebit.screens.ChangePasswordPage
 import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.ChatDetailPage
 import my.drivebit.screens.ChatListPage
-import my.drivebit.screens.CookiesPage
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.DownloadBookingContractPage
 import my.drivebit.screens.EditNamePage
@@ -20,12 +19,10 @@ import my.drivebit.screens.LoginPage
 import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCitySelectionPage
 import my.drivebit.screens.MyDealsPage
-import my.drivebit.screens.OfferPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.BookingPaymentLinkPage
 import my.drivebit.screens.PaymentFailurePage
 import my.drivebit.screens.PaymentSuccessPage
-import my.drivebit.screens.PrivacyPage
 import my.drivebit.components.CookieConsentBanner
 import my.drivebit.screens.ProfilePage
 import my.drivebit.screens.SearchPage
@@ -116,15 +113,6 @@ actual fun App() {
                 }
                 currentPath.startsWith("/documents") -> {
                     DocumentsPage()
-                }
-                currentPath.startsWith("/offer") -> {
-                    OfferPage()
-                }
-                currentPath.startsWith("/privacy") -> {
-                    PrivacyPage()
-                }
-                currentPath.startsWith("/cookies") -> {
-                    CookiesPage()
                 }
                 currentPath.startsWith("/payment-success") -> {
                     PaymentSuccessPage()

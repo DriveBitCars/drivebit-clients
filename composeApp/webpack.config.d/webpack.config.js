@@ -2,6 +2,9 @@ config.devServer = config.devServer || {};
 config.devServer.historyApiFallback = {
     rewrites: [
         { from: /^\/contacts\/?$/, to: '/contacts/index.html' },
+        { from: /^\/cookies\/?$/, to: '/cookies/index.html' },
+        { from: /^\/privacy\/?$/, to: '/privacy/index.html' },
+        { from: /^\/offer\/?$/, to: '/offer/index.html' },
         { from: /^\/car-detail/, to: '/car-detail/index.html' },
         { from: /^\/car-photos-gallery/, to: '/car-photos-gallery/index.html' },
     ],
