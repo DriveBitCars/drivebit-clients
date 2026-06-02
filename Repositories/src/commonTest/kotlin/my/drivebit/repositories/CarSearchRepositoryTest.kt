@@ -361,7 +361,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             val result = repository.searchCarsByUserCity.first()
@@ -391,7 +390,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             repository.searchCarsByUserCity.first()
@@ -416,7 +414,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             repository.searchCarsByUserCity.first()
@@ -438,7 +435,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             val exception =
@@ -467,7 +463,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity
@@ -506,25 +501,6 @@ class CarSearchRepositoryTest {
             val mockMyCityRepository = MockMyCityRepository()
             mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
             val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
-            val mockDictionary = MockDictionary()
-
-            val filter1 =
-                FilterSuggestion(
-                    shortName = "TASK-1",
-                    name = "Task 1",
-                    iconUrl = "icon1.svg",
-                    dailyPriceMin = 1000,
-                    dailyPriceMax = 2000,
-                )
-            val filter2 =
-                FilterSuggestion(
-                    shortName = "TASK-2",
-                    name = "Task 2",
-                    iconUrl = "icon2.svg",
-                    dailyPriceMin = 2000,
-                    dailyPriceMax = 3000,
-                )
-            mockDictionary.filtersSuggested = listOf(filter1, filter2)
 
             val firstCars = listOf(testCarItem(id = "1", brandName = "BMW", modelName = "X5"))
             val secondCars = listOf(testCarItem(id = "2", brandName = "Audi", modelName = "A4"))
@@ -535,7 +511,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity
@@ -556,7 +531,7 @@ class CarSearchRepositoryTest {
                 assertEquals("BMW", results[0].cars[0].general.brandName)
 
                 mockCarService.searchResult = CarSearchResponse(secondCars)
-                mockCurrentFiltersRepository.updateCurrentTask("TASK-1")
+                mockCurrentFiltersRepository.updateCurrentTask("Путешествия")
                 advanceUntilIdle()
 
                 job.cancel()
@@ -576,25 +551,6 @@ class CarSearchRepositoryTest {
             val mockMyCityRepository = MockMyCityRepository()
             mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
             val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
-            val mockDictionary = MockDictionary()
-
-            val filter =
-                FilterSuggestion(
-                    shortName = "TASK-1",
-                    name = "Task 1",
-                    iconUrl = "icon1.svg",
-                    availableMileagePerDayKmMin = 100,
-                    dailyPriceMin = 1000,
-                    dailyPriceMax = 2000,
-                    yearMin = 2020,
-                    yearMax = 2024,
-                    seatsMin = 4,
-                    seatsMax = 7,
-                    bodyTypes = listOf(),
-                    engineTypes = listOf(),
-                    colors = listOf(),
-                )
-            mockDictionary.filtersSuggested = listOf(filter)
 
             mockCarService.searchResult = CarSearchResponse(emptyList())
             val repository =
@@ -602,20 +558,19 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
-            mockCurrentFiltersRepository.updateCurrentTask("TASK-1")
+            mockCurrentFiltersRepository.updateCurrentTask("Мероприятие")
             repository.searchCarsByUserCity.first()
 
             assertEquals("158830", mockCarService.searchCityId)
-            assertEquals(100, mockCarService.searchAvailableMileagePerDayKmMin)
-            assertEquals(1000, mockCarService.searchDailyPriceMin)
-            assertEquals(2000, mockCarService.searchDailyPriceMax)
-            assertEquals(2020, mockCarService.searchYearMin)
-            assertEquals(2024, mockCarService.searchYearMax)
-            assertEquals(4, mockCarService.searchSeatsMin)
-            assertEquals(7, mockCarService.searchSeatsMax)
+            assertEquals(null, mockCarService.searchAvailableMileagePerDayKmMin)
+            assertEquals(null, mockCarService.searchDailyPriceMin)
+            assertEquals(8000, mockCarService.searchDailyPriceMax)
+            assertEquals(2021, mockCarService.searchYearMin)
+            assertEquals(null, mockCarService.searchYearMax)
+            assertEquals(null, mockCarService.searchSeatsMin)
+            assertEquals(null, mockCarService.searchSeatsMax)
         }
 
     @Test
@@ -631,7 +586,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             mockCurrentFiltersRepository.updateStartDate("2025-02-01")
@@ -656,7 +610,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             repository.searchCarsByUserCity.first()
@@ -680,7 +633,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity
@@ -722,7 +674,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity
@@ -764,7 +715,6 @@ class CarSearchRepositoryTest {
                     carService = mockCarService,
                     myCityRepository = mockMyCityRepository,
                     currentFiltersRepository = mockCurrentFiltersRepository,
-                    dictionary = mockDictionary,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity

@@ -33,7 +33,9 @@ import my.drivebit.shared.storage.Storage
 import my.drivebit.shell.MountWebShell
 import my.drivebit.shell.isStaticHtmlShellPath
 import my.drivebit.web.homePathHref
+import my.drivebit.web.isCityHomePath
 import my.drivebit.web.koin.WebKoinHost
+import my.drivebit.web.StaticFiltersShellSync
 import my.drivebit.web.StaticHeroShellSync
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
@@ -46,6 +48,7 @@ actual fun App() {
         CookieConsentBanner()
         Navigation { currentPath ->
             StaticHeroShellSync(currentPath)
+            StaticFiltersShellSync(currentPath)
             val storage: Storage = koinInject()
             when {
                 currentPath.startsWith("/list-your-car") -> {
@@ -154,11 +157,9 @@ actual fun App() {
                 currentPath.startsWith("/search") -> {
                     SearchPage()
                 }
-                else -> {
-                    if (!isStaticHtmlShellPath(currentPath)) {
-                        HomePage()
-                    }
-                }
+                isStaticHtmlShellPath(currentPath) -> Unit
+                isCityHomePath(currentPath) -> HomePage()
+                else -> HomePage()
             }
         }
     }

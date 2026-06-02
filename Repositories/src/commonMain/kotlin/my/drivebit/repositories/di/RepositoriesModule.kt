@@ -269,7 +269,6 @@ val repositoriesModule: Module =
                 carService = get(),
                 myCityRepository = get(),
                 currentFiltersRepository = get(named("main")),
-                dictionary = get(),
             )
         }
 
@@ -278,7 +277,6 @@ val repositoriesModule: Module =
                 carService = get(),
                 myCityRepository = get(),
                 currentFiltersRepository = get(named("search")),
-                dictionary = get(),
             )
         }
 

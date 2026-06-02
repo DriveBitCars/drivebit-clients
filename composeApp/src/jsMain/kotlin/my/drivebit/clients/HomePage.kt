@@ -5,8 +5,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import kotlinx.browser.document
 import kotlinx.browser.window
+import my.drivebit.web.HtmlFiltersBridge
 import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.FilterButtonsRow
@@ -114,26 +116,35 @@ fun HomePage() {
         endDateViewModel = endDateViewModel,
     )
 
+    HtmlFiltersBridge(
+        filterViewModel = filterViewModel,
+        navigationState = navigationState,
+    )
+
+    val staticFiltersMounted = remember { document.getElementById("drivebit-filters-static") != null }
+
     AppWithHeader {
-        FilterButtonsRow {
-            filters.forEach { filter ->
-                filterButton(
-                    filter = filter,
-                    isSelected = filter.title == selected,
-                    onClick = {
-                        parseCitySlugFromPath(currentPath)?.let { citySlug ->
-                            val effectiveTitle =
-                                if (filter.title != "Все" && filter.title == selected) "Все" else filter.title
-                            val targetPath = cityPathWithFilter(citySlug, effectiveTitle)
-                            if (targetPath != currentPath) {
-                                val targetUrl = targetPath + window.location.search
-                                window.history.pushState(null, "", targetUrl)
-                                navigationState.updatePath(targetPath)
+        if (!staticFiltersMounted) {
+            FilterButtonsRow {
+                filters.forEach { filter ->
+                    filterButton(
+                        filter = filter,
+                        isSelected = filter.title == selected,
+                        onClick = {
+                            parseCitySlugFromPath(currentPath)?.let { citySlug ->
+                                val effectiveTitle =
+                                    if (filter.title != "Все" && filter.title == selected) "Все" else filter.title
+                                val targetPath = cityPathWithFilter(citySlug, effectiveTitle)
+                                if (targetPath != currentPath) {
+                                    val targetUrl = targetPath + window.location.search
+                                    window.history.pushState(null, "", targetUrl)
+                                    navigationState.updatePath(targetPath)
+                                }
                             }
-                        }
-                        filterViewModel.onSelect(filter.title)
-                    },
-                )
+                            filterViewModel.onSelect(filter.title)
+                        },
+                    )
+                }
             }
         }
 
