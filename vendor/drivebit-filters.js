@@ -11,6 +11,20 @@
         return path || "/";
     }
 
+    function scrollActiveButtonIntoView(nav, activeTitle) {
+        var scroll = nav.querySelector(".drivebit-filters-scroll");
+        var buttons = nav.querySelectorAll(".drivebit-filter-btn");
+        var activeBtn = null;
+        for (var i = 0; i < buttons.length; i++) {
+            if ((buttons[i].getAttribute("data-filter-title") || "") === activeTitle) {
+                activeBtn = buttons[i];
+                break;
+            }
+        }
+        if (!scroll || !activeBtn) return;
+        activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+
     function setPressedState(nav, activeTitle) {
         if (!nav) return;
         var buttons = nav.querySelectorAll(".drivebit-filter-btn");
@@ -20,6 +34,7 @@
             btn.setAttribute("aria-pressed", pressed ? "true" : "false");
             btn.classList.toggle("is-selected", pressed);
         });
+        scrollActiveButtonIntoView(nav, activeTitle);
     }
 
     function titleFromPath(pathname) {

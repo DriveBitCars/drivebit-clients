@@ -355,36 +355,47 @@ body:has(#drivebit-hero-static) #root:not(:empty) .app-container {
 
 .drivebit-filters-static {
     max-width: 1200px;
+    width: 100%;
+    min-width: 0;
     margin: 0 auto 20px;
     padding: 0 24px;
     box-sizing: border-box;
 }
 
-.drivebit-filters-row {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: stretch;
+.drivebit-filters-scroll {
     width: 100%;
     max-width: 100%;
-    margin: 0 auto;
-    padding: 0;
-    border: none;
+    min-width: 0;
     border-radius: 999px;
     background: #09052b;
     box-shadow: 0 10px 28px rgba(9, 5, 43, 0.22);
-    overflow: hidden;
     overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
     scrollbar-width: none;
 }
 
-.drivebit-filters-row::-webkit-scrollbar {
+.drivebit-filters-scroll::-webkit-scrollbar {
     display: none;
 }
 
+.drivebit-filters-scroll:focus-visible {
+    outline: 2px solid #4f6ef7;
+    outline-offset: 2px;
+}
+
+.drivebit-filters-track {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: max-content;
+    min-width: 100%;
+}
+
 .drivebit-filter-btn {
-    flex: 1 1 0;
-    min-width: max-content;
+    flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -402,8 +413,13 @@ body:has(#drivebit-hero-static) #root:not(:empty) .app-container {
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+.drivebit-filter-btn:first-child {
+    border-radius: 999px 0 0 999px;
+}
+
 .drivebit-filter-btn:last-child {
     border-right: none;
+    border-radius: 0 999px 999px 0;
 }
 
 .drivebit-filter-btn:hover:not([aria-pressed="true"]):not(.is-selected) {
@@ -558,7 +574,6 @@ body:has(#drivebit-hero-static) #root:not(:empty) .app-container {
     }
 
     .drivebit-filter-btn {
-        flex: 0 0 auto;
         padding: 12px 14px;
         font-size: 13px;
     }
