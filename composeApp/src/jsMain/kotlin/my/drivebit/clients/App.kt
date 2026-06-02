@@ -21,8 +21,6 @@ import my.drivebit.screens.MyCitySelectionPage
 import my.drivebit.screens.MyDealsPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.BookingPaymentLinkPage
-import my.drivebit.screens.PaymentFailurePage
-import my.drivebit.screens.PaymentSuccessPage
 import my.drivebit.components.CookieConsentBanner
 import my.drivebit.screens.ProfilePage
 import my.drivebit.screens.SearchPage
@@ -113,12 +111,6 @@ actual fun App() {
                 }
                 currentPath.startsWith("/documents") -> {
                     DocumentsPage()
-                }
-                currentPath.startsWith("/payment-success") -> {
-                    PaymentSuccessPage()
-                }
-                currentPath.startsWith("/payment-failure") -> {
-                    PaymentFailurePage()
                 }
                 currentPath.startsWith("/download-booking-contract") -> {
                     if (storage.isLogined()) {

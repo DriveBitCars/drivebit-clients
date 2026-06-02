@@ -6,6 +6,8 @@ private val STATIC_HTML_SHELL_PATHS =
         "/cookies",
         "/privacy",
         "/offer",
+        "/payment-success",
+        "/payment-failure",
     )
 
 fun isStaticHtmlShellPath(pathname: String): Boolean {
