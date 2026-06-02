@@ -362,49 +362,66 @@ body:has(#drivebit-hero-static) #root:not(:empty) .app-container {
 
 .drivebit-filters-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-    align-items: center;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: #09052b;
+    box-shadow: 0 10px 28px rgba(9, 5, 43, 0.22);
+    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.drivebit-filters-row::-webkit-scrollbar {
+    display: none;
 }
 
 .drivebit-filter-btn {
+    flex: 1 1 0;
+    min-width: max-content;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 10px;
+    justify-content: center;
+    padding: 14px 16px;
     border: none;
-    border-radius: 8px;
-    background: #fff;
-    color: #09052b;
+    border-radius: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.28);
+    background: transparent;
+    color: #fff;
     font-family: Inter, system-ui, sans-serif;
     font-size: 14px;
     font-weight: 500;
-    line-height: 1.2;
+    line-height: 1.15;
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.drivebit-filter-btn:hover {
-    background: #f4f4f8;
+.drivebit-filter-btn:last-child {
+    border-right: none;
 }
 
-.drivebit-filter-btn.is-selected,
-.drivebit-filter-btn[aria-pressed="true"] {
-    background: #09052b;
+.drivebit-filter-btn:hover:not([aria-pressed="true"]):not(.is-selected) {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.drivebit-filter-btn.is-selected[data-filter-title="Все"],
+.drivebit-filter-btn[aria-pressed="true"][data-filter-title="Все"] {
+    background: #4f6ef7;
     color: #fff;
+    border-right-color: rgba(255, 255, 255, 0.2);
 }
 
-.drivebit-filter-btn.is-selected .drivebit-filter-icon,
-.drivebit-filter-btn[aria-pressed="true"] .drivebit-filter-icon {
-    filter: brightness(0) invert(1);
-}
-
-.drivebit-filter-icon {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-    pointer-events: none;
+.drivebit-filter-btn.is-selected:not([data-filter-title="Все"]),
+.drivebit-filter-btn[aria-pressed="true"]:not([data-filter-title="Все"]) {
+    background: #fff;
+    color: #09052b;
+    border-right-color: rgba(9, 5, 43, 0.12);
 }
 
 .drivebit-filter-label {
@@ -538,5 +555,11 @@ body:has(#drivebit-hero-static) #root:not(:empty) .app-container {
     .drivebit-filters-static {
         padding: 0 16px;
         margin-bottom: 16px;
+    }
+
+    .drivebit-filter-btn {
+        flex: 0 0 auto;
+        padding: 12px 14px;
+        font-size: 13px;
     }
 }
