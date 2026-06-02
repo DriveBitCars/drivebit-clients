@@ -54,4 +54,12 @@ class HeroDatesQueryTest {
         assertFalse(isSearchPath("/moskva"))
         assertFalse(isSearchPath("/"))
     }
+
+    @Test
+    fun isMyCitySelectionPath_matchesMyCitySelection() {
+        assertTrue(isMyCitySelectionPath("/my-city-selection"))
+        assertTrue(isMyCitySelectionPath("/my-city-selection/"))
+        assertFalse(isMyCitySelectionPath("/search"))
+        assertFalse(isMyCitySelectionPath("/moskva"))
+    }
 }
