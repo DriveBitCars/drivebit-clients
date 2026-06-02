@@ -9,8 +9,6 @@ import kotlinx.coroutines.flow.flow
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarSearchResponse
 import my.drivebit.network.services.City
-import my.drivebit.network.services.Dictionary
-
 private data class Quadruple<A, B, C, D>(
     val first: A,
     val second: B,
@@ -42,7 +40,6 @@ internal class CarSearchRepositoryImpl(
     private val carService: Car,
     private val myCityRepository: MyCityRepository,
     private val currentFiltersRepository: CurrentFiltersRepository,
-    private val dictionary: Dictionary,
 ) : CarSearchRepository {
     private val searchRefreshNonce = MutableStateFlow(0)
 
@@ -135,9 +132,7 @@ internal class CarSearchRepositoryImpl(
                         null
                     } else {
                         currentTaskShortName?.let { shortName ->
-                            dictionary
-                                .getFiltersSuggested()
-                                .firstOrNull { it.shortName == shortName }
+                            SuggestedFiltersCatalog.findByShortName(shortName)
                         }
                     }
 

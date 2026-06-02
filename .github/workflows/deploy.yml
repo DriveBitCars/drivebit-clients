@@ -74,7 +74,7 @@ jobs:
       run: ./gradlew clean --no-daemon
 
     - name: Build JS distribution (fast web version)
-      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution --no-daemon
+      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :chatsApp:jsBrowserDistribution --no-daemon
 
     - name: Merge split bundles into main dist
       run: |
@@ -100,6 +100,17 @@ jobs:
           test -f "$DIST/$route/index.html"
         done
         test -f "$DIST/myCars.js"
+        CHATS="chatsApp/build/dist/js/productionExecutable"
+        cp "$CHATS/chats.js" "$DIST/"
+        cp "$CHATS/chats.js.map" "$DIST/" 2>/dev/null || true
+        for route in chats chat; do
+          if [ -d "$CHATS/$route" ]; then
+            cp -r "$CHATS/$route" "$DIST/"
+          fi
+        done
+        test -f "$DIST/chats/index.html"
+        test -f "$DIST/chat/index.html"
+        test -f "$DIST/chats.js"
         echo "split bundles merged OK"
 
     - name: Verify Moscow SEO pages in dist
@@ -160,6 +171,9 @@ jobs:
         find composeApp/build/dist/js/productionExecutable -name index.html -print0 | \
           xargs -0 grep -l 'myCars\.js' | \
           xargs -r sed -i "s/myCars\.js?v=[0-9]*/myCars.js?v=$TIMESTAMP/g"
+        find composeApp/build/dist/js/productionExecutable -name index.html -print0 | \
+          xargs -0 grep -l 'chats\.js' | \
+          xargs -r sed -i "s/chats\.js?v=[0-9]*/chats.js?v=$TIMESTAMP/g"
         
         # Rename JS files with timestamp
         cd composeApp/build/dist/js/productionExecutable

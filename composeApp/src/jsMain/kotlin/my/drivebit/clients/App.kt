@@ -4,13 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.navigation.Navigation
+import my.drivebit.navigation.isChatBundlePath
 import my.drivebit.navigation.isOwnerCarBundlePath
 import my.drivebit.screens.ChangeEmailPage
 import my.drivebit.screens.ChangePasswordPage
 import my.drivebit.screens.ChangePhonePage
-import my.drivebit.screens.ChatDetailPage
-import my.drivebit.screens.ChatListPage
-import my.drivebit.screens.CookiesPage
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.DownloadBookingContractPage
 import my.drivebit.screens.EditNamePage
@@ -20,12 +18,8 @@ import my.drivebit.screens.LoginPage
 import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCitySelectionPage
 import my.drivebit.screens.MyDealsPage
-import my.drivebit.screens.OfferPage
 import my.drivebit.screens.OtpVerificationPage
 import my.drivebit.screens.BookingPaymentLinkPage
-import my.drivebit.screens.PaymentFailurePage
-import my.drivebit.screens.PaymentSuccessPage
-import my.drivebit.screens.PrivacyPage
 import my.drivebit.components.CookieConsentBanner
 import my.drivebit.screens.ProfilePage
 import my.drivebit.screens.SearchPage
@@ -33,7 +27,9 @@ import my.drivebit.shared.storage.Storage
 import my.drivebit.shell.MountWebShell
 import my.drivebit.shell.isStaticHtmlShellPath
 import my.drivebit.web.homePathHref
+import my.drivebit.web.isCityHomePath
 import my.drivebit.web.koin.WebKoinHost
+import my.drivebit.web.StaticFiltersShellSync
 import my.drivebit.web.StaticHeroShellSync
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
@@ -46,6 +42,7 @@ actual fun App() {
         CookieConsentBanner()
         Navigation { currentPath ->
             StaticHeroShellSync(currentPath)
+            StaticFiltersShellSync(currentPath)
             val storage: Storage = koinInject()
             when {
                 currentPath.startsWith("/list-your-car") -> {
@@ -53,6 +50,9 @@ actual fun App() {
                 }
                 isOwnerCarBundlePath(currentPath) -> {
                     RedirectToOwnerCarBundle()
+                }
+                isChatBundlePath(currentPath) -> {
+                    RedirectToChatBundle()
                 }
                 currentPath.startsWith("/my-city-selection") -> {
                     MyCitySelectionPage()
@@ -97,37 +97,8 @@ actual fun App() {
                         window.location.href = homePathHref(storage)
                     }
                 }
-                currentPath.startsWith("/chats") -> {
-                    if (storage.isLogined()) {
-                        ChatListPage()
-                    } else {
-                        window.location.href = homePathHref(storage)
-                    }
-                }
-                currentPath.startsWith("/chat") -> {
-                    if (storage.isLogined()) {
-                        ChatDetailPage()
-                    } else {
-                        window.location.href = homePathHref(storage)
-                    }
-                }
                 currentPath.startsWith("/documents") -> {
                     DocumentsPage()
-                }
-                currentPath.startsWith("/offer") -> {
-                    OfferPage()
-                }
-                currentPath.startsWith("/privacy") -> {
-                    PrivacyPage()
-                }
-                currentPath.startsWith("/cookies") -> {
-                    CookiesPage()
-                }
-                currentPath.startsWith("/payment-success") -> {
-                    PaymentSuccessPage()
-                }
-                currentPath.startsWith("/payment-failure") -> {
-                    PaymentFailurePage()
                 }
                 currentPath.startsWith("/download-booking-contract") -> {
                     if (storage.isLogined()) {
@@ -154,11 +125,9 @@ actual fun App() {
                 currentPath.startsWith("/search") -> {
                     SearchPage()
                 }
-                else -> {
-                    if (!isStaticHtmlShellPath(currentPath)) {
-                        HomePage()
-                    }
-                }
+                isStaticHtmlShellPath(currentPath) -> Unit
+                isCityHomePath(currentPath) -> HomePage()
+                else -> HomePage()
             }
         }
     }
@@ -174,6 +143,15 @@ private fun RedirectToListYourCarHtml() {
 
 @Composable
 private fun RedirectToOwnerCarBundle() {
+    LaunchedEffect(Unit) {
+        val path = window.location.pathname
+        val normalizedPath = if (path.endsWith("/")) path else "$path/"
+        window.location.replace(normalizedPath + window.location.search + window.location.hash)
+    }
+}
+
+@Composable
+private fun RedirectToChatBundle() {
     LaunchedEffect(Unit) {
         val path = window.location.pathname
         val normalizedPath = if (path.endsWith("/")) path else "$path/"

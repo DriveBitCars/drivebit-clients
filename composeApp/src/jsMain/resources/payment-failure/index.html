@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оплата не прошла - DriveBit</title>
+    <meta name="description" content="Платёж в DriveBit не был завершён.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="yandex-verification" content="c19b1a1a78585234" />
+    <link rel="canonical" href="https://drivebit.ru/payment-failure">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Оплата не прошла - DriveBit">
+    <meta property="og:description" content="Платёж в DriveBit не был завершён.">
+    <meta property="og:url" content="https://drivebit.ru/payment-failure">
+    <meta property="og:image" content="https://drivebit.ru/images/logos/logo.png">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="DriveBit">
+
+    <link rel="icon" type="image/svg+xml" href="/images/logos/turo_logo.svg">
+    <link rel="alternate icon" href="/images/logos/turo_logo.svg">
+    <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
+    <link rel="preload" href="/composeApp.js?v=4" as="script">
+    <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-header.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-info-page.css"/>
+</head>
+<body class="drivebit-static-info-page">
+    <!-- drivebit-app-header-start -->
+    <header id="drivebit-app-header" class="drivebit-app-header">
+        <a id="drivebit-unread-banner" class="drivebit-unread-banner" href="/chats" aria-live="polite">У Вас есть непрочитанные сообщения</a>
+        <div class="drivebit-app-header-inner">
+            <a class="drivebit-header-logo" href="/moskva">
+                <img src="/images/logos/turo_logo.svg" alt="Drive bit Logo" width="120" height="40" class="turo-logo">
+            </a>
+            <nav id="drivebit-header-nav-desktop" class="drivebit-header-nav" aria-label="Основная навигация">
+                <a href="/search">Аренда авто</a>
+                <a href="/list-your-car.html">Сдать авто</a>
+                <a href="/contacts">Контакты</a>
+            </nav>
+            <div id="drivebit-header-compose" class="drivebit-header-actions"></div>
+        </div>
+    </header>
+    <nav id="drivebit-header-nav-mobile" class="drivebit-header-nav-mobile" aria-label="Основная навигация">
+        <a href="/search">Аренда авто</a>
+        <a href="/list-your-car.html">Сдать авто</a>
+        <a href="/contacts">Контакты</a>
+    </nav>
+    <!-- drivebit-app-header-end -->
+
+    <main class="drivebit-payment-result" id="drivebit-payment-failure-page">
+        <div class="drivebit-payment-result__icon drivebit-payment-result__icon--failure" aria-hidden="true">×</div>
+        <h1 class="drivebit-payment-result__title">Оплата не прошла</h1>
+        <p class="drivebit-payment-result__message">Платёж не был завершён или был отклонён.</p>
+        <p id="drivebit-payment-failure-details" class="drivebit-payment-result__details" hidden></p>
+        <a class="drivebit-payment-result__button" href="/chats">Входящие</a>
+    </main>
+
+    <div id="root" aria-hidden="true"></div>
+
+    <div class="drivebit-footer-shell">
+        <footer class="drivebit-site-footer">
+            <a class="drivebit-footer-phone" id="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
+            <div class="drivebit-footer-bottom">
+                <span class="drivebit-footer-copy">© DriveBit Аренда автомобилей от собственников</span>
+                <a class="drivebit-footer-link drivebit-footer-link--offer" href="/offer">Оферта</a>
+                <a class="drivebit-footer-link drivebit-footer-link--cookies" href="/cookies">Cookies</a>
+                <a class="drivebit-footer-link drivebit-footer-link--privacy" href="/privacy">Политика конфиденциальности</a>
+            </div>
+        </footer>
+    </div>
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var details = (params.get("details") || "").trim();
+            if (!details) return;
+            var el = document.getElementById("drivebit-payment-failure-details");
+            if (!el) return;
+            el.textContent = details;
+            el.hidden = false;
+        })();
+    </script>
+    <script type="application/javascript" src="/composeApp.js?v=4"></script>
+</body>
+</html>

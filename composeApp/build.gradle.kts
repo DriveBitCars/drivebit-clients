@@ -272,19 +272,27 @@ val ownerCarShellRoutes =
         "passport-upload",
     )
 
+val chatShellRoutes =
+    listOf(
+        "chats",
+        "chat",
+    )
+
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     if (needsSplitBundleDevWebpack) {
         dependsOn(
             ":carDetailApp:jsBrowserDevelopmentWebpack",
             ":myCarsApp:jsBrowserDevelopmentWebpack",
+            ":chatsApp:jsBrowserDevelopmentWebpack",
         )
     } else {
         dependsOn(
             ":carDetailApp:jsBrowserProductionWebpack",
             ":myCarsApp:jsBrowserProductionWebpack",
+            ":chatsApp:jsBrowserProductionWebpack",
         )
     }
-    dependsOn(":myCarsApp:jsProcessResources")
+    dependsOn(":myCarsApp:jsProcessResources", ":chatsApp:jsProcessResources")
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.file("list-your-car.html"))
     from(rootProject.layout.projectDirectory.dir("vendor")) {
@@ -317,11 +325,26 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(myCarsWebpackDir) {
         include("myCars.js", "myCars.js.map")
     }
+    chatShellRoutes.forEach { route ->
+        from(project(":chatsApp").layout.buildDirectory.dir("processedResources/js/main/$route")) {
+            into(route)
+        }
+    }
+    val chatsWebpackDir =
+        if (needsSplitBundleDevWebpack) {
+            project(":chatsApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
+        } else {
+            project(":chatsApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
+        }
+    from(chatsWebpackDir) {
+        include("chats.js", "chats.js.map")
+    }
 }
 
 tasks.named("jsBrowserDevelopmentRun").configure {
     dependsOn(
         ":carDetailApp:jsBrowserDevelopmentWebpack",
         ":myCarsApp:jsBrowserDevelopmentWebpack",
+        ":chatsApp:jsBrowserDevelopmentWebpack",
     )
 }

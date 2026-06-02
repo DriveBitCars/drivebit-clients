@@ -5,39 +5,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
-import my.drivebit.network.services.Dictionary
-import my.drivebit.network.services.FilterSuggestion
 import my.drivebit.repositories.CurrentFiltersRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-class MockDictionary : Dictionary {
-    override suspend fun getCarBrands(): List<my.drivebit.network.services.CarBrand> =
-        throw NotImplementedError("Not used in FiltersViewModel")
-
-    override suspend fun getCarModels(brandId: Int): List<my.drivebit.network.services.CarModel> =
-        throw NotImplementedError("Not used in FiltersViewModel")
-
-    override suspend fun getCarBrandsExisting(): List<my.drivebit.network.services.CarBrand> =
-        throw NotImplementedError("Not used in FiltersViewModel")
-
-    override suspend fun getCarModelsExisting(brandId: Int): List<my.drivebit.network.services.CarModel> =
-        throw NotImplementedError("Not used in FiltersViewModel")
-
-    override suspend fun searchCities(query: String): List<my.drivebit.network.services.City> =
-        throw NotImplementedError("Not used in FiltersViewModel")
-
-    override suspend fun getAllCities(): List<my.drivebit.network.services.City> =
-        throw NotImplementedError("Not used in FiltersViewModel")
-
-    override suspend fun getCarEnums(): my.drivebit.network.services.CarEnumsResponse =
-        throw NotImplementedError("Not used in FiltersViewModel")
-
-    override suspend fun getDocumentEnums(): my.drivebit.network.services.DocumentEnumsResponse =
-        throw NotImplementedError("Not used in FiltersViewModel")
-
-    override suspend fun getFiltersSuggested(): List<FilterSuggestion> = emptyList()
-}
 
 class MockCurrentFiltersRepository : CurrentFiltersRepository {
     private val currentTaskShortNameState = MutableStateFlow<String?>(null)
@@ -200,33 +170,26 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
 }
 
 class FiltersViewModelTest {
-    private val mockDictionary = MockDictionary()
     private val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
 
     @Test
     fun `initial state should have correct selected filter`() =
         runTest {
-            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
+            val viewModel = FiltersViewModel(mockCurrentFiltersRepository)
 
-            val initialState =
-                withTimeout(5000) {
-                    viewModel.state.first { it.filters.size >= 2 }
-                }
+            val initialState = viewModel.state.first()
 
             assertEquals("Все", initialState.selected)
-            assertEquals(2, initialState.filters.size)
+            assertEquals(9, initialState.filters.size)
             assertEquals("Все", initialState.filters[0].title)
             assertEquals("Поблизости", initialState.filters[1].title)
+            assertEquals("Путешествия", initialState.filters[2].title)
         }
 
     @Test
     fun `onSelect should update selected filter when selecting All`() =
         runTest {
-            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
-
-            withTimeout(5000) {
-                viewModel.state.first { it.filters.size >= 2 }
-            }
+            val viewModel = FiltersViewModel(mockCurrentFiltersRepository)
 
             viewModel.onSelect("Все")
 
@@ -236,11 +199,7 @@ class FiltersViewModelTest {
     @Test
     fun `onSelect should update selected filter when selecting По близости`() =
         runTest {
-            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
-
-            withTimeout(5000) {
-                viewModel.state.first { it.filters.size >= 2 }
-            }
+            val viewModel = FiltersViewModel(mockCurrentFiltersRepository)
 
             viewModel.onSelect("Поблизости")
 
@@ -250,11 +209,7 @@ class FiltersViewModelTest {
     @Test
     fun `onSelect should handle multiple selections correctly`() =
         runTest {
-            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
-
-            withTimeout(5000) {
-                viewModel.state.first { it.filters.size >= 2 }
-            }
+            val viewModel = FiltersViewModel(mockCurrentFiltersRepository)
 
             viewModel.onSelect("Все")
             assertEquals("Все", viewModel.state.value.selected)
@@ -269,12 +224,9 @@ class FiltersViewModelTest {
     @Test
     fun `onSelect should maintain filters list unchanged`() =
         runTest {
-            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
+            val viewModel = FiltersViewModel(mockCurrentFiltersRepository)
 
-            val initialFilters =
-                withTimeout(5000) {
-                    viewModel.state.first { it.filters.size >= 2 }.filters
-                }
+            val initialFilters = viewModel.state.value.filters
 
             viewModel.onSelect("Поблизости")
 
