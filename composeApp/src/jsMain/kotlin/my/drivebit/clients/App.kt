@@ -34,6 +34,7 @@ import my.drivebit.shell.MountWebShell
 import my.drivebit.shell.isStaticHtmlShellPath
 import my.drivebit.web.homePathHref
 import my.drivebit.web.koin.WebKoinHost
+import my.drivebit.web.StaticHeroShellSync
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
@@ -44,6 +45,7 @@ actual fun App() {
         MountWebShell()
         CookieConsentBanner()
         Navigation { currentPath ->
+            StaticHeroShellSync(currentPath)
             val storage: Storage = koinInject()
             when {
                 currentPath.startsWith("/list-your-car") -> {
