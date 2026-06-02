@@ -10,7 +10,6 @@ import kotlinx.browser.window
 import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.FilterButtonsRow
-import my.drivebit.components.HeroBanner
 import my.drivebit.components.NearbyMapListSwitcher
 import my.drivebit.components.NearbyRadiusSelector
 import my.drivebit.components.PaginationBar
@@ -35,6 +34,7 @@ import my.drivebit.web.cityPathWithFilter
 import my.drivebit.web.filterTitleToPathSegment
 import my.drivebit.web.isCityHomePath
 import my.drivebit.web.parseCitySlugFromPath
+import my.drivebit.web.HtmlHeroDatesBridge
 import my.drivebit.web.parseFilterSlugFromCityPath
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
@@ -108,20 +108,13 @@ fun HomePage() {
         }
     }
 
-    AppWithHeader {
-        val selectedFilter = filters.find { it.title == selected }
-        selectedFilter?.let { filter ->
-            HeroBanner(
-                backgroundIconUrl = filter.backgroundIcon,
-                cityName = cityName,
-                citySlug = parseCitySlugFromPath(currentPath).orEmpty(),
-                filterSlug = parseFilterSlugFromCityPath(currentPath),
-                filterTitle = selected,
-                startDateViewModel = startDateViewModel,
-                endDateViewModel = endDateViewModel,
-            )
-        }
+    HtmlHeroDatesBridge(
+        currentFiltersRepository = currentFiltersRepository,
+        startDateViewModel = startDateViewModel,
+        endDateViewModel = endDateViewModel,
+    )
 
+    AppWithHeader {
         FilterButtonsRow {
             filters.forEach { filter ->
                 filterButton(
@@ -133,7 +126,8 @@ fun HomePage() {
                                 if (filter.title != "Все" && filter.title == selected) "Все" else filter.title
                             val targetPath = cityPathWithFilter(citySlug, effectiveTitle)
                             if (targetPath != currentPath) {
-                                window.history.pushState(null, "", targetPath)
+                                val targetUrl = targetPath + window.location.search
+                                window.history.pushState(null, "", targetUrl)
                                 navigationState.updatePath(targetPath)
                             }
                         }

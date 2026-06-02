@@ -8,47 +8,8 @@ import kotlinx.coroutines.withTimeout
 import my.drivebit.network.services.Dictionary
 import my.drivebit.network.services.FilterSuggestion
 import my.drivebit.repositories.CurrentFiltersRepository
-import my.drivebit.shared.storage.Storage
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-class MockStorage : Storage {
-    private val storage = mutableMapOf<String, String>()
-
-    override fun isLogined(): Boolean = false
-
-    override fun saveToken(token: String) {
-    }
-
-    override fun getToken(): String? = null
-
-    override fun saveRefreshToken(refreshToken: String) {
-    }
-
-    override fun getRefreshToken(): String? = null
-
-    override fun logout() {
-        storage.clear()
-    }
-
-    override fun putString(
-        key: String,
-        value: String,
-    ) {
-        storage[key] = value
-    }
-
-    override fun getString(
-        key: String,
-        defaultValue: String,
-    ): String = storage[key] ?: defaultValue
-
-    override fun contains(key: String): Boolean = storage.containsKey(key)
-
-    override fun remove(key: String) {
-        storage.remove(key)
-    }
-}
 
 class MockDictionary : Dictionary {
     override suspend fun getCarBrands(): List<my.drivebit.network.services.CarBrand> =
@@ -239,14 +200,13 @@ class MockCurrentFiltersRepository : CurrentFiltersRepository {
 }
 
 class FiltersViewModelTest {
-    private val mockStorage = MockStorage()
     private val mockDictionary = MockDictionary()
     private val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
 
     @Test
     fun `initial state should have correct selected filter`() =
         runTest {
-            val viewModel = FiltersViewModel(mockStorage, mockDictionary, mockCurrentFiltersRepository)
+            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
 
             val initialState =
                 withTimeout(5000) {
@@ -262,7 +222,7 @@ class FiltersViewModelTest {
     @Test
     fun `onSelect should update selected filter when selecting All`() =
         runTest {
-            val viewModel = FiltersViewModel(mockStorage, mockDictionary, mockCurrentFiltersRepository)
+            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
 
             withTimeout(5000) {
                 viewModel.state.first { it.filters.size >= 2 }
@@ -276,7 +236,7 @@ class FiltersViewModelTest {
     @Test
     fun `onSelect should update selected filter when selecting По близости`() =
         runTest {
-            val viewModel = FiltersViewModel(mockStorage, mockDictionary, mockCurrentFiltersRepository)
+            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
 
             withTimeout(5000) {
                 viewModel.state.first { it.filters.size >= 2 }
@@ -290,7 +250,7 @@ class FiltersViewModelTest {
     @Test
     fun `onSelect should handle multiple selections correctly`() =
         runTest {
-            val viewModel = FiltersViewModel(mockStorage, mockDictionary, mockCurrentFiltersRepository)
+            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
 
             withTimeout(5000) {
                 viewModel.state.first { it.filters.size >= 2 }
@@ -309,7 +269,7 @@ class FiltersViewModelTest {
     @Test
     fun `onSelect should maintain filters list unchanged`() =
         runTest {
-            val viewModel = FiltersViewModel(mockStorage, mockDictionary, mockCurrentFiltersRepository)
+            val viewModel = FiltersViewModel(mockDictionary, mockCurrentFiltersRepository)
 
             val initialFilters =
                 withTimeout(5000) {
