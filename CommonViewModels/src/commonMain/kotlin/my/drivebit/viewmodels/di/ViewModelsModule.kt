@@ -118,7 +118,6 @@ val commonViewModelsModule: Module =
 
         factory {
             FiltersViewModel(
-                storage = get(),
                 dictionary = get(),
                 currentFiltersRepository = get(named("main")),
             )

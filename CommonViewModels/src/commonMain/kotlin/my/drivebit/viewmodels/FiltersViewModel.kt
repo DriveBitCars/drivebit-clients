@@ -34,7 +34,6 @@ data class FilterScreenState(
 )
 
 class FiltersViewModel(
-    private val storage: Storage,
     private val dictionary: Dictionary,
     private val currentFiltersRepository: CurrentFiltersRepository,
 ) {
