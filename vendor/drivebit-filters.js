@@ -22,7 +22,16 @@
             }
         }
         if (!scroll || !activeBtn) return;
-        activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        var maxScroll = Math.max(0, scroll.scrollWidth - scroll.clientWidth);
+        var scrollRect = scroll.getBoundingClientRect();
+        var btnRect = activeBtn.getBoundingClientRect();
+        var delta =
+            btnRect.left + btnRect.width / 2 - (scrollRect.left + scrollRect.width / 2);
+        var target = scroll.scrollLeft + delta;
+        scroll.scrollTo({
+            left: Math.max(0, Math.min(target, maxScroll)),
+            behavior: "smooth",
+        });
     }
 
     function syncHeroBackground(nav, activeTitle) {
@@ -91,6 +100,7 @@
             var url = path + search;
 
             if (window.__drivebitFiltersBridgeReady) {
+                setPressedState(nav, title);
                 window.dispatchEvent(
                     new CustomEvent("drivebit-filter-select", {
                         detail: { title: title, path: path, url: url },

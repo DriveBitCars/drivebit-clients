@@ -360,7 +360,6 @@ body:has(#drivebit-hero-static) #root:not(:empty) .app-container {
     margin: 0 auto 20px;
     padding: 0 var(--drivebit-page-pad-x, 40px);
     box-sizing: border-box;
-    overflow: hidden;
 }
 
 body:not(:has(#drivebit-hero-static)) .drivebit-filters-static {
@@ -464,30 +463,6 @@ body:not(:has(#drivebit-hero-static)) .drivebit-filters-static {
 .drivebit-filter-label {
     pointer-events: none;
     white-space: nowrap;
-}
-
-@media (min-width: 641px) {
-    .drivebit-filters-scroll {
-        overflow-x: hidden;
-    }
-
-    .drivebit-filters-track {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .drivebit-filter-btn {
-        flex: 1 1 0;
-        min-width: 0;
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    .drivebit-filter-label {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-    }
 }
 
 .drivebit-city-filters {
@@ -616,25 +591,6 @@ body:not(:has(#drivebit-hero-static)) .drivebit-filters-static {
     .drivebit-filters-static {
         padding: 0 var(--drivebit-page-pad-x-mobile, 16px);
         margin-bottom: 16px;
-    }
-
-    .drivebit-filters-scroll {
-        overflow-x: auto;
-    }
-
-    .drivebit-filters-track {
-        width: max-content;
-        max-width: none;
-    }
-
-    .drivebit-filter-btn {
-        flex: 0 0 auto;
-        min-width: 0;
-    }
-
-    .drivebit-filter-label {
-        overflow: visible;
-        text-overflow: clip;
     }
 
     .drivebit-filter-btn {
