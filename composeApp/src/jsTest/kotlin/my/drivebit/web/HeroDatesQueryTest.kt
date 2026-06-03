@@ -62,4 +62,17 @@ class HeroDatesQueryTest {
         assertFalse(isMyCitySelectionPath("/search"))
         assertFalse(isMyCitySelectionPath("/moskva"))
     }
+
+    @Test
+    fun shouldShowStaticHeroShell_onlyOnCityHomeRoutes() {
+        assertTrue(shouldShowStaticHeroShell("/"))
+        assertTrue(shouldShowStaticHeroShell("/moskva"))
+        assertTrue(shouldShowStaticHeroShell("/moskva/poblizosti"))
+        assertFalse(shouldShowStaticHeroShell("/search"))
+        assertFalse(shouldShowStaticHeroShell("/my-city-selection"))
+        assertFalse(shouldShowStaticHeroShell("/profile"))
+        assertFalse(shouldShowStaticHeroShell("/login-by-phone"))
+        assertFalse(shouldShowStaticHeroShell("/my-bookings"))
+        assertFalse(shouldShowStaticHeroShell("/payment"))
+    }
 }
