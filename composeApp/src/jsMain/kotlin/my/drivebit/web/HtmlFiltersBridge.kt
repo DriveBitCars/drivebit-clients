@@ -18,7 +18,11 @@ fun HtmlFiltersBridge(
     filterViewModel: FiltersViewModel,
     navigationState: NavigationState,
 ) {
-    if (remember { document.getElementById("drivebit-filters-static") == null }) {
+    if (remember {
+            document.getElementById("drivebit-filters-static") == null ||
+                document.getElementById("drivebit-hero-static") == null
+        }
+    ) {
         return
     }
 

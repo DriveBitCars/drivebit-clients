@@ -10,8 +10,10 @@ There is **no** Python/Gradle step that rewrites them on build or deploy.
 
 ## Copy-paste fragments (optional)
 
-Files like `app-header.fragment.html`, `filters.fragment.html` are **reference snippets** only.
-Paste into the target `index.html` by hand when updating header/filters/hero.
+Files like `app-header.fragment.html`, `filters.fragment.html`, `cars-grid-skeleton.fragment.html` are **reference snippets** only.
+Paste into the target `index.html` by hand when updating header/filters/hero/cars grid placeholder.
+
+For bulk cars-grid skeleton rollout on listing pages, run `node scripts/inject-cars-grid-skeleton.mjs` from the repo root.
 
 ## New `/search/{brand}` page
 

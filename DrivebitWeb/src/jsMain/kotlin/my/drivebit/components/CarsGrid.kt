@@ -18,6 +18,7 @@ fun CarsGrid(
     onCarClick: (CarItem) -> Unit = { car -> window.location.href = "/car-detail?id=${car.id}" },
 ) {
     Div({
+        classes("drivebit-cars-grid-mounted")
         style {
             display(DisplayStyle.Grid)
             gridTemplateColumns("repeat(auto-fill, minmax(280px, 1fr))")

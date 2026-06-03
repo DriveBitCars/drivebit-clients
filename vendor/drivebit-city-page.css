@@ -362,6 +362,10 @@ body:has(#drivebit-hero-static) #root:not(:empty) .app-container {
     box-sizing: border-box;
 }
 
+body:not(:has(#drivebit-hero-static)) .drivebit-filters-static {
+    display: none;
+}
+
 .drivebit-filters-scroll {
     display: flex;
     flex-direction: row;

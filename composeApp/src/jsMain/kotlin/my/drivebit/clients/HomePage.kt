@@ -41,6 +41,7 @@ import my.drivebit.viewmodels.NearbyLayoutMode
 import my.drivebit.web.cityPathWithFilter
 import my.drivebit.web.filterTitleToPathSegment
 import my.drivebit.web.isCityHomePath
+import my.drivebit.web.shouldShowStaticHeroShell
 import my.drivebit.web.parseCitySlugFromPath
 import my.drivebit.web.HtmlHeroDatesBridge
 import my.drivebit.web.parseFilterSlugFromCityPath
@@ -140,10 +141,15 @@ fun HomePage() {
         navigationState = navigationState,
     )
 
+    val staticHeroMounted = remember { document.getElementById("drivebit-hero-static") != null }
     val staticFiltersMounted = remember { document.getElementById("drivebit-filters-static") != null }
+    val showComposeTripFilters =
+        staticHeroMounted &&
+            shouldShowStaticHeroShell(currentPath) &&
+            !staticFiltersMounted
 
     AppWithHeader {
-        if (!staticFiltersMounted) {
+        if (showComposeTripFilters) {
             FilterButtonsRow {
                 filters.forEach { filter ->
                     filterButton(
