@@ -1,0 +1,37 @@
+config.devServer = config.devServer || {};
+config.devServer.open = false;
+config.devServer.port = process.env.PORT ? parseInt(process.env.PORT, 10) : 'auto';
+config.devServer.hot = true;
+config.devServer.liveReload = true;
+config.devServer.historyApiFallback = {
+    rewrites: [
+        { from: /^\/verify-otp\/?$/, to: '/verify-otp/index.html' },
+        { from: /^\/login-by-phone\/?$/, to: '/login-by-phone/index.html' },
+        { from: /^\/login-by-mail\/?$/, to: '/login-by-mail/index.html' },
+        { from: /^\/login-by-password\/?$/, to: '/login-by-password/index.html' },
+    ],
+};
+
+config.devServer.proxy = [
+    {
+        context: ['/avatar'],
+        target: 'http://157.22.252.70:9000',
+        pathRewrite: {
+            '^/avatar': '/publicbct/avatars',
+        },
+        changeOrigin: true,
+        secure: false,
+    },
+    {
+        context: ['/publicbct'],
+        target: 'http://157.22.252.70:9000',
+        changeOrigin: true,
+        secure: false,
+    },
+    {
+        context: ['/privatebct'],
+        target: 'http://157.22.252.70:9000',
+        changeOrigin: true,
+        secure: false,
+    },
+];

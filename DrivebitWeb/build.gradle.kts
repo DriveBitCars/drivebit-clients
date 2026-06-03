@@ -30,6 +30,10 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koinComposeViewmodelJs)
         }
+        jsTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(project(":Network"))
+        }
     }
 }
 

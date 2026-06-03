@@ -41,7 +41,7 @@ jobs:
     - name: Build JS distribution
       run: |
         echo "🔨 Building JS distribution..."
-        ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :chatsApp:jsBrowserDistribution --no-daemon --stacktrace || exit 1
+        ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :chatsApp:jsBrowserDistribution :authApp:jsBrowserDistribution :accountApp:jsBrowserDistribution --no-daemon --stacktrace || exit 1
         echo "✅ Build completed"
 
     - name: Merge split bundles into main dist
@@ -66,6 +66,16 @@ jobs:
         test -f "$DIST/chats/index.html"
         test -f "$DIST/chat/index.html"
         test -f "$DIST/chats.js"
+        AUTH="authApp/build/dist/js/productionExecutable"
+        cp "$AUTH/auth.js" "$DIST/"
+        cp -r "$AUTH/login-by-phone" "$DIST/"
+        test -f "$DIST/login-by-phone/index.html"
+        test -f "$DIST/auth.js"
+        ACCOUNT="accountApp/build/dist/js/productionExecutable"
+        cp "$ACCOUNT/account.js" "$DIST/"
+        cp -r "$ACCOUNT/profile" "$DIST/"
+        test -f "$DIST/profile/index.html"
+        test -f "$DIST/account.js"
         echo "split bundles merged OK"
 
     - name: Prepare dist directory
