@@ -22,7 +22,31 @@
             }
         }
         if (!scroll || !activeBtn) return;
-        activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        var maxScroll = Math.max(0, scroll.scrollWidth - scroll.clientWidth);
+        var scrollRect = scroll.getBoundingClientRect();
+        var btnRect = activeBtn.getBoundingClientRect();
+        var delta =
+            btnRect.left + btnRect.width / 2 - (scrollRect.left + scrollRect.width / 2);
+        var target = scroll.scrollLeft + delta;
+        scroll.scrollTo({
+            left: Math.max(0, Math.min(target, maxScroll)),
+            behavior: "smooth",
+        });
+    }
+
+    function syncHeroBackground(nav, activeTitle) {
+        var heroBg = qs("drivebit-hero-bg");
+        if (!heroBg || !nav) return;
+        var buttons = nav.querySelectorAll(".drivebit-filter-btn");
+        for (var i = 0; i < buttons.length; i++) {
+            var btn = buttons[i];
+            if ((btn.getAttribute("data-filter-title") || "") !== activeTitle) continue;
+            var bg = btn.getAttribute("data-hero-bg");
+            if (bg && heroBg.getAttribute("src") !== bg) {
+                heroBg.setAttribute("src", bg);
+            }
+            return;
+        }
     }
 
     function setPressedState(nav, activeTitle) {
@@ -35,6 +59,7 @@
             btn.classList.toggle("is-selected", pressed);
         });
         scrollActiveButtonIntoView(nav, activeTitle);
+        syncHeroBackground(nav, activeTitle);
     }
 
     function titleFromPath(pathname) {
@@ -75,6 +100,7 @@
             var url = path + search;
 
             if (window.__drivebitFiltersBridgeReady) {
+                setPressedState(nav, title);
                 window.dispatchEvent(
                     new CustomEvent("drivebit-filter-select", {
                         detail: { title: title, path: path, url: url },

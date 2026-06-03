@@ -43,6 +43,9 @@ fun PaginationBar(
         modifier = {
             padding(24.px, 0.px)
         },
+        attrs = {
+            classes("drivebit-pagination-bar")
+        },
     ) {
         Row(
             gap = 8.px,

@@ -11,6 +11,7 @@ import org.jetbrains.compose.web.dom.Text
 @Composable
 fun TextError(text: String) {
     Span({
+        classes("drivebit-main-content-error")
         style {
             applyTypography(CSSTypography.Styles.body)
             fontSize(CSSTypography.FontSize.base)

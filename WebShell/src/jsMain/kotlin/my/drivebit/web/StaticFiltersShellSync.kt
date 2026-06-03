@@ -10,10 +10,10 @@ fun StaticFiltersShellSync(currentPath: String) {
     LaunchedEffect(currentPath) {
         val nav = document.getElementById("drivebit-filters-static") as? HTMLElement ?: return@LaunchedEffect
         nav.style.display =
-            if (isSearchPath(currentPath) || isMyCitySelectionPath(currentPath)) {
-                "none"
-            } else {
+            if (shouldShowStaticHeroShell(currentPath)) {
                 ""
+            } else {
+                "none"
             }
     }
 }

@@ -2,60 +2,122 @@ package my.drivebit.viewmodels
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import my.drivebit.network.services.CarItem
 import my.drivebit.repositories.CarSearchRepository
 
+sealed interface MainContentListState {
+    data object Loading : MainContentListState
+
+    data class FirstList(
+        val cars: List<CarItem>,
+    ) : MainContentListState
+
+    data class Error(
+        val message: String,
+    ) : MainContentListState
+}
+
 interface MainContentViewModel {
-    val firstList: StateFlow<List<CarItem>>
+    val firstList: StateFlow<MainContentListState>
     val displayedCars: StateFlow<List<CarItem>>
     val paginationInfo: StateFlow<Triple<Int, Int, Int>>
 
     fun refresh()
 
     fun setPage(page: Int)
+
+    fun markSearchStarted()
 }
 
 class MainContentViewModelImpl(
     private val carSearchRepository: CarSearchRepository,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : MainContentViewModel {
-    override val firstList: StateFlow<List<CarItem>> =
-        carSearchRepository
-            .searchCarsByUserCity
-            .map { it.cars }
-            .catch { emit(emptyList()) }
-            .stateIn(
-                scope = coroutineScope,
-                started = kotlinx.coroutines.flow.SharingStarted.Lazily,
+    private val viewModelScope = coroutineScope
+
+    private val _firstList = MutableStateFlow<MainContentListState>(MainContentListState.Loading)
+
+    override val firstList: StateFlow<MainContentListState> = _firstList.asStateFlow()
+
+    override val displayedCars: StateFlow<List<CarItem>> =
+        _firstList
+            .map { state ->
+                when (val s = state) {
+                    is MainContentListState.FirstList -> s.cars
+                    else -> emptyList()
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
                 initialValue = emptyList(),
             )
-
-    override val displayedCars: StateFlow<List<CarItem>> = firstList
 
     override val paginationInfo: StateFlow<Triple<Int, Int, Int>> =
         combine(
             carSearchRepository.currentPage,
             carSearchRepository.searchCarsByUserCity,
-        ) { page, response ->
-            Triple(page, response.totalPages, response.totalCount)
+            _firstList,
+        ) { page, response, listState ->
+            if (listState is MainContentListState.FirstList) {
+                Triple(page, response.totalPages, response.totalCount)
+            } else {
+                Triple(0, 0, 0)
+            }
         }.catch { emit(Triple(0, 0, 0)) }
             .stateIn(
-                scope = coroutineScope,
+                scope = viewModelScope,
                 started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
                 initialValue = Triple(0, 0, 0),
             )
 
+    private var searchJob: Job? = null
+
+    init {
+        startSearchCollection()
+    }
+
+    private fun startSearchCollection() {
+        searchJob?.cancel()
+        searchJob =
+            viewModelScope.launch {
+                carSearchRepository
+                    .searchCarsByUserCity
+                    .catch { e ->
+                        val errorMessage =
+                            ErrorHandler.extractErrorMessage(
+                                exception = e,
+                                defaultNetworkError = "Ошибка сети",
+                                defaultGenericError = "Не удалось загрузить автомобили",
+                            )
+                        _firstList.value = MainContentListState.Error(errorMessage)
+                    }.collectLatest { response ->
+                        _firstList.value = MainContentListState.FirstList(response.cars)
+                    }
+            }
+    }
+
     override fun refresh() {
+        markSearchStarted()
         carSearchRepository.refreshSearch()
     }
 
     override fun setPage(page: Int) {
+        markSearchStarted()
         carSearchRepository.setPage(page.coerceAtLeast(0))
+    }
+
+    override fun markSearchStarted() {
+        _firstList.value = MainContentListState.Loading
     }
 }

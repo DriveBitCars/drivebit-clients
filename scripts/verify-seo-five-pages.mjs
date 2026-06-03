@@ -87,6 +87,15 @@ for (const urlPath of paths) {
     if (!staticShell.includes("drivebit-seo-text")) {
       fail(`${urlPath}: static HTML missing drivebit-seo-text shell`);
     }
+    if (urlPath === "/moskva") {
+      const html = fs.readFileSync(path.join(root, staticFile), "utf8");
+      if (!html.includes("drivebit-cars-grid-static")) {
+        fail(`${urlPath}: static HTML missing drivebit-cars-grid-static skeleton`);
+      }
+      if (!html.includes("drivebit-cars-grid-skeleton.css")) {
+        fail(`${urlPath}: static HTML missing drivebit-cars-grid-skeleton.css link`);
+      }
+    }
   }
 }
 
