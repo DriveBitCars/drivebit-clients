@@ -2,11 +2,16 @@ package my.drivebit.maps
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.delay
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.maps.models.MapMarker
 import my.drivebit.maps.models.MapProvider
@@ -136,6 +141,18 @@ actual fun MapView(
     val mapId = remember { "map-${kotlin.random.Random.nextInt(100000)}" }
     val mapContainer = remember { mutableMapOf<String, Any?>() }
     val leafletMarkers = remember { mutableListOf<Marker>() }
+    var leafletReady by remember { mutableStateOf(false) }
+
+    LaunchedEffect(mapId) {
+        awaitLeafletReady()
+        for (attempt in 0 until 60) {
+            if (document.getElementById(mapId) != null) {
+                break
+            }
+            delay(16)
+        }
+        leafletReady = true
+    }
 
     Div(
         attrs = {
@@ -148,79 +165,82 @@ actual fun MapView(
         },
     )
 
-    SideEffect {
-        val container = document.getElementById(mapId) as? HTMLElement
-        if (container != null && js("typeof L !== 'undefined'").unsafeCast<Boolean>()) {
-            configureLeafletMarkerIcons()
-            val existingMap = mapContainer["map"] as? Map
-            if (existingMap == null) {
-                val mapOptions = js("{}").unsafeCast<Json>()
-                mapOptions.asDynamic().zoomControl = true
+    DisposableEffect(leafletReady, mapId, mapProvider, apiKey) {
+        if (leafletReady) {
+            val container = document.getElementById(mapId) as? HTMLElement
+            if (container != null) {
+                configureLeafletMarkerIcons()
+                val existingMap = mapContainer["map"] as? Map
+                if (existingMap == null) {
+            val mapOptions = js("{}").unsafeCast<Json>()
+            mapOptions.asDynamic().zoomControl = true
 
-                val map = Leaflet.map(container, mapOptions)
-                mapContainer["map"] = map
+            val map = Leaflet.map(container, mapOptions)
+            mapContainer["map"] = map
 
-                val tileLayerOptions = js("{}").unsafeCast<Json>()
-                val tileLayerUrl: String
-                val attribution: String
+            val tileLayerOptions = js("{}").unsafeCast<Json>()
+            val tileLayerUrl: String
+            val attribution: String
 
-                when (mapProvider) {
-                    MapProvider.YANDEX_MAPS -> {
-                        if (apiKey == null) {
-                            console.warn("Yandex Maps requires API key. Falling back to OpenStreetMap.")
-                            attribution = "© OpenStreetMap contributors"
-                            tileLayerUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        } else {
-                            attribution = "© Яндекс.Карты"
-                            tileLayerOptions.asDynamic().maxZoom = 19
-                            tileLayerUrl =
-                                "https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=21.03.15-0&x={x}&y={y}&z={z}&key=$apiKey"
-                        }
-                    }
-                    MapProvider.OPENSTREETMAP -> {
+            when (mapProvider) {
+                MapProvider.YANDEX_MAPS -> {
+                    if (apiKey == null) {
+                        console.warn("Yandex Maps requires API key. Falling back to OpenStreetMap.")
                         attribution = "© OpenStreetMap contributors"
-                        tileLayerOptions.asDynamic().maxZoom = 19
                         tileLayerUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    } else {
+                        attribution = "© Яндекс.Карты"
+                        tileLayerOptions.asDynamic().maxZoom = 19
+                        tileLayerUrl =
+                            "https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=21.03.15-0&x={x}&y={y}&z={z}&key=$apiKey"
                     }
                 }
+                MapProvider.OPENSTREETMAP -> {
+                    attribution = "© OpenStreetMap contributors"
+                    tileLayerOptions.asDynamic().maxZoom = 19
+                    tileLayerUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                }
+            }
 
-                tileLayerOptions.asDynamic().attribution = attribution
+            tileLayerOptions.asDynamic().attribution = attribution
 
-                val tileLayer = Leaflet.tileLayer(tileLayerUrl, tileLayerOptions)
-                tileLayer.addTo(map)
+            val tileLayer = Leaflet.tileLayer(tileLayerUrl, tileLayerOptions)
+            tileLayer.addTo(map)
 
-                window.setTimeout(
-                    {
-                        map.invalidateSize()
-                    },
-                    0,
-                )
+            window.setTimeout(
+                {
+                    map.invalidateSize()
+                },
+                0,
+            )
 
-                mapContainer["moveTimeout"] = null
-                map.on("moveend") {
-                    (mapContainer["moveTimeout"] as? Int)?.let { window.clearTimeout(it) }
-                    val timeoutId =
-                        window.setTimeout({
-                            val currentMap = mapContainer["map"] as? Map
-                            if (currentMap != null && currentMap == map) {
-                                val center = map.getCenter()
-                                val zoom = map.getZoom()
-                                onCameraMove(
-                                    MapCameraPosition(
-                                        location =
-                                            my.drivebit.maps.models.Location(
-                                                latitude = center.lat.toDouble(),
-                                                longitude = center.lng.toDouble(),
-                                            ),
-                                        zoom = zoom.toFloat(),
-                                    ),
-                                )
-                            }
-                        }, 300)
-                    mapContainer["moveTimeout"] = timeoutId
+            mapContainer["moveTimeout"] = null
+            map.on("moveend") {
+                (mapContainer["moveTimeout"] as? Int)?.let { window.clearTimeout(it) }
+                val timeoutId =
+                    window.setTimeout({
+                        val currentMap = mapContainer["map"] as? Map
+                        if (currentMap != null && currentMap == map) {
+                            val center = map.getCenter()
+                            val zoom = map.getZoom()
+                            onCameraMove(
+                                MapCameraPosition(
+                                    location =
+                                        my.drivebit.maps.models.Location(
+                                            latitude = center.lat.toDouble(),
+                                            longitude = center.lng.toDouble(),
+                                        ),
+                                    zoom = zoom.toFloat(),
+                                ),
+                            )
+                        }
+                    }, 300)
+                mapContainer["moveTimeout"] = timeoutId
+            }
                 }
             }
         }
+        onDispose { }
     }
 
     SideEffect {
