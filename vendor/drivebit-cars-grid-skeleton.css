@@ -1,0 +1,69 @@
+.drivebit-cars-grid-static {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px var(--drivebit-page-pad-x, 40px) 40px;
+    box-sizing: border-box;
+}
+
+.drivebit-cars-grid-static__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    width: 100%;
+}
+
+.drivebit-cars-grid-static__card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.drivebit-cars-grid-static__image,
+.drivebit-cars-grid-static__line {
+    border-radius: 8px;
+    background: linear-gradient(90deg, #e8e8ee 0%, #f4f4f8 50%, #e8e8ee 100%);
+    background-size: 200% 100%;
+    animation: drivebit-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.drivebit-cars-grid-static__image {
+    width: 100%;
+    height: 150px;
+}
+
+.drivebit-cars-grid-static__line {
+    height: 16px;
+}
+
+.drivebit-cars-grid-static__line--title {
+    width: 78%;
+}
+
+.drivebit-cars-grid-static__line--price {
+    width: 48%;
+    height: 14px;
+}
+
+body:has(#root .drivebit-cars-grid-compose) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose),
+body:has(#root .drivebit-cars-grid-mounted) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose),
+body:has(#root .drivebit-pagination-bar) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose),
+body:has(#root .leaflet-container) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose),
+body:has(#root .drivebit-main-content-error) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose) {
+    display: none;
+}
+
+@keyframes drivebit-skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .drivebit-cars-grid-static {
+        padding: 8px var(--drivebit-page-pad-x-mobile, 16px) 16px;
+    }
+}

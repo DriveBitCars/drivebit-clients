@@ -9,7 +9,9 @@ import androidx.compose.runtime.remember
 import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.navigation.NavigationState
+import my.drivebit.viewmodels.FilterItem
 import my.drivebit.viewmodels.FiltersViewModel
+import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
 
@@ -73,7 +75,19 @@ fun HtmlFiltersBridge(
             }
         val active = fromPath ?: filterState.selected
         syncStaticFiltersPressedState(active)
+        syncStaticHeroBackground(active, filterState.filters)
         window.dispatchEvent(org.w3c.dom.events.Event("drivebit-filter-path-changed"))
+    }
+}
+
+private fun syncStaticHeroBackground(
+    activeTitle: String,
+    filters: List<FilterItem>,
+) {
+    val heroBg = document.getElementById("drivebit-hero-bg") as? HTMLImageElement ?: return
+    val backgroundUrl = filters.firstOrNull { it.title == activeTitle }?.backgroundIcon ?: return
+    if (heroBg.getAttribute("src") != backgroundUrl) {
+        heroBg.setAttribute("src", backgroundUrl)
     }
 }
 

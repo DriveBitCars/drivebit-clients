@@ -31,15 +31,15 @@ data class FilterScreenState(
 class FiltersViewModel(
     private val currentFiltersRepository: CurrentFiltersRepository,
 ) {
-    private val backgroundIcons =
-        listOf(
-            SEARCHBACKGROUND_CAR2_JPG,
-            SEARCHBACKGROUND_CAR3_JPG,
-            SEARCHBACKGROUND_CAR4_JPG,
-            SEARCHBACKGROUND_CAR5_JPG,
-            SEARCHBACKGROUND_CAR6_JPG,
-            SEARCHBACKGROUND_CAR7_JPG,
-            SEARCHBACKGROUND_CAR8_JPG,
+    private val backgroundByFilterTitle =
+        mapOf(
+            "Путешествия" to SEARCHBACKGROUND_CAR2_JPG,
+            "К родным" to SEARCHBACKGROUND_CAR4_JPG,
+            "Командировки" to SEARCHBACKGROUND_CAR5_JPG,
+            "За город" to SEARCHBACKGROUND_CAR3_JPG,
+            "Каникулы" to SEARCHBACKGROUND_CAR6_JPG,
+            "Переезд" to SEARCHBACKGROUND_CAR8_JPG,
+            "Мероприятие" to SEARCHBACKGROUND_CAR7_JPG,
         )
 
     private val _state =
@@ -76,10 +76,9 @@ class FiltersViewModel(
             ),
         )
 
-        SuggestedFiltersCatalog.suggested.forEachIndexed { index, suggestion ->
+        SuggestedFiltersCatalog.suggested.forEach { suggestion ->
             val backgroundIcon =
-                backgroundIcons.getOrNull(index % backgroundIcons.size)
-                    ?: SEARCHBACKGROUND_CAR2_JPG
+                backgroundByFilterTitle[suggestion.shortName] ?: SEARCHBACKGROUND_CAR2_JPG
 
             filterItems.add(
                 FilterItem(

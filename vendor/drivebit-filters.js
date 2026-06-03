@@ -25,6 +25,21 @@
         activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     }
 
+    function syncHeroBackground(nav, activeTitle) {
+        var heroBg = qs("drivebit-hero-bg");
+        if (!heroBg || !nav) return;
+        var buttons = nav.querySelectorAll(".drivebit-filter-btn");
+        for (var i = 0; i < buttons.length; i++) {
+            var btn = buttons[i];
+            if ((btn.getAttribute("data-filter-title") || "") !== activeTitle) continue;
+            var bg = btn.getAttribute("data-hero-bg");
+            if (bg && heroBg.getAttribute("src") !== bg) {
+                heroBg.setAttribute("src", bg);
+            }
+            return;
+        }
+    }
+
     function setPressedState(nav, activeTitle) {
         if (!nav) return;
         var buttons = nav.querySelectorAll(".drivebit-filter-btn");
@@ -35,6 +50,7 @@
             btn.classList.toggle("is-selected", pressed);
         });
         scrollActiveButtonIntoView(nav, activeTitle);
+        syncHeroBackground(nav, activeTitle);
     }
 
     function titleFromPath(pathname) {
