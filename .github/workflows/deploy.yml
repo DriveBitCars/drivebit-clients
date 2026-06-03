@@ -68,7 +68,7 @@ jobs:
       run: ./gradlew clean --no-daemon
 
     - name: Build JS distribution (fast web version)
-      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :chatsApp:jsBrowserDistribution --no-daemon
+      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :chatsApp:jsBrowserDistribution :authApp:jsBrowserDistribution :accountApp:jsBrowserDistribution --no-daemon
 
     - name: Merge split bundles into main dist
       run: |
@@ -105,6 +105,26 @@ jobs:
         test -f "$DIST/chats/index.html"
         test -f "$DIST/chat/index.html"
         test -f "$DIST/chats.js"
+        AUTH="authApp/build/dist/js/productionExecutable"
+        cp "$AUTH/auth.js" "$DIST/"
+        cp "$AUTH/auth.js.map" "$DIST/" 2>/dev/null || true
+        for route in verify-otp login-by-phone login-by-mail login-by-password; do
+          if [ -d "$AUTH/$route" ]; then
+            cp -r "$AUTH/$route" "$DIST/"
+          fi
+        done
+        test -f "$DIST/login-by-phone/index.html"
+        test -f "$DIST/auth.js"
+        ACCOUNT="accountApp/build/dist/js/productionExecutable"
+        cp "$ACCOUNT/account.js" "$DIST/"
+        cp "$ACCOUNT/account.js.map" "$DIST/" 2>/dev/null || true
+        for route in profile my-bookings my-deals documents payment change-email; do
+          if [ -d "$ACCOUNT/$route" ]; then
+            cp -r "$ACCOUNT/$route" "$DIST/"
+          fi
+        done
+        test -f "$DIST/profile/index.html"
+        test -f "$DIST/account.js"
         echo "split bundles merged OK"
 
     - name: Verify Moscow SEO pages in dist
@@ -168,6 +188,12 @@ jobs:
         find composeApp/build/dist/js/productionExecutable -name index.html -print0 | \
           xargs -0 grep -l 'chats\.js' | \
           xargs -r sed -i "s/chats\.js?v=[0-9]*/chats.js?v=$TIMESTAMP/g"
+        find composeApp/build/dist/js/productionExecutable -name index.html -print0 | \
+          xargs -0 grep -l 'auth\.js' | \
+          xargs -r sed -i "s/auth\.js?v=[0-9]*/auth.js?v=$TIMESTAMP/g"
+        find composeApp/build/dist/js/productionExecutable -name index.html -print0 | \
+          xargs -0 grep -l 'account\.js' | \
+          xargs -r sed -i "s/account\.js?v=[0-9]*/account.js?v=$TIMESTAMP/g"
         
         # Rename JS files with timestamp
         cd composeApp/build/dist/js/productionExecutable

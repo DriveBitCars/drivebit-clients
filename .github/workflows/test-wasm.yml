@@ -73,12 +73,12 @@ jobs:
       run: ./gradlew kotlinUpgradeYarnLock kotlinStoreYarnLock --no-daemon || true
 
     - name: Clean dist (avoid stale cache)
-      run: rm -rf composeApp/build/dist carDetailApp/build/dist myCarsApp/build/dist chatsApp/build/dist
+      run: rm -rf composeApp/build/dist carDetailApp/build/dist myCarsApp/build/dist chatsApp/build/dist authApp/build/dist accountApp/build/dist
 
     - name: Build JS Browser Distribution
       env:
         NODE_OPTIONS: --max-old-space-size=4096
-      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :chatsApp:jsBrowserDistribution --no-daemon --stacktrace --no-parallel --no-build-cache
+      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :chatsApp:jsBrowserDistribution :authApp:jsBrowserDistribution :accountApp:jsBrowserDistribution --no-daemon --stacktrace --no-parallel --no-build-cache
 
     - name: Check JS bundles for skiko references
       run: |
@@ -99,6 +99,8 @@ jobs:
         check_js_no_skiko "carDetailApp/build/dist/js/productionExecutable/carDetail.js"
         check_js_no_skiko "myCarsApp/build/dist/js/productionExecutable/myCars.js"
         check_js_no_skiko "chatsApp/build/dist/js/productionExecutable/chats.js"
+        check_js_no_skiko "authApp/build/dist/js/productionExecutable/auth.js"
+        check_js_no_skiko "accountApp/build/dist/js/productionExecutable/account.js"
 
     - name: Check dist for skiko artifacts
       run: |
@@ -106,7 +108,9 @@ jobs:
           composeApp/build/dist/js/productionExecutable \
           carDetailApp/build/dist/js/productionExecutable \
           myCarsApp/build/dist/js/productionExecutable \
-          chatsApp/build/dist/js/productionExecutable; do
+          chatsApp/build/dist/js/productionExecutable \
+          authApp/build/dist/js/productionExecutable \
+          accountApp/build/dist/js/productionExecutable; do
           if find "$dist_dir" -maxdepth 1 \( -iname '*skiko*' -o -name 'js-reexport-symbols.mjs' \) | grep -q .; then
             echo "❌ Skiko/WASM artifacts found in $dist_dir:"
             find "$dist_dir" -maxdepth 1 \( -iname '*skiko*' -o -name 'js-reexport-symbols.mjs' \)
@@ -132,6 +136,12 @@ jobs:
         echo "📁 chatsApp build output:"
         find chatsApp/build/dist/js/productionExecutable -maxdepth 1 -type f -name "*.js" | head -10
         ls -lh chatsApp/build/dist/js/productionExecutable/chats.js 2>/dev/null || echo "chats.js not found"
+        echo ""
+        echo "📁 authApp build output:"
+        ls -lh authApp/build/dist/js/productionExecutable/auth.js 2>/dev/null || echo "auth.js not found"
+        echo ""
+        echo "📁 accountApp build output:"
+        ls -lh accountApp/build/dist/js/productionExecutable/account.js 2>/dev/null || echo "account.js not found"
 
     - name: Upload logs (on failure)
       if: failure()
@@ -143,6 +153,8 @@ jobs:
           carDetailApp/build/dist/
           myCarsApp/build/dist/
           chatsApp/build/dist/
+          authApp/build/dist/
+          accountApp/build/dist/
           build/js/yarn-error.log
         if-no-files-found: ignore
         retention-days: 7

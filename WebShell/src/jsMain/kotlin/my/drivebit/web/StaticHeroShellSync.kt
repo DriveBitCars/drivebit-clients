@@ -15,15 +15,17 @@ fun isMyCitySelectionPath(pathname: String): Boolean {
     return normalized == "/my-city-selection"
 }
 
+fun shouldShowStaticHeroShell(pathname: String): Boolean = isCityHomePath(pathname)
+
 @Composable
 fun StaticHeroShellSync(currentPath: String) {
     LaunchedEffect(currentPath) {
         val wrap = document.querySelector(".drivebit-hero-wrap") as? HTMLElement ?: return@LaunchedEffect
         wrap.style.display =
-            if (isSearchPath(currentPath) || isMyCitySelectionPath(currentPath)) {
-                "none"
-            } else {
+            if (shouldShowStaticHeroShell(currentPath)) {
                 ""
+            } else {
+                "none"
             }
     }
 }

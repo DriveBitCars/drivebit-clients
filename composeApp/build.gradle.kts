@@ -112,18 +112,14 @@ kotlin {
         }
 
         jsMain.dependencies {
-            implementation(compose.html.core)
-            implementation(compose.runtime)
-            implementation(libs.kotlinx.serialization.json)
+            implementation(project(":DrivebitWeb"))
             implementation(project(":WebShell"))
             implementation(project(":AppHeader"))
-            implementation(project(":Storage"))
             implementation(project(":CommonViewModels"))
             implementation(project(":Network"))
-            implementation(project(":Repositories"))
-            implementation(project(":UI-Components"))
-            implementation(project(":Utils"))
             implementation(project(":Maps"))
+            implementation(compose.html.core)
+            implementation(compose.runtime)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koinComposeViewmodelJs)
@@ -264,21 +260,54 @@ val chatShellRoutes =
         "chat",
     )
 
+val authShellRoutes =
+    listOf(
+        "verify-otp",
+        "login-by-phone",
+        "login-by-mail",
+        "login-by-password",
+    )
+
+val accountShellRoutes =
+    listOf(
+        "my-city-selection",
+        "profile",
+        "my-bookings",
+        "leave-review",
+        "my-deals",
+        "documents",
+        "download-booking-contract",
+        "payment",
+        "edit-name",
+        "change-email",
+        "change-phone",
+        "change-password",
+    )
+
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     if (needsSplitBundleDevWebpack) {
         dependsOn(
             ":carDetailApp:jsBrowserDevelopmentWebpack",
             ":myCarsApp:jsBrowserDevelopmentWebpack",
             ":chatsApp:jsBrowserDevelopmentWebpack",
+            ":authApp:jsBrowserDevelopmentWebpack",
+            ":accountApp:jsBrowserDevelopmentWebpack",
         )
     } else {
         dependsOn(
             ":carDetailApp:jsBrowserProductionWebpack",
             ":myCarsApp:jsBrowserProductionWebpack",
             ":chatsApp:jsBrowserProductionWebpack",
+            ":authApp:jsBrowserProductionWebpack",
+            ":accountApp:jsBrowserProductionWebpack",
         )
     }
-    dependsOn(":myCarsApp:jsProcessResources", ":chatsApp:jsProcessResources")
+    dependsOn(
+        ":myCarsApp:jsProcessResources",
+        ":chatsApp:jsProcessResources",
+        ":authApp:jsProcessResources",
+        ":accountApp:jsProcessResources",
+    )
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.file("list-your-car.html"))
     from(rootProject.layout.projectDirectory.dir("vendor")) {
@@ -325,6 +354,34 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(chatsWebpackDir) {
         include("chats.js", "chats.js.map")
     }
+    authShellRoutes.forEach { route ->
+        from(project(":authApp").layout.buildDirectory.dir("processedResources/js/main/$route")) {
+            into(route)
+        }
+    }
+    val authWebpackDir =
+        if (needsSplitBundleDevWebpack) {
+            project(":authApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
+        } else {
+            project(":authApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
+        }
+    from(authWebpackDir) {
+        include("auth.js", "auth.js.map")
+    }
+    accountShellRoutes.forEach { route ->
+        from(project(":accountApp").layout.buildDirectory.dir("processedResources/js/main/$route")) {
+            into(route)
+        }
+    }
+    val accountWebpackDir =
+        if (needsSplitBundleDevWebpack) {
+            project(":accountApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
+        } else {
+            project(":accountApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
+        }
+    from(accountWebpackDir) {
+        include("account.js", "account.js.map")
+    }
 }
 
 tasks.named("jsBrowserDevelopmentRun").configure {
@@ -332,5 +389,7 @@ tasks.named("jsBrowserDevelopmentRun").configure {
         ":carDetailApp:jsBrowserDevelopmentWebpack",
         ":myCarsApp:jsBrowserDevelopmentWebpack",
         ":chatsApp:jsBrowserDevelopmentWebpack",
+        ":authApp:jsBrowserDevelopmentWebpack",
+        ":accountApp:jsBrowserDevelopmentWebpack",
     )
 }

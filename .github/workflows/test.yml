@@ -169,6 +169,8 @@ jobs:
           - carDetailApp
           - myCarsApp
           - chatsApp
+          - authApp
+          - accountApp
           - composeApp
 
     steps:
