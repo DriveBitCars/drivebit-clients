@@ -5,13 +5,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.web.HtmlFiltersBridge
 import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.CarsGrid
+import my.drivebit.components.CarsGridSkeleton
 import my.drivebit.components.FilterButtonsRow
+import my.drivebit.components.TextError
 import my.drivebit.components.NearbyMapListSwitcher
 import my.drivebit.components.NearbyRadiusSelector
 import my.drivebit.components.PaginationBar
@@ -21,6 +25,7 @@ import my.drivebit.maps.MapView
 import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.maps.models.MapMarker
+import my.drivebit.network.services.CarItem
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.navigation.NavigationState
 import my.drivebit.web.navigateToCarDetail
@@ -28,6 +33,7 @@ import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.viewmodels.CarSearchViewModel
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.FiltersViewModel
+import my.drivebit.viewmodels.MainContentListState
 import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MapViewModel
 import my.drivebit.viewmodels.MyCityViewModel
@@ -72,9 +78,14 @@ fun HomePage() {
     val currentPath by navigationState.currentPath.collectAsState()
     val mapState = mapViewModel.state.collectAsState()
     val carSearchState = carSearchViewModel.state.collectAsState()
-    val cars by mainContentViewModel.firstList.collectAsState()
+    val firstListState by mainContentViewModel.firstList.collectAsState()
     val displayedCars by mainContentViewModel.displayedCars.collectAsState()
     val paginationInfo by mainContentViewModel.paginationInfo.collectAsState()
+    val cars =
+        when (val listState = firstListState) {
+            is MainContentListState.FirstList -> listState.cars
+            else -> emptyList()
+        }
     val filters = state.value.filters
     val selectedFromPath =
         parseFilterSlugFromCityPath(currentPath)?.let { filterSlug ->
@@ -108,6 +119,14 @@ fun HomePage() {
         if (isCityHomePath(currentPath) && cityName.isNotEmpty()) {
             mainContentViewModel.refresh()
         }
+    }
+
+    val hadSearchParams = remember { mutableStateOf(false) }
+    LaunchedEffect(selected, startState.date, endState.date) {
+        if (hadSearchParams.value) {
+            mainContentViewModel.markSearchStarted()
+        }
+        hadSearchParams.value = true
     }
 
     HtmlHeroDatesBridge(
@@ -150,145 +169,188 @@ fun HomePage() {
 
         when (selected) {
             "Поблизости" -> {
-                val nearbyLayout = mapState.value.nearbyLayoutMode
-                val nearbyListPage = mapState.value.nearbyListPage
-                val nearbyRadiusKm = mapState.value.nearbyRadiusKm
-                val usedFallbackCenter = mapState.value.usedFallbackCenter
+                when (val listState = firstListState) {
+                    MainContentListState.Loading -> {
+                        CarsGridSkeleton()
+                    }
 
-                LaunchedEffect(selected) {
-                    mapViewModel.initializeNearbySearch()
-                }
+                    is MainContentListState.Error -> {
+                        TextError(listState.message)
+                    }
 
-                LaunchedEffect(cars) {
-                    mapViewModel.syncNearbyListPageToTotalCount(cars.size, NEARBY_LIST_PAGE_SIZE)
-                }
+                    is MainContentListState.FirstList -> {
+                        val nearbyLayout = mapState.value.nearbyLayoutMode
+                        val nearbyListPage = mapState.value.nearbyListPage
+                        val nearbyRadiusKm = mapState.value.nearbyRadiusKm
+                        val usedFallbackCenter = mapState.value.usedFallbackCenter
 
-                val markers =
-                    cars
-                        .mapNotNull { car ->
-                            val lat = car.general.address.geoLat
-                            val lon = car.general.address.geoLon
-                            if (lat != null && lon != null) {
-                                MapMarker(
-                                    id = car.id,
-                                    location =
-                                        Location(
-                                            latitude = lat,
-                                            longitude = lon,
-                                        ),
-                                    title = listOfNotNull(car.general.brandName).joinToString(" "),
-                                )
-                            } else {
-                                null
+                        LaunchedEffect(selected) {
+                            mapViewModel.initializeNearbySearch()
+                        }
+
+                        LaunchedEffect(cars) {
+                            mapViewModel.syncNearbyListPageToTotalCount(cars.size, NEARBY_LIST_PAGE_SIZE)
+                        }
+
+                        val markers =
+                            cars
+                                .mapNotNull { car ->
+                                    val lat = car.general.address.geoLat
+                                    val lon = car.general.address.geoLon
+                                    if (lat != null && lon != null) {
+                                        MapMarker(
+                                            id = car.id,
+                                            location =
+                                                Location(
+                                                    latitude = lat,
+                                                    longitude = lon,
+                                                ),
+                                            title = listOfNotNull(car.general.brandName).joinToString(" "),
+                                        )
+                                    } else {
+                                        null
+                                    }
+                                }
+
+                        LaunchedEffect(cars, nearbyLayout) {
+                            if (nearbyLayout == NearbyLayoutMode.Map) {
+                                mapViewModel.updateCameraPositionFromCars(cars)
                             }
                         }
 
-                LaunchedEffect(cars, nearbyLayout) {
-                    if (nearbyLayout == NearbyLayoutMode.Map) {
-                        mapViewModel.updateCameraPositionFromCars(cars)
-                    }
-                }
-
-                NearbyMapListSwitcher(
-                    mode = nearbyLayout,
-                    onModeChange = { mapViewModel.setNearbyLayoutMode(it) },
-                )
-
-                NearbyRadiusSelector(
-                    selectedRadiusKm = nearbyRadiusKm,
-                    onRadiusChange = { mapViewModel.setNearbyRadiusKm(it) },
-                )
-
-                if (usedFallbackCenter) {
-                    P({
-                        style {
-                            marginTop(8.px)
-                            property("color", "#666")
-                            property("font-size", "14px")
-                        }
-                    }) {
-                        Text("Геолокация недоступна — показаны авто рядом с Москвой")
-                    }
-                }
-
-                when (nearbyLayout) {
-                    NearbyLayoutMode.Map ->
-                        NearbyMapView(
-                            cameraPosition = mapState.value.cameraPosition,
-                            markers = markers,
-                            onMarkerClick = { marker ->
-                                navigateToCarDetail(
-                                    carId = marker.id,
-                                    startDate = startState.date,
-                                    endDate = endState.date,
-                                )
-                            },
-                            onCameraMove = { position ->
-                                mapViewModel.updateCameraPosition(position)
-                            },
+                        NearbyMapListSwitcher(
+                            mode = nearbyLayout,
+                            onModeChange = { mapViewModel.setNearbyLayoutMode(it) },
                         )
-                    NearbyLayoutMode.List -> {
-                        val totalCount = cars.size
-                        val totalPages =
-                            if (totalCount == 0) {
-                                0
-                            } else {
-                                (totalCount + NEARBY_LIST_PAGE_SIZE - 1) / NEARBY_LIST_PAGE_SIZE
+
+                        NearbyRadiusSelector(
+                            selectedRadiusKm = nearbyRadiusKm,
+                            onRadiusChange = { mapViewModel.setNearbyRadiusKm(it) },
+                        )
+
+                        if (usedFallbackCenter) {
+                            P({
+                                style {
+                                    marginTop(8.px)
+                                    property("color", "#666")
+                                    property("font-size", "14px")
+                                }
+                            }) {
+                                Text("Геолокация недоступна — показаны авто рядом с Москвой")
                             }
-                        val pagedCars =
-                            cars.drop(nearbyListPage * NEARBY_LIST_PAGE_SIZE).take(NEARBY_LIST_PAGE_SIZE)
-                        Div({
-                            style {
-                                width(100.percent)
-                                marginTop(20.px)
-                            }
-                        }) {
-                            CarsGrid(
-                                cars = pagedCars,
-                                onCarClick = { car ->
-                                    navigateToCarDetail(
-                                        carId = car.id,
-                                        startDate = startState.date,
-                                        endDate = endState.date,
+                        }
+
+                        when (nearbyLayout) {
+                            NearbyLayoutMode.Map ->
+                                NearbyMapView(
+                                    cameraPosition = mapState.value.cameraPosition,
+                                    markers = markers,
+                                    onMarkerClick = { marker ->
+                                        navigateToCarDetail(
+                                            carId = marker.id,
+                                            startDate = startState.date,
+                                            endDate = endState.date,
+                                        )
+                                    },
+                                    onCameraMove = { position ->
+                                        mapViewModel.updateCameraPosition(position)
+                                    },
+                                )
+                            NearbyLayoutMode.List -> {
+                                val totalCount = cars.size
+                                val totalPages =
+                                    if (totalCount == 0) {
+                                        0
+                                    } else {
+                                        (totalCount + NEARBY_LIST_PAGE_SIZE - 1) / NEARBY_LIST_PAGE_SIZE
+                                    }
+                                val pagedCars =
+                                    cars.drop(nearbyListPage * NEARBY_LIST_PAGE_SIZE).take(NEARBY_LIST_PAGE_SIZE)
+                                Div({
+                                    style {
+                                        width(100.percent)
+                                        marginTop(20.px)
+                                    }
+                                }) {
+                                    CarsGrid(
+                                        cars = pagedCars,
+                                        onCarClick = { car ->
+                                            navigateToCarDetail(
+                                                carId = car.id,
+                                                startDate = startState.date,
+                                                endDate = endState.date,
+                                            )
+                                        },
                                     )
-                                },
-                            )
-                            PaginationBar(
-                                currentPage = nearbyListPage,
-                                totalPages = totalPages,
-                                totalCount = totalCount,
-                                pageSize = NEARBY_LIST_PAGE_SIZE,
-                                onPageChange = { mapViewModel.setNearbyListPage(it) },
-                            )
+                                    PaginationBar(
+                                        currentPage = nearbyListPage,
+                                        totalPages = totalPages,
+                                        totalCount = totalCount,
+                                        pageSize = NEARBY_LIST_PAGE_SIZE,
+                                        onPageChange = { mapViewModel.setNearbyListPage(it) },
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
             else -> {
-                Div({
-                    style {
-                        width(100.percent)
-                        marginTop(20.px)
-                    }
-                }) {
-                    CarsGrid(
-                        cars = displayedCars,
-                        onCarClick = { car ->
-                            navigateToCarDetail(
-                                carId = car.id,
-                                startDate = startState.date,
-                                endDate = endState.date,
-                            )
-                        },
-                    )
-                    PaginationBar(
-                        currentPage = paginationInfo.first,
-                        totalPages = paginationInfo.second,
-                        totalCount = paginationInfo.third,
-                        pageSize = 9,
-                        onPageChange = { mainContentViewModel.setPage(it) },
-                    )
-                }
+                MainContentCarsSection(
+                    firstListState = firstListState,
+                    displayedCars = displayedCars,
+                    paginationInfo = paginationInfo,
+                    startDate = startState.date,
+                    endDate = endState.date,
+                    onPageChange = { mainContentViewModel.setPage(it) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MainContentCarsSection(
+    firstListState: MainContentListState,
+    displayedCars: List<CarItem>,
+    paginationInfo: Triple<Int, Int, Int>,
+    startDate: String?,
+    endDate: String?,
+    onPageChange: (Int) -> Unit,
+) {
+    Div({
+        style {
+            width(100.percent)
+            marginTop(20.px)
+        }
+    }) {
+        when (val listState = firstListState) {
+            MainContentListState.Loading -> {
+                CarsGridSkeleton()
+            }
+
+            is MainContentListState.Error -> {
+                TextError(listState.message)
+            }
+
+            is MainContentListState.FirstList -> {
+                CarsGrid(
+                    cars = displayedCars,
+                    onCarClick = { car ->
+                        navigateToCarDetail(
+                            carId = car.id,
+                            startDate = startDate,
+                            endDate = endDate,
+                        )
+                    },
+                )
+                PaginationBar(
+                    currentPage = paginationInfo.first,
+                    totalPages = paginationInfo.second,
+                    totalCount = paginationInfo.third,
+                    pageSize = 9,
+                    onPageChange = onPageChange,
+                )
             }
         }
     }

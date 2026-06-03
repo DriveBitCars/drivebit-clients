@@ -16,6 +16,7 @@ import my.drivebit.resources.ImagePaths.SEARCHBACKGROUND_CAR5_JPG
 import my.drivebit.resources.ImagePaths.SEARCHBACKGROUND_CAR6_JPG
 import my.drivebit.resources.ImagePaths.SEARCHBACKGROUND_CAR7_JPG
 import my.drivebit.resources.ImagePaths.SEARCHBACKGROUND_CAR8_JPG
+
 data class FilterItem(
     val icon: String,
     val title: String,
