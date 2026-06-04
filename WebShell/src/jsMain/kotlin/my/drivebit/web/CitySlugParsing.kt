@@ -10,6 +10,7 @@ data class CityPathParts(
  */
 val RESERVED_FIRST_SEGMENTS: Set<String> =
     setOf(
+        "create-car",
         "city-selection",
         "my-city-selection",
         "list-your-car",

@@ -1645,7 +1645,7 @@ button[disabled] {
                 <a href="#calculator">Калькулятор</a>
                 <a href="#reviews">Отзывы</a>
             </nav>
-            <a href="https://drivebit.ru/create-car" class="btn btn-header">Начать зарабатывать</a>
+            <a href="/login-by-phone" class="btn btn-header cta-button">Начать зарабатывать</a>
             <div class="burger" id="burger">
                 <span></span><span></span><span></span>
             </div>
@@ -1655,7 +1655,7 @@ button[disabled] {
             <a href="#benefits">Преимущества</a>
             <a href="#calculator">Калькулятор</a>
             <a href="#reviews">Отзывы</a>
-            <a href="https://drivebit.ru/create-car" class="btn btn-primary">Начать зарабатывать</a>
+            <a href="/login-by-phone" class="btn btn-primary cta-button">Начать зарабатывать</a>
         </nav>
     </header>
 
@@ -1668,7 +1668,7 @@ button[disabled] {
                 <h1>Ваш автомобиль может приносить до <span class="highlight">120 000 ₽</span> в месяц</h1>
                 <p class="hero-sub">Сдавайте свой автомобиль в аренду, когда он простаивает. Поддержка 24/7, проверенные арендаторы и выплаты каждую неделю.</p>
                 <div class="hero-buttons">
-                    <a href="https://drivebit.ru/create-car" class="btn btn-primary btn-lg">
+                    <a href="/login-by-phone" class="btn btn-primary btn-lg cta-button">
                         Начать зарабатывать <i class="fas fa-arrow-right"></i>
                     </a>
                     <a href="#how" class="btn btn-outline btn-lg">
@@ -1784,7 +1784,7 @@ button[disabled] {
                     <div class="step-number">01</div>
                     <div class="step-icon"><i class="fas fa-user-plus"></i></div>
                     <h3>Зарегистрируйтесь</h3>
-                    <p>Подайте заявку на регистрацию в сервисе DriveBit по кнопке  <a href="https://drivebit.ru/create-car">Начать зарабатывать</a>. Это займёт всего 5 минут.</p>
+                    <p>Подайте заявку на регистрацию в сервисе DriveBit по кнопке  <a href="/login-by-phone" class="cta-button">Начать зарабатывать</a>. Это займёт всего 5 минут.</p>
                 </div>
                 <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
                 <div class="step">
@@ -1884,7 +1884,7 @@ button[disabled] {
                             <strong id="netIncome">42 500 ₽</strong>
                         </div>
                     </div>
-                    <a href="https://drivebit.ru/create-car" class="btn btn-primary btn-lg btn-block">Начать зарабатывать</a>
+                    <a href="/login-by-phone" class="btn btn-primary btn-lg btn-block cta-button">Начать зарабатывать</a>
                 </div>
             </div>
         </div>
@@ -2261,6 +2261,38 @@ button[disabled] {
     window.addEventListener('scroll', () => {
         const header = document.querySelector('.header');
         header.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    function isAuthenticated() {
+        try {
+            const token = localStorage.getItem('auth_token');
+            if (token && token.trim() !== '') {
+                return true;
+            }
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('auth_token')) {
+                    const value = localStorage.getItem(key);
+                    if (value && value.trim() !== '') {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function handleCtaClick(event) {
+        if (isAuthenticated()) {
+            event.preventDefault();
+            window.location.href = '/address-input';
+        }
+    }
+
+    document.querySelectorAll('.cta-button').forEach(button => {
+        button.addEventListener('click', handleCtaClick);
     });
 </script>
 </body>

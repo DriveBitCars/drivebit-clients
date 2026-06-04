@@ -1,7 +1,8 @@
 package my.drivebit.navigation
 
 fun isOwnerCarBundlePath(path: String): Boolean =
-    path.startsWith("/my-cars") ||
+    path.startsWith("/create-car") ||
+        path.startsWith("/my-cars") ||
         path.startsWith("/car-edit") ||
         path.startsWith("/car-photos-upload") ||
         (path.startsWith("/car-photos") && !path.startsWith("/car-photos-gallery")) ||
@@ -25,6 +26,7 @@ fun isOwnerCarBundlePath(path: String): Boolean =
 
 val ownerCarBundleShellRoutes: List<String> =
     listOf(
+        "create-car",
         "my-cars",
         "car-edit",
         "car-photos-upload",

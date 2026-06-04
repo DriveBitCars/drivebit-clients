@@ -85,12 +85,12 @@ jobs:
         MYCARS="myCarsApp/build/dist/js/productionExecutable"
         cp "$MYCARS/myCars.js" "$DIST/"
         cp "$MYCARS/myCars.js.map" "$DIST/" 2>/dev/null || true
-        for route in my-cars car-edit address-input car-sts-upload passport-upload city-selection; do
+        for route in create-car my-cars car-edit address-input car-sts-upload passport-upload city-selection; do
           if [ -d "$MYCARS/$route" ]; then
             cp -r "$MYCARS/$route" "$DIST/"
           fi
         done
-        for route in my-cars car-edit address-input car-sts-upload passport-upload city-selection; do
+        for route in create-car my-cars car-edit address-input car-sts-upload passport-upload city-selection; do
           test -f "$DIST/$route/index.html"
         done
         test -f "$DIST/myCars.js"
