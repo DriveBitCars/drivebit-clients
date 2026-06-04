@@ -310,6 +310,7 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     )
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.file("list-your-car.html"))
+    from(rootProject.layout.projectDirectory.file("send.php"))
     from(rootProject.layout.projectDirectory.dir("vendor")) {
         into("vendor")
     }

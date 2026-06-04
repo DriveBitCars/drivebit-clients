@@ -306,7 +306,7 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
-        source: "index.html,list-your-car.html"
+        source: "index.html,list-your-car.html,send.php"
         target: "${{ env.DEPLOY_ROOT }}/releases/${{ github.run_id }}-${{ github.run_attempt }}"
         strip_components: 0
         overwrite: true
@@ -530,6 +530,64 @@ jobs:
           $SUDO_CMD "$NGINX_BIN" -t
           $SUDO_CMD systemctl reload nginx
           echo "Nginx reloaded (static compression conf)"
+
+    - name: Ensure leads.log for send.php
+      continue-on-error: true
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          set -e
+          DEPLOY_ROOT="${{ env.DEPLOY_ROOT }}"
+          if [ "$EUID" -ne 0 ]; then SUDO_CMD="sudo"; else SUDO_CMD=""; fi
+          $SUDO_CMD touch "$DEPLOY_ROOT/leads.log"
+          $SUDO_CMD chown www-data:www-data "$DEPLOY_ROOT/leads.log" 2>/dev/null || $SUDO_CMD chown nginx:nginx "$DEPLOY_ROOT/leads.log" 2>/dev/null || true
+          $SUDO_CMD chmod 664 "$DEPLOY_ROOT/leads.log"
+          test -f "$DEPLOY_ROOT/current/send.php" && echo "send.php present in active release" || echo "send.php not in release yet"
+
+    - name: Configure nginx send.php handler
+      continue-on-error: true
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          set -e
+          if [ "$EUID" -ne 0 ]; then SUDO_CMD="sudo"; else SUDO_CMD=""; fi
+          NGINX_CONFIG=""
+          for p in /etc/nginx/sites-available/drivebit.ru /etc/nginx/sites-available/drivebit.my /etc/nginx/sites-available/drivebit-clients /etc/nginx/conf.d/drivebit.conf; do
+            if [ -f "$p" ]; then NGINX_CONFIG="$p"; break; fi
+          done
+          if [ -z "$NGINX_CONFIG" ]; then echo "nginx config not found"; exit 0; fi
+          if grep -q 'location = /send.php' "$NGINX_CONFIG"; then
+            echo "send.php location already configured"
+            exit 0
+          fi
+          PHP_SOCK=""
+          for s in /run/php/php8.3-fpm.sock /run/php/php8.2-fpm.sock /run/php/php8.1-fpm.sock /var/run/php/php-fpm.sock; do
+            if [ -S "$s" ]; then PHP_SOCK="$s"; break; fi
+          done
+          if [ -z "$PHP_SOCK" ]; then
+            echo "PHP-FPM not installed — run: apt-get install -y php-fpm php-mbstring postfix"
+            exit 0
+          fi
+          $SUDO_CMD cp "$NGINX_CONFIG" "${NGINX_CONFIG}.backup.send-php.$(date +%Y%m%d_%H%M%S)"
+          TEMP=$(mktemp)
+          printf '    location = /send.php {\n        include fastcgi_params;\n        fastcgi_param SCRIPT_FILENAME $document_root/send.php;\n        fastcgi_pass unix:%s;\n    }\n\n' "$PHP_SOCK" > "$TEMP"
+          $SUDO_CMD sed -i "/^[[:space:]]*location \\/[[:space:]]*{/r $TEMP" "$NGINX_CONFIG"
+          rm -f "$TEMP"
+          NGINX_BIN=""
+          for p in "$(command -v nginx 2>/dev/null || true)" /usr/sbin/nginx; do
+            [ -f "$p" ] && NGINX_BIN="$p" && break
+          done
+          $SUDO_CMD "$NGINX_BIN" -t
+          $SUDO_CMD systemctl reload nginx
+          echo "Configured location = /send.php with $PHP_SOCK"
 
     - name: Verify deployed page title
       uses: appleboy/ssh-action@v1.2.2
