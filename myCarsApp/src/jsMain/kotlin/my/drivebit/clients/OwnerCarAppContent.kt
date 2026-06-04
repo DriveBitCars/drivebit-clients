@@ -1,6 +1,7 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.screens.AddressInputPage
 import my.drivebit.screens.BodyTypeSelectionPage
@@ -33,6 +34,9 @@ internal fun OwnerCarAppContent(
     storage: Storage,
 ) {
     when {
+        currentPath.startsWith("/create-car") -> {
+            RedirectToPath("/address-input")
+        }
         currentPath.startsWith("/city-selection") -> {
             CitySelectionPage(
                 mode =
@@ -205,5 +209,12 @@ internal fun OwnerCarAppContent(
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun RedirectToPath(path: String) {
+    LaunchedEffect(path) {
+        window.location.replace(path)
     }
 }

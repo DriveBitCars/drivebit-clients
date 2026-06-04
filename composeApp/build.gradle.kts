@@ -231,6 +231,7 @@ val needsSplitBundleDevWebpack =
 
 val ownerCarShellRoutes =
     listOf(
+        "create-car",
         "my-cars",
         "car-edit",
         "car-photos-upload",
