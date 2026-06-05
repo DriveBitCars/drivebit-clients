@@ -14,6 +14,7 @@ import my.drivebit.shell.MountWebShell
 import my.drivebit.shell.isStaticHtmlShellPath
 import my.drivebit.web.StaticFiltersShellSync
 import my.drivebit.web.StaticHeroShellSync
+import my.drivebit.web.StaticMainPromoShellSync
 import my.drivebit.web.isCityHomePath
 import my.drivebit.web.koin.WebKoinHost
 
@@ -26,6 +27,7 @@ actual fun App() {
         Navigation { currentPath ->
             StaticHeroShellSync(currentPath)
             StaticFiltersShellSync(currentPath)
+            StaticMainPromoShellSync(currentPath)
             when {
                 currentPath.startsWith("/list-your-car") -> {
                     RedirectToListYourCarHtml()

@@ -2103,7 +2103,7 @@ button[disabled] {
         <div class="cta-content">
             <h2>Начните зарабатывать на своём автомобиле уже сегодня</h2>
             <p>Присоединяйтесь к 1000+ владельцев, которые превратили свой автомобиль в источник стабильного дохода</p>
-            <form class="cta-form" id="leadForm" action="/send.php" method="POST">
+            <form class="cta-form" id="leadForm" action="#" method="POST">
                 <div class="form-row">
                     <input type="text" name="name" placeholder="Ваше имя" required>
                     <input type="tel" name="phone" placeholder="Номер телефона" required>
@@ -2230,22 +2230,30 @@ button[disabled] {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
         submitBtn.disabled = true;
 
-        const formData = new FormData(leadForm);
+        const payload = {
+            formName: 'list-your-car',
+            data: {
+                name: leadForm.elements.name.value.trim(),
+                phone: leadForm.elements.phone.value.trim(),
+                car: leadForm.elements.car.value.trim()
+            }
+        };
 
-        fetch('/send.php', {
+        fetch('/api/api/forms/submit', {
             method: 'POST',
-            body: formData
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+        .then(async response => {
+            const data = await response.json().catch(() => ({}));
+            if (response.ok && data.submissionId) {
                 if (typeof ym === 'function') {
-                    ym(105947907, 'reachGoal', 'sdatauto');
+                    ym(105947907, 'reachGoal', 'submit');
                 }
                 leadForm.style.display = 'none';
                 formSuccess.style.display = 'block';
             } else {
-                alert('Ошибка при отправке. Попробуйте ещё раз или позвоните нам.');
+                alert(data.error || data.title || 'Ошибка при отправке. Попробуйте ещё раз или позвоните нам.');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }
