@@ -37,7 +37,7 @@ fun CarModelSelectionPage(
         val brandId = brandIdParam.toIntOrNull()
         if (brandId != null) {
             localError = null
-            viewModel.loadModels(brandId, existingInFleetOnly = true)
+            viewModel.loadModels(brandId)
         } else {
             localError = "Бренд не выбран"
         }
