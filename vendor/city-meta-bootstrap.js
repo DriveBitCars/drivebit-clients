@@ -166,6 +166,13 @@
         return base + " " + phrase;
     }
 
+    function pageHeadline(citySlug, filterSlug, cityName, filterTitle) {
+        if (isSeoOptimizedPage(citySlug, filterSlug)) {
+            return seoPageHeadline(cityName, filterTitle);
+        }
+        return heroBannerHeadline(cityName, filterTitle);
+    }
+
     function pageTitle(citySlug, filterSlug, cityName, filterTitle) {
         if (isSeoOptimizedPage(citySlug, filterSlug)) {
             return seoPageTitle(cityName, filterTitle);
@@ -200,10 +207,15 @@
         if (!cityName) return null;
         var filterTitle = filterTitleFromSlug(cityPath.filterSlug);
         var path = "/" + cityPath.citySlug + (cityPath.filterSlug ? "/" + cityPath.filterSlug : "");
+        var cityNamePrep = cityForms(cityName)[0];
         return {
             title: pageTitle(cityPath.citySlug, cityPath.filterSlug, cityName, filterTitle),
             description: pageDescription(cityPath.citySlug, cityPath.filterSlug, cityName, filterTitle),
+            headline: pageHeadline(cityPath.citySlug, cityPath.filterSlug, cityName, filterTitle),
+            cityNamePrep: cityNamePrep,
             path: path
         };
     };
+
+    window.drivebitCitySlugs = Object.keys(CITY_SLUGS);
 })();

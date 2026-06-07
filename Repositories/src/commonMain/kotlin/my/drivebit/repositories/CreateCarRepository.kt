@@ -3,6 +3,7 @@ package my.drivebit.repositories
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarResponse
+import my.drivebit.network.services.DEFAULT_CAR_PREPAYMENT_PERCENT
 
 interface CreateCarRepository {
     suspend fun createCar(dailyRate: Int): Result<CarResponse>
@@ -59,7 +60,7 @@ internal class CreateCarRepositoryImpl(
                     dailyRate7Days = carDataRepository.getDailyRate7Days(),
                     dailyRate14Days = carDataRepository.getDailyRate14Days(),
                     dailyRate21Days = carDataRepository.getDailyRate21Days(),
-                    prepaymentPercent = carDataRepository.getPrepaymentPercent(),
+                    prepaymentPercent = DEFAULT_CAR_PREPAYMENT_PERCENT,
                     ParkingAssistances = emptyList(),
                     MultimediaSystemOptions = emptyList(),
                 )

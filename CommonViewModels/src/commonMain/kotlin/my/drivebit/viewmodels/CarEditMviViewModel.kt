@@ -125,10 +125,6 @@ sealed interface CarEditIntent {
         val value: String,
     ) : CarEditIntent
 
-    data class UpdatePrepaymentPercent(
-        val value: String,
-    ) : CarEditIntent
-
     data class UpdateAvailableMileagePerDayKm(
         val value: String,
     ) : CarEditIntent
@@ -438,9 +434,6 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.UpdateDeposit -> {
                 updateFormData { it.copy(deposit = intent.value) }
             }
-            is CarEditIntent.UpdatePrepaymentPercent -> {
-                updateFormData { it.copy(prepaymentPercent = intent.value) }
-            }
             is CarEditIntent.UpdateAvailableMileagePerDayKm -> {
                 updateFormData { it.copy(availableMileagePerDayKm = intent.value) }
             }
@@ -572,11 +565,6 @@ class CarEditMviViewModelImpl(
                 val dailyRate14DaysValue = formData.dailyRate14Days.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val dailyRate21DaysValue = formData.dailyRate21Days.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val depositValue = formData.deposit.takeIf { it.isNotBlank() }?.toIntOrNull()
-                val prepaymentPercentValue =
-                    formData.prepaymentPercent
-                        .takeIf { it.isNotBlank() }
-                        ?.toIntOrNull()
-                        ?.coerceIn(0, 100)
                 val availableMileagePerDayKmValue =
                     formData.availableMileagePerDayKm.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val request =
@@ -604,7 +592,6 @@ class CarEditMviViewModelImpl(
                         dailyRate14Days = dailyRate14DaysValue,
                         dailyRate21Days = dailyRate21DaysValue,
                         deposit = depositValue,
-                        prepaymentPercent = prepaymentPercentValue,
                         availableMileagePerDayKm = availableMileagePerDayKmValue,
                         insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },
                         ParkingAssistances = emptyList(),
@@ -809,7 +796,6 @@ class CarEditMviViewModelImpl(
             dailyRate21Days =
                 car.dailyRate21Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             deposit = car.deposit?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
-            prepaymentPercent = car.prepaymentPercent?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             insurance = car.insurance?.trim()?.takeIf { it.isNotEmpty() },
             insuranceTranslate = car.insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() },
