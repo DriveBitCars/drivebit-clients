@@ -50,19 +50,27 @@ fun MessageTextWithDealsLink(
             )
         }
         contractBookingId != null -> {
-            val match = contractDownloadUrlRegex.find(text) ?: return Text(text)
-            val before = text.substring(0, match.range.first)
-            val after = text.substring(match.range.last + 1)
-            if (before.isNotBlank()) {
-                Text(before)
-            }
-            InlineLink(
-                href = contractDownloadPagePath(contractBookingId),
-                label = CONTRACT_LINK_LABEL,
-                stopPropagation = stopPropagation,
-            )
-            if (after.isNotBlank()) {
-                Text(after)
+            val match = contractDownloadUrlRegex.find(text)
+            if (match != null) {
+                val before = text.substring(0, match.range.first)
+                val after = text.substring(match.range.last + 1)
+                if (before.isNotBlank()) {
+                    Text(before)
+                }
+                InlineLink(
+                    href = contractDownloadPagePath(contractBookingId),
+                    label = CONTRACT_LINK_LABEL,
+                    stopPropagation = stopPropagation,
+                )
+                if (after.isNotBlank()) {
+                    Text(after)
+                }
+            } else {
+                InlineLink(
+                    href = contractDownloadPagePath(contractBookingId),
+                    label = CONTRACT_LINK_LABEL,
+                    stopPropagation = stopPropagation,
+                )
             }
         }
         else -> Text(text)

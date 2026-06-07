@@ -59,11 +59,7 @@ internal fun AccountAppContent(
             DocumentsPage()
         }
         currentPath.startsWith("/download-booking-contract") -> {
-            if (storage.isLogined()) {
-                DownloadBookingContractPage()
-            } else {
-                RedirectToHome(storage)
-            }
+            DownloadBookingContractPage()
         }
         currentPath.startsWith("/payment") -> {
             BookingPaymentLinkPage()
