@@ -29,6 +29,8 @@ interface MyBookingsAsRenterViewModel {
 
     fun loadBookings()
 
+    fun refreshBookings()
+
     fun payBooking(
         bookingId: String,
         returnUrl: String,
@@ -84,6 +86,16 @@ class MyBookingsAsRenterViewModelImpl(
         ) {
             val result = booking.getMyAsRenter()
             _bookings.value = result
+        }
+    }
+
+    override fun refreshBookings() {
+        coroutineScope.launch {
+            runCatching {
+                val result = booking.getMyAsRenter()
+                _bookings.value = result
+                _error.value = null
+            }
         }
     }
 

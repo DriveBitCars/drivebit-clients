@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
@@ -46,6 +47,10 @@ fun MyBookingsPage() {
 
     LaunchedEffect(Unit) {
         viewModel.loadBookings()
+        while (true) {
+            delay(30_000)
+            viewModel.refreshBookings()
+        }
     }
 
     PageWithLogo {

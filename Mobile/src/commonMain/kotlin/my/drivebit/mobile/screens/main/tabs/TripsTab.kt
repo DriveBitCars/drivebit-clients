@@ -93,6 +93,10 @@ object TripsTab : Tab {
 
         LaunchedEffect(Unit) {
             viewModel.loadBookings()
+            while (true) {
+                delay(30_000)
+                viewModel.refreshBookings()
+            }
         }
 
         Column(
