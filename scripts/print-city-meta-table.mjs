@@ -14,6 +14,10 @@ const STATIC_HTML = {
   "/moskva/poblizosti": "composeApp/src/jsMain/resources/moskva/poblizosti/index.html",
   "/moskva/puteshestviya": "composeApp/src/jsMain/resources/moskva/puteshestviya/index.html",
   "/moskva/za-gorod": "composeApp/src/jsMain/resources/moskva/za-gorod/index.html",
+  "/lyubertsy": "composeApp/src/jsMain/resources/lyubertsy/index.html",
+  "/zelenograd": "composeApp/src/jsMain/resources/zelenograd/index.html",
+  "/kaliningrad": "composeApp/src/jsMain/resources/kaliningrad/index.html",
+  "/krasnogorsk": "composeApp/src/jsMain/resources/krasnogorsk/index.html",
 };
 
 const paths = JSON.parse(fs.readFileSync(process.argv[2] ?? "/tmp/paths.json", "utf8"));
