@@ -206,4 +206,6 @@
             path: path
         };
     };
+
+    window.drivebitCitySlugs = Object.keys(CITY_SLUGS);
 })();

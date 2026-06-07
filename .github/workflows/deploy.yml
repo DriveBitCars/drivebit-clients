@@ -204,6 +204,20 @@ jobs:
         
         echo "✅ Cache-busting version added"
 
+    - name: Generate city SEO landing pages
+      run: |
+        set -e
+        DIST="composeApp/build/dist/js/productionExecutable"
+        node scripts/generate-city-seo-pages.mjs "$DIST"
+        for slug in lyubertsy zelenograd kaliningrad krasnogorsk; do
+          page="$DIST/$slug/index.html"
+          test -f "$page"
+          grep -q "$slug" "$page" || grep -q "DriveBit" "$page"
+        done
+        grep -q "Люберц" "$DIST/lyubertsy/index.html"
+        grep -q "Зеленоград" "$DIST/zelenograd/index.html"
+        echo "City SEO landing pages OK"
+
     - name: Verify GitHub Secrets
       run: |
         echo "🔍 Verifying GitHub Secrets..."
