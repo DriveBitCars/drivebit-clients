@@ -2258,7 +2258,7 @@ button[disabled] {
             const data = await response.json().catch(() => ({}));
             if (response.ok && data.submissionId) {
                 if (typeof ym === 'function') {
-                    ym(105947907, 'reachGoal', 'sdatauto');
+                    ym(105947907, 'reachGoal', 'owner');
                 }
                 leadForm.style.display = 'none';
                 formSuccess.style.display = 'block';
