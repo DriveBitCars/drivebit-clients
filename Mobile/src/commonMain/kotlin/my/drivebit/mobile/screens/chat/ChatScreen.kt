@@ -35,6 +35,7 @@ import kotlinx.coroutines.delay
 import my.drivebit.mobile.screens.main.LeaveReviewScreen
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.MessageDto
+import my.drivebit.network.services.canShowSignContractInChat
 import my.drivebit.network.services.contractBookingIdForAction
 import my.drivebit.network.services.contractDownloadPageUrl
 import my.drivebit.network.services.isLeaveReviewForCarAction
@@ -71,6 +72,7 @@ data class ChatScreen(
         val isLoading by viewModel.isLoading.collectAsState()
         val error by viewModel.error.collectAsState()
         val isPaying by viewModel.isPaying.collectAsState()
+        val signActionInProgress by viewModel.signActionInProgress.collectAsState()
         val bookingPaymentById by viewModel.bookingPaymentById.collectAsState()
         var messageText by remember { mutableStateOf("") }
         var payInfo by remember { mutableStateOf<String?>(null) }
@@ -146,6 +148,7 @@ data class ChatScreen(
                                     bookingForPay = bookingIdForPay?.let { bookingPaymentById[it] },
                                     bookingById = bookingPaymentById,
                                     isPaying = isPaying,
+                                    signActionInProgress = signActionInProgress,
                                     onPrepayBooking = { bookingId ->
                                         viewModel.prepayBooking(
                                             bookingId = bookingId,
@@ -165,6 +168,12 @@ data class ChatScreen(
                                     },
                                     onLeaveReviewForRenter = {
                                         uriHandler.openUri("https://drivebit.ru/my-deals")
+                                    },
+                                    onSignContract = { bookingId, counterpartyUserId ->
+                                        viewModel.signContract(
+                                            bookingId = bookingId,
+                                            counterpartyUserId = counterpartyUserId,
+                                        )
                                     },
                                 )
                             }
@@ -216,10 +225,12 @@ private fun MessageBubble(
     bookingForPay: BookingDTO? = null,
     bookingById: Map<String, BookingDTO> = emptyMap(),
     isPaying: Boolean = false,
+    signActionInProgress: Set<String> = emptySet(),
     onPrepayBooking: (String) -> Unit = {},
     onPayBooking: (String) -> Unit = {},
     onLeaveReviewForCar: (String) -> Unit = {},
     onLeaveReviewForRenter: () -> Unit = {},
+    onSignContract: (bookingId: String, counterpartyUserId: String) -> Unit = { _, _ -> },
 ) {
     val senderId = message.sender?.id
     val isOwnMessage = participantId != null && senderId != null && senderId != participantId
@@ -253,6 +264,12 @@ private fun MessageBubble(
             val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
             val showReviewForCar = message.isLeaveReviewForCarAction()
             val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
+            val bookingForContract = bookingIdForContract?.let { bookingById[it] }
+            val showSignContract =
+                bookingIdForContract != null &&
+                    participantId != null &&
+                    bookingForContract?.canShowSignContractInChat(participantId) == true
+            val isSigningContract = bookingIdForContract != null && bookingIdForContract in signActionInProgress
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -291,6 +308,15 @@ private fun MessageBubble(
                         modifier = Modifier.padding(top = 8.dp),
                     ) {
                         Text("Скачать договор")
+                    }
+                }
+                if (showSignContract) {
+                    Button(
+                        onClick = { onSignContract(bookingIdForContract!!, participantId!!) },
+                        enabled = !isSigningContract,
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Text(if (isSigningContract) "Подписание..." else "Подписать договор")
                     }
                 }
                 if (showReviewForCar) {

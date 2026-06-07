@@ -25,6 +25,8 @@ interface MyBookingsAsOwnerViewModel {
     fun confirmBooking(bookingId: String)
 
     fun declineBooking(bookingId: String)
+
+    fun signContractAsOwner(bookingId: String)
 }
 
 class MyBookingsAsOwnerViewModelImpl(
@@ -117,6 +119,32 @@ class MyBookingsAsOwnerViewModelImpl(
             _actionInProgress.update { it + bookingId }
             try {
                 booking.declineAsOwner(bookingId)
+                val result = booking.getMyAsOwner()
+                _bookings.value = result
+            } finally {
+                _actionInProgress.update { it - bookingId }
+            }
+        }
+    }
+
+    override fun signContractAsOwner(bookingId: String) {
+        if (bookingId in _actionInProgress.value) return
+
+        coroutineScope.safeLaunchWithErrorHandler(
+            isLoading = { false },
+            setLoading = { },
+            setError = { _error.value = it },
+            errorHandler = { e ->
+                ErrorHandler.extractErrorMessage(
+                    exception = e,
+                    defaultNetworkError = "Ошибка сети",
+                    defaultGenericError = "Не удалось подписать договор",
+                )
+            },
+        ) {
+            _actionInProgress.update { it + bookingId }
+            try {
+                booking.signContractAsOwner(bookingId)
                 val result = booking.getMyAsOwner()
                 _bookings.value = result
             } finally {

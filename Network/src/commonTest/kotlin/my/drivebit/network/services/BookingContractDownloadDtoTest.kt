@@ -97,4 +97,37 @@ class BookingContractDownloadDtoTest {
             assertEquals(1L, result.contractNumber)
             assertEquals("https://x", result.downloadUrl)
         }
+
+    @Test
+    fun `browserDownloadUrl rewrites direct MinIO presigned URL to same-origin path`() {
+        val dto =
+            BookingContractDownloadDto(
+                contractNumber = 1L,
+                fileName = "dogovor.pdf",
+                downloadUrl =
+                    "http://157.22.252.70:9000/privatebct/contracts/booking/file.pdf" +
+                        "?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Signature=abc",
+                urlExpiresAt = "2026-01-01T00:00:00Z",
+                generatedAt = "2026-01-01T00:00:00Z",
+            )
+
+        assertEquals(
+            "/privatebct/contracts/booking/file.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Signature=abc",
+            dto.browserDownloadUrl(),
+        )
+    }
+
+    @Test
+    fun `browserDownloadUrl leaves already proxied URLs unchanged`() {
+        val dto =
+            BookingContractDownloadDto(
+                contractNumber = 1L,
+                fileName = "dogovor.pdf",
+                downloadUrl = "https://drivebit.ru/privatebct/contracts/file.pdf?sig=1",
+                urlExpiresAt = "2026-01-01T00:00:00Z",
+                generatedAt = "2026-01-01T00:00:00Z",
+            )
+
+        assertEquals(dto.downloadUrl, dto.browserDownloadUrl())
+    }
 }

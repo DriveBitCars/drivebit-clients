@@ -34,6 +34,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import kotlinx.coroutines.delay
 import my.drivebit.mobile.screens.main.LeaveReviewScreen
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.canShowSignContractAsRenter
 import my.drivebit.network.services.contractDownloadPageUrl
 import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
@@ -69,6 +70,7 @@ object TripsTab : Tab {
         val isLoading by viewModel.isLoading.collectAsState()
         val error by viewModel.error.collectAsState()
         val isPaying by viewModel.isPaying.collectAsState()
+        val actionInProgress by viewModel.actionInProgress.collectAsState()
         val uriHandler = LocalUriHandler.current
         var payInfo by remember { mutableStateOf<String?>(null) }
 
@@ -146,6 +148,7 @@ object TripsTab : Tab {
                             BookingItemCard(
                                 booking = booking,
                                 isPaying = isPaying,
+                                isActionInProgress = booking.id in actionInProgress,
                                 onLeaveReview = {
                                     navigator.push(LeaveReviewScreen(carId = booking.carId))
                                 },
@@ -163,6 +166,7 @@ object TripsTab : Tab {
                                         failUrl = MOBILE_PAYMENT_FAIL_URL,
                                     )
                                 },
+                                onSignContract = { viewModel.signContractAsRenter(booking.id) },
                                 onDownloadContract = {
                                     uriHandler.openUri(contractDownloadPageUrl(booking.id))
                                 },
@@ -179,9 +183,11 @@ object TripsTab : Tab {
 internal fun BookingItemCard(
     booking: BookingDTO,
     isPaying: Boolean = false,
+    isActionInProgress: Boolean = false,
     onLeaveReview: () -> Unit,
     onPay: () -> Unit = {},
     onPrepay: () -> Unit = {},
+    onSignContract: () -> Unit = {},
     onDownloadContract: () -> Unit = {},
 ) {
     val carName =
@@ -193,9 +199,10 @@ internal fun BookingItemCard(
     val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
     val canPay = booking.statusAllowsRenterPayment()
     val canDownloadContract = booking.statusAllowsContractDownload()
+    val canSignContract = booking.canShowSignContractAsRenter()
     val fullPaymentLabel =
         "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
-    val showActions = canPay || booking.canPayPrepayment || canLeaveReview || canDownloadContract
+    val showActions = canPay || booking.canPayPrepayment || canLeaveReview || canDownloadContract || canSignContract
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -252,6 +259,16 @@ internal fun BookingItemCard(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text("Договор")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                if (canSignContract) {
+                    Button(
+                        onClick = onSignContract,
+                        enabled = !isActionInProgress,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(if (isActionInProgress) "Подписание..." else "Подписать договор")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }

@@ -21,8 +21,11 @@ import my.drivebit.network.services.PayBookingResult
 import my.drivebit.network.services.Payment
 import my.drivebit.network.services.SendMessageRequest
 import my.drivebit.network.services.checkoutBooking
+import my.drivebit.network.services.contractBookingIdForAction
 import my.drivebit.network.services.leaveReviewBookingIdForAction
 import my.drivebit.network.services.payBookingIdForAction
+import my.drivebit.network.services.SignContractChatRole
+import my.drivebit.network.services.signContractChatRole
 import my.drivebit.repositories.ParticipantAvatarCache
 import my.drivebit.utils.safeLaunchWithErrorHandler
 
@@ -46,6 +49,8 @@ interface ChatDetailViewModel {
 
     val isPaying: StateFlow<Boolean>
 
+    val signActionInProgress: StateFlow<Set<String>>
+
     val payEffects: SharedFlow<ChatPayEffect>
 
     fun loadChat()
@@ -66,6 +71,11 @@ interface ChatDetailViewModel {
         bookingId: String,
         returnUrl: String,
         failUrl: String,
+    )
+
+    fun signContract(
+        bookingId: String,
+        counterpartyUserId: String,
     )
 }
 
@@ -97,6 +107,9 @@ class ChatDetailViewModelImpl(
 
     private val _isPaying = MutableStateFlow(false)
     override val isPaying: StateFlow<Boolean> = _isPaying.asStateFlow()
+
+    private val _signActionInProgress = MutableStateFlow<Set<String>>(emptySet())
+    override val signActionInProgress: StateFlow<Set<String>> = _signActionInProgress.asStateFlow()
 
     private val _payEffects = MutableSharedFlow<ChatPayEffect>(extraBufferCapacity = 1)
     override val payEffects: SharedFlow<ChatPayEffect> = _payEffects.asSharedFlow()
@@ -140,7 +153,45 @@ class ChatDetailViewModelImpl(
             val result = chat.getMessages(chatId, limit = 50)
             val loaded = (result.messages ?: emptyList()).sortedBy { it.createdAt }
             _messages.value = loaded
-            refreshBookingsForPayActions(loaded)
+            refreshBookingsForMessageActions(loaded)
+        }
+    }
+
+    override fun signContract(
+        bookingId: String,
+        counterpartyUserId: String,
+    ) {
+        if (bookingId.isBlank() || bookingId in _signActionInProgress.value) return
+        val dto = _bookingPaymentById.value[bookingId] ?: return
+        val role = dto.signContractChatRole(counterpartyUserId) ?: return
+
+        coroutineScope.safeLaunchWithErrorHandler(
+            isLoading = { false },
+            setLoading = { },
+            setError = { message ->
+                coroutineScope.launch {
+                    _payEffects.emit(ChatPayEffect.ShowInfo(message ?: "Не удалось подписать договор"))
+                }
+            },
+            errorHandler = { e ->
+                ErrorHandler.extractErrorMessage(
+                    exception = e,
+                    defaultNetworkError = "Ошибка сети",
+                    defaultGenericError = "Не удалось подписать договор",
+                )
+            },
+        ) {
+            _signActionInProgress.update { it + bookingId }
+            try {
+                val updated =
+                    when (role) {
+                        SignContractChatRole.Owner -> booking.signContractAsOwner(bookingId)
+                        SignContractChatRole.Renter -> booking.signContractAsRenter(bookingId)
+                    }
+                _bookingPaymentById.update { current -> current + (bookingId to updated) }
+            } finally {
+                _signActionInProgress.update { it - bookingId }
+            }
         }
     }
 
@@ -202,13 +253,14 @@ class ChatDetailViewModelImpl(
         )
     }
 
-    private fun refreshBookingsForPayActions(messages: List<MessageDto>) {
+    private fun refreshBookingsForMessageActions(messages: List<MessageDto>) {
         val bookingIds =
             messages
                 .flatMap { message ->
                     listOfNotNull(
                         message.payBookingIdForAction(),
                         message.leaveReviewBookingIdForAction(),
+                        message.contractBookingIdForAction(),
                     )
                 }.distinct()
         if (bookingIds.isEmpty()) return
@@ -246,7 +298,7 @@ class ChatDetailViewModelImpl(
                             val refreshed = chat.getMessages(chatId, limit = 50)
                             val loaded = (refreshed.messages ?: emptyList()).sortedBy { it.createdAt }
                             _messages.value = loaded
-                            refreshBookingsForPayActions(loaded)
+                            refreshBookingsForMessageActions(loaded)
                         }
                     }
                     is PayBookingResult.Failed ->
