@@ -28,6 +28,7 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import kotlinx.coroutines.delay
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.canShowSignContractAsOwner
 import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.DrivebitTheme
 import my.drivebit.viewmodels.MyBookingsAsOwnerViewModel
@@ -107,6 +108,7 @@ object InboxTab : Tab {
                                 isActionInProgress = booking.id in actionInProgress,
                                 onConfirm = { viewModel.confirmBooking(booking.id) },
                                 onDecline = { viewModel.declineBooking(booking.id) },
+                                onSignContract = { viewModel.signContractAsOwner(booking.id) },
                             )
                         }
                     }
@@ -122,6 +124,7 @@ internal fun DealItemCard(
     isActionInProgress: Boolean,
     onConfirm: () -> Unit,
     onDecline: () -> Unit,
+    onSignContract: () -> Unit = {},
 ) {
     val renterName = booking.renterName?.takeIf { it.isNotBlank() } ?: "Арендатор"
     val carName =
@@ -133,6 +136,7 @@ internal fun DealItemCard(
     val canConfirmOrDecline =
         booking.status.equals("Pending", ignoreCase = true) ||
             booking.status.equals("AwaitingOwnerConfirmation", ignoreCase = true)
+    val canSignContract = booking.canShowSignContractAsOwner()
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -166,6 +170,16 @@ internal fun DealItemCard(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (canSignContract) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = onSignContract,
+                    enabled = !isActionInProgress,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(if (isActionInProgress) "Подписание..." else "Подписать договор")
+                }
+            }
             if (canConfirmOrDecline) {
                 Spacer(modifier = Modifier.height(12.dp))
                 if (isActionInProgress) {

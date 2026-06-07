@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
@@ -18,6 +19,7 @@ import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.canShowSignContractAsRenter
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.prepaymentButtonLabel
@@ -41,9 +43,14 @@ fun MyBookingsPage() {
     val bookings by viewModel.bookings.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val actionInProgress by viewModel.actionInProgress.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadBookings()
+        while (true) {
+            delay(30_000)
+            viewModel.refreshBookings()
+        }
     }
 
     PageWithLogo {
@@ -72,6 +79,7 @@ fun MyBookingsPage() {
                             bookings.forEach { booking ->
                                 BookingItemCard(
                                     booking = booking,
+                                    isActionInProgress = booking.id in actionInProgress,
                                     onLeaveReview = {
                                         navigationController?.navigateTo("/leave-review?carId=${booking.carId}")
                                     },
@@ -83,6 +91,7 @@ fun MyBookingsPage() {
                                             "/payment?bookingId=${booking.id}&mode=prepay",
                                         )
                                     },
+                                    onSignContract = { viewModel.signContractAsRenter(booking.id) },
                                     onDownloadContract = {
                                         navigationController?.navigateTo(
                                             "/download-booking-contract?bookingId=${booking.id}",
@@ -101,9 +110,11 @@ fun MyBookingsPage() {
 @Composable
 private fun BookingItemCard(
     booking: BookingDTO,
+    isActionInProgress: Boolean = false,
     onLeaveReview: () -> Unit,
     onPay: () -> Unit,
     onPrepay: () -> Unit,
+    onSignContract: () -> Unit,
     onDownloadContract: () -> Unit,
 ) {
     val ownerName = booking.ownerName?.takeIf { it.isNotBlank() } ?: "Владелец"
@@ -129,6 +140,7 @@ private fun BookingItemCard(
     val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
     val canPay = booking.statusAllowsRenterPayment()
     val canDownloadContract = booking.statusAllowsContractDownload()
+    val canSignContract = booking.canShowSignContractAsRenter()
     val fullPaymentLabel =
         "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
 
@@ -208,7 +220,7 @@ private fun BookingItemCard(
             }
         }
 
-        if (canPay || booking.canPayPrepayment || canLeaveReview || canDownloadContract) {
+        if (canPay || booking.canPayPrepayment || canLeaveReview || canDownloadContract || canSignContract) {
             Row(
                 justifyContent = JustifyContent.FlexStart,
                 gap = 8.px,
@@ -263,6 +275,26 @@ private fun BookingItemCard(
                         onClick { onDownloadContract() }
                     }) {
                         Text("Договор")
+                    }
+                }
+                if (canSignContract) {
+                    Button({
+                        style {
+                            padding(8.px, 16.px)
+                            backgroundColor(CSSColors.Blue)
+                            color(CSSColors.White)
+                            border(0.px)
+                            borderRadius(8.px)
+                            fontSize(14.px)
+                            fontWeight("600")
+                            cursor(if (isActionInProgress) "default" else "pointer")
+                            property("opacity", if (isActionInProgress) "0.6" else "1")
+                        }
+                        if (!isActionInProgress) {
+                            onClick { onSignContract() }
+                        }
+                    }) {
+                        Text(if (isActionInProgress) "Подписание..." else "Подписать договор")
                     }
                 }
                 if (canLeaveReview) {

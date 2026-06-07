@@ -30,6 +30,7 @@ enum class ActionTypeEnum {
     LeaveReviewForCar,
     ConfirmBooking,
     DownloadContract,
+    SignContract,
 }
 
 object ActionTypeEnumSerializer : KSerializer<ActionTypeEnum> {
@@ -262,7 +263,9 @@ fun MessageDto.contractBookingIdForAction(): String? {
         messageActionBlock?.actionParameters?.get("bookingId")?.takeIf { it.isNotBlank() }
             ?: bookingId?.takeIf { it.isNotBlank() }
     when (messageActionBlock?.actionType) {
-        ActionTypeEnum.DownloadContract -> return bookingFromMessage
+        ActionTypeEnum.DownloadContract,
+        ActionTypeEnum.SignContract,
+        -> return bookingFromMessage
         else -> {}
     }
     return text?.let(::extractBookingIdFromContractDownloadUrl)

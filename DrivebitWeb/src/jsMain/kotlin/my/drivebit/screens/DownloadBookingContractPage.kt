@@ -22,6 +22,7 @@ import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
+import my.drivebit.network.services.browserDownloadUrl
 import my.drivebit.viewmodels.BookingContractUiState
 import my.drivebit.viewmodels.BookingContractViewModel
 import org.jetbrains.compose.web.css.*
@@ -168,7 +169,7 @@ fun DownloadBookingContractPage() {
                                 property("align-self", "flex-start")
                             }
                             onClick {
-                                window.open(contract.downloadUrl, "_blank")
+                                window.open(contract.browserDownloadUrl(), "_blank")
                             }
                         }) {
                             Text("Скачать договор")

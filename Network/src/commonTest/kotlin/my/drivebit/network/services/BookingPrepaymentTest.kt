@@ -61,9 +61,76 @@ class BookingPrepaymentTest {
     }
 
     @Test
-    fun statusAllowsRenterPayment_onlyForConfirmed() {
-        assertTrue(booking(status = "Confirmed").statusAllowsRenterPayment())
-        assertFalse(booking(status = "Paid").statusAllowsRenterPayment())
+    fun statusAllowsRenterPayment_usesCanPayFullAmountFromApi() {
+        assertTrue(
+            booking(
+                status = "Confirmed",
+                canPayFullAmount = true,
+            ).statusAllowsRenterPayment(),
+        )
+        assertTrue(
+            booking(
+                status = "PrePaid",
+                canPayFullAmount = true,
+            ).statusAllowsRenterPayment(),
+        )
+        assertFalse(
+            booking(
+                status = "Paid",
+                canPayFullAmount = false,
+            ).statusAllowsRenterPayment(),
+        )
+    }
+
+    @Test
+    fun statusAllowsContractDownload_includesContractSignatureStatuses() {
+        assertTrue(booking(status = "Confirmed").statusAllowsContractDownload())
+        assertTrue(booking(status = "PrePaid").statusAllowsContractDownload())
+        assertTrue(booking(status = "ContractSignedByOwner").statusAllowsContractDownload())
+        assertTrue(booking(status = "ContractSignedByBoth").statusAllowsContractDownload())
+        assertFalse(booking(status = "Pending").statusAllowsContractDownload())
+    }
+
+    @Test
+    fun canShowSignContract_visibleAfterConfirmedEvenWhenApiFlagFalse() {
+        val ownerView =
+            booking(
+                status = "Confirmed",
+                canSignContractAsOwner = false,
+                contractSignedByOwner = false,
+            )
+        val renterView =
+            booking(
+                status = "Confirmed",
+                canSignContractAsRenter = false,
+                contractSignedByRenter = false,
+            )
+
+        assertTrue(ownerView.canShowSignContractAsOwner())
+        assertTrue(renterView.canShowSignContractAsRenter())
+    }
+
+    @Test
+    fun canShowSignContract_hiddenAfterPartySigned() {
+        val booking =
+            booking(
+                status = "Confirmed",
+                contractSignedByOwner = true,
+            )
+
+        assertFalse(booking.canShowSignContractAsOwner())
+    }
+
+    @Test
+    fun canShowSignContract_stillUsesApiFlagWhenPaid() {
+        val booking =
+            booking(
+                status = "Paid",
+                canSignContractAsOwner = true,
+                contractSignedByOwner = false,
+            )
+
+        assertTrue(booking.canShowSignContractAsOwner())
     }
 
     private fun booking(
@@ -72,6 +139,11 @@ class BookingPrepaymentTest {
         prepaymentPercent: Double = 0.0,
         prepaymentAmount: Double = 0.0,
         canPayPrepayment: Boolean = false,
+        canPayFullAmount: Boolean = false,
+        canSignContractAsOwner: Boolean = false,
+        canSignContractAsRenter: Boolean = false,
+        contractSignedByOwner: Boolean = false,
+        contractSignedByRenter: Boolean = false,
         totalAmountWithDeposit: Double = 0.0,
         balanceDueAmount: Double = 0.0,
     ): BookingDTO =
@@ -90,6 +162,11 @@ class BookingPrepaymentTest {
             balanceDueAmount = balanceDueAmount,
             prepaymentPaidAt = prepaymentPaidAt,
             canPayPrepayment = canPayPrepayment,
+            canPayFullAmount = canPayFullAmount,
+            canSignContractAsOwner = canSignContractAsOwner,
+            canSignContractAsRenter = canSignContractAsRenter,
+            contractSignedByOwner = contractSignedByOwner,
+            contractSignedByRenter = contractSignedByRenter,
             status = status,
             createdAt = "2026-05-27T10:00:00Z",
         )

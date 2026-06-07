@@ -73,6 +73,12 @@ private class FakeBooking(
     override suspend fun getContract(bookingId: String): my.drivebit.network.services.GetBookingContractResult =
         throw NotImplementedError()
 
+    override suspend fun signContractAsOwner(bookingId: String): my.drivebit.network.services.BookingDTO =
+        throw NotImplementedError()
+
+    override suspend fun signContractAsRenter(bookingId: String): my.drivebit.network.services.BookingDTO =
+        throw NotImplementedError()
+
     override suspend fun createAsRenter(request: my.drivebit.network.services.CreateBookingRequest) =
         my.drivebit.network.services.BookingDTO(
             id = "booking-1",
@@ -90,6 +96,7 @@ private class FakeBooking(
             totalAmount = 0.0,
             status = createStatus,
             statusTranslate = null,
+            canPayFullAmount = createStatus.equals("Confirmed", ignoreCase = true),
             createdAt = "2025-02-16T10:00:00Z",
         )
 }

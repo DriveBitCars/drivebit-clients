@@ -22,6 +22,7 @@ import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.MessageDto
+import my.drivebit.network.services.canShowSignContractInChat
 import my.drivebit.network.services.contractBookingIdForAction
 import my.drivebit.network.services.contractDownloadPagePath
 import my.drivebit.network.services.isLeaveReviewForCarAction
@@ -82,6 +83,7 @@ fun ChatDetailPage() {
     val error by viewModel.error.collectAsState()
     val isSending by viewModel.isSending.collectAsState()
     val isPaying by viewModel.isPaying.collectAsState()
+    val signActionInProgress by viewModel.signActionInProgress.collectAsState()
     val bookingPaymentById by viewModel.bookingPaymentById.collectAsState()
 
     LaunchedEffect(chatId) {
@@ -165,6 +167,7 @@ fun ChatDetailPage() {
                                         bookingForPay = bookingIdForPay?.let { bookingPaymentById[it] },
                                         bookingById = bookingPaymentById,
                                         isPaying = isPaying,
+                                        signActionInProgress = signActionInProgress,
                                         onPrepayBooking = { bookingId ->
                                             val origin = window.location.origin
                                             viewModel.prepayBooking(
@@ -179,6 +182,12 @@ fun ChatDetailPage() {
                                                 bookingId = bookingId,
                                                 returnUrl = "$origin/payment-success",
                                                 failUrl = "$origin/payment-failure",
+                                            )
+                                        },
+                                        onSignContract = { bookingId, counterpartyUserId ->
+                                            viewModel.signContract(
+                                                bookingId = bookingId,
+                                                counterpartyUserId = counterpartyUserId,
                                             )
                                         },
                                     )
@@ -262,8 +271,10 @@ private fun MessageBubble(
     bookingForPay: BookingDTO? = null,
     bookingById: Map<String, BookingDTO> = emptyMap(),
     isPaying: Boolean = false,
+    signActionInProgress: Set<String> = emptySet(),
     onPrepayBooking: (String) -> Unit = {},
     onPayBooking: (String) -> Unit = {},
+    onSignContract: (bookingId: String, counterpartyUserId: String) -> Unit = { _, _ -> },
 ) {
     val isSystemMessage = message.isSystemMessage
     val senderId = message.sender?.id
@@ -285,10 +296,22 @@ private fun MessageBubble(
         val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
         val payButtonVm = createButtonViewModel()
         val contractButtonVm = createButtonViewModel()
+        val signContractButtonVm = createButtonViewModel()
         val reviewCarButtonVm = createButtonViewModel()
         val reviewRenterButtonVm = createButtonViewModel()
+        val bookingForContract = bookingIdForContract?.let { bookingById[it] }
+        val showSignContract =
+            bookingIdForContract != null &&
+                participantId != null &&
+                bookingForContract?.canShowSignContractInChat(participantId) == true
+        val isSigningContract = bookingIdForContract != null && bookingIdForContract in signActionInProgress
         LaunchedEffect(isPaying) {
             payButtonVm.setState(if (isPaying) ButtonState.Loading else ButtonState.Enabled)
+        }
+        LaunchedEffect(isSigningContract) {
+            signContractButtonVm.setState(
+                if (isSigningContract) ButtonState.Loading else ButtonState.Enabled,
+            )
         }
         LaunchedEffect(reviewCarId) {
             reviewCarButtonVm.setState(
@@ -350,6 +373,23 @@ private fun MessageBubble(
                             viewModel = contractButtonVm,
                             onClick = {
                                 window.location.href = contractDownloadPagePath(bookingIdForContract)
+                            },
+                        )
+                    }
+                }
+                if (showSignContract) {
+                    Div({
+                        style {
+                            width(100.percent)
+                            maxWidth(280.px)
+                        }
+                    }) {
+                        ActionButton(
+                            text = if (isSigningContract) "Подписание..." else "Подписать договор",
+                            enabledColor = CSSColors.Blue,
+                            viewModel = signContractButtonVm,
+                            onClick = {
+                                onSignContract(bookingIdForContract!!, participantId!!)
                             },
                         )
                     }

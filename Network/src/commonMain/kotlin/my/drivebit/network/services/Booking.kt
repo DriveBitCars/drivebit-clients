@@ -19,6 +19,7 @@ import my.drivebit.network.collectErrorMessages
 import my.drivebit.network.consumeResponse
 import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
+import my.drivebit.utils.resolveMinioImageUrlForBrowser
 
 interface Booking {
     suspend fun calculate(request: CheckBookingAvailabilityRequest): CheckBookingAvailabilityResponse
@@ -34,6 +35,10 @@ interface Booking {
     suspend fun confirmAsOwner(bookingId: String)
 
     suspend fun declineAsOwner(bookingId: String)
+
+    suspend fun signContractAsOwner(bookingId: String): BookingDTO
+
+    suspend fun signContractAsRenter(bookingId: String): BookingDTO
 
     suspend fun getContract(bookingId: String): GetBookingContractResult
 }
@@ -99,6 +104,13 @@ data class BookingDTO(
     @JsonNames("prepaymentPaidAt", "prepayment_paid_at") val prepaymentPaidAt: String? = null,
     @JsonNames("prepaymentAvailable", "prepayment_available") val prepaymentAvailable: Boolean = false,
     @JsonNames("canPayPrepayment", "can_pay_prepayment") val canPayPrepayment: Boolean = false,
+    @JsonNames("canPayFullAmount", "can_pay_full_amount") val canPayFullAmount: Boolean = false,
+    @JsonNames("contractSignedByOwner", "contract_signed_by_owner") val contractSignedByOwner: Boolean = false,
+    @JsonNames("contractSignedByRenter", "contract_signed_by_renter") val contractSignedByRenter: Boolean = false,
+    @JsonNames("canSignContractAsOwner", "can_sign_contract_as_owner") val canSignContractAsOwner: Boolean = false,
+    @JsonNames("canSignContractAsRenter", "can_sign_contract_as_renter") val canSignContractAsRenter: Boolean = false,
+    @JsonNames("contractSignedByOwnerAt", "contract_signed_by_owner_at") val contractSignedByOwnerAt: String? = null,
+    @JsonNames("contractSignedByRenterAt", "contract_signed_by_renter_at") val contractSignedByRenterAt: String? = null,
     @JsonNames("dailyRate", "daily_rate") val dailyRate: Double = 0.0,
     val status: String,
     val statusTranslate: String? = null,
@@ -111,7 +123,7 @@ enum class BookingCheckoutKind {
     FullOrBalance,
 }
 
-fun BookingDTO.statusAllowsRenterPayment(): Boolean = status.equals("Confirmed", ignoreCase = true)
+fun BookingDTO.statusAllowsRenterPayment(): Boolean = canPayFullAmount
 
 fun BookingDTO.renterFullOrBalanceAmountRub(): Int {
     val amount =
@@ -162,11 +174,51 @@ data class BookingContractDownloadDto(
     @JsonNames("generatedAt", "generated_at") val generatedAt: String,
 )
 
+fun BookingContractDownloadDto.browserDownloadUrl(): String = resolveMinioImageUrlForBrowser(downloadUrl) ?: downloadUrl
+
 fun BookingDTO.statusAllowsContractDownload(): Boolean =
     status.equals("Confirmed", ignoreCase = true) ||
+        status.equals("PrePaid", ignoreCase = true) ||
         status.equals("Paid", ignoreCase = true) ||
+        status.equals("ContractSignedByOwner", ignoreCase = true) ||
+        status.equals("ContractSignedByRenter", ignoreCase = true) ||
+        status.equals("ContractSignedByBoth", ignoreCase = true) ||
         status.equals("Active", ignoreCase = true) ||
         status.equals("Completed", ignoreCase = true)
+
+fun BookingDTO.canShowSignContractAsOwner(): Boolean =
+    canSignContractAsOwner ||
+        (statusAllowsContractSignUi() && !contractSignedByOwner)
+
+fun BookingDTO.canShowSignContractAsRenter(): Boolean =
+    canSignContractAsRenter ||
+        (statusAllowsContractSignUi() && !contractSignedByRenter)
+
+private fun BookingDTO.statusAllowsContractSignUi(): Boolean =
+    status.equals("Confirmed", ignoreCase = true) ||
+        status.equals("PrePaid", ignoreCase = true) ||
+        status.equals("Paid", ignoreCase = true) ||
+        status.equals("ContractSignedByOwner", ignoreCase = true) ||
+        status.equals("ContractSignedByRenter", ignoreCase = true)
+
+fun BookingDTO.canShowSignContractInChat(counterpartyUserId: String): Boolean =
+    when (counterpartyUserId) {
+        ownerId -> canShowSignContractAsRenter()
+        renterId -> canShowSignContractAsOwner()
+        else -> false
+    }
+
+enum class SignContractChatRole {
+    Owner,
+    Renter,
+}
+
+fun BookingDTO.signContractChatRole(counterpartyUserId: String): SignContractChatRole? =
+    when (counterpartyUserId) {
+        ownerId -> if (canShowSignContractAsRenter()) SignContractChatRole.Renter else null
+        renterId -> if (canShowSignContractAsOwner()) SignContractChatRole.Owner else null
+        else -> null
+    }
 
 fun BookingDTO.isTerminalRenterBooking(): Boolean =
     status.equals("Completed", ignoreCase = true) ||
@@ -226,6 +278,18 @@ class BookingImpl(
         val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/decline"
         val response = authorizedHttpClient.put(url) { }
         response.consumeResponse()
+    }
+
+    override suspend fun signContractAsOwner(bookingId: String): BookingDTO {
+        val url = "${DEFAULT_BASE_URL}Booking/$bookingId/sign-contract-as-owner"
+        val response = authorizedHttpClient.post(url) { }
+        return response.parseResponse()
+    }
+
+    override suspend fun signContractAsRenter(bookingId: String): BookingDTO {
+        val url = "${DEFAULT_BASE_URL}Booking/$bookingId/sign-contract-as-renter"
+        val response = authorizedHttpClient.post(url) { }
+        return response.parseResponse()
     }
 
     override suspend fun getContract(bookingId: String): GetBookingContractResult {

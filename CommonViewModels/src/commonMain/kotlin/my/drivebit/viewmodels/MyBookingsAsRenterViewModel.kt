@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingCheckoutKind
@@ -23,9 +24,12 @@ interface MyBookingsAsRenterViewModel {
     val isLoading: StateFlow<Boolean>
     val error: StateFlow<String?>
     val isPaying: StateFlow<Boolean>
+    val actionInProgress: StateFlow<Set<String>>
     val payEffects: SharedFlow<ChatPayEffect>
 
     fun loadBookings()
+
+    fun refreshBookings()
 
     fun payBooking(
         bookingId: String,
@@ -38,6 +42,8 @@ interface MyBookingsAsRenterViewModel {
         returnUrl: String,
         failUrl: String,
     )
+
+    fun signContractAsRenter(bookingId: String)
 }
 
 class MyBookingsAsRenterViewModelImpl(
@@ -56,6 +62,9 @@ class MyBookingsAsRenterViewModelImpl(
 
     private val _isPaying = MutableStateFlow(false)
     override val isPaying: StateFlow<Boolean> = _isPaying.asStateFlow()
+
+    private val _actionInProgress = MutableStateFlow<Set<String>>(emptySet())
+    override val actionInProgress: StateFlow<Set<String>> = _actionInProgress.asStateFlow()
 
     private val _payEffects = MutableSharedFlow<ChatPayEffect>(extraBufferCapacity = 1)
     override val payEffects: SharedFlow<ChatPayEffect> = _payEffects.asSharedFlow()
@@ -77,6 +86,16 @@ class MyBookingsAsRenterViewModelImpl(
         ) {
             val result = booking.getMyAsRenter()
             _bookings.value = result
+        }
+    }
+
+    override fun refreshBookings() {
+        coroutineScope.launch {
+            runCatching {
+                val result = booking.getMyAsRenter()
+                _bookings.value = result
+                _error.value = null
+            }
         }
     }
 
@@ -131,6 +150,32 @@ class MyBookingsAsRenterViewModelImpl(
                 }
             } finally {
                 _isPaying.value = false
+            }
+        }
+    }
+
+    override fun signContractAsRenter(bookingId: String) {
+        if (bookingId in _actionInProgress.value) return
+
+        coroutineScope.safeLaunchWithErrorHandler(
+            isLoading = { false },
+            setLoading = { },
+            setError = { _error.value = it },
+            errorHandler = { e ->
+                ErrorHandler.extractErrorMessage(
+                    exception = e,
+                    defaultNetworkError = "Ошибка сети",
+                    defaultGenericError = "Не удалось подписать договор",
+                )
+            },
+        ) {
+            _actionInProgress.update { it + bookingId }
+            try {
+                booking.signContractAsRenter(bookingId)
+                val result = booking.getMyAsRenter()
+                _bookings.value = result
+            } finally {
+                _actionInProgress.update { it - bookingId }
             }
         }
     }
