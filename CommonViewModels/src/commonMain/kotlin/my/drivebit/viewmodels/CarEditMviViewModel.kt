@@ -15,6 +15,7 @@ import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarInsuranceType
 import my.drivebit.network.services.CarModel
+import my.drivebit.network.services.DEFAULT_CAR_PREPAYMENT_PERCENT
 import my.drivebit.repositories.EnumItem
 import my.drivebit.repositories.MyCarRepository
 
@@ -122,10 +123,6 @@ sealed interface CarEditIntent {
     ) : CarEditIntent
 
     data class UpdateDeposit(
-        val value: String,
-    ) : CarEditIntent
-
-    data class UpdatePrepaymentPercent(
         val value: String,
     ) : CarEditIntent
 
@@ -438,9 +435,6 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.UpdateDeposit -> {
                 updateFormData { it.copy(deposit = intent.value) }
             }
-            is CarEditIntent.UpdatePrepaymentPercent -> {
-                updateFormData { it.copy(prepaymentPercent = intent.value) }
-            }
             is CarEditIntent.UpdateAvailableMileagePerDayKm -> {
                 updateFormData { it.copy(availableMileagePerDayKm = intent.value) }
             }
@@ -572,11 +566,6 @@ class CarEditMviViewModelImpl(
                 val dailyRate14DaysValue = formData.dailyRate14Days.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val dailyRate21DaysValue = formData.dailyRate21Days.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val depositValue = formData.deposit.takeIf { it.isNotBlank() }?.toIntOrNull()
-                val prepaymentPercentValue =
-                    formData.prepaymentPercent
-                        .takeIf { it.isNotBlank() }
-                        ?.toIntOrNull()
-                        ?.coerceIn(0, 100)
                 val availableMileagePerDayKmValue =
                     formData.availableMileagePerDayKm.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val request =
@@ -604,7 +593,7 @@ class CarEditMviViewModelImpl(
                         dailyRate14Days = dailyRate14DaysValue,
                         dailyRate21Days = dailyRate21DaysValue,
                         deposit = depositValue,
-                        prepaymentPercent = prepaymentPercentValue,
+                        prepaymentPercent = DEFAULT_CAR_PREPAYMENT_PERCENT,
                         availableMileagePerDayKm = availableMileagePerDayKmValue,
                         insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },
                         ParkingAssistances = emptyList(),

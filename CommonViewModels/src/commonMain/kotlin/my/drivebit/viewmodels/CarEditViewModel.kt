@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
+import my.drivebit.network.services.DEFAULT_CAR_PREPAYMENT_PERCENT
 
 sealed interface CarEditState {
     data object Loading : CarEditState
@@ -397,11 +398,7 @@ class CarEditViewModelImpl(
                         description = formData.description.takeIf { it.isNotBlank() },
                         ValidAddressString = formData.address,
                         deposit = formData.deposit.takeIf { it.isNotBlank() }?.toIntOrNull(),
-                        prepaymentPercent =
-                            formData.prepaymentPercent
-                                .takeIf { it.isNotBlank() }
-                                ?.toIntOrNull()
-                                ?.coerceIn(0, 100),
+                        prepaymentPercent = DEFAULT_CAR_PREPAYMENT_PERCENT,
                         availableMileagePerDayKm =
                             formData.availableMileagePerDayKm.takeIf { it.isNotBlank() }?.toIntOrNull(),
                         insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },

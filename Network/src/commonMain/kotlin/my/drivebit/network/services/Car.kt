@@ -347,6 +347,8 @@ object CarInsuranceType {
         )
 }
 
+const val DEFAULT_CAR_PREPAYMENT_PERCENT = 10
+
 @Serializable
 data class CarPhotoItem(
     val id: Int,
