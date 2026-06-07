@@ -205,4 +205,30 @@ class ChatContractActionTest {
         assertTrue(booking.canShowSignContractInChat(counterpartyUserId = "renter-1"))
         assertFalse(booking.canShowSignContractInChat(counterpartyUserId = "stranger"))
     }
+
+    @Test
+    fun contractBookingIdForAction_parsesMinioContractUrlFromText() {
+        val message =
+            MessageDto(
+                id = "10",
+                chatId = "c1",
+                createdAt = "2026-06-07T12:00:00Z",
+                isSystemMessage = true,
+                text =
+                    "Скачать договор: http://157.22.252.70:9000/privatebct/contracts/" +
+                        "660e8400-e29b-41d4-a716-446655440001/file.pdf?X-Amz-Signature=abc",
+            )
+
+        assertEquals("660e8400-e29b-41d4-a716-446655440001", message.contractBookingIdForAction())
+    }
+
+    @Test
+    fun extractBookingIdFromMinioContractUrl_parsesPathWithoutHost() {
+        assertEquals(
+            "8a2f5e6c-e87e-473e-b574-ce5cbbe62f57",
+            extractBookingIdFromMinioContractUrl(
+                "/privatebct/contracts/8a2f5e6c-e87e-473e-b574-ce5cbbe62f57/file.pdf",
+            ),
+        )
+    }
 }

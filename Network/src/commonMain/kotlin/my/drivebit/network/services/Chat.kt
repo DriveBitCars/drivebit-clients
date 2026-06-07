@@ -224,8 +224,19 @@ data class SendMessageRequest(
 private val contractDownloadUrlRegex =
     Regex("""(?:https?://(?:www\.)?drivebit\.ru)?/download-booking-contract\?bookingId=([0-9a-fA-F-]{36})""")
 
+private val minioContractPathRegex =
+    Regex("""(?:https?://[^/?#]+:9000)?/privatebct/contracts/([0-9a-fA-F-]{36})/""")
+
 fun extractBookingIdFromContractDownloadUrl(text: String): String? =
     contractDownloadUrlRegex
+        .find(text)
+        ?.groupValues
+        ?.getOrNull(1)
+        ?.takeIf { it.isNotBlank() }
+        ?: extractBookingIdFromMinioContractUrl(text)
+
+fun extractBookingIdFromMinioContractUrl(text: String): String? =
+    minioContractPathRegex
         .find(text)
         ?.groupValues
         ?.getOrNull(1)
