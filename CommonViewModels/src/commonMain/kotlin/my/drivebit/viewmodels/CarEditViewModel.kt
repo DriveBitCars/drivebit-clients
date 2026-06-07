@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
-import my.drivebit.network.services.DEFAULT_CAR_PREPAYMENT_PERCENT
 
 sealed interface CarEditState {
     data object Loading : CarEditState
@@ -60,7 +59,6 @@ data class CarEditFormData(
     val dailyRate14Days: String = "",
     val dailyRate21Days: String = "",
     val deposit: String = "",
-    val prepaymentPercent: String = "",
     val availableMileagePerDayKm: String = "",
     val insurance: String? = null,
     val insuranceTranslate: String? = null,
@@ -242,7 +240,6 @@ class CarEditViewModelImpl(
                     ?.toInt()
                     ?.takeIf { it > 0 }
                     ?.let { NumberFormatter.formatInt(it) } ?: "",
-            prepaymentPercent = car.prepaymentPercent?.toInt()?.let { NumberFormatter.formatInt(it) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             insurance = car.insurance?.trim()?.takeIf { it.isNotEmpty() },
             insuranceTranslate = car.insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() },
@@ -398,7 +395,6 @@ class CarEditViewModelImpl(
                         description = formData.description.takeIf { it.isNotBlank() },
                         ValidAddressString = formData.address,
                         deposit = formData.deposit.takeIf { it.isNotBlank() }?.toIntOrNull(),
-                        prepaymentPercent = DEFAULT_CAR_PREPAYMENT_PERCENT,
                         availableMileagePerDayKm =
                             formData.availableMileagePerDayKm.takeIf { it.isNotBlank() }?.toIntOrNull(),
                         insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },

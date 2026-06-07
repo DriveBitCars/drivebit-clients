@@ -15,7 +15,6 @@ import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarInsuranceType
 import my.drivebit.network.services.CarModel
-import my.drivebit.network.services.DEFAULT_CAR_PREPAYMENT_PERCENT
 import my.drivebit.repositories.EnumItem
 import my.drivebit.repositories.MyCarRepository
 
@@ -593,7 +592,6 @@ class CarEditMviViewModelImpl(
                         dailyRate14Days = dailyRate14DaysValue,
                         dailyRate21Days = dailyRate21DaysValue,
                         deposit = depositValue,
-                        prepaymentPercent = DEFAULT_CAR_PREPAYMENT_PERCENT,
                         availableMileagePerDayKm = availableMileagePerDayKmValue,
                         insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },
                         ParkingAssistances = emptyList(),
@@ -798,7 +796,6 @@ class CarEditMviViewModelImpl(
             dailyRate21Days =
                 car.dailyRate21Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             deposit = car.deposit?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
-            prepaymentPercent = car.prepaymentPercent?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             insurance = car.insurance?.trim()?.takeIf { it.isNotEmpty() },
             insuranceTranslate = car.insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() },
