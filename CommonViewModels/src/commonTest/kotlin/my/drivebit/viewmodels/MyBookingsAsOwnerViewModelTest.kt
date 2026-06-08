@@ -71,7 +71,7 @@ private fun sampleBooking(id: String = "booking-1"): BookingDTO =
 @OptIn(ExperimentalCoroutinesApi::class)
 class MyBookingsAsOwnerViewModelTest {
     @Test
-    fun `signContractAsOwner updates booking locally when refresh fails`() =
+    fun `signContractAsOwner updates booking from sign response without reloading list`() =
         runTest(StandardTestDispatcher()) {
             val bookingId = "booking-1"
             val initial = sampleBooking(bookingId)
@@ -95,6 +95,7 @@ class MyBookingsAsOwnerViewModelTest {
             advanceUntilIdle()
 
             assertNull(viewModel.error.value)
+            assertEquals(1, fakeBooking.refreshCalls)
             val updatedBooking = viewModel.bookings.value.single()
             assertTrue(updatedBooking.contractSignedByOwner)
             assertFalse(updatedBooking.canSignContractAsOwner)

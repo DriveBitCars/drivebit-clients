@@ -152,18 +152,10 @@ class MyBookingsAsOwnerViewModelImpl(
             try {
                 val updated = booking.signContractAsOwner(bookingId)
                 println("✅ [MyBookingsAsOwnerViewModel] signContractAsOwner succeeded bookingId=$bookingId status=${updated.status}")
+                _error.value = null
                 _bookings.update { list ->
                     list.map { if (it.id == bookingId) updated else it }
                 }
-                runCatching { booking.getMyAsOwner() }
-                    .onSuccess { _bookings.value = it }
-                    .onFailure { e ->
-                        logBookingActionError(
-                            action = "signContractAsOwner.refresh",
-                            bookingId = bookingId,
-                            exception = e,
-                        )
-                    }
             } finally {
                 _actionInProgress.update { it - bookingId }
             }
