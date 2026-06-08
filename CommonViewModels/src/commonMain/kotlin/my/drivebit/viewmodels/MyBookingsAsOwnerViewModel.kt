@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import my.drivebit.network.NetworkException
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.utils.safeLaunchWithErrorHandler
@@ -135,6 +136,11 @@ class MyBookingsAsOwnerViewModelImpl(
             setLoading = { },
             setError = { _error.value = it },
             errorHandler = { e ->
+                logBookingActionError(
+                    action = "signContractAsOwner",
+                    bookingId = bookingId,
+                    exception = e,
+                )
                 ErrorHandler.extractErrorMessage(
                     exception = e,
                     defaultNetworkError = "Ошибка сети",
@@ -144,12 +150,29 @@ class MyBookingsAsOwnerViewModelImpl(
         ) {
             _actionInProgress.update { it + bookingId }
             try {
-                booking.signContractAsOwner(bookingId)
-                val result = booking.getMyAsOwner()
-                _bookings.value = result
+                val updated = booking.signContractAsOwner(bookingId)
+                println("✅ [MyBookingsAsOwnerViewModel] signContractAsOwner succeeded bookingId=$bookingId status=${updated.status}")
+                _error.value = null
+                _bookings.update { list ->
+                    list.map { if (it.id == bookingId) updated else it }
+                }
             } finally {
                 _actionInProgress.update { it - bookingId }
             }
         }
     }
+}
+
+private fun logBookingActionError(
+    action: String,
+    bookingId: String,
+    exception: Throwable,
+) {
+    println("❌ [MyBookingsAsOwnerViewModel] $action failed bookingId=$bookingId")
+    println("   exception: ${exception::class.simpleName}")
+    println("   message: ${exception.message}")
+    if (exception is NetworkException) {
+        println("   httpStatus: ${exception.statusCodeValue}")
+    }
+    exception.printStackTrace()
 }

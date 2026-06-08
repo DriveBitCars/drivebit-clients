@@ -75,7 +75,7 @@ object InboxTab : Tab {
             )
             Spacer(modifier = Modifier.height(16.dp))
             when {
-                isLoading -> {
+                isLoading && bookings.isEmpty() -> {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -84,7 +84,7 @@ object InboxTab : Tab {
                         CircularProgressIndicator()
                     }
                 }
-                error != null -> {
+                bookings.isEmpty() && error != null -> {
                     Text(
                         text = error ?: "Ошибка",
                         style = MaterialTheme.typography.bodyMedium,
@@ -99,6 +99,14 @@ object InboxTab : Tab {
                     )
                 }
                 else -> {
+                    if (error != null) {
+                        Text(
+                            text = error ?: "Ошибка",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(bottom = 12.dp),
+                        )
+                    }
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {

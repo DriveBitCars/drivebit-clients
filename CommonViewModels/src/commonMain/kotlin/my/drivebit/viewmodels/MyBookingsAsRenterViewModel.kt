@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import my.drivebit.network.NetworkException
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.network.services.BookingDTO
@@ -162,6 +163,11 @@ class MyBookingsAsRenterViewModelImpl(
             setLoading = { },
             setError = { _error.value = it },
             errorHandler = { e ->
+                logRenterBookingActionError(
+                    action = "signContractAsRenter",
+                    bookingId = bookingId,
+                    exception = e,
+                )
                 ErrorHandler.extractErrorMessage(
                     exception = e,
                     defaultNetworkError = "Ошибка сети",
@@ -171,12 +177,29 @@ class MyBookingsAsRenterViewModelImpl(
         ) {
             _actionInProgress.update { it + bookingId }
             try {
-                booking.signContractAsRenter(bookingId)
-                val result = booking.getMyAsRenter()
-                _bookings.value = result
+                val updated = booking.signContractAsRenter(bookingId)
+                println("✅ [MyBookingsAsRenterViewModel] signContractAsRenter succeeded bookingId=$bookingId status=${updated.status}")
+                _error.value = null
+                _bookings.update { list ->
+                    list.map { if (it.id == bookingId) updated else it }
+                }
             } finally {
                 _actionInProgress.update { it - bookingId }
             }
         }
     }
+}
+
+private fun logRenterBookingActionError(
+    action: String,
+    bookingId: String,
+    exception: Throwable,
+) {
+    println("❌ [MyBookingsAsRenterViewModel] $action failed bookingId=$bookingId")
+    println("   exception: ${exception::class.simpleName}")
+    println("   message: ${exception.message}")
+    if (exception is NetworkException) {
+        println("   httpStatus: ${exception.statusCodeValue}")
+    }
+    exception.printStackTrace()
 }

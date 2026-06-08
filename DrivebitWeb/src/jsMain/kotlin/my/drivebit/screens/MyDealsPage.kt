@@ -57,8 +57,8 @@ fun MyDealsPage() {
 
             FormSection {
                 when {
-                    isLoading -> Loader()
-                    error != null -> TextError(error ?: "Ошибка")
+                    isLoading && bookings.isEmpty() -> Loader()
+                    bookings.isEmpty() && error != null -> TextError(error ?: "Ошибка")
                     bookings.isEmpty() -> {
                         Div({
                             style {
@@ -72,6 +72,9 @@ fun MyDealsPage() {
                     }
                     else -> {
                         Column(gap = 16.px, modifier = { width(100.percent) }) {
+                            if (error != null) {
+                                TextError(error ?: "Ошибка")
+                            }
                             bookings.forEach { booking ->
                                 DealItemCard(
                                     booking = booking,
