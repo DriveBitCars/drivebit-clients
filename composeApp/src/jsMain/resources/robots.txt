@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 
+Disallow: /images/
 Disallow: /car/
 Disallow: /car-detail
 Disallow: /car-photos-gallery
@@ -22,6 +23,7 @@ Disallow: /city-selection
 
 User-agent: Googlebot
 Allow: /
+Disallow: /images/
 Disallow: /login-by-phone
 Disallow: /login-by-mail
 Disallow: /signup
@@ -36,12 +38,29 @@ Disallow: /change-phone
 
 User-agent: Bingbot
 Allow: /
+Disallow: /images/
 Disallow: /login-by-phone
 Disallow: /login-by-mail
 Disallow: /signup
 Disallow: /verify-otp
 Disallow: /car-detail
 Disallow: /car-photos-gallery
+Disallow: /api/
+Disallow: /profile
+Disallow: /edit-name
+Disallow: /change-email
+Disallow: /change-phone
+
+User-agent: Yandex
+Allow: /
+Disallow: /images/
+Disallow: /car/
+Disallow: /car-detail
+Disallow: /car-photos-gallery
+Disallow: /login-by-phone
+Disallow: /login-by-mail
+Disallow: /signup
+Disallow: /verify-otp
 Disallow: /api/
 Disallow: /profile
 Disallow: /edit-name
