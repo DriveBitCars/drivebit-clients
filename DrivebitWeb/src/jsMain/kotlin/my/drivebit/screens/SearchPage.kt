@@ -37,7 +37,7 @@ import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.navigation.NavigationState
 import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.web.BrandSlugResolver
-import my.drivebit.web.navigateToCarDetail
+import my.drivebit.web.buildCarDetailUrl
 import my.drivebit.web.parseSearchBrandSlugFromPath
 import my.drivebit.web.searchPathForBrandName
 import my.drivebit.viewmodels.SearchPageDateEndViewModel
@@ -345,8 +345,8 @@ fun SearchPage() {
                                 if (currentState.cars.isNotEmpty()) {
                                     CarsGrid(
                                         cars = displayedCars,
-                                        onCarClick = { car ->
-                                            navigateToCarDetail(
+                                        carHref = { car ->
+                                            buildCarDetailUrl(
                                                 carId = car.id,
                                                 startDate = startDateByRepo ?: searchParams.first,
                                                 endDate = endDateByRepo ?: searchParams.second,

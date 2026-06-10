@@ -10,26 +10,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.document
 import kotlinx.browser.window
-import my.drivebit.web.HtmlFiltersBridge
-import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.CarsGrid
 import my.drivebit.components.CarsGridSkeleton
 import my.drivebit.components.FilterButtonsRow
-import my.drivebit.components.TextError
 import my.drivebit.components.NearbyMapListSwitcher
 import my.drivebit.components.NearbyRadiusSelector
 import my.drivebit.components.PaginationBar
+import my.drivebit.components.TextError
 import my.drivebit.components.filterButton
 import my.drivebit.design.CSSColors
 import my.drivebit.maps.MapView
 import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.maps.models.MapMarker
-import my.drivebit.network.services.CarItem
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.navigation.NavigationState
-import my.drivebit.web.navigateToCarDetail
+import my.drivebit.network.services.CarItem
 import my.drivebit.repositories.CurrentFiltersRepository
+import my.drivebit.shell.AppWithHeader
 import my.drivebit.viewmodels.CarSearchViewModel
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.FiltersViewModel
@@ -38,13 +36,16 @@ import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MapViewModel
 import my.drivebit.viewmodels.MyCityViewModel
 import my.drivebit.viewmodels.NearbyLayoutMode
+import my.drivebit.web.HtmlFiltersBridge
+import my.drivebit.web.HtmlHeroDatesBridge
 import my.drivebit.web.cityPathWithFilter
 import my.drivebit.web.filterTitleToPathSegment
 import my.drivebit.web.isCityHomePath
-import my.drivebit.web.shouldShowStaticHeroShell
+import my.drivebit.web.buildCarDetailUrl
+import my.drivebit.web.navigateToCarDetail
 import my.drivebit.web.parseCitySlugFromPath
-import my.drivebit.web.HtmlHeroDatesBridge
 import my.drivebit.web.parseFilterSlugFromCityPath
+import my.drivebit.web.shouldShowStaticHeroShell
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
@@ -280,8 +281,8 @@ fun HomePage() {
                                 }) {
                                     CarsGrid(
                                         cars = pagedCars,
-                                        onCarClick = { car ->
-                                            navigateToCarDetail(
+                                        carHref = { car ->
+                                            buildCarDetailUrl(
                                                 carId = car.id,
                                                 startDate = startState.date,
                                                 endDate = endState.date,
@@ -342,8 +343,8 @@ private fun MainContentCarsSection(
             is MainContentListState.FirstList -> {
                 CarsGrid(
                     cars = displayedCars,
-                    onCarClick = { car ->
-                        navigateToCarDetail(
+                    carHref = { car ->
+                        buildCarDetailUrl(
                             carId = car.id,
                             startDate = startDate,
                             endDate = endDate,
