@@ -7,11 +7,11 @@ import my.drivebit.utils.dateToStartAtIso
 import my.drivebit.utils.dateToEndAtIso
 import my.drivebit.utils.encodeUrlParameter
 
-fun navigateToCarDetail(
+fun buildCarDetailUrl(
     carId: String,
-    startDate: String?,
-    endDate: String?,
-) {
+    startDate: String? = null,
+    endDate: String? = null,
+): String {
     val params = mutableListOf("id=${carId.encodeUrlParameter()}")
     dateToStartAtIso(startDate)?.let {
         params.add("$START_AT=${it.encodeUrlParameter()}")
@@ -19,5 +19,13 @@ fun navigateToCarDetail(
     dateToEndAtIso(endDate)?.let {
         params.add("$END_AT=${it.encodeUrlParameter()}")
     }
-    window.location.href = "/car-detail?${params.joinToString("&")}"
+    return "/car-detail?${params.joinToString("&")}"
+}
+
+fun navigateToCarDetail(
+    carId: String,
+    startDate: String?,
+    endDate: String?,
+) {
+    window.location.href = buildCarDetailUrl(carId, startDate, endDate)
 }

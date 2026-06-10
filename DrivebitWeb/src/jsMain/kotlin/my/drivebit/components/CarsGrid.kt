@@ -1,8 +1,8 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
-import kotlinx.browser.window
 import my.drivebit.network.services.CarItem
+import my.drivebit.web.buildCarDetailUrl
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.gap
@@ -15,7 +15,7 @@ import org.jetbrains.compose.web.dom.Div
 @Composable
 fun CarsGrid(
     cars: List<CarItem>,
-    onCarClick: (CarItem) -> Unit = { car -> window.location.href = "/car-detail?id=${car.id}" },
+    carHref: (CarItem) -> String = { car -> buildCarDetailUrl(car.id) },
 ) {
     Div({
         classes("drivebit-cars-grid-mounted")
@@ -30,7 +30,7 @@ fun CarsGrid(
             Column {
                 CarItemSmall(
                     car = car,
-                    onClick = { onCarClick(car) },
+                    href = carHref(car),
                 )
             }
         }

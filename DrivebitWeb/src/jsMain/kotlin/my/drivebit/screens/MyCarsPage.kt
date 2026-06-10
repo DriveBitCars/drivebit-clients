@@ -18,6 +18,7 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
 import my.drivebit.viewmodels.MyCarsViewModel
+import my.drivebit.web.buildCarDetailUrl
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -87,9 +88,7 @@ fun MyCarsPage() {
                                 Column(gap = 12.px) {
                                     CarItemSmall(
                                         car = car,
-                                        onClick = {
-                                            window.location.href = "/car-detail?id=${car.id}"
-                                        },
+                                        href = buildCarDetailUrl(car.id),
                                     )
                                     Row(justifyContent = JustifyContent.Center) {
                                         ActionButton(
