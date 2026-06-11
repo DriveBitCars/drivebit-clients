@@ -9,7 +9,7 @@ kotlin {
     js(IR) {
         browser {
             commonWebpackConfig {
-                outputFileName = "account.js"
+                outputFileName = "profile.js"
             }
         }
         binaries.executable()
@@ -48,29 +48,11 @@ tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
     duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
 }
 
-val accountShellRoutes =
-    listOf(
-        "my-city-selection",
-        "my-bookings",
-        "leave-review",
-        "my-deals",
-        "documents",
-        "download-booking-contract",
-        "payment",
-        "edit-name",
-        "change-email",
-        "change-phone",
-        "change-password",
-    )
-
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(rootProject.layout.projectDirectory.dir("vendor")) {
         into("vendor")
     }
-    val shellTemplate = layout.projectDirectory.file("src/jsMain/resources/account-app-shell/index.html")
-    accountShellRoutes.forEach { route ->
-        from(shellTemplate) {
-            into(route)
-        }
+    from(layout.projectDirectory.file("src/jsMain/resources/profile-app-shell/index.html")) {
+        into("profile")
     }
 }

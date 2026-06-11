@@ -14,7 +14,6 @@ import my.drivebit.screens.LeaveReviewPage
 import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCitySelectionPage
 import my.drivebit.screens.MyDealsPage
-import my.drivebit.screens.ProfilePage
 import my.drivebit.shared.storage.Storage
 import my.drivebit.web.homePathHref
 
@@ -26,13 +25,6 @@ internal fun AccountAppContent(
     when {
         currentPath.startsWith("/my-city-selection") -> {
             MyCitySelectionPage()
-        }
-        currentPath.startsWith("/profile") -> {
-            if (storage.isLogined()) {
-                ProfilePage()
-            } else {
-                RedirectToHome(storage)
-            }
         }
         currentPath.startsWith("/my-bookings") -> {
             if (storage.isLogined()) {

@@ -4,8 +4,6 @@ fun isAccountBundlePath(pathname: String): Boolean {
     val path = pathname.removeSuffix("/").ifEmpty { "/" }
     return path == "/my-city-selection" ||
         path.startsWith("/my-city-selection/") ||
-        path == "/profile" ||
-        path.startsWith("/profile/") ||
         path == "/my-bookings" ||
         path.startsWith("/my-bookings/") ||
         path == "/leave-review" ||
@@ -31,7 +29,6 @@ fun isAccountBundlePath(pathname: String): Boolean {
 val accountBundleShellRoutes: List<String> =
     listOf(
         "my-city-selection",
-        "profile",
         "my-bookings",
         "leave-review",
         "my-deals",

@@ -171,6 +171,7 @@ jobs:
           - chatsApp
           - authApp
           - accountApp
+          - profileApp
           - composeApp
 
     steps:
