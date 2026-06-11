@@ -269,10 +269,14 @@ val authShellRoutes =
         "login-by-password",
     )
 
+val profileShellRoutes =
+    listOf(
+        "profile",
+    )
+
 val accountShellRoutes =
     listOf(
         "my-city-selection",
-        "profile",
         "my-bookings",
         "leave-review",
         "my-deals",
@@ -293,6 +297,7 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
             ":chatsApp:jsBrowserDevelopmentWebpack",
             ":authApp:jsBrowserDevelopmentWebpack",
             ":accountApp:jsBrowserDevelopmentWebpack",
+            ":profileApp:jsBrowserDevelopmentWebpack",
         )
     } else {
         dependsOn(
@@ -301,6 +306,7 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
             ":chatsApp:jsBrowserProductionWebpack",
             ":authApp:jsBrowserProductionWebpack",
             ":accountApp:jsBrowserProductionWebpack",
+            ":profileApp:jsBrowserProductionWebpack",
         )
     }
     dependsOn(
@@ -308,6 +314,7 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
         ":chatsApp:jsProcessResources",
         ":authApp:jsProcessResources",
         ":accountApp:jsProcessResources",
+        ":profileApp:jsProcessResources",
     )
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.file("list-your-car.html"))
@@ -370,6 +377,20 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(authWebpackDir) {
         include("auth.js", "auth.js.map")
     }
+    profileShellRoutes.forEach { route ->
+        from(project(":profileApp").layout.buildDirectory.dir("processedResources/js/main/$route")) {
+            into(route)
+        }
+    }
+    val profileWebpackDir =
+        if (needsSplitBundleDevWebpack) {
+            project(":profileApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
+        } else {
+            project(":profileApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
+        }
+    from(profileWebpackDir) {
+        include("profile.js", "profile.js.map")
+    }
     accountShellRoutes.forEach { route ->
         from(project(":accountApp").layout.buildDirectory.dir("processedResources/js/main/$route")) {
             into(route)
@@ -393,5 +414,6 @@ tasks.named("jsBrowserDevelopmentRun").configure {
         ":chatsApp:jsBrowserDevelopmentWebpack",
         ":authApp:jsBrowserDevelopmentWebpack",
         ":accountApp:jsBrowserDevelopmentWebpack",
+        ":profileApp:jsBrowserDevelopmentWebpack",
     )
 }

@@ -68,7 +68,7 @@ jobs:
       run: ./gradlew clean --no-daemon
 
     - name: Build JS distribution (fast web version)
-      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :chatsApp:jsBrowserDistribution :authApp:jsBrowserDistribution :accountApp:jsBrowserDistribution --no-daemon
+      run: ./gradlew :composeApp:jsBrowserDistribution :carDetailApp:jsBrowserDistribution :myCarsApp:jsBrowserDistribution :chatsApp:jsBrowserDistribution :authApp:jsBrowserDistribution :accountApp:jsBrowserDistribution :profileApp:jsBrowserDistribution --no-daemon
 
     - name: Merge split bundles into main dist
       run: |
@@ -118,13 +118,20 @@ jobs:
         ACCOUNT="accountApp/build/dist/js/productionExecutable"
         cp "$ACCOUNT/account.js" "$DIST/"
         cp "$ACCOUNT/account.js.map" "$DIST/" 2>/dev/null || true
-        for route in profile my-bookings my-deals documents payment change-email; do
+        for route in my-bookings my-deals documents payment change-email; do
           if [ -d "$ACCOUNT/$route" ]; then
             cp -r "$ACCOUNT/$route" "$DIST/"
           fi
         done
-        test -f "$DIST/profile/index.html"
         test -f "$DIST/account.js"
+        PROFILE="profileApp/build/dist/js/productionExecutable"
+        cp "$PROFILE/profile.js" "$DIST/"
+        cp "$PROFILE/profile.js.map" "$DIST/" 2>/dev/null || true
+        if [ -d "$PROFILE/profile" ]; then
+          cp -r "$PROFILE/profile" "$DIST/"
+        fi
+        test -f "$DIST/profile/index.html"
+        test -f "$DIST/profile.js"
         echo "split bundles merged OK"
 
     - name: Verify Moscow SEO pages in dist
