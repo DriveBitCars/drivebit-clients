@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.browser.window
+import my.drivebit.analytics.reachYandexGoalArenda
 import my.drivebit.components.ActionButton
 import my.drivebit.components.ButtonContainer
 import my.drivebit.components.CenteredFormContainer
@@ -63,6 +64,7 @@ fun LoginByPasswordPage() {
 
     LaunchedEffect(uiState.authState) {
         if (uiState.authState is AuthFormState.Success) {
+            reachYandexGoalArenda()
             val targetPath =
                 when {
                     redirectPath.isNotBlank() -> redirectPath
