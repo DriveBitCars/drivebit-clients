@@ -15,8 +15,20 @@
         }
     }
 
+    function isMetrikaTagRequested() {
+        for (var j = 0; j < document.scripts.length; j++) {
+            if (
+                document.scripts[j].src &&
+                document.scripts[j].src.indexOf("metrika/tag.js") !== -1
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function loadMetrika() {
-        if (window.ym) {
+        if (isMetrikaTagRequested()) {
             return;
         }
         (function (m, e, t, r, i, k, a) {
