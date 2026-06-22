@@ -15,6 +15,7 @@ import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCitySelectionPage
 import my.drivebit.screens.MyDealsPage
 import my.drivebit.shared.storage.Storage
+import my.drivebit.navigation.RedirectToLogin
 import my.drivebit.web.homePathHref
 
 @Composable
@@ -57,16 +58,32 @@ internal fun AccountAppContent(
             BookingPaymentLinkPage()
         }
         currentPath.startsWith("/edit-name") -> {
-            EditNamePage(currentPath)
+            if (storage.isLogined()) {
+                EditNamePage(currentPath)
+            } else {
+                RedirectToLogin()
+            }
         }
         currentPath.startsWith("/change-email") -> {
-            ChangeEmailPage()
+            if (storage.isLogined()) {
+                ChangeEmailPage()
+            } else {
+                RedirectToLogin()
+            }
         }
         currentPath.startsWith("/change-phone") -> {
-            ChangePhonePage()
+            if (storage.isLogined()) {
+                ChangePhonePage()
+            } else {
+                RedirectToLogin()
+            }
         }
         currentPath.startsWith("/change-password") -> {
-            ChangePasswordPage()
+            if (storage.isLogined()) {
+                ChangePasswordPage()
+            } else {
+                RedirectToLogin()
+            }
         }
     }
 }

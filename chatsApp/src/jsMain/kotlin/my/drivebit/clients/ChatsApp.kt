@@ -1,10 +1,11 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.browser.window
 import my.drivebit.components.CookieConsentBanner
 import my.drivebit.navigation.Navigation
+import my.drivebit.navigation.RedirectToMainApp
+import my.drivebit.navigation.RedirectToSplitBundle
+import my.drivebit.navigation.isAnySplitBundlePath
 import my.drivebit.navigation.isChatBundlePath
 import my.drivebit.shared.storage.Storage
 import my.drivebit.shell.MountWebShell
@@ -19,18 +20,17 @@ fun ChatsApp() {
         CookieConsentBanner()
         Navigation { currentPath ->
             val storage: Storage = koinInject()
-            if (isChatBundlePath(currentPath)) {
-                ChatsAppContent(currentPath = currentPath, storage = storage)
-            } else {
-                RedirectToMainApp()
+            when {
+                isChatBundlePath(currentPath) -> {
+                    ChatsAppContent(currentPath = currentPath, storage = storage)
+                }
+                isAnySplitBundlePath(currentPath) -> {
+                    RedirectToSplitBundle()
+                }
+                else -> {
+                    RedirectToMainApp()
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun RedirectToMainApp() {
-    LaunchedEffect(Unit) {
-        window.location.href = "/"
     }
 }

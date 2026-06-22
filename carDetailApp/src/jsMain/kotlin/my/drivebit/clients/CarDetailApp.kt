@@ -1,10 +1,11 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.browser.window
 import my.drivebit.components.CookieConsentBanner
 import my.drivebit.navigation.Navigation
+import my.drivebit.navigation.RedirectToMainApp
+import my.drivebit.navigation.RedirectToSplitBundle
+import my.drivebit.navigation.isAnySplitBundlePath
 import my.drivebit.screens.CarDetailPage
 import my.drivebit.screens.CarPhotosGalleryPage
 import my.drivebit.shell.MountWebShell
@@ -24,17 +25,13 @@ fun CarDetailApp() {
                 currentPath.startsWith("/car-detail") -> {
                     CarDetailPage()
                 }
+                isAnySplitBundlePath(currentPath) -> {
+                    RedirectToSplitBundle()
+                }
                 else -> {
-                    RedirectToMainApp(currentPath)
+                    RedirectToMainApp()
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun RedirectToMainApp(currentPath: String) {
-    LaunchedEffect(currentPath) {
-        window.location.href = "/"
     }
 }

@@ -1,10 +1,11 @@
 package my.drivebit.clients
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.browser.window
 import my.drivebit.components.CookieConsentBanner
 import my.drivebit.navigation.Navigation
+import my.drivebit.navigation.RedirectToMainApp
+import my.drivebit.navigation.RedirectToSplitBundle
+import my.drivebit.navigation.isAnySplitBundlePath
 import my.drivebit.navigation.isProfileBundlePath
 import my.drivebit.shell.MountWebShell
 import my.drivebit.web.koin.WebKoinHost
@@ -16,18 +17,17 @@ fun ProfileApp() {
         MountWebShell()
         CookieConsentBanner()
         Navigation { currentPath ->
-            if (isProfileBundlePath(currentPath)) {
-                ProfileAppContent(currentPath = currentPath)
-            } else {
-                RedirectToMainApp()
+            when {
+                isProfileBundlePath(currentPath) -> {
+                    ProfileAppContent(currentPath = currentPath)
+                }
+                isAnySplitBundlePath(currentPath) -> {
+                    RedirectToSplitBundle()
+                }
+                else -> {
+                    RedirectToMainApp()
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun RedirectToMainApp() {
-    LaunchedEffect(Unit) {
-        window.location.href = "/"
     }
 }

@@ -9,7 +9,7 @@ class NavigationController(
 
     fun navigateTo(path: String) {
         if (shouldUseFullPageNavigation(path)) {
-            window.location.href = path
+            window.location.href = fullPageNavigationHref(path)
             return
         }
         window.history.pushState(null, "", path)
@@ -19,7 +19,7 @@ class NavigationController(
 
     fun replacePath(path: String) {
         if (shouldUseFullPageNavigation(path)) {
-            window.location.replace(path)
+            window.location.replace(fullPageNavigationHref(path))
             return
         }
         window.history.replaceState(null, "", path)
@@ -35,15 +35,21 @@ class NavigationController(
     }
 }
 
-private fun isSplitBundlePath(path: String): Boolean =
-    path.startsWith("/car-detail") ||
-        path.startsWith("/car-photos-gallery") ||
-        isOwnerCarBundlePath(path) ||
-        isChatBundlePath(path)
+private fun shouldUseFullPageNavigation(targetPath: String): Boolean =
+    requiresFullPageNavigation(
+        currentPathname = window.location.pathname,
+        targetPath = targetPath,
+    )
 
-private fun shouldUseFullPageNavigation(targetPath: String): Boolean {
-    val currentPath = window.location.pathname
-    val currentIsSplit = isSplitBundlePath(currentPath)
-    val targetIsSplit = isSplitBundlePath(targetPath)
-    return currentIsSplit != targetIsSplit
+private fun fullPageNavigationHref(targetPath: String): String {
+    val hashStart = targetPath.indexOf('#')
+    val queryStart = targetPath.indexOf('?')
+    val pathOnly = pathWithoutQuery(targetPath)
+    val search =
+        when {
+            queryStart >= 0 -> targetPath.substring(queryStart, if (hashStart >= 0) hashStart else targetPath.length)
+            else -> ""
+        }
+    val hash = if (hashStart >= 0) targetPath.substring(hashStart) else ""
+    return splitBundleHref(pathOnly, search, hash)
 }

@@ -98,7 +98,11 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
     val storage: Storage = koinInject()
 
     LaunchedEffect(state) {
-        if (state is ProfileState.Error && (state as ProfileState.Error).message == "Не авторизован") {
+        if (
+            state is ProfileState.Error &&
+            (state as ProfileState.Error).message == "Не авторизован" &&
+            !storage.isLogined()
+        ) {
             window.location.href = homePathHref(storage)
         }
     }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
 import my.drivebit.components.CookieConsentBanner
 import my.drivebit.navigation.Navigation
+import my.drivebit.navigation.RedirectToSplitBundle
 import my.drivebit.navigation.isAccountBundlePath
 import my.drivebit.navigation.isAuthBundlePath
 import my.drivebit.navigation.isChatBundlePath
@@ -63,14 +64,5 @@ actual fun App() {
 private fun RedirectToListYourCarHtml() {
     LaunchedEffect(Unit) {
         window.location.replace("/list-your-car.html")
-    }
-}
-
-@Composable
-private fun RedirectToSplitBundle() {
-    LaunchedEffect(Unit) {
-        val path = window.location.pathname
-        val normalizedPath = if (path.endsWith("/")) path else "$path/"
-        window.location.replace(normalizedPath + window.location.search + window.location.hash)
     }
 }
