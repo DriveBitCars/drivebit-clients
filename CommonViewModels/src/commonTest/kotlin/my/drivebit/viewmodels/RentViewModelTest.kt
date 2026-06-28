@@ -6,6 +6,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import io.ktor.http.HttpStatusCode
+import my.drivebit.network.NetworkException
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
@@ -19,8 +21,10 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 private class FakeStorage(
-    private val isLoggedIn: Boolean = true,
+    var isLoggedIn: Boolean = true,
 ) : Storage {
+    var logoutCalled = false
+
     override fun isLogined() = isLoggedIn
 
     override fun saveToken(token: String) {}
@@ -31,7 +35,10 @@ private class FakeStorage(
 
     override fun getRefreshToken(): String? = null
 
-    override fun logout() {}
+    override fun logout() {
+        logoutCalled = true
+        isLoggedIn = false
+    }
 
     override fun putString(
         key: String,
@@ -51,6 +58,7 @@ private class FakeStorage(
 private class FakeBooking(
     private val calculateResult: (CheckBookingAvailabilityRequest) -> CheckBookingAvailabilityResponse,
     private val createStatus: String = "Pending",
+    private val createError: Exception? = null,
 ) : Booking {
     var calculateCalls = mutableListOf<CheckBookingAvailabilityRequest>()
 
@@ -79,8 +87,9 @@ private class FakeBooking(
     override suspend fun signContractAsRenter(bookingId: String): my.drivebit.network.services.BookingDTO =
         throw NotImplementedError()
 
-    override suspend fun createAsRenter(request: my.drivebit.network.services.CreateBookingRequest) =
-        my.drivebit.network.services.BookingDTO(
+    override suspend fun createAsRenter(request: my.drivebit.network.services.CreateBookingRequest): my.drivebit.network.services.BookingDTO {
+        createError?.let { throw it }
+        return my.drivebit.network.services.BookingDTO(
             id = "booking-1",
             carId = request.carId,
             carBrandName = null,
@@ -99,6 +108,7 @@ private class FakeBooking(
             canPayFullAmount = createStatus.equals("Confirmed", ignoreCase = true),
             createdAt = "2025-02-16T10:00:00Z",
         )
+    }
 }
 
 private class FakePayment : Payment {
@@ -424,6 +434,103 @@ class RentViewModelTest {
 
             val state = viewModel.state.value as RentState.NavigateToLogin
             assertEquals("car-123", state.carId)
+        }
+
+    @Test
+    fun `onBookClick navigates to login and clears session when create returns 401`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val storage = FakeStorage(isLoggedIn = true)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                    createError = NetworkException(HttpStatusCode.Unauthorized, "Unauthorized"),
+                )
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = FakePayment(),
+                    storage = storage,
+                    carId = "car-123",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2025-02-16T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2025-02-18T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.onBookClick()
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as RentState.NavigateToLogin
+            assertEquals("car-123", state.carId)
+            assertEquals("2025-02-16T10:00:00Z", state.startDate)
+            assertEquals("2025-02-18T10:00:00Z", state.endDate)
+            assertTrue(storage.logoutCalled)
+            assertFalse(storage.isLoggedIn)
+        }
+
+    @Test
+    fun `onBookClick navigates to login when create fails with blank message 401`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val storage = FakeStorage(isLoggedIn = true)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                    createError = NetworkException(HttpStatusCode.Unauthorized, ""),
+                )
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = FakePayment(),
+                    storage = storage,
+                    carId = "car-123",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2025-02-16T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2025-02-18T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.onBookClick()
+            advanceUntilIdle()
+
+            assertTrue(viewModel.state.value is RentState.NavigateToLogin)
+            assertTrue(storage.logoutCalled)
+            assertFalse(storage.isLoggedIn)
+        }
+
+    @Test
+    fun `onBookClick shows createError for non-auth booking failures`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val storage = FakeStorage(isLoggedIn = true)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                    createError = NetworkException(HttpStatusCode.BadRequest, "CarAlreadyBookedForSelectedPeriod"),
+                )
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = FakePayment(),
+                    storage = storage,
+                    carId = "car-123",
+                    coroutineScope = testScope,
+                )
+
+            viewModel.setStartDate("2025-02-16T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.setEndDate("2025-02-18T10:00:00Z")
+            advanceUntilIdle()
+            viewModel.onBookClick()
+            advanceUntilIdle()
+
+            val state = viewModel.state.value as RentState.Book
+            assertEquals("CarAlreadyBookedForSelectedPeriod", state.createError)
+            assertFalse(storage.logoutCalled)
+            assertTrue(storage.isLoggedIn)
         }
 
     @Test

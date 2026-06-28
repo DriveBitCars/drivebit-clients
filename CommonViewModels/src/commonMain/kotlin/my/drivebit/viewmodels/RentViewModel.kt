@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import my.drivebit.network.NetworkException
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.network.services.BookingDTO
@@ -272,14 +273,25 @@ class RentViewModelImpl(
                         }
                     }
                 }.onFailure { e ->
-                    _state.update { s ->
-                        if (s is RentState.Book) {
-                            s.copy(
-                                isCreating = false,
-                                createError = localizeBookingError(e.message),
+                    if (isUnauthorizedBookingError(e)) {
+                        storage.logout()
+                        val bookState = _state.value as? RentState.Book ?: current
+                        _state.value =
+                            RentState.NavigateToLogin(
+                                carId = carId,
+                                startDate = bookState.startDate ?: start,
+                                endDate = bookState.endDate ?: end,
                             )
-                        } else {
-                            s
+                    } else {
+                        _state.update { s ->
+                            if (s is RentState.Book) {
+                                s.copy(
+                                    isCreating = false,
+                                    createError = localizeBookingError(e.message),
+                                )
+                            } else {
+                                s
+                            }
                         }
                     }
                 }
@@ -396,6 +408,17 @@ class RentViewModelImpl(
                     }
                 }
             }
+    }
+
+    private fun isUnauthorizedBookingError(exception: Throwable): Boolean {
+        val networkException = exception as? NetworkException
+        if (networkException?.statusCodeValue == 401) {
+            return true
+        }
+        val message = exception.message?.lowercase().orEmpty()
+        return message.contains("unauthorized") ||
+            message.contains("401") ||
+            message.contains("invalid refresh token")
     }
 
     private fun localizeBookingError(message: String?): String =
