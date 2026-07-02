@@ -18,6 +18,9 @@ jobs:
   fetch-logs:
     name: Fetch backend docker logs
     runs-on: ubuntu-latest
+    env:
+      LOG_LINES: ${{ inputs.lines || '8000' }}
+      LOG_PATTERN: ${{ inputs.pattern || 'confirm|booking|exeed|lx|AwaitingOwner|Contract|as-owner|422|401|500' }}
     steps:
       - name: Fetch logs from backend (root@157.22.252.70)
         id: backend_root
@@ -40,7 +43,7 @@ jobs:
             if [ -z "$CONTAINER" ]; then
               exit 1
             fi
-            docker logs --tail ${{ inputs.lines }} "$CONTAINER" 2>&1 | grep -iE "${{ inputs.pattern }}" | tail -300
+            docker logs --tail ${{ env.LOG_LINES }} "$CONTAINER" 2>&1 | grep -iE "${{ env.LOG_PATTERN }}" | tail -300
 
       - name: Fetch logs from api.drivebit.ru (user1)
         id: backend_api
@@ -64,7 +67,7 @@ jobs:
             if [ -z "$CONTAINER" ]; then
               exit 1
             fi
-            docker logs --tail ${{ inputs.lines }} "$CONTAINER" 2>&1 | grep -iE "${{ inputs.pattern }}" | tail -300
+            docker logs --tail ${{ env.LOG_LINES }} "$CONTAINER" 2>&1 | grep -iE "${{ env.LOG_PATTERN }}" | tail -300
 
       - name: Fetch logs via deploy host hop
         id: backend_hop
@@ -79,6 +82,6 @@ jobs:
             set +e
             echo "=== deploy host: $(hostname) user: $(whoami) ==="
             ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@157.22.252.70 \
-              "docker logs --tail ${{ inputs.lines }} drivebit-drivebitbackend-1 2>&1 | grep -iE '${{ inputs.pattern }}' | tail -300" \
+              "docker logs --tail $LOG_LINES drivebit-drivebitbackend-1 2>&1 | grep -iE '$LOG_PATTERN' | tail -300" \
               || ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 user1@api.drivebit.ru \
-              "docker logs --tail ${{ inputs.lines }} drivebit-drivebitbackend-1 2>&1 | grep -iE '${{ inputs.pattern }}' | tail -300"
+              "docker logs --tail $LOG_LINES drivebit-drivebitbackend-1 2>&1 | grep -iE '$LOG_PATTERN' | tail -300"
