@@ -1,0 +1,32 @@
+.drivebit-search-headline-wrap {
+    width: 100%;
+    max-width: var(--drivebit-page-max, 1200px);
+    margin: 0 auto;
+    padding: 24px var(--drivebit-page-pad-x, 40px) 8px;
+    box-sizing: border-box;
+}
+
+.drivebit-page-headline {
+    margin: 0;
+    max-width: 100%;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #111827;
+    text-wrap: balance;
+}
+
+body:has(#root:not(:empty)) #drivebit-search-headline-static {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .drivebit-search-headline-wrap {
+        padding: 16px var(--drivebit-page-pad-x-mobile, 16px) 4px;
+    }
+
+    .drivebit-page-headline {
+        font-size: 24px;
+    }
+}
