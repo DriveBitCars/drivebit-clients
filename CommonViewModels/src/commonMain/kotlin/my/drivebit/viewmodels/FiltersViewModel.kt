@@ -39,7 +39,7 @@ class FiltersViewModel(
             "За город" to SEARCHBACKGROUND_CAR3_JPG,
             "Каникулы" to SEARCHBACKGROUND_CAR6_JPG,
             "Переезд" to SEARCHBACKGROUND_CAR8_JPG,
-            "Мероприятие" to SEARCHBACKGROUND_CAR7_JPG,
+            "Внедорожник" to SEARCHBACKGROUND_CAR7_JPG,
         )
 
     private val _state =
