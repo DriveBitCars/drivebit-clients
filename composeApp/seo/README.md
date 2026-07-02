@@ -54,3 +54,29 @@ For bulk cars-grid skeleton rollout on listing pages, run `node scripts/inject-c
 
 1. Copy `moskva/kanikuly/index.html` (or closest filter).
 2. Update hero image preload, h1, filter `aria-pressed`, SEO block.
+
+## Body-type filter with custom SEO URL (example: Внедорожник)
+
+Use when the filter is **not** a trip-purpose slug (`kanikuly`, `pereezd`, …) but a long-tail URL from the SEO spec (e.g. `/moskva/arenda-vnedorozhnika-bez-voditelya`).
+
+### Checklist
+
+1. **Filter behavior** — `SuggestedFiltersCatalog.kt`: `shortName`, `bodyTypes` (e.g. `SUV`), icon.
+2. **Custom path segment** — `CityPathRouting.kt` → `CUSTOM_FILTER_PATH_SEGMENTS` (`"Внедорожник" to "arenda-vnedorozhnika-bez-voditelya"`).
+3. **Meta** — `landing-blocks.json` (`title`, `description`, `sections`), `MetaTags.kt`, `CityDeclensionUtils.kt`, `city-meta-bootstrap.js` (add slug to `SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS` when using seo title suffix).
+4. **Static page** — `composeApp/src/jsMain/resources/moskva/{slug}/index.html` with unique `<title>`, description, canonical, H1, active filter button.
+5. **Full SEO text before footer** — put all sections in `landing-blocks.json`, then inject into `index.html`:
+   ```bash
+   python3 -c "
+   from pathlib import Path; import re
+   from scripts.seo_blocks import render_block
+   p = '/moskva/arenda-vnedorozhnika-bez-voditelya'
+   html = render_block(p)
+   f = Path('composeApp/src/jsMain/resources/moskva/arenda-vnedorozhnika-bez-voditelya/index.html')
+   f.write_text(re.sub(r'<div class=\"drivebit-seo-shell\">[\s\S]*?</div>\s*\n', html, f.read_text(encoding='utf-8'), count=1), encoding='utf-8')
+   "
+   ```
+6. **All filter rows** — replace button label/path in root `index.html`, every city page, `filters.fragment.html`.
+7. **Sitemap + deploy verify** — `sitemap.xml`, `.github/workflows/deploy.yml` slug list, `print-city-meta-table.mjs`.
+
+Full write-up: [docs/solutions/best-practices/seo-vnedorozhnik-filter-landing-page.md](../../docs/solutions/best-practices/seo-vnedorozhnik-filter-landing-page.md).
