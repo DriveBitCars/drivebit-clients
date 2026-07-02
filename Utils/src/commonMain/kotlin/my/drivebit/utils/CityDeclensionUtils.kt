@@ -69,6 +69,7 @@ private val SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS =
         "za-gorod",
         "poblizosti",
         "arenda-vnedorozhnika-bez-voditelya",
+        "arenda-minivena-bez-voditelya",
     )
 
 fun isSeoOptimizedPage(
@@ -98,6 +99,7 @@ fun seoPageHeadline(
         "За город" -> "Аренда авто для поездки в другой город из $gen"
         "Поблизости" -> "Аренда авто на карте в $prep"
         "Внедорожник" -> "Аренда внедорожника без водителя в $prep"
+        "Минивэн" -> "Аренда минивэна без водителя в $prep"
         else -> "Аренда авто у частных владельцев в $prep"
     }
 }
@@ -200,8 +202,8 @@ fun cityPageDescription(
             "Подберите автомобиль на каникулы в $prep. $CITY_FILTER_RENT_SUFFIX"
         "Внедорожник" ->
             "Подберите внедорожник в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
-        "Переезд" ->
-            "Подберите автомобиль для переезда в $prep. $CITY_FILTER_RENT_SUFFIX"
+        "Минивэн" ->
+            "Подберите минивэн в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
         "Поблизости" ->
             "Найдите автомобили поблизости в $prep. Быстрая аренда у собственников, прозрачные условия и поддержка 24/7."
         "Путешествия" ->

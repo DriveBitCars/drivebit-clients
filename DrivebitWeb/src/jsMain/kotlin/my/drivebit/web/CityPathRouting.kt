@@ -11,6 +11,7 @@ private const val ALL_FILTER_TITLE = "Все"
 private val CUSTOM_FILTER_PATH_SEGMENTS =
     mapOf(
         "Внедорожник" to "arenda-vnedorozhnika-bez-voditelya",
+        "Минивэн" to "arenda-minivena-bez-voditelya",
     )
 
 fun filterTitleToPathSegment(title: String): String? {
@@ -28,7 +29,7 @@ private val KNOWN_FILTER_TITLES =
         "Командировки",
         "Каникулы",
         "Внедорожник",
-        "Переезд",
+        "Минивэн",
     )
 
 fun filterTitleFromPathSegment(filterSlug: String?): String {
