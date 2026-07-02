@@ -24,6 +24,7 @@ data class SeoLandingBlock(
     val paragraphs: List<String>,
     val title: String? = null,
     val description: String? = null,
+    val h1: String? = null,
     val sections: List<SeoContentSection>? = null,
 )
 

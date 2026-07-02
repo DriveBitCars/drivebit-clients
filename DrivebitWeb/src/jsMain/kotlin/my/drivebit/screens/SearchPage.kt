@@ -39,6 +39,7 @@ import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.web.BrandSlugResolver
 import my.drivebit.web.buildCarDetailUrl
 import my.drivebit.web.parseSearchBrandSlugFromPath
+import my.drivebit.web.resolveSearchPageHeadline
 import my.drivebit.web.searchPathForBrandName
 import my.drivebit.viewmodels.SearchPageDateEndViewModel
 import my.drivebit.viewmodels.SearchPageDateViewModel
@@ -59,6 +60,7 @@ import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
@@ -91,6 +93,11 @@ fun SearchPage() {
     val endDateByRepo by currentFiltersRepository.endState.collectAsState(null)
     val currentPath by navigationState.currentPath.collectAsState()
     val brandSlugFromPath = parseSearchBrandSlugFromPath(currentPath)
+    val pageHeadline =
+        resolveSearchPageHeadline(
+            path = currentPath,
+            brandName = filterBrandName,
+        )
 
     LaunchedEffect(brandSlugFromPath) {
         val slug = brandSlugFromPath ?: return@LaunchedEffect
@@ -189,14 +196,17 @@ fun SearchPage() {
         }) {
             when (val currentState = state) {
                 is SearchState.Loading -> {
+                    SearchPageHeadline(pageHeadline)
                     Loader()
                 }
 
                 is SearchState.Error -> {
+                    SearchPageHeadline(pageHeadline)
                     TextError(currentState.message)
                 }
 
                 is SearchState.Searching -> {
+                    SearchPageHeadline(pageHeadline)
                     Loader()
                 }
 
@@ -204,6 +214,7 @@ fun SearchPage() {
                     val searchPageDateViewModel: SearchPageDateViewModel = koinInject()
                     val searchPageDateEndViewModel: SearchPageDateEndViewModel = koinInject()
                     Column(gap = 24.px) {
+                        SearchPageHeadline(pageHeadline)
                         SearchDateRangeSelector(
                             startDate = startDateByRepo ?: searchParams.first,
                             endDate = endDateByRepo ?: searchParams.second,
@@ -516,6 +527,34 @@ fun SearchPage() {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SearchPageHeadline(text: String) {
+    Div({
+        classes("drivebit-search-headline-wrap")
+        style {
+            width(100.percent)
+            property("max-width", "1200px")
+            property("margin", "0 auto")
+            padding(0.px)
+        }
+    }) {
+        H1({
+            id("drivebit-page-headline")
+            classes("drivebit-page-headline")
+            style {
+                property("margin", "0")
+                fontSize(32.px)
+                fontWeight("600")
+                property("line-height", "1.25")
+                color(CSSColors.Black)
+                property("text-wrap", "balance")
+            }
+        }) {
+            Text(text)
         }
     }
 }
