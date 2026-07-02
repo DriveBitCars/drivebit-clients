@@ -36,8 +36,8 @@ class FiltersViewModel(
             "Путешествия" to SEARCHBACKGROUND_CAR2_JPG,
             "К родным" to SEARCHBACKGROUND_CAR4_JPG,
             "Командировки" to SEARCHBACKGROUND_CAR5_JPG,
-            "За город" to SEARCHBACKGROUND_CAR3_JPG,
-            "Каникулы" to SEARCHBACKGROUND_CAR6_JPG,
+            "Премиум" to SEARCHBACKGROUND_CAR3_JPG,
+            "Эконом" to SEARCHBACKGROUND_CAR6_JPG,
             "Минивэн" to SEARCHBACKGROUND_CAR8_JPG,
             "Внедорожник" to SEARCHBACKGROUND_CAR7_JPG,
         )

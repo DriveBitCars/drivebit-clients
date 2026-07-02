@@ -11,7 +11,7 @@ const bootstrapPath = path.join(root, "vendor/city-meta-bootstrap.js");
 const STATIC_HTML = {
   "/moskva": "composeApp/src/jsMain/resources/moskva/index.html",
   "/moskva/puteshestviya": "composeApp/src/jsMain/resources/moskva/puteshestviya/index.html",
-  "/moskva/za-gorod": "composeApp/src/jsMain/resources/moskva/za-gorod/index.html",
+  "/moskva/arenda-avto-premium-klassa-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-avto-premium-klassa-bez-voditelya/index.html",
   "/moskva/poblizosti": "composeApp/src/jsMain/resources/moskva/poblizosti/index.html",
 };
 

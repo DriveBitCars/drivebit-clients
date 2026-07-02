@@ -85,7 +85,30 @@ class CityPathRoutingTest {
         assertEquals("Все", filterTitleFromPathSegment(null))
         assertEquals("Поблизости", filterTitleFromPathSegment("poblizosti"))
         assertEquals("Путешествия", filterTitleFromPathSegment("puteshestviya"))
-        assertEquals("За город", filterTitleFromPathSegment("za-gorod"))
+    }
+
+    @Test
+    fun cityPathWithFilter_ekonomUsesSeoSlug() {
+        assertEquals(
+            "/moskva/arenda-avto-ekonom-klassa-bez-voditelya",
+            cityPathWithFilter("moskva", "Эконом"),
+        )
+    }
+
+    @Test
+    fun cityPathWithFilter_premiumUsesSeoSlug() {
+        assertEquals(
+            "/moskva/arenda-avto-premium-klassa-bez-voditelya",
+            cityPathWithFilter("moskva", "Премиум"),
+        )
+    }
+
+    @Test
+    fun filterTitleToPathSegment_ekonomAndPremiumUseSeoSlug() {
+        assertEquals("arenda-avto-ekonom-klassa-bez-voditelya", filterTitleToPathSegment("Эконом"))
+        assertEquals("Эконом", filterTitleFromPathSegment("arenda-avto-ekonom-klassa-bez-voditelya"))
+        assertEquals("arenda-avto-premium-klassa-bez-voditelya", filterTitleToPathSegment("Премиум"))
+        assertEquals("Премиум", filterTitleFromPathSegment("arenda-avto-premium-klassa-bez-voditelya"))
     }
 
     @Test
@@ -129,8 +152,8 @@ class CityPathRoutingTest {
                 "/moskva/k-rodnym",
                 "/moskva/puteshestviya",
                 "/moskva/komandirovki",
-                "/moskva/za-gorod",
-                "/moskva/kanikuly",
+                "/moskva/arenda-avto-ekonom-klassa-bez-voditelya",
+                "/moskva/arenda-avto-premium-klassa-bez-voditelya",
                 "/moskva/arenda-minivena-bez-voditelya",
                 "/moskva/arenda-vnedorozhnika-bez-voditelya",
                 "/zelenograd",

@@ -64,3 +64,4 @@ id_rda
 *.pub
 
 .firecrawl
+scripts/__pycache__/

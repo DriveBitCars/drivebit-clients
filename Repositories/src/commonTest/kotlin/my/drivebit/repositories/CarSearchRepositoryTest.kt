@@ -598,6 +598,54 @@ class CarSearchRepositoryTest {
         }
 
     @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `should pass econom dailyPriceMax when currentTaskShortName is Ekonom`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+
+            mockCarService.searchResult = CarSearchResponse(emptyList())
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                )
+
+            mockCurrentFiltersRepository.updateCurrentTask("Эконом")
+            repository.searchCarsByUserCity.first()
+
+            assertEquals(null, mockCarService.searchDailyPriceMin)
+            assertEquals(2500, mockCarService.searchDailyPriceMax)
+        }
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `should pass premium dailyPriceMin when currentTaskShortName is Premium`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+
+            mockCarService.searchResult = CarSearchResponse(emptyList())
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                )
+
+            mockCurrentFiltersRepository.updateCurrentTask("Премиум")
+            repository.searchCarsByUserCity.first()
+
+            assertEquals(7000, mockCarService.searchDailyPriceMin)
+            assertEquals(null, mockCarService.searchDailyPriceMax)
+        }
+
+    @Test
     fun `should pass start date and end date to carService search when dates are set`() =
         runTest {
             val mockCarService = MockCarService()
