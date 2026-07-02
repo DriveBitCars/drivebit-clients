@@ -1,6 +1,8 @@
 name: Fetch Backend Logs
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       lines:
