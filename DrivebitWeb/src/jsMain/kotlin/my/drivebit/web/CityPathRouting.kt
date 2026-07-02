@@ -8,10 +8,15 @@ private const val ALL_FILTER_TITLE = "Все"
  * Converts filter title into URL segment for city path.
  * "Все" is represented by city root path without a filter segment.
  */
+private val CUSTOM_FILTER_PATH_SEGMENTS =
+    mapOf(
+        "Внедорожник" to "arenda-vnedorozhnika-bez-voditelya",
+    )
+
 fun filterTitleToPathSegment(title: String): String? {
     val normalized = title.trim()
     if (normalized.isEmpty() || normalized == ALL_FILTER_TITLE) return null
-    return cityNameToSlug(normalized)
+    return CUSTOM_FILTER_PATH_SEGMENTS[normalized] ?: cityNameToSlug(normalized)
 }
 
 private val KNOWN_FILTER_TITLES =
@@ -22,13 +27,17 @@ private val KNOWN_FILTER_TITLES =
         "К родным",
         "Командировки",
         "Каникулы",
-        "Мероприятие",
+        "Внедорожник",
         "Переезд",
     )
 
 fun filterTitleFromPathSegment(filterSlug: String?): String {
     if (filterSlug.isNullOrBlank()) return ALL_FILTER_TITLE
     val normalized = filterSlug.lowercase()
+    CUSTOM_FILTER_PATH_SEGMENTS.entries
+        .firstOrNull { it.value == normalized }
+        ?.key
+        ?.let { return it }
     return KNOWN_FILTER_TITLES.firstOrNull { filterTitleToPathSegment(it) == normalized }
         ?: ALL_FILTER_TITLE
 }

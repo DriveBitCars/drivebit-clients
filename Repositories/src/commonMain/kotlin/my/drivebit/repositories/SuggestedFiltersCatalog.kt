@@ -50,15 +50,12 @@ object SuggestedFiltersCatalog {
                 seatsMin = 7,
             ),
             FilterSuggestion(
-                name = "Мероприятие (свадьба/праздник)",
-                shortName = "Мероприятие",
-                iconUrl = "/images/filter-main/admission.svg",
-                dailyPriceMax = 8000,
-                yearMin = 2021,
-                colors =
+                name = "Внедорожник",
+                shortName = "Внедорожник",
+                iconUrl = "/images/filter-main/direction.svg",
+                bodyTypes =
                     listOf(
-                        EnumItem(number = 0, name = "White", translate = "Белый"),
-                        EnumItem(number = 1, name = "Black", translate = "Чёрный"),
+                        EnumItem(number = 0, name = "SUV", translate = "Внедорожник"),
                     ),
             ),
         )

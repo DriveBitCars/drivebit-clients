@@ -560,17 +560,18 @@ class CarSearchRepositoryTest {
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
-            mockCurrentFiltersRepository.updateCurrentTask("Мероприятие")
+            mockCurrentFiltersRepository.updateCurrentTask("Внедорожник")
             repository.searchCarsByUserCity.first()
 
             assertEquals("158830", mockCarService.searchCityId)
             assertEquals(null, mockCarService.searchAvailableMileagePerDayKmMin)
             assertEquals(null, mockCarService.searchDailyPriceMin)
-            assertEquals(8000, mockCarService.searchDailyPriceMax)
-            assertEquals(2021, mockCarService.searchYearMin)
+            assertEquals(null, mockCarService.searchDailyPriceMax)
+            assertEquals(null, mockCarService.searchYearMin)
             assertEquals(null, mockCarService.searchYearMax)
             assertEquals(null, mockCarService.searchSeatsMin)
             assertEquals(null, mockCarService.searchSeatsMax)
+            assertEquals(listOf("SUV"), mockCarService.searchBodyTypes)
         }
 
     @Test

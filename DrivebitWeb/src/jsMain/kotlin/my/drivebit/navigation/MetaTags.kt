@@ -78,11 +78,11 @@ object MetaTags {
                     description = "Подберите автомобиль на каникулы в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
                     path = "/moskva/kanikuly",
                 ),
-            "/moskva/meropriyatie" to
+            "/moskva/arenda-vnedorozhnika-bez-voditelya" to
                 PageMeta(
-                    title = "Аренда авто на мероприятие в Москве - DriveBit",
-                    description = "Подберите автомобиль на мероприятие в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
-                    path = "/moskva/meropriyatie",
+                    title = "Аренда внедорожника без водителя в Москве через сервис DriveBit",
+                    description = "Аренда внедорожника без водителя в Москве через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+                    path = "/moskva/arenda-vnedorozhnika-bez-voditelya",
                 ),
             "/moskva/pereezd" to
                 PageMeta(

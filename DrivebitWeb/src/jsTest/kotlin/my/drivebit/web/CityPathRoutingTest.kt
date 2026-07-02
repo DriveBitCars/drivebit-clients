@@ -89,8 +89,22 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun cityPathWithFilter_vnedorozhnikUsesSeoSlug() {
+        assertEquals(
+            "/moskva/arenda-vnedorozhnika-bez-voditelya",
+            cityPathWithFilter("moskva", "Внедорожник"),
+        )
+    }
+
+    @Test
     fun filterTitleFromPathSegment_unknownSlugDefaultsToAll() {
         assertEquals("Все", filterTitleFromPathSegment("unknown-filter"))
+    }
+
+    @Test
+    fun filterTitleToPathSegment_vnedorozhnikUsesSeoSlug() {
+        assertEquals("arenda-vnedorozhnika-bez-voditelya", filterTitleToPathSegment("Внедорожник"))
+        assertEquals("Внедорожник", filterTitleFromPathSegment("arenda-vnedorozhnika-bez-voditelya"))
     }
 
     @Test
@@ -104,7 +118,7 @@ class CityPathRoutingTest {
                 "/moskva/za-gorod",
                 "/moskva/kanikuly",
                 "/moskva/pereezd",
-                "/moskva/meropriyatie",
+                "/moskva/arenda-vnedorozhnika-bez-voditelya",
                 "/zelenograd",
                 "/kaliningrad",
                 "/krasnogorsk",
