@@ -25,4 +25,28 @@ class ErrorHandlerTest {
             message,
         )
     }
+
+    @Test
+    fun `extractErrorMessage humanizes missing validated documents message`() {
+        val message =
+            ErrorHandler.extractErrorMessage(
+                NetworkException(
+                    HttpStatusCode.OK,
+                    "Владелец не может подтвердить бронирование: нет валидированных документов",
+                ),
+            )
+        assertEquals(
+            "Подтвердить сделку нельзя: загрузите документы в профиле и дождитесь их проверки.",
+            message,
+        )
+    }
+
+    @Test
+    fun `extractErrorMessage passes through unknown api message`() {
+        val message =
+            ErrorHandler.extractErrorMessage(
+                NetworkException(HttpStatusCode.BadRequest, "Сделка уже подтверждена"),
+            )
+        assertEquals("Сделка уже подтверждена", message)
+    }
 }

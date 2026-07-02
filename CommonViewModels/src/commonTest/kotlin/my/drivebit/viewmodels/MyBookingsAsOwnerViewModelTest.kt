@@ -42,7 +42,14 @@ private class MyBookingsFakeBooking(
 
     override suspend fun createAsRenter(request: CreateBookingRequest): BookingDTO = throw NotImplementedError()
 
-    override suspend fun confirmAsOwner(bookingId: String) = throw NotImplementedError()
+    override suspend fun confirmAsOwner(bookingId: String) {
+        if (bookingId == "booking-fail") {
+            throw NetworkException(
+                HttpStatusCode.OK,
+                "нет валидированных документов",
+            )
+        }
+    }
 
     override suspend fun declineAsOwner(bookingId: String) = throw NotImplementedError()
 
@@ -100,5 +107,27 @@ class MyBookingsAsOwnerViewModelTest {
             assertTrue(updatedBooking.contractSignedByOwner)
             assertFalse(updatedBooking.canSignContractAsOwner)
             assertEquals("ContractSignedByOwner", updatedBooking.status)
+        }
+
+    @Test
+    fun `confirmBooking surfaces backend error message`() =
+        runTest(StandardTestDispatcher()) {
+            val bookingId = "booking-fail"
+            val fakeBooking =
+                MyBookingsFakeBooking(
+                    ownerBookings = listOf(sampleBooking(bookingId)),
+                )
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val viewModel = MyBookingsAsOwnerViewModelImpl(fakeBooking, testScope)
+
+            viewModel.loadBookings()
+            advanceUntilIdle()
+            viewModel.confirmBooking(bookingId)
+            advanceUntilIdle()
+
+            assertEquals(
+                "Подтвердить сделку нельзя: загрузите документы в профиле и дождитесь их проверки.",
+                viewModel.error.value,
+            )
         }
 }

@@ -84,6 +84,11 @@ class MyBookingsAsOwnerViewModelImpl(
             setLoading = { },
             setError = { _error.value = it },
             errorHandler = { e ->
+                logBookingActionError(
+                    action = "confirmBooking",
+                    bookingId = bookingId,
+                    exception = e,
+                )
                 ErrorHandler.extractErrorMessage(
                     exception = e,
                     defaultNetworkError = "Ошибка сети",
@@ -110,6 +115,11 @@ class MyBookingsAsOwnerViewModelImpl(
             setLoading = { },
             setError = { _error.value = it },
             errorHandler = { e ->
+                logBookingActionError(
+                    action = "declineBooking",
+                    bookingId = bookingId,
+                    exception = e,
+                )
                 ErrorHandler.extractErrorMessage(
                     exception = e,
                     defaultNetworkError = "Ошибка сети",

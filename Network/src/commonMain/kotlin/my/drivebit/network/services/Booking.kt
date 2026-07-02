@@ -16,7 +16,7 @@ import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.ValidationErrorResponse
 import my.drivebit.network.collectErrorMessages
-import my.drivebit.network.consumeResponse
+import my.drivebit.network.consumeMessageResponse
 import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
 import my.drivebit.utils.resolveMinioImageUrlForBrowser
@@ -271,13 +271,13 @@ class BookingImpl(
     override suspend fun confirmAsOwner(bookingId: String) {
         val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/confirm"
         val response = authorizedHttpClient.put(url) { }
-        response.consumeResponse()
+        response.consumeMessageResponse(defaultError = "Не удалось подтвердить сделку")
     }
 
     override suspend fun declineAsOwner(bookingId: String) {
         val url = "${DEFAULT_BASE_URL}Booking/my/as-owner/$bookingId/decline"
         val response = authorizedHttpClient.put(url) { }
-        response.consumeResponse()
+        response.consumeMessageResponse(defaultError = "Не удалось отклонить сделку")
     }
 
     override suspend fun signContractAsOwner(bookingId: String): BookingDTO {
