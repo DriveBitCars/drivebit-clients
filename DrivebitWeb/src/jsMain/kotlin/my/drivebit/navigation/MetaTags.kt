@@ -72,11 +72,17 @@ object MetaTags {
                     description = "Подберите автомобиль для командировки в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
                     path = "/moskva/komandirovki",
                 ),
-            "/moskva/kanikuly" to
+            "/moskva/arenda-avto-ekonom-klassa-bez-voditelya" to
                 PageMeta(
-                    title = "Аренда авто на каникулы в Москве - DriveBit",
-                    description = "Подберите автомобиль на каникулы в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
-                    path = "/moskva/kanikuly",
+                    title = "Аренда автомобиля эконом-класса без водителя в Москве через сервис DriveBit",
+                    description = "Аренда автомобиля эконом-класса без водителя в Москве через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+                    path = "/moskva/arenda-avto-ekonom-klassa-bez-voditelya",
+                ),
+            "/moskva/arenda-avto-premium-klassa-bez-voditelya" to
+                PageMeta(
+                    title = "Аренда автомобиля премиум-класса без водителя в Москве через сервис DriveBit",
+                    description = "Аренда автомобиля премиум-класса без водителя в Москве через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+                    path = "/moskva/arenda-avto-premium-klassa-bez-voditelya",
                 ),
             "/moskva/arenda-vnedorozhnika-bez-voditelya" to
                 PageMeta(
@@ -101,12 +107,6 @@ object MetaTags {
                     title = "Аренда авто для путешествий в Москве - DriveBit",
                     description = "Подберите автомобиль для путешествий из Москвы. Аренда у собственников, прозрачные условия и поддержка 24/7.",
                     path = "/moskva/puteshestviya",
-                ),
-            "/moskva/za-gorod" to
-                PageMeta(
-                    title = "Аренда авто за город в Москве - DriveBit",
-                    description = "Подберите автомобиль для поездки за город из Москвы. Аренда у собственников, прозрачные условия и поддержка 24/7.",
-                    path = "/moskva/za-gorod",
                 ),
             "/login-by-phone" to
                 PageMeta(

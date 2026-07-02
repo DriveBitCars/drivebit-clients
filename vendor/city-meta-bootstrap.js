@@ -38,15 +38,15 @@
     var FILTER_SLUGS = {
         "poblizosti": "Поблизости",
         "puteshestviya": "Путешествия",
-        "za-gorod": "За город",
         "k-rodnym": "К родным",
         "komandirovki": "Командировки",
-        "kanikuly": "Каникулы",
         "arenda-vnedorozhnika-bez-voditelya": "Внедорожник",
-        "arenda-minivena-bez-voditelya": "Минивэн"
+        "arenda-minivena-bez-voditelya": "Минивэн",
+        "arenda-avto-ekonom-klassa-bez-voditelya": "Эконом",
+        "arenda-avto-premium-klassa-bez-voditelya": "Премиум"
     };
-    var GENITIVE_FILTERS = ["Путешествия", "За город"];
-    var SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS = ["puteshestviya", "za-gorod", "poblizosti", "arenda-vnedorozhnika-bez-voditelya", "arenda-minivena-bez-voditelya"];
+    var GENITIVE_FILTERS = ["Путешествия"];
+    var SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS = ["puteshestviya", "poblizosti", "arenda-vnedorozhnika-bez-voditelya", "arenda-minivena-bez-voditelya", "arenda-avto-ekonom-klassa-bez-voditelya", "arenda-avto-premium-klassa-bez-voditelya"];
     var SEO_PAGE_TITLE_SUFFIX = " через сервис DriveBit";
     var SEO_PAGE_DESCRIPTION_SUFFIX = ". Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!";
     var RESERVED = ["create-car", "city-selection", "my-city-selection", "list-your-car", "verify-otp", "login-by-phone", "login-by-mail", "login-by-password", "signup", "profile", "my-cars", "my-bookings", "leave-review", "my-deals", "chats", "chat", "documents", "offer", "contacts", "privacy", "cookies", "payment", "payment-success", "payment-failure", "download-booking-contract", "car-edit", "car-sts-upload", "car-photos-gallery", "car-photos-upload", "car-photos", "edit-name", "change-email", "change-phone", "change-password", "address-input", "license-plate-input", "car-brand-selection", "car-model-selection", "body-type-selection", "drive-type-selection", "engine-type-selection", "engine-volume-input", "production-year-input", "seats-count-input", "trunk-size-selection", "daily-rate-input", "description-input", "passport-upload", "search", "car-detail"];
@@ -105,14 +105,16 @@
         switch (filterTitle) {
             case "Путешествия":
                 return "Аренда авто для путешествий по России из " + gen;
-            case "За город":
-                return "Аренда авто для поездки в другой город из " + gen;
             case "Поблизости":
                 return "Аренда авто на карте в " + prep;
             case "Внедорожник":
                 return "Аренда внедорожника без водителя в " + prep;
             case "Минивэн":
                 return "Аренда минивэна без водителя в " + prep;
+            case "Эконом":
+                return "Аренда автомобиля эконом-класса без водителя в " + prep;
+            case "Премиум":
+                return "Аренда автомобиля премиум-класса без водителя в " + prep;
             default:
                 return "Аренда авто у частных владельцев в " + prep;
         }
@@ -142,8 +144,10 @@
                 return "Подберите автомобиль для поездки к родным в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
             case "Командировки":
                 return "Подберите автомобиль для командировки в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
-            case "Каникулы":
-                return "Подберите автомобиль на каникулы в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
+            case "Эконом":
+                return "Подберите автомобиль эконом-класса в аренду в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
+            case "Премиум":
+                return "Подберите автомобиль премиум-класса в аренду в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
             case "Внедорожник":
                 return "Подберите внедорожник в аренду в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
             case "Минивэн":
@@ -152,8 +156,6 @@
                 return "Найдите автомобили поблизости в " + prep + ". Быстрая аренда у собственников, прозрачные условия и поддержка 24/7.";
             case "Путешествия":
                 return "Подберите автомобиль для путешествий из " + gen + ". " + CITY_FILTER_RENT_SUFFIX;
-            case "За город":
-                return "Подберите автомобиль для поездки за город из " + gen + ". " + CITY_FILTER_RENT_SUFFIX;
             default:
                 return "Аренда авто в " + prep + " у собственников. Дешевле проката, полная страховка и поддержка 24/7.";
         }

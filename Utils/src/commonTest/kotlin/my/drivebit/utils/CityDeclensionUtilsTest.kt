@@ -46,10 +46,6 @@ class CityDeclensionUtilsTest {
             "Арендуй авто у частных владельцев из Москвы",
             heroBannerHeadline("Москва", "Путешествия"),
         )
-        assertEquals(
-            "Арендуй авто у частных владельцев из Москвы",
-            heroBannerHeadline("Москва", "За город"),
-        )
     }
 
     @Test
@@ -117,10 +113,11 @@ class CityDeclensionUtilsTest {
     fun isSeoOptimizedPage_whitelist() {
         assertEquals(true, isSeoOptimizedPage("moskva", null))
         assertEquals(true, isSeoOptimizedPage("moskva", "puteshestviya"))
-        assertEquals(true, isSeoOptimizedPage("moskva", "za-gorod"))
+        assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-premium-klassa-bez-voditelya"))
+        assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-ekonom-klassa-bez-voditelya"))
         assertEquals(true, isSeoOptimizedPage("moskva", "poblizosti"))
         assertEquals(true, isSeoOptimizedPage("krasnogorsk", null))
-        assertEquals(false, isSeoOptimizedPage("moskva", "kanikuly"))
+        assertEquals(false, isSeoOptimizedPage("moskva", "komandirovki"))
         assertEquals(false, isSeoOptimizedPage("kazan", null))
     }
 
@@ -152,7 +149,7 @@ class CityDeclensionUtilsTest {
     fun pageTitle_legacyUnchangedForNonWhitelist() {
         assertEquals(
             "Арендуй авто у частных владельцев в Москве - DriveBit",
-            pageTitle("moskva", "kanikuly", "Москва", "Каникулы"),
+            pageTitle("moskva", "komandirovki", "Москва", "Командировки"),
         )
         assertEquals(
             "Аренда авто у частных владельцев в Москве через сервис DriveBit",
