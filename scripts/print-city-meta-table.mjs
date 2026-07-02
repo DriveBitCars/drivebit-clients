@@ -6,13 +6,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const STATIC_HTML = {
   "/moskva": "composeApp/src/jsMain/resources/moskva/index.html",
-  "/moskva/k-rodnym": "composeApp/src/jsMain/resources/moskva/k-rodnym/index.html",
+  "/moskva/arenda-avto-v-krym": "composeApp/src/jsMain/resources/moskva/arenda-avto-v-krym/index.html",
+  "/moskva/arenda-avto-v-belarus": "composeApp/src/jsMain/resources/moskva/arenda-avto-v-belarus/index.html",
+  "/moskva/arenda-avto-v-abkhaziyu": "composeApp/src/jsMain/resources/moskva/arenda-avto-v-abkhaziyu/index.html",
   "/moskva/arenda-avto-ekonom-klassa-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-avto-ekonom-klassa-bez-voditelya/index.html",
-  "/moskva/komandirovki": "composeApp/src/jsMain/resources/moskva/komandirovki/index.html",
   "/moskva/arenda-vnedorozhnika-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-vnedorozhnika-bez-voditelya/index.html",
   "/moskva/arenda-minivena-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-minivena-bez-voditelya/index.html",
   "/moskva/poblizosti": "composeApp/src/jsMain/resources/moskva/poblizosti/index.html",
-  "/moskva/puteshestviya": "composeApp/src/jsMain/resources/moskva/puteshestviya/index.html",
   "/moskva/arenda-avto-premium-klassa-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-avto-premium-klassa-bez-voditelya/index.html",
   "/lyubertsy": "composeApp/src/jsMain/resources/lyubertsy/index.html",
   "/zelenograd": "composeApp/src/jsMain/resources/zelenograd/index.html",

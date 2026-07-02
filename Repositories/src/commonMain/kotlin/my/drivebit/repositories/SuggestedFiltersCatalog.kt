@@ -7,23 +7,23 @@ object SuggestedFiltersCatalog {
     val suggested: List<FilterSuggestion> =
         listOf(
             FilterSuggestion(
-                name = "Туризм / путешествие",
-                shortName = "Путешествия",
+                name = "Поездка в Крым",
+                shortName = "В Крым",
                 iconUrl = "/images/filter-main/travelling.svg",
                 availableMileagePerDayKmMin = 150,
                 dailyPriceMax = 6000,
             ),
             FilterSuggestion(
-                name = "Навестить родных",
-                shortName = "К родным",
+                name = "Поездка в Беларусь",
+                shortName = "Беларусь",
                 iconUrl = "/images/filter-main/parents.svg",
                 availableMileagePerDayKmMin = 150,
                 dailyPriceMax = 4500,
                 engineTypes = listOf(EnumItem(number = 1, name = "Diesel", translate = "Дизель")),
             ),
             FilterSuggestion(
-                name = "Работа / командировки",
-                shortName = "Командировки",
+                name = "Поездка в Абхазию",
+                shortName = "Абхазия",
                 iconUrl = "/images/filter-main/work.svg",
                 availableMileagePerDayKmMin = 200,
                 dailyPriceMax = 4000,

@@ -60,17 +60,23 @@ object MetaTags {
                     description = "Аренда авто в Москве у собственников. Дешевле проката, полная страховка и поддержка 24/7.",
                     path = "/moskva",
                 ),
-            "/moskva/k-rodnym" to
+            "/moskva/arenda-avto-v-krym" to
                 PageMeta(
-                    title = "Аренда авто для поездки к родным в Москве - DriveBit",
-                    description = "Подберите автомобиль для поездки к родным в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
-                    path = "/moskva/k-rodnym",
+                    title = "Аренда авто для поездки в Крым из Москвы через сервис DriveBit",
+                    description = "Аренда авто для поездки в Крым из Москвы через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+                    path = "/moskva/arenda-avto-v-krym",
                 ),
-            "/moskva/komandirovki" to
+            "/moskva/arenda-avto-v-belarus" to
                 PageMeta(
-                    title = "Аренда авто для командировок в Москве - DriveBit",
-                    description = "Подберите автомобиль для командировки в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
-                    path = "/moskva/komandirovki",
+                    title = "Аренда авто для поездки в Беларусь из Москвы через сервис DriveBit",
+                    description = "Аренда авто для поездки в Беларусь из Москвы через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+                    path = "/moskva/arenda-avto-v-belarus",
+                ),
+            "/moskva/arenda-avto-v-abkhaziyu" to
+                PageMeta(
+                    title = "Аренда авто для поездки в Абхазию из Москвы через сервис DriveBit",
+                    description = "Аренда авто для поездки в Абхазию из Москвы через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+                    path = "/moskva/arenda-avto-v-abkhaziyu",
                 ),
             "/moskva/arenda-avto-ekonom-klassa-bez-voditelya" to
                 PageMeta(
@@ -101,12 +107,6 @@ object MetaTags {
                     title = "Аренда авто поблизости в Москве - DriveBit",
                     description = "Найдите автомобили поблизости в Москве. Быстрая аренда у собственников, прозрачные условия и поддержка 24/7.",
                     path = "/moskva/poblizosti",
-                ),
-            "/moskva/puteshestviya" to
-                PageMeta(
-                    title = "Аренда авто для путешествий в Москве - DriveBit",
-                    description = "Подберите автомобиль для путешествий из Москвы. Аренда у собственников, прозрачные условия и поддержка 24/7.",
-                    path = "/moskva/puteshestviya",
                 ),
             "/login-by-phone" to
                 PageMeta(

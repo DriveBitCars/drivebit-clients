@@ -47,7 +47,7 @@ page.on("pageerror", (e) => errors.push(e.message));
 
 const cases = [
   { path: "/moskva", filter: null, name: "moskva-all" },
-  { path: "/moskva/k-rodnym", filter: "К родным", name: "k-rodnym" },
+  { path: "/moskva/arenda-avto-v-belarus", filter: "Беларусь", name: "belarus" },
 ];
 
 const results = [];

@@ -10,7 +10,7 @@ const bootstrapPath = path.join(root, "vendor/city-meta-bootstrap.js");
 
 const STATIC_HTML = {
   "/moskva": "composeApp/src/jsMain/resources/moskva/index.html",
-  "/moskva/puteshestviya": "composeApp/src/jsMain/resources/moskva/puteshestviya/index.html",
+  "/moskva/arenda-avto-v-krym": "composeApp/src/jsMain/resources/moskva/arenda-avto-v-krym/index.html",
   "/moskva/arenda-avto-premium-klassa-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-avto-premium-klassa-bez-voditelya/index.html",
   "/moskva/poblizosti": "composeApp/src/jsMain/resources/moskva/poblizosti/index.html",
 };
@@ -110,13 +110,13 @@ for (const urlPath of paths) {
   }
 }
 
-const puteshestviya = blocks["/moskva/puteshestviya"];
-if (!puteshestviya?.sections?.length) {
-  fail("/moskva/puteshestviya: expected sections in landing-blocks.json");
+const krym = blocks["/moskva/arenda-avto-v-krym"];
+if (!krym?.sections?.length) {
+  fail("/moskva/arenda-avto-v-krym: expected sections in landing-blocks.json");
 } else {
-  const hasTable = puteshestviya.sections.some((section) => section.table?.rows?.length);
+  const hasTable = krym.sections.some((section) => section.table?.rows?.length);
   if (!hasTable) {
-    fail("/moskva/puteshestviya: expected car-class table in sections");
+    fail("/moskva/arenda-avto-v-krym: expected car-class table in sections");
   }
 }
 

@@ -33,9 +33,9 @@ class FiltersViewModel(
 ) {
     private val backgroundByFilterTitle =
         mapOf(
-            "Путешествия" to SEARCHBACKGROUND_CAR2_JPG,
-            "К родным" to SEARCHBACKGROUND_CAR4_JPG,
-            "Командировки" to SEARCHBACKGROUND_CAR5_JPG,
+            "В Крым" to SEARCHBACKGROUND_CAR2_JPG,
+            "Беларусь" to SEARCHBACKGROUND_CAR4_JPG,
+            "Абхазия" to SEARCHBACKGROUND_CAR5_JPG,
             "Премиум" to SEARCHBACKGROUND_CAR3_JPG,
             "Эконом" to SEARCHBACKGROUND_CAR6_JPG,
             "Минивэн" to SEARCHBACKGROUND_CAR8_JPG,
