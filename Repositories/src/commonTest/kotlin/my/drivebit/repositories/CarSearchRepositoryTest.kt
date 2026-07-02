@@ -531,7 +531,7 @@ class CarSearchRepositoryTest {
                 assertEquals("BMW", results[0].cars[0].general.brandName)
 
                 mockCarService.searchResult = CarSearchResponse(secondCars)
-                mockCurrentFiltersRepository.updateCurrentTask("Путешествия")
+                mockCurrentFiltersRepository.updateCurrentTask("В Крым")
                 advanceUntilIdle()
 
                 job.cancel()

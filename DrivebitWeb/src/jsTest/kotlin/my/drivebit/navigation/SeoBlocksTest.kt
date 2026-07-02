@@ -38,9 +38,9 @@ class SeoBlocksTest {
     @Test
     fun renderSectionInnerHtml_rendersSectionsTableAndBullets() {
         val block =
-            SeoLandingBlocks.parseBlocksJson(PUTESHESTVIYA_FIXTURE_JSON)["/moskva/puteshestviya"]!!
+            SeoLandingBlocks.parseBlocksJson(KRYM_FIXTURE_JSON)["/moskva/arenda-avto-v-krym"]!!
         val html = SeoLandingBlocks.renderSectionInnerHtml(block)
-        assertTrue(html.contains("<h2>Почему путешествие"))
+        assertTrue(html.contains("<h2>Почему поездка"))
         assertTrue(html.contains("<ul>"))
         assertTrue(html.contains("<table>"))
         assertTrue(html.contains("<th>Класс авто</th>"))
@@ -77,24 +77,24 @@ class SeoBlocksTest {
             }
             """.trimIndent()
 
-        val PUTESHESTVIYA_FIXTURE_JSON =
+        val KRYM_FIXTURE_JSON =
             """
             {
-              "/moskva/puteshestviya": {
-                "ariaLabel": "Аренда авто для путешествий по России",
-                "h2": "Аренда авто для путешествий по России из Москвы",
+              "/moskva/arenda-avto-v-krym": {
+                "ariaLabel": "Аренда авто для поездки в Крым",
+                "h2": "Аренда авто для поездки в Крым из Москвы",
                 "paragraphs": [],
                 "sections": [
                   {
-                    "heading": "Аренда авто для путешествий по России из Москвы",
+                    "heading": "Аренда авто для поездки в Крым из Москвы",
                     "paragraphs": ["intro"]
                   },
                   {
-                    "heading": "Почему путешествие на арендованном авто — удобный выбор",
+                    "heading": "Почему поездка в Крым на арендованном авто — удобный выбор",
                     "bullets": ["one", "two"]
                   },
                   {
-                    "heading": "Какой автомобиль выбрать для поездки",
+                    "heading": "Какой автомобиль выбрать для поездки в Крым",
                     "table": {
                       "headers": ["Класс авто", "Примеры моделей"],
                       "rows": [["Минивэн", "Hyundai Starex"]]

@@ -84,7 +84,23 @@ class CityPathRoutingTest {
     fun filterTitleFromPathSegment_mapsKnownFilters() {
         assertEquals("Все", filterTitleFromPathSegment(null))
         assertEquals("Поблизости", filterTitleFromPathSegment("poblizosti"))
-        assertEquals("Путешествия", filterTitleFromPathSegment("puteshestviya"))
+        assertEquals("В Крым", filterTitleFromPathSegment("arenda-avto-v-krym"))
+        assertEquals("Беларусь", filterTitleFromPathSegment("arenda-avto-v-belarus"))
+        assertEquals("Абхазия", filterTitleFromPathSegment("arenda-avto-v-abkhaziyu"))
+    }
+
+    @Test
+    fun cityPathWithFilter_destinationFiltersUseSeoSlug() {
+        assertEquals("/moskva/arenda-avto-v-krym", cityPathWithFilter("moskva", "В Крым"))
+        assertEquals("/moskva/arenda-avto-v-belarus", cityPathWithFilter("moskva", "Беларусь"))
+        assertEquals("/moskva/arenda-avto-v-abkhaziyu", cityPathWithFilter("moskva", "Абхазия"))
+    }
+
+    @Test
+    fun filterTitleToPathSegment_destinationFiltersUseSeoSlug() {
+        assertEquals("arenda-avto-v-krym", filterTitleToPathSegment("В Крым"))
+        assertEquals("arenda-avto-v-belarus", filterTitleToPathSegment("Беларусь"))
+        assertEquals("arenda-avto-v-abkhaziyu", filterTitleToPathSegment("Абхазия"))
     }
 
     @Test
@@ -149,9 +165,9 @@ class CityPathRoutingTest {
         val urls =
             listOf(
                 "/moskva",
-                "/moskva/k-rodnym",
-                "/moskva/puteshestviya",
-                "/moskva/komandirovki",
+                "/moskva/arenda-avto-v-krym",
+                "/moskva/arenda-avto-v-belarus",
+                "/moskva/arenda-avto-v-abkhaziyu",
                 "/moskva/arenda-avto-ekonom-klassa-bez-voditelya",
                 "/moskva/arenda-avto-premium-klassa-bez-voditelya",
                 "/moskva/arenda-minivena-bez-voditelya",

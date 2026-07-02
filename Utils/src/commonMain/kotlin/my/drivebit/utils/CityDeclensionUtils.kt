@@ -4,7 +4,9 @@ private const val DEFAULT_CITY_NAME = "Москва"
 
 private val FILTERS_WITH_GENITIVE_FROM_CITY =
     setOf(
-        "Путешествия",
+        "В Крым",
+        "Беларусь",
+        "Абхазия",
     )
 
 private val CITY_FORMS: Map<String, Pair<String, String>> =
@@ -64,7 +66,9 @@ private val SEO_OPTIMIZED_CITY_SLUGS = setOf("moskva", "krasnogorsk")
 
 private val SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS =
     setOf(
-        "puteshestviya",
+        "arenda-avto-v-krym",
+        "arenda-avto-v-belarus",
+        "arenda-avto-v-abkhaziyu",
         "poblizosti",
         "arenda-vnedorozhnika-bez-voditelya",
         "arenda-minivena-bez-voditelya",
@@ -95,7 +99,9 @@ fun seoPageHeadline(
     val prep = cityInPrepositional(trimmedCity)
     val gen = cityInGenitive(trimmedCity)
     return when (filterTitle) {
-        "Путешествия" -> "Аренда авто для путешествий по России из $gen"
+        "В Крым" -> "Аренда авто для поездки в Крым из $gen"
+        "Беларусь" -> "Аренда авто для поездки в Беларусь из $gen"
+        "Абхазия" -> "Аренда авто для поездки в Абхазию из $gen"
         "Поблизости" -> "Аренда авто на карте в $prep"
         "Внедорожник" -> "Аренда внедорожника без водителя в $prep"
         "Минивэн" -> "Аренда минивэна без водителя в $prep"
@@ -195,10 +201,10 @@ fun cityPageDescription(
     val prep = cityInPrepositional(trimmedCity)
     val gen = cityInGenitive(trimmedCity)
     return when (filterTitle) {
-        "К родным" ->
-            "Подберите автомобиль для поездки к родным в $prep. $CITY_FILTER_RENT_SUFFIX"
-        "Командировки" ->
-            "Подберите автомобиль для командировки в $prep. $CITY_FILTER_RENT_SUFFIX"
+        "Беларусь" ->
+            "Подберите автомобиль для поездки в Беларусь из $gen. $CITY_FILTER_RENT_SUFFIX"
+        "Абхазия" ->
+            "Подберите автомобиль для поездки в Абхазию из $gen. $CITY_FILTER_RENT_SUFFIX"
         "Эконом" ->
             "Подберите автомобиль эконом-класса в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
         "Премиум" ->
@@ -209,8 +215,8 @@ fun cityPageDescription(
             "Подберите минивэн в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
         "Поблизости" ->
             "Найдите автомобили поблизости в $prep. Быстрая аренда у собственников, прозрачные условия и поддержка 24/7."
-        "Путешествия" ->
-            "Подберите автомобиль для путешествий из $gen. $CITY_FILTER_RENT_SUFFIX"
+        "В Крым" ->
+            "Подберите автомобиль для поездки в Крым из $gen. $CITY_FILTER_RENT_SUFFIX"
         else ->
             "Аренда авто в $prep у собственников. Дешевле проката, полная страховка и поддержка 24/7."
     }

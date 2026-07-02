@@ -31,12 +31,12 @@ class CityDeclensionUtilsTest {
             heroBannerHeadline("Москва", "Поблизости"),
         )
         assertEquals(
-            "Арендуй авто у частных владельцев в Москве",
-            heroBannerHeadline("Москва", "Командировки"),
+            "Арендуй авто у частных владельцев из Москвы",
+            heroBannerHeadline("Москва", "Абхазия"),
         )
         assertEquals(
-            "Арендуй авто у частных владельцев в Москве",
-            heroBannerHeadline("Москва", "К родным"),
+            "Арендуй авто у частных владельцев из Москвы",
+            heroBannerHeadline("Москва", "Беларусь"),
         )
     }
 
@@ -44,7 +44,7 @@ class CityDeclensionUtilsTest {
     fun heroBannerHeadline_usesGenitiveForTravelFilters() {
         assertEquals(
             "Арендуй авто у частных владельцев из Москвы",
-            heroBannerHeadline("Москва", "Путешествия"),
+            heroBannerHeadline("Москва", "В Крым"),
         )
     }
 
@@ -60,7 +60,7 @@ class CityDeclensionUtilsTest {
     fun heroBannerPageTitle_appendsDriveBitSuffix() {
         assertEquals(
             "Арендуй авто у частных владельцев из Москвы - DriveBit",
-            heroBannerPageTitle("Москва", "Путешествия"),
+            heroBannerPageTitle("Москва", "В Крым"),
         )
     }
 
@@ -79,8 +79,8 @@ class CityDeclensionUtilsTest {
     @Test
     fun cityPageDescription_travelFilter_usesGenitive() {
         assertEquals(
-            "Подберите автомобиль для путешествий из Москвы. Аренда у собственников, прозрачные условия и поддержка 24/7.",
-            cityPageDescription("Москва", "Путешествия"),
+            "Подберите автомобиль для поездки в Крым из Москвы. Аренда у собственников, прозрачные условия и поддержка 24/7.",
+            cityPageDescription("Москва", "В Крым"),
         )
     }
 
@@ -105,19 +105,21 @@ class CityDeclensionUtilsTest {
         )
         assertEquals(
             "Арендуй авто у частных владельцев из Казани",
-            heroBannerHeadline("Казань", "Путешествия"),
+            heroBannerHeadline("Казань", "В Крым"),
         )
     }
 
     @Test
     fun isSeoOptimizedPage_whitelist() {
         assertEquals(true, isSeoOptimizedPage("moskva", null))
-        assertEquals(true, isSeoOptimizedPage("moskva", "puteshestviya"))
+        assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-v-krym"))
+        assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-v-belarus"))
+        assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-v-abkhaziyu"))
         assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-premium-klassa-bez-voditelya"))
         assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-ekonom-klassa-bez-voditelya"))
         assertEquals(true, isSeoOptimizedPage("moskva", "poblizosti"))
         assertEquals(true, isSeoOptimizedPage("krasnogorsk", null))
-        assertEquals(false, isSeoOptimizedPage("moskva", "komandirovki"))
+        assertEquals(false, isSeoOptimizedPage("moskva", "unknown-filter"))
         assertEquals(false, isSeoOptimizedPage("kazan", null))
     }
 
@@ -132,8 +134,8 @@ class CityDeclensionUtilsTest {
             seoPageTitle("Москва", "Все"),
         )
         assertEquals(
-            "Аренда авто для путешествий по России из Москвы через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
-            seoPageDescription("Москва", "Путешествия"),
+            "Аренда авто для поездки в Крым из Москвы через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+            seoPageDescription("Москва", "В Крым"),
         )
         assertEquals(
             "Аренда авто на карте в Москве - аренда автомобиля поблизости через сервис DriveBit",
@@ -148,8 +150,8 @@ class CityDeclensionUtilsTest {
     @Test
     fun pageTitle_legacyUnchangedForNonWhitelist() {
         assertEquals(
-            "Арендуй авто у частных владельцев в Москве - DriveBit",
-            pageTitle("moskva", "komandirovki", "Москва", "Командировки"),
+            "Аренда авто для поездки в Абхазию из Москвы через сервис DriveBit",
+            pageTitle("moskva", "arenda-avto-v-abkhaziyu", "Москва", "Абхазия"),
         )
         assertEquals(
             "Аренда авто у частных владельцев в Москве через сервис DriveBit",

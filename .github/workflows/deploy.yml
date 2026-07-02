@@ -141,7 +141,7 @@ jobs:
         test -f "$DIST/moskva/poblizosti/index.html"
         grep -q 'drivebit-cars-grid-static' "$DIST/moskva/poblizosti/index.html"
         grep -q 'src="/composeApp.js' "$DIST/moskva/arenda-avto-ekonom-klassa-bez-voditelya/index.html"
-        for slug in "" k-rodnym komandirovki arenda-avto-ekonom-klassa-bez-voditelya arenda-avto-premium-klassa-bez-voditelya arenda-minivena-bez-voditelya arenda-vnedorozhnika-bez-voditelya poblizosti puteshestviya; do
+        for slug in "" arenda-avto-v-krym arenda-avto-v-belarus arenda-avto-v-abkhaziyu arenda-avto-ekonom-klassa-bez-voditelya arenda-avto-premium-klassa-bez-voditelya arenda-minivena-bez-voditelya arenda-vnedorozhnika-bez-voditelya poblizosti; do
           if [ -z "$slug" ]; then
             page="$DIST/moskva/index.html"
           else
