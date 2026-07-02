@@ -26,60 +26,78 @@ data class ValidationErrorResponse(
     val error: String? = null,
 )
 
+@kotlinx.serialization.Serializable
+data class ApiMessageDto(
+    val success: Boolean? = null,
+    val message: String? = null,
+)
+
+fun extractHttpErrorMessage(
+    bodyString: String,
+    json: Json = defaultJson,
+): String {
+    val trimmedBody = bodyString.trim()
+    return runCatching {
+        if (trimmedBody.startsWith("{") && trimmedBody.endsWith("}")) {
+            val errorResponse = json.decodeFromString<ValidationErrorResponse>(trimmedBody)
+            val errorMessages = errorResponse.errors?.collectErrorMessages().orEmpty()
+            when {
+                !errorResponse.message.isNullOrBlank() -> errorResponse.message
+                errorMessages.isNotEmpty() -> errorMessages.joinToString(". ")
+                !errorResponse.detail.isNullOrBlank() -> errorResponse.detail
+                !errorResponse.error.isNullOrBlank() -> errorResponse.error
+                !errorResponse.title.isNullOrBlank() -> errorResponse.title
+                else -> trimmedBody.trim('"').trim()
+            }
+        } else {
+            trimmedBody.trim('"').trim()
+        }
+    }.getOrElse {
+        trimmedBody.trim('"').trim()
+    }
+}
+
 suspend inline fun <reified T> HttpResponse.parseResponse(json: Json = defaultJson): T {
     val bodyString = bodyAsText()
 
     if (!status.isSuccess()) {
-        val errorMessage =
-            runCatching {
-                val trimmedBody = bodyString.trim()
-                if (trimmedBody.startsWith("{") && trimmedBody.endsWith("}")) {
-                    val errorResponse = json.decodeFromString<ValidationErrorResponse>(trimmedBody)
-                    val errorMessages = errorResponse.errors?.collectErrorMessages().orEmpty()
-                    when {
-                        !errorResponse.message.isNullOrBlank() -> errorResponse.message
-                        errorMessages.isNotEmpty() -> errorMessages.joinToString(". ")
-                        errorResponse.detail != null -> errorResponse.detail
-                        errorResponse.error != null -> errorResponse.error
-                        errorResponse.title != null -> errorResponse.title
-                        else -> trimmedBody.trim('"').trim()
-                    }
-                } else {
-                    trimmedBody.trim('"').trim()
-                }
-            }.getOrElse {
-                bodyString.trim('"').trim()
-            }
-        throw NetworkException(status, errorMessage)
+        throw NetworkException(status, extractHttpErrorMessage(bodyString, json))
     }
 
     return json.decodeFromString<T>(bodyString)
 }
 
-suspend fun HttpResponse.consumeResponse() {
+suspend fun HttpResponse.consumeResponse(json: Json = defaultJson) {
     val bodyString = bodyAsText()
     if (!status.isSuccess()) {
-        val errorMessage =
-            runCatching {
-                val trimmedBody = bodyString.trim()
-                if (trimmedBody.startsWith("{") && trimmedBody.endsWith("}")) {
-                    val errorResponse = defaultJson.decodeFromString<ValidationErrorResponse>(trimmedBody)
-                    val errorMessages = errorResponse.errors?.collectErrorMessages().orEmpty()
-                    when {
-                        !errorResponse.message.isNullOrBlank() -> errorResponse.message
-                        errorMessages.isNotEmpty() -> errorMessages.joinToString(". ")
-                        errorResponse.detail != null -> errorResponse.detail
-                        errorResponse.error != null -> errorResponse.error
-                        errorResponse.title != null -> errorResponse.title
-                        else -> trimmedBody.trim('"').trim()
-                    }
-                } else {
-                    trimmedBody.trim('"').trim()
-                }
-            }.getOrElse {
-                bodyString.trim('"').trim()
-            }
-        throw NetworkException(status, errorMessage)
+        throw NetworkException(status, extractHttpErrorMessage(bodyString, json))
+    }
+}
+
+suspend fun HttpResponse.consumeMessageResponse(
+    defaultError: String = "Операция не выполнена",
+    json: Json = defaultJson,
+) {
+    val bodyString = bodyAsText()
+    if (!status.isSuccess()) {
+        throw NetworkException(status, extractHttpErrorMessage(bodyString, json))
+    }
+
+    val trimmedBody = bodyString.trim()
+    if (!trimmedBody.startsWith("{") || !trimmedBody.endsWith("}")) {
+        return
+    }
+
+    val messageDto =
+        runCatching {
+            json.decodeFromString<ApiMessageDto>(trimmedBody)
+        }.getOrNull() ?: return
+
+    if (messageDto.success == false) {
+        throw NetworkException(
+            status,
+            messageDto.message?.takeIf { it.isNotBlank() } ?: defaultError,
+        )
     }
 }
 
