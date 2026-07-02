@@ -43,11 +43,13 @@ object SuggestedFiltersCatalog {
                 dailyPriceMax = 18000,
             ),
             FilterSuggestion(
-                name = "Переезд / перевозка",
-                shortName = "Переезд",
+                name = "Минивэн",
+                shortName = "Минивэн",
                 iconUrl = "/images/filter-main/house-moving-.svg",
-                dailyPriceMax = 6000,
-                seatsMin = 7,
+                bodyTypes =
+                    listOf(
+                        EnumItem(number = 9, name = "Minivan", translate = "Минивэн"),
+                    ),
             ),
             FilterSuggestion(
                 name = "Внедорожник",

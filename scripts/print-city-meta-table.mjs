@@ -10,7 +10,7 @@ const STATIC_HTML = {
   "/moskva/kanikuly": "composeApp/src/jsMain/resources/moskva/kanikuly/index.html",
   "/moskva/komandirovki": "composeApp/src/jsMain/resources/moskva/komandirovki/index.html",
   "/moskva/arenda-vnedorozhnika-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-vnedorozhnika-bez-voditelya/index.html",
-  "/moskva/pereezd": "composeApp/src/jsMain/resources/moskva/pereezd/index.html",
+  "/moskva/arenda-minivena-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-minivena-bez-voditelya/index.html",
   "/moskva/poblizosti": "composeApp/src/jsMain/resources/moskva/poblizosti/index.html",
   "/moskva/puteshestviya": "composeApp/src/jsMain/resources/moskva/puteshestviya/index.html",
   "/moskva/za-gorod": "composeApp/src/jsMain/resources/moskva/za-gorod/index.html",

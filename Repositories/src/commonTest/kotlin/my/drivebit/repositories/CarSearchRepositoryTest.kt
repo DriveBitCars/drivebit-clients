@@ -545,7 +545,38 @@ class CarSearchRepositoryTest {
 
     @Test
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    fun `should pass filter parameters to carService search when currentTaskShortName matches filter`() =
+    fun `should pass Minivan body type when currentTaskShortName is Miniven`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+
+            mockCarService.searchResult = CarSearchResponse(emptyList())
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                )
+
+            mockCurrentFiltersRepository.updateCurrentTask("Минивэн")
+            repository.searchCarsByUserCity.first()
+
+            assertEquals("158830", mockCarService.searchCityId)
+            assertEquals(null, mockCarService.searchAvailableMileagePerDayKmMin)
+            assertEquals(null, mockCarService.searchDailyPriceMin)
+            assertEquals(null, mockCarService.searchDailyPriceMax)
+            assertEquals(null, mockCarService.searchYearMin)
+            assertEquals(null, mockCarService.searchYearMax)
+            assertEquals(null, mockCarService.searchSeatsMin)
+            assertEquals(null, mockCarService.searchSeatsMax)
+            assertEquals(listOf("Minivan"), mockCarService.searchBodyTypes)
+        }
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `should pass SUV body type when currentTaskShortName is Vnedorozhnik`() =
         runTest {
             val mockCarService = MockCarService()
             val mockMyCityRepository = MockMyCityRepository()
@@ -563,14 +594,6 @@ class CarSearchRepositoryTest {
             mockCurrentFiltersRepository.updateCurrentTask("Внедорожник")
             repository.searchCarsByUserCity.first()
 
-            assertEquals("158830", mockCarService.searchCityId)
-            assertEquals(null, mockCarService.searchAvailableMileagePerDayKmMin)
-            assertEquals(null, mockCarService.searchDailyPriceMin)
-            assertEquals(null, mockCarService.searchDailyPriceMax)
-            assertEquals(null, mockCarService.searchYearMin)
-            assertEquals(null, mockCarService.searchYearMax)
-            assertEquals(null, mockCarService.searchSeatsMin)
-            assertEquals(null, mockCarService.searchSeatsMax)
             assertEquals(listOf("SUV"), mockCarService.searchBodyTypes)
         }
 

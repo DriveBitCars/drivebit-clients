@@ -84,11 +84,11 @@ object MetaTags {
                     description = "Аренда внедорожника без водителя в Москве через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
                     path = "/moskva/arenda-vnedorozhnika-bez-voditelya",
                 ),
-            "/moskva/pereezd" to
+            "/moskva/arenda-minivena-bez-voditelya" to
                 PageMeta(
-                    title = "Аренда авто для переезда в Москве - DriveBit",
-                    description = "Подберите автомобиль для переезда в Москве. Аренда у собственников, прозрачные условия и поддержка 24/7.",
-                    path = "/moskva/pereezd",
+                    title = "Аренда минивэна без водителя в Москве через сервис DriveBit",
+                    description = "Аренда минивэна без водителя в Москве через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+                    path = "/moskva/arenda-minivena-bez-voditelya",
                 ),
             "/moskva/poblizosti" to
                 PageMeta(

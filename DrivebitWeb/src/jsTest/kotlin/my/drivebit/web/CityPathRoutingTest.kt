@@ -108,6 +108,20 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun cityPathWithFilter_minivenUsesSeoSlug() {
+        assertEquals(
+            "/moskva/arenda-minivena-bez-voditelya",
+            cityPathWithFilter("moskva", "Минивэн"),
+        )
+    }
+
+    @Test
+    fun filterTitleToPathSegment_minivenUsesSeoSlug() {
+        assertEquals("arenda-minivena-bez-voditelya", filterTitleToPathSegment("Минивэн"))
+        assertEquals("Минивэн", filterTitleFromPathSegment("arenda-minivena-bez-voditelya"))
+    }
+
+    @Test
     fun parseCitySlugFromPath_supportedSitemapCityUrls() {
         val urls =
             listOf(
@@ -117,7 +131,7 @@ class CityPathRoutingTest {
                 "/moskva/komandirovki",
                 "/moskva/za-gorod",
                 "/moskva/kanikuly",
-                "/moskva/pereezd",
+                "/moskva/arenda-minivena-bez-voditelya",
                 "/moskva/arenda-vnedorozhnika-bez-voditelya",
                 "/zelenograd",
                 "/kaliningrad",
