@@ -15,6 +15,7 @@ import my.drivebit.screens.SearchPage
 import my.drivebit.shell.MountWebShell
 import my.drivebit.shell.isStaticHtmlShellPath
 import my.drivebit.web.StaticFiltersShellSync
+import my.drivebit.web.StaticHeroHeadlineSync
 import my.drivebit.web.StaticHeroShellSync
 import my.drivebit.web.StaticMainPromoShellSync
 import my.drivebit.web.isCityHomePath
@@ -28,6 +29,7 @@ actual fun App() {
         CookieConsentBanner()
         Navigation { currentPath ->
             StaticHeroShellSync(currentPath)
+            StaticHeroHeadlineSync(currentPath)
             StaticFiltersShellSync(currentPath)
             StaticMainPromoShellSync(currentPath)
             when {

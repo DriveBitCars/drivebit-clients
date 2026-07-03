@@ -55,7 +55,9 @@ fun HtmlFiltersBridge(
         }
 
         val pathListener: (Event) -> Unit = {
-            syncStaticFiltersPressedState(filterTitleFromPathSegment(parseFilterSlugFromCityPath(window.location.pathname)))
+            val path = window.location.pathname
+            activeFilterTitleForCityPath(path)?.let { syncStaticFiltersPressedState(it) }
+            heroHeadlineForCityPath(path)?.let { syncStaticHeroHeadlineText(it) }
         }
 
         window.addEventListener("drivebit-filter-select", selectListener)
@@ -68,14 +70,10 @@ fun HtmlFiltersBridge(
         }
     }
 
-    LaunchedEffect(currentPath, filterState.selected) {
-        val fromPath =
-            parseFilterSlugFromCityPath(currentPath)?.let { slug ->
-                filterState.filters.firstOrNull { filterTitleToPathSegment(it.title) == slug }?.title
-            }
-        val active = fromPath ?: filterState.selected
-        syncStaticFiltersPressedState(active)
-        syncStaticHeroBackground(active, filterState.filters)
+    LaunchedEffect(currentPath, filterState.filters) {
+        val activeFromPath = activeFilterTitleForCityPath(currentPath) ?: return@LaunchedEffect
+        syncStaticFiltersPressedState(activeFromPath)
+        syncStaticHeroBackground(activeFromPath, filterState.filters)
         window.dispatchEvent(org.w3c.dom.events.Event("drivebit-filter-path-changed"))
     }
 }
