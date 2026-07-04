@@ -20,11 +20,13 @@ import org.jetbrains.compose.web.dom.Text
 fun CarItemSmall(
     car: CarItem,
     href: String? = null,
+    gridIndex: Int = 0,
 ) {
     var isImageHovered by remember { mutableStateOf(false) }
     var currentPhotoIndex by remember { mutableStateOf(0) }
     var touchStartX by remember { mutableStateOf<Double?>(null) }
     val isMobileViewport = window.innerWidth <= 768
+    val imageLoadsEagerly = carGridImageLoadsEagerly(gridIndex, isMobileViewport)
 
     val cardContent: @Composable () -> Unit = {
         Column(
@@ -60,6 +62,11 @@ fun CarItemSmall(
                     Img(
                         src = currentPhotoUrl,
                         attrs = {
+                            attr("loading", carGridImageLoadingAttr(gridIndex, isMobileViewport))
+                            attr("decoding", "async")
+                            if (!imageLoadsEagerly) {
+                                attr("fetchpriority", "low")
+                            }
                             if (isMobileViewport) {
                                 onTouchStart { event ->
                                     touchStartX =

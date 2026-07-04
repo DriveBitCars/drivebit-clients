@@ -84,11 +84,12 @@ fun MyCarsPage() {
 
                     else -> {
                         Column(gap = 16.px) {
-                            cars.forEach { car ->
+                            cars.forEachIndexed { index, car ->
                                 Column(gap = 12.px) {
                                     CarItemSmall(
                                         car = car,
                                         href = buildCarDetailUrl(car.id),
+                                        gridIndex = index,
                                     )
                                     Row(justifyContent = JustifyContent.Center) {
                                         ActionButton(
