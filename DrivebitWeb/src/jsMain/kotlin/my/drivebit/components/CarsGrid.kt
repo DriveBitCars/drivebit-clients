@@ -26,11 +26,12 @@ fun CarsGrid(
             width(100.percent)
         }
     }) {
-        cars.forEach { car ->
+        cars.forEachIndexed { index, car ->
             Column {
                 CarItemSmall(
                     car = car,
                     href = carHref(car),
+                    gridIndex = index,
                 )
             }
         }
