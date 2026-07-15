@@ -179,7 +179,7 @@ class FiltersViewModelTest {
             val initialState = viewModel.state.first()
 
             assertEquals("Все", initialState.selected)
-            assertEquals(9, initialState.filters.size)
+            assertEquals(10, initialState.filters.size)
             assertEquals("Все", initialState.filters[0].title)
             assertEquals("Поблизости", initialState.filters[1].title)
             assertEquals("В Крым", initialState.filters[2].title)

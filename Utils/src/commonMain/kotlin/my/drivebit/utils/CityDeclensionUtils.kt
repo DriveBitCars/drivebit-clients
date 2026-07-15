@@ -73,6 +73,7 @@ private val SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS =
         "arenda-vnedorozhnika-bez-voditelya",
         "arenda-minivena-bez-voditelya",
         "arenda-avto-ekonom-klassa-bez-voditelya",
+        "arenda-avto-komfort-klassa-bez-voditelya",
         "arenda-avto-premium-klassa-bez-voditelya",
     )
 
@@ -106,6 +107,7 @@ fun seoPageHeadline(
         "Внедорожник" -> "Аренда внедорожника без водителя в $prep"
         "Минивэн" -> "Аренда минивэна без водителя в $prep"
         "Эконом" -> "Аренда автомобиля эконом-класса без водителя в $prep"
+        "Комфорт" -> "Аренда авто комфорт-класса без водителя в $prep"
         "Премиум" -> "Аренда автомобиля премиум-класса без водителя в $prep"
         else -> "Аренда авто у частных владельцев в $prep"
     }
@@ -116,11 +118,16 @@ fun seoPageTitle(
     filterTitle: String,
 ): String {
     val headline = seoPageHeadline(cityName, filterTitle)
-    return if (filterTitle == "Поблизости") {
-        val prep = cityInPrepositional(cityName.trim())
-        "Аренда авто на карте в $prep - аренда автомобиля поблизости$SEO_PAGE_TITLE_SUFFIX"
-    } else {
-        "$headline$SEO_PAGE_TITLE_SUFFIX"
+    return when (filterTitle) {
+        "Поблизости" -> {
+            val prep = cityInPrepositional(cityName.trim())
+            "Аренда авто на карте в $prep - аренда автомобиля поблизости$SEO_PAGE_TITLE_SUFFIX"
+        }
+        "Комфорт" -> {
+            val prep = cityInPrepositional(cityName.trim())
+            "Аренда автомобиля комфорт-класса в $prep$SEO_PAGE_TITLE_SUFFIX"
+        }
+        else -> "$headline$SEO_PAGE_TITLE_SUFFIX"
     }
 }
 
@@ -207,6 +214,8 @@ fun cityPageDescription(
             "Подберите автомобиль для поездки в Абхазию из $gen. $CITY_FILTER_RENT_SUFFIX"
         "Эконом" ->
             "Подберите автомобиль эконом-класса в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
+        "Комфорт" ->
+            "Подберите автомобиль комфорт-класса в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
         "Премиум" ->
             "Подберите автомобиль премиум-класса в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
         "Внедорожник" ->
