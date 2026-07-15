@@ -45,7 +45,7 @@ object SuggestedFiltersCatalog {
                 shortName = "Комфорт",
                 iconUrl = "/images/filter-main/work.svg",
                 dailyPriceMin = 2500,
-                dailyPriceMax = 7000,
+                dailyPriceMax = 4000,
             ),
             FilterSuggestion(
                 name = "Бизнес",

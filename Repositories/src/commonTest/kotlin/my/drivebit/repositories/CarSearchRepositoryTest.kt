@@ -666,7 +666,7 @@ class CarSearchRepositoryTest {
             repository.searchCarsByUserCity.first()
 
             assertEquals(2500, mockCarService.searchDailyPriceMin)
-            assertEquals(7000, mockCarService.searchDailyPriceMax)
+            assertEquals(4000, mockCarService.searchDailyPriceMax)
         }
 
     @Test
