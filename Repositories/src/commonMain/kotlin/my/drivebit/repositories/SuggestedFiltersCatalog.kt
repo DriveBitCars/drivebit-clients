@@ -29,12 +29,6 @@ object SuggestedFiltersCatalog {
                 dailyPriceMax = 4000,
             ),
             FilterSuggestion(
-                name = "Премиум",
-                shortName = "Премиум",
-                iconUrl = "/images/filter-main/dacha.svg",
-                dailyPriceMin = 7000,
-            ),
-            FilterSuggestion(
                 name = "Эконом",
                 shortName = "Эконом",
                 iconUrl = "/images/filter-main/holidays.svg",
@@ -53,6 +47,12 @@ object SuggestedFiltersCatalog {
                 iconUrl = "/images/filter-main/citigroup.svg",
                 dailyPriceMin = 4000,
                 dailyPriceMax = 7000,
+            ),
+            FilterSuggestion(
+                name = "Премиум",
+                shortName = "Премиум",
+                iconUrl = "/images/filter-main/dacha.svg",
+                dailyPriceMin = 7000,
             ),
             FilterSuggestion(
                 name = "Минивэн",
