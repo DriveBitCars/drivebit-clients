@@ -49,6 +49,8 @@ fun filterTitleFromPathSegment(filterSlug: String?): String {
         ?.key
         ?.let { return it }
     return KNOWN_FILTER_TITLES.firstOrNull { filterTitleToPathSegment(it) == normalized }
+        // Short transliteration aliases: /moskva/komfort, /moskva/biznes
+        ?: KNOWN_FILTER_TITLES.firstOrNull { cityNameToSlug(it) == normalized }
         ?: ALL_FILTER_TITLE
 }
 
@@ -65,4 +67,16 @@ fun cityPathWithFilter(
     } else {
         "/$citySlug/$filterSegment"
     }
+}
+
+/**
+ * Canonical city+filter path. Rewrites short aliases (`/moskva/komfort`) to SEO slugs.
+ * Returns null for non-city paths or unknown filter segments.
+ */
+fun canonicalCityFilterPath(path: String): String? {
+    val cityPath = parseCityPath(path) ?: return null
+    val filterSlug = cityPath.filterSlug ?: return "/${cityPath.citySlug}"
+    val filterTitle = filterTitleFromPathSegment(filterSlug)
+    if (filterTitle == ALL_FILTER_TITLE) return null
+    return cityPathWithFilter(cityPath.citySlug, filterTitle)
 }

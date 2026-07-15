@@ -47,6 +47,8 @@ class HeroHeadlineForPathTest {
         assertEquals("Поблизости", activeFilterTitleForCityPath("/moskva/poblizosti"))
         assertEquals("Комфорт", activeFilterTitleForCityPath("/moskva/arenda-avto-komfort-klassa-bez-voditelya"))
         assertEquals("Бизнес", activeFilterTitleForCityPath("/moskva/arenda-avto-biznes-klassa-bez-voditelya"))
+        assertEquals("Комфорт", activeFilterTitleForCityPath("/moskva/komfort"))
+        assertEquals("Бизнес", activeFilterTitleForCityPath("/moskva/biznes"))
     }
 
     @Test

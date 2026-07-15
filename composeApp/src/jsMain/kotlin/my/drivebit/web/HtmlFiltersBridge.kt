@@ -71,6 +71,12 @@ fun HtmlFiltersBridge(
     }
 
     LaunchedEffect(currentPath, filterState.filters) {
+        val canonical = canonicalCityFilterPath(currentPath)
+        if (canonical != null && canonical != currentPath) {
+            window.history.replaceState(null, "", canonical + window.location.search)
+            navigationState.updatePath(canonical)
+            return@LaunchedEffect
+        }
         val activeFromPath = activeFilterTitleForCityPath(currentPath) ?: return@LaunchedEffect
         syncStaticFiltersPressedState(activeFromPath)
         syncStaticHeroBackground(activeFromPath, filterState.filters)

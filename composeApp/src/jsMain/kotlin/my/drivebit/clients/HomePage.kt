@@ -39,6 +39,7 @@ import my.drivebit.viewmodels.NearbyLayoutMode
 import my.drivebit.web.HtmlFiltersBridge
 import my.drivebit.web.HtmlHeroDatesBridge
 import my.drivebit.web.cityPathWithFilter
+import my.drivebit.web.filterTitleFromPathSegment
 import my.drivebit.web.filterTitleToPathSegment
 import my.drivebit.web.isCityHomePath
 import my.drivebit.web.buildCarDetailUrl
@@ -91,7 +92,12 @@ fun HomePage() {
     val filters = state.value.filters
     val selectedFromPath =
         parseFilterSlugFromCityPath(currentPath)?.let { filterSlug ->
-            filters.firstOrNull { filterTitleToPathSegment(it.title) == filterSlug }?.title
+            val fromSegment = filterTitleFromPathSegment(filterSlug)
+            if (fromSegment != "Все") {
+                filters.firstOrNull { it.title == fromSegment }?.title
+            } else {
+                filters.firstOrNull { filterTitleToPathSegment(it.title) == filterSlug }?.title
+            }
         }
     val selected = selectedFromPath ?: state.value.selected
 
