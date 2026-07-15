@@ -670,6 +670,30 @@ class CarSearchRepositoryTest {
         }
 
     @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `should pass biznes dailyPrice range when currentTaskShortName is Biznes`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+
+            mockCarService.searchResult = CarSearchResponse(emptyList())
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    myCityRepository = mockMyCityRepository,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                )
+
+            mockCurrentFiltersRepository.updateCurrentTask("Бизнес")
+            repository.searchCarsByUserCity.first()
+
+            assertEquals(4000, mockCarService.searchDailyPriceMin)
+            assertEquals(7000, mockCarService.searchDailyPriceMax)
+        }
+
+    @Test
     fun `should pass start date and end date to carService search when dates are set`() =
         runTest {
             val mockCarService = MockCarService()

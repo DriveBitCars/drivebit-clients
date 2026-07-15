@@ -118,6 +118,7 @@ class CityDeclensionUtilsTest {
         assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-premium-klassa-bez-voditelya"))
         assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-ekonom-klassa-bez-voditelya"))
         assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-komfort-klassa-bez-voditelya"))
+        assertEquals(true, isSeoOptimizedPage("moskva", "arenda-avto-biznes-klassa-bez-voditelya"))
         assertEquals(true, isSeoOptimizedPage("moskva", "poblizosti"))
         assertEquals(true, isSeoOptimizedPage("krasnogorsk", null))
         assertEquals(false, isSeoOptimizedPage("moskva", "unknown-filter"))
@@ -157,6 +158,18 @@ class CityDeclensionUtilsTest {
         assertEquals(
             "Аренда автомобиля комфорт-класса в Москве через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
             seoPageDescription("Москва", "Комфорт"),
+        )
+        assertEquals(
+            "Аренда авто бизнес-класса без водителя в Москве",
+            seoPageHeadline("Москва", "Бизнес"),
+        )
+        assertEquals(
+            "Аренда автомобиля бизнес-класса в Москве через сервис DriveBit",
+            seoPageTitle("Москва", "Бизнес"),
+        )
+        assertEquals(
+            "Аренда автомобиля бизнес-класса в Москве через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+            seoPageDescription("Москва", "Бизнес"),
         )
     }
 

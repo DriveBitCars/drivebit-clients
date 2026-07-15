@@ -96,6 +96,12 @@ object MetaTags {
                     description = "Аренда автомобиля комфорт-класса в Москве через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
                     path = "/moskva/arenda-avto-komfort-klassa-bez-voditelya",
                 ),
+            "/moskva/arenda-avto-biznes-klassa-bez-voditelya" to
+                PageMeta(
+                    title = "Аренда автомобиля бизнес-класса в Москве через сервис DriveBit",
+                    description = "Аренда автомобиля бизнес-класса в Москве через сервис DriveBit. Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!",
+                    path = "/moskva/arenda-avto-biznes-klassa-bez-voditelya",
+                ),
             "/moskva/arenda-vnedorozhnika-bez-voditelya" to
                 PageMeta(
                     title = "Аренда внедорожника без водителя в Москве через сервис DriveBit",

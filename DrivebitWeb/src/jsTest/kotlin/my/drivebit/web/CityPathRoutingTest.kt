@@ -142,6 +142,20 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun cityPathWithFilter_biznesUsesSeoSlug() {
+        assertEquals(
+            "/moskva/arenda-avto-biznes-klassa-bez-voditelya",
+            cityPathWithFilter("moskva", "Бизнес"),
+        )
+    }
+
+    @Test
+    fun filterTitleToPathSegment_biznesUsesSeoSlug() {
+        assertEquals("arenda-avto-biznes-klassa-bez-voditelya", filterTitleToPathSegment("Бизнес"))
+        assertEquals("Бизнес", filterTitleFromPathSegment("arenda-avto-biznes-klassa-bez-voditelya"))
+    }
+
+    @Test
     fun cityPathWithFilter_vnedorozhnikUsesSeoSlug() {
         assertEquals(
             "/moskva/arenda-vnedorozhnika-bez-voditelya",

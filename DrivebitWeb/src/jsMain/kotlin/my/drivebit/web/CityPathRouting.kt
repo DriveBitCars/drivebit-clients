@@ -17,6 +17,7 @@ private val CUSTOM_FILTER_PATH_SEGMENTS =
         "Минивэн" to "arenda-minivena-bez-voditelya",
         "Эконом" to "arenda-avto-ekonom-klassa-bez-voditelya",
         "Комфорт" to "arenda-avto-komfort-klassa-bez-voditelya",
+        "Бизнес" to "arenda-avto-biznes-klassa-bez-voditelya",
         "Премиум" to "arenda-avto-premium-klassa-bez-voditelya",
     )
 
@@ -35,6 +36,7 @@ private val KNOWN_FILTER_TITLES =
         "Премиум",
         "Эконом",
         "Комфорт",
+        "Бизнес",
         "Внедорожник",
         "Минивэн",
     )

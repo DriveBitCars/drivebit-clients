@@ -74,6 +74,7 @@ private val SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS =
         "arenda-minivena-bez-voditelya",
         "arenda-avto-ekonom-klassa-bez-voditelya",
         "arenda-avto-komfort-klassa-bez-voditelya",
+        "arenda-avto-biznes-klassa-bez-voditelya",
         "arenda-avto-premium-klassa-bez-voditelya",
     )
 
@@ -108,6 +109,7 @@ fun seoPageHeadline(
         "Минивэн" -> "Аренда минивэна без водителя в $prep"
         "Эконом" -> "Аренда автомобиля эконом-класса без водителя в $prep"
         "Комфорт" -> "Аренда авто комфорт-класса без водителя в $prep"
+        "Бизнес" -> "Аренда авто бизнес-класса без водителя в $prep"
         "Премиум" -> "Аренда автомобиля премиум-класса без водителя в $prep"
         else -> "Аренда авто у частных владельцев в $prep"
     }
@@ -126,6 +128,10 @@ fun seoPageTitle(
         "Комфорт" -> {
             val prep = cityInPrepositional(cityName.trim())
             "Аренда автомобиля комфорт-класса в $prep$SEO_PAGE_TITLE_SUFFIX"
+        }
+        "Бизнес" -> {
+            val prep = cityInPrepositional(cityName.trim())
+            "Аренда автомобиля бизнес-класса в $prep$SEO_PAGE_TITLE_SUFFIX"
         }
         else -> "$headline$SEO_PAGE_TITLE_SUFFIX"
     }
@@ -216,6 +222,8 @@ fun cityPageDescription(
             "Подберите автомобиль эконом-класса в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
         "Комфорт" ->
             "Подберите автомобиль комфорт-класса в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
+        "Бизнес" ->
+            "Подберите автомобиль бизнес-класса в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
         "Премиум" ->
             "Подберите автомобиль премиум-класса в аренду в $prep. $CITY_FILTER_RENT_SUFFIX"
         "Внедорожник" ->
