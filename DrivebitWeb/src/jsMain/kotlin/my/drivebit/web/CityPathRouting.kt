@@ -33,12 +33,12 @@ private val KNOWN_FILTER_TITLES =
         "В Крым",
         "Беларусь",
         "Абхазия",
-        "Премиум",
         "Эконом",
         "Комфорт",
         "Бизнес",
-        "Внедорожник",
+        "Премиум",
         "Минивэн",
+        "Внедорожник",
     )
 
 fun filterTitleFromPathSegment(filterSlug: String?): String {
