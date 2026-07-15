@@ -24,8 +24,6 @@ import org.w3c.dom.events.Event
 private const val THUMBNAIL_HEIGHT_PX = 120
 private const val THUMBNAIL_GAP_PX = 8
 private const val THUMBNAIL_SCROLL_STEP_PX = THUMBNAIL_HEIGHT_PX + THUMBNAIL_GAP_PX
-private const val THUMBNAIL_COLUMN_MAX_HEIGHT_PX =
-    THUMBNAIL_HEIGHT_PX * 3 + THUMBNAIL_GAP_PX * 2
 
 @Composable
 fun CarPhotosSection(car: CarDetailResponse) {
@@ -37,6 +35,8 @@ fun CarPhotosSection(car: CarDetailResponse) {
     val thumbnailPhotos = allPhotos.drop(1)
 
     ResponsiveContainer { isMobile ->
+        var mainPhotoHeightPx by remember { mutableStateOf(0) }
+
         Column(
             gap = 16.px,
         ) {
@@ -50,17 +50,42 @@ fun CarPhotosSection(car: CarDetailResponse) {
             } else {
                 Row(
                     gap = 16.px,
-                    alignItems = AlignItems.FlexStart,
+                    alignItems = AlignItems.Stretch,
                     modifier = { width(100.percent) },
                 ) {
-                    Column(
-                        gap = 8.px,
-                        modifier = {
+                    Div({
+                        ref { element ->
+                            fun syncHeight() {
+                                val height = element.offsetHeight
+                                if (height > 0) {
+                                    mainPhotoHeightPx = height
+                                }
+                            }
+                            syncHeight()
+                            val img = element.querySelector("img")
+                            val onImgLoad: (Event) -> Unit = { syncHeight() }
+                            img?.addEventListener("load", onImgLoad)
+                            val onWindowResize: (Event) -> Unit = { syncHeight() }
+                            window.addEventListener("resize", onWindowResize)
+                            val rafId =
+                                window.requestAnimationFrame {
+                                    syncHeight()
+                                    window.requestAnimationFrame { syncHeight() }
+                                }
+                            onDispose {
+                                img?.removeEventListener("load", onImgLoad)
+                                window.removeEventListener("resize", onWindowResize)
+                                window.cancelAnimationFrame(rafId)
+                            }
+                        }
+                        style {
                             flex(1)
                             minWidth(0.px)
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
                             alignItems(AlignItems.FlexStart)
-                        },
-                    ) {
+                        }
+                    }) {
                         CarMainPhoto(mainPhoto, galleryPhotoUrls, allPhotos.isNotEmpty())
                     }
 
@@ -69,6 +94,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
                             photos = thumbnailPhotos,
                             galleryPhotoUrls = galleryPhotoUrls,
                             isClickable = allPhotos.isNotEmpty(),
+                            heightPx = mainPhotoHeightPx,
                         )
                     }
                 }
@@ -338,19 +364,22 @@ private fun CarThumbnailScroller(
     photos: List<CarPhotoItem>,
     galleryPhotoUrls: List<String>,
     isClickable: Boolean,
+    heightPx: Int,
 ) {
     var scrollElement by remember { mutableStateOf<HTMLDivElement?>(null) }
     var canScrollUp by remember { mutableStateOf(false) }
-    var canScrollDown by remember(photos.size) { mutableStateOf(photos.size > 3) }
-    val showArrows = photos.size > 3
+    var canScrollDown by remember { mutableStateOf(false) }
+    var showArrows by remember { mutableStateOf(false) }
 
     fun updateScrollState() {
         val el = scrollElement ?: return
+        val overflows = el.scrollHeight > el.clientHeight + 1
+        showArrows = overflows
         canScrollUp = el.scrollTop > 0
         canScrollDown = el.scrollTop + el.clientHeight < el.scrollHeight - 1
     }
 
-    LaunchedEffect(photos.size, scrollElement) {
+    LaunchedEffect(photos.size, scrollElement, heightPx) {
         updateScrollState()
     }
 
@@ -359,6 +388,13 @@ private fun CarThumbnailScroller(
             position(Position.Relative)
             width(200.px)
             flexShrink(0)
+            if (heightPx > 0) {
+                height(heightPx.px)
+            } else {
+                alignSelf(AlignSelf.Stretch)
+                minHeight(0.px)
+            }
+            overflow("hidden")
         }
     }) {
         Div({
@@ -373,8 +409,11 @@ private fun CarThumbnailScroller(
             }
             onScroll { updateScrollState() }
             style {
-                width(200.px)
-                maxHeight(THUMBNAIL_COLUMN_MAX_HEIGHT_PX.px)
+                position(Position.Absolute)
+                top(0.px)
+                left(0.px)
+                right(0.px)
+                bottom(0.px)
                 overflowY("auto")
                 property("scrollbar-width", "thin")
                 display(DisplayStyle.Flex)
