@@ -128,6 +128,20 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun cityPathWithFilter_komfortUsesSeoSlug() {
+        assertEquals(
+            "/moskva/arenda-avto-komfort-klassa-bez-voditelya",
+            cityPathWithFilter("moskva", "Комфорт"),
+        )
+    }
+
+    @Test
+    fun filterTitleToPathSegment_komfortUsesSeoSlug() {
+        assertEquals("arenda-avto-komfort-klassa-bez-voditelya", filterTitleToPathSegment("Комфорт"))
+        assertEquals("Комфорт", filterTitleFromPathSegment("arenda-avto-komfort-klassa-bez-voditelya"))
+    }
+
+    @Test
     fun cityPathWithFilter_vnedorozhnikUsesSeoSlug() {
         assertEquals(
             "/moskva/arenda-vnedorozhnika-bez-voditelya",
@@ -169,6 +183,7 @@ class CityPathRoutingTest {
                 "/moskva/arenda-avto-v-belarus",
                 "/moskva/arenda-avto-v-abkhaziyu",
                 "/moskva/arenda-avto-ekonom-klassa-bez-voditelya",
+                "/moskva/arenda-avto-komfort-klassa-bez-voditelya",
                 "/moskva/arenda-avto-premium-klassa-bez-voditelya",
                 "/moskva/arenda-minivena-bez-voditelya",
                 "/moskva/arenda-vnedorozhnika-bez-voditelya",

@@ -45,5 +45,14 @@ class HeroHeadlineForPathTest {
         assertEquals("Все", activeFilterTitleForCityPath("/moskva"))
         assertEquals("В Крым", activeFilterTitleForCityPath("/moskva/arenda-avto-v-krym"))
         assertEquals("Поблизости", activeFilterTitleForCityPath("/moskva/poblizosti"))
+        assertEquals("Комфорт", activeFilterTitleForCityPath("/moskva/arenda-avto-komfort-klassa-bez-voditelya"))
+    }
+
+    @Test
+    fun heroHeadlineForCityPath_komfort() {
+        assertEquals(
+            "Аренда авто комфорт-класса без водителя в Москве",
+            heroHeadlineForCityPath("/moskva/arenda-avto-komfort-klassa-bez-voditelya"),
+        )
     }
 }

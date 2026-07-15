@@ -14,6 +14,7 @@ const STATIC_HTML = {
   "/moskva/arenda-minivena-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-minivena-bez-voditelya/index.html",
   "/moskva/poblizosti": "composeApp/src/jsMain/resources/moskva/poblizosti/index.html",
   "/moskva/arenda-avto-premium-klassa-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-avto-premium-klassa-bez-voditelya/index.html",
+  "/moskva/arenda-avto-komfort-klassa-bez-voditelya": "composeApp/src/jsMain/resources/moskva/arenda-avto-komfort-klassa-bez-voditelya/index.html",
   "/lyubertsy": "composeApp/src/jsMain/resources/lyubertsy/index.html",
   "/zelenograd": "composeApp/src/jsMain/resources/zelenograd/index.html",
   "/kaliningrad": "composeApp/src/jsMain/resources/kaliningrad/index.html",
