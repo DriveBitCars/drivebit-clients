@@ -156,6 +156,32 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun filterTitleFromPathSegment_acceptsShortTransliterationAliases() {
+        // SPA / bookmarks may still land on cityNameToSlug paths like /moskva/komfort
+        assertEquals("Комфорт", filterTitleFromPathSegment("komfort"))
+        assertEquals("Бизнес", filterTitleFromPathSegment("biznes"))
+        assertEquals("Премиум", filterTitleFromPathSegment("premium"))
+        assertEquals("Эконом", filterTitleFromPathSegment("ekonom"))
+    }
+
+    @Test
+    fun canonicalCityFilterPath_rewritesShortAliasesToSeoSlugs() {
+        assertEquals(
+            "/moskva/arenda-avto-komfort-klassa-bez-voditelya",
+            canonicalCityFilterPath("/moskva/komfort"),
+        )
+        assertEquals(
+            "/moskva/arenda-avto-biznes-klassa-bez-voditelya",
+            canonicalCityFilterPath("/moskva/biznes"),
+        )
+        assertEquals(
+            "/moskva/arenda-avto-komfort-klassa-bez-voditelya",
+            canonicalCityFilterPath("/moskva/arenda-avto-komfort-klassa-bez-voditelya"),
+        )
+        assertNull(canonicalCityFilterPath("/profile"))
+    }
+
+    @Test
     fun cityPathWithFilter_vnedorozhnikUsesSeoSlug() {
         assertEquals(
             "/moskva/arenda-vnedorozhnika-bez-voditelya",

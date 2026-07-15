@@ -62,6 +62,19 @@
         syncHeroBackground(nav, activeTitle);
     }
 
+    // cityNameToSlug aliases for filters that also have longer SEO path segments
+    var SHORT_TITLE_BY_SLUG = {
+        komfort: "Комфорт",
+        biznes: "Бизнес",
+        premium: "Премиум",
+        ekonom: "Эконом",
+        vnedorozhnik: "Внедорожник",
+        miniven: "Минивэн",
+        "v-krym": "В Крым",
+        belarus: "Беларусь",
+        abkhaziya: "Абхазия",
+    };
+
     function titleFromPath(pathname) {
         var path = normalizePath(pathname);
         var nav = qs("drivebit-filters-static");
@@ -72,6 +85,15 @@
             var filterPath = btn.getAttribute("data-filter-path");
             if (filterPath && normalizePath(filterPath) === path) {
                 return btn.getAttribute("data-filter-title") || "Все";
+            }
+        }
+        var segment = path.split("/").pop() || "";
+        var aliasTitle = SHORT_TITLE_BY_SLUG[segment];
+        if (aliasTitle) {
+            for (var j = 0; j < buttons.length; j++) {
+                if ((buttons[j].getAttribute("data-filter-title") || "") === aliasTitle) {
+                    return aliasTitle;
+                }
             }
         }
         return "Все";
