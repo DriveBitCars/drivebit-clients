@@ -2,12 +2,12 @@ package my.drivebit.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.window
-import my.drivebit.components.ResponsiveContainer
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.CarPhotoItem
@@ -18,7 +18,14 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.events.Event
+
+private const val THUMBNAIL_HEIGHT_PX = 120
+private const val THUMBNAIL_GAP_PX = 8
+private const val THUMBNAIL_SCROLL_STEP_PX = THUMBNAIL_HEIGHT_PX + THUMBNAIL_GAP_PX
+private const val THUMBNAIL_COLUMN_MAX_HEIGHT_PX =
+    THUMBNAIL_HEIGHT_PX * 3 + THUMBNAIL_GAP_PX * 2
 
 @Composable
 fun CarPhotosSection(car: CarDetailResponse) {
@@ -27,7 +34,7 @@ fun CarPhotosSection(car: CarDetailResponse) {
     val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
     val galleryPhotoUrls = allPhotos.mapNotNull { it.url.takeIf { url -> url.isNotBlank() } }
     val mainPhoto = allPhotos.firstOrNull()
-    val thumbnailPhotos = allPhotos.drop(1).take(3)
+    val thumbnailPhotos = allPhotos.drop(1)
 
     ResponsiveContainer { isMobile ->
         Column(
@@ -57,13 +64,12 @@ fun CarPhotosSection(car: CarDetailResponse) {
                         CarMainPhoto(mainPhoto, galleryPhotoUrls, allPhotos.isNotEmpty())
                     }
 
-                    Column(
-                        gap = 8.px,
-                        modifier = { width(200.px) },
-                    ) {
-                        thumbnailPhotos.forEach { photo ->
-                            CarThumbnail(photo, galleryPhotoUrls, allPhotos.isNotEmpty())
-                        }
+                    if (thumbnailPhotos.isNotEmpty()) {
+                        CarThumbnailScroller(
+                            photos = thumbnailPhotos,
+                            galleryPhotoUrls = galleryPhotoUrls,
+                            isClickable = allPhotos.isNotEmpty(),
+                        )
                     }
                 }
             }
@@ -328,6 +334,125 @@ private fun CarMainPhoto(
 }
 
 @Composable
+private fun CarThumbnailScroller(
+    photos: List<CarPhotoItem>,
+    galleryPhotoUrls: List<String>,
+    isClickable: Boolean,
+) {
+    var scrollElement by remember { mutableStateOf<HTMLDivElement?>(null) }
+    var canScrollUp by remember { mutableStateOf(false) }
+    var canScrollDown by remember(photos.size) { mutableStateOf(photos.size > 3) }
+    val showArrows = photos.size > 3
+
+    fun updateScrollState() {
+        val el = scrollElement ?: return
+        canScrollUp = el.scrollTop > 0
+        canScrollDown = el.scrollTop + el.clientHeight < el.scrollHeight - 1
+    }
+
+    LaunchedEffect(photos.size, scrollElement) {
+        updateScrollState()
+    }
+
+    Div({
+        style {
+            position(Position.Relative)
+            width(200.px)
+            flexShrink(0)
+        }
+    }) {
+        Div({
+            ref { element ->
+                scrollElement = element
+                updateScrollState()
+                onDispose {
+                    if (scrollElement === element) {
+                        scrollElement = null
+                    }
+                }
+            }
+            onScroll { updateScrollState() }
+            style {
+                width(200.px)
+                maxHeight(THUMBNAIL_COLUMN_MAX_HEIGHT_PX.px)
+                overflowY("auto")
+                property("scrollbar-width", "thin")
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
+                gap(THUMBNAIL_GAP_PX.px)
+            }
+        }) {
+            photos.forEach { photo ->
+                CarThumbnail(photo, galleryPhotoUrls, isClickable)
+            }
+        }
+
+        if (showArrows) {
+            ThumbnailScrollArrow(
+                label = "▲",
+                enabled = canScrollUp,
+                alignTop = true,
+                onClick = {
+                    scrollElement?.scrollBy(0.0, -THUMBNAIL_SCROLL_STEP_PX.toDouble())
+                    updateScrollState()
+                },
+            )
+            ThumbnailScrollArrow(
+                label = "▼",
+                enabled = canScrollDown,
+                alignTop = false,
+                onClick = {
+                    scrollElement?.scrollBy(0.0, THUMBNAIL_SCROLL_STEP_PX.toDouble())
+                    updateScrollState()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThumbnailScrollArrow(
+    label: String,
+    enabled: Boolean,
+    alignTop: Boolean,
+    onClick: () -> Unit,
+) {
+    Div({
+        onClick {
+            it.stopPropagation()
+            if (enabled) onClick()
+        }
+        style {
+            position(Position.Absolute)
+            left(50.percent)
+            property("transform", "translateX(-50%)")
+            if (alignTop) {
+                top(8.px)
+            } else {
+                bottom(8.px)
+            }
+            property("z-index", "2")
+            width(32.px)
+            height(32.px)
+            borderRadius(50.percent)
+            backgroundColor(rgba(0, 0, 0, 0.5))
+            color(CSSColors.White)
+            display(DisplayStyle.Flex)
+            alignItems(AlignItems.Center)
+            justifyContent(JustifyContent.Center)
+            fontSize(16.px)
+            cursor(if (enabled) "pointer" else "default")
+            property("user-select", "none")
+            if (!enabled) {
+                opacity(0.35)
+            }
+        }
+    }) {
+        Text(label)
+    }
+}
+
+@Composable
 private fun CarThumbnail(
     photo: CarPhotoItem,
     galleryPhotoUrls: List<String>,
@@ -336,6 +461,7 @@ private fun CarThumbnail(
     Div({
         style {
             position(Position.Relative)
+            flexShrink(0)
             if (isClickable) cursor("pointer")
         }
         if (isClickable) {
@@ -347,9 +473,10 @@ private fun CarThumbnail(
             attrs = {
                 style {
                     width(100.percent)
-                    height(120.px)
+                    height(THUMBNAIL_HEIGHT_PX.px)
                     property("object-fit", "cover")
                     borderRadius(8.px)
+                    display(DisplayStyle.Block)
                 }
             },
         )
