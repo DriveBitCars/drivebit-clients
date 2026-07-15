@@ -38,6 +38,8 @@ class FiltersViewModel(
             "Абхазия" to SEARCHBACKGROUND_CAR5_JPG,
             "Премиум" to SEARCHBACKGROUND_CAR3_JPG,
             "Эконом" to SEARCHBACKGROUND_CAR6_JPG,
+            "Комфорт" to SEARCHBACKGROUND_CAR5_JPG,
+            "Бизнес" to SEARCHBACKGROUND_CAR2_JPG,
             "Минивэн" to SEARCHBACKGROUND_CAR8_JPG,
             "Внедорожник" to SEARCHBACKGROUND_CAR7_JPG,
         )

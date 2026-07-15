@@ -44,10 +44,11 @@
         "arenda-minivena-bez-voditelya": "Минивэн",
         "arenda-avto-ekonom-klassa-bez-voditelya": "Эконом",
         "arenda-avto-komfort-klassa-bez-voditelya": "Комфорт",
+        "arenda-avto-biznes-klassa-bez-voditelya": "Бизнес",
         "arenda-avto-premium-klassa-bez-voditelya": "Премиум"
     };
     var GENITIVE_FILTERS = ["В Крым", "Беларусь", "Абхазия"];
-    var SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS = ["arenda-avto-v-krym", "arenda-avto-v-belarus", "arenda-avto-v-abkhaziyu", "poblizosti", "arenda-vnedorozhnika-bez-voditelya", "arenda-minivena-bez-voditelya", "arenda-avto-ekonom-klassa-bez-voditelya", "arenda-avto-komfort-klassa-bez-voditelya", "arenda-avto-premium-klassa-bez-voditelya"];
+    var SEO_OPTIMIZED_MOSKVA_FILTER_SLUGS = ["arenda-avto-v-krym", "arenda-avto-v-belarus", "arenda-avto-v-abkhaziyu", "poblizosti", "arenda-vnedorozhnika-bez-voditelya", "arenda-minivena-bez-voditelya", "arenda-avto-ekonom-klassa-bez-voditelya", "arenda-avto-komfort-klassa-bez-voditelya", "arenda-avto-biznes-klassa-bez-voditelya", "arenda-avto-premium-klassa-bez-voditelya"];
     var SEO_PAGE_TITLE_SUFFIX = " через сервис DriveBit";
     var SEO_PAGE_DESCRIPTION_SUFFIX = ". Безопасно и быстро. Чистые и ухоженные автомобили дешевле каршеринга!";
     var RESERVED = ["create-car", "city-selection", "my-city-selection", "list-your-car", "verify-otp", "login-by-phone", "login-by-mail", "login-by-password", "signup", "profile", "my-cars", "my-bookings", "leave-review", "my-deals", "chats", "chat", "documents", "offer", "contacts", "privacy", "cookies", "payment", "payment-success", "payment-failure", "download-booking-contract", "car-edit", "car-sts-upload", "car-photos-gallery", "car-photos-upload", "car-photos", "edit-name", "change-email", "change-phone", "change-password", "address-input", "license-plate-input", "car-brand-selection", "car-model-selection", "body-type-selection", "drive-type-selection", "engine-type-selection", "engine-volume-input", "production-year-input", "seats-count-input", "trunk-size-selection", "daily-rate-input", "description-input", "passport-upload", "search", "car-detail"];
@@ -120,6 +121,8 @@
                 return "Аренда автомобиля эконом-класса без водителя в " + prep;
             case "Комфорт":
                 return "Аренда авто комфорт-класса без водителя в " + prep;
+            case "Бизнес":
+                return "Аренда авто бизнес-класса без водителя в " + prep;
             case "Премиум":
                 return "Аренда автомобиля премиум-класса без водителя в " + prep;
             default:
@@ -136,6 +139,10 @@
         if (filterTitle === "Комфорт") {
             var comfortPrep = cityForms((cityName || "").trim())[0];
             return "Аренда автомобиля комфорт-класса в " + comfortPrep + SEO_PAGE_TITLE_SUFFIX;
+        }
+        if (filterTitle === "Бизнес") {
+            var businessPrep = cityForms((cityName || "").trim())[0];
+            return "Аренда автомобиля бизнес-класса в " + businessPrep + SEO_PAGE_TITLE_SUFFIX;
         }
         return headline + SEO_PAGE_TITLE_SUFFIX;
     }
@@ -159,6 +166,8 @@
                 return "Подберите автомобиль эконом-класса в аренду в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
             case "Комфорт":
                 return "Подберите автомобиль комфорт-класса в аренду в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
+            case "Бизнес":
+                return "Подберите автомобиль бизнес-класса в аренду в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
             case "Премиум":
                 return "Подберите автомобиль премиум-класса в аренду в " + prep + ". " + CITY_FILTER_RENT_SUFFIX;
             case "Внедорожник":
