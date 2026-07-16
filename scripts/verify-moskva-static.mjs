@@ -14,6 +14,7 @@ await page.waitForTimeout(8000);
 
 const report = await page.evaluate(() => ({
   hasComposeApp: !!document.querySelector('script[src*="composeApp.js"]'),
+  hasThirdPartyLoader: !!document.querySelector('script[src*="drivebit-third-party-deferred"]'),
   hasRoot: !!document.getElementById("root"),
   hasLoader: !!document.querySelector(".drivebit-seo-loader"),
   hasLegacyNav: !!document.querySelector(".drivebit-seo-nav"),
@@ -24,6 +25,7 @@ const report = await page.evaluate(() => ({
 console.log(JSON.stringify({ url, ...report, errors }, null, 2));
 const ok =
   report.hasComposeApp &&
+  report.hasThirdPartyLoader &&
   report.hasRoot &&
   report.hasLoader &&
   !report.hasLegacyNav &&
