@@ -1,8 +1,25 @@
 (function (document, window) {
     var METRIKA_TAG_URL = "https://mc.yandex.ru/metrika/tag.js?id=105947907";
     var METRIKA_COUNTER_ID = 105947907;
-    var CALLIBRI_URL = "https://cdn.callibri.ru/callibri.js";
+    var CALLIBRI_URL = "//cdn.callibri.ru/callibri.js";
     var JIVO_URL = "//code.jivo.ru/widget/MWoBzLXYYF";
+    var LOG_PREFIX = "[DriveBit/Callibri]";
+
+    function log() {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(LOG_PREFIX);
+        if (window.console && typeof window.console.log === "function") {
+            window.console.log.apply(window.console, args);
+        }
+    }
+
+    function warn() {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(LOG_PREFIX);
+        if (window.console && typeof window.console.warn === "function") {
+            window.console.warn.apply(window.console, args);
+        }
+    }
 
     function isMetrikaTagRequested() {
         for (var j = 0; j < document.scripts.length; j++) {
@@ -16,8 +33,67 @@
         return false;
     }
 
+    function findCallibriScript() {
+        return (
+            document.querySelector("script[data-drivebit-callibri]") ||
+            document.querySelector('script[src*="callibri.js"]')
+        );
+    }
+
+    /**
+     * Official Callibri check:
+     * https://callibri.ru/help/ustanovka_skripta_callibri/kak_ustanovit_skript_callibri_napryamuyu_v_kod_sayta
+     * Console → callibriInit() → undefined means script is installed.
+     */
+    function verifyCallibriInstalled(attempt) {
+        var n = attempt || 0;
+        if (typeof window.callibriInit === "function") {
+            var result;
+            try {
+                result = window.callibriInit();
+            } catch (e) {
+                warn("callibriInit() threw:", e && e.message ? e.message : e);
+                return false;
+            }
+            if (result === undefined) {
+                var tag = findCallibriScript();
+                log(
+                    "OK: Callibri установлен (docs: callibriInit() → undefined)",
+                );
+                log(
+                    "HTML/DOM script:",
+                    tag && tag.src ? tag.src : "(не найден)",
+                    tag && tag.defer ? "defer=true" : "",
+                );
+                if (typeof window.ym === "function") {
+                    try {
+                        window.ym(METRIKA_COUNTER_ID, "getClientID", function (clientId) {
+                            log("Yandex Metrika ClientID:", clientId || "(пусто)");
+                        });
+                    } catch (e) {
+                        warn("getClientID failed:", e && e.message ? e.message : e);
+                    }
+                }
+                return true;
+            }
+            warn("callibriInit() unexpected result:", result);
+            return false;
+        }
+        if (n < 40) {
+            window.setTimeout(function () {
+                verifyCallibriInstalled(n + 1);
+            }, 250);
+            return null;
+        }
+        warn(
+            "Callibri НЕ обнаружен: нет callibriInit. Смотрите View Source → </body> и Network → callibri.js",
+        );
+        return false;
+    }
+
     function loadMetrika(onTagReady) {
         if (isMetrikaTagRequested()) {
+            log("Metrika tag.js already present");
             if (onTagReady) onTagReady();
             return;
         }
@@ -44,10 +120,12 @@
             tagScript.src = METRIKA_TAG_URL;
             if (onTagReady) {
                 tagScript.onload = function () {
+                    log("Metrika tag.js loaded (before Callibri defer runs)");
                     onTagReady();
                 };
             }
             firstScript.parentNode.insertBefore(tagScript, firstScript);
+            log("Metrika: start tag.js immediately (no setTimeout/idle delay)");
         } else if (onTagReady) {
             onTagReady();
         }
@@ -62,24 +140,37 @@
         });
     }
 
-    function loadCallibri(attempt) {
-        if (document.querySelector("script[data-drivebit-callibri]")) {
+    /**
+     * Prefer static Callibri tag from HTML (docs). Dynamic insert is fallback only.
+     */
+    function ensureCallibri(attempt) {
+        var existing = findCallibriScript();
+        if (existing) {
+            log(
+                "Callibri static/docs tag found in DOM:",
+                existing.src || "(inline)",
+                existing.defer ? "defer=true" : "",
+            );
+            verifyCallibriInstalled(0);
             return;
         }
-        if (document.querySelector('script[src*="callibri.js"]')) {
-            return;
-        }
+        warn("Static Callibri tag missing — fallback dynamic insert (docs prefer static before </body>)");
         var script = document.createElement("script");
         script.src = CALLIBRI_URL;
         script.type = "text/javascript";
         script.charset = "utf-8";
         script.defer = true;
         script.setAttribute("data-drivebit-callibri", "1");
+        script.onload = function () {
+            log("Callibri fallback loaded");
+            verifyCallibriInstalled(0);
+        };
         script.onerror = function () {
             script.remove();
+            warn("callibri.js load error, attempt=", attempt || 0);
             if ((attempt || 0) < 1) {
                 window.setTimeout(function () {
-                    loadCallibri((attempt || 0) + 1);
+                    ensureCallibri((attempt || 0) + 1);
                 }, 3000);
             }
         };
@@ -108,8 +199,9 @@
         window.addEventListener("load", fn, { once: true });
     }
 
+    log("boot: Metrika first, then verify Callibri (docs snippet before </body>)");
     loadMetrika(function () {
-        loadCallibri(0);
+        ensureCallibri(0);
     });
 
     afterLoad(function () {
