@@ -4,38 +4,31 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const MODULE_SCRIPT =
-    '    <script type="module" src="/vendor/drivebit-third-party-deferred.js"></script>';
-const LEGACY_DEFER_SCRIPT =
+const DEFER_SCRIPT =
     '<script src="/vendor/drivebit-third-party-deferred.js" defer></script>';
+const MODULE_SCRIPT =
+    '<script type="module" src="/vendor/drivebit-third-party-deferred.js"></script>';
 
 function walk(dir, out = []) {
     for (const name of fs.readdirSync(dir)) {
         const full = path.join(dir, name);
         const st = fs.statSync(full);
         if (st.isDirectory()) walk(full, out);
-        else if (name === "index.html") out.push(full);
+        else if (name === "index.html" || name.endsWith(".html")) out.push(full);
     }
     return out;
 }
 
-function hasComposeApp(html) {
-    return /composeApp\.js/.test(html);
-}
-
-function hasThirdPartyLoader(html) {
-    return /drivebit-third-party-deferred/.test(html);
-}
-
 function injectLoader(html) {
-    if (html.includes(LEGACY_DEFER_SCRIPT)) {
-        return html.replace(LEGACY_DEFER_SCRIPT, MODULE_SCRIPT.trim());
+    let next = html;
+    if (next.includes(MODULE_SCRIPT)) {
+        next = next.replaceAll(MODULE_SCRIPT, DEFER_SCRIPT);
     }
-    if (hasThirdPartyLoader(html)) {
-        return html;
+    if (next.includes(DEFER_SCRIPT)) {
+        return next;
     }
-    if (html.includes("</head>")) {
-        return html.replace("</head>", `${MODULE_SCRIPT}\n</head>`);
+    if (next.includes("</head>")) {
+        return next.replace("</head>", `    ${DEFER_SCRIPT}\n</head>`);
     }
     throw new Error("no </head> in HTML");
 }
@@ -50,27 +43,22 @@ const extraFiles = [
 const files = [...walk(resources), ...extraFiles].filter((f) => fs.existsSync(f));
 
 let updated = 0;
-let skipped = 0;
-let alreadyPresent = 0;
-
 for (const file of files) {
     let html = fs.readFileSync(file, "utf8");
-    if (!hasComposeApp(html) && !hasThirdPartyLoader(html)) {
-        if (file.endsWith("index.html") && extraFiles.includes(file)) {
-            // auth/car-detail shells may not have composeApp.js in head
-        } else if (!extraFiles.includes(file)) {
-            continue;
-        }
-    }
-    const before = html;
-    html = injectLoader(html);
-    if (html === before) {
-        if (hasThirdPartyLoader(before)) alreadyPresent++;
+    if (!/drivebit-third-party-deferred|composeApp\.js/.test(html) && !extraFiles.includes(file)) {
         continue;
     }
-    fs.writeFileSync(file, html);
-    updated++;
-    console.log("updated:", path.relative(root, file));
+    if (!/drivebit-third-party-deferred|composeApp\.js/.test(html) && extraFiles.includes(file)) {
+        // still try shells
+    }
+    const before = html;
+    if (!/drivebit-third-party-deferred/.test(html) && !/composeApp\.js/.test(html)) continue;
+    html = injectLoader(html);
+    if (html !== before) {
+        fs.writeFileSync(file, html);
+        updated++;
+        console.log("updated:", path.relative(root, file));
+    }
 }
 
-console.log(`done: ${updated} updated, ${alreadyPresent} unchanged, ${skipped} skipped`);
+console.log(`done: ${updated} updated`);

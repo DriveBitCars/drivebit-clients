@@ -4,6 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const DEFER_LOADER =
+    '<script src="/vendor/drivebit-third-party-deferred.js" defer></script>';
 const MODULE_LOADER =
     '<script type="module" src="/vendor/drivebit-third-party-deferred.js"></script>';
 
@@ -36,15 +38,22 @@ const failures = [];
 for (const rel of REQUIRED_FILES) {
     const file = path.join(root, rel);
     const html = fs.readFileSync(file, "utf8");
-    if (!html.includes(MODULE_LOADER)) {
-        failures.push(`${rel}: missing module third-party loader`);
+    if (html.includes(MODULE_LOADER)) {
+        failures.push(`${rel}: still uses type=module (broken MIME for .mjs imports)`);
+    }
+    if (!html.includes(DEFER_LOADER)) {
+        failures.push(`${rel}: missing defer third-party loader`);
     }
 }
 
 for (const file of composePages) {
     const html = fs.readFileSync(file, "utf8");
-    if (!html.includes(MODULE_LOADER)) {
-        failures.push(`${path.relative(root, file)}: missing module third-party loader`);
+    const rel = path.relative(root, file);
+    if (html.includes(MODULE_LOADER)) {
+        failures.push(`${rel}: still uses type=module`);
+    }
+    if (!html.includes(DEFER_LOADER)) {
+        failures.push(`${rel}: missing defer third-party loader`);
     }
 }
 
@@ -56,4 +65,4 @@ if (failures.length > 0) {
     process.exit(1);
 }
 
-console.log(`OK: third-party loader present on ${composePages.length} composeApp pages + shells`);
+console.log(`OK: defer third-party loader present on ${composePages.length} composeApp pages + shells`);
