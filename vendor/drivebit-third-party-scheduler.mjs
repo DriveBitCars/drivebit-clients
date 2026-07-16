@@ -64,6 +64,9 @@ export function loadCallibri(env, attempt) {
     if (document.querySelector("script[data-drivebit-callibri]")) {
         return;
     }
+    if (document.querySelector('script[src*="callibri.js"]')) {
+        return;
+    }
     const script = document.createElement("script");
     script.src = CALLIBRI_URL;
     script.type = "text/javascript";

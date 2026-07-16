@@ -114,9 +114,40 @@ gh run watch <run-id> --exit-status
 
 Deploy takes ~10–12 min. Success = `conclusion: success`.
 
-### 9. Post-deploy verify (when applicable)
+### 9. Post-deploy prod smoke (required)
 
-Spot-check prod URLs or API behavior changed by the release. Report release URL + deploy run URL.
+**Do not announce «на проде» until this step passes.**
+
+Run automated smoke against production:
+
+```bash
+npm install   # if node_modules missing locally
+npm run verify:prod-smoke
+```
+
+Default base URL: `https://drivebit.ru`. Exit code **0** required.
+
+**What the smoke test checks:**
+
+| Check | Gate |
+|-------|------|
+| HTTP 200 | `/moskva`, `/search`, `/login`, `/contacts`, `/list-your-car.html` |
+| Compose mount | `#root` has content on `/moskva` and `/search` |
+| Third-party loader | `drivebit-third-party-deferred.js` in HTML on all key pages |
+| Navigation | Hero button «Найти автомобиль» opens `/search` |
+| Vendor assets | `/vendor/drivebit-third-party-deferred.js` served (classic `defer`, not `type=module`) |
+| JS errors | No `pageerror` on any checked page |
+
+**Analytics note:** Metrika/Callibri may not load in headless Playwright (ad-block / external scripts). The smoke script reports `analytics` info but does not fail on it. For analytics-only releases, additionally spot-check in a real browser: Network tab → `metrika/tag.js` before `callibri.js`.
+
+**Optional manual spot-check** (browser or `cursor-ide-browser`):
+
+1. https://drivebit.ru/moskva — hero, filters, car grid render
+2. Click «Найти автомобиль» → `/search` with results UI
+3. Header links: «Контакты», «Сдать авто»
+4. https://drivebit.ru/login — auth shell loads (may redirect if already logged in)
+
+Report in final message: release URL + deploy run URL + smoke test output summary.
 
 ## Quick Reference
 
@@ -128,6 +159,7 @@ Spot-check prod URLs or API behavior changed by the release. Report release URL 
 | Merge | `gh pr merge --merge` |
 | Release | `gh release create v3.16.NN --target trunk` |
 | Deploy | `gh run watch` on latest `deploy.yml` |
+| Prod smoke | `npm run verify:prod-smoke` → exit 0 |
 
 ## Common Mistakes
 
@@ -137,12 +169,14 @@ Spot-check prod URLs or API behavior changed by the release. Report release URL 
 | `git add -A` sweeps junk | Stage paths explicitly |
 | Merge before CI green | Wait for `gh pr checks --watch` |
 | Skip deploy watch | Release ≠ deployed until `deploy.yml` succeeds |
+| Skip prod smoke | Deploy success ≠ site works; run `npm run verify:prod-smoke` |
 | Wrong version | Always read `gh release list --limit 1` first |
 | Broad local `./gradlew check` for CI debug | Run only the failing module/task from the log |
 
 ## Red Flags — STOP
 
 - Announcing «готово» / «на проде» without deploy run exit code 0
+- Announcing «на проде» without `npm run verify:prod-smoke` exit code 0
 - Pushing to `trunk` directly (except emergency hotfix per `.cursorrules`)
 - Creating release before merge to `trunk`
 - Leaving unrelated files in the commit
