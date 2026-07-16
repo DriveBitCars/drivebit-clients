@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const MODULE_LOADER =
+    '<script type="module" src="/vendor/drivebit-third-party-deferred.js"></script>';
+
+const REQUIRED_FILES = [
+    "composeApp/src/jsMain/resources/moskva/index.html",
+    "index.html",
+    "list-your-car.html",
+    "authApp/src/jsMain/resources/auth-app-shell/index.html",
+    "carDetailApp/src/jsMain/resources/car-detail/index.html",
+];
+
+function walk(dir, out = []) {
+    for (const name of fs.readdirSync(dir)) {
+        const full = path.join(dir, name);
+        const st = fs.statSync(full);
+        if (st.isDirectory()) walk(full, out);
+        else if (name === "index.html") out.push(full);
+    }
+    return out;
+}
+
+const resources = path.join(root, "composeApp/src/jsMain/resources");
+const composePages = walk(resources).filter((file) => {
+    const html = fs.readFileSync(file, "utf8");
+    return /composeApp\.js/.test(html);
+});
+
+const failures = [];
+
+for (const rel of REQUIRED_FILES) {
+    const file = path.join(root, rel);
+    const html = fs.readFileSync(file, "utf8");
+    if (!html.includes(MODULE_LOADER)) {
+        failures.push(`${rel}: missing module third-party loader`);
+    }
+}
+
+for (const file of composePages) {
+    const html = fs.readFileSync(file, "utf8");
+    if (!html.includes(MODULE_LOADER)) {
+        failures.push(`${path.relative(root, file)}: missing module third-party loader`);
+    }
+}
+
+if (failures.length > 0) {
+    console.error("Third-party loader verification failed:");
+    for (const failure of failures) {
+        console.error(`  - ${failure}`);
+    }
+    process.exit(1);
+}
+
+console.log(`OK: third-party loader present on ${composePages.length} composeApp pages + shells`);

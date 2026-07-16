@@ -69,6 +69,12 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
 
+    - name: Third-party loader unit tests
+      run: npm run test:third-party
+
+    - name: Verify third-party loader in HTML shells
+      run: npm run verify:third-party-loader
+
     - name: Quick static analysis
       run: ./gradlew ktlintCheck --no-daemon --stacktrace --parallel
 

@@ -22,7 +22,7 @@ private fun ensureYandexMetrikaStub() {
     }
     val script = document.createElement("script") as HTMLScriptElement
     script.src = DEFERRED_LOADER_PATH
-    script.defer = true
+    script.type = "module"
     document.head?.appendChild(script)
 }
 
