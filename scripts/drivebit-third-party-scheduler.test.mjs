@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { bootThirdPartyScripts } from "../vendor/drivebit-third-party-scheduler.mjs";
+import {
+    bootThirdPartyScripts,
+    verifyCallibriInstalled,
+} from "../vendor/drivebit-third-party-scheduler.mjs";
 
 const METRIKA_URL = "https://mc.yandex.ru/metrika/tag.js?id=105947907";
 const CALLIBRI_URL = "https://cdn.callibri.ru/callibri.js";
@@ -16,10 +19,12 @@ function createMockEnv(options = {}) {
 
     const head = {
         appendChild(node) {
+            node.parentNode = head;
             headChildren.push(node);
             scripts.push(node);
         },
         insertBefore(node, ref) {
+            node.parentNode = head;
             headChildren.push(node);
             scripts.push(node);
         },
@@ -40,6 +45,9 @@ function createMockEnv(options = {}) {
         querySelector(selector) {
             if (selector === "script[data-drivebit-callibri]") {
                 return scripts.find((s) => s.getAttribute?.("data-drivebit-callibri") === "1") ?? null;
+            }
+            if (selector === 'script[src*="callibri.js"]') {
+                return scripts.find((s) => s.src?.includes("callibri.js")) ?? null;
             }
             if (selector === 'script[src*="code.jivo.ru"]') {
                 return scripts.find((s) => s.src?.includes("code.jivo.ru")) ?? null;
@@ -85,6 +93,10 @@ function createMockEnv(options = {}) {
     const window = {
         location: { hostname: options.hostname ?? "drivebit.ru" },
         ym: undefined,
+        console: {
+            log() {},
+            warn() {},
+        },
         addEventListener(type, fn, opts) {
             if (type === "load") {
                 loadListeners.push(fn);
@@ -192,4 +204,51 @@ test("bootThirdPartyScripts is idempotent for Metrika and Callibri", () => {
         env.document.scripts.filter((s) => s.getAttribute?.("data-drivebit-callibri") === "1").length,
         callibriCount,
     );
+});
+
+test("verifyCallibriInstalled passes official Callibri check callibriInit → undefined", () => {
+    const logs = [];
+    const env = createMockEnv();
+    env.window.console = {
+        log: (...args) => logs.push(args.join(" ")),
+        warn: (...args) => logs.push("WARN " + args.join(" ")),
+    };
+    env.window.callibriInit = () => undefined;
+
+    assert.equal(verifyCallibriInstalled(env, 0), true);
+    assert.ok(
+        logs.some((line) => line.includes("callibriInit() → undefined")),
+        "Must log official Callibri success check",
+    );
+});
+
+test("verifyCallibriInstalled fails when callibriInit is missing after retries exhausted", () => {
+    const logs = [];
+    const env = createMockEnv();
+    env.window.console = {
+        log: (...args) => logs.push(args.join(" ")),
+        warn: (...args) => logs.push("WARN " + args.join(" ")),
+    };
+
+    assert.equal(verifyCallibriInstalled(env, 40), false);
+    assert.ok(logs.some((line) => line.includes("НЕ обнаружен")));
+});
+
+test("loadCallibri does not duplicate when static docs tag already in DOM", () => {
+    const env = createMockEnv();
+    const staticTag = env.document.createElement("script");
+    staticTag.src = "//cdn.callibri.ru/callibri.js";
+    staticTag.defer = true;
+    staticTag.type = "text/javascript";
+    staticTag.charset = "utf-8";
+    env.document.head.appendChild(staticTag);
+    env.window.callibriInit = () => undefined;
+
+    bootThirdPartyScripts(env);
+    env.metrikaScript()?.onload?.();
+
+    const callibriCount = env.document.scripts.filter((s) =>
+        String(s.src || "").includes("callibri.js"),
+    ).length;
+    assert.equal(callibriCount, 1, "Must not inject a second Callibri script");
 });
