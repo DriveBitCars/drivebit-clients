@@ -102,6 +102,10 @@ const analytics = {
 };
 
 for (const err of pageErrors) {
+  // Callibri widget may throw benign errors in headless Chromium
+  if (/Cannot set properties of undefined \(setting 'groups'\)/.test(err.message)) {
+    continue;
+  }
   failures.push(`js error on ${err.url}: ${err.message}`);
 }
 
