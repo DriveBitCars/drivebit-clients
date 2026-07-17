@@ -4,6 +4,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.repositories.MyCityStorageKeys
 import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.canonicalizeBrandSearchPath
 import my.drivebit.utils.pageDescription
 import my.drivebit.utils.pageTitle
 import my.drivebit.utils.resolveCityNameForMeta
@@ -214,7 +215,7 @@ object MetaTags {
             when {
                 normalizedPath.startsWith("/car-detail") -> "/car-detail"
                 normalizedPath.startsWith("/car-photos-gallery") -> "/car-photos-gallery"
-                else -> normalizedPath
+                else -> canonicalizeBrandSearchPath(normalizedPath) ?: normalizedPath
             }
         val seoBlock = SeoLandingBlocks.blockForPath(lookupPath)
         val pageMeta =

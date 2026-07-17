@@ -25,12 +25,27 @@ class SearchPageHeadlineTest {
             SeoLandingBlock(
                 ariaLabel = "Аренда BMW в Москве",
                 h2 = "Аренда BMW в Москве без водителя",
-                h1 = "Аренда BMW в Москве",
+                h1 = "Аренда BMW без водителя в Москве",
                 paragraphs = emptyList(),
             )
         assertEquals(
-            "Аренда BMW в Москве",
-            resolveSearchPageHeadline("/search/bmw", null, block),
+            "Аренда BMW без водителя в Москве",
+            resolveSearchPageHeadline("/bmw", null, block),
+        )
+    }
+
+    @Test
+    fun `resolveSearchPageHeadline uses audi seo spec h1`() {
+        val block =
+            SeoLandingBlock(
+                ariaLabel = "Аренда Audi в Москве",
+                h2 = "Аренда Audi без водителя в Москве",
+                h1 = "Аренда Audi без водителя в Москве",
+                paragraphs = emptyList(),
+            )
+        assertEquals(
+            "Аренда Audi без водителя в Москве",
+            resolveSearchPageHeadline("/audi", null, block),
         )
     }
 

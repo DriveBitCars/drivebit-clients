@@ -2,6 +2,7 @@ package my.drivebit.navigation
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import my.drivebit.utils.canonicalizeBrandSearchPath
 
 @Serializable
 data class SeoContentTable(
@@ -42,7 +43,11 @@ object SeoLandingBlocks {
         return loaded
     }
 
-    fun blockForPath(path: String): SeoLandingBlock? = blocksByPath()[normalizePath(path)]
+    fun blockForPath(path: String): SeoLandingBlock? {
+        val normalized = normalizePath(path)
+        val canonical = canonicalizeBrandSearchPath(normalized) ?: normalized
+        return blocksByPath()[canonical] ?: blocksByPath()[normalized]
+    }
 
     fun renderShell(block: SeoLandingBlock): String =
         """    <div class="drivebit-seo-shell">
