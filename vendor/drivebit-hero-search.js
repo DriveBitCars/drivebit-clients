@@ -3,11 +3,20 @@
         return document.getElementById(id);
     }
 
+    function citySlugFromPath(pathname) {
+        var trimmed = (pathname || "").replace(/\/+$/, "").replace(/^\//, "");
+        if (!trimmed) return "moskva";
+        var segment = trimmed.split("/")[0];
+        if (!segment || segment === "search") return "moskva";
+        return segment.toLowerCase();
+    }
+
     function buildSearchUrl(startDate, endDate) {
         var params = [];
         if (startDate) params.push("startDate=" + encodeURIComponent(startDate));
         if (endDate) params.push("endDate=" + encodeURIComponent(endDate));
-        return params.length ? "/search?" + params.join("&") : "/search";
+        var base = "/" + citySlugFromPath(window.location.pathname) + "/search";
+        return params.length ? base + "?" + params.join("&") : base;
     }
 
     function formatDateDisplay(isoDate) {

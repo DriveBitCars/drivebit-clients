@@ -2,6 +2,7 @@ package my.drivebit.web
 
 import kotlinx.browser.document
 import kotlinx.browser.window
+import my.drivebit.utils.buildCitySearchPath
 import org.w3c.dom.url.URLSearchParams
 
 fun formatHeroDateDisplay(isoDate: String): String {
@@ -14,11 +15,13 @@ fun formatHeroDateDisplay(isoDate: String): String {
 fun buildHeroSearchUrl(
     startDate: String?,
     endDate: String?,
+    citySlug: String = "moskva",
 ): String {
     val params = mutableListOf<String>()
     startDate?.takeIf { it.isNotEmpty() }?.let { params.add("startDate=${encodeURIComponent(it)}") }
     endDate?.takeIf { it.isNotEmpty() }?.let { params.add("endDate=${encodeURIComponent(it)}") }
-    return if (params.isEmpty()) "/search" else "/search?${params.joinToString("&")}"
+    val query = params.joinToString("&").takeIf { it.isNotEmpty() }
+    return buildCitySearchPath(citySlug, query)
 }
 
 private fun encodeURIComponent(value: String): String = js("encodeURIComponent")(value) as String

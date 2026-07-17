@@ -359,7 +359,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -388,7 +388,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -412,7 +412,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -433,7 +433,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -461,7 +461,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -509,7 +509,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -556,7 +556,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -587,7 +587,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -610,7 +610,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -634,7 +634,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -658,7 +658,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -682,7 +682,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -704,7 +704,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -728,7 +728,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -751,7 +751,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -792,7 +792,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 
@@ -833,7 +833,7 @@ class CarSearchRepositoryTest {
             val repository =
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
-                    myCityRepository = mockMyCityRepository,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
                     currentFiltersRepository = mockCurrentFiltersRepository,
                 )
 

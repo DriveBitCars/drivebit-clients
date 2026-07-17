@@ -15,7 +15,7 @@ class SearchPageHeadlineTest {
             )
         assertEquals(
             "Аренда BMW в Москве без водителя",
-            resolveSearchPageHeadline("/search/bmw", null, block),
+            resolveSearchPageHeadline("/search/bmw", null, block = block),
         )
     }
 
@@ -30,7 +30,7 @@ class SearchPageHeadlineTest {
             )
         assertEquals(
             "Аренда BMW без водителя в Москве",
-            resolveSearchPageHeadline("/bmw", null, block),
+            resolveSearchPageHeadline("/bmw", null, block = block),
         )
     }
 
@@ -45,7 +45,7 @@ class SearchPageHeadlineTest {
             )
         assertEquals(
             "Аренда Audi без водителя в Москве",
-            resolveSearchPageHeadline("/audi", null, block),
+            resolveSearchPageHeadline("/audi", null, block = block),
         )
     }
 
@@ -59,7 +59,15 @@ class SearchPageHeadlineTest {
             )
         assertEquals(
             "Поиск автомобилей для аренды в Москве",
-            resolveSearchPageHeadline("/search", null, block),
+            resolveSearchPageHeadline("/moskva/search", null, block = block),
+        )
+    }
+
+    @Test
+    fun `resolveSearchPageHeadline uses city name from url`() {
+        assertEquals(
+            "Поиск автомобилей для аренды в Калининграде",
+            resolveSearchPageHeadline("/kaliningrad/search", null, cityName = "Калининград", block = null),
         )
     }
 
@@ -67,7 +75,7 @@ class SearchPageHeadlineTest {
     fun `resolveSearchPageHeadline falls back to brand name`() {
         assertEquals(
             "Аренда Toyota в Москве без водителя",
-            resolveSearchPageHeadline("/search", "Toyota", block = null),
+            resolveSearchPageHeadline("/moskva/search", "Toyota", block = null),
         )
     }
 }

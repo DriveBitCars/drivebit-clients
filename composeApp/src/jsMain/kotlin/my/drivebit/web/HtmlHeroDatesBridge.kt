@@ -45,7 +45,8 @@ fun HtmlHeroDatesBridge(
             val start = startDateViewModel.state.value.date
             val end = endDateViewModel.state.value.date
             writeHeroDatesToQuery(start, end)
-            val url = buildHeroSearchUrl(start, end)
+            val citySlug = parseCitySlugFromPath(window.location.pathname) ?: "moskva"
+            val url = buildHeroSearchUrl(start, end, citySlug = citySlug)
             navigationController?.navigateTo(url) ?: run { window.location.href = url }
         }
         window.addEventListener("drivebit-hero-dates-changed", datesChangedListener)

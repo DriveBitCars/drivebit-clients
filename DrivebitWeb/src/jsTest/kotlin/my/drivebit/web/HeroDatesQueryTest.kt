@@ -36,14 +36,22 @@ class HeroDatesQueryTest {
     @Test
     fun buildHeroSearchUrl_includesQueryParams() {
         assertEquals(
-            "/search?startDate=2026-04-25&endDate=2026-04-30",
+            "/moskva/search?startDate=2026-04-25&endDate=2026-04-30",
             buildHeroSearchUrl("2026-04-25", "2026-04-30"),
         )
     }
 
     @Test
     fun buildHeroSearchUrl_withoutDates() {
-        assertEquals("/search", buildHeroSearchUrl(null, null))
+        assertEquals("/moskva/search", buildHeroSearchUrl(null, null))
+    }
+
+    @Test
+    fun buildHeroSearchUrl_usesCitySlugFromArgument() {
+        assertEquals(
+            "/kaliningrad/search",
+            buildHeroSearchUrl(null, null, citySlug = "kaliningrad"),
+        )
     }
 
     @Test
@@ -53,6 +61,8 @@ class HeroDatesQueryTest {
         assertTrue(isSearchPath("/search/bmw"))
         assertTrue(isSearchPath("/audi"))
         assertTrue(isSearchPath("/bmw"))
+        assertTrue(isSearchPath("/moskva/search"))
+        assertTrue(isSearchPath("/kaliningrad/search/"))
         assertFalse(isSearchPath("/moskva"))
         assertFalse(isSearchPath("/"))
     }

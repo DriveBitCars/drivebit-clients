@@ -38,7 +38,7 @@ interface CarSearchRepository {
 
 internal class CarSearchRepositoryImpl(
     private val carService: Car,
-    private val myCityRepository: MyCityRepository,
+    private val selectedCity: Flow<City>,
     private val currentFiltersRepository: CurrentFiltersRepository,
 ) : CarSearchRepository {
     private val searchRefreshNonce = MutableStateFlow(0)
@@ -46,7 +46,7 @@ internal class CarSearchRepositoryImpl(
     @OptIn(ExperimentalCoroutinesApi::class)
     override val searchCarsByUserCity: Flow<CarSearchResponse> =
         combine(
-            myCityRepository.getSelectedCity,
+            selectedCity,
             searchRefreshNonce,
             currentFiltersRepository.currentTaskShortName,
             currentFiltersRepository.startState,
@@ -59,7 +59,7 @@ internal class CarSearchRepositoryImpl(
             currentFiltersRepository.bodyTypeName,
             currentFiltersRepository.seatsMin,
         ) { values ->
-            val selectedCity = values[0] as City
+            val city = values[0] as City
             val currentTaskShortName = values[2] as String?
             val startDate = values[3] as String?
             val endDate = values[4] as String?
@@ -71,7 +71,7 @@ internal class CarSearchRepositoryImpl(
             val bodyTypeName = values[10] as String?
             val seatsMin = values[11] as Int?
             Triple(
-                Quadruple(selectedCity, currentTaskShortName, startDate, endDate),
+                Quadruple(city, currentTaskShortName, startDate, endDate),
                 Pair(dailyRateMin, dailyRateMax),
                 Quintuple(brandId, modelId, driveTypeName, bodyTypeName, seatsMin),
             )

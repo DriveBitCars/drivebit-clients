@@ -140,12 +140,15 @@ fun DateRangeSelector(
                                     append("endDate=$currentEndDate")
                                 }
                             }
+                        val citySlug =
+                            my.drivebit.utils.parseCitySlugFromSearchPath(kotlinx.browser.window.location.pathname)
+                                ?: my.drivebit.web.parseCitySlugFromPath(kotlinx.browser.window.location.pathname)
+                                ?: "moskva"
                         val url =
-                            if (queryParams.isNotEmpty()) {
-                                "/search?$queryParams"
-                            } else {
-                                "/search"
-                            }
+                            my.drivebit.utils.buildCitySearchPath(
+                                citySlug,
+                                queryParams.takeIf { it.isNotEmpty() },
+                            )
                         navigationController?.navigateTo(url)
                         onSearchClick()
                     },
