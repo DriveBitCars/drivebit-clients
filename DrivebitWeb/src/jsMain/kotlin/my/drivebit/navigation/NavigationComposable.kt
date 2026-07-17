@@ -8,6 +8,7 @@ import my.drivebit.repositories.MyCityRepository
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.cityNameToSlug
 import my.drivebit.web.CitySlugResolver
+import my.drivebit.web.isSearchPath
 import my.drivebit.web.parseCitySlugFromPath
 import org.koin.compose.koinInject
 
@@ -27,6 +28,7 @@ fun Navigation(content: @Composable (String) -> Unit) {
                     val target = "/${cityNameToSlug(city.name)}"
                     navigationController?.replacePath(target)
                 }
+                isSearchPath(currentPath) -> Unit
                 else -> {
                     parseCitySlugFromPath(currentPath)?.let { slug ->
                         val city =
