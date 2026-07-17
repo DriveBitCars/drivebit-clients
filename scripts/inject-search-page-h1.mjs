@@ -32,6 +32,9 @@ function pathToHtmlFile(routePath) {
   if (normalized === "audi" || normalized === "bmw") {
     return path.join(resourcesDir, normalized, "index.html");
   }
+  if (/^[a-z0-9-]+\/search$/.test(normalized)) {
+    return path.join(resourcesDir, normalized, "index.html");
+  }
   return null;
 }
 
@@ -126,7 +129,8 @@ const searchRoutes = Object.entries(blocks).filter(
     route === "/search" ||
     route.startsWith("/search/") ||
     route === "/audi" ||
-    route === "/bmw",
+    route === "/bmw" ||
+    /^\/[a-z0-9-]+\/search$/.test(route),
 );
 let updated = 0;
 let created = 0;

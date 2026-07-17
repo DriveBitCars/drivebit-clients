@@ -9,7 +9,7 @@ const base = (process.argv[2] || "https://drivebit.ru").replace(/\/$/, "");
 
 const PAGES = [
   { path: "/moskva", name: "city landing" },
-  { path: "/search", name: "search" },
+  { path: "/moskva/search", name: "search" },
   { path: "/login", name: "login shell" },
   { path: "/contacts", name: "contacts" },
   { path: "/list-your-car.html", name: "list your car" },
@@ -50,9 +50,9 @@ const searchButton = page.getByRole("button", { name: "Найти автомоб
 const searchNavOk = (await searchButton.count()) > 0;
 if (searchNavOk) {
   await searchButton.click();
-  await page.waitForURL(/\/search/, { timeout: 15000 });
+  await page.waitForURL(/\/[^/]+\/search/, { timeout: 15000 });
 }
-const navigationOk = /\/search/.test(page.url());
+const navigationOk = /\/[^/]+\/search/.test(page.url());
 
 await page.goto(`${base}/moskva`, { waitUntil: "load", timeout: 60000 });
 await page.waitForTimeout(12000);
@@ -87,7 +87,7 @@ for (const item of results) {
   }
 }
 
-if (!navigationOk) failures.push("navigation: hero search button did not open /search");
+if (!navigationOk) failures.push("navigation: hero search button did not open /{city}/search");
 
 const vendorScheduler = await fetch(`${base}/vendor/drivebit-third-party-scheduler.mjs`).then(
   (r) => r.ok,

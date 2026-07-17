@@ -36,17 +36,21 @@ import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.navigation.NavigationState
 import my.drivebit.repositories.CurrentFiltersRepository
+import my.drivebit.repositories.SearchCityRepository
+import my.drivebit.utils.buildCitySearchPath
+import my.drivebit.utils.isShortBrandSearchPath
+import my.drivebit.utils.parseCitySlugFromSearchPath
+import my.drivebit.viewmodels.SearchPageDateEndViewModel
+import my.drivebit.viewmodels.SearchPageDateViewModel
+import my.drivebit.viewmodels.SearchState
+import my.drivebit.viewmodels.SearchViewModel
 import my.drivebit.web.BrandSlugResolver
+import my.drivebit.web.CitySlugResolver
 import my.drivebit.web.buildCarDetailUrl
 import my.drivebit.web.canonicalSearchBrandPath
 import my.drivebit.web.parseSearchBrandSlugFromPath
 import my.drivebit.web.resolveSearchPageHeadline
 import my.drivebit.web.searchPathForBrandName
-import my.drivebit.viewmodels.SearchPageDateEndViewModel
-import my.drivebit.viewmodels.SearchPageDateViewModel
-import my.drivebit.viewmodels.SearchState
-import my.drivebit.viewmodels.SearchViewModel
-import my.drivebit.utils.isShortBrandSearchPath
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.border
@@ -74,6 +78,8 @@ fun SearchPage() {
     val navigationController = LocalNavigationController.current!!
     val navigationState: NavigationState = koinInject()
     val brandSlugResolver: BrandSlugResolver = koinInject()
+    val citySlugResolver: CitySlugResolver = koinInject()
+    val searchCityRepository: SearchCityRepository = koinInject()
     val viewModel: SearchViewModel = koinInject()
     val state by viewModel.state.collectAsState()
     val displayedCars by viewModel.displayedCars.collectAsState()
@@ -95,20 +101,36 @@ fun SearchPage() {
     val endDateByRepo by currentFiltersRepository.endState.collectAsState(null)
     val currentPath by navigationState.currentPath.collectAsState()
     val brandSlugFromPath = parseSearchBrandSlugFromPath(currentPath)
+    val citySlugFromPath = parseCitySlugFromSearchPath(currentPath) ?: "moskva"
+    var searchCityName by remember { mutableStateOf<String?>(null) }
     val pageHeadline =
         resolveSearchPageHeadline(
             path = currentPath,
             brandName = filterBrandName,
+            cityName = searchCityName,
         )
 
     LaunchedEffect(currentPath) {
+        val normalized = currentPath.substringBefore('?').substringBefore('#').removeSuffix("/").ifEmpty { "/" }
+        if (normalized == "/search") {
+            val query = window.location.search
+            val target = buildCitySearchPath("moskva") + query
+            window.history.replaceState(null, "", target)
+            navigationState.updatePath(buildCitySearchPath("moskva"))
+            return@LaunchedEffect
+        }
         val canonical = canonicalSearchBrandPath(currentPath) ?: return@LaunchedEffect
-        val normalized = currentPath.removeSuffix("/").ifEmpty { "/" }
         if (normalized.startsWith("/search/") && isShortBrandSearchPath(canonical) && canonical != normalized) {
             val query = window.location.search
             window.history.replaceState(null, "", "$canonical$query")
             navigationState.updatePath(canonical)
         }
+    }
+
+    LaunchedEffect(citySlugFromPath) {
+        val city = citySlugResolver.resolve(citySlugFromPath) ?: citySlugResolver.moscowCity()
+        searchCityRepository.setCity(city)
+        searchCityName = city.name
     }
 
     LaunchedEffect(brandSlugFromPath) {
@@ -349,12 +371,13 @@ fun SearchPage() {
                                         viewModel.resetAllFilters()
                                         searchPageDateViewModel.set(null)
                                         searchPageDateEndViewModel.set(null)
+                                        val citySearchPath = buildCitySearchPath(citySlugFromPath)
                                         val targetPath =
-                                            if (brandSlugFromPath != null) "/search" else window.location.pathname
+                                            if (brandSlugFromPath != null) citySearchPath else window.location.pathname
                                         window.history.pushState(null, "", targetPath)
                                         locationSearch = ""
                                         if (brandSlugFromPath != null) {
-                                            navigationState.updatePath("/search")
+                                            navigationState.updatePath(citySearchPath)
                                         }
                                     },
                                 )
@@ -447,8 +470,9 @@ fun SearchPage() {
                                                 showBrandFilter = false
                                                 if (brandSlugFromPath != null) {
                                                     val query = window.location.search
-                                                    window.history.pushState(null, "", "/search$query")
-                                                    navigationState.updatePath("/search")
+                                                    val citySearchPath = buildCitySearchPath(citySlugFromPath)
+                                                    window.history.pushState(null, "", "$citySearchPath$query")
+                                                    navigationState.updatePath(citySearchPath)
                                                 }
                                             },
                                             onOk = { showBrandFilter = false },

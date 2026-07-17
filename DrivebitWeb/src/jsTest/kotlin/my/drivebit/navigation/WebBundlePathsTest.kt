@@ -43,7 +43,9 @@ class WebBundlePathsTest {
         assertFalse(requiresFullPageNavigation("/profile", "/profile"))
         assertFalse(requiresFullPageNavigation("/change-email", "/change-phone"))
         assertFalse(requiresFullPageNavigation("/edit-name", "/change-email"))
-        assertFalse(requiresFullPageNavigation("/moskva", "/search"))
+        assertTrue(requiresFullPageNavigation("/moskva", "/moskva/search"))
+        assertTrue(requiresFullPageNavigation("/moskva", "/search"))
+        assertFalse(requiresFullPageNavigation("/moskva/search", "/kaliningrad/search"))
     }
 
     @Test

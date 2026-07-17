@@ -6,7 +6,9 @@ import androidx.compose.runtime.getValue
 import kotlinx.coroutines.flow.first
 import my.drivebit.repositories.MyCityRepository
 import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.buildCitySearchPath
 import my.drivebit.utils.cityNameToSlug
+import my.drivebit.utils.parseCitySlugFromSearchPath
 import my.drivebit.web.CitySlugResolver
 import my.drivebit.web.isSearchPath
 import my.drivebit.web.parseCitySlugFromPath
@@ -28,7 +30,26 @@ fun Navigation(content: @Composable (String) -> Unit) {
                     val target = "/${cityNameToSlug(city.name)}"
                     navigationController?.replacePath(target)
                 }
-                isSearchPath(currentPath) -> Unit
+                isSearchPath(currentPath) -> {
+                    val normalized =
+                        currentPath
+                            .substringBefore('?')
+                            .substringBefore('#')
+                            .removeSuffix("/")
+                            .ifEmpty { "/" }
+                    if (normalized == "/search") {
+                        navigationController?.replacePath(buildCitySearchPath("moskva"))
+                        return@LaunchedEffect
+                    }
+                    parseCitySlugFromSearchPath(currentPath)?.let { slug ->
+                        citySlugResolver.resolve(slug)?.let { city ->
+                            val current = myCityRepository.getSelectedCity.first()
+                            if (current.id != city.id || current.name != city.name) {
+                                myCityRepository.selectCity(city.id, city.name)
+                            }
+                        }
+                    }
+                }
                 else -> {
                     parseCitySlugFromPath(currentPath)?.let { slug ->
                         val city =

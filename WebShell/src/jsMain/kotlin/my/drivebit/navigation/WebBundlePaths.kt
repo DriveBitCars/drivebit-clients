@@ -33,4 +33,9 @@ fun webBundleForPath(pathname: String): WebBundle {
 fun requiresFullPageNavigation(
     currentPathname: String,
     targetPath: String,
-): Boolean = webBundleForPath(currentPathname) != webBundleForPath(targetPath)
+): Boolean {
+    if (webBundleForPath(currentPathname) != webBundleForPath(targetPath)) return true
+    val current = pathWithoutQuery(currentPathname)
+    val target = pathWithoutQuery(targetPath)
+    return my.drivebit.web.isSearchPath(current) != my.drivebit.web.isSearchPath(target)
+}

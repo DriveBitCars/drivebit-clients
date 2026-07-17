@@ -184,11 +184,19 @@ object MetaTags {
                     path = "/payment-failure",
                     noindex = true,
                 ),
+            "/moskva/search" to
+                PageMeta(
+                    title = "Поиск автомобилей в Москве - DriveBit",
+                    description = "Расширенный поиск аренды автомобилей в Москве по марке, цене, типу кузова и приводу.",
+                    path = "/moskva/search",
+                    noindex = true,
+                ),
             "/search" to
                 PageMeta(
-                    title = "Поиск автомобилей - DriveBit",
+                    title = "Поиск автомобилей в Москве - DriveBit",
                     description = "Расширенный поиск аренды автомобилей в Москве по марке, цене, типу кузова и приводу.",
-                    path = "/search",
+                    path = "/moskva/search",
+                    noindex = true,
                 ),
             "/car-detail" to
                 PageMeta(
