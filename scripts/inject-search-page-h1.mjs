@@ -29,6 +29,9 @@ function pathToHtmlFile(routePath) {
   if (normalized.startsWith("search/")) {
     return path.join(resourcesDir, normalized, "index.html");
   }
+  if (normalized === "audi" || normalized === "bmw") {
+    return path.join(resourcesDir, normalized, "index.html");
+  }
   return null;
 }
 
@@ -118,7 +121,13 @@ function createSearchIndexFromTemplate(templateHtml, block) {
   );
 }
 
-const searchRoutes = Object.entries(blocks).filter(([route]) => route === "/search" || route.startsWith("/search/"));
+const searchRoutes = Object.entries(blocks).filter(
+  ([route]) =>
+    route === "/search" ||
+    route.startsWith("/search/") ||
+    route === "/audi" ||
+    route === "/bmw",
+);
 let updated = 0;
 let created = 0;
 
@@ -136,7 +145,7 @@ for (const [route, block] of searchRoutes) {
       console.warn(`Missing HTML for ${route}: ${htmlPath}`);
       continue;
     }
-    const templatePath = path.join(resourcesDir, "search/bmw/index.html");
+    const templatePath = path.join(resourcesDir, "search/skoda/index.html");
     const templateHtml = fs.readFileSync(templatePath, "utf8");
     const next = createSearchIndexFromTemplate(templateHtml, block);
     fs.mkdirSync(path.dirname(htmlPath), { recursive: true });

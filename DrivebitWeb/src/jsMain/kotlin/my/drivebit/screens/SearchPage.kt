@@ -38,6 +38,7 @@ import my.drivebit.navigation.NavigationState
 import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.web.BrandSlugResolver
 import my.drivebit.web.buildCarDetailUrl
+import my.drivebit.web.canonicalSearchBrandPath
 import my.drivebit.web.parseSearchBrandSlugFromPath
 import my.drivebit.web.resolveSearchPageHeadline
 import my.drivebit.web.searchPathForBrandName
@@ -45,6 +46,7 @@ import my.drivebit.viewmodels.SearchPageDateEndViewModel
 import my.drivebit.viewmodels.SearchPageDateViewModel
 import my.drivebit.viewmodels.SearchState
 import my.drivebit.viewmodels.SearchViewModel
+import my.drivebit.utils.isShortBrandSearchPath
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.border
@@ -98,6 +100,16 @@ fun SearchPage() {
             path = currentPath,
             brandName = filterBrandName,
         )
+
+    LaunchedEffect(currentPath) {
+        val canonical = canonicalSearchBrandPath(currentPath) ?: return@LaunchedEffect
+        val normalized = currentPath.removeSuffix("/").ifEmpty { "/" }
+        if (normalized.startsWith("/search/") && isShortBrandSearchPath(canonical) && canonical != normalized) {
+            val query = window.location.search
+            window.history.replaceState(null, "", "$canonical$query")
+            navigationState.updatePath(canonical)
+        }
+    }
 
     LaunchedEffect(brandSlugFromPath) {
         val slug = brandSlugFromPath ?: return@LaunchedEffect

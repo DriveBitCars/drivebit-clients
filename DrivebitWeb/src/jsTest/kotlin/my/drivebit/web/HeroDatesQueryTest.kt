@@ -51,6 +51,8 @@ class HeroDatesQueryTest {
         assertTrue(isSearchPath("/search"))
         assertTrue(isSearchPath("/search/"))
         assertTrue(isSearchPath("/search/bmw"))
+        assertTrue(isSearchPath("/audi"))
+        assertTrue(isSearchPath("/bmw"))
         assertFalse(isSearchPath("/moskva"))
         assertFalse(isSearchPath("/"))
     }

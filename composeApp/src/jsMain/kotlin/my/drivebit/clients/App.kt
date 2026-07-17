@@ -19,6 +19,7 @@ import my.drivebit.web.StaticHeroHeadlineSync
 import my.drivebit.web.StaticHeroShellSync
 import my.drivebit.web.StaticMainPromoShellSync
 import my.drivebit.web.isCityHomePath
+import my.drivebit.web.isSearchPath
 import my.drivebit.web.koin.WebKoinHost
 
 @Composable
@@ -51,7 +52,7 @@ actual fun App() {
                 isAccountBundlePath(currentPath) -> {
                     RedirectToSplitBundle()
                 }
-                currentPath.startsWith("/search") -> {
+                isSearchPath(currentPath) -> {
                     SearchPage()
                 }
                 isStaticHtmlShellPath(currentPath) -> Unit

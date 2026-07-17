@@ -47,7 +47,7 @@ For bulk cars-grid skeleton rollout on listing pages, run `node scripts/inject-c
 ## New `/search/{brand}` page
 
 1. Add an entry to [`landing-blocks.json`](landing-blocks.json) (`h2` is used as page H1).
-2. Copy an existing `search/bmw/index.html` or run:
+2. Copy an existing `audi/index.html` / `bmw/index.html` (short brand URLs) or a `search/{brand}/index.html`, or run:
    ```bash
    node scripts/inject-search-page-h1.mjs
    ```
