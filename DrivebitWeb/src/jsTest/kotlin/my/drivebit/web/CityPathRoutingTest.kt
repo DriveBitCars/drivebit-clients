@@ -35,6 +35,14 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun parseCityPath_returnsNullForShortBrandSeoPaths() {
+        assertNull(parseCityPath("/audi"))
+        assertNull(parseCityPath("/bmw"))
+        assertNull(parseCityPath("/audi/"))
+        assertNull(parseCityPath("/BMW"))
+    }
+
+    @Test
     fun parseCityPath_returnsNullForDownloadBookingContract() {
         assertNull(parseCityPath("/download-booking-contract"))
         assertNull(parseCityPath("/download-booking-contract?bookingId=abc"))
