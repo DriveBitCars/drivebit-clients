@@ -254,10 +254,14 @@ private fun SearchResultsContent(
             startDate = filters.startDate,
             endDate = filters.endDate,
             onStartDateChanged = { date ->
-                navigateFilter { it.copy(startDate = date) }
+                if (date != filters.startDate) {
+                    navigateFilter { it.copy(startDate = date) }
+                }
             },
             onEndDateChanged = { date ->
-                navigateFilter { it.copy(endDate = date) }
+                if (date != filters.endDate) {
+                    navigateFilter { it.copy(endDate = date) }
+                }
             },
         )
         FlowRow(gap = 8.px) {

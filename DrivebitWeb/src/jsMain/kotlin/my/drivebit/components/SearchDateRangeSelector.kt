@@ -60,8 +60,12 @@ fun SearchDateRangeSelector(
         if (endState.date != endDate) endViewModel.setDate(endDate)
     }
 
-    LaunchedEffect(startState.date) { onStartDateChanged(startState.date) }
-    LaunchedEffect(endState.date) { onEndDateChanged(endState.date) }
+    LaunchedEffect(startState.date) {
+        if (startState.date != startDate) onStartDateChanged(startState.date)
+    }
+    LaunchedEffect(endState.date) {
+        if (endState.date != endDate) onEndDateChanged(endState.date)
+    }
 
     Row(gap = 12.px) {
         SearchDateFieldItem(
