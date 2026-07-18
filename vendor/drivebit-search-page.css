@@ -30,3 +30,10 @@ body:has(#root:not(:empty)) #drivebit-search-headline-static {
         font-size: 24px;
     }
 }
+
+@media (max-width: 640px) {
+    #root > div {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+}

@@ -30,6 +30,7 @@ import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.minWidth
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
@@ -66,7 +67,14 @@ fun SearchDateRangeSelector(
         if (endState.date != endDate) onEndDateChanged(endState.date)
     }
 
-    Row(gap = 12.px) {
+    Row(
+        gap = 12.px,
+        modifier = {
+            width(100.percent)
+            property("box-sizing", "border-box")
+            property("min-width", "0")
+        },
+    ) {
         SearchDateFieldItem(
             actionLabel = "с",
             value = startState.date?.let(::formatSearchDateForDisplay) ?: "выберите даты",

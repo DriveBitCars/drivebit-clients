@@ -112,17 +112,26 @@ fun SearchApp() {
         viewModel.load(locationHref)
     }
 
-    val filtersForHeadline =
+    var lastFilters by remember { mutableStateOf<SearchFilterSet?>(null) }
+
+    LaunchedEffect(state) {
+        val current = state
+        if (current is SearchUiState.Results) {
+            lastFilters = current.filters
+        }
+    }
+
+    val filtersForUi =
         when (val s = state) {
             is SearchUiState.Results -> s.filters
-            else -> null
+            else -> lastFilters ?: filtersFromLocation(locationHref)
         }
 
     val pathOnly = locationHref.substringBefore('?').substringBefore('#')
     val pageHeadline =
         resolveSearchPageHeadline(
             path = pathOnly,
-            brandName = filtersForHeadline?.brandName,
+            brandName = filtersForUi.brandName,
             cityName = searchCityName,
         )
 
@@ -132,12 +141,17 @@ fun SearchApp() {
             padding(20.px)
             property("max-width", "1200px")
             property("margin", "0 auto")
+            property("box-sizing", "border-box")
         }
     }) {
         when (val currentState = state) {
             is SearchUiState.Loading -> {
-                SearchPageHeadline(pageHeadline)
-                CarsGridSkeleton()
+                SearchResultsContent(
+                    filters = filtersForUi,
+                    result = null,
+                    pageHeadline = pageHeadline,
+                    onLocationChanged = { locationHref = currentLocationHref() },
+                )
             }
 
             is SearchUiState.Error -> {
@@ -147,7 +161,8 @@ fun SearchApp() {
 
             is SearchUiState.Results -> {
                 SearchResultsContent(
-                    state = currentState,
+                    filters = currentState.filters,
+                    result = currentState.result,
                     pageHeadline = pageHeadline,
                     onLocationChanged = { locationHref = currentLocationHref() },
                 )
@@ -156,13 +171,35 @@ fun SearchApp() {
     }
 }
 
+private fun filtersFromLocation(locationHref: String): SearchFilterSet {
+    val parts = parseSearchUrl(locationHref)
+    return SearchFilterSet(
+        citySlug = parts.citySlug,
+        brandSlug = parts.brandSlug,
+        modelSlug = parts.modelSlug,
+        startDate = parts.startDate,
+        endDate = parts.endDate,
+        dailyRateMin = parts.dailyRateMin,
+        dailyRateMax = parts.dailyRateMax,
+        driveType = parts.driveType,
+        driveTypeLabel = parts.driveTypeLabel,
+        bodyType = parts.bodyType,
+        bodyTypeLabel = parts.bodyTypeLabel,
+        seatsMin = parts.seatsMin,
+        yearMin = parts.yearMin,
+        yearMax = parts.yearMax,
+        mileageMin = parts.mileageMin,
+        page = parts.page,
+    )
+}
+
 @Composable
 private fun SearchResultsContent(
-    state: SearchUiState.Results,
+    filters: SearchFilterSet,
+    result: SearchCarsResult?,
     pageHeadline: String,
     onLocationChanged: () -> Unit,
 ) {
-    val filters = state.filters
     var showPriceFilter by remember { mutableStateOf(false) }
     var showBrandFilter by remember { mutableStateOf(false) }
     var showDriveTypeFilter by remember { mutableStateOf(false) }
@@ -383,41 +420,47 @@ private fun SearchResultsContent(
                 property("min-height", "240px")
             },
             underneath = {
-                if (state.result.cars.isNotEmpty()) {
-                    CarsGrid(
-                        cars = state.result.cars,
-                        carHref = { car ->
-                            buildCarDetailUrl(
-                                carId = car.id,
-                                startDate = filters.startDate,
-                                endDate = filters.endDate,
-                            )
-                        },
-                    )
-                    PaginationBar(
-                        currentPage = urlPageToUiIndex(filters.page),
-                        totalPages = state.result.totalPages,
-                        totalCount = state.result.totalCount,
-                        pageSize = 9,
-                        onPageChange = { uiIndex ->
-                            navigatePage(uiIndexToUrlPage(uiIndex))
-                        },
-                    )
-                } else {
-                    Div({
-                        style {
-                            padding(40.px)
-                            textAlign("center")
-                        }
-                    }) {
-                        Span({
+                when {
+                    result == null -> {
+                        CarsGridSkeleton()
+                    }
+                    result.cars.isNotEmpty() -> {
+                        CarsGrid(
+                            cars = result.cars,
+                            carHref = { car ->
+                                buildCarDetailUrl(
+                                    carId = car.id,
+                                    startDate = filters.startDate,
+                                    endDate = filters.endDate,
+                                )
+                            },
+                        )
+                        PaginationBar(
+                            currentPage = urlPageToUiIndex(filters.page),
+                            totalPages = result.totalPages,
+                            totalCount = result.totalCount,
+                            pageSize = 9,
+                            onPageChange = { uiIndex ->
+                                navigatePage(uiIndexToUrlPage(uiIndex))
+                            },
+                        )
+                    }
+                    else -> {
+                        Div({
                             style {
-                                applyTypography(CSSTypography.Styles.body)
-                                fontSize(CSSTypography.FontSize.base)
-                                color(CSSColors.Gray600)
+                                padding(40.px)
+                                textAlign("center")
                             }
                         }) {
-                            Text("Автомобили не найдены")
+                            Span({
+                                style {
+                                    applyTypography(CSSTypography.Styles.body)
+                                    fontSize(CSSTypography.FontSize.base)
+                                    color(CSSColors.Gray600)
+                                }
+                            }) {
+                                Text("Автомобили не найдены")
+                            }
                         }
                     }
                 }
@@ -428,7 +471,7 @@ private fun SearchResultsContent(
                         PriceFilter(
                             minPrice = minPrice,
                             maxPrice = maxPrice,
-                            resultsCount = state.result.totalCount,
+                            resultsCount = result?.totalCount ?: 0,
                             onReset = {
                                 minPrice.value = 0
                                 maxPrice.value = 50000
@@ -533,7 +576,7 @@ private fun SearchResultsContent(
                     BoxOverlay {
                         SeatsFilter(
                             selectedSeatsMin = filters.seatsMin,
-                            resultsCount = state.result.totalCount,
+                            resultsCount = result?.totalCount ?: 0,
                             onSeatsMinSelected = { seatsMin ->
                                 navigateFilter { it.copy(seatsMin = seatsMin) }
                                 showSeatsFilter = false

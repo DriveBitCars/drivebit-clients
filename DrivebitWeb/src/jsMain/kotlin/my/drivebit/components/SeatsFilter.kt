@@ -28,8 +28,9 @@ fun SeatsFilter(
             backgroundColor(CSSColors.White)
             borderRadius(12.px)
             property("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.1)")
-            width(400.px)
-            property("max-width", "90vw")
+            width(100.percent)
+            property("max-width", "400px")
+            property("box-sizing", "border-box")
         },
     ) {
         Span({
