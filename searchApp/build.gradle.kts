@@ -20,6 +20,13 @@ kotlin {
         jsMain.dependencies {
             implementation(project(":SearchCore"))
             implementation(project(":Utils"))
+            implementation(project(":DrivebitWeb"))
+            implementation(project(":WebShell"))
+            implementation(project(":AppHeader"))
+            implementation(project(":Storage"))
+            implementation(project(":Repositories"))
+            implementation(project(":CommonViewModels"))
+            implementation(project(":Network"))
             implementation(compose.html.core)
             implementation(compose.runtime)
             implementation(libs.koin.core)
@@ -54,5 +61,8 @@ tasks.withType<org.gradle.api.tasks.Copy>().configureEach {
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(layout.projectDirectory.file("src/jsMain/resources/search-app-shell/index.html")) {
         into("search-shell")
+    }
+    from(rootProject.layout.projectDirectory.dir("vendor")) {
+        into("vendor")
     }
 }
