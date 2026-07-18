@@ -26,6 +26,11 @@ data class SearchFilterSet(
     val page: Int = 1,
 )
 
+inline fun applySearchFilterChange(
+    current: SearchFilterSet,
+    transform: (SearchFilterSet) -> SearchFilterSet,
+): SearchFilterSet = transform(current).copy(page = 1)
+
 data class SearchCarCard(
     val id: String,
     val title: String,
