@@ -1,15 +1,15 @@
 package my.drivebit.viewmodels
 
-import my.drivebit.repositories.CurrentFiltersRepository
+import my.drivebit.repositories.SearchFiltersRepository
 
 interface SearchPageDateEndViewModel {
     fun set(date: String?)
 }
 
 class SearchPageDateEndViewModelImpl(
-    private val currentFiltersRepository: CurrentFiltersRepository,
+    private val searchFiltersRepository: SearchFiltersRepository,
 ) : SearchPageDateEndViewModel {
     override fun set(date: String?) {
-        currentFiltersRepository.updateEndDate(date)
+        searchFiltersRepository.updateEndDate(date)
     }
 }

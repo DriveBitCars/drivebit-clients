@@ -5,28 +5,89 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-interface CurrentFiltersRepository : SearchFiltersRepository {
-    companion object {
-        const val DEFAULT_NEARBY_RADIUS_KM = 10
-    }
+interface SearchFiltersRepository {
+    val currentTaskShortName: Flow<String?>
+    val startState: Flow<String?>
+    val endState: Flow<String?>
+    val dailyRateMin: Flow<Int?>
+    val dailyRateMax: Flow<Int?>
+    val brandId: Flow<Int?>
+    val brandName: Flow<String?>
+    val modelId: Flow<Int?>
+    val modelName: Flow<String?>
+    val driveTypeName: Flow<String?>
+    val driveTypeTranslate: Flow<String?>
+    val bodyTypeName: Flow<String?>
+    val bodyTypeTranslate: Flow<String?>
+    val seatsMin: Flow<Int?>
+    val engineTypeName: Flow<String?>
+    val engineTypeTranslate: Flow<String?>
+    val colorName: Flow<String?>
+    val colorTranslate: Flow<String?>
+    val yearMin: Flow<Int?>
+    val yearMax: Flow<Int?>
+    val seatsMax: Flow<Int?>
+    val availableMileagePerDayKmMin: Flow<Int?>
+    val currentPage: Flow<Int>
 
-    val nearbySearchLat: Flow<Double?>
-    val nearbySearchLon: Flow<Double?>
-    val nearbyRadiusKm: Flow<Int>
+    fun setPage(page: Int)
 
-    fun updateNearbySearchCenter(
-        lat: Double,
-        lon: Double,
+    fun updateCurrentTask(shortName: String)
+
+    fun updateStartDate(date: String?)
+
+    fun updateEndDate(date: String?)
+
+    fun updateDailyRateMin(value: Int?)
+
+    fun updateDailyRateMax(value: Int?)
+
+    fun updateBrand(
+        id: Int?,
+        name: String?,
     )
 
-    fun updateNearbyRadiusKm(km: Int)
+    fun updateModel(
+        id: Int?,
+        name: String?,
+    )
+
+    fun updateDriveType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateBodyType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateSeatsMin(value: Int?)
+
+    fun updateEngineType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateColor(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateYearMin(value: Int?)
+
+    fun updateYearMax(value: Int?)
+
+    fun updateSeatsMax(value: Int?)
+
+    fun updateAvailableMileagePerDayKmMin(value: Int?)
 }
 
-internal class CurrentFiltersRepositoryImpl(
+internal class SearchFiltersRepositoryImpl(
     private val settings: Settings,
-    private val keyPrefix: String? = null,
-) : CurrentFiltersRepository {
+) : SearchFiltersRepository {
     companion object {
+        private const val KEY_PREFIX = "search"
         private const val START_DATE_KEY = "start_date"
         private const val END_DATE_KEY = "end_date"
         private const val DAILY_RATE_MIN_KEY = "daily_rate_min"
@@ -48,12 +109,9 @@ internal class CurrentFiltersRepositoryImpl(
         private const val YEAR_MAX_KEY = "filter_year_max"
         private const val SEATS_MAX_KEY = "filter_seats_max"
         private const val AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY = "filter_available_mileage_per_day_km_min"
-        private const val NEARBY_SEARCH_LAT_KEY = "nearby_search_lat"
-        private const val NEARBY_SEARCH_LON_KEY = "nearby_search_lon"
-        private const val NEARBY_RADIUS_KM_KEY = "nearby_radius_km"
     }
 
-    private fun key(name: String): String = if (keyPrefix != null) "${keyPrefix}_$name" else name
+    private fun key(name: String): String = "${KEY_PREFIX}_$name"
 
     private val currentTaskShortNameState = MutableStateFlow<String?>(null)
     private val startStateFlow = MutableStateFlow<String?>(null)
@@ -77,17 +135,11 @@ internal class CurrentFiltersRepositoryImpl(
     private val yearMaxState = MutableStateFlow<Int?>(null)
     private val seatsMaxState = MutableStateFlow<Int?>(null)
     private val availableMileagePerDayKmMinState = MutableStateFlow<Int?>(null)
-    private val nearbySearchLatState = MutableStateFlow<Double?>(null)
-    private val nearbySearchLonState = MutableStateFlow<Double?>(null)
-    private val nearbyRadiusKmState = MutableStateFlow(CurrentFiltersRepository.DEFAULT_NEARBY_RADIUS_KM)
     private val currentPageState = MutableStateFlow(0)
 
     init {
-        val savedStartDate = settings.getStringOrNullIfEmpty(START_DATE_KEY)
-        startStateFlow.value = savedStartDate
-
-        val savedEndDate = settings.getStringOrNullIfEmpty(END_DATE_KEY)
-        endStateFlow.value = savedEndDate
+        startStateFlow.value = settings.getStringOrNullIfEmpty(START_DATE_KEY)
+        endStateFlow.value = settings.getStringOrNullIfEmpty(END_DATE_KEY)
 
         val savedDailyRateMin = settings.getInt(key(DAILY_RATE_MIN_KEY), -1)
         dailyRateMinState.value = if (savedDailyRateMin < 0) null else savedDailyRateMin
@@ -97,42 +149,24 @@ internal class CurrentFiltersRepositoryImpl(
 
         val savedBrandId = settings.getInt(key(BRAND_ID_KEY), -1)
         brandIdState.value = if (savedBrandId < 0) null else savedBrandId
-
-        val savedBrandName = settings.getStringOrNullIfEmpty(key(BRAND_NAME_KEY))
-        brandNameState.value = savedBrandName
+        brandNameState.value = settings.getStringOrNullIfEmpty(key(BRAND_NAME_KEY))
 
         val savedModelId = settings.getInt(key(MODEL_ID_KEY), -1)
         modelIdState.value = if (savedModelId < 0) null else savedModelId
+        modelNameState.value = settings.getStringOrNullIfEmpty(key(MODEL_NAME_KEY))
 
-        val savedModelName = settings.getStringOrNullIfEmpty(key(MODEL_NAME_KEY))
-        modelNameState.value = savedModelName
-
-        val savedDriveTypeName = settings.getStringOrNullIfEmpty(key(DRIVE_TYPE_NAME_KEY))
-        driveTypeNameState.value = savedDriveTypeName
-
-        val savedDriveTypeTranslate = settings.getStringOrNullIfEmpty(key(DRIVE_TYPE_TRANSLATE_KEY))
-        driveTypeTranslateState.value = savedDriveTypeTranslate
-
-        val savedBodyTypeName = settings.getStringOrNullIfEmpty(key(BODY_TYPE_NAME_KEY))
-        bodyTypeNameState.value = savedBodyTypeName
-
-        val savedBodyTypeTranslate = settings.getStringOrNullIfEmpty(key(BODY_TYPE_TRANSLATE_KEY))
-        bodyTypeTranslateState.value = savedBodyTypeTranslate
+        driveTypeNameState.value = settings.getStringOrNullIfEmpty(key(DRIVE_TYPE_NAME_KEY))
+        driveTypeTranslateState.value = settings.getStringOrNullIfEmpty(key(DRIVE_TYPE_TRANSLATE_KEY))
+        bodyTypeNameState.value = settings.getStringOrNullIfEmpty(key(BODY_TYPE_NAME_KEY))
+        bodyTypeTranslateState.value = settings.getStringOrNullIfEmpty(key(BODY_TYPE_TRANSLATE_KEY))
 
         val savedSeatsMin = settings.getInt(key(SEATS_MIN_KEY), -1)
         seatsMinState.value = if (savedSeatsMin < 0) null else savedSeatsMin
 
-        val savedEngineTypeName = settings.getStringOrNullIfEmpty(key(ENGINE_TYPE_NAME_KEY))
-        engineTypeNameState.value = savedEngineTypeName
-
-        val savedEngineTypeTranslate = settings.getStringOrNullIfEmpty(key(ENGINE_TYPE_TRANSLATE_KEY))
-        engineTypeTranslateState.value = savedEngineTypeTranslate
-
-        val savedColorName = settings.getStringOrNullIfEmpty(key(COLOR_NAME_KEY))
-        colorNameState.value = savedColorName
-
-        val savedColorTranslate = settings.getStringOrNullIfEmpty(key(COLOR_TRANSLATE_KEY))
-        colorTranslateState.value = savedColorTranslate
+        engineTypeNameState.value = settings.getStringOrNullIfEmpty(key(ENGINE_TYPE_NAME_KEY))
+        engineTypeTranslateState.value = settings.getStringOrNullIfEmpty(key(ENGINE_TYPE_TRANSLATE_KEY))
+        colorNameState.value = settings.getStringOrNullIfEmpty(key(COLOR_NAME_KEY))
+        colorTranslateState.value = settings.getStringOrNullIfEmpty(key(COLOR_TRANSLATE_KEY))
 
         val savedYearMin = settings.getInt(key(YEAR_MIN_KEY), -1)
         yearMinState.value = if (savedYearMin < 0) null else savedYearMin
@@ -145,16 +179,6 @@ internal class CurrentFiltersRepositoryImpl(
 
         val savedAvailableMileage = settings.getInt(key(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY), -1)
         availableMileagePerDayKmMinState.value = if (savedAvailableMileage < 0) null else savedAvailableMileage
-
-        val savedNearbyLat = settings.getStringOrNullIfEmpty(key(NEARBY_SEARCH_LAT_KEY))?.toDoubleOrNull()
-        nearbySearchLatState.value = savedNearbyLat
-
-        val savedNearbyLon = settings.getStringOrNullIfEmpty(key(NEARBY_SEARCH_LON_KEY))?.toDoubleOrNull()
-        nearbySearchLonState.value = savedNearbyLon
-
-        val savedRadius = settings.getInt(key(NEARBY_RADIUS_KM_KEY), -1)
-        nearbyRadiusKmState.value =
-            if (savedRadius > 0) savedRadius else CurrentFiltersRepository.DEFAULT_NEARBY_RADIUS_KM
     }
 
     override val currentTaskShortName: Flow<String?> = currentTaskShortNameState.asStateFlow()
@@ -179,9 +203,6 @@ internal class CurrentFiltersRepositoryImpl(
     override val yearMax: Flow<Int?> = yearMaxState.asStateFlow()
     override val seatsMax: Flow<Int?> = seatsMaxState.asStateFlow()
     override val availableMileagePerDayKmMin: Flow<Int?> = availableMileagePerDayKmMinState.asStateFlow()
-    override val nearbySearchLat: Flow<Double?> = nearbySearchLatState.asStateFlow()
-    override val nearbySearchLon: Flow<Double?> = nearbySearchLonState.asStateFlow()
-    override val nearbyRadiusKm: Flow<Int> = nearbyRadiusKmState.asStateFlow()
     override val currentPage: Flow<Int> = currentPageState.asStateFlow()
 
     override fun setPage(page: Int) {
@@ -394,23 +415,6 @@ internal class CurrentFiltersRepositoryImpl(
             settings.remove(key(AVAILABLE_MILEAGE_PER_DAY_KM_MIN_KEY))
         }
         availableMileagePerDayKmMinState.value = value
-        currentPageState.value = 0
-    }
-
-    override fun updateNearbySearchCenter(
-        lat: Double,
-        lon: Double,
-    ) {
-        settings.putString(key(NEARBY_SEARCH_LAT_KEY), lat.toString())
-        settings.putString(key(NEARBY_SEARCH_LON_KEY), lon.toString())
-        nearbySearchLatState.value = lat
-        nearbySearchLonState.value = lon
-        currentPageState.value = 0
-    }
-
-    override fun updateNearbyRadiusKm(km: Int) {
-        settings.putInt(key(NEARBY_RADIUS_KM_KEY), km)
-        nearbyRadiusKmState.value = km
         currentPageState.value = 0
     }
 }

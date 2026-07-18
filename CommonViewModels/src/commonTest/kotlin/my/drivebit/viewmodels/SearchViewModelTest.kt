@@ -62,7 +62,7 @@ class SearchViewModelTest {
     ): SearchViewModelImpl =
         SearchViewModelImpl(
             carSearchRepository = repository,
-            currentFiltersRepository = MockCurrentFiltersRepository(),
+            searchFiltersRepository = MockCurrentFiltersRepository(),
             coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
         )
 
@@ -127,7 +127,7 @@ class SearchViewModelTest {
             val viewModel =
                 SearchViewModelImpl(
                     carSearchRepository = repository,
-                    currentFiltersRepository = filters,
+                    searchFiltersRepository = filters,
                     coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
                 )
 

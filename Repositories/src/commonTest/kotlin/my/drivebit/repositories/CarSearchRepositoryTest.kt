@@ -19,9 +19,11 @@ import my.drivebit.network.services.City
 import my.drivebit.network.services.Dictionary
 import my.drivebit.network.services.FilterSuggestion
 import my.drivebit.repositories.CurrentFiltersRepository
+import my.drivebit.shared.storage.InMemorySettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 
 class CarSearchRepositoryTest {
     private class MockCarService : Car {
@@ -360,7 +362,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             val result = repository.searchCarsByUserCity.first()
@@ -389,7 +391,8 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
+                    nearbyFilters = mockCurrentFiltersRepository,
                 )
 
             repository.searchCarsByUserCity.first()
@@ -399,6 +402,30 @@ class CarSearchRepositoryTest {
             assertEquals(37.62, mockCarService.searchGeoLon)
             assertEquals(25.0, mockCarService.searchRadiusKm)
             assertEquals(100, mockCarService.searchPageSize)
+        }
+
+    @Test
+    fun `should never pass geo params when nearby filters source is null`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            mockCarService.searchResult = CarSearchResponse(emptyList())
+            val searchFilters = SearchFiltersRepositoryImpl(InMemorySettings())
+            searchFilters.updateCurrentTask("Поблизости")
+            val repository =
+                CarSearchRepositoryImpl(
+                    carService = mockCarService,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
+                    filters = searchFilters,
+                    nearbyFilters = null,
+                )
+
+            repository.searchCarsByUserCity.first()
+
+            assertNull(mockCarService.searchGeoLat)
+            assertNull(mockCarService.searchGeoLon)
+            assertNull(mockCarService.searchRadiusKm)
         }
 
     @Test
@@ -413,7 +440,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             repository.searchCarsByUserCity.first()
@@ -434,7 +461,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             val exception =
@@ -462,7 +489,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity
@@ -510,7 +537,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity
@@ -557,7 +584,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             mockCurrentFiltersRepository.updateCurrentTask("Минивэн")
@@ -588,7 +615,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             mockCurrentFiltersRepository.updateCurrentTask("Внедорожник")
@@ -611,7 +638,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             mockCurrentFiltersRepository.updateCurrentTask("Эконом")
@@ -635,7 +662,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             mockCurrentFiltersRepository.updateCurrentTask("Премиум")
@@ -659,7 +686,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             mockCurrentFiltersRepository.updateCurrentTask("Комфорт")
@@ -683,7 +710,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             mockCurrentFiltersRepository.updateCurrentTask("Бизнес")
@@ -705,7 +732,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             mockCurrentFiltersRepository.updateStartDate("2025-02-01")
@@ -729,7 +756,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             repository.searchCarsByUserCity.first()
@@ -752,7 +779,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity
@@ -793,7 +820,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity
@@ -834,7 +861,7 @@ class CarSearchRepositoryTest {
                 CarSearchRepositoryImpl(
                     carService = mockCarService,
                     selectedCity = mockMyCityRepository.getSelectedCity,
-                    currentFiltersRepository = mockCurrentFiltersRepository,
+                    filters = mockCurrentFiltersRepository,
                 )
 
             val resultsFlow = repository.searchCarsByUserCity

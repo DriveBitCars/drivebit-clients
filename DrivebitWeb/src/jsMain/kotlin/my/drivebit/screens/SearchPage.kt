@@ -35,8 +35,8 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.navigation.NavigationState
-import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.repositories.SearchCityRepository
+import my.drivebit.repositories.SearchFiltersRepository
 import my.drivebit.utils.buildCitySearchPath
 import my.drivebit.utils.isShortBrandSearchPath
 import my.drivebit.utils.parseCitySlugFromSearchPath
@@ -70,7 +70,6 @@ import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
-import org.koin.core.qualifier.named
 import org.w3c.dom.url.URLSearchParams
 
 @Composable
@@ -86,19 +85,19 @@ fun SearchPage() {
     val paginationInfo by viewModel.paginationInfo.collectAsState()
     var locationSearch by remember { mutableStateOf(window.location.search) }
     val searchParams = rememberSearchParams(locationSearch)
-    val currentFiltersRepository: CurrentFiltersRepository = koinInject(named("search"))
-    val dailyRateMin by currentFiltersRepository.dailyRateMin.collectAsState(null)
-    val dailyRateMax by currentFiltersRepository.dailyRateMax.collectAsState(null)
-    val filterBrandName by currentFiltersRepository.brandName.collectAsState(null)
-    val filterModelName by currentFiltersRepository.modelName.collectAsState(null)
-    val filterDriveTypeTranslate by currentFiltersRepository.driveTypeTranslate.collectAsState(null)
-    val filterBodyTypeTranslate by currentFiltersRepository.bodyTypeTranslate.collectAsState(null)
-    val filterSeatsMin by currentFiltersRepository.seatsMin.collectAsState(null)
-    val filterYearMin by currentFiltersRepository.yearMin.collectAsState(null)
-    val filterYearMax by currentFiltersRepository.yearMax.collectAsState(null)
-    val filterMileageMin by currentFiltersRepository.availableMileagePerDayKmMin.collectAsState(null)
-    val startDateByRepo by currentFiltersRepository.startState.collectAsState(null)
-    val endDateByRepo by currentFiltersRepository.endState.collectAsState(null)
+    val searchFiltersRepository: SearchFiltersRepository = koinInject()
+    val dailyRateMin by searchFiltersRepository.dailyRateMin.collectAsState(null)
+    val dailyRateMax by searchFiltersRepository.dailyRateMax.collectAsState(null)
+    val filterBrandName by searchFiltersRepository.brandName.collectAsState(null)
+    val filterModelName by searchFiltersRepository.modelName.collectAsState(null)
+    val filterDriveTypeTranslate by searchFiltersRepository.driveTypeTranslate.collectAsState(null)
+    val filterBodyTypeTranslate by searchFiltersRepository.bodyTypeTranslate.collectAsState(null)
+    val filterSeatsMin by searchFiltersRepository.seatsMin.collectAsState(null)
+    val filterYearMin by searchFiltersRepository.yearMin.collectAsState(null)
+    val filterYearMax by searchFiltersRepository.yearMax.collectAsState(null)
+    val filterMileageMin by searchFiltersRepository.availableMileagePerDayKmMin.collectAsState(null)
+    val startDateByRepo by searchFiltersRepository.startState.collectAsState(null)
+    val endDateByRepo by searchFiltersRepository.endState.collectAsState(null)
     val currentPath by navigationState.currentPath.collectAsState()
     val brandSlugFromPath = parseSearchBrandSlugFromPath(currentPath)
     val citySlugFromPath = parseCitySlugFromSearchPath(currentPath) ?: "moskva"
@@ -143,8 +142,8 @@ fun SearchPage() {
     }
 
     LaunchedEffect(searchParams.first, searchParams.second) {
-        searchParams.first?.let { currentFiltersRepository.updateStartDate(it) }
-        searchParams.second?.let { currentFiltersRepository.updateEndDate(it) }
+        searchParams.first?.let { searchFiltersRepository.updateStartDate(it) }
+        searchParams.second?.let { searchFiltersRepository.updateEndDate(it) }
     }
 
     var showPriceFilter by remember { mutableStateOf(false) }

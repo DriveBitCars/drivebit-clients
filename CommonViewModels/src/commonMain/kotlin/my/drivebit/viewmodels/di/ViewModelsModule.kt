@@ -429,18 +429,18 @@ val commonViewModelsModule: Module =
         factory<SearchViewModel> {
             SearchViewModelImpl(
                 carSearchRepository = get(named("search")),
-                currentFiltersRepository = get(named("search")),
+                searchFiltersRepository = get(),
             )
         }
 
         factory<SearchPageDateViewModel> {
             SearchPageDateViewModelImpl(
-                currentFiltersRepository = get(named("search")),
+                searchFiltersRepository = get(),
             )
         }
         factory<SearchPageDateEndViewModel> {
             SearchPageDateEndViewModelImpl(
-                currentFiltersRepository = get(named("search")),
+                searchFiltersRepository = get(),
             )
         }
 

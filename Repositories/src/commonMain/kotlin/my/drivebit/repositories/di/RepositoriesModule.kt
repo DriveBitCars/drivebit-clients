@@ -38,6 +38,8 @@ import my.drivebit.repositories.MyCityRepository
 import my.drivebit.repositories.MyCityRepositoryImpl
 import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.repositories.ParticipantAvatarCache
+import my.drivebit.repositories.SearchFiltersRepository
+import my.drivebit.repositories.SearchFiltersRepositoryImpl
 import my.drivebit.repositories.ParticipantAvatarCacheImpl
 import my.drivebit.repositories.PasswordLoginRepository
 import my.drivebit.repositories.PasswordLoginRepositoryImpl
@@ -235,10 +237,9 @@ val repositoriesModule: Module =
             )
         }
 
-        single<CurrentFiltersRepository>(named("search")) {
-            CurrentFiltersRepositoryImpl(
+        single<SearchFiltersRepository> {
+            SearchFiltersRepositoryImpl(
                 settings = get(),
-                keyPrefix = "search",
             )
         }
 
@@ -271,10 +272,12 @@ val repositoriesModule: Module =
         }
 
         single<CarSearchRepository>(named("main")) {
+            val mainFilters = get<CurrentFiltersRepository>(named("main"))
             CarSearchRepositoryImpl(
                 carService = get(),
                 selectedCity = get<MyCityRepository>().getSelectedCity,
-                currentFiltersRepository = get(named("main")),
+                filters = mainFilters,
+                nearbyFilters = mainFilters,
             )
         }
 
@@ -282,7 +285,8 @@ val repositoriesModule: Module =
             CarSearchRepositoryImpl(
                 carService = get(),
                 selectedCity = get<SearchCityRepository>().city,
-                currentFiltersRepository = get(named("search")),
+                filters = get(),
+                nearbyFilters = null,
             )
         }
 

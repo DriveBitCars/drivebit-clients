@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.CarItem
 import my.drivebit.repositories.CarSearchRepository
-import my.drivebit.repositories.CurrentFiltersRepository
+import my.drivebit.repositories.SearchFiltersRepository
 
 sealed interface SearchState {
     data object Loading : SearchState
@@ -92,7 +92,7 @@ interface SearchViewModel {
 
 class SearchViewModelImpl(
     private val carSearchRepository: CarSearchRepository,
-    private val currentFiltersRepository: CurrentFiltersRepository,
+    private val searchFiltersRepository: SearchFiltersRepository,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : SearchViewModel {
     private val viewModelScope = coroutineScope
@@ -165,91 +165,91 @@ class SearchViewModelImpl(
     }
 
     override fun updateDailyRateMin(value: Int?) {
-        currentFiltersRepository.updateDailyRateMin(value)
+        searchFiltersRepository.updateDailyRateMin(value)
     }
 
     override fun updateDailyRateMax(value: Int?) {
-        currentFiltersRepository.updateDailyRateMax(value)
+        searchFiltersRepository.updateDailyRateMax(value)
     }
 
     override fun updateBrand(
         id: Int?,
         name: String?,
     ) {
-        currentFiltersRepository.updateBrand(id, name)
+        searchFiltersRepository.updateBrand(id, name)
     }
 
     override fun updateModel(
         id: Int?,
         name: String?,
     ) {
-        currentFiltersRepository.updateModel(id, name)
+        searchFiltersRepository.updateModel(id, name)
     }
 
     override fun updateDriveType(
         name: String?,
         translate: String?,
     ) {
-        currentFiltersRepository.updateDriveType(name, translate)
+        searchFiltersRepository.updateDriveType(name, translate)
     }
 
     override fun updateBodyType(
         name: String?,
         translate: String?,
     ) {
-        currentFiltersRepository.updateBodyType(name, translate)
+        searchFiltersRepository.updateBodyType(name, translate)
     }
 
     override fun updateSeatsMin(value: Int?) {
-        currentFiltersRepository.updateSeatsMin(value)
+        searchFiltersRepository.updateSeatsMin(value)
     }
 
     override fun updateEngineType(
         name: String?,
         translate: String?,
     ) {
-        currentFiltersRepository.updateEngineType(name, translate)
+        searchFiltersRepository.updateEngineType(name, translate)
     }
 
     override fun updateColor(
         name: String?,
         translate: String?,
     ) {
-        currentFiltersRepository.updateColor(name, translate)
+        searchFiltersRepository.updateColor(name, translate)
     }
 
     override fun updateYearMin(value: Int?) {
-        currentFiltersRepository.updateYearMin(value)
+        searchFiltersRepository.updateYearMin(value)
     }
 
     override fun updateYearMax(value: Int?) {
-        currentFiltersRepository.updateYearMax(value)
+        searchFiltersRepository.updateYearMax(value)
     }
 
     override fun updateSeatsMax(value: Int?) {
-        currentFiltersRepository.updateSeatsMax(value)
+        searchFiltersRepository.updateSeatsMax(value)
     }
 
     override fun updateAvailableMileagePerDayKmMin(value: Int?) {
-        currentFiltersRepository.updateAvailableMileagePerDayKmMin(value)
+        searchFiltersRepository.updateAvailableMileagePerDayKmMin(value)
     }
 
     override fun resetAllFilters() {
-        currentFiltersRepository.updateDailyRateMin(null)
-        currentFiltersRepository.updateDailyRateMax(null)
-        currentFiltersRepository.updateBrand(null, null)
-        currentFiltersRepository.updateModel(null, null)
-        currentFiltersRepository.updateDriveType(null, null)
-        currentFiltersRepository.updateBodyType(null, null)
-        currentFiltersRepository.updateSeatsMin(null)
-        currentFiltersRepository.updateEngineType(null, null)
-        currentFiltersRepository.updateColor(null, null)
-        currentFiltersRepository.updateYearMin(null)
-        currentFiltersRepository.updateYearMax(null)
-        currentFiltersRepository.updateSeatsMax(null)
-        currentFiltersRepository.updateAvailableMileagePerDayKmMin(null)
-        currentFiltersRepository.updateStartDate(null)
-        currentFiltersRepository.updateEndDate(null)
+        searchFiltersRepository.updateDailyRateMin(null)
+        searchFiltersRepository.updateDailyRateMax(null)
+        searchFiltersRepository.updateBrand(null, null)
+        searchFiltersRepository.updateModel(null, null)
+        searchFiltersRepository.updateDriveType(null, null)
+        searchFiltersRepository.updateBodyType(null, null)
+        searchFiltersRepository.updateSeatsMin(null)
+        searchFiltersRepository.updateEngineType(null, null)
+        searchFiltersRepository.updateColor(null, null)
+        searchFiltersRepository.updateYearMin(null)
+        searchFiltersRepository.updateYearMax(null)
+        searchFiltersRepository.updateSeatsMax(null)
+        searchFiltersRepository.updateAvailableMileagePerDayKmMin(null)
+        searchFiltersRepository.updateStartDate(null)
+        searchFiltersRepository.updateEndDate(null)
     }
 
     override fun setPage(page: Int) {
