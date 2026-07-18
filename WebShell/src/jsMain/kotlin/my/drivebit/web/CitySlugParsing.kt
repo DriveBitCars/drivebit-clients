@@ -79,6 +79,8 @@ fun parseCityPath(pathname: String): CityPathParts? {
     val citySlug = segments[0].lowercase()
     if (citySlug in RESERVED_FIRST_SEGMENTS || citySlug in SHORT_BRAND_SEARCH_PATH_SLUGS) return null
     val filterSlug = segments.getOrNull(1)?.lowercase()
+    // /{city}/search is the search screen, not a city filter landing
+    if (filterSlug == "search") return null
     return CityPathParts(citySlug = citySlug, filterSlug = filterSlug)
 }
 

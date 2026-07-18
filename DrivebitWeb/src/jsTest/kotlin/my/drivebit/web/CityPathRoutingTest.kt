@@ -69,6 +69,13 @@ class CityPathRoutingTest {
     }
 
     @Test
+    fun parseCityPath_returnsNullForCitySearchPath() {
+        assertNull(parseCityPath("/moskva/search"))
+        assertNull(parseCityPath("/rostov-na-donu/search/"))
+        assertNull(parseCityPath("/kaliningrad/search?startDate=2026-07-01"))
+    }
+
+    @Test
     fun parseFilterSlugFromCityPath_returnsFilterSlug() {
         assertEquals("poblizosti", parseFilterSlugFromCityPath("/moskva/poblizosti"))
     }

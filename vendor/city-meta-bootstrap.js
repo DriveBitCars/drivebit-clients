@@ -33,6 +33,10 @@
         "Минеральные Воды": [
             "Минеральных Водах",
             "Минеральных Вод"
+        ],
+        "Ростов-на-Дону": [
+            "Ростове-на-Дону",
+            "Ростова-на-Дону"
         ]
     };
     var FILTER_SLUGS = {
@@ -222,9 +226,11 @@
         if (segments.length !== 1 && segments.length !== 2) return null;
         var citySlug = segments[0].toLowerCase();
         if (RESERVED.indexOf(citySlug) >= 0) return null;
+        var filterSlug = segments[1] ? segments[1].toLowerCase() : null;
+        if (filterSlug === "search") return null;
         return {
             citySlug: citySlug,
-            filterSlug: segments[1] ? segments[1].toLowerCase() : null
+            filterSlug: filterSlug
         };
     }
 
