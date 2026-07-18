@@ -16,7 +16,7 @@ import my.drivebit.repositories.CarEnumsRepositoryImpl
 import my.drivebit.repositories.CarModelRepository
 import my.drivebit.repositories.CarModelRepositoryImpl
 import my.drivebit.repositories.CarSearchRepository
-import my.drivebit.repositories.CarSearchRepositoryImpl
+import my.drivebit.repositories.CarSearchMainRepositoryImpl
 import my.drivebit.repositories.ChangeEmailRepositoryImpl
 import my.drivebit.repositories.ChangePasswordRepositoryImpl
 import my.drivebit.repositories.ChangePhoneRepositoryImpl
@@ -235,13 +235,6 @@ val repositoriesModule: Module =
             )
         }
 
-        single<CurrentFiltersRepository>(named("search")) {
-            CurrentFiltersRepositoryImpl(
-                settings = get(),
-                keyPrefix = "search",
-            )
-        }
-
         single<CarEnumsRepository> {
             CarEnumsRepositoryImpl(
                 dictionary = get(),
@@ -271,18 +264,10 @@ val repositoriesModule: Module =
         }
 
         single<CarSearchRepository>(named("main")) {
-            CarSearchRepositoryImpl(
+            CarSearchMainRepositoryImpl(
                 carService = get(),
                 selectedCity = get<MyCityRepository>().getSelectedCity,
                 currentFiltersRepository = get(named("main")),
-            )
-        }
-
-        single<CarSearchRepository>(named("search")) {
-            CarSearchRepositoryImpl(
-                carService = get(),
-                selectedCity = get<SearchCityRepository>().city,
-                currentFiltersRepository = get(named("search")),
             )
         }
 

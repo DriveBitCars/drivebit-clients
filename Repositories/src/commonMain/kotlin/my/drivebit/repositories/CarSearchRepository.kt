@@ -6,9 +6,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarSearchResponse
 import my.drivebit.network.services.City
+
 private data class Quadruple<A, B, C, D>(
     val first: A,
     val second: B,
@@ -36,7 +38,75 @@ interface CarSearchRepository {
     fun refreshSearch()
 }
 
-internal class CarSearchRepositoryImpl(
+data class CarSearchFilters(
+    val cityId: String,
+    val dateFrom: String? = null,
+    val dateTo: String? = null,
+    val availableMileagePerDayKmMin: Int? = null,
+    val dailyPriceMin: Int? = null,
+    val dailyPriceMax: Int? = null,
+    val yearMin: Int? = null,
+    val yearMax: Int? = null,
+    val seatsMin: Int? = null,
+    val seatsMax: Int? = null,
+    val bodyTypes: List<String>? = null,
+    val engineTypes: List<String>? = null,
+    val colors: List<String>? = null,
+    val brandId: Int? = null,
+    val modelId: Int? = null,
+    val driveTypes: List<String>? = null,
+    val page: Int = 1,
+)
+
+internal class FiltersCarSearchRepository(
+    private val carService: Car,
+    private val filters: CarSearchFilters,
+    private val pageSize: Int = PAGE_SIZE,
+) : CarSearchRepository {
+    private val refreshNonce = MutableStateFlow(0)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val searchCarsByUserCity: Flow<CarSearchResponse> =
+        refreshNonce.flatMapLatest {
+            flow {
+                emit(
+                    carService.search(
+                        cityId = filters.cityId,
+                        dateFrom = filters.dateFrom,
+                        dateTo = filters.dateTo,
+                        availableMileagePerDayKmMin = filters.availableMileagePerDayKmMin,
+                        dailyPriceMin = filters.dailyPriceMin,
+                        dailyPriceMax = filters.dailyPriceMax,
+                        yearMin = filters.yearMin,
+                        yearMax = filters.yearMax,
+                        seatsMin = filters.seatsMin,
+                        seatsMax = filters.seatsMax,
+                        bodyTypes = filters.bodyTypes,
+                        engineTypes = filters.engineTypes,
+                        colors = filters.colors,
+                        brandId = filters.brandId,
+                        modelId = filters.modelId,
+                        driveTypes = filters.driveTypes,
+                        geoLat = null,
+                        geoLon = null,
+                        radiusKm = null,
+                        page = filters.page.coerceAtLeast(1),
+                        pageSize = pageSize,
+                    ),
+                )
+            }
+        }
+
+    override val currentPage: Flow<Int> = flowOf((filters.page.coerceAtLeast(1) - 1))
+
+    override fun setPage(page: Int) = Unit
+
+    override fun refreshSearch() {
+        refreshNonce.value++
+    }
+}
+
+internal class CarSearchMainRepositoryImpl(
     private val carService: Car,
     private val selectedCity: Flow<City>,
     private val currentFiltersRepository: CurrentFiltersRepository,

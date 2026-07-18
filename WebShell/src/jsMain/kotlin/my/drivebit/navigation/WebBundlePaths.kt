@@ -8,6 +8,7 @@ enum class WebBundle {
     Chat,
     OwnerCar,
     CarDetail,
+    Search,
 }
 
 fun pathWithoutQuery(path: String): String =
@@ -26,6 +27,7 @@ fun webBundleForPath(pathname: String): WebBundle {
         isChatBundlePath(path) -> WebBundle.Chat
         isOwnerCarBundlePath(path) -> WebBundle.OwnerCar
         path.startsWith("/car-detail") || path.startsWith("/car-photos-gallery") -> WebBundle.CarDetail
+        my.drivebit.web.isSearchPath(path) -> WebBundle.Search
         else -> WebBundle.Main
     }
 }
@@ -33,9 +35,4 @@ fun webBundleForPath(pathname: String): WebBundle {
 fun requiresFullPageNavigation(
     currentPathname: String,
     targetPath: String,
-): Boolean {
-    if (webBundleForPath(currentPathname) != webBundleForPath(targetPath)) return true
-    val current = pathWithoutQuery(currentPathname)
-    val target = pathWithoutQuery(targetPath)
-    return my.drivebit.web.isSearchPath(current) != my.drivebit.web.isSearchPath(target)
-}
+): Boolean = webBundleForPath(currentPathname) != webBundleForPath(targetPath)

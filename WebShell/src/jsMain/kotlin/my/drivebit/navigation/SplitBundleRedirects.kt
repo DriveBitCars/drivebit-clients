@@ -12,7 +12,8 @@ fun isAnySplitBundlePath(pathname: String): Boolean {
         isChatBundlePath(path) ||
         isOwnerCarBundlePath(path) ||
         path.startsWith("/car-detail") ||
-        path.startsWith("/car-photos-gallery")
+        path.startsWith("/car-photos-gallery") ||
+        my.drivebit.web.isSearchPath(path)
 }
 
 fun splitBundleHref(
