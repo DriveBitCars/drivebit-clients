@@ -14,12 +14,12 @@ import my.drivebit.components.Box
 import my.drivebit.components.BoxOverlay
 import my.drivebit.components.BrandModelFilter
 import my.drivebit.components.CarsGrid
+import my.drivebit.components.CarsGridSkeleton
 import my.drivebit.components.Column
 import my.drivebit.components.DriveTypeFilter
 import my.drivebit.components.FilterChip
 import my.drivebit.components.FiltersResetChip
 import my.drivebit.components.FlowRow
-import my.drivebit.components.Loader
 import my.drivebit.components.MileageFilter
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.PriceFilter
@@ -127,7 +127,6 @@ fun SearchApp() {
         )
 
     Div({
-        classes("drivebit-cars-grid-mounted")
         style {
             width(100.percent)
             padding(20.px)
@@ -138,7 +137,7 @@ fun SearchApp() {
         when (val currentState = state) {
             is SearchUiState.Loading -> {
                 SearchPageHeadline(pageHeadline)
-                Loader()
+                CarsGridSkeleton()
             }
 
             is SearchUiState.Error -> {
