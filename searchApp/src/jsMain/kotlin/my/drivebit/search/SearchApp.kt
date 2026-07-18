@@ -57,8 +57,14 @@ fun SearchApp() {
                             ).joinToString(", ").ifEmpty { "все" },
                     )
                 }
-                s.result.cars.forEach { car ->
-                    Div { Text("${car.title}${car.price?.let { " — $it ₽" } ?: ""}") }
+                    s.result.cars.forEach { car ->
+                    val title =
+                        listOf(car.general.brandName, car.general.modelName)
+                            .filter { it.isNotEmpty() }
+                            .joinToString(" ")
+                            .ifEmpty { car.id }
+                    val price = car.minDailyPrice()
+                    Div { Text("$title${price?.let { " — $it ₽" } ?: ""}") }
                 }
                 if (s.result.totalPages > 1) {
                     Button({

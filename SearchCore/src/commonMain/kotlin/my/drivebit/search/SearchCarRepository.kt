@@ -2,6 +2,7 @@ package my.drivebit.search
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import my.drivebit.network.services.CarItem
 
 data class SearchFilterSet(
     val citySlug: String? = null,
@@ -31,14 +32,8 @@ inline fun applySearchFilterChange(
     transform: (SearchFilterSet) -> SearchFilterSet,
 ): SearchFilterSet = transform(current).copy(page = 1)
 
-data class SearchCarCard(
-    val id: String,
-    val title: String,
-    val price: Int? = null,
-)
-
 data class SearchCarsResult(
-    val cars: List<SearchCarCard> = emptyList(),
+    val cars: List<CarItem> = emptyList(),
     val totalCount: Int = 0,
     val totalPages: Int = 0,
 )
