@@ -166,7 +166,7 @@ fun DateRangeSelector(
 }
 
 @Composable
-private fun CalendarIconBlue(size: CSSSizeValue<out CSSUnit.px>) {
+fun CalendarIconBlue(size: CSSSizeValue<out CSSUnit.px>) {
     Div({
         style {
             width(size)

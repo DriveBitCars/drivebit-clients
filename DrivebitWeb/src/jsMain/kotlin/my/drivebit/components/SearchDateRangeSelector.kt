@@ -33,7 +33,6 @@ import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLElement
@@ -163,18 +162,7 @@ private fun SearchDateFieldItem(
                     }
                 }) { Text(value) }
             }
-            Img(
-                src = "/images/filter-main/calendar.svg",
-                alt = "календарь",
-                attrs = {
-                    style {
-                        width(18.px)
-                        height(18.px)
-                        property("flex-shrink", "0")
-                        property("opacity", "0.55")
-                    }
-                },
-            )
+            CalendarIconBlue(size = 18.px)
         }
     }
 }
