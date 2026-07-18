@@ -72,7 +72,11 @@ fun buildSearchUrl(parts: SearchUrlParts): String {
         when {
             parts.brandSlug != null -> {
                 val brandPath = pathForBrandSlug(parts.brandSlug)
-                val model = parts.modelSlug?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
+                val model =
+                    parts.modelSlug
+                        ?.trim()
+                        ?.lowercase()
+                        ?.takeIf { it.isNotEmpty() }
                 if (model != null) "$brandPath/$model" else brandPath
             }
             parts.citySlug != null -> {
@@ -82,12 +86,14 @@ fun buildSearchUrl(parts: SearchUrlParts): String {
         }
 
     val queryPairs = mutableListOf<Pair<String, String>>()
+
     fun add(
         key: String,
         value: String?,
     ) {
         value?.takeIf { it.isNotEmpty() }?.let { queryPairs.add(key to it) }
     }
+
     fun addInt(
         key: String,
         value: Int?,

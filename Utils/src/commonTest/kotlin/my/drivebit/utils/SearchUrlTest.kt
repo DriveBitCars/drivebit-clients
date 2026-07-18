@@ -63,7 +63,10 @@ class SearchUrlTest {
     @Test
     fun `build uses search prefix for other brand slugs`() {
         assertEquals("/search/toyota", buildSearchUrl(SearchUrlParts(brandSlug = "toyota")))
-        assertEquals("/search/skoda/octavia", buildSearchUrl(SearchUrlParts(brandSlug = "skoda", modelSlug = "octavia")))
+        assertEquals(
+            "/search/skoda/octavia",
+            buildSearchUrl(SearchUrlParts(brandSlug = "skoda", modelSlug = "octavia")),
+        )
     }
 
     @Test
