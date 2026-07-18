@@ -70,7 +70,9 @@ fun SearchApp() {
                 }
                 Button({
                     onClick {
-                        navigateSearch(s.filters.copy(seatsMin = 5, page = 1))
+                        navigateSearch(
+                            applySearchFilterChange(s.filters) { it.copy(seatsMin = 5) },
+                        )
                         locationHref = window.location.pathname + window.location.search
                     }
                 }) { Text("5+ мест") }
