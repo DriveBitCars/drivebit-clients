@@ -20,6 +20,19 @@ class ApplySearchFilterChangeTest {
     }
 
     @Test
+    fun `filter change resets page even when transform sets page`() {
+        val current =
+            SearchFilterSet(
+                citySlug = "moskva",
+                page = 3,
+            )
+        val updated =
+            applySearchFilterChange(current) { it.copy(seatsMin = 5, page = 99) }
+        assertEquals(5, updated.seatsMin)
+        assertEquals(1, updated.page)
+    }
+
+    @Test
     fun `next page uses copy not filter-change helper`() {
         val current =
             SearchFilterSet(

@@ -3,6 +3,7 @@ package my.drivebit.search
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -100,5 +101,43 @@ class SearchViewModelTest {
             assertEquals(2, capturedPage)
             val results = assertIs<SearchUiState.Results>(vm.state.value)
             assertEquals(2, results.filters.page)
+        }
+
+    @Test
+    fun `later load wins over slower in-flight load`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val vm =
+                SearchViewModel(
+                    repositoryFactory = { filters ->
+                        val page = filters.page
+                        object : SearchCarRepository {
+                            override val results: Flow<SearchCarsResult> =
+                                flow {
+                                    if (page == 1) {
+                                        delay(100)
+                                    }
+                                    emit(
+                                        SearchCarsResult(
+                                            cars = listOf(SearchCarCard(id = page.toString(), title = "Page $page")),
+                                            totalCount = 1,
+                                            totalPages = 3,
+                                        ),
+                                    )
+                                }
+                        }
+                    },
+                    brandResolver = { null },
+                    modelResolver = { _, _ -> null },
+                    coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
+                )
+
+            vm.load("/moskva/search?page=1")
+            vm.load("/moskva/search?page=2")
+            advanceUntilIdle()
+
+            val results = assertIs<SearchUiState.Results>(vm.state.value)
+            assertEquals(2, results.filters.page)
+            assertEquals("2", results.result.cars.first().id)
         }
 }

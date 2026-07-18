@@ -1,7 +1,9 @@
 package my.drivebit.search
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,18 +35,23 @@ class SearchViewModel(
     private val _state = MutableStateFlow<SearchUiState>(SearchUiState.Loading)
     val state: StateFlow<SearchUiState> = _state.asStateFlow()
 
+    private var loadJob: Job? = null
+
     fun load(url: String) {
-        coroutineScope.launch {
-            _state.value = SearchUiState.Loading
-            try {
-                val parts = parseSearchUrl(url)
-                val filters = resolveFilters(parts)
-                val result = repositoryFactory(filters).results.first()
-                _state.value = SearchUiState.Results(filters = filters, result = result)
-            } catch (e: Exception) {
-                _state.value = SearchUiState.Error(e.message ?: "Не удалось выполнить поиск")
+        loadJob?.cancel()
+        loadJob =
+            coroutineScope.launch {
+                _state.value = SearchUiState.Loading
+                try {
+                    val parts = parseSearchUrl(url)
+                    val filters = resolveFilters(parts)
+                    val result = repositoryFactory(filters).results.first()
+                    _state.value = SearchUiState.Results(filters = filters, result = result)
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    _state.value = SearchUiState.Error(e.message ?: "Не удалось выполнить поиск")
+                }
             }
-        }
     }
 
     private suspend fun resolveFilters(parts: SearchUrlParts): SearchFilterSet {
