@@ -41,14 +41,18 @@ fun BoxOverlay(content: @Composable () -> Unit) {
             position(Position.Absolute)
             top(0.px)
             left(0.px)
+            width(100.percent)
             property("z-index", "10")
             property("pointer-events", "none")
+            property("box-sizing", "border-box")
         }
     }) {
         Div({
             style {
                 property("pointer-events", "auto")
-                property("display", "inline-block")
+                width(100.percent)
+                property("max-width", "400px")
+                property("box-sizing", "border-box")
             }
         }) {
             content()
