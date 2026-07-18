@@ -74,4 +74,31 @@ class SearchViewModelTest {
             val error = assertIs<SearchUiState.Error>(vm.state.value)
             assertEquals("boom", error.message)
         }
+
+    @Test
+    fun `load url with page 2 passes page to repository factory`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            var capturedPage: Int? = null
+            val vm =
+                SearchViewModel(
+                    repositoryFactory = { filters ->
+                        capturedPage = filters.page
+                        object : SearchCarRepository {
+                            override val results: Flow<SearchCarsResult> =
+                                flowOf(SearchCarsResult(totalCount = 0, totalPages = 3))
+                        }
+                    },
+                    brandResolver = { null },
+                    modelResolver = { _, _ -> null },
+                    coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
+                )
+
+            vm.load("/moskva/search?page=2")
+            advanceUntilIdle()
+
+            assertEquals(2, capturedPage)
+            val results = assertIs<SearchUiState.Results>(vm.state.value)
+            assertEquals(2, results.filters.page)
+        }
 }
