@@ -178,7 +178,9 @@ class MyBookingsAsRenterViewModelImpl(
             _actionInProgress.update { it + bookingId }
             try {
                 val updated = booking.signContractAsRenter(bookingId)
-                println("✅ [MyBookingsAsRenterViewModel] signContractAsRenter succeeded bookingId=$bookingId status=${updated.status}")
+                println(
+                    "✅ [MyBookingsAsRenterViewModel] signContractAsRenter succeeded bookingId=$bookingId status=${updated.status}",
+                )
                 _error.value = null
                 _bookings.update { list ->
                     list.map { if (it.id == bookingId) updated else it }
