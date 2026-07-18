@@ -19,6 +19,7 @@ private data class CarDtoPagedResult(
 private data class CarDtoItem(
     val id: String,
     val general: CarDtoGeneral? = null,
+    val dailyRate: Double? = null,
     val price: Double? = null,
 )
 
@@ -78,7 +79,7 @@ class HttpSearchCarsApi(
                     SearchCarCard(
                         id = item.id,
                         title = listOf(brand, model).filter { it.isNotEmpty() }.joinToString(" ").ifEmpty { item.id },
-                        price = item.price?.takeIf { it > 0 }?.toInt(),
+                        price = (item.dailyRate ?: item.price)?.takeIf { it > 0 }?.toInt(),
                     )
                 },
             totalCount = paged.totalCount,
@@ -89,7 +90,8 @@ class HttpSearchCarsApi(
 
 fun resolveSearchCityId(citySlug: String?): String =
     when (citySlug?.lowercase()) {
-        "kaliningrad" -> "158831"
-        "rostov-na-donu" -> "158832"
-        else -> "158830"
+        "rostov-na-donu" -> "158833"
+        "krasnogorsk" -> "158840"
+        "lyubertsy" -> "158841"
+        else -> "158835"
     }

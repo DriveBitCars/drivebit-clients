@@ -38,6 +38,7 @@ fun SearchApp() {
     }
 
     Div({
+        classes("drivebit-cars-grid-mounted")
         style { padding(16.px) }
     }) {
         H1 { Text("Поиск автомобилей") }
