@@ -120,4 +120,33 @@ class SearchUrlTest {
         assertEquals("toyota", parseSearchUrl("/search/toyota").brandSlug)
         assertNull(parseSearchUrl("/toyota").brandSlug)
     }
+
+    @Test
+    fun `build includes page when greater than 1`() {
+        val url = buildSearchUrl(SearchUrlParts(citySlug = "moskva", page = 2))
+        assertEquals("/moskva/search?page=2", url)
+    }
+
+    @Test
+    fun `build omits page query when page is 1`() {
+        val url = buildSearchUrl(SearchUrlParts(citySlug = "moskva", page = 1))
+        assertEquals("/moskva/search", url)
+        assertFalse(url.contains("page="))
+    }
+
+    @Test
+    fun `round trip preserves page 3 on city search`() {
+        val url = buildSearchUrl(SearchUrlParts(citySlug = "moskva", page = 3))
+        assertEquals("/moskva/search?page=3", url)
+        assertEquals(3, parseSearchUrl(url).page)
+        assertEquals(url, buildSearchUrl(parseSearchUrl(url)))
+    }
+
+    @Test
+    fun `parse invalid or missing page becomes 1`() {
+        assertEquals(1, parseSearchUrl("/moskva/search").page)
+        assertEquals(1, parseSearchUrl("/moskva/search?page=0").page)
+        assertEquals(1, parseSearchUrl("/moskva/search?page=-2").page)
+        assertEquals(1, parseSearchUrl("/moskva/search?page=abc").page)
+    }
 }
