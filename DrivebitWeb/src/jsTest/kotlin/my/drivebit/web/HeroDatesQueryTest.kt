@@ -81,6 +81,8 @@ class HeroDatesQueryTest {
         assertTrue(shouldShowStaticHeroShell("/moskva"))
         assertTrue(shouldShowStaticHeroShell("/moskva/poblizosti"))
         assertFalse(shouldShowStaticHeroShell("/search"))
+        assertFalse(shouldShowStaticHeroShell("/moskva/search"))
+        assertFalse(shouldShowStaticHeroShell("/rostov-na-donu/search"))
         assertFalse(shouldShowStaticHeroShell("/my-city-selection"))
         assertFalse(shouldShowStaticHeroShell("/profile"))
         assertFalse(shouldShowStaticHeroShell("/login-by-phone"))

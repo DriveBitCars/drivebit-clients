@@ -20,6 +20,7 @@ const STATIC_HTML = {
   "/zelenograd": "composeApp/src/jsMain/resources/zelenograd/index.html",
   "/kaliningrad": "composeApp/src/jsMain/resources/kaliningrad/index.html",
   "/krasnogorsk": "composeApp/src/jsMain/resources/krasnogorsk/index.html",
+  "/rostov-na-donu": "composeApp/src/jsMain/resources/rostov-na-donu/index.html",
 };
 
 const paths = JSON.parse(fs.readFileSync(process.argv[2] ?? "/tmp/paths.json", "utf8"));
