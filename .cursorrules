@@ -58,9 +58,29 @@ This is a Kotlin Multiplatform project for Drivebit mobile clients targeting And
 - **No local state in UI** - avoid `remember { mutableStateOf() }` for business logic, use ViewModel state instead
 - **Follow MVI pattern** - Model (State), View (UI), Intent (User Actions) - all handled through ViewModel
 
+## Flow-first Approach
+- **Prefer Kotlin Flow over one-shot APIs** for any state that can change over time (filters, selection, search results, auth, settings)
+- **Repositories expose `Flow` / `StateFlow`** as the source of truth; avoid imperative getters that go stale
+- **Derive state with operators** (`map`, `combine`, `flatMapLatest`, `stateIn`) instead of manually copying values between MutableStateFlows
+- **ViewModels collect and transform repository flows** into UI state; do not re-fetch or re-sync in ad-hoc callbacks when a flow already exists
+- **One-shot `suspend` is OK** only for fire-and-forget actions (submit, delete, navigate side-effects) that do not represent ongoing state
+- **UI observes flows reactively** (`collectAsState` / `collectAsStateWithLifecycle`) — no polling or manual refresh loops for flow-backed data
+
+## TDD
+- **Write the failing test first**, then the minimal implementation that makes it pass, then refactor
+- **Do not add production code without a failing test** that describes the expected behavior
+- **Always stage and commit new/updated tests together with the production code** — never leave test files untracked or out of the commit
+- **One behavior per test** — name tests by the scenario and expected outcome
+- Prefer unit tests in `commonTest` next to the module under change; extend existing test files when the same type is already covered
+- Red → Green → Refactor: keep each cycle small; do not implement extra features while making the current test pass
+- When fixing a bug: first add a regression test that fails, then fix the code
+
 ## Git Workflow Rules
-- **NEVER push directly to `trunk` branch**
+- **NEVER push directly to `main` branch**
 - **ALWAYS create feature branches** for new changes
-- **ALWAYS use Pull Requests** to merge changes into `trunk`
-- **Workflow**: create branch → make changes → push branch → create PR → merge to trunk
-- **Exception**: Only emergency hotfixes can be pushed directly to trunk (with immediate PR follow-up)
+- **ALWAYS use Pull Requests** to merge changes into `main`
+- **Workflow**: create branch → make changes → push branch → create PR → merge to main
+- **Exception**: Only emergency hotfixes can be pushed directly to main (with immediate PR follow-up)
+- **ALWAYS `git add` all new project files** as soon as you create them (new modules, sources, tests, resources, Gradle includes) — do not leave `??` untracked until the user asks
+- After creating or renaming files: run `git status` and stage every new path that belongs to the change (exclude secrets, local-only junk, and unrelated dirty files like accidental `.cursorrules` / `gradle.properties` edits unless those were part of the task)
+- Staging new files is **not** a commit — still only commit when the user explicitly asks

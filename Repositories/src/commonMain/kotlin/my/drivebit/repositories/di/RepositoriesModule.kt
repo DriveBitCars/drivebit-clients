@@ -16,7 +16,7 @@ import my.drivebit.repositories.CarEnumsRepositoryImpl
 import my.drivebit.repositories.CarModelRepository
 import my.drivebit.repositories.CarModelRepositoryImpl
 import my.drivebit.repositories.CarSearchRepository
-import my.drivebit.repositories.CarSearchRepositoryImpl
+import my.drivebit.repositories.CarSearchMainRepositoryImpl
 import my.drivebit.repositories.ChangeEmailRepositoryImpl
 import my.drivebit.repositories.ChangePasswordRepositoryImpl
 import my.drivebit.repositories.ChangePhoneRepositoryImpl
@@ -38,8 +38,6 @@ import my.drivebit.repositories.MyCityRepository
 import my.drivebit.repositories.MyCityRepositoryImpl
 import my.drivebit.repositories.OtpResultRepository
 import my.drivebit.repositories.ParticipantAvatarCache
-import my.drivebit.repositories.SearchFiltersRepository
-import my.drivebit.repositories.SearchFiltersRepositoryImpl
 import my.drivebit.repositories.ParticipantAvatarCacheImpl
 import my.drivebit.repositories.PasswordLoginRepository
 import my.drivebit.repositories.PasswordLoginRepositoryImpl
@@ -237,12 +235,6 @@ val repositoriesModule: Module =
             )
         }
 
-        single<SearchFiltersRepository> {
-            SearchFiltersRepositoryImpl(
-                settings = get(),
-            )
-        }
-
         single<CarEnumsRepository> {
             CarEnumsRepositoryImpl(
                 dictionary = get(),
@@ -272,21 +264,10 @@ val repositoriesModule: Module =
         }
 
         single<CarSearchRepository>(named("main")) {
-            val mainFilters = get<CurrentFiltersRepository>(named("main"))
-            CarSearchRepositoryImpl(
+            CarSearchMainRepositoryImpl(
                 carService = get(),
                 selectedCity = get<MyCityRepository>().getSelectedCity,
-                filters = mainFilters,
-                nearbyFilters = mainFilters,
-            )
-        }
-
-        single<CarSearchRepository>(named("search")) {
-            CarSearchRepositoryImpl(
-                carService = get(),
-                selectedCity = get<SearchCityRepository>().city,
-                filters = get(),
-                nearbyFilters = null,
+                currentFiltersRepository = get(named("main")),
             )
         }
 

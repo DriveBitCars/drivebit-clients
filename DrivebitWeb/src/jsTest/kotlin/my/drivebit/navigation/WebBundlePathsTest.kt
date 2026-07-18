@@ -46,6 +46,9 @@ class WebBundlePathsTest {
         assertTrue(requiresFullPageNavigation("/moskva", "/moskva/search"))
         assertTrue(requiresFullPageNavigation("/moskva", "/search"))
         assertFalse(requiresFullPageNavigation("/moskva/search", "/kaliningrad/search"))
+        assertEquals(WebBundle.Search, webBundleForPath("/moskva/search"))
+        assertEquals(WebBundle.Search, webBundleForPath("/bmw"))
+        assertEquals(WebBundle.Search, webBundleForPath("/search/bmw/x5"))
     }
 
     @Test
@@ -66,6 +69,8 @@ class WebBundlePathsTest {
         assertTrue(isAnySplitBundlePath("/edit-name"))
         assertTrue(isAnySplitBundlePath("/change-email"))
         assertTrue(isAnySplitBundlePath("/verify-otp"))
+        assertTrue(isAnySplitBundlePath("/moskva/search"))
+        assertTrue(isAnySplitBundlePath("/bmw"))
         assertFalse(isAnySplitBundlePath("/moskva"))
     }
 }

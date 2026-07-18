@@ -38,42 +38,96 @@ interface CarSearchRepository {
     fun refreshSearch()
 }
 
-internal class CarSearchRepositoryImpl(
+data class CarSearchFilters(
+    val cityId: String,
+    val dateFrom: String? = null,
+    val dateTo: String? = null,
+    val availableMileagePerDayKmMin: Int? = null,
+    val dailyPriceMin: Int? = null,
+    val dailyPriceMax: Int? = null,
+    val yearMin: Int? = null,
+    val yearMax: Int? = null,
+    val seatsMin: Int? = null,
+    val seatsMax: Int? = null,
+    val bodyTypes: List<String>? = null,
+    val engineTypes: List<String>? = null,
+    val colors: List<String>? = null,
+    val brandId: Int? = null,
+    val modelId: Int? = null,
+    val driveTypes: List<String>? = null,
+    val page: Int = 1,
+)
+
+internal class FiltersCarSearchRepository(
+    private val carService: Car,
+    private val filters: CarSearchFilters,
+    private val pageSize: Int = PAGE_SIZE,
+) : CarSearchRepository {
+    private val refreshNonce = MutableStateFlow(0)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val searchCarsByUserCity: Flow<CarSearchResponse> =
+        refreshNonce.flatMapLatest {
+            flow {
+                emit(
+                    carService.search(
+                        cityId = filters.cityId,
+                        dateFrom = filters.dateFrom,
+                        dateTo = filters.dateTo,
+                        availableMileagePerDayKmMin = filters.availableMileagePerDayKmMin,
+                        dailyPriceMin = filters.dailyPriceMin,
+                        dailyPriceMax = filters.dailyPriceMax,
+                        yearMin = filters.yearMin,
+                        yearMax = filters.yearMax,
+                        seatsMin = filters.seatsMin,
+                        seatsMax = filters.seatsMax,
+                        bodyTypes = filters.bodyTypes,
+                        engineTypes = filters.engineTypes,
+                        colors = filters.colors,
+                        brandId = filters.brandId,
+                        modelId = filters.modelId,
+                        driveTypes = filters.driveTypes,
+                        geoLat = null,
+                        geoLon = null,
+                        radiusKm = null,
+                        page = filters.page.coerceAtLeast(1),
+                        pageSize = pageSize,
+                    ),
+                )
+            }
+        }
+
+    override val currentPage: Flow<Int> = flowOf((filters.page.coerceAtLeast(1) - 1))
+
+    override fun setPage(page: Int) = Unit
+
+    override fun refreshSearch() {
+        refreshNonce.value++
+    }
+}
+
+internal class CarSearchMainRepositoryImpl(
     private val carService: Car,
     private val selectedCity: Flow<City>,
-    private val filters: SearchFiltersRepository,
-    private val nearbyFilters: CurrentFiltersRepository? = null,
+    private val currentFiltersRepository: CurrentFiltersRepository,
 ) : CarSearchRepository {
     private val searchRefreshNonce = MutableStateFlow(0)
-
-    private val nearbyParams: Flow<Triple<Double?, Double?, Int>> =
-        if (nearbyFilters != null) {
-            combine(
-                nearbyFilters.nearbySearchLat,
-                nearbyFilters.nearbySearchLon,
-                nearbyFilters.nearbyRadiusKm,
-            ) { lat, lon, radiusKm ->
-                Triple(lat, lon, radiusKm)
-            }
-        } else {
-            flowOf(Triple(null, null, 0))
-        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val searchCarsByUserCity: Flow<CarSearchResponse> =
         combine(
             selectedCity,
             searchRefreshNonce,
-            filters.currentTaskShortName,
-            filters.startState,
-            filters.endState,
-            filters.dailyRateMin,
-            filters.dailyRateMax,
-            filters.brandId,
-            filters.modelId,
-            filters.driveTypeName,
-            filters.bodyTypeName,
-            filters.seatsMin,
+            currentFiltersRepository.currentTaskShortName,
+            currentFiltersRepository.startState,
+            currentFiltersRepository.endState,
+            currentFiltersRepository.dailyRateMin,
+            currentFiltersRepository.dailyRateMax,
+            currentFiltersRepository.brandId,
+            currentFiltersRepository.modelId,
+            currentFiltersRepository.driveTypeName,
+            currentFiltersRepository.bodyTypeName,
+            currentFiltersRepository.seatsMin,
         ) { values ->
             val city = values[0] as City
             val currentTaskShortName = values[2] as String?
@@ -93,12 +147,12 @@ internal class CarSearchRepositoryImpl(
             )
         }.combine(
             combine(
-                filters.engineTypeName,
-                filters.colorName,
-                filters.yearMin,
-                filters.yearMax,
-                filters.seatsMax,
-                filters.availableMileagePerDayKmMin,
+                currentFiltersRepository.engineTypeName,
+                currentFiltersRepository.colorName,
+                currentFiltersRepository.yearMin,
+                currentFiltersRepository.yearMax,
+                currentFiltersRepository.seatsMax,
+                currentFiltersRepository.availableMileagePerDayKmMin,
             ) { values ->
                 Quadruple(
                     Pair(values[0] as String?, values[1] as String?),
@@ -109,10 +163,18 @@ internal class CarSearchRepositoryImpl(
             },
         ) { mainFilters, extraFilters ->
             Pair(mainFilters, extraFilters)
-        }.combine(filters.currentPage) { filtersPair, page ->
+        }.combine(currentFiltersRepository.currentPage) { filtersPair, page ->
             Triple(filtersPair.first, filtersPair.second, page)
-        }.combine(nearbyParams) { filtersTriple, nearby ->
-            Pair(filtersTriple, nearby)
+        }.combine(
+            combine(
+                currentFiltersRepository.nearbySearchLat,
+                currentFiltersRepository.nearbySearchLon,
+                currentFiltersRepository.nearbyRadiusKm,
+            ) { lat, lon, radiusKm ->
+                Triple(lat, lon, radiusKm)
+            },
+        ) { filtersTriple, nearbyParams ->
+            Pair(filtersTriple, nearbyParams)
         }.flatMapLatest { (filtersTriple, nearbyParams) ->
             val (mainFilters, extraFilters, page) = filtersTriple
             val (nearbyLat, nearbyLon, nearbyRadiusKm) = nearbyParams
@@ -152,8 +214,7 @@ internal class CarSearchRepositoryImpl(
                     }
 
                 val useNearbyGeo =
-                    nearbyFilters != null &&
-                        currentTaskShortName == "Поблизости" &&
+                    currentTaskShortName == "Поблизости" &&
                         nearbyLat != null &&
                         nearbyLon != null
 
@@ -186,10 +247,10 @@ internal class CarSearchRepositoryImpl(
             }
         }
 
-    override val currentPage: Flow<Int> = filters.currentPage
+    override val currentPage: Flow<Int> = currentFiltersRepository.currentPage
 
     override fun setPage(page: Int) {
-        filters.setPage(page)
+        currentFiltersRepository.setPage(page)
     }
 
     override fun refreshSearch() {

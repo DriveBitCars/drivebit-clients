@@ -1,0 +1,12 @@
+---
+description: Always stage newly created project files with git add
+alwaysApply: true
+---
+
+# Stage new files in git
+
+- As soon as you create a new file or module, run `git add` on it.
+- Do not leave project sources/tests/resources/Gradle files as `??` untracked.
+- After creating or renaming files, check `git status` and stage every new path that belongs to the change.
+- Exclude secrets and unrelated local junk; do not stage accidental edits outside the task.
+- Staging is not a commit — commit only when the user explicitly asks.

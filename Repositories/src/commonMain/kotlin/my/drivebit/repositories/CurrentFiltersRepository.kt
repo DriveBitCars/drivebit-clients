@@ -5,14 +5,39 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-interface CurrentFiltersRepository : SearchFiltersRepository {
+interface CurrentFiltersRepository {
     companion object {
         const val DEFAULT_NEARBY_RADIUS_KM = 10
     }
 
+    val currentTaskShortName: Flow<String?>
+    val startState: Flow<String?>
+    val endState: Flow<String?>
+    val dailyRateMin: Flow<Int?>
+    val dailyRateMax: Flow<Int?>
+    val brandId: Flow<Int?>
+    val brandName: Flow<String?>
+    val modelId: Flow<Int?>
+    val modelName: Flow<String?>
+    val driveTypeName: Flow<String?>
+    val driveTypeTranslate: Flow<String?>
+    val bodyTypeName: Flow<String?>
+    val bodyTypeTranslate: Flow<String?>
+    val seatsMin: Flow<Int?>
+    val engineTypeName: Flow<String?>
+    val engineTypeTranslate: Flow<String?>
+    val colorName: Flow<String?>
+    val colorTranslate: Flow<String?>
+    val yearMin: Flow<Int?>
+    val yearMax: Flow<Int?>
+    val seatsMax: Flow<Int?>
+    val availableMileagePerDayKmMin: Flow<Int?>
     val nearbySearchLat: Flow<Double?>
     val nearbySearchLon: Flow<Double?>
     val nearbyRadiusKm: Flow<Int>
+    val currentPage: Flow<Int>
+
+    fun setPage(page: Int)
 
     fun updateNearbySearchCenter(
         lat: Double,
@@ -20,6 +45,56 @@ interface CurrentFiltersRepository : SearchFiltersRepository {
     )
 
     fun updateNearbyRadiusKm(km: Int)
+
+    fun updateCurrentTask(shortName: String)
+
+    fun updateStartDate(date: String?)
+
+    fun updateEndDate(date: String?)
+
+    fun updateDailyRateMin(value: Int?)
+
+    fun updateDailyRateMax(value: Int?)
+
+    fun updateBrand(
+        id: Int?,
+        name: String?,
+    )
+
+    fun updateModel(
+        id: Int?,
+        name: String?,
+    )
+
+    fun updateDriveType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateBodyType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateSeatsMin(value: Int?)
+
+    fun updateEngineType(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateColor(
+        name: String?,
+        translate: String?,
+    )
+
+    fun updateYearMin(value: Int?)
+
+    fun updateYearMax(value: Int?)
+
+    fun updateSeatsMax(value: Int?)
+
+    fun updateAvailableMileagePerDayKmMin(value: Int?)
 }
 
 internal class CurrentFiltersRepositoryImpl(

@@ -11,7 +11,6 @@ import my.drivebit.navigation.isAuthBundlePath
 import my.drivebit.navigation.isChatBundlePath
 import my.drivebit.navigation.isOwnerCarBundlePath
 import my.drivebit.navigation.isProfileBundlePath
-import my.drivebit.screens.SearchPage
 import my.drivebit.shell.MountWebShell
 import my.drivebit.shell.isStaticHtmlShellPath
 import my.drivebit.web.StaticFiltersShellSync
@@ -53,7 +52,7 @@ actual fun App() {
                     RedirectToSplitBundle()
                 }
                 isSearchPath(currentPath) -> {
-                    SearchPage()
+                    RedirectToSplitBundle()
                 }
                 isStaticHtmlShellPath(currentPath) -> Unit
                 isCityHomePath(currentPath) -> HomePage()

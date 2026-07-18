@@ -298,6 +298,7 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
             ":authApp:jsBrowserDevelopmentWebpack",
             ":accountApp:jsBrowserDevelopmentWebpack",
             ":profileApp:jsBrowserDevelopmentWebpack",
+            ":searchApp:jsBrowserDevelopmentWebpack",
         )
     } else {
         dependsOn(
@@ -307,6 +308,7 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
             ":authApp:jsBrowserProductionWebpack",
             ":accountApp:jsBrowserProductionWebpack",
             ":profileApp:jsBrowserProductionWebpack",
+            ":searchApp:jsBrowserProductionWebpack",
         )
     }
     dependsOn(
@@ -315,6 +317,7 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
         ":authApp:jsProcessResources",
         ":accountApp:jsProcessResources",
         ":profileApp:jsProcessResources",
+        ":searchApp:jsProcessResources",
     )
     from(rootProject.layout.projectDirectory.file("index.html"))
     from(rootProject.layout.projectDirectory.file("list-your-car.html"))
@@ -405,6 +408,18 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(accountWebpackDir) {
         include("account.js", "account.js.map")
     }
+    from(project(":searchApp").layout.buildDirectory.dir("processedResources/js/main/search-shell")) {
+        into("search")
+    }
+    val searchWebpackDir =
+        if (needsSplitBundleDevWebpack) {
+            project(":searchApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
+        } else {
+            project(":searchApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")
+        }
+    from(searchWebpackDir) {
+        include("appCompose.js", "appCompose.js.map")
+    }
 }
 
 tasks.named("jsBrowserDevelopmentRun").configure {
@@ -415,5 +430,6 @@ tasks.named("jsBrowserDevelopmentRun").configure {
         ":authApp:jsBrowserDevelopmentWebpack",
         ":accountApp:jsBrowserDevelopmentWebpack",
         ":profileApp:jsBrowserDevelopmentWebpack",
+        ":searchApp:jsBrowserDevelopmentWebpack",
     )
 }

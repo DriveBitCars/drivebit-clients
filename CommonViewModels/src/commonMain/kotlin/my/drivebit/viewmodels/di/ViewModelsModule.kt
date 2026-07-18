@@ -78,12 +78,6 @@ import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
 import my.drivebit.viewmodels.RentViewModel
 import my.drivebit.viewmodels.RentViewModelImpl
-import my.drivebit.viewmodels.SearchPageDateEndViewModel
-import my.drivebit.viewmodels.SearchPageDateEndViewModelImpl
-import my.drivebit.viewmodels.SearchPageDateViewModel
-import my.drivebit.viewmodels.SearchPageDateViewModelImpl
-import my.drivebit.viewmodels.SearchViewModel
-import my.drivebit.viewmodels.SearchViewModelImpl
 import my.drivebit.viewmodels.TrunkSizeViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModelImpl
@@ -423,24 +417,6 @@ val commonViewModelsModule: Module =
                 carId = carId,
                 documents = get(),
                 car = get(),
-            )
-        }
-
-        factory<SearchViewModel> {
-            SearchViewModelImpl(
-                carSearchRepository = get(named("search")),
-                searchFiltersRepository = get(),
-            )
-        }
-
-        factory<SearchPageDateViewModel> {
-            SearchPageDateViewModelImpl(
-                searchFiltersRepository = get(),
-            )
-        }
-        factory<SearchPageDateEndViewModel> {
-            SearchPageDateEndViewModelImpl(
-                searchFiltersRepository = get(),
             )
         }
 
