@@ -29,7 +29,7 @@ class SearchViewModelTest {
                             override val results: Flow<SearchCarsResult> =
                                 flowOf(
                                     SearchCarsResult(
-                                        cars = listOf(SearchCarCard(id = "1", title = "BMW")),
+                                        cars = listOf(testCarItem(id = "1", brand = "BMW", model = "")),
                                         totalCount = 1,
                                         totalPages = 1,
                                     ),
@@ -119,7 +119,7 @@ class SearchViewModelTest {
                                     }
                                     emit(
                                         SearchCarsResult(
-                                            cars = listOf(SearchCarCard(id = page.toString(), title = "Page $page")),
+                                            cars = listOf(testCarItem(id = page.toString(), brand = "Page", model = page.toString())),
                                             totalCount = 1,
                                             totalPages = 3,
                                         ),

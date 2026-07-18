@@ -4,30 +4,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import kotlinx.serialization.Serializable
+import my.drivebit.network.services.CarDTOPagedResult
 
 private const val BASE_URL = "https://drivebit.ru/api/"
-
-@Serializable
-private data class CarDtoPagedResult(
-    val items: List<CarDtoItem> = emptyList(),
-    val totalCount: Int = 0,
-    val totalPages: Int = 0,
-)
-
-@Serializable
-private data class CarDtoItem(
-    val id: String,
-    val general: CarDtoGeneral? = null,
-    val dailyRate: Double? = null,
-    val price: Double? = null,
-)
-
-@Serializable
-private data class CarDtoGeneral(
-    val brandName: String? = null,
-    val modelName: String? = null,
-)
 
 class HttpSearchCarsApi(
     private val httpClient: HttpClient,
@@ -53,7 +32,7 @@ class HttpSearchCarsApi(
         pageSize: Int,
     ): SearchCarsResult {
         val url = "${BASE_URL}Car/list/filtered/$cityId"
-        val paged: CarDtoPagedResult =
+        val paged: CarDTOPagedResult =
             httpClient
                 .get(url) {
                     parameter("page", page)
@@ -72,26 +51,9 @@ class HttpSearchCarsApi(
                     driveTypes?.forEach { parameter("DriveType", it) }
                 }.body()
         return SearchCarsResult(
-            cars =
-                paged.items.map { item ->
-                    val brand = item.general?.brandName.orEmpty()
-                    val model = item.general?.modelName.orEmpty()
-                    SearchCarCard(
-                        id = item.id,
-                        title = listOf(brand, model).filter { it.isNotEmpty() }.joinToString(" ").ifEmpty { item.id },
-                        price = (item.dailyRate ?: item.price)?.takeIf { it > 0 }?.toInt(),
-                    )
-                },
+            cars = paged.items,
             totalCount = paged.totalCount,
             totalPages = paged.totalPages,
         )
     }
 }
-
-fun resolveSearchCityId(citySlug: String?): String =
-    when (citySlug?.lowercase()) {
-        "rostov-na-donu" -> "158833"
-        "krasnogorsk" -> "158840"
-        "lyubertsy" -> "158841"
-        else -> "158835"
-    }

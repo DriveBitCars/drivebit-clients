@@ -65,3 +65,6 @@ id_rda
 
 .firecrawl
 scripts/__pycache__/
+
+# CodeGraph local index — rebuilt by `codegraph init`, never commit
+.codegraph/

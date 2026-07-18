@@ -62,7 +62,9 @@ class PublicOfferValidatorTest {
             appendLine("Акцепт настоящей Оферты")
             appendLine("2. Предмет Агентского договора")
             appendLine("3. Термины и определения")
-            appendLine("${PublicOfferMetadata.COMPANY_NAME} ИНН ${PublicOfferMetadata.INN} ОГРН ${PublicOfferMetadata.OGRN} КПП ${PublicOfferMetadata.KPP}")
+            appendLine(
+                "${PublicOfferMetadata.COMPANY_NAME} ИНН ${PublicOfferMetadata.INN} ОГРН ${PublicOfferMetadata.OGRN} КПП ${PublicOfferMetadata.KPP}",
+            )
             appendLine("6.3.1. Договор аренды")
             appendLine("8. Права и обязанности Пользователя")
             appendLine("10.5. Возвраты денежных средств")

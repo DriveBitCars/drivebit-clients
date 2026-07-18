@@ -1,12 +1,12 @@
 package my.drivebit.viewmodels
 
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import io.ktor.http.HttpStatusCode
 import my.drivebit.network.NetworkException
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingCheckoutKind
@@ -87,7 +87,9 @@ private class FakeBooking(
     override suspend fun signContractAsRenter(bookingId: String): my.drivebit.network.services.BookingDTO =
         throw NotImplementedError()
 
-    override suspend fun createAsRenter(request: my.drivebit.network.services.CreateBookingRequest): my.drivebit.network.services.BookingDTO {
+    override suspend fun createAsRenter(
+        request: my.drivebit.network.services.CreateBookingRequest,
+    ): my.drivebit.network.services.BookingDTO {
         createError?.let { throw it }
         return my.drivebit.network.services.BookingDTO(
             id = "booking-1",

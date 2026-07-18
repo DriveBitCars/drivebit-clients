@@ -2,6 +2,9 @@ package my.drivebit.search
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import my.drivebit.network.services.CarAddress
+import my.drivebit.network.services.CarGeneral
+import my.drivebit.network.services.CarItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -13,7 +16,7 @@ class SearchCarRepositoryTest {
             val api = RecordingSearchApi()
             api.response =
                 SearchCarsResult(
-                    cars = listOf(SearchCarCard(id = "1", title = "BMW X5")),
+                    cars = listOf(testCarItem(id = "1", brand = "BMW", model = "X5")),
                     totalCount = 1,
                     totalPages = 1,
                 )
@@ -32,7 +35,7 @@ class SearchCarRepositoryTest {
                 SearchCarRepositoryImpl(
                     api = api,
                     filters = filters,
-                    cityIdResolver = { "158830" },
+                    resolveCityId = { "158830" },
                 )
 
             val result = repository.results.first()
@@ -49,9 +52,29 @@ class SearchCarRepositoryTest {
             assertNull(api.lastGeoLon)
             assertNull(api.lastRadiusKm)
             assertEquals(1, result.cars.size)
-            assertEquals("BMW X5", result.cars[0].title)
+            assertEquals("BMW", result.cars[0].general.brandName)
+            assertEquals("X5", result.cars[0].general.modelName)
         }
 }
+
+internal fun testCarItem(
+    id: String = "1",
+    brand: String = "BMW",
+    model: String = "X5",
+): CarItem =
+    CarItem(
+        id = id,
+        year = 2020,
+        price = 5000.0,
+        photos = emptyList(),
+        general =
+            CarGeneral(
+                brandName = brand,
+                modelName = model,
+                seats = 5,
+                address = CarAddress(),
+            ),
+    )
 
 private class RecordingSearchApi : SearchCarsApi {
     var response: SearchCarsResult = SearchCarsResult()

@@ -8,14 +8,53 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.window
-import my.drivebit.utils.SearchUrlParts
-import my.drivebit.utils.buildSearchUrl
+import kotlinx.coroutines.flow.first
+import my.drivebit.components.BodyTypeFilter
+import my.drivebit.components.Box
+import my.drivebit.components.BoxOverlay
+import my.drivebit.components.BrandModelFilter
+import my.drivebit.components.CarsGrid
+import my.drivebit.components.Column
+import my.drivebit.components.DriveTypeFilter
+import my.drivebit.components.FilterChip
+import my.drivebit.components.FiltersResetChip
+import my.drivebit.components.FlowRow
+import my.drivebit.components.Loader
+import my.drivebit.components.MileageFilter
+import my.drivebit.components.PaginationBar
+import my.drivebit.components.PriceFilter
+import my.drivebit.components.SearchDateRangeSelector
+import my.drivebit.components.SeatsFilter
+import my.drivebit.components.TextError
+import my.drivebit.components.YEAR_FILTER_MIN
+import my.drivebit.components.YearFilter
+import my.drivebit.components.currentCalendarYear
+import my.drivebit.components.mileageFilterLabelForMin
+import my.drivebit.design.CSSColors
+import my.drivebit.design.CSSTypography
+import my.drivebit.design.applyTypography
+import my.drivebit.utils.buildCitySearchPath
+import my.drivebit.utils.cityNameToSlug
+import my.drivebit.utils.isShortBrandSearchPath
+import my.drivebit.utils.parseSearchUrl
+import my.drivebit.utils.uiIndexToUrlPage
+import my.drivebit.utils.urlPageToUiIndex
+import my.drivebit.repositories.MyCityRepository
+import my.drivebit.web.CitySlugResolver
+import my.drivebit.web.buildCarDetailUrl
+import my.drivebit.web.canonicalSearchBrandPath
+import my.drivebit.web.resolveSearchPageHeadline
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H1
-import org.jetbrains.compose.web.dom.P
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 import org.w3c.dom.events.Event
@@ -23,85 +62,550 @@ import org.w3c.dom.events.Event
 @Composable
 fun SearchApp() {
     val viewModel: SearchViewModel = koinInject()
-    var locationHref by remember { mutableStateOf(window.location.pathname + window.location.search) }
+    val citySlugResolver: CitySlugResolver = koinInject()
+    val myCityRepository: MyCityRepository = koinInject()
+    var locationHref by remember { mutableStateOf(currentLocationHref()) }
     val state by viewModel.state.collectAsState()
+    var searchCityName by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         val onPopState: (Event) -> Unit = {
-            locationHref = window.location.pathname + window.location.search
+            locationHref = currentLocationHref()
         }
         window.addEventListener("popstate", onPopState)
     }
 
     LaunchedEffect(locationHref) {
+        val path =
+            locationHref
+                .substringBefore('?')
+                .substringBefore('#')
+                .removeSuffix("/")
+                .ifEmpty { "/" }
+        if (path == "/search") {
+            val target = buildCitySearchPath("moskva") + window.location.search
+            window.history.replaceState(null, "", target)
+            locationHref = currentLocationHref()
+            return@LaunchedEffect
+        }
+        val canonical = canonicalSearchBrandPath(path)
+        if (canonical != null &&
+            path.startsWith("/search/") &&
+            isShortBrandSearchPath(canonical) &&
+            canonical != path
+        ) {
+            window.history.replaceState(null, "", "$canonical${window.location.search}")
+            locationHref = currentLocationHref()
+            return@LaunchedEffect
+        }
+        val urlParts = parseSearchUrl(locationHref)
+        val citySlugFromUrl = urlParts.citySlug
+        if (citySlugFromUrl != null) {
+            val city =
+                citySlugResolver.resolve(citySlugFromUrl)
+                    ?: citySlugResolver.moscowCity()
+            myCityRepository.selectCity(city.id, city.name)
+            searchCityName = city.name
+        } else {
+            searchCityName = myCityRepository.getSelectedCity.first().name
+        }
         viewModel.load(locationHref)
     }
 
+    val filtersForHeadline =
+        when (val s = state) {
+            is SearchUiState.Results -> s.filters
+            else -> null
+        }
+
+    val pathOnly = locationHref.substringBefore('?').substringBefore('#')
+    val pageHeadline =
+        resolveSearchPageHeadline(
+            path = pathOnly,
+            brandName = filtersForHeadline?.brandName,
+            cityName = searchCityName,
+        )
+
     Div({
         classes("drivebit-cars-grid-mounted")
-        style { padding(16.px) }
+        style {
+            width(100.percent)
+            padding(20.px)
+            property("max-width", "1200px")
+            property("margin", "0 auto")
+        }
     }) {
-        H1 { Text("Поиск автомобилей") }
-        when (val s = state) {
-            is SearchUiState.Loading -> P { Text("Загрузка…") }
-            is SearchUiState.Error -> P { Text(s.message) }
+        when (val currentState = state) {
+            is SearchUiState.Loading -> {
+                SearchPageHeadline(pageHeadline)
+                Loader()
+            }
+
+            is SearchUiState.Error -> {
+                SearchPageHeadline(pageHeadline)
+                TextError(currentState.message)
+            }
+
             is SearchUiState.Results -> {
-                P {
-                    Text(
-                        "Найдено: ${s.result.totalCount}. Фильтры: " +
-                            listOfNotNull(
-                                s.filters.brandName,
-                                s.filters.modelName,
-                                s.filters.startDate,
-                                s.filters.seatsMin?.let { "$it мест" },
-                            ).joinToString(", ").ifEmpty { "все" },
-                    )
-                }
-                s.result.cars.forEach { car ->
-                    Div { Text("${car.title}${car.price?.let { " — $it ₽" } ?: ""}") }
-                }
-                if (s.result.totalPages > 1) {
-                    Button({
-                        onClick {
-                            val nextPage = (s.filters.page + 1).coerceAtMost(s.result.totalPages)
-                            navigateSearch(s.filters.copy(page = nextPage))
-                            locationHref = window.location.pathname + window.location.search
-                        }
-                    }) { Text("Следующая страница") }
-                }
-                Button({
-                    onClick {
-                        navigateSearch(
-                            applySearchFilterChange(s.filters) { it.copy(seatsMin = 5) },
-                        )
-                        locationHref = window.location.pathname + window.location.search
-                    }
-                }) { Text("5+ мест") }
+                SearchResultsContent(
+                    state = currentState,
+                    pageHeadline = pageHeadline,
+                    onLocationChanged = { locationHref = currentLocationHref() },
+                )
             }
         }
     }
 }
 
-private fun navigateSearch(filters: SearchFilterSet) {
-    val parts =
-        SearchUrlParts(
-            citySlug = filters.citySlug ?: if (filters.brandSlug == null) "moskva" else null,
-            brandSlug = filters.brandSlug,
-            modelSlug = filters.modelSlug,
+@Composable
+private fun SearchResultsContent(
+    state: SearchUiState.Results,
+    pageHeadline: String,
+    onLocationChanged: () -> Unit,
+) {
+    val filters = state.filters
+    var showPriceFilter by remember { mutableStateOf(false) }
+    var showBrandFilter by remember { mutableStateOf(false) }
+    var showDriveTypeFilter by remember { mutableStateOf(false) }
+    var showBodyTypeFilter by remember { mutableStateOf(false) }
+    var showSeatsFilter by remember { mutableStateOf(false) }
+    var showYearFilter by remember { mutableStateOf(false) }
+    var showMileageFilter by remember { mutableStateOf(false) }
+    val minPrice = remember { mutableStateOf(filters.dailyRateMin ?: 0) }
+    val maxPrice = remember { mutableStateOf(filters.dailyRateMax ?: 50000) }
+    val minYear = remember { mutableStateOf(filters.yearMin ?: YEAR_FILTER_MIN) }
+    val maxYear = remember { mutableStateOf(filters.yearMax ?: currentCalendarYear()) }
+
+    LaunchedEffect(filters.dailyRateMin) {
+        filters.dailyRateMin?.let { minPrice.value = it }
+    }
+    LaunchedEffect(filters.dailyRateMax) {
+        filters.dailyRateMax?.let { maxPrice.value = it }
+    }
+    LaunchedEffect(filters.yearMin) {
+        filters.yearMin?.let { minYear.value = it }
+    }
+    LaunchedEffect(filters.yearMax) {
+        filters.yearMax?.let { maxYear.value = it }
+    }
+
+    fun closeOverlays() {
+        showPriceFilter = false
+        showBrandFilter = false
+        showDriveTypeFilter = false
+        showBodyTypeFilter = false
+        showSeatsFilter = false
+        showYearFilter = false
+        showMileageFilter = false
+    }
+
+    fun navigateFilter(transform: (SearchFilterSet) -> SearchFilterSet) {
+        navigateSearchFilters(applySearchFilterChange(filters, transform))
+        onLocationChanged()
+    }
+
+    fun navigatePage(page: Int) {
+        navigateSearchFilters(filters.copy(page = page))
+        onLocationChanged()
+    }
+
+    val isPriceSelected = filters.dailyRateMin != null || filters.dailyRateMax != null
+    val priceText =
+        if (isPriceSelected) {
+            "${filters.dailyRateMin ?: 0} - ${filters.dailyRateMax ?: 50000}"
+        } else {
+            null
+        }
+    val isBrandSelected = filters.brandName != null
+    val brandChipText =
+        when {
+            filters.brandName != null && filters.modelName != null ->
+                "${filters.brandName} ${filters.modelName}"
+            filters.brandName != null -> filters.brandName
+            else -> null
+        }
+    val isDriveTypeSelected = filters.driveTypeLabel != null
+    val isBodyTypeSelected = filters.bodyTypeLabel != null
+    val isSeatsSelected = filters.seatsMin != null
+    val seatsChipText = filters.seatsMin?.let { "$it или более" }
+    val isYearSelected = filters.yearMin != null || filters.yearMax != null
+    val yearChipText =
+        if (isYearSelected) {
+            "${filters.yearMin ?: YEAR_FILTER_MIN} — ${filters.yearMax ?: currentCalendarYear()}"
+        } else {
+            null
+        }
+    val isMileageSelected = filters.mileageMin != null
+    val mileageChipText = mileageFilterLabelForMin(filters.mileageMin)
+    val hasDatesSelected = filters.startDate != null || filters.endDate != null
+    val hasAnyFilter =
+        isPriceSelected ||
+            isBrandSelected ||
+            isDriveTypeSelected ||
+            isBodyTypeSelected ||
+            isSeatsSelected ||
+            isYearSelected ||
+            isMileageSelected ||
+            hasDatesSelected
+
+    Column(gap = 24.px) {
+        SearchPageHeadline(pageHeadline)
+        SearchDateRangeSelector(
             startDate = filters.startDate,
             endDate = filters.endDate,
-            dailyRateMin = filters.dailyRateMin,
-            dailyRateMax = filters.dailyRateMax,
-            driveType = filters.driveType,
-            driveTypeLabel = filters.driveTypeLabel,
-            bodyType = filters.bodyType,
-            bodyTypeLabel = filters.bodyTypeLabel,
-            seatsMin = filters.seatsMin,
-            yearMin = filters.yearMin,
-            yearMax = filters.yearMax,
-            mileageMin = filters.mileageMin,
-            page = filters.page,
+            onStartDateChanged = { date ->
+                navigateFilter { it.copy(startDate = date) }
+            },
+            onEndDateChanged = { date ->
+                navigateFilter { it.copy(endDate = date) }
+            },
         )
-    val url = buildSearchUrl(parts)
-    window.history.pushState(null, "", url)
+        FlowRow(gap = 8.px) {
+            FilterChip(
+                name = "Марка",
+                onClick = {
+                    showBrandFilter = !showBrandFilter
+                    showPriceFilter = false
+                    showDriveTypeFilter = false
+                    showBodyTypeFilter = false
+                    showSeatsFilter = false
+                    showYearFilter = false
+                    showMileageFilter = false
+                },
+                isSelected = isBrandSelected,
+                selectedText = brandChipText,
+            )
+            FilterChip(
+                name = "Привод",
+                onClick = {
+                    showDriveTypeFilter = !showDriveTypeFilter
+                    showPriceFilter = false
+                    showBrandFilter = false
+                    showBodyTypeFilter = false
+                    showSeatsFilter = false
+                    showYearFilter = false
+                    showMileageFilter = false
+                },
+                isSelected = isDriveTypeSelected,
+                selectedText = filters.driveTypeLabel,
+            )
+            FilterChip(
+                name = "Кузов",
+                onClick = {
+                    showBodyTypeFilter = !showBodyTypeFilter
+                    showPriceFilter = false
+                    showBrandFilter = false
+                    showDriveTypeFilter = false
+                    showSeatsFilter = false
+                    showYearFilter = false
+                    showMileageFilter = false
+                },
+                isSelected = isBodyTypeSelected,
+                selectedText = filters.bodyTypeLabel,
+            )
+            FilterChip(
+                name = "Количество мест",
+                onClick = {
+                    showSeatsFilter = !showSeatsFilter
+                    showPriceFilter = false
+                    showBrandFilter = false
+                    showDriveTypeFilter = false
+                    showBodyTypeFilter = false
+                    showYearFilter = false
+                    showMileageFilter = false
+                },
+                isSelected = isSeatsSelected,
+                selectedText = seatsChipText,
+            )
+            FilterChip(
+                name = "Год выпуска",
+                onClick = {
+                    showYearFilter = !showYearFilter
+                    showPriceFilter = false
+                    showBrandFilter = false
+                    showDriveTypeFilter = false
+                    showBodyTypeFilter = false
+                    showSeatsFilter = false
+                    showMileageFilter = false
+                },
+                isSelected = isYearSelected,
+                selectedText = yearChipText,
+            )
+            FilterChip(
+                name = "Километраж",
+                onClick = {
+                    showMileageFilter = !showMileageFilter
+                    showPriceFilter = false
+                    showBrandFilter = false
+                    showDriveTypeFilter = false
+                    showBodyTypeFilter = false
+                    showSeatsFilter = false
+                    showYearFilter = false
+                },
+                isSelected = isMileageSelected,
+                selectedText = mileageChipText,
+            )
+            FilterChip(
+                name = "Цена",
+                onClick = {
+                    showPriceFilter = !showPriceFilter
+                    showBrandFilter = false
+                    showDriveTypeFilter = false
+                    showBodyTypeFilter = false
+                    showSeatsFilter = false
+                    showYearFilter = false
+                    showMileageFilter = false
+                },
+                isSelected = isPriceSelected,
+                selectedText = priceText,
+            )
+            if (hasAnyFilter) {
+                FiltersResetChip(
+                    onClick = {
+                        closeOverlays()
+                        minPrice.value = 0
+                        maxPrice.value = 50000
+                        minYear.value = YEAR_FILTER_MIN
+                        maxYear.value = currentCalendarYear()
+                        navigateSearchFilters(
+                            SearchFilterSet(citySlug = filters.citySlug ?: "moskva"),
+                        )
+                        onLocationChanged()
+                    },
+                )
+            }
+        }
+        Box(
+            modifier = {
+                property("min-height", "240px")
+            },
+            underneath = {
+                if (state.result.cars.isNotEmpty()) {
+                    CarsGrid(
+                        cars = state.result.cars,
+                        carHref = { car ->
+                            buildCarDetailUrl(
+                                carId = car.id,
+                                startDate = filters.startDate,
+                                endDate = filters.endDate,
+                            )
+                        },
+                    )
+                    PaginationBar(
+                        currentPage = urlPageToUiIndex(filters.page),
+                        totalPages = state.result.totalPages,
+                        totalCount = state.result.totalCount,
+                        pageSize = 9,
+                        onPageChange = { uiIndex ->
+                            navigatePage(uiIndexToUrlPage(uiIndex))
+                        },
+                    )
+                } else {
+                    Div({
+                        style {
+                            padding(40.px)
+                            textAlign("center")
+                        }
+                    }) {
+                        Span({
+                            style {
+                                applyTypography(CSSTypography.Styles.body)
+                                fontSize(CSSTypography.FontSize.base)
+                                color(CSSColors.Gray600)
+                            }
+                        }) {
+                            Text("Автомобили не найдены")
+                        }
+                    }
+                }
+            },
+            overlay = {
+                if (showPriceFilter) {
+                    BoxOverlay {
+                        PriceFilter(
+                            minPrice = minPrice,
+                            maxPrice = maxPrice,
+                            resultsCount = state.result.totalCount,
+                            onReset = {
+                                minPrice.value = 0
+                                maxPrice.value = 50000
+                                navigateFilter {
+                                    it.copy(dailyRateMin = null, dailyRateMax = null)
+                                }
+                                showPriceFilter = false
+                            },
+                            onViewResults = {
+                                navigateFilter {
+                                    it.copy(
+                                        dailyRateMin = minPrice.value,
+                                        dailyRateMax = maxPrice.value,
+                                    )
+                                }
+                                showPriceFilter = false
+                            },
+                        )
+                    }
+                }
+                if (showBrandFilter) {
+                    BoxOverlay {
+                        BrandModelFilter(
+                            onBrandSelected = { brandId, brandName ->
+                                navigateFilter {
+                                    it.copy(
+                                        brandId = brandId,
+                                        brandName = brandName,
+                                        brandSlug = cityNameToSlug(brandName),
+                                        modelId = null,
+                                        modelName = null,
+                                        modelSlug = null,
+                                        citySlug = null,
+                                    )
+                                }
+                            },
+                            onModelSelected = { modelId, modelName ->
+                                navigateFilter {
+                                    it.copy(
+                                        modelId = modelId,
+                                        modelName = modelName,
+                                        modelSlug = cityNameToSlug(modelName),
+                                    )
+                                }
+                                showBrandFilter = false
+                            },
+                            onReset = {
+                                navigateFilter {
+                                    it.copy(
+                                        brandId = null,
+                                        brandName = null,
+                                        brandSlug = null,
+                                        modelId = null,
+                                        modelName = null,
+                                        modelSlug = null,
+                                        citySlug = it.citySlug ?: "moskva",
+                                    )
+                                }
+                                showBrandFilter = false
+                            },
+                            onOk = { showBrandFilter = false },
+                        )
+                    }
+                }
+                if (showDriveTypeFilter) {
+                    BoxOverlay {
+                        DriveTypeFilter(
+                            onDriveTypeSelected = { name, translate ->
+                                navigateFilter {
+                                    it.copy(driveType = name, driveTypeLabel = translate)
+                                }
+                                showDriveTypeFilter = false
+                            },
+                            onReset = {
+                                navigateFilter {
+                                    it.copy(driveType = null, driveTypeLabel = null)
+                                }
+                                showDriveTypeFilter = false
+                            },
+                        )
+                    }
+                }
+                if (showBodyTypeFilter) {
+                    BoxOverlay {
+                        BodyTypeFilter(
+                            onBodyTypeSelected = { name, translate ->
+                                navigateFilter {
+                                    it.copy(bodyType = name, bodyTypeLabel = translate)
+                                }
+                                showBodyTypeFilter = false
+                            },
+                            onReset = {
+                                navigateFilter {
+                                    it.copy(bodyType = null, bodyTypeLabel = null)
+                                }
+                                showBodyTypeFilter = false
+                            },
+                        )
+                    }
+                }
+                if (showSeatsFilter) {
+                    BoxOverlay {
+                        SeatsFilter(
+                            selectedSeatsMin = filters.seatsMin,
+                            resultsCount = state.result.totalCount,
+                            onSeatsMinSelected = { seatsMin ->
+                                navigateFilter { it.copy(seatsMin = seatsMin) }
+                                showSeatsFilter = false
+                            },
+                            onReset = {
+                                navigateFilter { it.copy(seatsMin = null) }
+                                showSeatsFilter = false
+                            },
+                        )
+                    }
+                }
+                if (showYearFilter) {
+                    BoxOverlay {
+                        YearFilter(
+                            minYear = minYear,
+                            maxYear = maxYear,
+                            onReset = {
+                                minYear.value = YEAR_FILTER_MIN
+                                maxYear.value = currentCalendarYear()
+                                navigateFilter { it.copy(yearMin = null, yearMax = null) }
+                                showYearFilter = false
+                            },
+                            onViewResults = {
+                                navigateFilter {
+                                    it.copy(yearMin = minYear.value, yearMax = maxYear.value)
+                                }
+                                showYearFilter = false
+                            },
+                        )
+                    }
+                }
+                if (showMileageFilter) {
+                    BoxOverlay {
+                        MileageFilter(
+                            selectedMileageMin = filters.mileageMin,
+                            onMileageMinSelected = { mileageMin ->
+                                navigateFilter { it.copy(mileageMin = mileageMin) }
+                                showMileageFilter = false
+                            },
+                            onReset = {
+                                navigateFilter { it.copy(mileageMin = null) }
+                                showMileageFilter = false
+                            },
+                        )
+                    }
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun SearchPageHeadline(text: String) {
+    Div({
+        classes("drivebit-search-headline-wrap")
+        style {
+            width(100.percent)
+            property("max-width", "1200px")
+            property("margin", "0 auto")
+            padding(0.px)
+        }
+    }) {
+        H1({
+            id("drivebit-page-headline")
+            classes("drivebit-page-headline")
+            style {
+                property("margin", "0")
+                fontSize(32.px)
+                fontWeight("600")
+                property("line-height", "1.25")
+                color(CSSColors.Black)
+                property("text-wrap", "balance")
+            }
+        }) {
+            Text(text)
+        }
+    }
 }
