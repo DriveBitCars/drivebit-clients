@@ -35,7 +35,7 @@ class SearchCarRepositoryTest {
                 SearchCarRepositoryImpl(
                     api = api,
                     filters = filters,
-                    cityIdResolver = { "158830" },
+                    resolveCityId = { "158830" },
                 )
 
             val result = repository.results.first()

@@ -68,12 +68,12 @@ interface SearchCarRepository {
 class SearchCarRepositoryImpl(
     private val api: SearchCarsApi,
     private val filters: SearchFilterSet,
-    private val cityIdResolver: (String?) -> String,
+    private val resolveCityId: suspend () -> String,
     private val pageSize: Int = 9,
 ) : SearchCarRepository {
     override val results: Flow<SearchCarsResult> =
         flow {
-            val cityId = cityIdResolver(filters.citySlug)
+            val cityId = resolveCityId()
             emit(
                 api.searchCars(
                     cityId = cityId,

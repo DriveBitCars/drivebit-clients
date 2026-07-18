@@ -57,11 +57,3 @@ class HttpSearchCarsApi(
         )
     }
 }
-
-fun resolveSearchCityId(citySlug: String?): String =
-    when (citySlug?.lowercase()) {
-        "rostov-na-donu" -> "158833"
-        "krasnogorsk" -> "158840"
-        "lyubertsy" -> "158841"
-        else -> "158835"
-    }

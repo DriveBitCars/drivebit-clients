@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.browser.window
+import kotlinx.coroutines.flow.first
 import my.drivebit.components.BodyTypeFilter
 import my.drivebit.components.Box
 import my.drivebit.components.BoxOverlay
@@ -38,6 +39,7 @@ import my.drivebit.utils.isShortBrandSearchPath
 import my.drivebit.utils.parseSearchUrl
 import my.drivebit.utils.uiIndexToUrlPage
 import my.drivebit.utils.urlPageToUiIndex
+import my.drivebit.repositories.MyCityRepository
 import my.drivebit.web.CitySlugResolver
 import my.drivebit.web.buildCarDetailUrl
 import my.drivebit.web.canonicalSearchBrandPath
@@ -61,6 +63,7 @@ import org.w3c.dom.events.Event
 fun SearchApp() {
     val viewModel: SearchViewModel = koinInject()
     val citySlugResolver: CitySlugResolver = koinInject()
+    val myCityRepository: MyCityRepository = koinInject()
     var locationHref by remember { mutableStateOf(currentLocationHref()) }
     val state by viewModel.state.collectAsState()
     var searchCityName by remember { mutableStateOf<String?>(null) }
@@ -95,24 +98,25 @@ fun SearchApp() {
             locationHref = currentLocationHref()
             return@LaunchedEffect
         }
+        val urlParts = parseSearchUrl(locationHref)
+        val citySlugFromUrl = urlParts.citySlug
+        if (citySlugFromUrl != null) {
+            val city =
+                citySlugResolver.resolve(citySlugFromUrl)
+                    ?: citySlugResolver.moscowCity()
+            myCityRepository.selectCity(city.id, city.name)
+            searchCityName = city.name
+        } else {
+            searchCityName = myCityRepository.getSelectedCity.first().name
+        }
         viewModel.load(locationHref)
     }
 
-    val urlParts = remember(locationHref) { parseSearchUrl(locationHref) }
     val filtersForHeadline =
         when (val s = state) {
             is SearchUiState.Results -> s.filters
             else -> null
         }
-    val citySlug =
-        filtersForHeadline?.citySlug
-            ?: urlParts.citySlug
-            ?: "moskva"
-
-    LaunchedEffect(citySlug) {
-        val city = citySlugResolver.resolve(citySlug) ?: citySlugResolver.moscowCity()
-        searchCityName = city.name
-    }
 
     val pathOnly = locationHref.substringBefore('?').substringBefore('#')
     val pageHeadline =
