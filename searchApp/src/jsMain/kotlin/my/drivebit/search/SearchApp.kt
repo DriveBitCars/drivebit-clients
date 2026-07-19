@@ -450,6 +450,7 @@ private fun SearchResultsContent(
                     }
                     else -> {
                         Div({
+                            classes("drivebit-search-results-empty")
                             style {
                                 padding(40.px)
                                 textAlign("center")

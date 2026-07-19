@@ -47,6 +47,7 @@
 
 body:has(#root .drivebit-cars-grid-compose) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose),
 body:has(#root .drivebit-cars-grid-mounted) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose),
+body:has(#root .drivebit-search-results-empty) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose),
 body:has(#root .drivebit-pagination-bar) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose),
 body:has(#root .leaflet-container) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose),
 body:has(#root .drivebit-main-content-error) #drivebit-cars-grid-static:not(.drivebit-cars-grid-compose) {
