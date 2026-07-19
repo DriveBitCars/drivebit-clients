@@ -19,6 +19,7 @@ class BrandSearchPathUtilsTest {
     fun parseBrandSlugFromPath_acceptsLegacyShortAudiBmw() {
         assertEquals("audi", parseBrandSlugFromPath("/audi"))
         assertEquals("bmw", parseBrandSlugFromPath("/bmw/"))
+        assertEquals("bmw", parseBrandSlugFromPath("/bmw/x5"))
     }
 
     @Test
@@ -44,6 +45,13 @@ class BrandSearchPathUtilsTest {
         assertEquals("/search/bmw", canonicalizeBrandSearchPath("/bmw"))
         assertEquals("/search/skoda", canonicalizeBrandSearchPath("/search/skoda"))
         assertNull(canonicalizeBrandSearchPath("/moskva"))
+    }
+
+    @Test
+    fun canonicalizeBrandSearchPath_preservesModelSlug() {
+        assertEquals("/search/bmw/x5", canonicalizeBrandSearchPath("/search/bmw/x5"))
+        assertEquals("/search/bmw/x5", canonicalizeBrandSearchPath("/bmw/x5"))
+        assertEquals("/search/audi/a6", canonicalizeBrandSearchPath("/audi/a6"))
     }
 
     @Test

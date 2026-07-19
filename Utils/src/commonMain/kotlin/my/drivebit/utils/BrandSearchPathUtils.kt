@@ -23,14 +23,32 @@ fun parseBrandSlugFromPath(pathname: String): String? {
         val segment = trimmed.removePrefix("search/").substringBefore('/')
         return segment.takeIf { it.isNotEmpty() }?.lowercase()
     }
-    if ('/' in trimmed) return null
-    val segment = trimmed.lowercase()
+    val segment = trimmed.substringBefore('/').lowercase()
     return segment.takeIf { it in LEGACY_SHORT_BRAND_SEARCH_PATH_SLUGS }
 }
 
 fun canonicalizeBrandSearchPath(pathname: String): String? {
-    val slug = parseBrandSlugFromPath(pathname) ?: return null
-    return pathForBrandSlug(slug)
+    val pathOnly = pathname.substringBefore('?').substringBefore('#')
+    val trimmed = pathOnly.trim().removePrefix("/").removeSuffix("/")
+    if (trimmed.isEmpty()) return null
+    val segments = trimmed.split('/').filter { it.isNotEmpty() }.map { it.lowercase() }
+
+    val brandSlug: String
+    val modelSlug: String?
+    when {
+        segments.size >= 2 && segments[0] == "search" -> {
+            brandSlug = segments[1]
+            modelSlug = segments.getOrNull(2)?.takeIf { it.isNotEmpty() }
+        }
+        segments.isNotEmpty() && segments[0] in LEGACY_SHORT_BRAND_SEARCH_PATH_SLUGS -> {
+            brandSlug = segments[0]
+            modelSlug = segments.getOrNull(1)?.takeIf { it.isNotEmpty() }
+        }
+        else -> return null
+    }
+    if (brandSlug.isEmpty()) return null
+    val base = pathForBrandSlug(brandSlug)
+    return if (modelSlug != null) "$base/$modelSlug" else base
 }
 
 fun isShortBrandSearchPath(pathname: String): Boolean {
