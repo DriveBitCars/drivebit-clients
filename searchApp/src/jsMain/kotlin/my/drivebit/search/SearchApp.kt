@@ -33,12 +33,15 @@ import my.drivebit.components.mileageFilterLabelForMin
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
+import my.drivebit.navigation.MetaTags
 import my.drivebit.utils.cityNameToSlug
+import my.drivebit.utils.commitSearchLocationSeo
 import my.drivebit.utils.parseSearchUrl
 import my.drivebit.utils.resolveBareSearchRedirectPath
 import my.drivebit.utils.uiIndexToUrlPage
 import my.drivebit.utils.urlPageToUiIndex
 import my.drivebit.repositories.MyCityRepository
+import my.drivebit.shared.storage.Storage
 import my.drivebit.web.CitySlugResolver
 import my.drivebit.web.buildCarDetailUrl
 import my.drivebit.web.canonicalSearchBrandPath
@@ -63,6 +66,7 @@ fun SearchApp() {
     val viewModel: SearchViewModel = koinInject()
     val citySlugResolver: CitySlugResolver = koinInject()
     val myCityRepository: MyCityRepository = koinInject()
+    val storage: Storage = koinInject()
     var locationHref by remember { mutableStateOf(currentLocationHref()) }
     val state by viewModel.state.collectAsState()
     var searchCityName by remember { mutableStateOf<String?>(null) }
@@ -107,6 +111,9 @@ fun SearchApp() {
             searchCityName = myCityRepository.getSelectedCity.first().name
         }
         viewModel.load(locationHref)
+        commitSearchLocationSeo(locationHref) { seoPath ->
+            MetaTags.updateForPath(seoPath, storage)
+        }
     }
 
     var lastFilters by remember { mutableStateOf<SearchFilterSet?>(null) }
