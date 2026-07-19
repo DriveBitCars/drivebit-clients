@@ -124,7 +124,24 @@ fun SearchApp() {
     val filtersForUi =
         when (val s = state) {
             is SearchUiState.Results -> s.filters
-            else -> lastFilters ?: filtersFromLocation(locationHref)
+            else -> {
+                val fromUrl = filtersFromLocation(locationHref)
+                val previous = lastFilters
+                if (previous != null &&
+                    previous.brandSlug == fromUrl.brandSlug &&
+                    previous.modelSlug == fromUrl.modelSlug &&
+                    previous.citySlug == fromUrl.citySlug
+                ) {
+                    fromUrl.copy(
+                        brandId = previous.brandId,
+                        brandName = previous.brandName,
+                        modelId = previous.modelId,
+                        modelName = previous.modelName,
+                    )
+                } else {
+                    fromUrl
+                }
+            }
         }
 
     val pathOnly = locationHref.substringBefore('?').substringBefore('#')
@@ -135,6 +152,9 @@ fun SearchApp() {
             cityName = searchCityName,
         )
 
+    val resultsState = state as? SearchUiState.Results
+    val errorMessage = (state as? SearchUiState.Error)?.message
+
     Div({
         style {
             width(100.percent)
@@ -144,30 +164,13 @@ fun SearchApp() {
             property("box-sizing", "border-box")
         }
     }) {
-        when (val currentState = state) {
-            is SearchUiState.Loading -> {
-                SearchResultsContent(
-                    filters = filtersForUi,
-                    result = null,
-                    pageHeadline = pageHeadline,
-                    onLocationChanged = { locationHref = currentLocationHref() },
-                )
-            }
-
-            is SearchUiState.Error -> {
-                SearchPageHeadline(pageHeadline)
-                TextError(currentState.message)
-            }
-
-            is SearchUiState.Results -> {
-                SearchResultsContent(
-                    filters = currentState.filters,
-                    result = currentState.result,
-                    pageHeadline = pageHeadline,
-                    onLocationChanged = { locationHref = currentLocationHref() },
-                )
-            }
-        }
+        SearchResultsContent(
+            filters = resultsState?.filters ?: filtersForUi,
+            result = resultsState?.result,
+            pageHeadline = pageHeadline,
+            errorMessage = errorMessage,
+            onLocationChanged = { locationHref = currentLocationHref() },
+        )
     }
 }
 
@@ -198,6 +201,7 @@ private fun SearchResultsContent(
     filters: SearchFilterSet,
     result: SearchCarsResult?,
     pageHeadline: String,
+    errorMessage: String? = null,
     onLocationChanged: () -> Unit,
 ) {
     var showPriceFilter by remember { mutableStateOf(false) }
@@ -289,17 +293,14 @@ private fun SearchResultsContent(
         SearchDateRangeSelector(
             startDate = filters.startDate,
             endDate = filters.endDate,
-            onStartDateChanged = { date ->
-                if (date != filters.startDate) {
-                    navigateFilter { it.copy(startDate = date) }
-                }
-            },
-            onEndDateChanged = { date ->
-                if (date != filters.endDate) {
-                    navigateFilter { it.copy(endDate = date) }
-                }
+            applyOnlyCompleteRange = true,
+            onDateRangeChanged = { start, end ->
+                navigateFilter { it.copy(startDate = start, endDate = end) }
             },
         )
+        if (errorMessage != null) {
+            TextError(errorMessage)
+        }
         FlowRow(gap = 8.px) {
             FilterChip(
                 name = "Марка",
@@ -495,6 +496,8 @@ private fun SearchResultsContent(
                 if (showBrandFilter) {
                     BoxOverlay {
                         BrandModelFilter(
+                            initialBrandId = filters.brandId,
+                            initialBrandName = filters.brandName,
                             onBrandSelected = { brandId, brandName ->
                                 navigateFilter {
                                     it.copy(

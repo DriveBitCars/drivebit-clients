@@ -10,6 +10,7 @@ import kotlinx.datetime.number
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
+import my.drivebit.utils.resolveSearchDateRangeNavigation
 import my.drivebit.viewmodels.DateFieldViewModel
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -25,7 +26,6 @@ import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.minWidth
@@ -42,11 +42,11 @@ import org.w3c.dom.HTMLElement
 fun SearchDateRangeSelector(
     startDate: String?,
     endDate: String?,
-    onStartDateChanged: (String?) -> Unit,
-    onEndDateChanged: (String?) -> Unit,
+    onDateRangeChanged: (start: String?, end: String?) -> Unit,
     disabledDates: Set<String> = emptySet(),
     endMinOffsetDaysFromStart: Int = 0,
     clearRangeOnCancel: Boolean = true,
+    applyOnlyCompleteRange: Boolean = false,
 ) {
     val startViewModel = remember { DateFieldViewModel(initialDate = startDate) }
     val endViewModel = remember { DateFieldViewModel(initialDate = endDate) }
@@ -60,11 +60,23 @@ fun SearchDateRangeSelector(
         if (endState.date != endDate) endViewModel.setDate(endDate)
     }
 
-    LaunchedEffect(startState.date) {
-        if (startState.date != startDate) onStartDateChanged(startState.date)
-    }
-    LaunchedEffect(endState.date) {
-        if (endState.date != endDate) onEndDateChanged(endState.date)
+    LaunchedEffect(startState.date, endState.date) {
+        if (applyOnlyCompleteRange) {
+            val update =
+                resolveSearchDateRangeNavigation(
+                    appliedStart = startDate,
+                    appliedEnd = endDate,
+                    draftStart = startState.date,
+                    draftEnd = endState.date,
+                )
+            if (update != null) {
+                onDateRangeChanged(update.startDate, update.endDate)
+            }
+        } else {
+            if (startState.date != startDate || endState.date != endDate) {
+                onDateRangeChanged(startState.date, endState.date)
+            }
+        }
     }
 
     Row(
