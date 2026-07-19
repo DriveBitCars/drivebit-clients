@@ -78,8 +78,10 @@ fun CarAvailabilityPage() {
                             SearchDateRangeSelector(
                                 startDate = currentState.selectedStartDate,
                                 endDate = currentState.selectedEndDate,
-                                onStartDateChanged = viewModel::updateSelectedStartDate,
-                                onEndDateChanged = viewModel::updateSelectedEndDate,
+                                onDateRangeChanged = { start, end ->
+                                    viewModel.updateSelectedStartDate(start)
+                                    viewModel.updateSelectedEndDate(end)
+                                },
                                 disabledDates = currentState.disabledDates,
                                 endMinOffsetDaysFromStart = 0,
                                 clearRangeOnCancel = false,

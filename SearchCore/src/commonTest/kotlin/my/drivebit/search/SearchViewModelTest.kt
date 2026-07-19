@@ -140,4 +140,37 @@ class SearchViewModelTest {
             assertEquals(2, results.filters.page)
             assertEquals("2", results.result.cars.first().id)
         }
+
+    @Test
+    fun `brand then body type load completes with both filters`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            var lastFilters: SearchFilterSet? = null
+            val vm =
+                SearchViewModel(
+                    repositoryFactory = { filters ->
+                        lastFilters = filters
+                        object : SearchCarRepository {
+                            override val results: Flow<SearchCarsResult> =
+                                flowOf(SearchCarsResult(totalCount = 0, totalPages = 0))
+                        }
+                    },
+                    brandResolver = { slug -> if (slug == "bmw") 10 to "BMW" else null },
+                    modelResolver = { _, _ -> null },
+                    coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
+                )
+
+            vm.load("/bmw")
+            advanceUntilIdle()
+            vm.load("/bmw?bodyType=SUV&bodyTypeLabel=%D0%92%D0%BD%D0%B5%D0%B4%D0%BE%D1%80%D0%BE%D0%B6%D0%BD%D0%B8%D0%BA")
+            advanceUntilIdle()
+
+            val results = assertIs<SearchUiState.Results>(vm.state.value)
+            assertEquals(10, results.filters.brandId)
+            assertEquals("BMW", results.filters.brandName)
+            assertEquals("SUV", results.filters.bodyType)
+            assertEquals("Внедорожник", results.filters.bodyTypeLabel)
+            assertEquals("SUV", lastFilters?.bodyType)
+            assertEquals(10, lastFilters?.brandId)
+        }
 }

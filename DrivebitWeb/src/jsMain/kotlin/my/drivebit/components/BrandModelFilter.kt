@@ -25,6 +25,8 @@ fun BrandModelFilter(
     onModelSelected: (modelId: Int, modelName: String) -> Unit,
     onReset: () -> Unit,
     onOk: () -> Unit,
+    initialBrandId: Int? = null,
+    initialBrandName: String? = null,
 ) {
     val brandViewModel: CarBrandViewModel = koinInject()
     val modelViewModel: CarModelViewModel = koinInject()
@@ -33,13 +35,19 @@ fun BrandModelFilter(
     val brandError by brandViewModel.error.collectAsState()
     val modelError by modelViewModel.error.collectAsState()
 
-    var selectedBrandId by remember { mutableStateOf<Int?>(null) }
-    var selectedBrandName by remember { mutableStateOf<String?>(null) }
+    var selectedBrandId by remember { mutableStateOf(initialBrandId) }
+    var selectedBrandName by remember { mutableStateOf(initialBrandName) }
     var brandQuery by remember { mutableStateOf("") }
     var modelQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         brandViewModel.loadBrands(existingInFleetOnly = true)
+    }
+
+    LaunchedEffect(initialBrandId) {
+        if (initialBrandId != null && selectedBrandId == initialBrandId) {
+            modelViewModel.loadModels(initialBrandId, existingInFleetOnly = true)
+        }
     }
 
     Column(
