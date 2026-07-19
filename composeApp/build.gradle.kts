@@ -408,9 +408,9 @@ tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {
     from(accountWebpackDir) {
         include("account.js", "account.js.map")
     }
-    from(project(":searchApp").layout.buildDirectory.dir("processedResources/js/main/search-shell")) {
-        into("search")
-    }
+    // Do not copy search-shell into search/ — that overwrites the SEO redirect at /search
+    // (composeApp/src/jsMain/resources/search/index.html → /moskva/search). City search
+    // pages load /appCompose.js directly; the bare shell is only for searchApp standalone.
     val searchWebpackDir =
         if (needsSplitBundleDevWebpack) {
             project(":searchApp").layout.buildDirectory.dir("kotlin-webpack/js/developmentExecutable")
