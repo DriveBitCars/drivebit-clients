@@ -34,7 +34,6 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.utils.cityNameToSlug
-import my.drivebit.utils.isShortBrandSearchPath
 import my.drivebit.utils.parseSearchUrl
 import my.drivebit.utils.resolveBareSearchRedirectPath
 import my.drivebit.utils.uiIndexToUrlPage
@@ -91,11 +90,7 @@ fun SearchApp() {
             return@LaunchedEffect
         }
         val canonical = canonicalSearchBrandPath(path)
-        if (canonical != null &&
-            path.startsWith("/search/") &&
-            isShortBrandSearchPath(canonical) &&
-            canonical != path
-        ) {
+        if (canonical != null && canonical != path) {
             window.history.replaceState(null, "", "$canonical${window.location.search}")
             locationHref = currentLocationHref()
             return@LaunchedEffect

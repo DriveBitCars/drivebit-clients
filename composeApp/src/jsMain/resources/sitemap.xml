@@ -81,12 +81,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://drivebit.ru/audi</loc>
+    <loc>https://drivebit.ru/search/audi</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://drivebit.ru/bmw</loc>
+    <loc>https://drivebit.ru/search/bmw</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>

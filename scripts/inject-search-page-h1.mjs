@@ -128,8 +128,6 @@ const searchRoutes = Object.entries(blocks).filter(
   ([route]) =>
     route === "/search" ||
     route.startsWith("/search/") ||
-    route === "/audi" ||
-    route === "/bmw" ||
     /^\/[a-z0-9-]+\/search$/.test(route),
 );
 let updated = 0;

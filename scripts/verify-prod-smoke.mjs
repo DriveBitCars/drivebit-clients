@@ -10,8 +10,8 @@ const base = (process.argv[2] || "https://drivebit.ru").replace(/\/$/, "");
 const PAGES = [
   { path: "/moskva", name: "city landing" },
   { path: "/moskva/search", name: "search" },
-  { path: "/bmw", name: "brand search" },
-  { path: "/bmw/x5", name: "brand model search" },
+  { path: "/search/bmw", name: "brand search" },
+  { path: "/search/bmw/x5", name: "brand model search" },
   { path: "/login", name: "login shell" },
   { path: "/contacts", name: "contacts" },
   { path: "/list-your-car.html", name: "list your car" },

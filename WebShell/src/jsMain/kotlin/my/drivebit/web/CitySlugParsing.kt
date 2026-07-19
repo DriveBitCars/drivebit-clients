@@ -1,6 +1,6 @@
 package my.drivebit.web
 
-import my.drivebit.utils.SHORT_BRAND_SEARCH_PATH_SLUGS
+import my.drivebit.utils.LEGACY_SHORT_BRAND_SEARCH_PATH_SLUGS
 
 data class CityPathParts(
     val citySlug: String,
@@ -77,7 +77,7 @@ fun parseCityPath(pathname: String): CityPathParts? {
     val segments = trimmed.split('/').filter { it.isNotEmpty() }
     if (segments.size != 1 && segments.size != 2) return null
     val citySlug = segments[0].lowercase()
-    if (citySlug in RESERVED_FIRST_SEGMENTS || citySlug in SHORT_BRAND_SEARCH_PATH_SLUGS) return null
+    if (citySlug in RESERVED_FIRST_SEGMENTS || citySlug in LEGACY_SHORT_BRAND_SEARCH_PATH_SLUGS) return null
     val filterSlug = segments.getOrNull(1)?.lowercase()
     // /{city}/search is the search screen, not a city filter landing
     if (filterSlug == "search") return null
