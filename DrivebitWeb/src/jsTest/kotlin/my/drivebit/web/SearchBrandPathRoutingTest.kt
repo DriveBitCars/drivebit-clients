@@ -13,7 +13,7 @@ class SearchBrandPathRoutingTest {
     }
 
     @Test
-    fun parseSearchBrandSlug_returnsSlugForShortAudiBmwPaths() {
+    fun parseSearchBrandSlug_returnsSlugForLegacyShortAudiBmwPaths() {
         assertEquals("audi", parseSearchBrandSlugFromPath("/audi"))
         assertEquals("bmw", parseSearchBrandSlugFromPath("/bmw/"))
     }
@@ -25,21 +25,24 @@ class SearchBrandPathRoutingTest {
     }
 
     @Test
-    fun searchPathForBrandName_usesShortPathForAudiAndBmw() {
-        assertEquals("/audi", searchPathForBrandName("Audi"))
-        assertEquals("/bmw", searchPathForBrandName("BMW"))
-    }
-
-    @Test
-    fun searchPathForBrandName_keepsSearchPrefixForOtherBrands() {
+    fun searchPathForBrandName_usesSearchPrefixForAllBrands() {
+        assertEquals("/search/audi", searchPathForBrandName("Audi"))
+        assertEquals("/search/bmw", searchPathForBrandName("BMW"))
         assertEquals("/search/mercedes-benz", searchPathForBrandName("Mercedes-Benz"))
         assertEquals("/search/skoda", searchPathForBrandName("Skoda"))
     }
 
     @Test
-    fun isSearchBrandPath_matchesShortAndPrefixed() {
+    fun isSearchBrandPath_matchesLegacyShortAndPrefixed() {
         assertTrue(isSearchBrandPath("/audi"))
         assertTrue(isSearchBrandPath("/bmw"))
         assertTrue(isSearchBrandPath("/search/bmw"))
+    }
+
+    @Test
+    fun canonicalSearchBrandPath_mapsLegacyShortToSearchPrefix() {
+        assertEquals("/search/audi", canonicalSearchBrandPath("/audi"))
+        assertEquals("/search/bmw", canonicalSearchBrandPath("/bmw"))
+        assertEquals("/search/bmw", canonicalSearchBrandPath("/search/bmw"))
     }
 }

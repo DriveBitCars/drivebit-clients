@@ -53,15 +53,11 @@ class SearchUrlTest {
     }
 
     @Test
-    fun `build uses short path for bmw and audi without search segment`() {
-        assertEquals("/bmw", buildSearchUrl(SearchUrlParts(brandSlug = "bmw")))
-        assertEquals("/audi", buildSearchUrl(SearchUrlParts(brandSlug = "audi")))
-        assertEquals("/bmw/x5", buildSearchUrl(SearchUrlParts(brandSlug = "bmw", modelSlug = "x5")))
-        assertEquals("/audi/a6", buildSearchUrl(SearchUrlParts(brandSlug = "audi", modelSlug = "a6")))
-    }
-
-    @Test
-    fun `build uses search prefix for other brand slugs`() {
+    fun `build uses search prefix for all brand slugs including bmw and audi`() {
+        assertEquals("/search/bmw", buildSearchUrl(SearchUrlParts(brandSlug = "bmw")))
+        assertEquals("/search/audi", buildSearchUrl(SearchUrlParts(brandSlug = "audi")))
+        assertEquals("/search/bmw/x5", buildSearchUrl(SearchUrlParts(brandSlug = "bmw", modelSlug = "x5")))
+        assertEquals("/search/audi/a6", buildSearchUrl(SearchUrlParts(brandSlug = "audi", modelSlug = "a6")))
         assertEquals("/search/toyota", buildSearchUrl(SearchUrlParts(brandSlug = "toyota")))
         assertEquals(
             "/search/skoda/octavia",
@@ -82,7 +78,7 @@ class SearchUrlTest {
                     page = 1,
                 ),
             )
-        assertEquals("/bmw/x5?startDate=2025-02-01&dailyRateMin=1000", url)
+        assertEquals("/search/bmw/x5?startDate=2025-02-01&dailyRateMin=1000", url)
         assertFalse(url.contains("brand"))
         assertFalse(url.contains("model"))
         assertFalse(url.contains("page="))

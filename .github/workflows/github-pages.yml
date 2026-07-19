@@ -84,6 +84,10 @@ jobs:
             mkdir -p "$DIST/$brand"
             cp "composeApp/src/jsMain/resources/$brand/index.html" "$DIST/$brand/index.html"
           fi
+          if [ ! -f "$DIST/search/$brand/index.html" ] && [ -f "composeApp/src/jsMain/resources/search/$brand/index.html" ]; then
+            mkdir -p "$DIST/search/$brand"
+            cp "composeApp/src/jsMain/resources/search/$brand/index.html" "$DIST/search/$brand/index.html"
+          fi
         done
         if [ ! -f "$DIST/rostov-na-donu/index.html" ] && [ -d "composeApp/src/jsMain/resources/rostov-na-donu" ]; then
           cp -R "composeApp/src/jsMain/resources/rostov-na-donu" "$DIST/"

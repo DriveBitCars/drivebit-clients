@@ -37,7 +37,7 @@ fun parseSearchUrl(url: String): SearchUrlParts {
             brandSlug = segments[1].takeIf { it.isNotEmpty() }
             modelSlug = segments.getOrNull(2)?.takeIf { it.isNotEmpty() }
         }
-        segments.size >= 1 && segments[0] in SHORT_BRAND_SEARCH_PATH_SLUGS -> {
+        segments.size >= 1 && segments[0] in LEGACY_SHORT_BRAND_SEARCH_PATH_SLUGS -> {
             brandSlug = segments[0]
             modelSlug = segments.getOrNull(1)?.takeIf { it.isNotEmpty() }
         }

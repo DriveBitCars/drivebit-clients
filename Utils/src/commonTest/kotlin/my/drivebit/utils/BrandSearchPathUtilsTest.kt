@@ -8,19 +8,15 @@ import kotlin.test.assertTrue
 
 class BrandSearchPathUtilsTest {
     @Test
-    fun pathForBrandSlug_usesShortPathForAudiAndBmw() {
-        assertEquals("/audi", pathForBrandSlug("audi"))
-        assertEquals("/bmw", pathForBrandSlug("BMW"))
-    }
-
-    @Test
-    fun pathForBrandSlug_keepsSearchPrefixForOtherBrands() {
+    fun pathForBrandSlug_usesSearchPrefixForAllBrandsIncludingAudiAndBmw() {
+        assertEquals("/search/audi", pathForBrandSlug("audi"))
+        assertEquals("/search/bmw", pathForBrandSlug("BMW"))
         assertEquals("/search/skoda", pathForBrandSlug("skoda"))
         assertEquals("/search/mercedes-benz", pathForBrandSlug("mercedes-benz"))
     }
 
     @Test
-    fun parseBrandSlugFromPath_acceptsShortAudiBmw() {
+    fun parseBrandSlugFromPath_acceptsLegacyShortAudiBmw() {
         assertEquals("audi", parseBrandSlugFromPath("/audi"))
         assertEquals("bmw", parseBrandSlugFromPath("/bmw/"))
     }
@@ -41,16 +37,17 @@ class BrandSearchPathUtilsTest {
     }
 
     @Test
-    fun canonicalizeBrandSearchPath_mapsLegacyAudiBmwToShort() {
-        assertEquals("/audi", canonicalizeBrandSearchPath("/search/audi"))
-        assertEquals("/bmw", canonicalizeBrandSearchPath("/search/bmw/"))
-        assertEquals("/audi", canonicalizeBrandSearchPath("/audi"))
+    fun canonicalizeBrandSearchPath_mapsLegacyShortAudiBmwToSearchPrefix() {
+        assertEquals("/search/audi", canonicalizeBrandSearchPath("/search/audi"))
+        assertEquals("/search/bmw", canonicalizeBrandSearchPath("/search/bmw/"))
+        assertEquals("/search/audi", canonicalizeBrandSearchPath("/audi"))
+        assertEquals("/search/bmw", canonicalizeBrandSearchPath("/bmw"))
         assertEquals("/search/skoda", canonicalizeBrandSearchPath("/search/skoda"))
         assertNull(canonicalizeBrandSearchPath("/moskva"))
     }
 
     @Test
-    fun isShortBrandSearchPath_onlyAudiBmw() {
+    fun isShortBrandSearchPath_onlyLegacyAudiBmwBarePaths() {
         assertTrue(isShortBrandSearchPath("/audi"))
         assertTrue(isShortBrandSearchPath("/bmw/"))
         assertFalse(isShortBrandSearchPath("/search/audi"))
