@@ -51,7 +51,7 @@ class HttpSearchCarsApi(
                     driveTypes?.forEach { parameter("DriveType", it) }
                 }.body()
         return SearchCarsResult(
-            cars = paged.items,
+            cars = sanitizeSearchCarPhotoUrls(paged.items),
             totalCount = paged.totalCount,
             totalPages = paged.totalPages,
         )
