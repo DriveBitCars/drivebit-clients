@@ -10,10 +10,22 @@ const base = (process.argv[2] || "https://drivebit.ru").replace(/\/$/, "");
 const PAGES = [
   { path: "/moskva", name: "city landing" },
   { path: "/moskva/search", name: "search" },
+  { path: "/bmw", name: "brand search" },
+  { path: "/bmw/x5", name: "brand model search" },
   { path: "/login", name: "login shell" },
   { path: "/contacts", name: "contacts" },
   { path: "/list-your-car.html", name: "list your car" },
 ];
+
+/** Pages that must embed Callibri the same way as city landing. */
+const CALLIBRI_REQUIRED = new Set([
+  "city landing",
+  "search",
+  "brand search",
+  "brand model search",
+  "contacts",
+  "login shell",
+]);
 
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
@@ -27,13 +39,23 @@ for (const { path, name } of PAGES) {
   const response = await page.goto(url, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(path === "/moskva" ? 8000 : 4000);
 
-  const report = await page.evaluate(() => ({
-    hasComposeApp: !!document.querySelector('script[src*="composeApp.js"]'),
-    hasThirdPartyLoader: !!document.querySelector('script[src*="drivebit-third-party-deferred"]'),
-    hasRoot: !!document.getElementById("root"),
-    rootLen: document.getElementById("root")?.innerHTML?.length ?? 0,
-    title: document.title,
-  }));
+  const report = await page.evaluate(() => {
+    const scripts = Array.from(document.scripts);
+    const hasComposeBundle = scripts.some(
+      (s) =>
+        /composeApp\.js/.test(s.src) ||
+        /appCompose\.js/.test(s.src) ||
+        /searchApp\.js/.test(s.src),
+    );
+    return {
+      hasComposeApp: hasComposeBundle,
+      hasThirdPartyLoader: scripts.some((s) => /drivebit-third-party-deferred/.test(s.src)),
+      hasCallibriScript: scripts.some((s) => /callibri\.js/.test(s.src)),
+      hasRoot: !!document.getElementById("root"),
+      rootLen: document.getElementById("root")?.innerHTML?.length ?? 0,
+      title: document.title,
+    };
+  });
 
   results.push({
     name,
@@ -79,26 +101,40 @@ const failures = [];
 for (const item of results) {
   if (item.status !== 200) failures.push(`${item.name}: HTTP ${item.status}`);
   if (!item.hasThirdPartyLoader) failures.push(`${item.name}: missing third-party loader`);
-  if (item.path !== "/list-your-car.html" && !item.hasComposeApp && item.name !== "list your car") {
-    if (!item.hasComposeApp) failures.push(`${item.name}: missing composeApp.js`);
+  if (CALLIBRI_REQUIRED.has(item.name) && !item.hasCallibriScript) {
+    failures.push(`${item.name}: missing Callibri script (cdn.callibri.ru/callibri.js)`);
   }
-  if (item.name === "city landing" || item.name === "search") {
+  if (item.path !== "/list-your-car.html") {
+    if (!item.hasComposeApp) failures.push(`${item.name}: missing compose/search app bundle`);
+  }
+  if (
+    item.name === "city landing" ||
+    item.name === "search" ||
+    item.name === "brand search" ||
+    item.name === "brand model search"
+  ) {
     if (!item.hasRoot || item.rootLen <= 0) failures.push(`${item.name}: compose root empty`);
   }
 }
 
 if (!navigationOk) failures.push("navigation: hero search button did not open /{city}/search");
 
-const vendorScheduler = await fetch(`${base}/vendor/drivebit-third-party-scheduler.mjs`).then(
-  (r) => r.ok,
-).catch(() => false);
+const vendorDeferred = await fetch(`${base}/vendor/drivebit-third-party-deferred.js`)
+  .then((r) => r.ok)
+  .catch(() => false);
+if (!vendorDeferred) failures.push("vendor: drivebit-third-party-deferred.js not served");
+
+const vendorScheduler = await fetch(`${base}/vendor/drivebit-third-party-scheduler.mjs`)
+  .then((r) => r.ok)
+  .catch(() => false);
 if (!vendorScheduler) failures.push("vendor: drivebit-third-party-scheduler.mjs not served");
 
 const analytics = {
   ...thirdParty,
+  vendorDeferred,
   vendorScheduler,
   note:
-    "Metrika/Callibri may be blocked in headless; verify order manually in browser DevTools if needed.",
+    "Callibri script tag in HTML is a hard gate. Metrika/Callibri network load may be blocked in headless; verify callibriInit() in a real browser if needed.",
 };
 
 for (const err of pageErrors) {

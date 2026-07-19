@@ -132,48 +132,65 @@ jobs:
         fi
         test -f "$DIST/profile/index.html"
         test -f "$DIST/profile.js"
+        # Short brand landings must stay at dist root (SEO + Callibri)
+        for brand in bmw audi; do
+          if [ ! -f "$DIST/$brand/index.html" ] && [ -f "composeApp/src/jsMain/resources/$brand/index.html" ]; then
+            mkdir -p "$DIST/$brand"
+            cp "composeApp/src/jsMain/resources/$brand/index.html" "$DIST/$brand/index.html"
+          fi
+        done
+        if [ ! -f "$DIST/rostov-na-donu/index.html" ] && [ -d "composeApp/src/jsMain/resources/rostov-na-donu" ]; then
+          cp -R "composeApp/src/jsMain/resources/rostov-na-donu" "$DIST/"
+        fi
         echo "split bundles merged OK"
 
     - name: Verify Moscow SEO pages in dist
       run: |
-        set -e
+        set -euo pipefail
         DIST="composeApp/build/dist/js/productionExecutable"
-        test -f "$DIST/moskva/poblizosti/index.html"
-        grep -q 'drivebit-cars-grid-static' "$DIST/moskva/poblizosti/index.html"
-        grep -q 'src="/composeApp.js' "$DIST/moskva/arenda-avto-ekonom-klassa-bez-voditelya/index.html"
+        fail() { echo "SEO verify failed: $*" >&2; exit 1; }
+        test -f "$DIST/moskva/poblizosti/index.html" || fail "missing moskva/poblizosti"
+        grep -q 'drivebit-cars-grid-static' "$DIST/moskva/poblizosti/index.html" || fail "poblizosti grid"
+        grep -q 'src="/composeApp.js' "$DIST/moskva/arenda-avto-ekonom-klassa-bez-voditelya/index.html" || fail "ekonom composeApp.js"
         for slug in "" arenda-avto-v-krym arenda-avto-v-belarus arenda-avto-v-abkhaziyu arenda-avto-ekonom-klassa-bez-voditelya arenda-avto-komfort-klassa-bez-voditelya arenda-avto-biznes-klassa-bez-voditelya arenda-avto-premium-klassa-bez-voditelya arenda-minivena-bez-voditelya arenda-vnedorozhnika-bez-voditelya poblizosti; do
           if [ -z "$slug" ]; then
             page="$DIST/moskva/index.html"
           else
             page="$DIST/moskva/$slug/index.html"
           fi
-          test -f "$page"
+          test -f "$page" || fail "missing $page"
         done
         echo "Moscow SEO landing pages OK"
-        test -f "$DIST/bmw/index.html"
-        grep -q 'drivebit-seo-text' "$DIST/bmw/index.html"
-        grep -q 'drivebit-page-headline' "$DIST/bmw/index.html"
-        grep -q '<h1' "$DIST/bmw/index.html"
-        grep -q 'Аренда BMW без водителя в Москве' "$DIST/bmw/index.html"
-        test -f "$DIST/audi/index.html"
-        grep -q 'Аренда Audi без водителя в Москве' "$DIST/audi/index.html"
-        test -f "$DIST/search/bmw/index.html"
-        grep -q 'canonical' "$DIST/search/bmw/index.html"
-        test -f "$DIST/moskva/search/index.html"
-        grep -q 'drivebit-page-headline' "$DIST/moskva/search/index.html"
-        grep -q 'Поиск автомобилей для аренды в Москве' "$DIST/moskva/search/index.html"
-        test -f "$DIST/kaliningrad/search/index.html"
-        test -f "$DIST/krasnogorsk/search/index.html"
-        test -f "$DIST/lyubertsy/search/index.html"
-        test -f "$DIST/zelenograd/search/index.html"
-        test -f "$DIST/rostov-na-donu/index.html"
-        test -f "$DIST/rostov-na-donu/search/index.html"
-        grep -q 'Поиск автомобилей для аренды в Ростове-на-Дону' "$DIST/rostov-na-donu/search/index.html"
-        test -f "$DIST/search/index.html"
-        grep -q 'moskva/search' "$DIST/search/index.html"
+        test -f "$DIST/bmw/index.html" || fail "missing bmw/index.html (ls=$(ls -la "$DIST" | head))"
+        grep -q 'drivebit-seo-text' "$DIST/bmw/index.html" || fail "bmw seo-text"
+        grep -q 'drivebit-page-headline' "$DIST/bmw/index.html" || fail "bmw headline"
+        grep -q '<h1' "$DIST/bmw/index.html" || fail "bmw h1"
+        grep -q 'Аренда BMW без водителя в Москве' "$DIST/bmw/index.html" || fail "bmw h1 text"
+        grep -q 'callibri.js' "$DIST/bmw/index.html" || fail "bmw Callibri"
+        grep -q 'drivebit-third-party-deferred' "$DIST/bmw/index.html" || fail "bmw third-party loader"
+        test -f "$DIST/audi/index.html" || fail "missing audi/index.html"
+        grep -q 'Аренда Audi без водителя в Москве' "$DIST/audi/index.html" || fail "audi h1 text"
+        grep -q 'callibri.js' "$DIST/audi/index.html" || fail "audi Callibri"
+        test -f "$DIST/search/bmw/index.html" || fail "missing search/bmw"
+        grep -q 'canonical' "$DIST/search/bmw/index.html" || fail "search/bmw canonical"
+        test -f "$DIST/moskva/search/index.html" || fail "missing moskva/search"
+        grep -q 'drivebit-page-headline' "$DIST/moskva/search/index.html" || fail "moskva/search headline"
+        grep -q 'Поиск автомобилей для аренды в Москве' "$DIST/moskva/search/index.html" || fail "moskva/search h1 text"
+        grep -q 'callibri.js' "$DIST/moskva/search/index.html" || fail "moskva/search Callibri"
+        grep -q 'drivebit-third-party-deferred' "$DIST/moskva/search/index.html" || fail "moskva/search third-party"
+        test -f "$DIST/kaliningrad/search/index.html" || fail "kaliningrad/search"
+        test -f "$DIST/krasnogorsk/search/index.html" || fail "krasnogorsk/search"
+        test -f "$DIST/lyubertsy/search/index.html" || fail "lyubertsy/search"
+        test -f "$DIST/zelenograd/search/index.html" || fail "zelenograd/search"
+        test -f "$DIST/rostov-na-donu/index.html" || fail "rostov index"
+        test -f "$DIST/rostov-na-donu/search/index.html" || fail "rostov/search"
+        grep -q 'Поиск автомобилей для аренды в Ростове-на-Дону' "$DIST/rostov-na-donu/search/index.html" || fail "rostov/search h1"
+        test -f "$DIST/search/index.html" || fail "search/index"
+        grep -q 'moskva/search' "$DIST/search/index.html" || fail "search redirect"
         echo "Search brand SEO pages OK"
-        test -f "$DIST/contacts/index.html"
-        grep -q 'drivebit-contacts-page' "$DIST/contacts/index.html"
+        test -f "$DIST/contacts/index.html" || fail "contacts"
+        grep -q 'drivebit-contacts-page' "$DIST/contacts/index.html" || fail "contacts marker"
+        grep -q 'callibri.js' "$DIST/contacts/index.html" || fail "contacts Callibri"
         echo "Contacts static page OK"
 
     - name: Show built index.html title

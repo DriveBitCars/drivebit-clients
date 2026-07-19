@@ -131,23 +131,25 @@ Default base URL: `https://drivebit.ru`. Exit code **0** required.
 
 | Check | Gate |
 |-------|------|
-| HTTP 200 | `/moskva`, `/search`, `/login`, `/contacts`, `/list-your-car.html` |
-| Compose mount | `#root` has content on `/moskva` and `/search` |
+| HTTP 200 | `/moskva`, `/moskva/search`, `/bmw`, `/bmw/x5`, `/login`, `/contacts`, `/list-your-car.html` |
+| Compose mount | `#root` has content on city, search, brand, brand-model pages |
 | Third-party loader | `drivebit-third-party-deferred.js` in HTML on all key pages |
-| Navigation | Hero button «Найти автомобиль» opens `/search` |
-| Vendor assets | `/vendor/drivebit-third-party-deferred.js` served (classic `defer`, not `type=module`) |
-| JS errors | No `pageerror` on any checked page |
+| **Callibri** | `cdn.callibri.ru/callibri.js` script tag present on city, **search**, **brand** (`/bmw`), **brand-model** (`/bmw/x5`), contacts, login — same as other screens |
+| Navigation | Hero button «Найти автомобиль» opens `/{city}/search` |
+| Vendor assets | `/vendor/drivebit-third-party-deferred.js` and scheduler `.mjs` served |
+| JS errors | No `pageerror` on any checked page (benign Callibri headless noise ignored) |
 
-**Analytics note:** Metrika/Callibri may not load in headless Playwright (ad-block / external scripts). The smoke script reports `analytics` info but does not fail on it. For analytics-only releases, additionally spot-check in a real browser: Network tab → `metrika/tag.js` before `callibri.js`.
+**Callibri gate (required every ship):** smoke must fail if Callibri is missing on search or brand folders. Do not announce prod OK when `hasCallibriScript` is false for those paths. Network load of Callibri may still be blocked in headless; the hard gate is the HTML script tag. Optional real-browser spot-check: console → `callibriInit()` → `undefined`.
 
 **Optional manual spot-check** (browser or `cursor-ide-browser`):
 
 1. https://drivebit.ru/moskva — hero, filters, car grid render
-2. Click «Найти автомобиль» → `/search` with results UI
-3. Header links: «Контакты», «Сдать авто»
-4. https://drivebit.ru/login — auth shell loads (may redirect if already logged in)
+2. Click «Найти автомобиль» → `/moskva/search` with results UI + Callibri in page source
+3. https://drivebit.ru/bmw and https://drivebit.ru/bmw/x5 — search shell + Callibri script tag
+4. Header links: «Контакты», «Сдать авто»
+5. https://drivebit.ru/login — auth shell loads (may redirect if already logged in)
 
-Report in final message: release URL + deploy run URL + smoke test output summary.
+Report in final message: release URL + deploy run URL + smoke test output summary (include Callibri pass/fail for search + brand).
 
 ## Quick Reference
 
@@ -170,6 +172,7 @@ Report in final message: release URL + deploy run URL + smoke test output summar
 | Merge before CI green | Wait for `gh pr checks --watch` |
 | Skip deploy watch | Release ≠ deployed until `deploy.yml` succeeds |
 | Skip prod smoke | Deploy success ≠ site works; run `npm run verify:prod-smoke` |
+| Skip Callibri on search/brand | Smoke must assert `callibri.js` on `/moskva/search`, `/bmw`, `/bmw/x5` |
 | Wrong version | Always read `gh release list --limit 1` first |
 | Broad local `./gradlew check` for CI debug | Run only the failing module/task from the log |
 
@@ -177,6 +180,7 @@ Report in final message: release URL + deploy run URL + smoke test output summar
 
 - Announcing «готово» / «на проде» without deploy run exit code 0
 - Announcing «на проде» without `npm run verify:prod-smoke` exit code 0
+- Announcing prod OK when Callibri is missing on search or brand pages
 - Pushing to `trunk` directly (except emergency hotfix per `.cursorrules`)
 - Creating release before merge to `trunk`
 - Leaving unrelated files in the commit
