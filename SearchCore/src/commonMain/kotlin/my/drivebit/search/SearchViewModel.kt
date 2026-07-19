@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import my.drivebit.network.NetworkException
 import my.drivebit.utils.SearchUrlParts
 import my.drivebit.utils.parseSearchUrl
 
@@ -25,6 +26,33 @@ sealed interface SearchUiState {
         val message: String,
     ) : SearchUiState
 }
+
+internal fun userFacingSearchError(error: Throwable): String {
+    val raw = error.message?.trim().orEmpty()
+    val status = (error as? NetworkException)?.statusCodeValue ?: extractHttpStatusFromMessage(raw)
+    if (isTechnicalSearchError(raw) || raw.isEmpty()) {
+        return when {
+            status != null && status in 500..599 -> SEARCH_SERVER_UNAVAILABLE_MESSAGE
+            status != null && status == 408 -> SEARCH_SERVER_UNAVAILABLE_MESSAGE
+            status != null && status == 429 -> SEARCH_SERVER_UNAVAILABLE_MESSAGE
+            else -> SEARCH_GENERIC_ERROR_MESSAGE
+        }
+    }
+    return raw
+}
+
+private fun isTechnicalSearchError(message: String): Boolean =
+    message.contains("Expected response body of the type", ignoreCase = true) ||
+        message.contains("NoTransformationFoundException", ignoreCase = true) ||
+        message.contains("SourceByteReadChannel", ignoreCase = true) ||
+        message.contains("io.ktor", ignoreCase = true) ||
+        (message.contains("Response status", ignoreCase = true) && message.contains('`'))
+
+private fun extractHttpStatusFromMessage(message: String): Int? =
+    Regex("""Response status `(\d{3})`""").find(message)?.groupValues?.get(1)?.toIntOrNull()
+
+private const val SEARCH_SERVER_UNAVAILABLE_MESSAGE = "Сервер временно недоступен. Попробуйте позже"
+private const val SEARCH_GENERIC_ERROR_MESSAGE = "Не удалось выполнить поиск. Попробуйте позже"
 
 class SearchViewModel(
     private val repositoryFactory: (SearchFilterSet) -> SearchCarRepository,
@@ -49,7 +77,7 @@ class SearchViewModel(
                     _state.value = SearchUiState.Results(filters = filters, result = result)
                 } catch (e: Exception) {
                     if (e is CancellationException) throw e
-                    _state.value = SearchUiState.Error(e.message ?: "Не удалось выполнить поиск")
+                    _state.value = SearchUiState.Error(userFacingSearchError(e))
                 }
             }
     }
