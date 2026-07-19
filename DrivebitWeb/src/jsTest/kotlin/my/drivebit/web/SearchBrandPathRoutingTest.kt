@@ -45,4 +45,11 @@ class SearchBrandPathRoutingTest {
         assertEquals("/search/bmw", canonicalSearchBrandPath("/bmw"))
         assertEquals("/search/bmw", canonicalSearchBrandPath("/search/bmw"))
     }
+
+    @Test
+    fun canonicalSearchBrandPath_preservesModel() {
+        assertEquals("/search/bmw/x5", canonicalSearchBrandPath("/bmw/x5"))
+        assertEquals("/search/bmw/x5", canonicalSearchBrandPath("/search/bmw/x5"))
+    }
 }
+
