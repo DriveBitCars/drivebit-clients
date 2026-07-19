@@ -55,6 +55,21 @@ class SeoBlocksTest {
         assertEquals("Аренда авто у частных владельцев в Красногорске", block.h2)
     }
 
+    @Test
+    fun renderSectionInnerHtml_audiBrand_hasFourSectionsWithCyrillicQueries() {
+        val block = SeoLandingBlocks.parseBlocksJson(AUDI_BRAND_FIXTURE_JSON)["/search/audi"]!!
+        val sections = block.sections
+        assertNotNull(sections)
+        assertEquals(4, sections.size)
+        val html = SeoLandingBlocks.renderSectionInnerHtml(block)
+        assertTrue(html.contains("аренда ауди"))
+        assertTrue(html.contains("аренда ауди в москве"))
+        assertTrue(html.contains("аренда ауди без водителя"))
+        assertTrue(html.contains("Как забронировать"))
+        assertTrue(html.contains("<h2>"))
+        assertTrue(!html.contains("аренда audi в москве"))
+    }
+
     private companion object {
         val FIXTURE_JSON =
             """
@@ -112,6 +127,45 @@ class SeoBlocksTest {
                 "ariaLabel": "Аренда авто в Красногорске",
                 "h2": "Аренда авто у частных владельцев в Красногорске",
                 "paragraphs": ["p1", "p2"]
+              }
+            }
+            """.trimIndent()
+
+        val AUDI_BRAND_FIXTURE_JSON =
+            """
+            {
+              "/search/audi": {
+                "ariaLabel": "Аренда Audi в Москве",
+                "h2": "Аренда Audi без водителя в Москве",
+                "paragraphs": [],
+                "sections": [
+                  {
+                    "heading": "Аренда Audi без водителя в Москве",
+                    "paragraphs": [
+                      "На DriveBit можно взять Audi в аренду в Москве напрямую у владельцев — без водителя и без переплаты классическому прокату. В каталоге — седаны, кроссоверы и другие модели для города, командировок и поездок по области. Популярные запросы: аренда ауди, аренда ауди в москве, аренда ауди без водителя, посуточная аренда Audi."
+                    ]
+                  },
+                  {
+                    "heading": "Какие модели Audi доступны",
+                    "paragraphs": [
+                      "Сравните предложения собственников: от компактных A3/A4 до кроссоверов Q5/Q7 и бизнес-седанов. У каждой машины — цена за сутки, пробег, залог и условия в карточке. Страховка и поддержка DriveBit включены в сервис."
+                    ]
+                  },
+                  {
+                    "heading": "Для каких поездок подходит Audi",
+                    "paragraphs": [
+                      "Деловые встречи и представительские поездки по Москве.",
+                      "Комфортные маршруты по области и в аэропорт.",
+                      "Посуточная аренда, когда нужна машина на выходные или короткий срок."
+                    ]
+                  },
+                  {
+                    "heading": "Как забронировать Audi",
+                    "paragraphs": [
+                      "Выберите модель, укажите даты и оформите заявку онлайн. Менеджер подтвердит бронь; также доступны Telegram и WhatsApp. Нужны паспорт РФ и водительское удостоверение."
+                    ]
+                  }
+                ]
               }
             }
             """.trimIndent()
