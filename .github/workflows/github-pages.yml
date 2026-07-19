@@ -79,6 +79,15 @@ jobs:
         cp -r "$PROFILE/profile" "$DIST/"
         test -f "$DIST/profile/index.html"
         test -f "$DIST/profile.js"
+        for brand in bmw audi; do
+          if [ ! -f "$DIST/$brand/index.html" ] && [ -f "composeApp/src/jsMain/resources/$brand/index.html" ]; then
+            mkdir -p "$DIST/$brand"
+            cp "composeApp/src/jsMain/resources/$brand/index.html" "$DIST/$brand/index.html"
+          fi
+        done
+        if [ ! -f "$DIST/rostov-na-donu/index.html" ] && [ -d "composeApp/src/jsMain/resources/rostov-na-donu" ]; then
+          cp -R "composeApp/src/jsMain/resources/rostov-na-donu" "$DIST/"
+        fi
         echo "split bundles merged OK"
 
     - name: Prepare dist directory
