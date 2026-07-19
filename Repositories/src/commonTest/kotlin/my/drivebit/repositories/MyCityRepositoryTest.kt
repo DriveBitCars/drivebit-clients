@@ -231,6 +231,7 @@ class MyCityRepositoryTest {
             val cityNameInStorage = storage.getString(MyCityStorageKeys.NAME_KEY)
             assertEquals("158831", cityIdInStorage)
             assertEquals("Санкт-Петербург", cityNameInStorage)
+            assertEquals("sankt-peterburg", storage.getString(MyCityStorageKeys.SLUG_KEY))
         }
 
     @Test

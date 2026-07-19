@@ -21,3 +21,21 @@ fun buildCitySearchPath(
 }
 
 fun isCitySearchPath(pathname: String): Boolean = parseCitySlugFromSearchPath(pathname) != null
+
+/**
+ * Bare `/search` → `/{city}/search` from MyCityRepository city name.
+ * Missing/invalid city falls back to Moscow (`moskva`).
+ */
+fun resolveBareSearchRedirectPath(
+    selectedCityName: String?,
+    queryWithoutQuestionMark: String? = null,
+): String {
+    val slug =
+        selectedCityName
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let(::cityNameToSlug)
+            ?.takeIf { it.isNotEmpty() && it != "city" }
+            ?: "moskva"
+    return buildCitySearchPath(slug, queryWithoutQuestionMark)
+}
