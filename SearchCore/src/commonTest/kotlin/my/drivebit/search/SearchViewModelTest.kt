@@ -1,5 +1,6 @@
 package my.drivebit.search
 
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import my.drivebit.network.NetworkException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -74,6 +76,64 @@ class SearchViewModelTest {
 
             val error = assertIs<SearchUiState.Error>(vm.state.value)
             assertEquals("boom", error.message)
+        }
+
+    @Test
+    fun `load url hides technical ktor body transformation errors`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val technical =
+                "Expected response body of the type 'class CarDTOPagedResult' but was " +
+                    "'class SourceByteReadChannel' In response from " +
+                    "`https://drivebit.ru/api/Car/list/filtered/158835?page=1&pageSize=9&BrandId=1` " +
+                    "Response status `503` Response header `ContentType: null`"
+            val vm =
+                SearchViewModel(
+                    repositoryFactory = {
+                        object : SearchCarRepository {
+                            override val results: Flow<SearchCarsResult> =
+                                flow { throw IllegalStateException(technical) }
+                        }
+                    },
+                    brandResolver = { null },
+                    modelResolver = { _, _ -> null },
+                    coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
+                )
+
+            vm.load("/search/abarth")
+            advanceUntilIdle()
+
+            val error = assertIs<SearchUiState.Error>(vm.state.value)
+            assertEquals("Сервер временно недоступен. Попробуйте позже", error.message)
+        }
+
+    @Test
+    fun `load url maps NetworkException 503 to friendly message`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val vm =
+                SearchViewModel(
+                    repositoryFactory = {
+                        object : SearchCarRepository {
+                            override val results: Flow<SearchCarsResult> =
+                                flow {
+                                    throw NetworkException(
+                                        HttpStatusCode.ServiceUnavailable,
+                                        "",
+                                    )
+                                }
+                        }
+                    },
+                    brandResolver = { null },
+                    modelResolver = { _, _ -> null },
+                    coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
+                )
+
+            vm.load("/search/abarth")
+            advanceUntilIdle()
+
+            val error = assertIs<SearchUiState.Error>(vm.state.value)
+            assertEquals("Сервер временно недоступен. Попробуйте позже", error.message)
         }
 
     @Test

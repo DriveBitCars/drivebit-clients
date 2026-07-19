@@ -28,6 +28,7 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.core)
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+            implementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.android)

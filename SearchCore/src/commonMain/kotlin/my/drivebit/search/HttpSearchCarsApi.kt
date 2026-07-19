@@ -1,9 +1,9 @@
 package my.drivebit.search
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import my.drivebit.network.parseResponse
 import my.drivebit.network.services.CarDTOPagedResult
 
 private const val BASE_URL = "https://drivebit.ru/api/"
@@ -49,7 +49,7 @@ class HttpSearchCarsApi(
                     brandId?.let { parameter("BrandId", it) }
                     modelId?.let { parameter("ModelId", it) }
                     driveTypes?.forEach { parameter("DriveType", it) }
-                }.body()
+                }.parseResponse()
         return SearchCarsResult(
             cars = sanitizeSearchCarPhotoUrls(paged.items),
             totalCount = paged.totalCount,
