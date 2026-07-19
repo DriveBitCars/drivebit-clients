@@ -142,6 +142,9 @@ jobs:
         if [ ! -f "$DIST/rostov-na-donu/index.html" ] && [ -d "composeApp/src/jsMain/resources/rostov-na-donu" ]; then
           cp -R "composeApp/src/jsMain/resources/rostov-na-donu" "$DIST/"
         fi
+        # /search must remain the redirect stub (city from my_city_slug, fallback moskva)
+        mkdir -p "$DIST/search"
+        cp "composeApp/src/jsMain/resources/search/index.html" "$DIST/search/index.html"
         echo "split bundles merged OK"
 
     - name: Verify Moscow SEO pages in dist

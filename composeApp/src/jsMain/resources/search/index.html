@@ -7,7 +7,19 @@
     <meta name="robots" content="noindex, follow">
     <link rel="canonical" href="https://drivebit.ru/moskva/search">
     <meta http-equiv="refresh" content="0; url=/moskva/search">
-    <script>location.replace('/moskva/search' + location.search + location.hash);</script>
+    <script>
+        (function () {
+            var FALLBACK = "moskva";
+            var slug = "";
+            try {
+                slug = localStorage.getItem("my_city_slug") || "";
+            } catch (e) {}
+            if (!/^[a-z0-9-]+$/.test(slug)) {
+                slug = FALLBACK;
+            }
+            location.replace("/" + slug + "/search" + location.search + location.hash);
+        })();
+    </script>
 </head>
 <body>
     <p>Страница переехала: <a href="/moskva/search">drivebit.ru/moskva/search</a></p>

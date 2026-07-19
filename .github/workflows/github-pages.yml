@@ -88,6 +88,8 @@ jobs:
         if [ ! -f "$DIST/rostov-na-donu/index.html" ] && [ -d "composeApp/src/jsMain/resources/rostov-na-donu" ]; then
           cp -R "composeApp/src/jsMain/resources/rostov-na-donu" "$DIST/"
         fi
+        mkdir -p "$DIST/search"
+        cp "composeApp/src/jsMain/resources/search/index.html" "$DIST/search/index.html"
         echo "split bundles merged OK"
 
     - name: Prepare dist directory

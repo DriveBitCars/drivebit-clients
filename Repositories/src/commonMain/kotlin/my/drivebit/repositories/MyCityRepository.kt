@@ -8,10 +8,12 @@ import kotlinx.coroutines.flow.flow
 import my.drivebit.network.services.City
 import my.drivebit.network.services.Dictionary
 import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.cityNameToSlug
 
 object MyCityStorageKeys {
     const val ID_KEY = "my_city_id"
     const val NAME_KEY = "my_city_name"
+    const val SLUG_KEY = "my_city_slug"
 }
 
 interface MyCityRepository {
@@ -97,8 +99,10 @@ internal class MyCityRepositoryImpl(
         cityId: Int,
         cityName: String,
     ) {
+        val slug = cityNameToSlug(cityName).takeIf { it.isNotEmpty() && it != "city" } ?: "moskva"
         storage.putString(MyCityStorageKeys.ID_KEY, cityId.toString())
         storage.putString(MyCityStorageKeys.NAME_KEY, cityName)
+        storage.putString(MyCityStorageKeys.SLUG_KEY, slug)
         selectedCityFlow.value = City(id = cityId, name = cityName)
     }
 }

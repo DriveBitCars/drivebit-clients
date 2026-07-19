@@ -33,10 +33,10 @@ import my.drivebit.components.mileageFilterLabelForMin
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
-import my.drivebit.utils.buildCitySearchPath
 import my.drivebit.utils.cityNameToSlug
 import my.drivebit.utils.isShortBrandSearchPath
 import my.drivebit.utils.parseSearchUrl
+import my.drivebit.utils.resolveBareSearchRedirectPath
 import my.drivebit.utils.uiIndexToUrlPage
 import my.drivebit.utils.urlPageToUiIndex
 import my.drivebit.repositories.MyCityRepository
@@ -83,7 +83,9 @@ fun SearchApp() {
                 .removeSuffix("/")
                 .ifEmpty { "/" }
         if (path == "/search") {
-            val target = buildCitySearchPath("moskva") + window.location.search
+            val cityName = runCatching { myCityRepository.getSelectedCity.first().name }.getOrNull()
+            val query = window.location.search.removePrefix("?").takeIf { it.isNotEmpty() }
+            val target = resolveBareSearchRedirectPath(cityName, query)
             window.history.replaceState(null, "", target)
             locationHref = currentLocationHref()
             return@LaunchedEffect

@@ -39,4 +39,34 @@ class CitySearchPathUtilsTest {
         assertFalse(isCitySearchPath("/moskva"))
         assertFalse(isCitySearchPath("/moskva/poblizosti"))
     }
+
+    @Test
+    fun resolveBareSearchRedirectPath_usesSelectedCityFromRepository() {
+        assertEquals("/kaliningrad/search", resolveBareSearchRedirectPath("Калининград"))
+        assertEquals("/rostov-na-donu/search", resolveBareSearchRedirectPath("Ростов-на-Дону"))
+        assertEquals("/moskva/search", resolveBareSearchRedirectPath("Москва"))
+    }
+
+    @Test
+    fun resolveBareSearchRedirectPath_fallsBackToMoskvaWhenCityMissing() {
+        assertEquals("/moskva/search", resolveBareSearchRedirectPath(null))
+        assertEquals("/moskva/search", resolveBareSearchRedirectPath(""))
+        assertEquals("/moskva/search", resolveBareSearchRedirectPath("   "))
+        assertEquals("/moskva/search", resolveBareSearchRedirectPath("@@@"))
+    }
+
+    @Test
+    fun resolveBareSearchRedirectPath_preservesQuery() {
+        assertEquals(
+            "/kaliningrad/search?startDate=2026-04-25&endDate=2026-04-30",
+            resolveBareSearchRedirectPath(
+                "Калининград",
+                "startDate=2026-04-25&endDate=2026-04-30",
+            ),
+        )
+        assertEquals(
+            "/moskva/search?page=2",
+            resolveBareSearchRedirectPath(null, "page=2"),
+        )
+    }
 }
