@@ -233,6 +233,39 @@ class TelegramLinkViewModelTest {
         }
 
     @Test
+    fun `toggle off from LinkPending abandons and stops polling`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val scope = CoroutineScope(Job() + dispatcher)
+            val api = FakeTelegramNotifications()
+            val vm =
+                TelegramLinkViewModelImpl(
+                    api = api,
+                    coroutineScope = scope,
+                    pollIntervalMs = 2_000L,
+                )
+            try {
+                vm.loadStatus()
+                runCurrent()
+                vm.onCheckboxChanged(true)
+                runCurrent()
+                assertIs<TelegramLinkUiState.LinkPending>(vm.uiState.value)
+                val statusCallsBeforeAbandon = api.statusCalls
+                vm.onCheckboxChanged(false)
+                runCurrent()
+                assertIs<TelegramLinkUiState.Unlinked>(vm.uiState.value)
+                assertEquals(0, api.unlinkCalls)
+                api.status = TelegramBindingStatus(isLinked = true, telegramUsername = "bot_user")
+                advanceTimeBy(2_000L)
+                runCurrent()
+                assertIs<TelegramLinkUiState.Unlinked>(vm.uiState.value)
+                assertEquals(statusCallsBeforeAbandon, api.statusCalls)
+            } finally {
+                scope.cancel()
+            }
+        }
+
+    @Test
     fun `createLink failure returns to Unlinked with Error`() =
         runTest {
             val dispatcher = StandardTestDispatcher(testScheduler)

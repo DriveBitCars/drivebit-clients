@@ -43,6 +43,7 @@ fun TelegramLinkUiState.isCheckboxChecked(): Boolean =
         is TelegramLinkUiState.LinkPending,
         is TelegramLinkUiState.ConfirmUnlink,
         -> true
+        is TelegramLinkUiState.Error -> checkboxChecked
         else -> false
     }
 
