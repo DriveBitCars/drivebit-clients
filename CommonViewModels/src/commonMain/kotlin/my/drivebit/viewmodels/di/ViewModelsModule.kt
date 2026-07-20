@@ -1,5 +1,6 @@
 package my.drivebit.viewmodels.di
 
+import my.drivebit.network.services.TelegramNotifications
 import my.drivebit.utils.EmailInputValidator
 import my.drivebit.utils.EmailValidator
 import my.drivebit.utils.InputValidator
@@ -78,6 +79,8 @@ import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.ProfileViewModelImpl
 import my.drivebit.viewmodels.RentViewModel
 import my.drivebit.viewmodels.RentViewModelImpl
+import my.drivebit.viewmodels.TelegramLinkViewModel
+import my.drivebit.viewmodels.TelegramLinkViewModelImpl
 import my.drivebit.viewmodels.TrunkSizeViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModelImpl
@@ -245,6 +248,12 @@ val commonViewModelsModule: Module =
                 initialFirstName = firstName,
                 initialLastName = lastName,
                 initialMiddleName = middleName,
+            )
+        }
+
+        factory<TelegramLinkViewModel> {
+            TelegramLinkViewModelImpl(
+                api = get<TelegramNotifications>(),
             )
         }
 
