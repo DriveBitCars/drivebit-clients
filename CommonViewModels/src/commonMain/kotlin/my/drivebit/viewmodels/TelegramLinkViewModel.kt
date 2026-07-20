@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import my.drivebit.network.services.TelegramNotifications
 
 sealed interface TelegramLinkUiState {
@@ -34,6 +36,7 @@ sealed interface TelegramLinkUiState {
     data class Error(
         val message: String,
         val checkboxChecked: Boolean = false,
+        val restoreLinked: Linked? = null,
     ) : TelegramLinkUiState
 }
 
@@ -66,6 +69,7 @@ class TelegramLinkViewModelImpl(
     private val api: TelegramNotifications,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
     private val pollIntervalMs: Long = 2_000L,
+    private val clock: Clock = Clock.System,
 ) : TelegramLinkViewModel {
     private val _uiState = MutableStateFlow<TelegramLinkUiState>(TelegramLinkUiState.Loading)
     override val uiState: StateFlow<TelegramLinkUiState> = _uiState.asStateFlow()
@@ -101,7 +105,11 @@ class TelegramLinkViewModelImpl(
     override fun onCheckboxChanged(checked: Boolean) {
         val current = _uiState.value
         when {
-            checked && (current is TelegramLinkUiState.Unlinked || current is TelegramLinkUiState.Error) -> {
+            checked &&
+                (
+                    current is TelegramLinkUiState.Unlinked ||
+                        (current is TelegramLinkUiState.Error && current.restoreLinked == null)
+                ) -> {
                 coroutineScope.launch {
                     runCatching { api.createLink() }
                         .onSuccess { link ->
@@ -135,6 +143,9 @@ class TelegramLinkViewModelImpl(
                 cancelPolling()
                 _uiState.value = TelegramLinkUiState.Unlinked
             }
+            !checked && current is TelegramLinkUiState.Error && current.restoreLinked != null -> {
+                _uiState.value = TelegramLinkUiState.ConfirmUnlink(previous = current.restoreLinked)
+            }
         }
     }
 
@@ -156,6 +167,7 @@ class TelegramLinkViewModelImpl(
                                     defaultGenericError = "Не удалось отвязать Telegram",
                                 ),
                             checkboxChecked = true,
+                            restoreLinked = current.previous,
                         )
                 }
         }
@@ -174,7 +186,8 @@ class TelegramLinkViewModelImpl(
             coroutineScope.launch {
                 while (isActive) {
                     delay(pollIntervalMs)
-                    if (_uiState.value !is TelegramLinkUiState.LinkPending) break
+                    val pending = _uiState.value as? TelegramLinkUiState.LinkPending ?: break
+                    if (isLinkExpired(pending.expiresAt)) break
                     runCatching { api.getLinkStatus() }
                         .onSuccess { status ->
                             if (status.isLinked) {
@@ -185,6 +198,11 @@ class TelegramLinkViewModelImpl(
                 }
             }
     }
+
+    private fun isLinkExpired(expiresAt: String): Boolean =
+        runCatching {
+            Instant.parse(expiresAt) <= clock.now()
+        }.getOrDefault(false)
 
     private fun cancelPolling() {
         pollJob?.cancel()
