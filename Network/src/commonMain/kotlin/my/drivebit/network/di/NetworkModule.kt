@@ -28,6 +28,8 @@ import my.drivebit.network.services.Photo
 import my.drivebit.network.services.PhotoImpl
 import my.drivebit.network.services.Review
 import my.drivebit.network.services.ReviewImpl
+import my.drivebit.network.services.TelegramNotifications
+import my.drivebit.network.services.TelegramNotificationsImpl
 import my.drivebit.network.services.User
 import my.drivebit.network.services.UserImpl
 import my.drivebit.shared.storage.Storage
@@ -123,6 +125,9 @@ val networkModule =
         }
         single<User> {
             UserImpl(get(named("authorized")))
+        }
+        single<TelegramNotifications> {
+            TelegramNotificationsImpl(get(named("authorized")))
         }
         single<Car> {
             CarImpl(get(named("authorized")))
