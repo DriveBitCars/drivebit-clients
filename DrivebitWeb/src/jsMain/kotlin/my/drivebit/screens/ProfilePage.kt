@@ -21,10 +21,14 @@ import my.drivebit.components.PageContainer
 import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.RowSpaceBetween
 import my.drivebit.components.Spacer
+import my.drivebit.components.TelegramUnlinkConfirmDialog
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.components.UserAvatar
+import my.drivebit.design.CSSColors
+import my.drivebit.design.CSSTypography
+import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.UserNameFormatter
@@ -35,10 +39,19 @@ import my.drivebit.viewmodels.AvatarUploadViewModel
 import my.drivebit.viewmodels.IconUserViewModel
 import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
+import my.drivebit.viewmodels.TelegramLinkUiState
+import my.drivebit.viewmodels.TelegramLinkViewModel
+import my.drivebit.viewmodels.isCheckboxChecked
+import my.drivebit.viewmodels.isCheckboxEnabled
 import my.drivebit.web.homePathHref
 import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.A
+import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Input
+import org.jetbrains.compose.web.dom.Label
+import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -265,6 +278,122 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                     }
                                 navigationController?.navigateTo(path)
                             }
+                        }
+
+                        Spacer(16.px)
+
+                        val telegramLinkViewModel: TelegramLinkViewModel = koinInject()
+                        val telegramState by telegramLinkViewModel.uiState.collectAsState()
+
+                        LaunchedEffect(Unit) {
+                            telegramLinkViewModel.loadStatus()
+                        }
+
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.FlexStart)
+                                gap(12.px)
+                                marginTop(8.px)
+                            }
+                        }) {
+                            Input(
+                                type = InputType.Checkbox,
+                                attrs = {
+                                    id("telegram-notifications-checkbox")
+                                    checked(telegramState.isCheckboxChecked())
+                                    if (!telegramState.isCheckboxEnabled()) {
+                                        disabled()
+                                    }
+                                    onInput { event ->
+                                        val checked =
+                                            (event.target as org.w3c.dom.HTMLInputElement).checked
+                                        telegramLinkViewModel.onCheckboxChanged(checked)
+                                    }
+                                    style {
+                                        width(20.px)
+                                        height(20.px)
+                                        marginTop(2.px)
+                                        cursor(
+                                            if (telegramState.isCheckboxEnabled()) {
+                                                "pointer"
+                                            } else {
+                                                "not-allowed"
+                                            },
+                                        )
+                                        flexShrink(0)
+                                    }
+                                },
+                            )
+                            Label(
+                                forId = "telegram-notifications-checkbox",
+                                attrs = {
+                                    style {
+                                        cursor(
+                                            if (telegramState.isCheckboxEnabled()) {
+                                                "pointer"
+                                            } else {
+                                                "not-allowed"
+                                            },
+                                        )
+                                        flexShrink(1)
+                                        applyTypography(CSSTypography.Styles.body)
+                                        fontSize(CSSTypography.FontSize.sm)
+                                        color(CSSColors.Black)
+                                        lineHeight("1.45")
+                                    }
+                                },
+                            ) {
+                                Text("Получать уведомления в телеграм")
+                            }
+                        }
+
+                        when (val currentTelegramState = telegramState) {
+                            is TelegramLinkUiState.LinkPending -> {
+                                Spacer(8.px)
+                                LinkButton("Привязать телеграм") {
+                                    window.open(currentTelegramState.deepLinkUrl, "_blank")
+                                }
+                                Div({
+                                    style {
+                                        marginTop(8.px)
+                                        applyTypography(CSSTypography.Styles.body)
+                                        fontSize(CSSTypography.FontSize.sm)
+                                        color(CSSColors.Black)
+                                        lineHeight("1.45")
+                                    }
+                                }) {
+                                    Text(
+                                        "Если кнопка не работает, то отправьте код ${currentTelegramState.code} телеграм боту ",
+                                    )
+                                    A(attrs = {
+                                        attr("href", "https://t.me/drivebit_bot")
+                                        attr("target", "_blank")
+                                        attr("rel", "noopener noreferrer")
+                                        style {
+                                            color(CSSColors.Blue)
+                                            property("text-decoration", "none")
+                                            cursor("pointer")
+                                        }
+                                    }) {
+                                        Text("@drivebit_bot")
+                                    }
+                                }
+                            }
+
+                            is TelegramLinkUiState.Error -> {
+                                Spacer(8.px)
+                                TextError(currentTelegramState.message)
+                            }
+
+                            else -> Unit
+                        }
+
+                        if (telegramState is TelegramLinkUiState.ConfirmUnlink) {
+                            TelegramUnlinkConfirmDialog(
+                                onConfirm = { telegramLinkViewModel.confirmUnlink() },
+                                onCancel = { telegramLinkViewModel.cancelUnlink() },
+                            )
                         }
                     }
                 }
