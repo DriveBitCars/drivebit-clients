@@ -10,6 +10,7 @@ import my.drivebit.components.CarDepositSection
 import my.drivebit.components.CarDescription
 import my.drivebit.components.CarDetailAddress
 import my.drivebit.components.CarInsuranceSection
+import my.drivebit.components.CarTravelDestinationsSection
 import my.drivebit.components.CarLocationMap
 import my.drivebit.components.CarOwnerSection
 import my.drivebit.components.CarPhotosSection
@@ -236,6 +237,8 @@ private fun CarDetailInfoColumn(
         CarDescription(description = car.general.description)
 
         CarInsuranceSection(car)
+
+        CarTravelDestinationsSection(car)
 
         owner?.let { ownerInfo ->
             CarOwnerSection(

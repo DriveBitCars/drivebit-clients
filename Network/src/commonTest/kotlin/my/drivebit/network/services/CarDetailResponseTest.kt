@@ -323,6 +323,46 @@ class CarDetailResponseTest {
     }
 
     @Test
+    fun `resolvedTravelDestinationsDisplay joins translates with comma`() {
+        val car =
+            CarDetailResponse(
+                id = "x",
+                general =
+                    CarGeneral(
+                        brandName = "A",
+                        modelName = "B",
+                        vin = "",
+                        seats = 5,
+                        address = CarAddress(geoLat = 0.0, geoLon = 0.0),
+                    ),
+                equipment =
+                    CarEquipment(
+                        allowedTravelDestinations = listOf("Belarus", "Abkhazia"),
+                        allowedTravelDestinationsTranslate = listOf("Беларусь", "Абхазия"),
+                    ),
+            )
+        assertEquals("Беларусь, Абхазия", car.resolvedTravelDestinationsDisplay())
+    }
+
+    @Test
+    fun `resolvedTravelDestinationsDisplay is null when destinations are empty`() {
+        val car =
+            CarDetailResponse(
+                id = "x",
+                general =
+                    CarGeneral(
+                        brandName = "A",
+                        modelName = "B",
+                        vin = "",
+                        seats = 5,
+                        address = CarAddress(geoLat = 0.0, geoLon = 0.0),
+                    ),
+                equipment = CarEquipment(),
+            )
+        assertNull(car.resolvedTravelDestinationsDisplay())
+    }
+
+    @Test
     fun `getCar should deserialize equipment allowedTravelDestinations`() =
         runTest {
             val successResponse =
