@@ -221,6 +221,13 @@ data class CarDetailResponse(
     fun resolvedAllowedTravelDestinationsTranslate(): List<String> =
         equipment?.allowedTravelDestinationsTranslate.orEmpty()
 
+    fun resolvedTravelDestinationsDisplay(): String? =
+        resolvedAllowedTravelDestinationsTranslate()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(", ")
+
     fun resolvedBrandId(): Int? = brandId
 
     fun resolvedModelId(): Int? = modelId
