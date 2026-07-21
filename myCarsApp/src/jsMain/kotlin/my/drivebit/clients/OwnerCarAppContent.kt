@@ -25,6 +25,7 @@ import my.drivebit.screens.PassportUploadPage
 import my.drivebit.screens.ProductionYearInputPage
 import my.drivebit.screens.SeatsCountInputPage
 import my.drivebit.screens.TrunkSizeSelectionPage
+import my.drivebit.screens.TravelDestinationsSelectionPage
 import my.drivebit.shared.storage.Storage
 import my.drivebit.web.homePathHref
 
@@ -172,10 +173,20 @@ internal fun OwnerCarAppContent(
         currentPath.startsWith("/trunk-size-selection") -> {
             TrunkSizeSelectionPage(
                 onTrunkSizeSelected = {
-                    window.location.href = "/description-input"
+                    window.location.href = "/travel-destinations-selection"
                 },
                 onBack = {
                     window.location.href = "/seats-count-input"
+                },
+            )
+        }
+        currentPath.startsWith("/travel-destinations-selection") -> {
+            TravelDestinationsSelectionPage(
+                onContinue = {
+                    window.location.href = "/description-input"
+                },
+                onBack = {
+                    window.location.href = "/trunk-size-selection"
                 },
             )
         }
@@ -195,7 +206,7 @@ internal fun OwnerCarAppContent(
                     window.location.href = "/daily-rate-input"
                 },
                 onBack = {
-                    window.location.href = "/trunk-size-selection"
+                    window.location.href = "/travel-destinations-selection"
                 },
             )
         }

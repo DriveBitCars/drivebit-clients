@@ -41,6 +41,8 @@ interface CarEnumsRepository {
 
     suspend fun getAllTrunkSizes(): List<EnumItem>
 
+    suspend fun getAllTravelDestinations(): List<EnumItem>
+
     suspend fun getAllDocumentTypes(): List<EnumItem>
 }
 
@@ -156,6 +158,11 @@ class CarEnumsRepositoryImpl(
     override suspend fun getAllTrunkSizes(): List<EnumItem> {
         val enums = getEnums()
         return enums.TrunkSizeEnum.map { it.toEnumItem() }
+    }
+
+    override suspend fun getAllTravelDestinations(): List<EnumItem> {
+        val enums = getEnums()
+        return enums.TravelDestinationEnum.map { it.toEnumItem() }
     }
 
     override suspend fun getAllDocumentTypes(): List<EnumItem> =

@@ -58,6 +58,7 @@ val RESERVED_FIRST_SEGMENTS: Set<String> =
         "production-year-input",
         "seats-count-input",
         "trunk-size-selection",
+        "travel-destinations-selection",
         "daily-rate-input",
         "description-input",
         "passport-upload",

@@ -33,6 +33,9 @@ class CarEnumsHelper(
 
     suspend fun getAllTrunkSizes(useTranslation: Boolean = true): List<EnumItem> = repository.getAllTrunkSizes()
 
+    suspend fun getAllTravelDestinations(useTranslation: Boolean = true): List<EnumItem> =
+        repository.getAllTravelDestinations()
+
     suspend fun refreshEnums() {
         repository.getEnums()
     }

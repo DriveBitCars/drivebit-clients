@@ -20,6 +20,7 @@ fun isOwnerCarBundlePath(path: String): Boolean =
         path.startsWith("/production-year-input") ||
         path.startsWith("/seats-count-input") ||
         path.startsWith("/trunk-size-selection") ||
+        path.startsWith("/travel-destinations-selection") ||
         path.startsWith("/daily-rate-input") ||
         path.startsWith("/description-input") ||
         path.startsWith("/passport-upload")
@@ -45,6 +46,7 @@ val ownerCarBundleShellRoutes: List<String> =
         "production-year-input",
         "seats-count-input",
         "trunk-size-selection",
+        "travel-destinations-selection",
         "daily-rate-input",
         "description-input",
         "passport-upload",

@@ -66,6 +66,8 @@ private class FakeCarEnumsRepository : CarEnumsRepository {
     override suspend fun getAllDriveTypes(): List<EnumItem> = throw NotImplementedError()
 
     override suspend fun getAllTrunkSizes(): List<EnumItem> = throw NotImplementedError()
+
+    override suspend fun getAllTravelDestinations(): List<EnumItem> = throw NotImplementedError()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

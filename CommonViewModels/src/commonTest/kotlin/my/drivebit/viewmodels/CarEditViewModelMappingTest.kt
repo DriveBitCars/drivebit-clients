@@ -78,6 +78,27 @@ class CarEditViewModelMappingTest {
             assertEquals("Test Address", formData.address)
             assertEquals(1, formData.photos.size)
             assertEquals("https://example.com/photo.jpg", formData.photos[0].url)
+            assertEquals(emptyList(), formData.allowedTravelDestinations)
+        }
+
+    @Test
+    fun `toFormData should map equipment allowedTravelDestinations`() =
+        runTest(StandardTestDispatcher()) {
+            val carResponse =
+                CarDetailResponse(
+                    id = "car-1",
+                    equipment =
+                        my.drivebit.network.services.CarEquipment(
+                            allowedTravelDestinations = listOf("Belarus", "Abkhazia"),
+                            allowedTravelDestinationsTranslate = listOf("Беларусь", "Абхазия"),
+                        ),
+                )
+
+            val viewModel = CarEditViewModelImpl(MockCarServiceForEdit())
+            val formData = viewModel.mapToFormData(carResponse)
+
+            assertEquals(listOf("Belarus", "Abkhazia"), formData.allowedTravelDestinations)
+            assertEquals(listOf("Беларусь", "Абхазия"), formData.allowedTravelDestinationsTranslate)
         }
 
     @Test

@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 import my.drivebit.components.ActionButton
 import my.drivebit.components.CarInsuranceSelectField
+import my.drivebit.components.CarTravelDestinationsField
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
 import my.drivebit.components.FormSection
@@ -461,6 +462,12 @@ fun CarEditPage() {
                                 insurance = formData.insurance,
                                 insuranceTranslate = formData.insuranceTranslate,
                                 onSelect = { viewModel.handleIntent(CarEditIntent.SelectInsurance(it)) },
+                            )
+
+                            CarTravelDestinationsField(
+                                options = currentState.travelDestinations,
+                                selectedNames = formData.allowedTravelDestinations,
+                                onToggle = { viewModel.handleIntent(CarEditIntent.ToggleTravelDestination(it)) },
                             )
 
                             CarStsDocumentsSection(carId = currentState.carId)
