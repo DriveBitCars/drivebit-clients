@@ -55,6 +55,7 @@ data class CarSearchFilters(
     val brandId: Int? = null,
     val modelId: Int? = null,
     val driveTypes: List<String>? = null,
+    val allowedTravelDestinations: List<String>? = null,
     val page: Int = 1,
 )
 
@@ -87,6 +88,7 @@ internal class FiltersCarSearchRepository(
                         brandId = filters.brandId,
                         modelId = filters.modelId,
                         driveTypes = filters.driveTypes,
+                        allowedTravelDestinations = filters.allowedTravelDestinations,
                         geoLat = null,
                         geoLon = null,
                         radiusKm = null,
@@ -236,6 +238,7 @@ internal class CarSearchMainRepositoryImpl(
                         brandId = brandId,
                         modelId = modelId,
                         driveTypes = driveTypeName?.let { listOf(it) },
+                        allowedTravelDestinations = filter?.allowedTravelDestinations,
                         geoLat = if (useNearbyGeo) nearbyLat else null,
                         geoLon = if (useNearbyGeo) nearbyLon else null,
                         radiusKm = if (useNearbyGeo) nearbyRadiusKm.toDouble() else null,

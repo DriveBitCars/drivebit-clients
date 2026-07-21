@@ -39,6 +39,7 @@ interface Car {
         brandId: Int? = null,
         modelId: Int? = null,
         driveTypes: List<String>? = null,
+        allowedTravelDestinations: List<String>? = null,
         geoLat: Double? = null,
         geoLon: Double? = null,
         radiusKm: Double? = null,
@@ -215,8 +216,7 @@ data class CarDetailResponse(
 
     fun resolvedTrunkSizeTranslate(): String? = trunk?.trunkSizeTranslate
 
-    fun resolvedAllowedTravelDestinations(): List<String> =
-        equipment?.allowedTravelDestinations.orEmpty()
+    fun resolvedAllowedTravelDestinations(): List<String> = equipment?.allowedTravelDestinations.orEmpty()
 
     fun resolvedAllowedTravelDestinationsTranslate(): List<String> =
         equipment?.allowedTravelDestinationsTranslate.orEmpty()
@@ -534,6 +534,7 @@ class CarImpl(
         brandId: Int?,
         modelId: Int?,
         driveTypes: List<String>?,
+        allowedTravelDestinations: List<String>?,
         geoLat: Double?,
         geoLon: Double?,
         radiusKm: Double?,
@@ -564,6 +565,7 @@ class CarImpl(
                 brandId?.let { parameter("BrandId", it) }
                 modelId?.let { parameter("ModelId", it) }
                 driveTypes?.forEach { parameter("DriveType", it) }
+                allowedTravelDestinations?.forEach { parameter("AllowedTravelDestinations", it) }
             }
         val result: CarDTOPagedResult = response.parseResponse()
         return CarSearchResponse(
