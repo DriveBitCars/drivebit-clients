@@ -85,12 +85,23 @@ jobs:
         MYCARS="myCarsApp/build/dist/js/productionExecutable"
         cp "$MYCARS/myCars.js" "$DIST/"
         cp "$MYCARS/myCars.js.map" "$DIST/" 2>/dev/null || true
-        for route in create-car my-cars car-edit address-input car-sts-upload passport-upload city-selection; do
+        for route in \
+          create-car my-cars car-edit car-photos-upload car-photos car-availability \
+          city-selection address-input car-sts-upload license-plate-input \
+          car-brand-selection car-model-selection body-type-selection \
+          drive-type-selection engine-type-selection engine-volume-input \
+          production-year-input seats-count-input trunk-size-selection \
+          travel-destinations-selection daily-rate-input description-input \
+          passport-upload
+        do
           if [ -d "$MYCARS/$route" ]; then
             cp -r "$MYCARS/$route" "$DIST/"
           fi
         done
-        for route in create-car my-cars car-edit address-input car-sts-upload passport-upload city-selection; do
+        for route in \
+          create-car my-cars car-edit address-input car-sts-upload passport-upload \
+          city-selection travel-destinations-selection trunk-size-selection
+        do
           test -f "$DIST/$route/index.html"
         done
         test -f "$DIST/myCars.js"
