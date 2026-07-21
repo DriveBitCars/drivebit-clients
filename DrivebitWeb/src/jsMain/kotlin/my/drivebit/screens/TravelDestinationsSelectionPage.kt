@@ -12,6 +12,7 @@ import my.drivebit.components.FormSection
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.ToolbarBackArrow
+import my.drivebit.design.CSSColors
 import my.drivebit.shell.PageWithLogo
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.TravelDestinationsViewModel
@@ -56,6 +57,7 @@ fun TravelDestinationsSelectionPage(
 
             ButtonContainer(id = "travel-destinations-continue") {
                 ActionButton(
+                    enabledColor = CSSColors.Blue,
                     text = "Далее",
                     viewModel = continueButtonViewModel,
                     onClick = {

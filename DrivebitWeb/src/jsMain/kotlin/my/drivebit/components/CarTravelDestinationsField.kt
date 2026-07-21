@@ -6,7 +6,6 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.repositories.EnumItem
 import org.jetbrains.compose.web.attributes.InputType
-import org.jetbrains.compose.web.attributes.checked
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Input
@@ -39,24 +38,40 @@ fun CarTravelDestinationsField(
             }
         }) {
             options.forEach { option ->
-                Label({
+                val checkboxId = "travel-destination-${option.name}"
+                Div({
                     style {
                         display(DisplayStyle.Flex)
                         alignItems(AlignItems.Center)
                         gap(8.px)
-                        cursor("pointer")
                     }
                 }) {
-                    Input(InputType.Checkbox) {
-                        checked(option.name in selectedNames)
-                        onChange { onToggle(option.name) }
-                    }
-                    Span({
-                        style {
-                            applyTypography(CSSTypography.Styles.body)
-                            color(CSSColors.Black)
-                        }
-                    }) {
+                    Input(
+                        type = InputType.Checkbox,
+                        attrs = {
+                            id(checkboxId)
+                            checked(option.name in selectedNames)
+                            onInput {
+                                onToggle(option.name)
+                            }
+                            style {
+                                width(20.px)
+                                height(20.px)
+                                cursor("pointer")
+                                flexShrink(0)
+                            }
+                        },
+                    )
+                    Label(
+                        forId = checkboxId,
+                        attrs = {
+                            style {
+                                cursor("pointer")
+                                applyTypography(CSSTypography.Styles.body)
+                                color(CSSColors.Black)
+                            }
+                        },
+                    ) {
                         Text(option.translate)
                     }
                 }
