@@ -59,6 +59,21 @@ jobs:
         cp -r "$MYCARS/my-cars" "$DIST/"
         test -f "$DIST/my-cars/index.html"
         test -f "$DIST/myCars.js"
+        # Owner create/edit shell routes live in myCarsApp dist; keep Pages in sync.
+        for route in \
+          create-car car-edit car-photos-upload car-photos car-availability \
+          city-selection address-input car-sts-upload license-plate-input \
+          car-brand-selection car-model-selection body-type-selection \
+          drive-type-selection engine-type-selection engine-volume-input \
+          production-year-input seats-count-input trunk-size-selection \
+          travel-destinations-selection daily-rate-input description-input \
+          passport-upload
+        do
+          if [ -d "$MYCARS/$route" ]; then
+            cp -r "$MYCARS/$route" "$DIST/"
+          fi
+        done
+        test -f "$DIST/travel-destinations-selection/index.html"
         CHATS="chatsApp/build/dist/js/productionExecutable"
         cp "$CHATS/chats.js" "$DIST/"
         cp -r "$CHATS/chats" "$DIST/"
