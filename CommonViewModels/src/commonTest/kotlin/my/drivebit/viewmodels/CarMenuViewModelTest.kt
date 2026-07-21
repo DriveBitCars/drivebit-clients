@@ -29,15 +29,28 @@ private fun defaultGeneral() =
     )
 
 class MockMyCarRepositoryForMenu : MyCarRepository {
-    private var cars: List<CarItem> = emptyList()
+    private var cachedCars: List<CarItem> = emptyList()
+    private var networkCars: List<CarItem> = emptyList()
+    var refreshCount = 0
 
-    fun setCars(carsList: List<CarItem>) {
-        this.cars = carsList
+    fun setCachedCars(carsList: List<CarItem>) {
+        cachedCars = carsList
     }
 
-    override suspend fun getMyCar(): List<CarItem> = cars
+    fun setNetworkCars(carsList: List<CarItem>) {
+        networkCars = carsList
+    }
 
-    override fun refresh() {}
+    fun setCars(carsList: List<CarItem>) {
+        cachedCars = carsList
+        networkCars = carsList
+    }
+
+    override suspend fun getMyCar(): List<CarItem> = if (refreshCount > 0) networkCars else cachedCars
+
+    override fun refresh() {
+        refreshCount++
+    }
 }
 
 class MockStorageForCarMenu : Storage {
@@ -224,6 +237,31 @@ class CarMenuViewModelTest {
             viewModel.load()
             advanceUntilIdle()
 
+            assertEquals(CarMenuOption.MyCars, viewModel.menuOption.value)
+        }
+
+    @Test
+    fun `should show MyCars when cached list is empty but network has cars`() =
+        runTest(testDispatcher) {
+            mockStorage.setLoggedIn(true)
+            val mockMyCarRepository =
+                MockMyCarRepositoryForMenu().apply {
+                    setCachedCars(emptyList())
+                    setNetworkCars(
+                        listOf(
+                            CarItem(
+                                id = "1",
+                                general = defaultGeneral(),
+                                photos = emptyList(),
+                            ),
+                        ),
+                    )
+                }
+            val viewModel = CarMenuViewModelImpl(mockStorage, mockMyCarRepository, coroutineScope = this)
+            viewModel.load()
+            advanceUntilIdle()
+
+            assertEquals(1, mockMyCarRepository.refreshCount)
             assertEquals(CarMenuOption.MyCars, viewModel.menuOption.value)
         }
 

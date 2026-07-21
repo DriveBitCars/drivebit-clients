@@ -50,6 +50,7 @@ class CarMenuViewModelImpl(
         _isLoading.value = true
         coroutineScope.launch {
             runCatching {
+                myCarRepository.refresh()
                 val cars = myCarRepository.getMyCar()
                 _menuOption.value =
                     if (cars.isEmpty()) {
