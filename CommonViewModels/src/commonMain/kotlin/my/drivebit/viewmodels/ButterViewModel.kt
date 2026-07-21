@@ -133,9 +133,7 @@ class ButterViewModelImpl(
 
     override fun open() {
         isMenuOpened = true
-        if (carMenuViewModel.isLoading.value) {
-            carMenuViewModel.load()
-        }
+        carMenuViewModel.load()
         updateMenu(carMenuViewModel.menuOption.value, carMenuViewModel.isLoading.value)
     }
 

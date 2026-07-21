@@ -10,6 +10,7 @@ import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.CarMenuOption
 import my.drivebit.viewmodels.CarMenuViewModel
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
@@ -99,13 +100,39 @@ class MockCarMenuViewModelForButter : CarMenuViewModel {
     }
 
     override fun load() {
+        loadCallCount++
     }
+
+    var loadCallCount = 0
 }
 
 class ButterViewModelTest {
     private val mockStorage = MockStorageForButter()
     private val mockAvatarRepository = MockAvatarRepositoryForButter()
     private val mockCarMenuViewModel = MockCarMenuViewModelForButter()
+
+    @Test
+    fun `open should reload car menu option`() {
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
+
+        viewModel.open()
+
+        assertEquals(2, mockCarMenuViewModel.loadCallCount)
+    }
+
+    @Test
+    fun `open should show MyCars menu item when user has cars`() {
+        mockStorage.setLoggedIn(true)
+        mockCarMenuViewModel.setMenuOption(CarMenuOption.MyCars)
+        mockCarMenuViewModel.setIsLoading(false)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
+
+        viewModel.open()
+
+        val openedState = viewModel.state.value as ButterState.Opened
+        assertTrue(openedState.model.any { it.text == "Мои авто" })
+        assertFalse(openedState.model.any { it.text == "Сдать авто" })
+    }
 
     @Test
     fun `initial state should be Idle`() {
