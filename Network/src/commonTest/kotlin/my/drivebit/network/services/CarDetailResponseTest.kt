@@ -321,4 +321,56 @@ class CarDetailResponseTest {
             )
         assertNull(car.resolvedInsuranceDisplay())
     }
+
+    @Test
+    fun `getCar should deserialize equipment allowedTravelDestinations`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "22e09ade-47b3-45da-9195-d0b382a88fee",
+                    "general": {
+                        "brandName": "BMW",
+                        "modelName": "X5",
+                        "year": 2020,
+                        "licensePlate": "A123BC",
+                        "vin": "",
+                        "seats": 5,
+                        "address": { "geoLat": 55.0, "geoLon": 37.0 }
+                    },
+                    "equipment": {
+                        "allowedTravelDestinations": ["Belarus", "Crimea"],
+                        "allowedTravelDestinationsTranslate": ["Беларусь", "В Крым"]
+                    }
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine {
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json(
+                            Json {
+                                ignoreUnknownKeys = true
+                                isLenient = true
+                                encodeDefaults = false
+                            },
+                        )
+                    }
+                }
+
+            val response = httpClient.get("https://drivebit.ru/api/Car/test-id")
+            val result: CarDetailResponse = response.parseResponse()
+
+            assertEquals(listOf("Belarus", "Crimea"), result.resolvedAllowedTravelDestinations())
+            assertEquals(listOf("Беларусь", "В Крым"), result.resolvedAllowedTravelDestinationsTranslate())
+        }
 }

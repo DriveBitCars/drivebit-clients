@@ -155,6 +155,7 @@ data class CarDetailResponse(
     val chassis: CarChassis? = null,
     val body: CarBody? = null,
     val trunk: CarTrunk? = null,
+    val equipment: CarEquipment? = null,
     val photos: List<CarPhotoItem> = emptyList(),
     val brandId: Int? = null,
     val brandName: String? = null,
@@ -213,6 +214,12 @@ data class CarDetailResponse(
     fun resolvedTrunkSize(): String? = trunk?.trunkSize
 
     fun resolvedTrunkSizeTranslate(): String? = trunk?.trunkSizeTranslate
+
+    fun resolvedAllowedTravelDestinations(): List<String> =
+        equipment?.allowedTravelDestinations.orEmpty()
+
+    fun resolvedAllowedTravelDestinationsTranslate(): List<String> =
+        equipment?.allowedTravelDestinationsTranslate.orEmpty()
 
     fun resolvedBrandId(): Int? = brandId
 
@@ -317,6 +324,12 @@ data class CarTrunk(
 )
 
 @Serializable
+data class CarEquipment(
+    val allowedTravelDestinations: List<String> = emptyList(),
+    val allowedTravelDestinationsTranslate: List<String> = emptyList(),
+)
+
+@Serializable
 data class CarAddress(
     val postalCode: String? = null,
     val region: String? = null,
@@ -385,6 +398,7 @@ data class CarCreateRequest(
     val insurance: String? = null,
     @SerialName("parkingAssistances") val ParkingAssistances: List<Int> = emptyList(),
     @SerialName("multimediaSystemOptions") val MultimediaSystemOptions: List<Int> = emptyList(),
+    val allowedTravelDestinations: List<String> = emptyList(),
 )
 
 @Serializable
@@ -424,6 +438,7 @@ data class UpdateCarRequest(
     val color: String? = null,
     @SerialName("parkingAssistances") val parkingAssistances: List<String>? = null,
     @SerialName("multimediaSystemOptions") val multimediaSystemOptions: List<String>? = null,
+    val allowedTravelDestinations: List<String>? = null,
 )
 
 fun CarCreateRequest.toUpdateCarRequest(resolvedCarId: String): UpdateCarRequest =
@@ -448,6 +463,7 @@ fun CarCreateRequest.toUpdateCarRequest(resolvedCarId: String): UpdateCarRequest
         engineType = engineType,
         driveType = driveType,
         trunkSize = trunkSize,
+        allowedTravelDestinations = allowedTravelDestinations.takeIf { it.isNotEmpty() },
     )
 
 @Serializable

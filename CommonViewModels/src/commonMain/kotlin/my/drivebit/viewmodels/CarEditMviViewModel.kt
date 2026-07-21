@@ -133,6 +133,10 @@ sealed interface CarEditIntent {
         val apiValue: String?,
     ) : CarEditIntent
 
+    data class ToggleTravelDestination(
+        val name: String,
+    ) : CarEditIntent
+
     data class UpdateDescription(
         val value: String,
     ) : CarEditIntent
@@ -206,6 +210,7 @@ sealed interface CarEditMviState {
         val driveTypes: List<EnumItem> = emptyList(),
         val engineTypes: List<EnumItem> = emptyList(),
         val trunkSizes: List<EnumItem> = emptyList(),
+        val travelDestinations: List<EnumItem> = emptyList(),
         val isBrandFocused: Boolean = false,
         val isModelFocused: Boolean = false,
         val isBodyTypeFocused: Boolean = false,
@@ -253,6 +258,7 @@ class CarEditMviViewModelImpl(
     private val driveTypeViewModel: DriveTypeViewModel,
     private val engineTypeViewModel: EngineTypeViewModel,
     private val trunkSizeViewModel: TrunkSizeViewModel,
+    private val travelDestinationsViewModel: TravelDestinationsViewModel,
     private val carId: String,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
     private val observerCoroutineScope: CoroutineScope? = null,
@@ -282,6 +288,8 @@ class CarEditMviViewModelImpl(
             ) { brands, models, bodyTypes, driveTypes, engineTypes ->
                 CarEditEnumsState(brands, models, bodyTypes, driveTypes, engineTypes)
             }.combine(trunkSizeViewModel.trunkSizes) { enumsState, trunkSizes ->
+                enumsState to trunkSizes
+            }.combine(travelDestinationsViewModel.options) { (enumsState, trunkSizes), travelDestinations ->
                 _state.update { currentState ->
                     when (currentState) {
                         is CarEditMviState.Success -> {
@@ -295,6 +303,7 @@ class CarEditMviViewModelImpl(
                                 driveTypes = enumsState.driveTypes,
                                 engineTypes = enumsState.engineTypes,
                                 trunkSizes = trunkSizes,
+                                travelDestinations = travelDestinations,
                             )
                         }
                         else -> currentState
@@ -451,6 +460,30 @@ class CarEditMviViewModelImpl(
                     )
                 }
             }
+            is CarEditIntent.ToggleTravelDestination -> {
+                updateFormData { form ->
+                    val selected = form.allowedTravelDestinations.toMutableList()
+                    val translates = form.allowedTravelDestinationsTranslate.toMutableList()
+                    val index = selected.indexOf(intent.name)
+                    if (index >= 0) {
+                        selected.removeAt(index)
+                        if (index < translates.size) translates.removeAt(index)
+                    } else {
+                        selected.add(intent.name)
+                        val label =
+                            (_state.value as? CarEditMviState.Success)
+                                ?.travelDestinations
+                                ?.find { it.name == intent.name }
+                                ?.translate
+                                ?: intent.name
+                        translates.add(label)
+                    }
+                    form.copy(
+                        allowedTravelDestinations = selected,
+                        allowedTravelDestinationsTranslate = translates,
+                    )
+                }
+            }
             is CarEditIntent.UpdateDescription -> {
                 updateFormData { it.copy(description = intent.value) }
             }
@@ -504,6 +537,7 @@ class CarEditMviViewModelImpl(
             driveTypeViewModel.loadDriveTypes()
             engineTypeViewModel.loadEngineTypes()
             trunkSizeViewModel.loadTrunkSizes()
+            travelDestinationsViewModel.load()
             runCatching {
                 val car = carService.getCar(carId)
                 val formData = mapToFormData(car)
@@ -596,6 +630,7 @@ class CarEditMviViewModelImpl(
                         insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },
                         ParkingAssistances = emptyList(),
                         MultimediaSystemOptions = emptyList(),
+                        allowedTravelDestinations = formData.allowedTravelDestinations,
                     )
                 carService.createOrUpdateCar(request, carIdToSave)
                 myCarRepository.refresh()
@@ -799,6 +834,8 @@ class CarEditMviViewModelImpl(
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             insurance = car.insurance?.trim()?.takeIf { it.isNotEmpty() },
             insuranceTranslate = car.insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() },
+            allowedTravelDestinations = car.resolvedAllowedTravelDestinations(),
+            allowedTravelDestinationsTranslate = car.resolvedAllowedTravelDestinationsTranslate(),
             photos = car.photos,
         )
 }

@@ -122,6 +122,39 @@ class CarEnumsRepositoryTest {
             assertEquals("Седан", result.translate)
         }
 
+    @Test
+    fun `should get all travel destinations when present`() =
+        runTest {
+            val enums =
+                createValidEnums().copy(
+                    TravelDestinationEnum =
+                        listOf(
+                            NetworkEnumItem(1, "Belarus", "Беларусь"),
+                            NetworkEnumItem(2, "Crimea", "В Крым"),
+                        ),
+                )
+            val fakeDictionary = createFakeDictionary(enums)
+            val repository = CarEnumsRepositoryImpl(fakeDictionary)
+
+            val result = repository.getAllTravelDestinations()
+
+            assertEquals(2, result.size)
+            assertEquals("Belarus", result[0].name)
+            assertEquals("Беларусь", result[0].translate)
+        }
+
+    @Test
+    fun `should return empty travel destinations when enum missing`() =
+        runTest {
+            val enums = createValidEnums().copy(TravelDestinationEnum = emptyList())
+            val fakeDictionary = createFakeDictionary(enums)
+            val repository = CarEnumsRepositoryImpl(fakeDictionary)
+
+            val result = repository.getAllTravelDestinations()
+
+            assertTrue(result.isEmpty())
+        }
+
     private fun createFakeDictionary(enums: CarEnumsResponse): Dictionary =
         object : Dictionary {
             override suspend fun getCarEnums(): CarEnumsResponse = enums

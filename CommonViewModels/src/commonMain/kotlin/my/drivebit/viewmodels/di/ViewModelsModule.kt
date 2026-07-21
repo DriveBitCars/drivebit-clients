@@ -82,6 +82,7 @@ import my.drivebit.viewmodels.RentViewModelImpl
 import my.drivebit.viewmodels.TelegramLinkViewModel
 import my.drivebit.viewmodels.TelegramLinkViewModelImpl
 import my.drivebit.viewmodels.TrunkSizeViewModel
+import my.drivebit.viewmodels.TravelDestinationsViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModelImpl
 import my.drivebit.viewmodels.ValidatorViewModel
@@ -322,6 +323,13 @@ val commonViewModelsModule: Module =
         }
 
         factory {
+            TravelDestinationsViewModel(
+                carEnumsRepository = get(),
+                selectedTravelDestinationsRepository = get(),
+            )
+        }
+
+        factory {
             CityViewModel(
                 cityRepository = get(),
             )
@@ -376,6 +384,7 @@ val commonViewModelsModule: Module =
                 driveTypeViewModel = get(),
                 engineTypeViewModel = get(),
                 trunkSizeViewModel = get(),
+                travelDestinationsViewModel = get(),
                 carId = carId,
             )
         }

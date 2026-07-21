@@ -81,4 +81,26 @@ class CarUpdateRequestTest {
         val json = defaultJson.encodeToString(UpdateCarRequest.serializer(), updateRequest)
         assertFalse(json.contains("insurance"))
     }
+
+    @Test
+    fun `toUpdateCarRequest maps allowedTravelDestinations enum names`() {
+        val carId = "d5edee76-d7d7-42bd-be61-bfc3a73786c8"
+        val createRequest =
+            CarCreateRequest(
+                year = 2015,
+                allowedTravelDestinations = listOf("Belarus", "Abkhazia"),
+            )
+
+        val updateRequest = createRequest.toUpdateCarRequest(carId)
+
+        assertEquals(listOf("Belarus", "Abkhazia"), updateRequest.allowedTravelDestinations)
+        val updateJson = defaultJson.encodeToString(UpdateCarRequest.serializer(), updateRequest)
+        assertTrue(updateJson.contains("\"allowedTravelDestinations\""))
+        assertTrue(updateJson.contains("Belarus"))
+        assertTrue(updateJson.contains("Abkhazia"))
+
+        val createJson = defaultJson.encodeToString(CarCreateRequest.serializer(), createRequest)
+        assertTrue(createJson.contains("\"allowedTravelDestinations\""))
+        assertTrue(createJson.contains("Belarus"))
+    }
 }

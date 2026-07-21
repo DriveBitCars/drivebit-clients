@@ -62,6 +62,8 @@ data class CarEditFormData(
     val availableMileagePerDayKm: String = "",
     val insurance: String? = null,
     val insuranceTranslate: String? = null,
+    val allowedTravelDestinations: List<String> = emptyList(),
+    val allowedTravelDestinationsTranslate: List<String> = emptyList(),
     val photos: List<my.drivebit.network.services.CarPhotoItem> = emptyList(),
 )
 
@@ -243,6 +245,8 @@ class CarEditViewModelImpl(
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             insurance = car.insurance?.trim()?.takeIf { it.isNotEmpty() },
             insuranceTranslate = car.insuranceTranslate?.trim()?.takeIf { it.isNotEmpty() },
+            allowedTravelDestinations = car.resolvedAllowedTravelDestinations(),
+            allowedTravelDestinationsTranslate = car.resolvedAllowedTravelDestinationsTranslate(),
             photos = car.photos,
         )
     }
@@ -400,6 +404,7 @@ class CarEditViewModelImpl(
                         insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },
                         ParkingAssistances = emptyList(),
                         MultimediaSystemOptions = emptyList(),
+                        allowedTravelDestinations = formData.allowedTravelDestinations,
                     )
                 carService.createOrUpdateCar(request, formData.carId)
                 val updatedCar = carService.getCar(formData.carId)

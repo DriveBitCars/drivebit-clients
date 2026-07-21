@@ -787,6 +787,28 @@ class CarEditMviViewModelTest {
         }
 
     @Test
+    fun `SaveCar should send allowedTravelDestinations selected in form`() =
+        runTest(StandardTestDispatcher()) {
+            val mockCarService = MockCarServiceForMvi()
+            val viewModel = createCarEditMviViewModel(carService = mockCarService, carId = "test-car-id")
+
+            advanceUntilIdle()
+            viewModel.handleIntent(CarEditIntent.UpdateLicensePlate("А123ВЕ12"))
+            advanceUntilIdle()
+            viewModel.handleIntent(CarEditIntent.ToggleTravelDestination("Belarus"))
+            advanceUntilIdle()
+            viewModel.handleIntent(CarEditIntent.ToggleTravelDestination("Crimea"))
+            advanceUntilIdle()
+            viewModel.handleIntent(CarEditIntent.SaveCar)
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf("Belarus", "Crimea"),
+                mockCarService.lastCreateOrUpdateRequest?.allowedTravelDestinations,
+            )
+        }
+
+    @Test
     fun `UpdateEngineVolume should update form data and set hasChanges to true`() =
         runTest(StandardTestDispatcher()) {
             val viewModel = createCarEditMviViewModel(carId = "")
@@ -1136,6 +1158,8 @@ fun createMockCarEnumsRepository(): my.drivebit.repositories.CarEnumsRepository 
 
         override suspend fun getAllTrunkSizes(): List<my.drivebit.repositories.EnumItem> = emptyList()
 
+        override suspend fun getAllTravelDestinations(): List<my.drivebit.repositories.EnumItem> = emptyList()
+
         override suspend fun getAllDocumentTypes(): List<my.drivebit.repositories.EnumItem> = emptyList()
     }
 
@@ -1196,6 +1220,24 @@ fun TestScope.createCarEditMviViewModel(
             driveTypeViewModel = driveTypeViewModel ?: createMockDriveTypeViewModel(coroutineScope = viewModelScope),
             engineTypeViewModel = engineTypeViewModel ?: createMockEngineTypeViewModel(coroutineScope = viewModelScope),
             trunkSizeViewModel = trunkSizeViewModel ?: createMockTrunkSizeViewModel(coroutineScope = viewModelScope),
+            travelDestinationsViewModel =
+                TravelDestinationsViewModel(
+                    carEnumsRepository = createMockCarEnumsRepository(),
+                    selectedTravelDestinationsRepository =
+                        object : my.drivebit.repositories.SelectedTravelDestinationsRepository {
+                            override fun saveDestinations(
+                                names: List<String>,
+                                translates: List<String>,
+                            ) = Unit
+
+                            override fun getDestinationNames(): List<String> = emptyList()
+
+                            override fun getDestinationTranslates(): List<String> = emptyList()
+
+                            override fun clearDestinations() = Unit
+                        },
+                    coroutineScope = viewModelScope,
+                ),
             myCarRepository = myCarRepository,
             carId = carId,
             coroutineScope = viewModelScope,

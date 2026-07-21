@@ -17,6 +17,7 @@ internal class CreateCarRepositoryImpl(
     private val selectedDriveTypeRepository: SelectedDriveTypeRepository,
     private val selectedEngineTypeRepository: SelectedEngineTypeRepository,
     private val selectedTrunkSizeRepository: SelectedTrunkSizeRepository,
+    private val selectedTravelDestinationsRepository: SelectedTravelDestinationsRepository,
     private val licensePlateRepository: LicensePlateRepository,
     private val selectedAddressRepository: SelectedAddressRepository,
     private val selectedCityRepository: SelectedCityRepository,
@@ -63,6 +64,7 @@ internal class CreateCarRepositoryImpl(
                     prepaymentPercent = DEFAULT_CAR_PREPAYMENT_PERCENT,
                     ParkingAssistances = emptyList(),
                     MultimediaSystemOptions = emptyList(),
+                    allowedTravelDestinations = selectedTravelDestinationsRepository.getDestinationNames(),
                 )
 
             // Выбор города при создании машины отключён: город вводится вместе с адресом, cityId = null
