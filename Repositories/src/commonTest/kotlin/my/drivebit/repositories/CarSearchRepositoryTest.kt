@@ -41,6 +41,7 @@ class CarSearchRepositoryTest {
         var searchBrandId: Int? = null
         var searchModelId: Int? = null
         var searchDriveTypes: List<String>? = null
+        var searchAllowedTravelDestinations: List<String>? = null
         var searchGeoLat: Double? = null
         var searchGeoLon: Double? = null
         var searchRadiusKm: Double? = null
@@ -67,6 +68,7 @@ class CarSearchRepositoryTest {
             brandId: Int?,
             modelId: Int?,
             driveTypes: List<String>?,
+            allowedTravelDestinations: List<String>?,
             geoLat: Double?,
             geoLon: Double?,
             radiusKm: Double?,
@@ -95,6 +97,7 @@ class CarSearchRepositoryTest {
             searchBrandId = brandId
             searchModelId = modelId
             searchDriveTypes = driveTypes
+            searchAllowedTravelDestinations = allowedTravelDestinations
             searchPage = page
             searchPageSize = pageSize
             return searchResult
@@ -691,6 +694,31 @@ class CarSearchRepositoryTest {
 
             assertEquals(4000, mockCarService.searchDailyPriceMin)
             assertEquals(7000, mockCarService.searchDailyPriceMax)
+        }
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun `should pass Crimea AllowedTravelDestinations when currentTaskShortName is V Krym`() =
+        runTest {
+            val mockCarService = MockCarService()
+            val mockMyCityRepository = MockMyCityRepository()
+            mockMyCityRepository.selectedCity = City(id = 158830, name = "Москва")
+            val mockCurrentFiltersRepository = MockCurrentFiltersRepository()
+
+            mockCarService.searchResult = CarSearchResponse(emptyList())
+            val repository =
+                CarSearchMainRepositoryImpl(
+                    carService = mockCarService,
+                    selectedCity = mockMyCityRepository.getSelectedCity,
+                    currentFiltersRepository = mockCurrentFiltersRepository,
+                )
+
+            mockCurrentFiltersRepository.updateCurrentTask("В Крым")
+            repository.searchCarsByUserCity.first()
+
+            assertEquals(listOf("Crimea"), mockCarService.searchAllowedTravelDestinations)
+            assertEquals(null, mockCarService.searchAvailableMileagePerDayKmMin)
+            assertEquals(null, mockCarService.searchDailyPriceMax)
         }
 
     @Test

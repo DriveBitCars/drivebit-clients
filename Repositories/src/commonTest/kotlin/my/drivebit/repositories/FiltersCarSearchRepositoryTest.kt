@@ -78,6 +78,7 @@ private class RecordingCarService : Car {
     var searchBrandId: Int? = null
     var searchModelId: Int? = null
     var searchDriveTypes: List<String>? = null
+    var searchAllowedTravelDestinations: List<String>? = null
     var searchGeoLat: Double? = null
     var searchGeoLon: Double? = null
     var searchRadiusKm: Double? = null
@@ -102,6 +103,7 @@ private class RecordingCarService : Car {
         brandId: Int?,
         modelId: Int?,
         driveTypes: List<String>?,
+        allowedTravelDestinations: List<String>?,
         geoLat: Double?,
         geoLon: Double?,
         radiusKm: Double?,
@@ -124,6 +126,7 @@ private class RecordingCarService : Car {
         searchBrandId = brandId
         searchModelId = modelId
         searchDriveTypes = driveTypes
+        searchAllowedTravelDestinations = allowedTravelDestinations
         searchGeoLat = geoLat
         searchGeoLon = geoLon
         searchRadiusKm = radiusKm

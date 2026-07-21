@@ -108,6 +108,7 @@ data class FilterSuggestion(
     val bodyTypes: List<EnumItem>? = null,
     val engineTypes: List<EnumItem>? = null,
     val colors: List<EnumItem>? = null,
+    val allowedTravelDestinations: List<String>? = null,
 ) {
     val title: String
         get() = name

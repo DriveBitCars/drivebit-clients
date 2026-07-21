@@ -10,8 +10,7 @@ object SuggestedFiltersCatalog {
                 name = "Поездка в Крым",
                 shortName = "В Крым",
                 iconUrl = "/images/filter-main/travelling.svg",
-                availableMileagePerDayKmMin = 150,
-                dailyPriceMax = 6000,
+                allowedTravelDestinations = listOf("Crimea"),
             ),
             FilterSuggestion(
                 name = "Поездка в Беларусь",
@@ -74,6 +73,5 @@ object SuggestedFiltersCatalog {
             ),
         )
 
-    fun findByShortName(shortName: String): FilterSuggestion? =
-        suggested.firstOrNull { it.shortName == shortName }
+    fun findByShortName(shortName: String): FilterSuggestion? = suggested.firstOrNull { it.shortName == shortName }
 }

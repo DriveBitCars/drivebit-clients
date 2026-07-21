@@ -147,6 +147,7 @@ class MockCarServiceForDetail : Car {
         brandId: Int?,
         modelId: Int?,
         driveTypes: List<String>?,
+        allowedTravelDestinations: List<String>?,
         geoLat: Double?,
         geoLon: Double?,
         radiusKm: Double?,
