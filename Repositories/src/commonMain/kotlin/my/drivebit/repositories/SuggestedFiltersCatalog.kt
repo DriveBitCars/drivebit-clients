@@ -24,8 +24,7 @@ object SuggestedFiltersCatalog {
                 name = "Поездка в Абхазию",
                 shortName = "Абхазия",
                 iconUrl = "/images/filter-main/work.svg",
-                availableMileagePerDayKmMin = 200,
-                dailyPriceMax = 4000,
+                allowedTravelDestinations = listOf("Abkhazia"),
             ),
             FilterSuggestion(
                 name = "Эконом",
