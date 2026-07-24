@@ -107,4 +107,21 @@ class MapViewModelTest {
 
             assertEquals(2, viewModel.state.value.nearbyListPage)
         }
+
+    @Test
+    fun `setNearbyLayoutMode switches to List and keeps radius`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val viewModel =
+                MapViewModel(
+                    locationManager = FakeLocationManager(null),
+                    initialRadiusKm = 25,
+                    coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
+                )
+
+            viewModel.setNearbyLayoutMode(NearbyLayoutMode.List)
+
+            assertEquals(NearbyLayoutMode.List, viewModel.state.value.nearbyLayoutMode)
+            assertEquals(25, viewModel.state.value.nearbyRadiusKm)
+        }
 }

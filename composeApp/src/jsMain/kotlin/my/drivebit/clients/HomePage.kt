@@ -67,6 +67,7 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
+import org.koin.compose.currentKoinScope
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
@@ -212,14 +213,21 @@ fun HomePage() {
         }
 
         key(searchKey) {
-            val onNavigatePage: (Int) -> Unit = { pageIndex ->
-                val next = homeUrl.copy(page = pageIndex + 1)
-                pushHomeUrl(next)
-                navigationState.updatePath(buildHomeUrl(next).substringBefore('?'))
-                locationSearch = window.location.search
-            }
-            val mainContentViewModel: MainContentViewModel =
-                koinInject(parameters = { parametersOf(searchRequest, onNavigatePage) })
+            val koinScope = currentKoinScope()
+            val mainContentViewModel =
+                remember(searchRequest) {
+                    koinScope.get<MainContentViewModel> {
+                        parametersOf(
+                            searchRequest,
+                            { pageIndex: Int ->
+                                val next = currentHomeUrlParts().copy(page = pageIndex + 1)
+                                pushHomeUrl(next)
+                                navigationState.updatePath(buildHomeUrl(next).substringBefore('?'))
+                                locationSearch = window.location.search
+                            },
+                        )
+                    }
+                }
 
             val firstListState by mainContentViewModel.firstList.collectAsState()
             val displayedCars by mainContentViewModel.displayedCars.collectAsState()
@@ -267,9 +275,11 @@ private fun NearbyHomeContent(
     navigationState: NavigationState,
     onLocationSearchChanged: (String) -> Unit,
 ) {
-    val mapViewModel: MapViewModel =
-        koinInject(
-            parameters = {
+    val koinScope = currentKoinScope()
+    val initialRadiusKm = homeUrl.radiusKm ?: HOME_DEFAULT_NEARBY_RADIUS_KM
+    val mapViewModel =
+        remember(initialRadiusKm) {
+            koinScope.get<MapViewModel> {
                 parametersOf(
                     { lat: Double, lon: Double, radiusKm: Int ->
                         val next =
@@ -293,10 +303,10 @@ private fun NearbyHomeContent(
                         navigationState.updatePath(buildHomeUrl(next).substringBefore('?'))
                         onLocationSearchChanged(window.location.search)
                     },
-                    homeUrl.radiusKm ?: HOME_DEFAULT_NEARBY_RADIUS_KM,
+                    initialRadiusKm,
                 )
-            },
-        )
+            }
+        }
     val mapState = mapViewModel.state.collectAsState()
 
     LaunchedEffect(homeUrl.page) {
