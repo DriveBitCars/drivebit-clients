@@ -1,10 +1,11 @@
 # Регрессия: URL-first фильтры на home (pages-dev)
 
-> Проверено: 2026-07-24 · источники: Playwright e2e desktop + **mobile (iPhone 14 / Pixel 7)** на https://dev.drivebit.my · trunk `965819c2`
+> Проверено: 2026-07-24 · источники: Playwright e2e desktop + **mobile (iPhone 14 / Pixel 7)** на https://dev.drivebit.my · trunk `965819c2`  
+> Перепроверка «Поблизости»: 2026-07-24 evening · trunk `e6344a5f` · `tmp/e2e-nearby-recheck/` · **25/25 PASS** (desktop + iPhone 14 + Pixel smoke)
 
 ## Вердикт
 
-Фильтры, снятие, refresh и пагинация на city home работают через URL на **desktop и mobile**. «Поблизости» OK: карта, geo, радиус, режим **Список** (после фикса #307).
+Фильтры, снятие, refresh и пагинация на city home работают через URL на **desktop и mobile**. «Поблизости» OK: карта, geo, радиус, режим **Список** (после фикса #307). Перепроверка после #310: E1–E5 desktop/mobile без регрессий (маркеры ~100, List «Показано 1–9 из 100», `radiusKm=25`).
 
 **С чего начать:** чеклист ниже на `https://dev.drivebit.my/moskva` (canonical; `dev.drivebit.ru` → 301).
 
@@ -112,10 +113,12 @@
 |-----|-----|
 | Desktop скрины + `report.json` | `tmp/e2e-home-filters-regress/` |
 | **Mobile** скрины + `report.json` | `tmp/e2e-mobile-home-filters/` |
+| **Nearby recheck** (E1–E5 + smoke) | `tmp/e2e-nearby-recheck/` · 25/25 PASS |
 | Pages deploy (merge #306 URL-first) | https://github.com/DriveBitCars/drivebit-clients/actions/runs/30084552654 ✅ |
 | Pages deploy (merge #307 List fix) | https://github.com/DriveBitCars/drivebit-clients/actions/runs/30089143823 ✅ |
 | Pages deploy (docs #308) | https://github.com/DriveBitCars/drivebit-clients/actions/runs/30089861155 ✅ |
-| Base URL | `https://dev.drivebit.my` |
+| Pages deploy (docs #310 skill) | https://github.com/DriveBitCars/drivebit-clients/actions/runs/30102783807 ✅ |
+| Base URL | `https://dev.drivebit.my` (`dev.drivebit.ru` — self-signed в headless) |
 
 Известные шумности headless: Jivo, analytics, редкий Leaflet `_leaflet_pos`, 404 картинок (в т.ч. на mobile карточках).
 
