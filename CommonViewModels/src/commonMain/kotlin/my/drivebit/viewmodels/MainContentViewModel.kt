@@ -21,6 +21,8 @@ sealed interface MainContentListState {
 
     data class FirstList(
         val cars: List<CarItem>,
+        val totalCount: Int,
+        val totalPages: Int,
     ) : MainContentListState
 
     data class Error(
@@ -103,7 +105,12 @@ class MainContentViewModelImpl(
                             )
                         _firstList.value = MainContentListState.Error(errorMessage)
                     }.collectLatest { response ->
-                        _firstList.value = MainContentListState.FirstList(response.cars)
+                        _firstList.value =
+                            MainContentListState.FirstList(
+                                cars = response.cars,
+                                totalCount = response.totalCount,
+                                totalPages = response.totalPages,
+                            )
                     }
             }
     }

@@ -124,11 +124,16 @@ val commonViewModelsModule: Module =
                     Double,
                     Double,
                     Int,
-                ) -> Unit, onNearbyRadiusChanged: (Int) -> Unit, initialRadiusKm: Int,
+                ) -> Unit,
+                onNearbyRadiusChanged: (Int) -> Unit,
+                initialRadiusKm: Int,
+                cityName: String,
             ),
             ->
             MapViewModel(
                 locationManager = get(),
+                addressSuggestRepository = get(),
+                cityName = cityName,
                 onNearbyCenterReady = onNearbyCenterReady,
                 onNearbyRadiusChanged = onNearbyRadiusChanged,
                 initialRadiusKm = initialRadiusKm,

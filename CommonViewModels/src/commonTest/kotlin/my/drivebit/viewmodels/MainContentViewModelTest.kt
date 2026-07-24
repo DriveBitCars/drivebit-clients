@@ -64,13 +64,19 @@ class MainContentViewModelTest {
     fun `firstList emits FirstList after repository returns data`() =
         runTest {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            val viewModel = createViewModel(repositoryWithCars(), dispatcher)
+            val viewModel =
+                createViewModel(
+                    repositoryWithCars(totalPages = 3, totalCount = 19),
+                    dispatcher,
+                )
 
             assertIs<MainContentListState.Loading>(viewModel.firstList.value)
 
             advanceUntilIdle()
 
-            assertIs<MainContentListState.FirstList>(viewModel.firstList.value)
+            val state = assertIs<MainContentListState.FirstList>(viewModel.firstList.value)
+            assertEquals(19, state.totalCount)
+            assertEquals(3, state.totalPages)
         }
 
     @Test
