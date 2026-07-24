@@ -12,13 +12,11 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.components.DateRangeCalendarDialog
 import my.drivebit.navigation.LocalNavigationController
-import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.viewmodels.DateFieldViewModel
 import org.w3c.dom.events.Event
 
 @Composable
 fun HtmlHeroDatesBridge(
-    currentFiltersRepository: CurrentFiltersRepository,
     startDateViewModel: DateFieldViewModel,
     endDateViewModel: DateFieldViewModel,
 ) {
@@ -53,6 +51,7 @@ fun HtmlHeroDatesBridge(
             navigationController?.navigateTo(url) ?: run { window.location.href = url }
         }
         window.addEventListener("drivebit-hero-dates-changed", datesChangedListener)
+        window.addEventListener("drivebit-home-url-changed", datesChangedListener)
         window.addEventListener("popstate", datesChangedListener)
         window.addEventListener("drivebit-hero-open-start-calendar", openStartListener)
         window.addEventListener("drivebit-hero-open-end-calendar", openEndListener)
@@ -61,6 +60,7 @@ fun HtmlHeroDatesBridge(
         onDispose {
             js("window.__drivebitHeroBridgeReady = false")
             window.removeEventListener("drivebit-hero-dates-changed", datesChangedListener)
+            window.removeEventListener("drivebit-home-url-changed", datesChangedListener)
             window.removeEventListener("popstate", datesChangedListener)
             window.removeEventListener("drivebit-hero-open-start-calendar", openStartListener)
             window.removeEventListener("drivebit-hero-open-end-calendar", openEndListener)
@@ -96,8 +96,6 @@ fun HtmlHeroDatesBridge(
 
     LaunchedEffect(startState.date, endState.date) {
         updateHeroDateDomDisplays(startState.date, endState.date)
-        currentFiltersRepository.updateStartDate(startState.date)
-        currentFiltersRepository.updateEndDate(endState.date)
     }
 
     DateRangeCalendarDialog(

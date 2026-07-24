@@ -12,6 +12,7 @@ import my.drivebit.network.services.CarGeneral
 import my.drivebit.network.services.CarItem
 import my.drivebit.network.services.CarSearchResponse
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -19,14 +20,21 @@ class MainContentViewModelTest {
     private fun createViewModel(
         repository: MockCarSearchRepository,
         dispatcher: CoroutineDispatcher,
+        onNavigatePage: ((Int) -> Unit)? = null,
     ): MainContentViewModelImpl =
         MainContentViewModelImpl(
             carSearchRepository = repository,
+            onNavigatePage = onNavigatePage,
             coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
         )
 
-    private fun repositoryWithCars(): MockCarSearchRepository =
+    private fun repositoryWithCars(
+        pageIndex: Int = 0,
+        totalPages: Int = 1,
+        totalCount: Int = 1,
+    ): MockCarSearchRepository =
         MockCarSearchRepository().apply {
+            this.pageIndex = pageIndex
             searchResult =
                 CarSearchResponse(
                     cars =
@@ -47,8 +55,8 @@ class MainContentViewModelTest {
                                     ),
                             ),
                         ),
-                    totalCount = 1,
-                    totalPages = 1,
+                    totalCount = totalCount,
+                    totalPages = totalPages,
                 )
         }
 
@@ -89,5 +97,46 @@ class MainContentViewModelTest {
             advanceUntilIdle()
 
             assertIs<MainContentListState.Error>(viewModel.firstList.value)
+        }
+
+    @Test
+    fun `paginationInfo uses page from repository after FirstList`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val viewModel =
+                createViewModel(
+                    repositoryWithCars(pageIndex = 1, totalPages = 5, totalCount = 42),
+                    dispatcher,
+                )
+
+            advanceUntilIdle()
+
+            assertEquals(Triple(1, 5, 42), viewModel.paginationInfo.value)
+            assertEquals(1, viewModel.displayedCars.value.size)
+            assertEquals(
+                "car-1",
+                viewModel.displayedCars.value
+                    .first()
+                    .id,
+            )
+        }
+
+    @Test
+    fun `setPage invokes onNavigatePage callback`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            var navigatedTo: Int? = null
+            val viewModel =
+                createViewModel(
+                    repositoryWithCars(),
+                    dispatcher,
+                    onNavigatePage = { navigatedTo = it },
+                )
+
+            advanceUntilIdle()
+            viewModel.setPage(2)
+
+            assertEquals(2, navigatedTo)
+            assertIs<MainContentListState.Loading>(viewModel.firstList.value)
         }
 }

@@ -19,6 +19,7 @@ class MockCarSearchRepository : CarSearchRepository {
     var shouldThrowError = false
     var errorMessage = "Network error"
     var searchResult: CarSearchResponse = CarSearchResponse(emptyList())
+    var pageIndex: Int = 0
 
     override val searchCarsByUserCity: kotlinx.coroutines.flow.Flow<CarSearchResponse>
         get() {
@@ -30,10 +31,12 @@ class MockCarSearchRepository : CarSearchRepository {
             return kotlinx.coroutines.flow.flowOf(searchResult)
         }
 
-    override val currentPage: kotlinx.coroutines.flow.Flow<Int> =
-        kotlinx.coroutines.flow.flowOf(0)
+    override val currentPage: kotlinx.coroutines.flow.Flow<Int>
+        get() = kotlinx.coroutines.flow.flowOf(pageIndex)
 
-    override fun setPage(page: Int) {}
+    override fun setPage(page: Int) {
+        pageIndex = page.coerceAtLeast(0)
+    }
 
     override fun refreshSearch() {}
 }

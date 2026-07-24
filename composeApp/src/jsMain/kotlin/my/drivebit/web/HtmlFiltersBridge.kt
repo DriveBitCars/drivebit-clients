@@ -9,10 +9,12 @@ import androidx.compose.runtime.remember
 import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.navigation.NavigationState
+import my.drivebit.utils.HomeUrlParts
+import my.drivebit.utils.buildHomeUrl
 import my.drivebit.viewmodels.FilterItem
 import my.drivebit.viewmodels.FiltersViewModel
-import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.events.Event
 
 @Composable
@@ -35,23 +37,32 @@ fun HtmlFiltersBridge(
         val selectListener: (Event) -> Unit = listener@{ event ->
             val detail = event.asDynamic().detail
             val title = detail.title as? String ?: return@listener
-            val path = detail.path as? String ?: return@listener
 
-            val currentSelected = filterViewModel.state.value.selected
+            val current = currentHomeUrlParts()
+            val currentSelected = activeFilterTitleForCityPath(currentPath) ?: "Все"
             val effectiveTitle =
                 if (title != "Все" && title == currentSelected) "Все" else title
-            val effectivePath =
-                parseCitySlugFromPath(currentPath)?.let { citySlug ->
-                    cityPathWithFilter(citySlug, effectiveTitle)
-                } ?: path
-            val effectiveUrl = effectivePath + window.location.search
-
-            if (effectiveUrl != window.location.pathname + window.location.search) {
-                window.history.pushState(null, "", effectiveUrl)
-                navigationState.updatePath(effectivePath)
+            val citySlug = parseCitySlugFromPath(currentPath) ?: current.citySlug
+            val isNearby = effectiveTitle == "Поблизости"
+            val next =
+                HomeUrlParts(
+                    citySlug = citySlug,
+                    filterSlug = filterTitleToPathSegment(effectiveTitle),
+                    startDate = current.startDate,
+                    endDate = current.endDate,
+                    page = 1,
+                    lat = if (isNearby) current.lat else null,
+                    lon = if (isNearby) current.lon else null,
+                    radiusKm = if (isNearby) current.radiusKm else null,
+                )
+            val nextUrl = buildHomeUrl(next)
+            val nextPath = nextUrl.substringBefore('?')
+            if (nextUrl != window.location.pathname + window.location.search) {
+                window.history.pushState(null, "", nextUrl)
+                navigationState.updatePath(nextPath)
             }
-            filterViewModel.onSelect(effectiveTitle)
             syncStaticFiltersPressedState(effectiveTitle)
+            window.dispatchEvent(org.w3c.dom.CustomEvent("drivebit-home-url-changed"))
         }
 
         val pathListener: (Event) -> Unit = {
@@ -73,7 +84,8 @@ fun HtmlFiltersBridge(
     LaunchedEffect(currentPath, filterState.filters) {
         val canonical = canonicalCityFilterPath(currentPath)
         if (canonical != null && canonical != currentPath) {
-            window.history.replaceState(null, "", canonical + window.location.search)
+            val query = window.location.search
+            window.history.replaceState(null, "", canonical + query)
             navigationState.updatePath(canonical)
             return@LaunchedEffect
         }
