@@ -244,6 +244,7 @@ fun HomePage() {
                         homeUrl = homeUrl,
                         cars = cars,
                         firstListState = firstListState,
+                        cityName = city.name,
                         startDate = startState.date,
                         endDate = endState.date,
                         navigationState = navigationState,
@@ -270,6 +271,7 @@ private fun NearbyHomeContent(
     homeUrl: HomeUrlParts,
     cars: List<CarItem>,
     firstListState: MainContentListState,
+    cityName: String,
     startDate: String?,
     endDate: String?,
     navigationState: NavigationState,
@@ -278,7 +280,7 @@ private fun NearbyHomeContent(
     val koinScope = currentKoinScope()
     val initialRadiusKm = homeUrl.radiusKm ?: HOME_DEFAULT_NEARBY_RADIUS_KM
     val mapViewModel =
-        remember(initialRadiusKm) {
+        remember(initialRadiusKm, cityName) {
             koinScope.get<MapViewModel> {
                 parametersOf(
                     { lat: Double, lon: Double, radiusKm: Int ->
@@ -304,6 +306,7 @@ private fun NearbyHomeContent(
                         onLocationSearchChanged(window.location.search)
                     },
                     initialRadiusKm,
+                    cityName,
                 )
             }
         }
@@ -316,11 +319,6 @@ private fun NearbyHomeContent(
     when (val listState = firstListState) {
         MainContentListState.Loading -> {
             CarsGridSkeleton()
-            if (homeUrl.lat == null || homeUrl.lon == null) {
-                LaunchedEffect(Unit) {
-                    mapViewModel.initializeNearbySearch()
-                }
-            }
         }
 
         is MainContentListState.Error -> {
@@ -329,8 +327,8 @@ private fun NearbyHomeContent(
 
         is MainContentListState.FirstList -> {
             if (homeUrl.lat == null || homeUrl.lon == null) {
-                LaunchedEffect(Unit) {
-                    mapViewModel.initializeNearbySearch()
+                LaunchedEffect(listState.cars) {
+                    mapViewModel.initializeNearbySearch(listState.cars)
                 }
             }
 
@@ -338,9 +336,16 @@ private fun NearbyHomeContent(
             val nearbyListPage = mapState.value.nearbyListPage
             val nearbyRadiusKm = mapState.value.nearbyRadiusKm
             val usedFallbackCenter = mapState.value.usedFallbackCenter
+            val nearbyPagedCars = mapState.value.nearbyPagedCars
+            val nearbyTotalPages = mapState.value.nearbyTotalPages
+            val nearbyTotalCount = mapState.value.nearbyTotalCount
 
-            LaunchedEffect(cars) {
-                mapViewModel.syncNearbyListPageToTotalCount(cars.size, NEARBY_LIST_PAGE_SIZE)
+            LaunchedEffect(cars, listState.totalCount) {
+                mapViewModel.updateNearbyCars(
+                    cars = cars,
+                    totalCount = listState.totalCount,
+                    pageSize = NEARBY_LIST_PAGE_SIZE,
+                )
             }
 
             val markers =
@@ -387,7 +392,7 @@ private fun NearbyHomeContent(
                         property("font-size", "14px")
                     }
                 }) {
-                    Text("Геолокация недоступна — показаны авто рядом с Москвой")
+                    Text("Геолокация недоступна — поиск выполнен рядом с выбранным городом")
                 }
             }
 
@@ -408,15 +413,6 @@ private fun NearbyHomeContent(
                         },
                     )
                 NearbyLayoutMode.List -> {
-                    val totalCount = cars.size
-                    val totalPages =
-                        if (totalCount == 0) {
-                            0
-                        } else {
-                            (totalCount + NEARBY_LIST_PAGE_SIZE - 1) / NEARBY_LIST_PAGE_SIZE
-                        }
-                    val pagedCars =
-                        cars.drop(nearbyListPage * NEARBY_LIST_PAGE_SIZE).take(NEARBY_LIST_PAGE_SIZE)
                     Div({
                         style {
                             width(100.percent)
@@ -424,7 +420,7 @@ private fun NearbyHomeContent(
                         }
                     }) {
                         CarsGrid(
-                            cars = pagedCars,
+                            cars = nearbyPagedCars,
                             carHref = { car ->
                                 buildCarDetailUrl(
                                     carId = car.id,
@@ -435,9 +431,10 @@ private fun NearbyHomeContent(
                         )
                         PaginationBar(
                             currentPage = nearbyListPage,
-                            totalPages = totalPages,
-                            totalCount = totalCount,
+                            totalPages = nearbyTotalPages,
+                            totalCount = nearbyTotalCount,
                             pageSize = NEARBY_LIST_PAGE_SIZE,
+                            currentPageItemCount = nearbyPagedCars.size,
                             onPageChange = { pageIndex ->
                                 mapViewModel.setNearbyListPage(pageIndex)
                                 val next = currentHomeUrlParts().copy(page = pageIndex + 1)

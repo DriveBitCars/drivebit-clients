@@ -12,6 +12,8 @@ import my.drivebit.maps.LocationManager
 import my.drivebit.maps.models.Location
 import my.drivebit.maps.models.MapCameraPosition
 import my.drivebit.network.services.CarItem
+import my.drivebit.repositories.AddressSuggestRepository
+import my.drivebit.repositories.ResultAddressSuggest
 import my.drivebit.utils.HOME_DEFAULT_NEARBY_RADIUS_KM
 
 enum class NearbyLayoutMode {
@@ -25,16 +27,24 @@ data class MapScreenState(
     val nearbyListPage: Int = 0,
     val nearbyRadiusKm: Int = HOME_DEFAULT_NEARBY_RADIUS_KM,
     val usedFallbackCenter: Boolean = false,
+    val nearbyPagedCars: List<CarItem> = emptyList(),
+    val nearbyTotalPages: Int = 0,
+    val nearbyTotalCount: Int = 0,
 )
 
 class MapViewModel(
     private val locationManager: LocationManager,
+    private val addressSuggestRepository: AddressSuggestRepository,
+    private val cityName: String,
     private val onNearbyCenterReady: ((lat: Double, lon: Double, radiusKm: Int) -> Unit)? = null,
     private val onNearbyRadiusChanged: ((radiusKm: Int) -> Unit)? = null,
     initialRadiusKm: Int = HOME_DEFAULT_NEARBY_RADIUS_KM,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
     private val viewModelScope = coroutineScope
+    private var nearbyCars: List<CarItem> = emptyList()
+    private var nearbyPageSize: Int = 1
+    private var requestedNearbyListPage: Int = 0
 
     private val _state =
         MutableStateFlow(
@@ -46,20 +56,24 @@ class MapViewModel(
     val state: StateFlow<MapScreenState>
         get() = _state.asStateFlow()
 
-    fun initializeNearbySearch() {
+    fun initializeNearbySearch(cityCars: List<CarItem> = emptyList()) {
         viewModelScope.launch {
             val location = locationManager.getCurrentLocation()
-            val center = location ?: Location.moscow()
+            val center = location ?: averageCarLocation(cityCars) ?: resolveCityCenter()
             val usedFallback = location == null
             val radiusKm = _state.value.nearbyRadiusKm
-            onNearbyCenterReady?.invoke(center.latitude, center.longitude, radiusKm)
+            if (center != null) {
+                onNearbyCenterReady?.invoke(center.latitude, center.longitude, radiusKm)
+            }
             _state.update {
                 it.copy(
                     cameraPosition =
-                        MapCameraPosition(
-                            location = center,
-                            zoom = 10f,
-                        ),
+                        center?.let { fallbackCenter ->
+                            MapCameraPosition(
+                                location = fallbackCenter,
+                                zoom = 10f,
+                            )
+                        } ?: it.cameraPosition,
                     usedFallbackCenter = usedFallback,
                     nearbyListPage = 0,
                 )
@@ -68,7 +82,9 @@ class MapViewModel(
     }
 
     fun setNearbyRadiusKm(km: Int) {
-        _state.update { it.copy(nearbyRadiusKm = km, nearbyListPage = 0) }
+        _state.update { it.copy(nearbyRadiusKm = km) }
+        requestedNearbyListPage = 0
+        updateNearbyPage(0)
         onNearbyRadiusChanged?.invoke(km)
     }
 
@@ -77,25 +93,18 @@ class MapViewModel(
     }
 
     fun setNearbyListPage(page: Int) {
-        _state.update { it.copy(nearbyListPage = page.coerceAtLeast(0)) }
+        requestedNearbyListPage = page.coerceAtLeast(0)
+        updateNearbyPage(requestedNearbyListPage)
     }
 
-    fun syncNearbyListPageToTotalCount(
+    fun updateNearbyCars(
+        cars: List<CarItem>,
         totalCount: Int,
         pageSize: Int,
     ) {
-        if (totalCount <= 0) {
-            if (_state.value.nearbyListPage != 0) {
-                _state.update { it.copy(nearbyListPage = 0) }
-            }
-            return
-        }
-        val totalPages = (totalCount + pageSize - 1) / pageSize
-        val maxPageIndex = (totalPages - 1).coerceAtLeast(0)
-        val clamped = _state.value.nearbyListPage.coerceIn(0, maxPageIndex)
-        if (clamped != _state.value.nearbyListPage) {
-            _state.update { it.copy(nearbyListPage = clamped) }
-        }
+        nearbyCars = cars
+        nearbyPageSize = pageSize.coerceAtLeast(1)
+        updateNearbyPage(requestedNearbyListPage, totalCount)
     }
 
     fun updateCameraPosition(position: MapCameraPosition) {
@@ -103,36 +112,75 @@ class MapViewModel(
     }
 
     fun updateCameraPositionFromCars(cars: List<CarItem>) {
-        val validCars =
-            cars
-                .mapNotNull { car ->
-                    val lat = car.general.address.geoLat
-                    val lon = car.general.address.geoLon
-                    if (lat != null && lon != null) lat to lon else null
-                }
+        val center = averageCarLocation(cars) ?: return
+        _state.update {
+            it.copy(
+                cameraPosition =
+                    MapCameraPosition(
+                        location = center,
+                        zoom = it.cameraPosition.zoom,
+                    ),
+            )
+        }
+    }
 
-        val targetPosition =
-            if (validCars.isNotEmpty()) {
-                val (avgLat, avgLon) =
-                    validCars
-                        .fold(0.0 to 0.0) { acc, next -> (acc.first + next.first) to (acc.second + next.second) }
-                        .let { (sumLat, sumLon) ->
-                            val count = validCars.size.toDouble()
-                            (sumLat / count) to (sumLon / count)
-                        }
-
-                MapCameraPosition(
-                    location =
-                        Location(
-                            latitude = avgLat,
-                            longitude = avgLon,
-                        ),
-                    zoom = _state.value.cameraPosition.zoom,
-                )
-            } else {
-                MapCameraPosition.default()
+    private fun averageCarLocation(cars: List<CarItem>): Location? {
+        val validLocations =
+            cars.mapNotNull { car ->
+                val lat = car.general.address.geoLat
+                val lon = car.general.address.geoLon
+                if (lat != null && lon != null) lat to lon else null
             }
+        if (validLocations.isEmpty()) return null
 
-        _state.update { it.copy(cameraPosition = targetPosition) }
+        val (latitudeSum, longitudeSum) =
+            validLocations.fold(0.0 to 0.0) { sum, location ->
+                (sum.first + location.first) to (sum.second + location.second)
+            }
+        return Location(
+            latitude = latitudeSum / validLocations.size,
+            longitude = longitudeSum / validLocations.size,
+        )
+    }
+
+    private suspend fun resolveCityCenter(): Location? {
+        if (cityName.isBlank()) return null
+        val result = addressSuggestRepository.suggest(cityName)
+        if (result !is ResultAddressSuggest.Success) return null
+        return result.suggestions.firstNotNullOfOrNull { suggestion ->
+            val latitude = suggestion.data?.geoLat?.toDoubleOrNull()
+            val longitude = suggestion.data?.geoLon?.toDoubleOrNull()
+            if (latitude != null && longitude != null) {
+                Location(latitude = latitude, longitude = longitude)
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun updateNearbyPage(
+        requestedPage: Int,
+        totalCount: Int = _state.value.nearbyTotalCount,
+    ) {
+        val totalPages =
+            if (nearbyCars.isEmpty()) {
+                0
+            } else {
+                (nearbyCars.size + nearbyPageSize - 1) / nearbyPageSize
+            }
+        val page =
+            if (totalPages == 0) {
+                0
+            } else {
+                requestedPage.coerceIn(0, totalPages - 1)
+            }
+        _state.update {
+            it.copy(
+                nearbyListPage = page,
+                nearbyPagedCars = nearbyCars.drop(page * nearbyPageSize).take(nearbyPageSize),
+                nearbyTotalPages = totalPages,
+                nearbyTotalCount = totalCount,
+            )
+        }
     }
 }
