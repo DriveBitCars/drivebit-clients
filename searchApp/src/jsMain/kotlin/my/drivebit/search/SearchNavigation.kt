@@ -36,4 +36,9 @@ fun navigateSearchFilters(filters: SearchFilterSet) {
     window.history.pushState(null, "", buildSearchUrl(filters.toSearchUrlParts()))
 }
 
+fun resetSearchFilters(
+    filters: SearchFilterSet,
+    selectedCitySlug: String?,
+): SearchFilterSet = SearchFilterSet(citySlug = filters.citySlug ?: selectedCitySlug ?: "moskva")
+
 fun currentLocationHref(): String = window.location.pathname + window.location.search
