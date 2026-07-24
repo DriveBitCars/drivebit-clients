@@ -2,10 +2,10 @@
 name: test-end-to-end-dev
 description: >-
   Run commit-push-tests, merge to trunk, wait for GitHub Pages deploy to
-  dev.drivebit.ru, then verify main web flows in the browser with screenshots.
-  Use when the user says /test-end-to-end-dev, /test-ene-to-end-dev,
-  «проверь на pages-dev», «e2e на деве», or asks to commit-push then validate
-  GitHub Pages / pages-dev.
+  dev.drivebit.ru, then verify main web flows in the browser (desktop + mobile)
+  with screenshots. Use when the user says /test-end-to-end-dev,
+  /test-ene-to-end-dev, «проверь на pages-dev», «e2e на деве», «на мобильном»,
+  or asks to commit-push then validate GitHub Pages / pages-dev.
 ---
 
 # Test end-to-end on pages-dev
@@ -17,7 +17,7 @@ Pipeline:
 1. **`/commit-push-tests`** (stage new files → commit → push → PR → CI green)
 2. **Merge PR into `trunk`** (Pages deploys only from `trunk`)
 3. **Wait for GitHub Pages deploy** (`Deploy to GitHub Pages` → `dev.drivebit.ru`)
-4. **Browser e2e** on pages-dev: main flows + screenshots
+4. **Browser e2e** on pages-dev: **desktop + mobile** main flows + screenshots
 
 This skill does **not** create a GitHub Release or run production `deploy.yml`.
 For prod ship use `drivebit-ship-release`.
@@ -27,16 +27,19 @@ For prod ship use `drivebit-ship-release`.
 - `/test-end-to-end-dev`, `/test-ene-to-end-dev`
 - «проверь на pages-dev / GitHub Pages»
 - «commit-push, дождись pages, открой дев в браузере»
+- «проверь на мобильном» / mobile viewport e2e on pages-dev
 
 ## URLs & workflows
 
 | Item | Value |
 |------|-------|
-| Pages-dev site | `https://dev.drivebit.ru` |
+| Pages-dev site | `https://dev.drivebit.ru` (often **301 →** `https://dev.drivebit.my`) |
+| Canonical live base | `https://dev.drivebit.my` (use for browser e2e after redirect) |
 | Fallback Pages URL | `https://drivebitcars.github.io/drivebit-clients/` |
 | Pages workflow | `.github/workflows/github-pages.yml` (`Deploy to GitHub Pages`) |
 | Pages trigger | push to `trunk` or `workflow_dispatch` |
 | Prod site | `https://drivebit.ru` (out of scope here) |
+| Home filters regression doc | `docs/home-filters-url-regression.md` |
 
 ## Progress checklist
 
@@ -45,9 +48,10 @@ Progress:
 - [ ] 1. Run commit-push-tests to CI green
 - [ ] 2. Merge PR into trunk (no release)
 - [ ] 3. Wait for Pages deploy success
-- [ ] 4. Browser smoke on https://dev.drivebit.ru
-- [ ] 5. Screenshots of key pages
-- [ ] 6. Report PR + Pages run + screenshot evidence
+- [ ] 4. Browser smoke desktop on pages-dev
+- [ ] 5. Browser smoke + key flows on mobile viewport
+- [ ] 6. Screenshots (desktop + mobile)
+- [ ] 7. Report PR + Pages run + screenshot evidence
 ```
 
 ## 1. Commit → push → CI
@@ -83,23 +87,23 @@ Optional HTTP gate before browser work:
 
 ```bash
 curl -sI "https://dev.drivebit.ru/moskva" | head -5
+curl -sI "https://dev.drivebit.my/moskva" | head -5
 ```
 
-Expect HTTP 200 (allow short retry loop if CDN is still propagating).
+Expect HTTP 200 on the final host (`.ru` may 301 to `.my`; allow short retry if CDN is still propagating).
 
 ## 4. Browser e2e on pages-dev
 
-Base URL: **`https://dev.drivebit.ru`**
+Base URL: start from **`https://dev.drivebit.ru`**, follow redirects; interact on the live host (usually **`https://dev.drivebit.my`**).
 
-Use **cursor-ide-browser** MCP (navigate → snapshot → interact → screenshots).
-Playwright/`scripts/verify-prod-smoke.mjs` is optional support, not a substitute for visual screenshots.
+Prefer **cursor-ide-browser** MCP when available. If missing, use **Playwright** (`devices["iPhone 14"]` / `Pixel 7`) — still required to produce real screenshots. `scripts/verify-prod-smoke.mjs` is optional helper only.
 
-### Required page checks
+### Required page checks (desktop **and** mobile)
 
 | Path | What must be true |
 |------|-------------------|
 | `/moskva` | HTTP 200; hero / city home visible; `#root` has content or static hero shell present |
-| `/moskva/search` | Search UI loads (results, loading, or error — not blank white); script may be `appCompose.js` or `composeApp.js` depending on branch |
+| `/moskva/search` | Search UI loads (results, loading, or error — not blank white); script may be `appCompose.js` or `composeApp.js` |
 | `/bmw` or `/search/toyota` | Brand search shell loads |
 | `/login` or `/login-by-phone` | Auth shell loads |
 | `/contacts` | Contacts page loads |
@@ -113,16 +117,59 @@ Playwright/`scripts/verify-prod-smoke.mjs` is optional support, not a substitute
 4. Open `/login-by-phone` — confirm form/shell visible
 5. Header nav: **Контакты** / **Сдать авто** if present
 
+### Mobile viewport (required)
+
+Always run a **mobile** pass, not only desktop.
+
+| Item | Value |
+|------|-------|
+| Primary device | Playwright `devices["iPhone 14"]` (or equivalent ~390×844) |
+| Secondary (optional) | `devices["Pixel 7"]` smoke on `/moskva` + one nearby/filter URL |
+| Locale | `ru-RU` |
+
+Mobile-specific notes:
+
+- Home trip filters on mobile are often **static HTML**: `button.drivebit-filter-btn` (+ `.is-selected`), not Compose `.universal-button`
+- Nearby **Карта / Список / N км** remain Compose `.universal-button`
+- Scroll chips into view (`scrollIntoView({ inline: "center" })`) before click
+- Dismiss cookie banner («Понятно») if present
+- Hero CTA may be `#drivebit-hero-search-btn`
+
+If the change touches **home filters / URL / pagination / nearby**, also run the mobile filter checklist below (or full doc checklist).
+
+### Home filters regression (when relevant)
+
+When the PR touches city-home filters, URL-first search, pagination, or nearby — run both desktop and mobile against the checklist in **`docs/home-filters-url-regression.md`**:
+
+| Area | Must pass |
+|------|-----------|
+| Select each filter chip | URL slug + pressed state + cars/map |
+| Deselect (toggle) | back to `/{city}`, pressed «Все» |
+| Refresh | slug / `poblizosti?lat&lon` survive reload |
+| Pagination | «Вперёд» → `?page=2`; deeplink; «Назад» |
+| Nearby | markers; List mode grid + «Показано»; radius → `radiusKm` in URL |
+
+Known slug: Минивэн → `/moskva/arenda-minivena-bez-voditelya` (not `arenda-avto-minivena-…`).
+
+Save evidence under `tmp/e2e-*-regress/` or `tmp/e2e-mobile-home-filters/` and update the doc date/results if you ran the checklist.
+
 ### Screenshots (required)
 
-Save at least:
+**Desktop** — at least:
 
 1. `/moskva` first viewport
 2. `/moskva/search` (or post-CTA search URL)
 3. One brand search page (`/bmw` or `/search/...`)
 4. Auth shell (`/login-by-phone`)
 
-Use browser screenshot tools; keep images for the final report. Note any JS `pageerror` in the report.
+**Mobile** — at least:
+
+1. `/moskva` first viewport (iPhone-class)
+2. `/moskva/search` or post-CTA search
+3. One brand or contacts page
+4. If filters/nearby were in scope: one filter selected + nearby map **or** List
+
+Keep images for the final report. Note any JS `pageerror` in the report.
 
 ### Fail the skill if
 
@@ -130,6 +177,7 @@ Use browser screenshot tools; keep images for the final report. Note any JS `pag
 - Key URL not HTTP 200
 - City home or search is blank / broken shell
 - Hero→search navigation fails when the button exists
+- **Mobile pass skipped** (desktop-only is not enough)
 - You only ran commit-push-tests without Pages + browser proof
 
 ## 5. Report
@@ -139,16 +187,17 @@ Return:
 - Branch + commit SHAs
 - PR URL + merge result
 - Pages workflow run URL + conclusion
-- Pages-dev base URL used
-- Short pass/fail per checked path
-- Screenshot paths / attachments
-- Known limitations (analytics blocked in headless, etc.)
+- Pages-dev base URL used (note `.ru` → `.my` if redirected)
+- Short pass/fail per checked path (**desktop and mobile**)
+- Screenshot paths / attachments (both viewports)
+- Known limitations (analytics blocked in headless, broken image 404 noise, etc.)
 
 ## Red flags — STOP
 
 - Claiming Pages-dev OK without deploy watch exit 0
-- Testing **prod** `drivebit.ru` instead of **dev** `dev.drivebit.ru` (unless user asked)
+- Testing **prod** `drivebit.ru` instead of **dev** (unless user asked)
 - Skipping screenshots
+- Skipping **mobile** viewport
 - Merging then releasing/prod-deploy under this skill
 - Leaving new skill/task files untracked
 
@@ -156,4 +205,5 @@ Return:
 
 - `commit-push-tests` — stage/commit/push/CI only
 - `drivebit-ship-release` — merge + GitHub Release + prod deploy + prod smoke
-- `scripts/verify-prod-smoke.mjs` — reusable smoke ideas; pass `https://dev.drivebit.ru` as base if using it as helper
+- `scripts/verify-prod-smoke.mjs` — reusable smoke ideas; pass pages-dev base if using as helper
+- `docs/home-filters-url-regression.md` — URL-first home filters checklist + last results
