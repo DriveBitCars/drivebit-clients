@@ -3,7 +3,6 @@ package my.drivebit.viewmodels
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import my.drivebit.repositories.CurrentFiltersRepository
 import my.drivebit.repositories.SuggestedFiltersCatalog
 import my.drivebit.resources.ImagePaths.FILTER_MAIN_CAR_SVG
 import my.drivebit.resources.ImagePaths.FILTER_MAIN_POINT_SVG
@@ -24,13 +23,10 @@ data class FilterItem(
 )
 
 data class FilterScreenState(
-    val selected: String,
     val filters: List<FilterItem>,
 )
 
-class FiltersViewModel(
-    private val currentFiltersRepository: CurrentFiltersRepository,
-) {
+class FiltersViewModel {
     private val backgroundByFilterTitle =
         mapOf(
             "В Крым" to SEARCHBACKGROUND_CAR2_JPG,
@@ -47,7 +43,6 @@ class FiltersViewModel(
     private val _state =
         MutableStateFlow(
             FilterScreenState(
-                selected = getSelectedFilter(),
                 filters = emptyList(),
             ),
         )
@@ -93,32 +88,4 @@ class FiltersViewModel(
 
         return filterItems
     }
-
-    fun onSelect(title: String) {
-        val effectiveTitle =
-            if (title != "Все" && title == _state.value.selected) "Все" else title
-        _state.update { it.copy(selected = effectiveTitle) }
-        currentFiltersRepository.updateCurrentTask(effectiveTitle)
-        if (effectiveTitle == "Все") {
-            clearAllFilters()
-        }
-    }
-
-    private fun clearAllFilters() {
-        currentFiltersRepository.updateDailyRateMin(null)
-        currentFiltersRepository.updateDailyRateMax(null)
-        currentFiltersRepository.updateBrand(null, null)
-        currentFiltersRepository.updateModel(null, null)
-        currentFiltersRepository.updateDriveType(null, null)
-        currentFiltersRepository.updateBodyType(null, null)
-        currentFiltersRepository.updateSeatsMin(null)
-        currentFiltersRepository.updateEngineType(null, null)
-        currentFiltersRepository.updateColor(null, null)
-        currentFiltersRepository.updateYearMin(null)
-        currentFiltersRepository.updateYearMax(null)
-        currentFiltersRepository.updateSeatsMax(null)
-        currentFiltersRepository.updateAvailableMileagePerDayKmMin(null)
-    }
-
-    private fun getSelectedFilter(): String = "Все"
 }

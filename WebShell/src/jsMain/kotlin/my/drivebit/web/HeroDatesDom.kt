@@ -2,8 +2,10 @@ package my.drivebit.web
 
 import kotlinx.browser.document
 import kotlinx.browser.window
+import my.drivebit.utils.HomeUrlParts
 import my.drivebit.utils.buildCitySearchPath
-import org.w3c.dom.url.URLSearchParams
+import my.drivebit.utils.buildHomeUrl
+import my.drivebit.utils.parseHomeUrl
 
 fun formatHeroDateDisplay(isoDate: String): String {
     if (isoDate.isEmpty()) return ""
@@ -30,14 +32,30 @@ fun writeHeroDatesToQuery(
     startDate: String?,
     endDate: String?,
 ) {
-    val params = URLSearchParams()
-    startDate?.takeIf { it.isNotEmpty() }?.let { params.set("startDate", it) }
-    endDate?.takeIf { it.isNotEmpty() }?.let { params.set("endDate", it) }
-    val query = params.toString()
-    val newUrl = window.location.pathname + if (query.isNotEmpty()) "?$query" else ""
+    val current = parseHomeUrl(window.location.pathname + window.location.search)
+    val updated =
+        current.copy(
+            startDate = startDate?.takeIf { it.isNotEmpty() },
+            endDate = endDate?.takeIf { it.isNotEmpty() },
+        )
+    val newUrl = buildHomeUrl(updated)
     window.history.replaceState(null, "", newUrl)
     window.dispatchEvent(org.w3c.dom.CustomEvent("drivebit-hero-dates-changed"))
 }
+
+fun pushHomeUrl(parts: HomeUrlParts) {
+    val newUrl = buildHomeUrl(parts)
+    window.history.pushState(null, "", newUrl)
+    window.dispatchEvent(org.w3c.dom.CustomEvent("drivebit-home-url-changed"))
+}
+
+fun replaceHomeUrl(parts: HomeUrlParts) {
+    val newUrl = buildHomeUrl(parts)
+    window.history.replaceState(null, "", newUrl)
+    window.dispatchEvent(org.w3c.dom.CustomEvent("drivebit-home-url-changed"))
+}
+
+fun currentHomeUrlParts(): HomeUrlParts = parseHomeUrl(window.location.pathname + window.location.search)
 
 fun updateHeroDateDomDisplays(
     startDate: String?,

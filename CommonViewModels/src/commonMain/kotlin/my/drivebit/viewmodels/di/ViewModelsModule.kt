@@ -1,6 +1,7 @@
 package my.drivebit.viewmodels.di
 
 import my.drivebit.network.services.TelegramNotifications
+import my.drivebit.repositories.HomeSearchRequest
 import my.drivebit.utils.EmailInputValidator
 import my.drivebit.utils.EmailValidator
 import my.drivebit.utils.InputValidator
@@ -33,8 +34,6 @@ import my.drivebit.viewmodels.CarMenuViewModelImpl
 import my.drivebit.viewmodels.CarModelViewModel
 import my.drivebit.viewmodels.CarPhotosViewModel
 import my.drivebit.viewmodels.CarPhotosViewModelImpl
-import my.drivebit.viewmodels.CarSearchViewModel
-import my.drivebit.viewmodels.CarSearchViewModelImpl
 import my.drivebit.viewmodels.CarStsDocumentsViewModel
 import my.drivebit.viewmodels.CarStsDocumentsViewModelImpl
 import my.drivebit.viewmodels.ChatDetailViewModel
@@ -81,13 +80,14 @@ import my.drivebit.viewmodels.RentViewModel
 import my.drivebit.viewmodels.RentViewModelImpl
 import my.drivebit.viewmodels.TelegramLinkViewModel
 import my.drivebit.viewmodels.TelegramLinkViewModelImpl
-import my.drivebit.viewmodels.TrunkSizeViewModel
 import my.drivebit.viewmodels.TravelDestinationsViewModel
+import my.drivebit.viewmodels.TrunkSizeViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModelImpl
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.WinCodeInputViewModel
 import org.koin.core.module.Module
+import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -115,15 +115,23 @@ val commonViewModelsModule: Module =
         }
 
         factory {
-            FiltersViewModel(
-                currentFiltersRepository = get(named("main")),
-            )
+            FiltersViewModel()
         }
 
         factory {
+            (
+                onNearbyCenterReady: (
+                    Double,
+                    Double,
+                    Int,
+                ) -> Unit, onNearbyRadiusChanged: (Int) -> Unit, initialRadiusKm: Int,
+            ),
+            ->
             MapViewModel(
                 locationManager = get(),
-                currentFiltersRepository = get(named("main")),
+                onNearbyCenterReady = onNearbyCenterReady,
+                onNearbyRadiusChanged = onNearbyRadiusChanged,
+                initialRadiusKm = initialRadiusKm,
             )
         }
 
@@ -145,15 +153,10 @@ val commonViewModelsModule: Module =
             )
         }
 
-        factory<CarSearchViewModel> {
-            CarSearchViewModelImpl(
-                carSearchRepository = get(named("main")),
-            )
-        }
-
-        single<MainContentViewModel> {
+        factory<MainContentViewModel> { (request: HomeSearchRequest, onNavigatePage: (Int) -> Unit) ->
             MainContentViewModelImpl(
-                carSearchRepository = get(named("main")),
+                carSearchRepository = get(named("main")) { parametersOf(request) },
+                onNavigatePage = onNavigatePage,
             )
         }
 

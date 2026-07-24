@@ -15,8 +15,8 @@ import my.drivebit.repositories.CarEnumsRepository
 import my.drivebit.repositories.CarEnumsRepositoryImpl
 import my.drivebit.repositories.CarModelRepository
 import my.drivebit.repositories.CarModelRepositoryImpl
-import my.drivebit.repositories.CarSearchRepository
 import my.drivebit.repositories.CarSearchMainRepositoryImpl
+import my.drivebit.repositories.CarSearchRepository
 import my.drivebit.repositories.ChangeEmailRepositoryImpl
 import my.drivebit.repositories.ChangePasswordRepositoryImpl
 import my.drivebit.repositories.ChangePhoneRepositoryImpl
@@ -26,10 +26,9 @@ import my.drivebit.repositories.CreateCarRepository
 import my.drivebit.repositories.CreateCarRepositoryImpl
 import my.drivebit.repositories.CreateOtpRepository
 import my.drivebit.repositories.CreateOtpRepositoryImpl
-import my.drivebit.repositories.CurrentFiltersRepository
-import my.drivebit.repositories.CurrentFiltersRepositoryImpl
 import my.drivebit.repositories.HasPassportRepo
 import my.drivebit.repositories.HasPassportRepoImpl
+import my.drivebit.repositories.HomeSearchRequest
 import my.drivebit.repositories.LicensePlateRepository
 import my.drivebit.repositories.LicensePlateRepositoryImpl
 import my.drivebit.repositories.MyCarRepository
@@ -57,10 +56,10 @@ import my.drivebit.repositories.SelectedDriveTypeRepository
 import my.drivebit.repositories.SelectedDriveTypeRepositoryImpl
 import my.drivebit.repositories.SelectedEngineTypeRepository
 import my.drivebit.repositories.SelectedEngineTypeRepositoryImpl
-import my.drivebit.repositories.SelectedTrunkSizeRepository
-import my.drivebit.repositories.SelectedTrunkSizeRepositoryImpl
 import my.drivebit.repositories.SelectedTravelDestinationsRepository
 import my.drivebit.repositories.SelectedTravelDestinationsRepositoryImpl
+import my.drivebit.repositories.SelectedTrunkSizeRepository
+import my.drivebit.repositories.SelectedTrunkSizeRepositoryImpl
 import my.drivebit.repositories.VerifyOtpRepositoryImpl
 import my.drivebit.repositories.WinCodeRepository
 import my.drivebit.repositories.WinCodeRepositoryImpl
@@ -236,13 +235,6 @@ val repositoriesModule: Module =
             )
         }
 
-        single<CurrentFiltersRepository>(named("main")) {
-            CurrentFiltersRepositoryImpl(
-                settings = get(),
-                keyPrefix = "main",
-            )
-        }
-
         single<CarEnumsRepository> {
             CarEnumsRepositoryImpl(
                 dictionary = get(),
@@ -271,11 +263,10 @@ val repositoriesModule: Module =
             SearchCityRepositoryImpl()
         }
 
-        single<CarSearchRepository>(named("main")) {
+        factory<CarSearchRepository>(named("main")) { (request: HomeSearchRequest) ->
             CarSearchMainRepositoryImpl(
                 carService = get(),
-                selectedCity = get<MyCityRepository>().getSelectedCity,
-                currentFiltersRepository = get(named("main")),
+                request = request,
             )
         }
 

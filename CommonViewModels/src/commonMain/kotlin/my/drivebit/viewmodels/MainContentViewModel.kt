@@ -42,6 +42,7 @@ interface MainContentViewModel {
 
 class MainContentViewModelImpl(
     private val carSearchRepository: CarSearchRepository,
+    private val onNavigatePage: ((Int) -> Unit)? = null,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : MainContentViewModel {
     private val viewModelScope = coroutineScope
@@ -114,7 +115,13 @@ class MainContentViewModelImpl(
 
     override fun setPage(page: Int) {
         markSearchStarted()
-        carSearchRepository.setPage(page.coerceAtLeast(0))
+        val safePage = page.coerceAtLeast(0)
+        val navigate = onNavigatePage
+        if (navigate != null) {
+            navigate(safePage)
+        } else {
+            carSearchRepository.setPage(safePage)
+        }
     }
 
     override fun markSearchStarted() {
