@@ -79,6 +79,8 @@
         var path = normalizePath(pathname);
         var nav = qs("drivebit-filters-static");
         if (!nav) return "Все";
+        var pathParts = path.split("/").filter(Boolean);
+        var segment = pathParts.length > 1 ? pathParts[pathParts.length - 1] : "";
         var buttons = nav.querySelectorAll(".drivebit-filter-btn");
         for (var i = 0; i < buttons.length; i++) {
             var btn = buttons[i];
@@ -86,8 +88,14 @@
             if (filterPath && normalizePath(filterPath) === path) {
                 return btn.getAttribute("data-filter-title") || "Все";
             }
+            if (
+                segment &&
+                filterPath &&
+                normalizePath(filterPath).split("/").pop() === segment
+            ) {
+                return btn.getAttribute("data-filter-title") || "Все";
+            }
         }
-        var segment = path.split("/").pop() || "";
         var aliasTitle = SHORT_TITLE_BY_SLUG[segment];
         if (aliasTitle) {
             for (var j = 0; j < buttons.length; j++) {
