@@ -1,10 +1,10 @@
 # Регрессия: URL-first фильтры на home (pages-dev)
 
-> Проверено: 2026-07-24 · источники: Playwright e2e на https://dev.drivebit.my · trunk `06e76d29` (+ фикс List после)
+> Проверено: 2026-07-24 · источники: Playwright e2e на https://dev.drivebit.my · trunk `d0af315d` (merge #307)
 
 ## Вердикт
 
-Фильтры, снятие, refresh и пагинация на city home работают через URL. «Поблизости»: карта, geo в query и радиус — OK. Режим «Список» на pages-dev после URL-first **ломался** (VM пересоздавался на рекомпозицию) — фикс: `remember` + `currentKoinScope().get` для `MapViewModel` / `MainContentViewModel`.
+Фильтры, снятие, refresh и пагинация на city home работают через URL. «Поблизости» полностью OK: карта, geo, радиус, режим **Список** (после фикса #307).
 
 **С чего начать:** чеклист ниже на `https://dev.drivebit.my/moskva` (canonical; `dev.drivebit.ru` → 301).
 
@@ -75,12 +75,12 @@
 | E1 | chip / deeplink poblizosti | Leaflet, маркеры (>0) | ✅ (~100) |
 | E2 | geo | query `lat`+`lon` (fallback Москва) | ✅ |
 | E3 | радиус «25 км» | `radiusKm=25` в URL, карта обновляется | ✅ |
-| E4 | «Список» | List selected, сетка авто + «Показано» | ❌→🔧 (см. ниже) |
+| E4 | «Список» | List selected, сетка авто + «Показано» | ✅ post-#307: «Показано 1–9 из 100», 9 карточек |
 | E5 | refresh с lat/lon | карта/состояние сохраняются | ✅ |
 
-**Баг E4 (до фикса):** клик «Список» не держался — `koinInject(parametersOf(новые лямбды))` пересоздавал `MapViewModel` на каждый `collectAsState`, режим снова `Map`.
+**Баг E4 (до #307):** клик «Список» не держался — `koinInject(parametersOf(новые лямбды))` пересоздавал `MapViewModel` на каждый `collectAsState`, режим снова `Map`.
 
-**Фикс:** `remember(initialRadiusKm) { koinScope.get<MapViewModel> { … } }` (и аналогично `MainContentViewModel`).
+**Фикс (#307):** `remember(initialRadiusKm) { koinScope.get<MapViewModel> { … } }` (и аналогично `MainContentViewModel`).
 
 ### F. Smoke pages-dev (skill)
 
@@ -98,7 +98,9 @@
 |-----|-----|
 | Скриншоты + `report.json` | `tmp/e2e-home-filters-regress/` |
 | Скрипт | `tmp/e2e-home-filters-regress/run.mjs` |
-| Pages deploy (merge #306) | https://github.com/DriveBitCars/drivebit-clients/actions/runs/30084552654 ✅ |
+| Pages deploy (merge #306 URL-first) | https://github.com/DriveBitCars/drivebit-clients/actions/runs/30084552654 ✅ |
+| Pages deploy (merge #307 List fix) | https://github.com/DriveBitCars/drivebit-clients/actions/runs/30089143823 ✅ |
+| Postfix screenshots | `tmp/e2e-home-filters-regress/postfix-*.png` |
 | Base URL | `https://dev.drivebit.my` |
 
 Известные шумности headless: Jivo, analytics, редкий Leaflet `_leaflet_pos`, 404 картинок.
@@ -114,3 +116,4 @@
 | Дата | Что изменили |
 |------|----------------|
 | 2026-07-24 | Первичный e2e после PR #306; задокументирован баг «Список»; чеклист A–F |
+| 2026-07-24 | После merge #307: E4 ✅ (Список); обновлены SHA / Pages run |
