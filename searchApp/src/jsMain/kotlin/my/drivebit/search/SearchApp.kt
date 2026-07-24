@@ -172,6 +172,7 @@ fun SearchApp() {
             filters = resultsState?.filters ?: filtersForUi,
             result = resultsState?.result,
             pageHeadline = pageHeadline,
+            selectedCitySlug = searchCityName?.let(::cityNameToSlug),
             errorMessage = errorMessage,
             onLocationChanged = { locationHref = currentLocationHref() },
         )
@@ -205,6 +206,7 @@ private fun SearchResultsContent(
     filters: SearchFilterSet,
     result: SearchCarsResult?,
     pageHeadline: String,
+    selectedCitySlug: String?,
     errorMessage: String? = null,
     onLocationChanged: () -> Unit,
 ) {
@@ -412,9 +414,7 @@ private fun SearchResultsContent(
                         maxPrice.value = 50000
                         minYear.value = YEAR_FILTER_MIN
                         maxYear.value = currentCalendarYear()
-                        navigateSearchFilters(
-                            SearchFilterSet(citySlug = filters.citySlug ?: "moskva"),
-                        )
+                        navigateSearchFilters(resetSearchFilters(filters, selectedCitySlug))
                         onLocationChanged()
                     },
                 )
@@ -535,7 +535,7 @@ private fun SearchResultsContent(
                                         modelId = null,
                                         modelName = null,
                                         modelSlug = null,
-                                        citySlug = it.citySlug ?: "moskva",
+                                        citySlug = it.citySlug ?: selectedCitySlug ?: "moskva",
                                     )
                                 }
                                 showBrandFilter = false
