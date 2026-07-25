@@ -15,6 +15,7 @@ import my.drivebit.network.NetworkException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SearchViewModelTest {
@@ -232,5 +233,62 @@ class SearchViewModelTest {
             assertEquals("Внедорожник", results.filters.bodyTypeLabel)
             assertEquals("SUV", lastFilters?.bodyType)
             assertEquals(10, lastFilters?.brandId)
+        }
+
+    @Test
+    fun `body type path load applies sedan filter without brand`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            var lastFilters: SearchFilterSet? = null
+            val vm =
+                SearchViewModel(
+                    repositoryFactory = { filters ->
+                        lastFilters = filters
+                        object : SearchCarRepository {
+                            override val results: Flow<SearchCarsResult> =
+                                flowOf(SearchCarsResult(totalCount = 1, totalPages = 1))
+                        }
+                    },
+                    brandResolver = { slug -> error("should not resolve brand for $slug") },
+                    modelResolver = { _, _ -> null },
+                    coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
+                )
+
+            vm.load("/search/sedan")
+            advanceUntilIdle()
+
+            val results = assertIs<SearchUiState.Results>(vm.state.value)
+            assertEquals("Sedan", results.filters.bodyType)
+            assertEquals("Седан", results.filters.bodyTypeLabel)
+            assertNull(results.filters.brandSlug)
+            assertNull(results.filters.brandId)
+            assertEquals("Sedan", lastFilters?.bodyType)
+        }
+
+    @Test
+    fun `brand path with body query keeps both filters`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val vm =
+                SearchViewModel(
+                    repositoryFactory = {
+                        object : SearchCarRepository {
+                            override val results: Flow<SearchCarsResult> =
+                                flowOf(SearchCarsResult(totalCount = 0, totalPages = 0))
+                        }
+                    },
+                    brandResolver = { slug -> if (slug == "bmw") 10 to "BMW" else null },
+                    modelResolver = { _, slug -> if (slug == "x5") 99 to "X5" else null },
+                    coroutineScope = CoroutineScope(SupervisorJob() + dispatcher),
+                )
+
+            vm.load("/search/bmw/x5?bodyType=Sedan&bodyTypeLabel=%D0%A1%D0%B5%D0%B4%D0%B0%D0%BD")
+            advanceUntilIdle()
+
+            val results = assertIs<SearchUiState.Results>(vm.state.value)
+            assertEquals(10, results.filters.brandId)
+            assertEquals(99, results.filters.modelId)
+            assertEquals("Sedan", results.filters.bodyType)
+            assertEquals("Седан", results.filters.bodyTypeLabel)
         }
 }

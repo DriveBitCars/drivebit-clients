@@ -20,8 +20,12 @@ fun parseBrandSlugFromPath(pathname: String): String? {
     val trimmed = pathOnly.trim().removePrefix("/").removeSuffix("/")
     if (trimmed.isEmpty()) return null
     if (trimmed.startsWith("search/")) {
-        val segment = trimmed.removePrefix("search/").substringBefore('/')
-        return segment.takeIf { it.isNotEmpty() }?.lowercase()
+        val rest = trimmed.removePrefix("search/")
+        val segment = rest.substringBefore('/')
+        if (segment.isEmpty()) return null
+        // `/search/{body}` is not a brand; `/search/{brand}/{model}` keeps brand
+        if ('/' !in rest && isBodyTypeSearchSlug(segment)) return null
+        return segment.lowercase()
     }
     val segment = trimmed.substringBefore('/').lowercase()
     return segment.takeIf { it in LEGACY_SHORT_BRAND_SEARCH_PATH_SLUGS }
@@ -39,6 +43,7 @@ fun canonicalizeBrandSearchPath(pathname: String): String? {
         segments.size >= 2 && segments[0] == "search" -> {
             brandSlug = segments[1]
             modelSlug = segments.getOrNull(2)?.takeIf { it.isNotEmpty() }
+            if (modelSlug == null && isBodyTypeSearchSlug(brandSlug)) return null
         }
         segments.isNotEmpty() && segments[0] in LEGACY_SHORT_BRAND_SEARCH_PATH_SLUGS -> {
             brandSlug = segments[0]

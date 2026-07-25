@@ -148,4 +148,122 @@ class SearchUrlTest {
         assertEquals(1, parseSearchUrl("/moskva/search?page=-2").page)
         assertEquals(1, parseSearchUrl("/moskva/search?page=abc").page)
     }
+
+    @Test
+    fun `parse body type path without brand`() {
+        val parsed = parseSearchUrl("/search/sedan")
+        assertNull(parsed.brandSlug)
+        assertNull(parsed.modelSlug)
+        assertNull(parsed.citySlug)
+        assertEquals("Sedan", parsed.bodyType)
+        assertEquals("Седан", parsed.bodyTypeLabel)
+    }
+
+    @Test
+    fun `parse suv body path`() {
+        val parsed = parseSearchUrl("/search/suv")
+        assertEquals("SUV", parsed.bodyType)
+        assertEquals("Внедорожник", parsed.bodyTypeLabel)
+        assertNull(parsed.brandSlug)
+    }
+
+    @Test
+    fun `build body-only path omits body query keys`() {
+        val url =
+            buildSearchUrl(
+                SearchUrlParts(
+                    bodyType = "Sedan",
+                    bodyTypeLabel = "Седан",
+                ),
+            )
+        assertEquals("/search/sedan", url)
+        assertFalse(url.contains("bodyType="))
+    }
+
+    @Test
+    fun `build prefers body path over city when brand missing`() {
+        val url =
+            buildSearchUrl(
+                SearchUrlParts(
+                    citySlug = "moskva",
+                    bodyType = "Sedan",
+                    bodyTypeLabel = "Седан",
+                ),
+            )
+        assertEquals("/search/sedan", url)
+    }
+
+    @Test
+    fun `build brand with body keeps body in query`() {
+        val url =
+            buildSearchUrl(
+                SearchUrlParts(
+                    brandSlug = "bmw",
+                    modelSlug = "x5",
+                    bodyType = "SUV",
+                    bodyTypeLabel = "Внедорожник",
+                ),
+            )
+        assertEquals("/search/bmw/x5?bodyType=SUV&bodyTypeLabel=%D0%92%D0%BD%D0%B5%D0%B4%D0%BE%D1%80%D0%BE%D0%B6%D0%BD%D0%B8%D0%BA", url)
+        assertNull(parseSearchUrl(url).citySlug)
+        assertEquals("bmw", parseSearchUrl(url).brandSlug)
+        assertEquals("x5", parseSearchUrl(url).modelSlug)
+        assertEquals("SUV", parseSearchUrl(url).bodyType)
+    }
+
+    @Test
+    fun `city search without body unchanged`() {
+        assertEquals("/moskva/search", buildSearchUrl(SearchUrlParts(citySlug = "moskva")))
+        val parsed = parseSearchUrl("/moskva/search?page=2&seatsMin=4")
+        assertEquals("moskva", parsed.citySlug)
+        assertNull(parsed.bodyType)
+        assertNull(parsed.brandSlug)
+        assertEquals(2, parsed.page)
+        assertEquals(4, parsed.seatsMin)
+    }
+
+    @Test
+    fun `city search with body query still round trips`() {
+        val original =
+            SearchUrlParts(
+                citySlug = "moskva",
+                bodyType = "SUV",
+                bodyTypeLabel = "Внедорожник",
+                page = 2,
+            )
+        // Explicit city+body without going through body-path preference: use query-only URL parse
+        val parsed = parseSearchUrl("/moskva/search?bodyType=SUV&bodyTypeLabel=%D0%92%D0%BD%D0%B5%D0%B4%D0%BE%D1%80%D0%BE%D0%B6%D0%BD%D0%B8%D0%BA&page=2")
+        assertEquals("moskva", parsed.citySlug)
+        assertEquals("SUV", parsed.bodyType)
+        assertEquals("Внедорожник", parsed.bodyTypeLabel)
+        assertEquals(2, parsed.page)
+        assertNull(parsed.brandSlug)
+        // Re-build from city+body prefers body path (canonical emit)
+        assertEquals("/search/suv?page=2", buildSearchUrl(original))
+    }
+
+    @Test
+    fun `search toyota remains brand not body`() {
+        val parsed = parseSearchUrl("/search/toyota")
+        assertEquals("toyota", parsed.brandSlug)
+        assertNull(parsed.bodyType)
+    }
+
+    @Test
+    fun `body path with page and dates`() {
+        val url =
+            buildSearchUrl(
+                SearchUrlParts(
+                    bodyType = "Minivan",
+                    bodyTypeLabel = "Минивэн",
+                    startDate = "2025-02-01",
+                    page = 2,
+                ),
+            )
+        assertEquals("/search/minivan?startDate=2025-02-01&page=2", url)
+        val parsed = parseSearchUrl(url)
+        assertEquals("Minivan", parsed.bodyType)
+        assertEquals(2, parsed.page)
+        assertNull(parsed.brandSlug)
+    }
 }

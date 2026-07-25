@@ -28,14 +28,24 @@ fun parseSearchUrl(url: String): SearchUrlParts {
     var citySlug: String? = null
     var brandSlug: String? = null
     var modelSlug: String? = null
+    var bodyFromPath: BodyTypePathInfo? = null
 
     when {
         segments.size == 2 && segments[1] == "search" -> {
             citySlug = segments[0]
         }
         segments.size >= 2 && segments[0] == "search" -> {
-            brandSlug = segments[1].takeIf { it.isNotEmpty() }
-            modelSlug = segments.getOrNull(2)?.takeIf { it.isNotEmpty() }
+            val first = segments[1].takeIf { it.isNotEmpty() }
+            val second = segments.getOrNull(2)?.takeIf { it.isNotEmpty() }
+            when {
+                first != null && second == null && isBodyTypeSearchSlug(first) -> {
+                    bodyFromPath = bodyTypePathInfoBySlug(first)
+                }
+                else -> {
+                    brandSlug = first
+                    modelSlug = second
+                }
+            }
         }
         segments.size >= 1 && segments[0] in LEGACY_SHORT_BRAND_SEARCH_PATH_SLUGS -> {
             brandSlug = segments[0]
@@ -47,6 +57,8 @@ fun parseSearchUrl(url: String): SearchUrlParts {
     }
 
     val params = parseQueryParams(query)
+    val bodyType = params["bodyType"] ?: bodyFromPath?.apiName
+    val bodyTypeLabel = params["bodyTypeLabel"] ?: bodyFromPath?.label
     return SearchUrlParts(
         citySlug = citySlug,
         brandSlug = brandSlug,
@@ -57,8 +69,8 @@ fun parseSearchUrl(url: String): SearchUrlParts {
         dailyRateMax = params["dailyRateMax"]?.toIntOrNull(),
         driveType = params["driveType"],
         driveTypeLabel = params["driveTypeLabel"],
-        bodyType = params["bodyType"],
-        bodyTypeLabel = params["bodyTypeLabel"],
+        bodyType = bodyType,
+        bodyTypeLabel = bodyTypeLabel,
         seatsMin = params["seatsMin"]?.toIntOrNull(),
         yearMin = params["yearMin"]?.toIntOrNull(),
         yearMax = params["yearMax"]?.toIntOrNull(),
@@ -68,6 +80,7 @@ fun parseSearchUrl(url: String): SearchUrlParts {
 }
 
 fun buildSearchUrl(parts: SearchUrlParts): String {
+    val bodyInfo = parts.bodyType?.let { bodyTypePathInfoByApiName(it) }
     val path =
         when {
             parts.brandSlug != null -> {
@@ -79,11 +92,15 @@ fun buildSearchUrl(parts: SearchUrlParts): String {
                         ?.takeIf { it.isNotEmpty() }
                 if (model != null) "$brandPath/$model" else brandPath
             }
+            bodyInfo != null -> {
+                "/search/${bodyInfo.slug}"
+            }
             parts.citySlug != null -> {
                 "/${parts.citySlug.trim().lowercase().trim('/')}/search"
             }
             else -> "/search"
         }
+    val bodyInPath = parts.brandSlug == null && bodyInfo != null
 
     val queryPairs = mutableListOf<Pair<String, String>>()
 
@@ -106,8 +123,10 @@ fun buildSearchUrl(parts: SearchUrlParts): String {
     addInt("dailyRateMax", parts.dailyRateMax)
     add("driveType", parts.driveType)
     add("driveTypeLabel", parts.driveTypeLabel)
-    add("bodyType", parts.bodyType)
-    add("bodyTypeLabel", parts.bodyTypeLabel)
+    if (!bodyInPath) {
+        add("bodyType", parts.bodyType)
+        add("bodyTypeLabel", parts.bodyTypeLabel ?: bodyInfo?.label)
+    }
     addInt("seatsMin", parts.seatsMin)
     addInt("yearMin", parts.yearMin)
     addInt("yearMax", parts.yearMax)
