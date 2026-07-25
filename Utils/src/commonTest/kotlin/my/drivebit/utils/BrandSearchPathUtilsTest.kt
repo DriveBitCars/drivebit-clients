@@ -55,6 +55,21 @@ class BrandSearchPathUtilsTest {
     }
 
     @Test
+    fun parseBrandSlugFromPath_rejectsBodyTypeSlugs() {
+        assertNull(parseBrandSlugFromPath("/search/sedan"))
+        assertNull(parseBrandSlugFromPath("/search/suv"))
+        assertNull(parseBrandSlugFromPath("/search/minivan/"))
+        assertEquals("bmw", parseBrandSlugFromPath("/search/bmw/x5"))
+    }
+
+    @Test
+    fun canonicalizeBrandSearchPath_rejectsBodyTypeSlugs() {
+        assertNull(canonicalizeBrandSearchPath("/search/sedan"))
+        assertNull(canonicalizeBrandSearchPath("/search/hatchback"))
+        assertEquals("/search/bmw/x5", canonicalizeBrandSearchPath("/search/bmw/x5"))
+    }
+
+    @Test
     fun isShortBrandSearchPath_onlyLegacyAudiBmwBarePaths() {
         assertTrue(isShortBrandSearchPath("/audi"))
         assertTrue(isShortBrandSearchPath("/bmw/"))

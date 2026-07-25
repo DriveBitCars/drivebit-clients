@@ -70,6 +70,21 @@ class SeoBlocksTest {
         assertTrue(!html.contains("аренда audi в москве"))
     }
 
+    @Test
+    fun renderSectionInnerHtml_sedanBody_hasFourSectionsWithSheetQueries() {
+        val block = SeoLandingBlocks.parseBlocksJson(SEDAN_BODY_FIXTURE_JSON)["/search/sedan"]!!
+        val sections = block.sections
+        assertNotNull(sections)
+        assertEquals(4, sections.size)
+        val html = SeoLandingBlocks.renderSectionInnerHtml(block)
+        assertTrue(html.contains("аренда седана"))
+        assertTrue(html.contains("аренда седана в москве"))
+        assertTrue(html.contains("аренда седана без водителя"))
+        assertTrue(html.contains("Как забронировать"))
+        assertTrue(html.contains("<h2>"))
+        assertTrue(!html.contains("Audi"))
+    }
+
     private companion object {
         val FIXTURE_JSON =
             """
@@ -163,6 +178,43 @@ class SeoBlocksTest {
                     "heading": "Как забронировать Audi",
                     "paragraphs": [
                       "Выберите модель, укажите даты и оформите заявку онлайн. Менеджер подтвердит бронь; также доступны Telegram и WhatsApp. Нужны паспорт РФ и водительское удостоверение."
+                    ]
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+
+        val SEDAN_BODY_FIXTURE_JSON =
+            """
+            {
+              "/search/sedan": {
+                "ariaLabel": "Аренда седана в Москве",
+                "h2": "Аренда седана без водителя в Москве",
+                "paragraphs": [],
+                "sections": [
+                  {
+                    "heading": "Аренда седана без водителя в Москве",
+                    "paragraphs": [
+                      "На DriveBit можно взять седан в аренду в Москве напрямую у владельцев — без водителя и без переплаты классическому прокату. Большой выбор марок и моделей седанов для города, командировок и поездок по области. Популярные запросы: аренда седана, аренда седана в москве, аренда седана без водителя."
+                    ]
+                  },
+                  {
+                    "heading": "Какие седаны доступны",
+                    "paragraphs": [
+                      "Сравните предложения собственников: от компактных городских седанов до бизнес-класса."
+                    ]
+                  },
+                  {
+                    "heading": "Для каких поездок подходит седан",
+                    "paragraphs": [
+                      "Деловые встречи и повседневные поездки по Москве."
+                    ]
+                  },
+                  {
+                    "heading": "Как забронировать седан",
+                    "paragraphs": [
+                      "Выберите автомобиль, укажите даты и оформите заявку онлайн."
                     ]
                   }
                 ]
