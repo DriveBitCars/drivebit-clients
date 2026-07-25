@@ -958,7 +958,14 @@
         (function () {
             var l = window.location;
             if (l.search && l.search.length > 2 && l.search[1] === "/") {
-                var decoded = l.search.substring(2).split("&").join("?");
+                var encoded = l.search.substring(2);
+                var queryStart = encoded.indexOf("&");
+                var decoded =
+                    queryStart === -1
+                        ? encoded
+                        : encoded.substring(0, queryStart) +
+                          "?" +
+                          encoded.substring(queryStart + 1);
                 window.history.replaceState(null, "", "/" + decoded + l.hash);
             }
         })();

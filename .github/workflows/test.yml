@@ -75,6 +75,9 @@ jobs:
     - name: Static filter unit tests
       run: npm run test:filters
 
+    - name: GitHub Pages redirect unit tests
+      run: npm run test:spa-redirect
+
     - name: Verify third-party loader in HTML shells
       run: npm run verify:third-party-loader
 
