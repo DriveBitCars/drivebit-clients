@@ -23,6 +23,7 @@ sealed interface BookingPaymentLinkUiState {
 
     data class FinishedWithMessage(
         val text: String,
+        val alreadyPaid: Boolean = false,
     ) : BookingPaymentLinkUiState
 }
 
@@ -74,10 +75,18 @@ class BookingPaymentLinkViewModelImpl(
                         val text =
                             result.message?.takeIf { it.isNotBlank() }
                                 ?: "Оплата уже выполнена"
-                        _uiState.value = BookingPaymentLinkUiState.FinishedWithMessage(text)
+                        _uiState.value =
+                            BookingPaymentLinkUiState.FinishedWithMessage(
+                                text = text,
+                                alreadyPaid = true,
+                            )
                     }
                     is PayBookingResult.Failed ->
-                        _uiState.value = BookingPaymentLinkUiState.FinishedWithMessage(result.message)
+                        _uiState.value =
+                            BookingPaymentLinkUiState.FinishedWithMessage(
+                                text = result.message,
+                                alreadyPaid = false,
+                            )
                 }
             }
     }

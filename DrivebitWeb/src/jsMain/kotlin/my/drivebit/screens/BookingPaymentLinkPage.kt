@@ -6,6 +6,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.browser.window
+import my.drivebit.analytics.reachYandexGoalPayAlreadyPaid
+import my.drivebit.analytics.reachYandexGoalPayClick
+import my.drivebit.analytics.reachYandexGoalPayFail
+import my.drivebit.analytics.reachYandexGoalPayRedirect
 import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.Loader
 import my.drivebit.components.TextError
@@ -13,6 +17,8 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.shared.storage.Storage
+import my.drivebit.utils.PaymentFunnelKind
+import my.drivebit.utils.PaymentFunnelSource
 import my.drivebit.utils.REDIRECT_PATH
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.network.services.BookingCheckoutKind
@@ -91,7 +97,17 @@ fun BookingPaymentLinkPage() {
             "prepay", "prepayment" -> BookingCheckoutKind.Prepayment
             else -> BookingCheckoutKind.FullOrBalance
         }
+    val funnelKind =
+        when (checkoutKind) {
+            BookingCheckoutKind.Prepayment -> PaymentFunnelKind.Prepay
+            BookingCheckoutKind.FullOrBalance -> PaymentFunnelKind.Full
+        }
     LaunchedEffect(bookingId, checkoutKind) {
+        reachYandexGoalPayClick(
+            source = PaymentFunnelSource.PaymentLink,
+            kind = funnelKind,
+            bookingId = bookingId,
+        )
         viewModel.startCheckout(
             returnUrl = "$origin/payment-success",
             failUrl = "$origin/payment-failure",
@@ -102,6 +118,11 @@ fun BookingPaymentLinkPage() {
     val checkoutUrl = (uiState as? BookingPaymentLinkUiState.OpenCheckout)?.url
     LaunchedEffect(checkoutUrl) {
         val url = checkoutUrl ?: return@LaunchedEffect
+        reachYandexGoalPayRedirect(
+            source = PaymentFunnelSource.PaymentLink,
+            kind = funnelKind,
+            bookingId = bookingId,
+        )
         window.location.href = url
     }
 
@@ -163,6 +184,22 @@ fun BookingPaymentLinkPage() {
                     }
                 }
                 is BookingPaymentLinkUiState.FinishedWithMessage -> {
+                    LaunchedEffect(state.text, state.alreadyPaid) {
+                        if (state.alreadyPaid) {
+                            reachYandexGoalPayAlreadyPaid(
+                                source = PaymentFunnelSource.PaymentLink,
+                                kind = funnelKind,
+                                bookingId = bookingId,
+                            )
+                        } else {
+                            reachYandexGoalPayFail(
+                                source = PaymentFunnelSource.PaymentLink,
+                                kind = funnelKind,
+                                bookingId = bookingId,
+                                message = state.text,
+                            )
+                        }
+                    }
                     P({
                         style {
                             applyTypography(CSSTypography.Styles.body)

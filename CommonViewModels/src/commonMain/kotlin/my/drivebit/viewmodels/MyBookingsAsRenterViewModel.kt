@@ -138,16 +138,28 @@ class MyBookingsAsRenterViewModelImpl(
             try {
                 when (val result = payment.checkoutBooking(bookingId, kind, returnUrl, failUrl)) {
                     is PayBookingResult.Redirect ->
-                        _payEffects.emit(ChatPayEffect.OpenCheckout(result.url))
+                        _payEffects.emit(ChatPayEffect.OpenCheckout(result.url, bookingId = bookingId))
                     is PayBookingResult.AlreadyPaid -> {
                         val text =
                             result.message?.takeIf { it.isNotBlank() }
                                 ?: "Оплата уже выполнена"
-                        _payEffects.emit(ChatPayEffect.ShowInfo(text))
+                        _payEffects.emit(
+                            ChatPayEffect.ShowInfo(
+                                text = text,
+                                bookingId = bookingId,
+                                alreadyPaid = true,
+                            ),
+                        )
                         loadBookings()
                     }
                     is PayBookingResult.Failed ->
-                        _payEffects.emit(ChatPayEffect.ShowInfo(result.message))
+                        _payEffects.emit(
+                            ChatPayEffect.ShowInfo(
+                                text = result.message,
+                                bookingId = bookingId,
+                                alreadyPaid = false,
+                            ),
+                        )
                 }
             } finally {
                 _isPaying.value = false

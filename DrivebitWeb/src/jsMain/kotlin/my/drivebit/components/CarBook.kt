@@ -19,6 +19,10 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import my.drivebit.analytics.reachYandexGoalBron
+import my.drivebit.analytics.reachYandexGoalPayAlreadyPaid
+import my.drivebit.analytics.reachYandexGoalPayClick
+import my.drivebit.analytics.reachYandexGoalPayFail
+import my.drivebit.analytics.reachYandexGoalPayRedirect
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
@@ -26,6 +30,8 @@ import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.AUTO_BOOK_AFTER_LOGIN
 import my.drivebit.utils.END_AT
+import my.drivebit.utils.PaymentFunnelKind
+import my.drivebit.utils.PaymentFunnelSource
 import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.START_AT
 import my.drivebit.utils.addDays
@@ -68,14 +74,34 @@ fun CarBook(
     val navigationController = LocalNavigationController.current
     val buttonViewModel = createButtonViewModel()
     val payButtonViewModel = createButtonViewModel()
+    var lastCarPayKind by remember { mutableStateOf(PaymentFunnelKind.Full) }
 
     LaunchedEffect(Unit) {
         viewModel.payEffects.collect { effect ->
             when (effect) {
                 is RentPayEffect.OpenCheckout -> {
+                    reachYandexGoalPayRedirect(
+                        source = PaymentFunnelSource.CarDetail,
+                        kind = lastCarPayKind,
+                        bookingId = effect.bookingId,
+                    )
                     window.location.href = effect.url
                 }
                 is RentPayEffect.ShowInfo -> {
+                    if (effect.alreadyPaid) {
+                        reachYandexGoalPayAlreadyPaid(
+                            source = PaymentFunnelSource.CarDetail,
+                            kind = lastCarPayKind,
+                            bookingId = effect.bookingId,
+                        )
+                    } else {
+                        reachYandexGoalPayFail(
+                            source = PaymentFunnelSource.CarDetail,
+                            kind = lastCarPayKind,
+                            bookingId = effect.bookingId,
+                            message = effect.text,
+                        )
+                    }
                     window.alert(effect.text)
                 }
             }
@@ -435,6 +461,13 @@ fun CarBook(
                                 enabledColor = CSSColors.Blue,
                                 text = payUi.prepaymentButtonLabel,
                                 onClick = {
+                                    lastCarPayKind = PaymentFunnelKind.Prepay
+                                    val bookingId = bookState.pendingPaymentBookingId.orEmpty()
+                                    reachYandexGoalPayClick(
+                                        source = PaymentFunnelSource.CarDetail,
+                                        kind = PaymentFunnelKind.Prepay,
+                                        bookingId = bookingId,
+                                    )
                                     val origin = window.location.origin
                                     viewModel.payCreatedBooking(
                                         kind = BookingCheckoutKind.Prepayment,
@@ -449,6 +482,13 @@ fun CarBook(
                             enabledColor = CSSColors.Blue,
                             text = payUi.fullPaymentLabel,
                             onClick = {
+                                lastCarPayKind = PaymentFunnelKind.Full
+                                val bookingId = bookState.pendingPaymentBookingId.orEmpty()
+                                reachYandexGoalPayClick(
+                                    source = PaymentFunnelSource.CarDetail,
+                                    kind = PaymentFunnelKind.Full,
+                                    bookingId = bookingId,
+                                )
                                 val origin = window.location.origin
                                 viewModel.payCreatedBooking(
                                     kind = BookingCheckoutKind.FullOrBalance,

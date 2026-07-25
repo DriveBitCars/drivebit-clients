@@ -31,10 +31,13 @@ import my.drivebit.shared.storage.Storage
 sealed interface RentPayEffect {
     data class OpenCheckout(
         val url: String,
+        val bookingId: String = "",
     ) : RentPayEffect
 
     data class ShowInfo(
         val text: String,
+        val bookingId: String = "",
+        val alreadyPaid: Boolean = false,
     ) : RentPayEffect
 }
 
@@ -467,15 +470,27 @@ class RentViewModelImpl(
                         }
                 ) {
                     is PayBookingResult.Redirect ->
-                        _payEffects.emit(RentPayEffect.OpenCheckout(result.url))
+                        _payEffects.emit(RentPayEffect.OpenCheckout(result.url, bookingId = bookingId))
                     is PayBookingResult.AlreadyPaid -> {
                         val text =
                             result.message?.takeIf { it.isNotBlank() }
                                 ?: "Оплата уже выполнена"
-                        _payEffects.emit(RentPayEffect.ShowInfo(text))
+                        _payEffects.emit(
+                            RentPayEffect.ShowInfo(
+                                text = text,
+                                bookingId = bookingId,
+                                alreadyPaid = true,
+                            ),
+                        )
                     }
                     is PayBookingResult.Failed ->
-                        _payEffects.emit(RentPayEffect.ShowInfo(result.message))
+                        _payEffects.emit(
+                            RentPayEffect.ShowInfo(
+                                text = result.message,
+                                bookingId = bookingId,
+                                alreadyPaid = false,
+                            ),
+                        )
                 }
             } finally {
                 _isPaying.value = false

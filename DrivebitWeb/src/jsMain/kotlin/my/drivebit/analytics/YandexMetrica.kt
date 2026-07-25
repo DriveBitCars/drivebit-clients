@@ -2,6 +2,10 @@ package my.drivebit.analytics
 
 import kotlinx.browser.document
 import kotlinx.browser.window
+import my.drivebit.utils.PaymentFunnelGoals
+import my.drivebit.utils.PaymentFunnelKind
+import my.drivebit.utils.PaymentFunnelSource
+import my.drivebit.utils.paymentFunnelParams
 import org.w3c.dom.HTMLScriptElement
 import kotlin.js.js
 import kotlin.js.jsTypeOf
@@ -26,9 +30,20 @@ private fun ensureYandexMetrikaStub() {
     document.head?.appendChild(script)
 }
 
-private fun reachYandexGoal(goal: String) {
+private fun reachYandexGoal(
+    goal: String,
+    params: Map<String, String> = emptyMap(),
+) {
     ensureYandexMetrikaStub()
-    window.asDynamic().ym(YANDEX_COUNTER_ID, "reachGoal", goal)
+    if (params.isEmpty()) {
+        window.asDynamic().ym(YANDEX_COUNTER_ID, "reachGoal", goal)
+        return
+    }
+    val payload = js("{}")
+    params.forEach { (key, value) ->
+        payload[key] = value
+    }
+    window.asDynamic().ym(YANDEX_COUNTER_ID, "reachGoal", goal, payload)
 }
 
 fun reachYandexGoalArenda() {
@@ -37,4 +52,57 @@ fun reachYandexGoalArenda() {
 
 fun reachYandexGoalBron() {
     reachYandexGoal(BRON_GOAL)
+}
+
+fun reachYandexGoalPayClick(
+    source: PaymentFunnelSource,
+    kind: PaymentFunnelKind,
+    bookingId: String,
+) {
+    reachYandexGoal(
+        PaymentFunnelGoals.CLICK,
+        paymentFunnelParams(source, kind, bookingId),
+    )
+}
+
+fun reachYandexGoalPayRedirect(
+    source: PaymentFunnelSource,
+    kind: PaymentFunnelKind,
+    bookingId: String,
+) {
+    reachYandexGoal(
+        PaymentFunnelGoals.REDIRECT,
+        paymentFunnelParams(source, kind, bookingId),
+    )
+}
+
+fun reachYandexGoalPayFail(
+    source: PaymentFunnelSource,
+    kind: PaymentFunnelKind,
+    bookingId: String,
+    message: String,
+) {
+    reachYandexGoal(
+        PaymentFunnelGoals.FAIL,
+        paymentFunnelParams(source, kind, bookingId, message),
+    )
+}
+
+fun reachYandexGoalPayAlreadyPaid(
+    source: PaymentFunnelSource,
+    kind: PaymentFunnelKind,
+    bookingId: String,
+) {
+    reachYandexGoal(
+        PaymentFunnelGoals.ALREADY_PAID,
+        paymentFunnelParams(source, kind, bookingId),
+    )
+}
+
+fun reachYandexGoalPaymentSuccessPage() {
+    reachYandexGoal(PaymentFunnelGoals.SUCCESS_PAGE)
+}
+
+fun reachYandexGoalPaymentFailurePage() {
+    reachYandexGoal(PaymentFunnelGoals.FAILURE_PAGE)
 }
