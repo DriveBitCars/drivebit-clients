@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import my.drivebit.repositories.di.repositoriesModule
 import my.drivebit.shared.storage.di.storageModule
 import my.drivebit.viewmodels.di.commonViewModelsModule
+import my.drivebit.web.analytics.initializeHawkErrorTracking
 import my.drivebit.web.di.headerWebModule
 import my.drivebit.web.di.webExtensionModule
 import my.drivebit.web.login.loginWebModule
@@ -43,6 +44,7 @@ fun ensureHeaderKoinStarted() {
 
 @Composable
 fun WebKoinHost(content: @Composable () -> Unit) {
+    initializeHawkErrorTracking()
     if (GlobalContext.getOrNull() == null) {
         KoinApplication(application = {
             modules(webKoinModules)
