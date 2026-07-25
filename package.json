@@ -9,6 +9,7 @@
     "test:search-redirect": "node --test scripts/search-index-redirect.test.mjs",
     "test:cars-grid-static": "node --test scripts/cars-grid-static-hide.test.mjs",
     "test:filters": "node --test scripts/drivebit-filters.test.mjs",
+    "test:spa-redirect": "node --test scripts/spa-pages-redirect.test.mjs",
     "verify:third-party-loader": "node scripts/verify-third-party-loader.mjs",
     "verify:prod-smoke": "node scripts/verify-prod-smoke.mjs"
   },
