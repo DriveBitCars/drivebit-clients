@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
+import my.drivebit.analytics.reachYandexGoalPayClick
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
 import my.drivebit.components.FormSection
@@ -25,6 +26,8 @@ import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.statusAllowsContractDownload
 import my.drivebit.network.services.statusAllowsRenterPayment
+import my.drivebit.utils.PaymentFunnelKind
+import my.drivebit.utils.PaymentFunnelSource
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
@@ -87,9 +90,19 @@ fun MyBookingsPage() {
                                         navigationController?.navigateTo("/leave-review?carId=${booking.carId}")
                                     },
                                     onPay = {
+                                        reachYandexGoalPayClick(
+                                            source = PaymentFunnelSource.MyBookings,
+                                            kind = PaymentFunnelKind.Full,
+                                            bookingId = booking.id,
+                                        )
                                         navigationController?.navigateTo("/payment?bookingId=${booking.id}")
                                     },
                                     onPrepay = {
+                                        reachYandexGoalPayClick(
+                                            source = PaymentFunnelSource.MyBookings,
+                                            kind = PaymentFunnelKind.Prepay,
+                                            bookingId = booking.id,
+                                        )
                                         navigationController?.navigateTo(
                                             "/payment?bookingId=${booking.id}&mode=prepay",
                                         )

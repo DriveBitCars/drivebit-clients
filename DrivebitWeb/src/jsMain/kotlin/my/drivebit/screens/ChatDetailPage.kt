@@ -33,6 +33,12 @@ import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.shouldShowLeaveReviewForRenter
+import my.drivebit.analytics.reachYandexGoalPayAlreadyPaid
+import my.drivebit.analytics.reachYandexGoalPayClick
+import my.drivebit.analytics.reachYandexGoalPayFail
+import my.drivebit.analytics.reachYandexGoalPayRedirect
+import my.drivebit.utils.PaymentFunnelKind
+import my.drivebit.utils.PaymentFunnelSource
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.viewmodels.ButtonState
@@ -85,14 +91,34 @@ fun ChatDetailPage() {
     val isPaying by viewModel.isPaying.collectAsState()
     val signActionInProgress by viewModel.signActionInProgress.collectAsState()
     val bookingPaymentById by viewModel.bookingPaymentById.collectAsState()
+    var lastChatPayKind by remember { mutableStateOf(PaymentFunnelKind.Full) }
 
     LaunchedEffect(chatId) {
         viewModel.payEffects.collect { effect ->
             when (effect) {
                 is ChatPayEffect.OpenCheckout -> {
+                    reachYandexGoalPayRedirect(
+                        source = PaymentFunnelSource.Chat,
+                        kind = lastChatPayKind,
+                        bookingId = effect.bookingId,
+                    )
                     window.location.href = effect.url
                 }
                 is ChatPayEffect.ShowInfo -> {
+                    if (effect.alreadyPaid) {
+                        reachYandexGoalPayAlreadyPaid(
+                            source = PaymentFunnelSource.Chat,
+                            kind = lastChatPayKind,
+                            bookingId = effect.bookingId,
+                        )
+                    } else {
+                        reachYandexGoalPayFail(
+                            source = PaymentFunnelSource.Chat,
+                            kind = lastChatPayKind,
+                            bookingId = effect.bookingId,
+                            message = effect.text,
+                        )
+                    }
                     window.alert(effect.text)
                 }
             }
@@ -169,6 +195,12 @@ fun ChatDetailPage() {
                                         isPaying = isPaying,
                                         signActionInProgress = signActionInProgress,
                                         onPrepayBooking = { bookingId ->
+                                            lastChatPayKind = PaymentFunnelKind.Prepay
+                                            reachYandexGoalPayClick(
+                                                source = PaymentFunnelSource.Chat,
+                                                kind = PaymentFunnelKind.Prepay,
+                                                bookingId = bookingId,
+                                            )
                                             val origin = window.location.origin
                                             viewModel.prepayBooking(
                                                 bookingId = bookingId,
@@ -177,6 +209,12 @@ fun ChatDetailPage() {
                                             )
                                         },
                                         onPayBooking = { bookingId ->
+                                            lastChatPayKind = PaymentFunnelKind.Full
+                                            reachYandexGoalPayClick(
+                                                source = PaymentFunnelSource.Chat,
+                                                kind = PaymentFunnelKind.Full,
+                                                bookingId = bookingId,
+                                            )
                                             val origin = window.location.origin
                                             viewModel.payBooking(
                                                 bookingId = bookingId,
