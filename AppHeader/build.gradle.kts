@@ -25,6 +25,10 @@ kotlin {
             implementation(project(":Utils"))
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            implementation(npm("@hawk.so/javascript", "3.2.21"))
+        }
+        jsTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }
