@@ -4,6 +4,10 @@
     var CALLIBRI_URL = "//cdn.callibri.ru/callibri.js";
     var JIVO_URL = "//code.jivo.ru/widget/MWoBzLXYYF";
     var LOG_PREFIX = "[DriveBit/Callibri]";
+    var CALLIBRI_FALLBACK_MS = 4000;
+    var INTERACTION_EVENTS = ["pointerdown", "keydown", "scroll", "touchstart"];
+    var callibriScheduled = false;
+    var callibriFallbackId = null;
 
     function log() {
         var args = Array.prototype.slice.call(arguments);
@@ -86,7 +90,7 @@
             return null;
         }
         warn(
-            "Callibri НЕ обнаружен: нет callibriInit. Смотрите View Source → </body> и Network → callibri.js",
+            "Callibri НЕ обнаружен: нет callibriInit. Смотрите Network → callibri.js (deferred load)",
         );
         return false;
     }
@@ -120,19 +124,19 @@
             tagScript.src = METRIKA_TAG_URL;
             if (onTagReady) {
                 tagScript.onload = function () {
-                    log("Metrika tag.js loaded (before Callibri defer runs)");
+                    log("Metrika tag.js loaded");
                     onTagReady();
                 };
             }
             firstScript.parentNode.insertBefore(tagScript, firstScript);
-            log("Metrika: start tag.js immediately (no setTimeout/idle delay)");
+            log("Metrika: start tag.js immediately (webvisor off for INP)");
         } else if (onTagReady) {
             onTagReady();
         }
 
         window.ym(METRIKA_COUNTER_ID, "init", {
             ssr: true,
-            webvisor: true,
+            webvisor: false,
             clickmap: true,
             ecommerce: "dataLayer",
             accurateTrackBounce: true,
@@ -140,21 +144,18 @@
         });
     }
 
-    /**
-     * Prefer static Callibri tag from HTML (docs). Dynamic insert is fallback only.
-     */
     function ensureCallibri(attempt) {
         var existing = findCallibriScript();
         if (existing) {
             log(
-                "Callibri static/docs tag found in DOM:",
+                "Callibri script already in DOM:",
                 existing.src || "(inline)",
                 existing.defer ? "defer=true" : "",
             );
             verifyCallibriInstalled(0);
             return;
         }
-        warn("Static Callibri tag missing — fallback dynamic insert (docs prefer static before </body>)");
+        log("Callibri: dynamic insert (idle/interaction deferred)");
         var script = document.createElement("script");
         script.src = CALLIBRI_URL;
         script.type = "text/javascript";
@@ -162,7 +163,7 @@
         script.defer = true;
         script.setAttribute("data-drivebit-callibri", "1");
         script.onload = function () {
-            log("Callibri fallback loaded");
+            log("Callibri loaded");
             verifyCallibriInstalled(0);
         };
         script.onerror = function () {
@@ -175,6 +176,50 @@
             }
         };
         document.head.appendChild(script);
+    }
+
+    function scheduleDeferredCallibri() {
+        if (callibriScheduled) return;
+        callibriScheduled = true;
+
+        var started = false;
+        function start() {
+            if (started) return;
+            started = true;
+            cleanup();
+            ensureCallibri(0);
+        }
+
+        function onInteraction() {
+            start();
+        }
+
+        function cleanup() {
+            for (var i = 0; i < INTERACTION_EVENTS.length; i++) {
+                window.removeEventListener(INTERACTION_EVENTS[i], onInteraction);
+            }
+            if (callibriFallbackId != null) {
+                window.clearTimeout(callibriFallbackId);
+                callibriFallbackId = null;
+            }
+        }
+
+        for (var i = 0; i < INTERACTION_EVENTS.length; i++) {
+            window.addEventListener(INTERACTION_EVENTS[i], onInteraction, {
+                once: true,
+                passive: true,
+            });
+        }
+
+        if (typeof window.requestIdleCallback === "function") {
+            window.requestIdleCallback(function () {
+                start();
+            }, { timeout: CALLIBRI_FALLBACK_MS });
+        }
+
+        callibriFallbackId = window.setTimeout(function () {
+            start();
+        }, CALLIBRI_FALLBACK_MS);
     }
 
     function loadJivo() {
@@ -199,9 +244,9 @@
         window.addEventListener("load", fn, { once: true });
     }
 
-    log("boot: Metrika first, then verify Callibri (docs snippet before </body>)");
+    log("boot: Metrika first (webvisor off), Callibri deferred to idle/interaction");
     loadMetrika(function () {
-        ensureCallibri(0);
+        scheduleDeferredCallibri();
     });
 
     afterLoad(function () {

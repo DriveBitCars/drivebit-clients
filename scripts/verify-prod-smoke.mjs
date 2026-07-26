@@ -37,7 +37,7 @@ const results = [];
 for (const { path, name } of PAGES) {
   const url = `${base}${path}`;
   const response = await page.goto(url, { waitUntil: "load", timeout: 60000 });
-  await page.waitForTimeout(path === "/moskva" ? 8000 : 4000);
+  await page.waitForTimeout(path === "/moskva" ? 8000 : 5000);
 
   const report = await page.evaluate(() => {
     const scripts = Array.from(document.scripts);
@@ -45,7 +45,8 @@ for (const { path, name } of PAGES) {
       (s) =>
         /composeApp\.js/.test(s.src) ||
         /appCompose\.js/.test(s.src) ||
-        /searchApp\.js/.test(s.src),
+        /searchApp\.js/.test(s.src) ||
+        /drivebit-compose-idle-loader/.test(s.src),
     );
     return {
       hasComposeApp: hasComposeBundle,
@@ -102,7 +103,9 @@ for (const item of results) {
   if (item.status !== 200) failures.push(`${item.name}: HTTP ${item.status}`);
   if (!item.hasThirdPartyLoader) failures.push(`${item.name}: missing third-party loader`);
   if (CALLIBRI_REQUIRED.has(item.name) && !item.hasCallibriScript) {
-    failures.push(`${item.name}: missing Callibri script (cdn.callibri.ru/callibri.js)`);
+    failures.push(
+      `${item.name}: Callibri not injected after deferred load (cdn.callibri.ru/callibri.js)`,
+    );
   }
   if (item.path !== "/list-your-car.html") {
     if (!item.hasComposeApp) failures.push(`${item.name}: missing compose/search app bundle`);

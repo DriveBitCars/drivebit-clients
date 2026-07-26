@@ -13,7 +13,9 @@ await page.goto(url, { waitUntil: "load", timeout: 60000 });
 await page.waitForTimeout(8000);
 
 const report = await page.evaluate(() => ({
-  hasComposeApp: !!document.querySelector('script[src*="composeApp.js"]'),
+  hasComposeApp: !!document.querySelector(
+    'script[src*="composeApp.js"], script[src*="drivebit-compose-idle-loader"]',
+  ),
   hasThirdPartyLoader: !!document.querySelector('script[src*="drivebit-third-party-deferred"]'),
   hasRoot: !!document.getElementById("root"),
   hasLoader: !!document.querySelector(".drivebit-seo-loader"),

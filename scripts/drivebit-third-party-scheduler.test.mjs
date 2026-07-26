@@ -5,17 +5,15 @@ import {
     verifyCallibriInstalled,
 } from "../vendor/drivebit-third-party-scheduler.mjs";
 
-const METRIKA_URL = "https://mc.yandex.ru/metrika/tag.js?id=105947907";
-const CALLIBRI_URL = "https://cdn.callibri.ru/callibri.js";
-const JIVO_URL = "//code.jivo.ru/widget/MWoBzLXYYF";
-
 function createMockEnv(options = {}) {
     const scripts = [];
     const loadListeners = [];
+    const interactionListeners = {};
     const headChildren = [];
     const bodyChildren = [];
     let idleCallback = null;
     let setTimeoutCalls = [];
+    let timeoutSeq = 0;
 
     const head = {
         appendChild(node) {
@@ -100,13 +98,26 @@ function createMockEnv(options = {}) {
         addEventListener(type, fn, opts) {
             if (type === "load") {
                 loadListeners.push(fn);
+                return;
             }
+            if (!interactionListeners[type]) interactionListeners[type] = [];
+            interactionListeners[type].push({ fn, opts });
+        },
+        removeEventListener(type, fn) {
+            const list = interactionListeners[type];
+            if (!list) return;
+            interactionListeners[type] = list.filter((e) => e.fn !== fn);
         },
         requestIdleCallback(fn, opts) {
             idleCallback = { fn, opts };
         },
         setTimeout(fn, delay) {
-            setTimeoutCalls.push({ fn, delay });
+            const id = ++timeoutSeq;
+            setTimeoutCalls.push({ fn, delay, id });
+            return id;
+        },
+        clearTimeout(id) {
+            setTimeoutCalls = setTimeoutCalls.filter((c) => c.id !== id);
         },
     };
 
@@ -114,6 +125,7 @@ function createMockEnv(options = {}) {
         document,
         window,
         loadListeners,
+        interactionListeners,
         get idleCallback() {
             return idleCallback;
         },
@@ -122,6 +134,13 @@ function createMockEnv(options = {}) {
         },
         fireLoad() {
             for (const fn of loadListeners) fn();
+        },
+        fireInteraction(type) {
+            const list = interactionListeners[type] || [];
+            for (const { fn } of list.slice()) fn();
+        },
+        runIdle() {
+            if (idleCallback) idleCallback.fn();
         },
         metrikaScript() {
             return scripts.find((s) => s.src?.includes("metrika/tag.js"));
@@ -132,6 +151,13 @@ function createMockEnv(options = {}) {
         jivoScript() {
             return scripts.find((s) => s.src?.includes("code.jivo.ru"));
         },
+        captureYmInit() {
+            const orig = window.ym;
+            window.ym = function () {
+                ymCalls.push(Array.from(arguments));
+                if (typeof orig === "function") orig.apply(null, arguments);
+            };
+        },
     };
 }
 
@@ -140,7 +166,6 @@ test("bootThirdPartyScripts injects Metrika immediately without idle/setTimeout 
     bootThirdPartyScripts(env);
 
     assert.ok(env.metrikaScript(), "Metrika script should be injected synchronously on boot");
-    assert.equal(env.idleCallback, null, "Must not use requestIdleCallback for Metrika activation");
     assert.equal(
         env.setTimeoutCalls.filter((c) => c.delay <= 100).length,
         0,
@@ -148,29 +173,59 @@ test("bootThirdPartyScripts injects Metrika immediately without idle/setTimeout 
     );
 });
 
-test("loadCallibri creates script with defer, not async", () => {
+test("Metrika init disables webvisor and keeps clickmap", () => {
     const env = createMockEnv();
     bootThirdPartyScripts(env);
 
-    const metrika = env.metrikaScript();
-    assert.ok(metrika, "Metrika must be injected first");
-    metrika.onload?.();
-
-    const callibri = env.callibriScript();
-    assert.ok(callibri, "Callibri script should be injected after Metrika onload");
-    assert.equal(callibri.defer, true);
-    assert.notEqual(callibri.async, true);
+    assert.ok(Array.isArray(env.window.ym.a), "ym uses call queue");
+    const initArgs = env.window.ym.a.find((a) => a[1] === "init");
+    assert.ok(initArgs, "ym init must be queued");
+    assert.equal(initArgs[2].webvisor, false);
+    assert.equal(initArgs[2].clickmap, true);
 });
 
-test("Callibri does not start before Metrika tag script is inserted and loaded", () => {
+test("Callibri is not injected immediately after Metrika onload", () => {
     const env = createMockEnv();
     bootThirdPartyScripts(env);
 
     assert.ok(env.metrikaScript(), "Metrika tag must exist before Callibri");
-    assert.equal(env.callibriScript(), undefined, "Callibri must wait for Metrika onload");
-
     env.metrikaScript().onload?.();
-    assert.ok(env.callibriScript(), "Callibri starts only after Metrika onload");
+    assert.equal(env.callibriScript(), undefined, "Callibri must wait for idle or interaction");
+});
+
+test("Callibri loads on requestIdleCallback after Metrika is ready", () => {
+    const env = createMockEnv();
+    bootThirdPartyScripts(env);
+    env.metrikaScript().onload?.();
+
+    assert.ok(env.idleCallback, "Should schedule requestIdleCallback for Callibri");
+    env.runIdle();
+
+    const callibri = env.callibriScript();
+    assert.ok(callibri, "Callibri script should load on idle");
+    assert.equal(callibri.defer, true);
+    assert.notEqual(callibri.async, true);
+});
+
+test("Callibri loads on first pointerdown before idle", () => {
+    const env = createMockEnv();
+    bootThirdPartyScripts(env);
+    env.metrikaScript().onload?.();
+
+    assert.equal(env.callibriScript(), undefined);
+    env.fireInteraction("pointerdown");
+    assert.ok(env.callibriScript(), "Callibri loads on first interaction");
+});
+
+test("Callibri loads on fallback timeout after Metrika ready", () => {
+    const env = createMockEnv();
+    bootThirdPartyScripts(env);
+    env.metrikaScript().onload?.();
+
+    const fallback = env.setTimeoutCalls.find((c) => c.delay >= 3000);
+    assert.ok(fallback, "Must schedule fallback timeout >= 3s");
+    fallback.fn();
+    assert.ok(env.callibriScript(), "Callibri loads on fallback timeout");
 });
 
 test("Jivo is scheduled on window.load, not before", () => {
@@ -188,6 +243,7 @@ test("bootThirdPartyScripts is idempotent for Metrika and Callibri", () => {
     const env = createMockEnv();
     bootThirdPartyScripts(env);
     env.metrikaScript().onload?.();
+    env.runIdle();
 
     const metrikaCount = env.document.scripts.filter((s) => s.src?.includes("metrika/tag.js")).length;
     const callibriCount = env.document.scripts.filter(
@@ -195,6 +251,8 @@ test("bootThirdPartyScripts is idempotent for Metrika and Callibri", () => {
     ).length;
 
     bootThirdPartyScripts(env);
+    env.metrikaScript()?.onload?.();
+    env.runIdle();
 
     assert.equal(
         env.document.scripts.filter((s) => s.src?.includes("metrika/tag.js")).length,
@@ -234,21 +292,22 @@ test("verifyCallibriInstalled fails when callibriInit is missing after retries e
     assert.ok(logs.some((line) => line.includes("НЕ обнаружен")));
 });
 
-test("loadCallibri does not duplicate when static docs tag already in DOM", () => {
+test("loadCallibri does not duplicate when script already injected", () => {
     const env = createMockEnv();
-    const staticTag = env.document.createElement("script");
-    staticTag.src = "//cdn.callibri.ru/callibri.js";
-    staticTag.defer = true;
-    staticTag.type = "text/javascript";
-    staticTag.charset = "utf-8";
-    env.document.head.appendChild(staticTag);
-    env.window.callibriInit = () => undefined;
-
     bootThirdPartyScripts(env);
     env.metrikaScript()?.onload?.();
+    env.runIdle();
 
     const callibriCount = env.document.scripts.filter((s) =>
         String(s.src || "").includes("callibri.js"),
     ).length;
-    assert.equal(callibriCount, 1, "Must not inject a second Callibri script");
+    assert.equal(callibriCount, 1);
+
+    env.fireInteraction("pointerdown");
+    env.runIdle();
+    assert.equal(
+        env.document.scripts.filter((s) => String(s.src || "").includes("callibri.js")).length,
+        1,
+        "Must not inject a second Callibri script",
+    );
 });
