@@ -14,6 +14,7 @@ internal class AuthNotifyingStorage(
 
     override fun saveRefreshToken(refreshToken: String) {
         delegate.saveRefreshToken(refreshToken)
+        dispatchAuthChangedEvent()
     }
 
     override fun getRefreshToken(): String? = delegate.getRefreshToken()
