@@ -123,9 +123,19 @@
             tagScript.async = true;
             tagScript.src = METRIKA_TAG_URL;
             if (onTagReady) {
+                var readyFired = false;
+                function fireReady() {
+                    if (readyFired) return;
+                    readyFired = true;
+                    onTagReady();
+                }
                 tagScript.onload = function () {
                     log("Metrika tag.js loaded");
-                    onTagReady();
+                    fireReady();
+                };
+                tagScript.onerror = function () {
+                    warn("Metrika tag.js failed; continuing with Callibri deferral");
+                    fireReady();
                 };
             }
             firstScript.parentNode.insertBefore(tagScript, firstScript);
