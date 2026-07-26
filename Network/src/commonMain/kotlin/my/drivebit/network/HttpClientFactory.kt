@@ -16,6 +16,8 @@ expect fun createPlatformHttpClientEngine(): HttpClientEngine
 
 const val DEFAULT_BASE_URL = "https://drivebit.ru/api/"
 
+private val tokenRefreshCoordinator = TokenRefreshCoordinator()
+
 fun createHttpClientWithConfig(
     json: Json =
         Json {
@@ -28,6 +30,7 @@ fun createHttpClientWithConfig(
     getRefreshToken: (() -> String),
     saveTokens: ((String?, String) -> Unit),
     authService: Auth,
+    onRefreshFailed: () -> Unit = {},
 ): HttpClient =
     HttpClient(createPlatformHttpClientEngine()) {
         install(ContentNegotiation) {
@@ -50,113 +53,23 @@ fun createHttpClientWithConfig(
             bearer {
                 sendWithoutRequest { true }
                 loadTokens {
-                    val accessToken = getToken.invoke()
-                    val refreshToken = getRefreshToken.invoke()
-                    println("🔑 [Auth] loadTokens called")
-                    println("   - Access token length: ${accessToken.length}")
-                    println("   - Refresh token length: ${refreshToken.length}")
-                    println(
-                        "   - Access token: ${if (accessToken.isNotBlank()) {
-                            "present (${accessToken.take(
-                                20,
-                            )}...)"
-                        } else {
-                            "empty or blank"
-                        }}",
+                    BearerTokens(
+                        accessToken = getToken.invoke(),
+                        refreshToken = getRefreshToken.invoke(),
                     )
-                    println(
-                        "   - Refresh token: ${if (refreshToken.isNotBlank()) {
-                            "present (${refreshToken.take(
-                                20,
-                            )}...)"
-                        } else {
-                            "empty or blank"
-                        }}",
-                    )
-                    if (refreshToken.isNotEmpty() && refreshToken.isBlank()) {
-                        println("   ⚠️ WARNING: Refresh token contains only whitespace!")
-                    }
-                    val tokens =
-                        BearerTokens(
-                            accessToken = accessToken,
-                            refreshToken = refreshToken,
-                        )
-                    println("   - ✅ Returning BearerTokens (accessToken isBlank: ${accessToken.isBlank()})")
-                    tokens
                 }
                 refreshTokens {
-                    println("🔄 [Auth] refreshTokens called")
-                    val currentOldTokens = oldTokens
-                    val refreshTokenValue = currentOldTokens?.refreshToken
-
-                    println("🔄 [Auth] Old tokens:")
-                    println("   - oldTokens is null: ${oldTokens == null}")
-                    println("   - currentOldTokens is null: ${currentOldTokens == null}")
-                    println(
-                        "   - Access token: ${if (currentOldTokens?.accessToken != null) {
-                            "present (${currentOldTokens.accessToken.take(
-                                20,
-                            )}...)"
-                        } else {
-                            "null"
-                        }}",
+                    tokenRefreshCoordinator.refreshTokens(
+                        staleRefreshToken = oldTokens?.refreshToken,
+                        getAccessToken = getToken,
+                        getRefreshToken = getRefreshToken,
+                        saveTokens = saveTokens,
+                        requestRefresh = { refreshToken ->
+                            val newTokens = authService.createTokens(refreshToken)
+                            newTokens.accessToken.token to newTokens.refreshToken.token
+                        },
+                        onRefreshFailed = onRefreshFailed,
                     )
-                    println(
-                        "   - Refresh token: ${if (refreshTokenValue != null && refreshTokenValue.isNotBlank()) {
-                            "present (${refreshTokenValue.take(
-                                20,
-                            )}...)"
-                        } else if (refreshTokenValue == null) {
-                            "null"
-                        } else {
-                            "empty or blank"
-                        }}",
-                    )
-                    println("   - Refresh token value length: ${refreshTokenValue?.length ?: 0}")
-                    println("   - Refresh token isEmpty: ${refreshTokenValue?.isEmpty() ?: true}")
-                    println("   - Refresh token isBlank: ${refreshTokenValue?.isBlank() ?: true}")
-                    println("   - Refresh token trimmed length: ${refreshTokenValue?.trim()?.length ?: 0}")
-                    if (refreshTokenValue != null && refreshTokenValue.length > 0) {
-                        println("   - Refresh token first 30 chars: '${refreshTokenValue.take(30)}'")
-                        println(
-                            "   - Refresh token contains only spaces: ${refreshTokenValue.all { it.isWhitespace() }}",
-                        )
-                    }
-
-                    if (refreshTokenValue == null || refreshTokenValue.isBlank()) {
-                        println("❌ [Auth] Refresh token is null or blank, cannot refresh")
-                        println("   - refreshTokenValue == null: ${refreshTokenValue == null}")
-                        println("   - refreshTokenValue.isEmpty(): ${refreshTokenValue?.isEmpty() ?: "N/A"}")
-                        println("   - refreshTokenValue.isBlank(): ${refreshTokenValue?.isBlank() ?: "N/A"}")
-                        null
-                    } else {
-                        runCatching {
-                            println("🔄 [Auth] Attempting to refresh tokens...")
-                            println("   - Using refresh token: ${refreshTokenValue.take(20)}...")
-
-                            val newTokens = authService.createTokens(refreshTokenValue)
-
-                            val newAccessToken = newTokens.accessToken.token
-                            val newRefreshToken = newTokens.refreshToken.token
-
-                            println("✅ [Auth] Tokens refreshed successfully")
-                            println("   - New access token: ${newAccessToken.take(20)}...")
-                            println("   - New refresh token: ${newRefreshToken.take(20)}...")
-
-                            saveTokens.invoke(newAccessToken, newRefreshToken)
-
-                            BearerTokens(
-                                accessToken = newAccessToken,
-                                refreshToken = newRefreshToken,
-                            )
-                        }.getOrElse { e ->
-                            println("❌ [Auth] Failed to refresh tokens")
-                            println("   - Error type: ${e::class.simpleName}")
-                            println("   - Error message: ${e.message}")
-                            e.printStackTrace()
-                            null
-                        }
-                    }
                 }
             }
         }

@@ -119,6 +119,9 @@ val networkModule =
                     println("🔧 [NetworkModule] Tokens saved to storage")
                 },
                 authService = authService,
+                onRefreshFailed = {
+                    storage.logout()
+                },
             ).also {
                 println("🔧 [NetworkModule] Authorized HttpClient created successfully")
             }
