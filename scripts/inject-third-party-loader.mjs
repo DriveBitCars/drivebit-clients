@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 /**
- * Injects third-party scripts to match Callibri docs:
- * https://callibri.ru/help/ustanovka_skripta_callibri/kak_ustanovit_skript_callibri_napryamuyu_v_kod_sayta
- *
- * - Metrika loader in <head> (defer) — starts immediately, no setTimeout delay
- * - Callibri exact snippet before </body> with defer (visible in View Source)
+ * Ensures Metrika deferred loader is in <head> and removes eager Callibri tags.
+ * Callibri is loaded by drivebit-third-party-deferred.js on idle / first interaction.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -15,12 +12,11 @@ const DEFER_SCRIPT =
     '<script src="/vendor/drivebit-third-party-deferred.js" defer></script>';
 const MODULE_SCRIPT =
     '<script type="module" src="/vendor/drivebit-third-party-deferred.js"></script>';
-/** Exact snippet from Callibri documentation */
-const CALLIBRI_SCRIPT =
-    '<script src="//cdn.callibri.ru/callibri.js" type="text/javascript" charset="utf-8" defer></script>';
 
 const CALLIBRI_ANY =
-    /[ \t]*<script[^>]*cdn\.callibri\.ru\/callibri\.js[^>]*>\s*<\/script>\s*/gi;
+    /[ \t]*<!--\s*Callibri:[^>]*-->\s*\n?/gi;
+const CALLIBRI_SCRIPT_ANY =
+    /[ \t]*<script[^>]*cdn\.callibri\.ru\/callibri\.js[^>]*>\s*<\/script>\s*\n?/gi;
 
 function walk(dir, out = []) {
     for (const name of fs.readdirSync(dir)) {
@@ -39,7 +35,6 @@ function injectScripts(html) {
         next = next.replaceAll(MODULE_SCRIPT, DEFER_SCRIPT);
     }
 
-    // Metrika loader must stay in <head> so it runs before body Callibri (defer order)
     if (!next.includes(DEFER_SCRIPT)) {
         if (!next.includes("</head>")) {
             throw new Error("no </head> in HTML");
@@ -47,18 +42,8 @@ function injectScripts(html) {
         next = next.replace("</head>", `    ${DEFER_SCRIPT}\n</head>`);
     }
 
-    // Remove any existing Callibri tags (head or elsewhere) — re-place before </body>
     next = next.replace(CALLIBRI_ANY, "");
-
-    if (!next.includes("</body>")) {
-        throw new Error("no </body> in HTML");
-    }
-
-    // Docs: add script before closing </body>
-    next = next.replace(
-        "</body>",
-        `    <!-- Callibri: official snippet before </body> -->\n    ${CALLIBRI_SCRIPT}\n</body>`,
-    );
+    next = next.replace(CALLIBRI_SCRIPT_ANY, "");
 
     return next;
 }
@@ -77,10 +62,10 @@ const files = [...new Set([...walk(resources), ...extraFiles])].filter((f) =>
 let updated = 0;
 for (const file of files) {
     let html = fs.readFileSync(file, "utf8");
-    if (!/drivebit-third-party-deferred|composeApp\.js/.test(html) && !extraFiles.includes(file)) {
+    if (!/drivebit-third-party-deferred|composeApp\.js|callibri\.js/.test(html) && !extraFiles.includes(file)) {
         continue;
     }
-    if (!/drivebit-third-party-deferred/.test(html) && !/composeApp\.js/.test(html)) continue;
+    if (!/drivebit-third-party-deferred|callibri\.js/.test(html) && !/composeApp\.js/.test(html)) continue;
     const before = html;
     html = injectScripts(html);
     if (html !== before) {

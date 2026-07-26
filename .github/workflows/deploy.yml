@@ -165,7 +165,8 @@ jobs:
         fail() { echo "SEO verify failed: $*" >&2; exit 1; }
         test -f "$DIST/moskva/poblizosti/index.html" || fail "missing moskva/poblizosti"
         grep -q 'drivebit-cars-grid-static' "$DIST/moskva/poblizosti/index.html" || fail "poblizosti grid"
-        grep -q 'src="/composeApp.js' "$DIST/moskva/arenda-avto-ekonom-klassa-bez-voditelya/index.html" || fail "ekonom composeApp.js"
+        grep -q 'drivebit-compose-idle-loader' "$DIST/moskva/arenda-avto-ekonom-klassa-bez-voditelya/index.html" || fail "ekonom compose idle loader"
+        grep -q 'data-src="/composeApp.js' "$DIST/moskva/arenda-avto-ekonom-klassa-bez-voditelya/index.html" || fail "ekonom composeApp.js data-src"
         for slug in "" arenda-avto-v-krym arenda-avto-v-belarus arenda-avto-v-abkhaziyu arenda-avto-ekonom-klassa-bez-voditelya arenda-avto-komfort-klassa-bez-voditelya arenda-avto-biznes-klassa-bez-voditelya arenda-avto-premium-klassa-bez-voditelya arenda-minivena-bez-voditelya arenda-vnedorozhnika-bez-voditelya poblizosti; do
           if [ -z "$slug" ]; then
             page="$DIST/moskva/index.html"
@@ -180,17 +181,14 @@ jobs:
         grep -q 'drivebit-page-headline' "$DIST/search/bmw/index.html" || fail "bmw headline"
         grep -q '<h1' "$DIST/search/bmw/index.html" || fail "bmw h1"
         grep -q 'Аренда BMW без водителя в Москве' "$DIST/search/bmw/index.html" || fail "bmw h1 text"
-        grep -q 'callibri.js' "$DIST/search/bmw/index.html" || fail "bmw Callibri"
         grep -q 'drivebit-third-party-deferred' "$DIST/search/bmw/index.html" || fail "bmw third-party loader"
         grep -q 'canonical' "$DIST/search/bmw/index.html" || fail "search/bmw canonical"
         grep -q 'https://drivebit.ru/search/bmw' "$DIST/search/bmw/index.html" || fail "search/bmw canonical href"
         test -f "$DIST/search/bmw/x5/index.html" || fail "missing search/bmw/x5"
-        grep -q 'callibri.js' "$DIST/search/bmw/x5/index.html" || fail "bmw/x5 Callibri"
         test -f "$DIST/bmw/x5/index.html" || fail "missing bmw/x5 redirect stub"
         grep -q 'url=/search/bmw/x5' "$DIST/bmw/x5/index.html" || fail "bmw/x5 redirect"
         test -f "$DIST/search/audi/index.html" || fail "missing search/audi/index.html"
         grep -q 'Аренда Audi без водителя в Москве' "$DIST/search/audi/index.html" || fail "audi h1 text"
-        grep -q 'callibri.js' "$DIST/search/audi/index.html" || fail "audi Callibri"
         test -f "$DIST/bmw/index.html" || fail "missing bmw redirect stub"
         grep -q 'url=/search/bmw' "$DIST/bmw/index.html" || fail "bmw redirect to search/bmw"
         test -f "$DIST/audi/index.html" || fail "missing audi redirect stub"
@@ -198,7 +196,6 @@ jobs:
         test -f "$DIST/moskva/search/index.html" || fail "missing moskva/search"
         grep -q 'drivebit-page-headline' "$DIST/moskva/search/index.html" || fail "moskva/search headline"
         grep -q 'Поиск автомобилей для аренды в Москве' "$DIST/moskva/search/index.html" || fail "moskva/search h1 text"
-        grep -q 'callibri.js' "$DIST/moskva/search/index.html" || fail "moskva/search Callibri"
         grep -q 'drivebit-third-party-deferred' "$DIST/moskva/search/index.html" || fail "moskva/search third-party"
         test -f "$DIST/kaliningrad/search/index.html" || fail "kaliningrad/search"
         test -f "$DIST/krasnogorsk/search/index.html" || fail "krasnogorsk/search"
@@ -212,7 +209,7 @@ jobs:
         echo "Search brand SEO pages OK"
         test -f "$DIST/contacts/index.html" || fail "contacts"
         grep -q 'drivebit-contacts-page' "$DIST/contacts/index.html" || fail "contacts marker"
-        grep -q 'callibri.js' "$DIST/contacts/index.html" || fail "contacts Callibri"
+        grep -q 'drivebit-compose-idle-loader' "$DIST/contacts/index.html" || fail "contacts compose idle loader"
         echo "Contacts static page OK"
 
     - name: Show built index.html title

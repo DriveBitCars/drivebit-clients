@@ -3,6 +3,8 @@ const METRIKA_COUNTER_ID = 105947907;
 const CALLIBRI_URL = "//cdn.callibri.ru/callibri.js";
 const JIVO_URL = "//code.jivo.ru/widget/MWoBzLXYYF";
 const LOG_PREFIX = "[DriveBit/Callibri]";
+const CALLIBRI_FALLBACK_MS = 4000;
+const INTERACTION_EVENTS = ["pointerdown", "keydown", "scroll", "touchstart"];
 
 function log(env) {
     const args = Array.prototype.slice.call(arguments, 1);
@@ -110,7 +112,7 @@ export function loadMetrika(env, onTagReady) {
 
     window.ym(METRIKA_COUNTER_ID, "init", {
         ssr: true,
-        webvisor: true,
+        webvisor: false,
         clickmap: true,
         ecommerce: "dataLayer",
         accurateTrackBounce: true,
@@ -118,16 +120,16 @@ export function loadMetrika(env, onTagReady) {
     });
 }
 
-/** Prefer static docs tag; dynamic insert is fallback only. */
+/** Prefer existing tag; dynamic insert is the normal path after HTML eager tags removed. */
 export function loadCallibri(env, attempt) {
     const { document, window } = env;
     const existing = findCallibriScript(document);
     if (existing) {
-        log(env, "Callibri static/docs tag found in DOM:", existing.src || "(inline)");
+        log(env, "Callibri script already in DOM:", existing.src || "(inline)");
         verifyCallibriInstalled(env, 0);
         return;
     }
-    warn(env, "Static Callibri tag missing — fallback dynamic insert");
+    log(env, "Callibri: dynamic insert (idle/interaction deferred)");
     const script = document.createElement("script");
     script.src = CALLIBRI_URL;
     script.type = "text/javascript";
@@ -146,6 +148,52 @@ export function loadCallibri(env, attempt) {
         }
     };
     document.head.appendChild(script);
+}
+
+export function scheduleDeferredCallibri(env) {
+    const { window } = env;
+    if (env._callibriScheduled) {
+        return;
+    }
+    env._callibriScheduled = true;
+
+    let started = false;
+    function start() {
+        if (started) return;
+        started = true;
+        cleanup();
+        loadCallibri(env, 0);
+    }
+
+    function onInteraction() {
+        start();
+    }
+
+    function cleanup() {
+        for (let i = 0; i < INTERACTION_EVENTS.length; i++) {
+            window.removeEventListener(INTERACTION_EVENTS[i], onInteraction);
+        }
+        if (env._callibriFallbackId != null && typeof window.clearTimeout === "function") {
+            window.clearTimeout(env._callibriFallbackId);
+        }
+    }
+
+    for (let i = 0; i < INTERACTION_EVENTS.length; i++) {
+        window.addEventListener(INTERACTION_EVENTS[i], onInteraction, { once: true, passive: true });
+    }
+
+    if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(
+            function () {
+                start();
+            },
+            { timeout: CALLIBRI_FALLBACK_MS },
+        );
+    }
+
+    env._callibriFallbackId = window.setTimeout(function () {
+        start();
+    }, CALLIBRI_FALLBACK_MS);
 }
 
 export function loadJivo(env) {
@@ -172,9 +220,9 @@ function afterLoad(env, fn) {
 }
 
 export function bootThirdPartyScripts(env) {
-    log(env, "boot: Metrika first, then verify Callibri (docs snippet before </body>)");
+    log(env, "boot: Metrika first, Callibri deferred to idle/interaction");
     loadMetrika(env, function () {
-        loadCallibri(env, 0);
+        scheduleDeferredCallibri(env);
     });
 
     afterLoad(env, function () {

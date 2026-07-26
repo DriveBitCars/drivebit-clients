@@ -72,6 +72,9 @@ jobs:
     - name: Third-party loader unit tests
       run: npm run test:third-party
 
+    - name: Compose idle loader unit tests
+      run: npm run test:compose-idle
+
     - name: Static filter unit tests
       run: npm run test:filters
 
@@ -80,6 +83,9 @@ jobs:
 
     - name: Verify third-party loader in HTML shells
       run: npm run verify:third-party-loader
+
+    - name: Verify compose idle loader in marketing shells
+      run: npm run verify:compose-idle-loader
 
     - name: Quick static analysis
       run: ./gradlew ktlintCheck --no-daemon --stacktrace --parallel
