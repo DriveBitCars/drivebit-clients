@@ -3,7 +3,8 @@ name: test-end-to-end-dev
 description: >-
   Run commit-push-tests, merge to trunk, wait for GitHub Pages deploy to
   dev.drivebit.ru, then verify main web flows in the browser (desktop + mobile)
-  with screenshots. Use when the user says /test-end-to-end-dev,
+  with screenshots, console error checks, and Hawk Garage
+  (https://garage.hawk.so/). Use when the user says /test-end-to-end-dev,
   /test-ene-to-end-dev, «проверь на pages-dev», «e2e на деве», «на мобильном»,
   or asks to commit-push then validate GitHub Pages / pages-dev.
 ---
@@ -18,6 +19,8 @@ Pipeline:
 2. **Merge PR into `trunk`** (Pages deploys only from `trunk`)
 3. **Wait for GitHub Pages deploy** (`Deploy to GitHub Pages` → `dev.drivebit.ru`)
 4. **Browser e2e** on pages-dev: **desktop + mobile** main flows + screenshots
+5. **Console errors** — capture and fail on unexpected JS/`pageerror` / `console.error`
+6. **Hawk Garage** — check https://garage.hawk.so/ for new errors from the e2e window
 
 This skill does **not** create a GitHub Release or run production `deploy.yml`.
 For prod ship use `drivebit-ship-release`.
@@ -39,6 +42,7 @@ For prod ship use `drivebit-ship-release`.
 | Pages workflow | `.github/workflows/github-pages.yml` (`Deploy to GitHub Pages`) |
 | Pages trigger | push to `trunk` or `workflow_dispatch` |
 | Prod site | `https://drivebit.ru` (out of scope here) |
+| Hawk errors UI | https://garage.hawk.so/ |
 | Home filters regression doc | `docs/home-filters-url-regression.md` |
 
 ## Progress checklist
@@ -51,7 +55,9 @@ Progress:
 - [ ] 4. Browser smoke desktop on pages-dev
 - [ ] 5. Browser smoke + key flows on mobile viewport
 - [ ] 6. Screenshots (desktop + mobile)
-- [ ] 7. Report PR + Pages run + screenshot evidence
+- [ ] 7. Console: no unexpected pageerror / console.error
+- [ ] 8. Hawk Garage: no new errors from this e2e window (https://garage.hawk.so/)
+- [ ] 9. Report PR + Pages run + screenshot + console + Hawk evidence
 ```
 
 ## 1. Commit → push → CI
@@ -96,7 +102,7 @@ Expect HTTP 200 on the final host (`.ru` may 301 to `.my`; allow short retry if 
 
 Base URL: start from **`https://dev.drivebit.ru`**, follow redirects; interact on the live host (usually **`https://dev.drivebit.my`**).
 
-Prefer **cursor-ide-browser** MCP when available. If missing, use **Playwright** (`devices["iPhone 14"]` / `Pixel 7`) — still required to produce real screenshots. `scripts/verify-prod-smoke.mjs` is optional helper only.
+Prefer **cursor-ide-browser** MCP when available. If missing, use **Playwright** (`devices["iPhone 14"]` / `Pixel 7`) — still required to produce real screenshots. `scripts/verify-prod-smoke.mjs` / `scripts/e2e-pages-dev-inp.mjs` are optional helpers only.
 
 ### Required page checks (desktop **and** mobile)
 
@@ -169,7 +175,47 @@ Save evidence under `tmp/e2e-*-regress/` or `tmp/e2e-mobile-home-filters/` and u
 3. One brand or contacts page
 4. If filters/nearby were in scope: one filter selected + nearby map **or** List
 
-Keep images for the final report. Note any JS `pageerror` in the report.
+Keep images for the final report.
+
+### Console errors (required)
+
+On **every** e2e page (desktop and mobile), collect:
+
+- Playwright / browser **`pageerror`** (uncaught exceptions)
+- **`console` messages** of type `error` (and treat `pageerror` as hard failures)
+
+Wire listeners **before** `goto`:
+
+```js
+page.on("pageerror", (e) => pageErrors.push(String(e?.message || e)));
+page.on("console", (msg) => {
+  if (msg.type() === "error") consoleErrors.push(msg.text());
+});
+```
+
+**Fail the skill** if any unexpected `pageerror` or `console.error` appears during the smoke.
+
+Allowlist only clearly known noise (document each allowed string in the report), for example:
+
+- Third-party blocked in headless (Metrika / Callibri / Jivo network failures) when the app shell still works
+- Broken remote image 404 noise that does not break UI
+
+Do **not** allowlist app/Compose/Kotlin/JS exceptions, blank `#root`, or Hawk catcher init failures on pages-dev.
+
+Include console/`pageerror` lists in the final report (empty list = pass).
+
+### Hawk Garage (required)
+
+After browser e2e (or overlapping it), open **https://garage.hawk.so/** and check the DriveBit project for errors tied to this run:
+
+1. Prefer environment **`development`** (pages-dev: `dev.drivebit.ru` / `dev.drivebit.my` — see `HawkErrorTracking.kt` `hawkEnvironment`)
+2. Look at events from **now − ~15–30 minutes** (cover the e2e window)
+3. Fail if **new** errors appeared that match the flows you just exercised (home, search, auth, contacts, filters)
+4. Note event titles / counts / links in the report
+
+If Garage requires login and you cannot authenticate, say so explicitly in the report and still fail closed on **browser console/`pageerror`** evidence — do not claim “no Hawk errors” without opening Garage or an API equivalent.
+
+Optional: correlate that `window.__drivebitHawk` exists on pages-dev after load (Hawk catcher initialized); absence alone is not a pass for Garage.
 
 ### Fail the skill if
 
@@ -178,6 +224,8 @@ Keep images for the final report. Note any JS `pageerror` in the report.
 - City home or search is blank / broken shell
 - Hero→search navigation fails when the button exists
 - **Mobile pass skipped** (desktop-only is not enough)
+- **Unexpected console `error` or `pageerror` during e2e**
+- **New relevant errors in Hawk Garage** for the e2e window (or Garage not checked without an explicit auth blocker note)
 - You only ran commit-push-tests without Pages + browser proof
 
 ## 5. Report
@@ -190,7 +238,9 @@ Return:
 - Pages-dev base URL used (note `.ru` → `.my` if redirected)
 - Short pass/fail per checked path (**desktop and mobile**)
 - Screenshot paths / attachments (both viewports)
-- Known limitations (analytics blocked in headless, broken image 404 noise, etc.)
+- Console / `pageerror` summary (empty = clean)
+- Hawk Garage check: URL https://garage.hawk.so/, environment, time window, new errors yes/no (+ links if any)
+- Known limitations (analytics blocked in headless, broken image 404 noise, Garage auth blocker, etc.)
 
 ## Red flags — STOP
 
@@ -198,6 +248,8 @@ Return:
 - Testing **prod** `drivebit.ru` instead of **dev** (unless user asked)
 - Skipping screenshots
 - Skipping **mobile** viewport
+- Skipping **console error** collection
+- Skipping **https://garage.hawk.so/** (or claiming clean Hawk without looking)
 - Merging then releasing/prod-deploy under this skill
 - Leaving new skill/task files untracked
 
@@ -206,4 +258,6 @@ Return:
 - `commit-push-tests` — stage/commit/push/CI only
 - `drivebit-ship-release` — merge + GitHub Release + prod deploy + prod smoke
 - `scripts/verify-prod-smoke.mjs` — reusable smoke ideas; pass pages-dev base if using as helper
+- `scripts/e2e-pages-dev-inp.mjs` — optional INP/deferral-oriented smoke
 - `docs/home-filters-url-regression.md` — URL-first home filters checklist + last results
+- `AppHeader/.../HawkErrorTracking.kt` — Hawk token/env mapping for pages-dev → `development`
