@@ -228,6 +228,19 @@ test("Callibri loads on fallback timeout after Metrika ready", () => {
     assert.ok(env.callibriScript(), "Callibri loads on fallback timeout");
 });
 
+test("Callibri still schedules when Metrika tag.js fails to load", () => {
+    const env = createMockEnv();
+    bootThirdPartyScripts(env);
+
+    assert.equal(env.callibriScript(), undefined);
+    assert.equal(typeof env.metrikaScript()?.onerror, "function", "Metrika must have onerror");
+    env.metrikaScript().onerror?.();
+
+    assert.ok(env.idleCallback, "Callibri deferral must start after Metrika error");
+    env.runIdle();
+    assert.ok(env.callibriScript(), "Callibri must load even if Metrika fails");
+});
+
 test("Jivo is scheduled on window.load, not before", () => {
     const env = createMockEnv();
     bootThirdPartyScripts(env);

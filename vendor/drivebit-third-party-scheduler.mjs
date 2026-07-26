@@ -100,8 +100,16 @@ export function loadMetrika(env, onTagReady) {
         tagScript.async = true;
         tagScript.src = METRIKA_TAG_URL;
         if (onTagReady) {
-            tagScript.onload = function () {
+            let readyFired = false;
+            function fireReady() {
+                if (readyFired) return;
+                readyFired = true;
                 onTagReady();
+            }
+            tagScript.onload = fireReady;
+            tagScript.onerror = function () {
+                warn(env, "Metrika tag.js failed; continuing with Callibri deferral");
+                fireReady();
             };
         }
         firstScript.parentNode.insertBefore(tagScript, firstScript);
