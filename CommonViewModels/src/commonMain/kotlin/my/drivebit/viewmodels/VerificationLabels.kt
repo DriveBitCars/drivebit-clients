@@ -4,9 +4,9 @@ object VerificationLabels {
     const val PASSPORT = "ПАСПОРТ"
     const val DRIVER_LICENSE = "ВУ"
     const val STS = "СТС"
-    const val OWNER = "ВЛАДЕЛЕЦ"
+    const val OWNER = "ПРОВЕРЕННЫЙ ВЛАДЕЛЕЦ"
     const val RENTER = "АРЕНДАТОР"
-    const val CAR = "АВТО"
+    const val CAR = "СТС"
 
     fun forUser(
         isPassportVerified: Boolean,
