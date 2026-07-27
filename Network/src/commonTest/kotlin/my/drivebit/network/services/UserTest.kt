@@ -13,7 +13,9 @@ import my.drivebit.network.NetworkException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class UserTest {
     @Test
@@ -91,7 +93,9 @@ class UserTest {
                     "middleName": "Middle",
                     "email": "user@example.com",
                     "createdAt": "2025-12-02T19:14:47.914Z",
-                    "photos": ["photo1.jpg", "photo2.jpg"]
+                    "photos": ["photo1.jpg", "photo2.jpg"],
+                    "isPassportVerified": true,
+                    "isDriverLicenseVerified": true
                 }
                 """.trimIndent()
 
@@ -126,6 +130,45 @@ class UserTest {
             assertEquals(2, result.photos.size)
             assertEquals("photo1.jpg", result.photos[0])
             assertEquals("photo2.jpg", result.photos[1])
+            assertTrue(result.isPassportVerified)
+            assertTrue(result.isDriverLicenseVerified)
+        }
+
+    @Test
+    fun `userGet defaults verification flags to false when absent`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "phone": "+1234567890",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "createdAt": "2025-12-02T19:14:47.914Z",
+                    "photos": []
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine {
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val result = UserImpl(httpClient).userGet()
+
+            assertFalse(result.isPassportVerified)
+            assertFalse(result.isDriverLicenseVerified)
         }
 
     @Test

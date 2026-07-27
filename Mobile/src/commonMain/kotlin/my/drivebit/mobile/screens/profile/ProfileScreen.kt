@@ -27,10 +27,12 @@ import my.drivebit.network.services.UserGetResponse
 import my.drivebit.shared.storage.Storage
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
+import my.drivebit.ui.components.VerificationBadgeRow
 import my.drivebit.ui.theme.DrivebitTheme
 import my.drivebit.utils.mapIso8601ToMonthYearString
 import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
+import my.drivebit.viewmodels.VerificationLabels
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 
@@ -117,6 +119,12 @@ fun ProfileScreenContent(
                                 user.lastName?.let { append(" $it") }
                             }.trim(),
                         style = MaterialTheme.typography.headlineMedium,
+                    )
+                    VerificationBadgeRow(
+                        VerificationLabels.forUser(
+                            isPassportVerified = user.isPassportVerified,
+                            isDriverLicenseVerified = user.isDriverLicenseVerified,
+                        ),
                     )
                 }
 

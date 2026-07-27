@@ -1,5 +1,7 @@
 package my.drivebit.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -8,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
@@ -61,16 +64,25 @@ fun ApplicationTopBar(
     title: String,
     onBackClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    badges: List<String> = emptyList(),
 ) {
+    val titleContent: @Composable () -> Unit = {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            VerificationBadgeRow(badges)
+        }
+    }
+
     if (onBackClick != null) {
         TopAppBar(
-            title = {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            },
+            title = titleContent,
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
                     Icon(
@@ -90,13 +102,7 @@ fun ApplicationTopBar(
         )
     } else {
         TopAppBar(
-            title = {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            },
+            title = titleContent,
             colors =
                 TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,

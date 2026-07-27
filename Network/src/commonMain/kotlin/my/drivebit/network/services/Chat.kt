@@ -173,6 +173,8 @@ data class ChatParticipantDto(
     val id: String,
     val name: String? = null,
     val avatar: String? = null,
+    @JsonNames("isPassportVerified", "is_passport_verified") val isPassportVerified: Boolean = false,
+    @JsonNames("isDriverLicenseVerified", "is_driver_license_verified") val isDriverLicenseVerified: Boolean = false,
 )
 
 @Serializable
@@ -188,6 +190,8 @@ data class ChatLastMessageDto(
 data class MessageSenderDto(
     val id: String,
     val name: String? = null,
+    @JsonNames("isPassportVerified", "is_passport_verified") val isPassportVerified: Boolean = false,
+    @JsonNames("isDriverLicenseVerified", "is_driver_license_verified") val isDriverLicenseVerified: Boolean = false,
 )
 
 @Serializable

@@ -50,6 +50,7 @@ import my.drivebit.ui.components.Loader
 import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.viewmodels.ChatDetailViewModel
 import my.drivebit.viewmodels.ChatPayEffect
+import my.drivebit.viewmodels.VerificationLabels
 import org.koin.compose.currentKoinScope
 import org.koin.core.parameter.parametersOf
 
@@ -114,6 +115,11 @@ data class ChatScreen(
                 ApplicationTopBar(
                     title = chatDetail?.participant?.name?.takeIf { it.isNotBlank() } ?: "Чат",
                     onBackClick = { navigator.pop() },
+                    badges =
+                        VerificationLabels.forUser(
+                            isPassportVerified = chatDetail?.participant?.isPassportVerified == true,
+                            isDriverLicenseVerified = chatDetail?.participant?.isDriverLicenseVerified == true,
+                        ),
                 )
             },
         ) { innerPadding ->

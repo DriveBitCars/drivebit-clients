@@ -29,9 +29,11 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import kotlinx.coroutines.delay
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.canShowSignContractAsOwner
+import my.drivebit.ui.components.VerificationBadgeRow
 import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.DrivebitTheme
 import my.drivebit.viewmodels.MyBookingsAsOwnerViewModel
+import my.drivebit.viewmodels.VerificationLabels
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 
@@ -156,6 +158,12 @@ internal fun DealItemCard(
                 text = renterName,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
+            )
+            VerificationBadgeRow(
+                VerificationLabels.forBookingAsOwner(
+                    isRenterVerified = booking.isRenterVerified,
+                    isCarVerified = booking.isCarVerified,
+                ),
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

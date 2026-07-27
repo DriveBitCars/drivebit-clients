@@ -45,6 +45,7 @@ import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.ChatDetailViewModel
 import my.drivebit.viewmodels.ChatPayEffect
 import my.drivebit.viewmodels.UnreadMessagesViewModel
+import my.drivebit.viewmodels.VerificationLabels
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.disabled
@@ -159,6 +160,11 @@ fun ChatDetailPage() {
             ToolbarBackArrow(
                 title = chatDetail?.participant?.name?.takeIf { it.isNotBlank() } ?: "Чат",
                 onBackClick = { window.location.href = "/chats" },
+                badges =
+                    VerificationLabels.forUser(
+                        isPassportVerified = chatDetail?.participant?.isPassportVerified == true,
+                        isDriverLicenseVerified = chatDetail?.participant?.isDriverLicenseVerified == true,
+                    ),
             )
 
             when {

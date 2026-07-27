@@ -26,6 +26,7 @@ import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.components.UserAvatar
+import my.drivebit.components.VerificationBadgeRow
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
@@ -41,6 +42,7 @@ import my.drivebit.viewmodels.ProfileState
 import my.drivebit.viewmodels.ProfileViewModel
 import my.drivebit.viewmodels.TelegramLinkUiState
 import my.drivebit.viewmodels.TelegramLinkViewModel
+import my.drivebit.viewmodels.VerificationLabels
 import my.drivebit.viewmodels.isCheckboxChecked
 import my.drivebit.viewmodels.isCheckboxEnabled
 import my.drivebit.web.homePathHref
@@ -236,6 +238,12 @@ fun ProfilePage(viewModel: ProfileViewModel = koinInject()) {
                                     },
                                 )
                             }
+                            VerificationBadgeRow(
+                                VerificationLabels.forUser(
+                                    isPassportVerified = user.isPassportVerified,
+                                    isDriverLicenseVerified = user.isDriverLicenseVerified,
+                                ),
+                            )
                         }
                         user.createdAt.let { createdAt ->
                             val formattedDate = mapIso8601ToMonthYearString(createdAt)

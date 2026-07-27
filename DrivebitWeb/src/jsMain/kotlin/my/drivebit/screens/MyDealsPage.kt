@@ -16,6 +16,7 @@ import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyGray
 import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.VerificationBadgeRow
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.BookingDTO
@@ -25,6 +26,7 @@ import my.drivebit.utils.formatRelativeTime
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.viewmodels.MyBookingsAsOwnerViewModel
+import my.drivebit.viewmodels.VerificationLabels
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -165,6 +167,12 @@ private fun DealItemCard(
                     }
                     DealStatusTag(text = booking.statusTranslate?.takeIf { it.isNotBlank() } ?: booking.status)
                 }
+                VerificationBadgeRow(
+                    VerificationLabels.forBookingAsOwner(
+                        isRenterVerified = booking.isRenterVerified,
+                        isCarVerified = booking.isCarVerified,
+                    ),
+                )
                 Span({
                     style {
                         fontSize(14.px)

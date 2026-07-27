@@ -31,8 +31,10 @@ import kotlinx.datetime.Instant
 import my.drivebit.network.services.ChatListDto
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
+import my.drivebit.ui.components.VerificationBadgeRow
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.viewmodels.ChatListViewModel
+import my.drivebit.viewmodels.VerificationLabels
 import org.koin.compose.koinInject
 
 class ChatListScreen : Screen {
@@ -138,12 +140,20 @@ private fun ChatListItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(
-                        text = participantName,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = participantName,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        VerificationBadgeRow(
+                            VerificationLabels.forUser(
+                                isPassportVerified = chat.participant.isPassportVerified,
+                                isDriverLicenseVerified = chat.participant.isDriverLicenseVerified,
+                            ),
+                        )
+                    }
                     Text(
                         text = relativeTime,
                         style = MaterialTheme.typography.bodySmall,

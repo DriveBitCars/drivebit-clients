@@ -35,6 +35,7 @@ fun CarOwnerSection(
     memberSince: String?,
     rating: Double?,
     tripsCount: Int?,
+    verificationLabels: List<String> = emptyList(),
 ) {
     val ownerName = name.takeIf { it.isNotBlank() } ?: "Владелец"
 
@@ -66,14 +67,20 @@ fun CarOwnerSection(
             )
 
             Column(gap = 6.px) {
-                Span({
-                    style {
-                        fontSize(15.px)
-                        fontWeight("600")
-                        color(CSSColors.Black)
+                Row(
+                    gap = 8.px,
+                    alignItems = AlignItems.Center,
+                ) {
+                    Span({
+                        style {
+                            fontSize(15.px)
+                            fontWeight("600")
+                            color(CSSColors.Black)
+                        }
+                    }) {
+                        Text(ownerName)
                     }
-                }) {
-                    Text(ownerName)
+                    VerificationBadgeRow(verificationLabels)
                 }
 
                 memberSince?.takeIf { it.isNotBlank() }?.let { since ->

@@ -340,10 +340,12 @@ class CarDetailViewModelTest {
             mockCarService.carResponse =
                 mockCarService.carResponse.copy(
                     owner = ownerId,
+                    isStsVerified = true,
                     general =
                         mockCarService.carResponse.general.copy(
                             owner = ownerId,
                             ownerName = "Иван Иванов",
+                            isOwnerVerified = true,
                         ),
                 )
             val mockPhotoService =
@@ -371,6 +373,8 @@ class CarDetailViewModelTest {
             assertEquals("Иван Иванов", owner.name)
             assertEquals(null, owner.memberSince)
             assertEquals("https://example.com/avatar.jpg", owner.avatarUrl)
+            assertEquals(true, owner.isVerified)
+            assertEquals(true, state.car.isStsVerified)
         }
 
     @Test

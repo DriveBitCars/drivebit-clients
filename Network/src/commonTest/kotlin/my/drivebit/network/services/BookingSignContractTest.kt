@@ -111,6 +111,41 @@ class BookingSignContractTest {
         }
 
     @Test
+    fun `signContractAsOwner parses verification badge aggregates`() =
+        runTest {
+            val bookingId = "550e8400-e29b-41d4-a716-446655440000"
+            val mockEngine =
+                MockEngine {
+                    respond(
+                        content =
+                            """
+                            {
+                              "id": "$bookingId",
+                              "carId": "660e8400-e29b-41d4-a716-446655440001",
+                              "renterId": "770e8400-e29b-41d4-a716-446655440002",
+                              "ownerId": "880e8400-e29b-41d4-a716-446655440003",
+                              "startAt": "2026-05-28T10:00:00Z",
+                              "endAt": "2026-05-30T10:00:00Z",
+                              "totalAmount": 10000.0,
+                              "status": "Paid",
+                              "createdAt": "2026-05-27T10:00:00Z",
+                              "isOwnerVerified": true,
+                              "isRenterVerified": true,
+                              "isCarVerified": false
+                            }
+                            """.trimIndent(),
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+            val result = BookingImpl(HttpClient(mockEngine), HttpClient(mockEngine)).signContractAsOwner(bookingId)
+
+            assertTrue(result.isOwnerVerified)
+            assertTrue(result.isRenterVerified)
+            assertEquals(false, result.isCarVerified)
+        }
+
+    @Test
     fun `signContractAsRenter posts to renter endpoint and parses response`() =
         runTest {
             val bookingId = "550e8400-e29b-41d4-a716-446655440000"
