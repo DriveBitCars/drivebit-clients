@@ -19,6 +19,8 @@ class VerificationLabelsTest {
             listOf(VerificationLabels.OWNER, VerificationLabels.CAR),
             VerificationLabels.forBookingAsRenter(isOwnerVerified = true, isCarVerified = true),
         )
+        assertEquals("СТС", VerificationLabels.CAR)
+        assertEquals("ПРОВЕРЕННЫЙ ВЛАДЕЛЕЦ", VerificationLabels.OWNER)
     }
 
     @Test
