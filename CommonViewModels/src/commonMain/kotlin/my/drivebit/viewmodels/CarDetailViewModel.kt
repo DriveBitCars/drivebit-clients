@@ -50,6 +50,7 @@ data class CarOwnerUi(
     val name: String,
     val avatarUrl: String?,
     val memberSince: String?,
+    val isVerified: Boolean = false,
 )
 
 interface CarDetailViewModel {
@@ -90,6 +91,7 @@ class CarDetailViewModelImpl(
                 loadOwner(
                     ownerId = car.general.owner,
                     ownerName = car.general.ownerName,
+                    isVerified = car.general.isOwnerVerified,
                 )
                 loadBookingBlocks()
                 loadReviewsPage(1)
@@ -128,6 +130,7 @@ class CarDetailViewModelImpl(
     private fun loadOwner(
         ownerId: String?,
         ownerName: String?,
+        isVerified: Boolean,
     ) {
         if (ownerId.isNullOrBlank()) {
             return
@@ -143,6 +146,7 @@ class CarDetailViewModelImpl(
                         name = buildOwnerName(ownerName),
                         avatarUrl = avatarFromService,
                         memberSince = null,
+                        isVerified = isVerified,
                     )
                 }.getOrElse {
                     CarOwnerUi(
@@ -150,6 +154,7 @@ class CarDetailViewModelImpl(
                         name = buildOwnerName(ownerName),
                         avatarUrl = null,
                         memberSince = null,
+                        isVerified = isVerified,
                     )
                 }
 

@@ -13,6 +13,7 @@ import org.jetbrains.compose.web.dom.Text
 fun ToolbarBackArrow(
     title: String,
     onBackClick: () -> Unit,
+    badges: List<String> = emptyList(),
 ) {
     Div({
         style {
@@ -56,17 +57,28 @@ fun ToolbarBackArrow(
             }
         }
 
-        Span({
+        Div({
             style {
-                applyTypography(CSSTypography.Styles.body)
-                fontSize(CSSTypography.FontSize.xxxl)
-                fontWeight(CSSTypography.FontWeight.bold)
-                color(CSSColors.Black)
-                letterSpacing(0.5.px)
-                lineHeight("1.2")
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Row)
+                alignItems(AlignItems.Center)
+                gap(8.px)
+                flexWrap(FlexWrap.Wrap)
             }
         }) {
-            Text(title)
+            Span({
+                style {
+                    applyTypography(CSSTypography.Styles.body)
+                    fontSize(CSSTypography.FontSize.xxxl)
+                    fontWeight(CSSTypography.FontWeight.bold)
+                    color(CSSColors.Black)
+                    letterSpacing(0.5.px)
+                    lineHeight("1.2")
+                }
+            }) {
+                Text(title)
+            }
+            VerificationBadgeRow(badges)
         }
     }
 }

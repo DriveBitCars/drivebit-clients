@@ -31,6 +31,7 @@ import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarOwnerUi
 import my.drivebit.viewmodels.CarReviewUi
 import my.drivebit.viewmodels.RentViewModel
+import my.drivebit.viewmodels.VerificationLabels
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.StyleScope
@@ -226,6 +227,7 @@ private fun CarDetailInfoColumn(
         CarTitleSection(
             carName = carName,
             carYear = carYear,
+            verificationLabels = VerificationLabels.forCarSts(car.isStsVerified),
         )
 
         CarRatesSection(car)
@@ -247,6 +249,7 @@ private fun CarDetailInfoColumn(
                 memberSince = ownerInfo.memberSince,
                 rating = null,
                 tripsCount = null,
+                verificationLabels = VerificationLabels.forCarOwner(ownerInfo.isVerified),
             )
         }
 

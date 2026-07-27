@@ -7,6 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.parseResponse
 
@@ -44,6 +45,8 @@ data class UserGetResponse(
     val email: String? = null,
     val createdAt: String,
     val photos: List<String> = emptyList(),
+    @JsonNames("isPassportVerified", "is_passport_verified") val isPassportVerified: Boolean = false,
+    @JsonNames("isDriverLicenseVerified", "is_driver_license_verified") val isDriverLicenseVerified: Boolean = false,
 )
 
 @Serializable

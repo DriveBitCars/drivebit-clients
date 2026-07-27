@@ -41,10 +41,12 @@ import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.statusAllowsContractDownload
 import my.drivebit.network.services.statusAllowsRenterPayment
+import my.drivebit.ui.components.VerificationBadgeRow
 import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.DrivebitTheme
 import my.drivebit.viewmodels.ChatPayEffect
 import my.drivebit.viewmodels.MyBookingsAsRenterViewModel
+import my.drivebit.viewmodels.VerificationLabels
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 
@@ -207,6 +209,7 @@ internal fun BookingItemCard(
             .filter { it.isNotBlank() }
             .joinToString(" ")
             .ifBlank { "Автомобиль" }
+    val ownerName = booking.ownerName?.takeIf { it.isNotBlank() } ?: "Владелец"
     val dateRange = "${booking.startAt.take(10)} — ${booking.endAt.take(10)}"
     val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
     val canPay = booking.statusAllowsRenterPayment()
@@ -226,6 +229,17 @@ internal fun BookingItemCard(
                 text = carName,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = ownerName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            VerificationBadgeRow(
+                VerificationLabels.forBookingAsRenter(
+                    isOwnerVerified = booking.isOwnerVerified,
+                    isCarVerified = booking.isCarVerified,
+                ),
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

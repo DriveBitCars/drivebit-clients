@@ -17,10 +17,12 @@ import my.drivebit.components.ParticipantAvatar
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmartHeader
+import my.drivebit.components.VerificationBadgeRow
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.ChatListDto
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.viewmodels.ChatListViewModel
+import my.drivebit.viewmodels.VerificationLabels
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -130,6 +132,12 @@ private fun ChatListItem(
                     }) {
                         Text(participantName)
                     }
+                    VerificationBadgeRow(
+                        VerificationLabels.forUser(
+                            isPassportVerified = chat.participant.isPassportVerified,
+                            isDriverLicenseVerified = chat.participant.isDriverLicenseVerified,
+                        ),
+                    )
                     if (chat.unreadCount > 0) {
                         Span({
                             style {

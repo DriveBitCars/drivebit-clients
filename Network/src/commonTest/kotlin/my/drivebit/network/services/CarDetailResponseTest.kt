@@ -16,6 +16,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class CarDetailResponseTest {
     @Test
@@ -412,5 +413,56 @@ class CarDetailResponseTest {
 
             assertEquals(listOf("Belarus", "Crimea"), result.resolvedAllowedTravelDestinations())
             assertEquals(listOf("Беларусь", "В Крым"), result.resolvedAllowedTravelDestinationsTranslate())
+        }
+
+    @Test
+    fun `getCar should deserialize verification badges`() =
+        runTest {
+            val successResponse =
+                """
+                {
+                    "id": "22e09ade-47b3-45da-9195-d0b382a88fee",
+                    "isStsVerified": true,
+                    "general": {
+                        "brandName": "BMW",
+                        "modelName": "X5",
+                        "year": 2020,
+                        "licensePlate": "A123BC",
+                        "vin": "",
+                        "seats": 5,
+                        "ownerName": "Иван",
+                        "isOwnerVerified": true,
+                        "address": { "geoLat": 55.0, "geoLon": 37.0 }
+                    }
+                }
+                """.trimIndent()
+
+            val mockEngine =
+                MockEngine {
+                    respond(
+                        content = successResponse,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json(
+                            Json {
+                                ignoreUnknownKeys = true
+                                isLenient = true
+                                encodeDefaults = false
+                            },
+                        )
+                    }
+                }
+
+            val response = httpClient.get("https://drivebit.ru/api/Car/test-id")
+            val result: CarDetailResponse = response.parseResponse()
+
+            assertTrue(result.isStsVerified)
+            assertTrue(result.general.isOwnerVerified)
         }
 }
