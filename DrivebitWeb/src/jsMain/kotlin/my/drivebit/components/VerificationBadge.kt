@@ -6,8 +6,9 @@ import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.alignItems
-import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
@@ -29,8 +30,8 @@ fun VerificationBadge(text: String) {
         style {
             padding(4.px, 8.px)
             borderRadius(6.px)
-            backgroundColor(CSSColors.Gray300)
-            color(CSSColors.Gray600)
+            border(1.5.px, LineStyle.Solid, CSSColors.Blue)
+            color(CSSColors.Blue)
             fontSize(12.px)
             fontWeight("600")
         }
