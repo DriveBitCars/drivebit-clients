@@ -1,0 +1,14 @@
+---
+description: Always execute implementation plans inline; never ask Subagent vs Inline
+alwaysApply: true
+---
+
+# Plan execution preference
+
+When a written implementation plan is ready (after brainstorming / writing-plans):
+
+- **Always use Inline Execution** in the current session (`executing-plans`).
+- **Do not ask** whether to use Subagent-Driven vs Inline.
+- Do not offer that choice in the plan handoff message; proceed with inline execution (or say you are starting inline and begin).
+
+Subagent-driven development is only allowed if the user explicitly requests subagents for that task.

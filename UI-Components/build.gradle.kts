@@ -47,6 +47,10 @@ kotlin {
         }
 
         jsMain.dependencies { }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 
