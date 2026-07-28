@@ -1,6 +1,6 @@
 package my.drivebit.ui.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import my.drivebit.ui.theme.ColorsDriveBit
+import my.drivebit.ui.theme.VerificationBadgeStyle
 
 @Composable
 fun VerificationBadge(
@@ -23,9 +23,13 @@ fun VerificationBadge(
         text = text.uppercase(),
         modifier =
             modifier
-                .background(ColorsDriveBit.Gray300, RoundedCornerShape(6.dp))
+                .border(
+                    width = VerificationBadgeStyle.borderWidthDp.dp,
+                    color = VerificationBadgeStyle.borderColor,
+                    shape = RoundedCornerShape(6.dp),
+                )
                 .padding(horizontal = 8.dp, vertical = 4.dp),
-        color = ColorsDriveBit.Gray600,
+        color = VerificationBadgeStyle.contentColor,
         fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
     )
