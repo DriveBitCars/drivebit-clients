@@ -5,7 +5,11 @@ import kotlin.test.assertEquals
 
 class VerificationLabelsTest {
     @Test
-    fun `forUser returns verified user when passport and driver license verified`() {
+    fun `forUser returns verified user when passport verified`() {
+        assertEquals(
+            listOf(VerificationLabels.VERIFIED_USER),
+            VerificationLabels.forUser(isPassportVerified = true, isDriverLicenseVerified = false),
+        )
         assertEquals(
             listOf(VerificationLabels.VERIFIED_USER),
             VerificationLabels.forUser(isPassportVerified = true, isDriverLicenseVerified = true),
@@ -14,11 +18,7 @@ class VerificationLabelsTest {
     }
 
     @Test
-    fun `forUser returns individual document labels when only one verified`() {
-        assertEquals(
-            listOf(VerificationLabels.PASSPORT),
-            VerificationLabels.forUser(isPassportVerified = true, isDriverLicenseVerified = false),
-        )
+    fun `forUser returns driver license only when passport not verified`() {
         assertEquals(
             listOf(VerificationLabels.DRIVER_LICENSE),
             VerificationLabels.forUser(isPassportVerified = false, isDriverLicenseVerified = true),

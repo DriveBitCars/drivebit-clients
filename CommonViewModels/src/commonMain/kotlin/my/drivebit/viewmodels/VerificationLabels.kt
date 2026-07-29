@@ -1,7 +1,6 @@
 package my.drivebit.viewmodels
 
 object VerificationLabels {
-    const val PASSPORT = "ПАСПОРТ"
     const val DRIVER_LICENSE = "ВУ"
     const val STS = "СТС"
     const val VERIFIED_USER = "Проверенный пользователь"
@@ -14,12 +13,9 @@ object VerificationLabels {
         isDriverLicenseVerified: Boolean,
     ): List<String> =
         when {
-            isPassportVerified && isDriverLicenseVerified -> listOf(VERIFIED_USER)
-            else ->
-                buildList {
-                    if (isPassportVerified) add(PASSPORT)
-                    if (isDriverLicenseVerified) add(DRIVER_LICENSE)
-                }
+            isPassportVerified -> listOf(VERIFIED_USER)
+            isDriverLicenseVerified -> listOf(DRIVER_LICENSE)
+            else -> emptyList()
         }
 
     fun forCarOwner(isOwnerVerified: Boolean): List<String> = if (isOwnerVerified) listOf(OWNER) else emptyList()
