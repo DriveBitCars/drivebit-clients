@@ -2,9 +2,13 @@ package my.drivebit.analytics
 
 import kotlinx.browser.document
 import kotlinx.browser.window
+import my.drivebit.utils.BookingFunnelGoals
+import my.drivebit.utils.BookingFunnelSource
 import my.drivebit.utils.PaymentFunnelGoals
 import my.drivebit.utils.PaymentFunnelKind
 import my.drivebit.utils.PaymentFunnelSource
+import my.drivebit.utils.bookingFunnelCreateParams
+import my.drivebit.utils.bookingFunnelIntentParams
 import my.drivebit.utils.paymentFunnelParams
 import org.w3c.dom.HTMLScriptElement
 import kotlin.js.js
@@ -12,7 +16,6 @@ import kotlin.js.jsTypeOf
 
 private const val YANDEX_COUNTER_ID = 105947907
 private const val ARENDA_GOAL = "arenda"
-private const val BRON_GOAL = "bron"
 private const val DEFERRED_LOADER_PATH = "/vendor/drivebit-third-party-deferred.js"
 
 private fun ensureYandexMetrikaStub() {
@@ -51,7 +54,45 @@ fun reachYandexGoalArenda() {
 }
 
 fun reachYandexGoalBron() {
-    reachYandexGoal(BRON_GOAL)
+    reachYandexGoal(BookingFunnelGoals.LEGACY)
+}
+
+fun reachYandexGoalBronClick(carId: String) {
+    reachYandexGoal(BookingFunnelGoals.LEGACY)
+    reachYandexGoal(
+        BookingFunnelGoals.CLICK,
+        bookingFunnelIntentParams(BookingFunnelSource.Click, carId),
+    )
+}
+
+fun reachYandexGoalBronAuto(carId: String) {
+    reachYandexGoal(BookingFunnelGoals.LEGACY)
+    reachYandexGoal(
+        BookingFunnelGoals.AUTO,
+        bookingFunnelIntentParams(BookingFunnelSource.Auto, carId),
+    )
+}
+
+fun reachYandexGoalBronCreateOk(
+    source: BookingFunnelSource,
+    carId: String,
+    bookingId: String,
+) {
+    reachYandexGoal(
+        BookingFunnelGoals.CREATE_OK,
+        bookingFunnelCreateParams(source, carId, bookingId),
+    )
+}
+
+fun reachYandexGoalBronCreateFail(
+    source: BookingFunnelSource,
+    carId: String,
+    message: String?,
+) {
+    reachYandexGoal(
+        BookingFunnelGoals.CREATE_FAIL,
+        bookingFunnelCreateParams(source, carId, bookingId = null, message = message),
+    )
 }
 
 fun reachYandexGoalPayClick(

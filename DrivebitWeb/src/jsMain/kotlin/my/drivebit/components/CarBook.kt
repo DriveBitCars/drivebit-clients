@@ -18,7 +18,10 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
-import my.drivebit.analytics.reachYandexGoalBron
+import my.drivebit.analytics.reachYandexGoalBronAuto
+import my.drivebit.analytics.reachYandexGoalBronClick
+import my.drivebit.analytics.reachYandexGoalBronCreateFail
+import my.drivebit.analytics.reachYandexGoalBronCreateOk
 import my.drivebit.analytics.reachYandexGoalPayAlreadyPaid
 import my.drivebit.analytics.reachYandexGoalPayClick
 import my.drivebit.analytics.reachYandexGoalPayFail
@@ -27,8 +30,10 @@ import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.shared.storage.Storage
 import my.drivebit.utils.AUTO_BOOK_AFTER_LOGIN
+import my.drivebit.utils.BookingFunnelSource
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.PaymentFunnelKind
 import my.drivebit.utils.PaymentFunnelSource
@@ -41,7 +46,6 @@ import my.drivebit.utils.removeUrlQueryParam
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateFieldViewModel
 import my.drivebit.viewmodels.DateTimeFieldViewModel
-import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.viewmodels.PendingBookingPaymentUi
 import my.drivebit.viewmodels.RentPayEffect
 import my.drivebit.viewmodels.RentState
@@ -64,6 +68,7 @@ import kotlin.time.Duration.Companion.hours
 @Suppress("FunctionName")
 fun CarBook(
     viewModel: RentViewModel,
+    carId: String,
     disabledDates: Set<String> = emptySet(),
     initialStartAt: String? = null,
     initialEndAt: String? = null,
@@ -75,6 +80,9 @@ fun CarBook(
     val buttonViewModel = createButtonViewModel()
     val payButtonViewModel = createButtonViewModel()
     var lastCarPayKind by remember { mutableStateOf(PaymentFunnelKind.Full) }
+    var lastBookingIntentSource by remember { mutableStateOf<BookingFunnelSource?>(null) }
+    var reportedCreateOkBookingId by remember { mutableStateOf<String?>(null) }
+    var reportedCreateFailMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.payEffects.collect { effect ->
@@ -209,7 +217,10 @@ fun CarBook(
         if (bookState.showStartDateError || bookState.showEndDateError) return@LaunchedEffect
         autoBookConsumed = true
         removeUrlQueryParam(AUTO_BOOK_AFTER_LOGIN)
-        reachYandexGoalBron()
+        lastBookingIntentSource = BookingFunnelSource.Auto
+        reportedCreateOkBookingId = null
+        reportedCreateFailMessage = null
+        reachYandexGoalBronAuto(carId)
         viewModel.onBookClick()
     }
 
@@ -221,6 +232,22 @@ fun CarBook(
                 else -> ButtonState.Enabled
             },
         )
+    }
+
+    LaunchedEffect(bookState.pendingPaymentBookingId, lastBookingIntentSource) {
+        val bookingId = bookState.pendingPaymentBookingId ?: return@LaunchedEffect
+        val source = lastBookingIntentSource ?: return@LaunchedEffect
+        if (reportedCreateOkBookingId == bookingId) return@LaunchedEffect
+        reportedCreateOkBookingId = bookingId
+        reachYandexGoalBronCreateOk(source = source, carId = carId, bookingId = bookingId)
+    }
+
+    LaunchedEffect(bookState.createError, lastBookingIntentSource) {
+        val message = bookState.createError?.takeIf { it.isNotBlank() } ?: return@LaunchedEffect
+        val source = lastBookingIntentSource ?: return@LaunchedEffect
+        if (reportedCreateFailMessage == message) return@LaunchedEffect
+        reportedCreateFailMessage = message
+        reachYandexGoalBronCreateFail(source = source, carId = carId, message = message)
     }
 
     LaunchedEffect(bookState.startDate, bookState.endDate) {
@@ -424,7 +451,10 @@ fun CarBook(
                 enabledColor = CSSColors.Blue,
                 text = "Забронировать",
                 onClick = {
-                    reachYandexGoalBron()
+                    lastBookingIntentSource = BookingFunnelSource.Click
+                    reportedCreateOkBookingId = null
+                    reportedCreateFailMessage = null
+                    reachYandexGoalBronClick(carId)
                     viewModel.onBookClick()
                 },
             )

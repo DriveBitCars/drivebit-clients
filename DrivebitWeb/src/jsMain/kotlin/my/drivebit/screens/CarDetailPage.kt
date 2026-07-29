@@ -156,6 +156,7 @@ private fun CarDetailContent(
                     }) {
                         CarBook(
                             viewModel = rentViewModel,
+                            carId = car.id,
                             disabledDates = disabledBookingDates,
                             initialStartAt = getUrlParameter(START_AT).takeIf { it.isNotBlank() },
                             initialEndAt = getUrlParameter(END_AT).takeIf { it.isNotBlank() },
@@ -185,6 +186,7 @@ private fun CarDetailContent(
                     )
                     CarBook(
                         viewModel = rentViewModel,
+                        carId = car.id,
                         disabledDates = disabledBookingDates,
                         initialStartAt = getUrlParameter(START_AT).takeIf { it.isNotBlank() },
                         initialEndAt = getUrlParameter(END_AT).takeIf { it.isNotBlank() },
