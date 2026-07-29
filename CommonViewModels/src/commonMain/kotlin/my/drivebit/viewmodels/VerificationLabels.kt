@@ -4,6 +4,7 @@ object VerificationLabels {
     const val PASSPORT = "ПАСПОРТ"
     const val DRIVER_LICENSE = "ВУ"
     const val STS = "СТС"
+    const val VERIFIED_USER = "Проверенный пользователь"
     const val OWNER = "ПРОВЕРЕННЫЙ ВЛАДЕЛЕЦ"
     const val RENTER = "АРЕНДАТОР"
     const val CAR = "СТС"
@@ -12,9 +13,13 @@ object VerificationLabels {
         isPassportVerified: Boolean,
         isDriverLicenseVerified: Boolean,
     ): List<String> =
-        buildList {
-            if (isPassportVerified) add(PASSPORT)
-            if (isDriverLicenseVerified) add(DRIVER_LICENSE)
+        when {
+            isPassportVerified && isDriverLicenseVerified -> listOf(VERIFIED_USER)
+            else ->
+                buildList {
+                    if (isPassportVerified) add(PASSPORT)
+                    if (isDriverLicenseVerified) add(DRIVER_LICENSE)
+                }
         }
 
     fun forCarOwner(isOwnerVerified: Boolean): List<String> = if (isOwnerVerified) listOf(OWNER) else emptyList()
