@@ -21,7 +21,6 @@ import my.drivebit.components.CarTitleSection
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
 import my.drivebit.components.ResponsiveContainer
-import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.utils.END_AT
 import my.drivebit.utils.START_AT
@@ -33,11 +32,13 @@ import my.drivebit.viewmodels.CarReviewUi
 import my.drivebit.viewmodels.RentViewModel
 import my.drivebit.viewmodels.VerificationLabels
 import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
-import org.jetbrains.compose.web.css.flexWrap
+import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.minWidth
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -136,54 +137,43 @@ private fun CarDetailContent(
         CarPhotosSection(car)
 
         ResponsiveContainer { isMobile ->
-            if (isMobile) {
-                Column(gap = 24.px) {
-                    CarDetailInfoColumn(
-                        car = car,
-                        owner = owner,
-                        reviews = reviews,
-                        reviewsPage = reviewsPage,
-                        reviewsTotalPages = reviewsTotalPages,
-                        reviewsTotalCount = reviewsTotalCount,
-                        reviewsLoading = reviewsLoading,
-                        reviewsError = reviewsError,
-                        onLoadReviewsPage = onLoadReviewsPage,
-                    )
-                    Div({
-                        style {
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(if (isMobile) FlexDirection.Column else FlexDirection.Row)
+                    property("flex-wrap", if (isMobile) "nowrap" else "wrap")
+                    alignItems(if (isMobile) AlignItems.Stretch else AlignItems.FlexStart)
+                    property("gap", "24px")
+                    width(100.percent)
+                }
+            }) {
+                CarDetailInfoColumn(
+                    car = car,
+                    owner = owner,
+                    reviews = reviews,
+                    reviewsPage = reviewsPage,
+                    reviewsTotalPages = reviewsTotalPages,
+                    reviewsTotalCount = reviewsTotalCount,
+                    reviewsLoading = reviewsLoading,
+                    reviewsError = reviewsError,
+                    onLoadReviewsPage = onLoadReviewsPage,
+                    modifier =
+                        if (isMobile) {
+                            null
+                        } else {
+                            {
+                                flex(2)
+                                minWidth(0.px)
+                            }
+                        },
+                )
+                Div({
+                    style {
+                        if (isMobile) {
                             width(100.percent)
                         }
-                    }) {
-                        CarBook(
-                            viewModel = rentViewModel,
-                            carId = car.id,
-                            disabledDates = disabledBookingDates,
-                            initialStartAt = getUrlParameter(START_AT).takeIf { it.isNotBlank() },
-                            initialEndAt = getUrlParameter(END_AT).takeIf { it.isNotBlank() },
-                        )
                     }
-                }
-            } else {
-                Row(
-                    gap = 24.px,
-                    flexWrap = FlexWrap.Wrap,
-                    alignItems = AlignItems.FlexStart,
-                ) {
-                    CarDetailInfoColumn(
-                        car = car,
-                        owner = owner,
-                        reviews = reviews,
-                        reviewsPage = reviewsPage,
-                        reviewsTotalPages = reviewsTotalPages,
-                        reviewsTotalCount = reviewsTotalCount,
-                        reviewsLoading = reviewsLoading,
-                        reviewsError = reviewsError,
-                        onLoadReviewsPage = onLoadReviewsPage,
-                        modifier = {
-                            flex(2)
-                            minWidth(0.px)
-                        },
-                    )
+                }) {
                     CarBook(
                         viewModel = rentViewModel,
                         carId = car.id,

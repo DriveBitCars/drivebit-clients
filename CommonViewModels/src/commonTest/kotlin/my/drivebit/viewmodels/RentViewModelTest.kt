@@ -61,6 +61,7 @@ private class FakeBooking(
     private val createError: Exception? = null,
 ) : Booking {
     var calculateCalls = mutableListOf<CheckBookingAvailabilityRequest>()
+    var createCalls = 0
 
     override suspend fun calculate(request: CheckBookingAvailabilityRequest): CheckBookingAvailabilityResponse {
         calculateCalls.add(request)
@@ -90,9 +91,10 @@ private class FakeBooking(
     override suspend fun createAsRenter(
         request: my.drivebit.network.services.CreateBookingRequest,
     ): my.drivebit.network.services.BookingDTO {
+        createCalls += 1
         createError?.let { throw it }
         return my.drivebit.network.services.BookingDTO(
-            id = "booking-1",
+            id = "booking-$createCalls",
             carId = request.carId,
             carBrandName = null,
             carModelName = null,
@@ -632,5 +634,123 @@ class RentViewModelTest {
 
             val state = viewModel.state.value as RentState.Book
             assertEquals("", state.depositAmount)
+        }
+
+    @Test
+    fun `setStartDate with same start does not clear pendingPaymentBookingId after create`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                )
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = FakePayment(),
+                    storage = FakeStorage(isLoggedIn = true),
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+            val start = "2025-02-16T10:00:00Z"
+            val end = "2025-02-18T10:00:00Z"
+            viewModel.setStartDate(start)
+            advanceUntilIdle()
+            viewModel.setEndDate(end)
+            advanceUntilIdle()
+            viewModel.onBookClick()
+            advanceUntilIdle()
+
+            assertEquals("booking-1", (viewModel.state.value as RentState.Book).pendingPaymentBookingId)
+
+            viewModel.setStartDate(start)
+            advanceUntilIdle()
+
+            val after = viewModel.state.value as RentState.Book
+            assertEquals("booking-1", after.pendingPaymentBookingId)
+            assertTrue(after.pendingBookingPaymentUi is PendingBookingPaymentUi.AwaitingOwnerConfirmation)
+        }
+
+    @Test
+    fun `setInitialDates with same range does not clear pendingPaymentBookingId after create`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                )
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = FakePayment(),
+                    storage = FakeStorage(isLoggedIn = true),
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+            val start = "2025-02-16T10:00:00Z"
+            val end = "2025-02-18T10:00:00Z"
+            viewModel.setInitialDates(start, end)
+            advanceUntilIdle()
+            viewModel.onBookClick()
+            advanceUntilIdle()
+
+            assertEquals("booking-1", (viewModel.state.value as RentState.Book).pendingPaymentBookingId)
+
+            viewModel.setInitialDates(start, end)
+            advanceUntilIdle()
+
+            assertEquals("booking-1", (viewModel.state.value as RentState.Book).pendingPaymentBookingId)
+        }
+
+    @Test
+    fun `tryConsumeAutoBookAfterLogin returns true only once`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val viewModel =
+                RentViewModelImpl(
+                    booking =
+                        FakeBooking(
+                            calculateResult = {
+                                CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0)
+                            },
+                        ),
+                    payment = FakePayment(),
+                    storage = FakeStorage(isLoggedIn = true),
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+
+            assertTrue(viewModel.tryConsumeAutoBookAfterLogin())
+            assertFalse(viewModel.tryConsumeAutoBookAfterLogin())
+            assertFalse(viewModel.tryConsumeAutoBookAfterLogin())
+        }
+
+    @Test
+    fun `second auto book click is ignored while first create is in flight`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                )
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = FakePayment(),
+                    storage = FakeStorage(isLoggedIn = true),
+                    carId = "car-1",
+                    coroutineScope = testScope,
+                )
+            viewModel.setInitialDates("2025-02-16T10:00:00Z", "2025-02-18T10:00:00Z")
+            advanceUntilIdle()
+
+            assertTrue(viewModel.tryConsumeAutoBookAfterLogin())
+            viewModel.onBookClick()
+            assertFalse(viewModel.tryConsumeAutoBookAfterLogin())
+            viewModel.onBookClick()
+            advanceUntilIdle()
+
+            assertEquals(1, booking.createCalls)
+            assertEquals("booking-1", (viewModel.state.value as RentState.Book).pendingPaymentBookingId)
         }
 }
