@@ -18,9 +18,9 @@ class VerificationLabelsTest {
     }
 
     @Test
-    fun `forUser returns driver license only when passport not verified`() {
+    fun `forUser returns verified user when only driver license verified`() {
         assertEquals(
-            listOf(VerificationLabels.DRIVER_LICENSE),
+            listOf(VerificationLabels.VERIFIED_USER),
             VerificationLabels.forUser(isPassportVerified = false, isDriverLicenseVerified = true),
         )
         assertEquals(emptyList(), VerificationLabels.forUser(false, false))
@@ -37,20 +37,48 @@ class VerificationLabelsTest {
     }
 
     @Test
-    fun `forBookingAsRenter returns owner and car labels`() {
-        assertEquals(
-            listOf(VerificationLabels.OWNER, VerificationLabels.CAR),
-            VerificationLabels.forBookingAsRenter(isOwnerVerified = true, isCarVerified = true),
-        )
-        assertEquals("СТС", VerificationLabels.CAR)
-        assertEquals("ПРОВЕРЕННЫЙ ВЛАДЕЛЕЦ", VerificationLabels.OWNER)
+    fun `forCarSts never returns STS label`() {
+        assertEquals(emptyList(), VerificationLabels.forCarSts(isStsVerified = true))
+        assertEquals(emptyList(), VerificationLabels.forCarSts(isStsVerified = false))
     }
 
     @Test
-    fun `forBookingAsOwner returns renter and car labels`() {
+    fun `forBookingAsRenter returns verified user when any document verified`() {
         assertEquals(
-            listOf(VerificationLabels.RENTER),
+            listOf(VerificationLabels.VERIFIED_USER),
+            VerificationLabels.forBookingAsRenter(isOwnerVerified = true, isCarVerified = true),
+        )
+        assertEquals(
+            listOf(VerificationLabels.VERIFIED_USER),
+            VerificationLabels.forBookingAsRenter(isOwnerVerified = true, isCarVerified = false),
+        )
+        assertEquals(
+            listOf(VerificationLabels.VERIFIED_USER),
+            VerificationLabels.forBookingAsRenter(isOwnerVerified = false, isCarVerified = true),
+        )
+        assertEquals(
+            emptyList(),
+            VerificationLabels.forBookingAsRenter(isOwnerVerified = false, isCarVerified = false),
+        )
+    }
+
+    @Test
+    fun `forBookingAsOwner returns verified user when any document verified`() {
+        assertEquals(
+            listOf(VerificationLabels.VERIFIED_USER),
             VerificationLabels.forBookingAsOwner(isRenterVerified = true, isCarVerified = false),
+        )
+        assertEquals(
+            listOf(VerificationLabels.VERIFIED_USER),
+            VerificationLabels.forBookingAsOwner(isRenterVerified = false, isCarVerified = true),
+        )
+        assertEquals(
+            listOf(VerificationLabels.VERIFIED_USER),
+            VerificationLabels.forBookingAsOwner(isRenterVerified = true, isCarVerified = true),
+        )
+        assertEquals(
+            emptyList(),
+            VerificationLabels.forBookingAsOwner(isRenterVerified = false, isCarVerified = false),
         )
     }
 }
