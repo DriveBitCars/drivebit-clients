@@ -96,6 +96,8 @@ interface RentViewModel {
 
     fun onBookClick()
 
+    fun tryConsumeAutoBookAfterLogin(): Boolean
+
     fun payCreatedBooking(
         kind: BookingCheckoutKind,
         returnUrl: String,
@@ -117,6 +119,7 @@ class RentViewModelImpl(
     private val viewModelScope = coroutineScope
     private var calculateJob: Job? = null
     private var createJob: Job? = null
+    private var autoBookAfterLoginConsumed: Boolean = false
 
     private val _state = MutableStateFlow<RentState>(RentState.Book())
     override val state: StateFlow<RentState> = _state.asStateFlow()
@@ -127,6 +130,12 @@ class RentViewModelImpl(
     private val _payEffects = MutableSharedFlow<RentPayEffect>(extraBufferCapacity = 1)
     override val payEffects: SharedFlow<RentPayEffect> = _payEffects.asSharedFlow()
 
+    override fun tryConsumeAutoBookAfterLogin(): Boolean {
+        if (autoBookAfterLoginConsumed) return false
+        autoBookAfterLoginConsumed = true
+        return true
+    }
+
     override fun consumeNavigationEvent() {
         _state.value = RentState.Book()
     }
@@ -134,6 +143,9 @@ class RentViewModelImpl(
     override fun setStartDate(date: String?) {
         _state.update {
             if (it is RentState.Book) {
+                if (sameBookingInstant(it.startDate, date)) {
+                    return@update it.copy(showStartDateError = false)
+                }
                 val currentEnd = it.endDate
                 val endDate =
                     when {
@@ -164,6 +176,9 @@ class RentViewModelImpl(
     override fun setEndDate(date: String?) {
         _state.update {
             if (it is RentState.Book) {
+                if (sameBookingInstant(it.endDate, date)) {
+                    return@update it.copy(showEndDateError = false)
+                }
                 it.copy(
                     endDate = date,
                     showEndDateError = false,
@@ -194,6 +209,14 @@ class RentViewModelImpl(
             }
         _state.update {
             if (it is RentState.Book) {
+                if (sameBookingInstant(it.startDate, startTrimmed) &&
+                    sameBookingInstant(it.endDate, endDateValid)
+                ) {
+                    return@update it.copy(
+                        showStartDateError = false,
+                        showEndDateError = false,
+                    )
+                }
                 it.copy(
                     startDate = startTrimmed,
                     endDate = endDateValid,
@@ -216,6 +239,7 @@ class RentViewModelImpl(
     override fun onBookClick() {
         val current = _state.value as? RentState.Book ?: return
         if (current.pendingPaymentBookingId != null) return
+        if (current.isCreating) return
         if (!storage.isLogined()) {
             _state.value =
                 RentState.NavigateToLogin(
@@ -249,11 +273,11 @@ class RentViewModelImpl(
         val start = current.startDate!!.trim()
         val end = current.endDate!!.trim()
         createJob?.cancel()
+        _state.update {
+            if (it is RentState.Book) it.copy(isCreating = true, createError = null) else it
+        }
         createJob =
             viewModelScope.launch {
-                _state.update {
-                    if (it is RentState.Book) it.copy(isCreating = true, createError = null) else it
-                }
                 runCatching {
                     booking.createAsRenter(
                         CreateBookingRequest(
@@ -422,6 +446,17 @@ class RentViewModelImpl(
         return message.contains("unauthorized") ||
             message.contains("401") ||
             message.contains("invalid refresh token")
+    }
+
+    private fun sameBookingInstant(
+        left: String?,
+        right: String?,
+    ): Boolean {
+        if (left == right) return true
+        if (left.isNullOrBlank() || right.isNullOrBlank()) return false
+        return runCatching {
+            Instant.parse(left) == Instant.parse(right)
+        }.getOrDefault(false)
     }
 
     private fun localizeBookingError(message: String?): String =

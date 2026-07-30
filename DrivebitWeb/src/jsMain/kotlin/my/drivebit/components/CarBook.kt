@@ -147,8 +147,6 @@ fun CarBook(
 
     val bookState = state as? RentState.Book ?: return
 
-    var autoBookConsumed by remember { mutableStateOf(false) }
-
     LaunchedEffect(initialStartAt, initialEndAt) {
         when {
             initialStartAt != null && initialEndAt != null -> {
@@ -201,7 +199,6 @@ fun CarBook(
 
     LaunchedEffect(
         autoBookAfterLogin,
-        autoBookConsumed,
         bookState.startDate,
         bookState.endDate,
         bookState.showStartDateError,
@@ -209,13 +206,13 @@ fun CarBook(
         bookState.pendingPaymentBookingId,
         bookState.isCreating,
     ) {
-        if (!autoBookAfterLogin || autoBookConsumed) return@LaunchedEffect
+        if (!autoBookAfterLogin) return@LaunchedEffect
         if (bookState.pendingPaymentBookingId != null) return@LaunchedEffect
         if (bookState.isCreating) return@LaunchedEffect
         if (!storage.isLogined()) return@LaunchedEffect
         if (bookState.startDate.isNullOrBlank() || bookState.endDate.isNullOrBlank()) return@LaunchedEffect
         if (bookState.showStartDateError || bookState.showEndDateError) return@LaunchedEffect
-        autoBookConsumed = true
+        if (!viewModel.tryConsumeAutoBookAfterLogin()) return@LaunchedEffect
         removeUrlQueryParam(AUTO_BOOK_AFTER_LOGIN)
         lastBookingIntentSource = BookingFunnelSource.Auto
         reportedCreateOkBookingId = null
