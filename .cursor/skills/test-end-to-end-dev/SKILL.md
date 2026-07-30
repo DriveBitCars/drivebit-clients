@@ -3,8 +3,9 @@ name: test-end-to-end-dev
 description: >-
   Run commit-push-tests, merge to trunk, wait for GitHub Pages deploy to
   dev.drivebit.ru, then verify main web flows in the browser (desktop + mobile)
-  with screenshots, console error checks, and Hawk Garage
-  (https://garage.hawk.so/). Use when the user says /test-end-to-end-dev,
+  with screenshots, console error checks, Hawk Garage (https://garage.hawk.so/),
+  and (when booking/auth/autoBook is in scope) the unauth→OTP→autoBook-once
+  regression. Use when the user says /test-end-to-end-dev,
   /test-ene-to-end-dev, «проверь на pages-dev», «e2e на деве», «на мобильном»,
   or asks to commit-push then validate GitHub Pages / pages-dev.
 ---
@@ -20,7 +21,8 @@ Pipeline:
 3. **Wait for GitHub Pages deploy** (`Deploy to GitHub Pages` → `dev.drivebit.ru`)
 4. **Browser e2e** on pages-dev: **desktop + mobile** main flows + screenshots
 5. **Console errors** — capture and fail on unexpected JS/`pageerror` / `console.error`
-6. **Hawk Garage** — check https://garage.hawk.so/ for new errors from the e2e window
+6. **Booking autoBook-once** (when in scope — see below) — unauth book → OTP login → exactly **one POST** create
+7. **Hawk Garage** — check https://garage.hawk.so/ for new errors from the e2e window
 
 This skill does **not** create a GitHub Release or run production `deploy.yml`.
 For prod ship use `drivebit-ship-release`.
@@ -31,6 +33,7 @@ For prod ship use `drivebit-ship-release`.
 - «проверь на pages-dev / GitHub Pages»
 - «commit-push, дождись pages, открой дев в браузере»
 - «проверь на мобильном» / mobile viewport e2e on pages-dev
+- booking / autoBook / double-book mentions («бронь один раз», «после OTP»)
 
 ## URLs & workflows
 
@@ -44,6 +47,9 @@ For prod ship use `drivebit-ship-release`.
 | Prod site | `https://drivebit.ru` (out of scope here) |
 | Hawk errors UI | https://garage.hawk.so/ |
 | Home filters regression doc | `docs/home-filters-url-regression.md` |
+| Book-once helper | `scripts/e2e-pages-dev-book-once.mjs` |
+| Book-once evidence dir | `tmp/e2e-book-once-pages-dev/` (or dated `tmp/e2e-*-book-once/`) |
+| E2E login email | `mail@antonbutov.com` (OTP via mail MCP `user-mcp-mail-antonbutovcom`) |
 
 ## Progress checklist
 
@@ -56,8 +62,9 @@ Progress:
 - [ ] 5. Browser smoke + key flows on mobile viewport
 - [ ] 6. Screenshots (desktop + mobile)
 - [ ] 7. Console: no unexpected pageerror / console.error
-- [ ] 8. Hawk Garage: no new errors from this e2e window (https://garage.hawk.so/)
-- [ ] 9. Report PR + Pages run + screenshot + console + Hawk evidence
+- [ ] 8. Booking autoBook-once (when in scope): POST create == 1, no real booking
+- [ ] 9. Hawk Garage: no new errors from this e2e window (https://garage.hawk.so/)
+- [ ] 10. Report PR + Pages run + screenshot + console + book-once + Hawk evidence
 ```
 
 ## 1. Commit → push → CI
@@ -204,6 +211,66 @@ Do **not** allowlist app/Compose/Kotlin/JS exceptions, blank `#root`, or Hawk ca
 
 Include console/`pageerror` lists in the final report (empty list = pass).
 
+### Booking autoBook-once (when in scope)
+
+**Required when** the PR / change touches any of:
+
+- `RentViewModel` / create booking / `pendingPaymentBookingId`
+- `CarBook` / `autoBook` / `AUTO_BOOK_AFTER_LOGIN`
+- car-detail rent UI / OTP return to car with auto-book
+- login → book funnel / double-booking fixes
+
+**Also run** when the user explicitly asks to verify booking / «бронь один раз» / OTP autoBook.
+
+Skip only when the change is clearly unrelated (e.g. pure docs, badge CSS, home filters only) — note the skip in the report.
+
+#### Why block create
+
+Pages-dev WASM still calls **prod** API (`https://drivebit.ru/api/…`, see `DEFAULT_BASE_URL`). Never let e2e create a real booking.
+
+#### Procedure
+
+1. Evidence dir: `tmp/e2e-book-once-pages-dev/` (or `tmp/e2e-<topic>-book-once/`)
+2. Start helper **in a durable background shell** (`block_until_ms: 0` / nohup) so it survives while you fetch OTP:
+
+```bash
+mkdir -p tmp/e2e-book-once-pages-dev
+OUT_DIR=tmp/e2e-book-once-pages-dev node scripts/e2e-pages-dev-book-once.mjs
+```
+
+3. Wait until `OUT/otp-request.json` appears (email submit done → verify-otp).
+4. Fetch OTP for `mail@antonbutov.com` via mail MCP (`get_recent_messages` → subject `DriveBit - Код подтверждения` → decode HTML/base64 code).
+5. Write digits-only OTP to `OUT/otp.txt` (e.g. `087266`). Do **not** use DB `OtpSessions.OtpCode` — it is bcrypt-hashed.
+6. Wait for `OUT/book-once-report.json`.
+
+Helper flow (already encoded in the script):
+
+1. Clear storage (unauth)
+2. Open a car from `/moskva/search` with future `startAt`/`endAt` query params
+3. Click **«Забронировать»** → login; prefer `/login-by-mail` keeping `returnCarId` + dates
+4. Fill `mail@antonbutov.com`, check `#terms-consent-checkbox` (not the offer `<a>`), **Продолжить**
+5. OTP → after login land on `/car-detail?…&autoBook=1` (param may be consumed)
+6. **Abort** network `Booking/my/as-renter` (all methods); count **POST** only
+7. Wait ~15s after first create for a second autoBook
+
+#### Pass / fail
+
+| Check | Must be |
+|-------|---------|
+| `postCreateCount` | **1** |
+| `getAsRenterCount` | ignored for pass (same path is also a list GET) |
+| Real `CarBookings` row for the test user in the e2e window | **0** (abort before server) |
+| Screenshots | `01-car-unauth` … `04-after-autobook` under evidence dir |
+
+**Fail the skill** if `postCreateCount !== 1` when this test was in scope.
+
+#### Agent pitfalls
+
+- Keep Playwright **alive** while polling mail (background job); killing the parent shell kills OTP wait mid-flight
+- Do not click «условиями оферты» / privacy links (navigates away from login)
+- Dates must be on the car URL / return params or autoBook never fires
+- Count **POST**, not total route hits
+
 ### Hawk Garage (required)
 
 After browser e2e (or overlapping it), open **https://garage.hawk.so/** and check the DriveBit project for errors tied to this run:
@@ -225,6 +292,7 @@ Optional: correlate that `window.__drivebitHawk` exists on pages-dev after load 
 - Hero→search navigation fails when the button exists
 - **Mobile pass skipped** (desktop-only is not enough)
 - **Unexpected console `error` or `pageerror` during e2e**
+- **Booking autoBook-once in scope and `postCreateCount !== 1`** (or real booking created because create was not aborted)
 - **New relevant errors in Hawk Garage** for the e2e window (or Garage not checked without an explicit auth blocker note)
 - You only ran commit-push-tests without Pages + browser proof
 
@@ -239,6 +307,7 @@ Return:
 - Short pass/fail per checked path (**desktop and mobile**)
 - Screenshot paths / attachments (both viewports)
 - Console / `pageerror` summary (empty = clean)
+- Booking autoBook-once: in scope yes/no; `postCreateCount`; evidence dir; create aborted yes/no
 - Hawk Garage check: URL https://garage.hawk.so/, environment, time window, new errors yes/no (+ links if any)
 - Known limitations (analytics blocked in headless, broken image 404 noise, Garage auth blocker, etc.)
 
@@ -250,6 +319,8 @@ Return:
 - Skipping **mobile** viewport
 - Skipping **console error** collection
 - Skipping **https://garage.hawk.so/** (or claiming clean Hawk without looking)
+- Running booking e2e **without** aborting `Booking/my/as-renter` POST (creates real prod bookings)
+- Counting GET list hits as create failures (`postCreateCount` only)
 - Merging then releasing/prod-deploy under this skill
 - Leaving new skill/task files untracked
 
@@ -259,5 +330,6 @@ Return:
 - `drivebit-ship-release` — merge + GitHub Release + prod deploy + prod smoke
 - `scripts/verify-prod-smoke.mjs` — reusable smoke ideas; pass pages-dev base if using as helper
 - `scripts/e2e-pages-dev-inp.mjs` — optional INP/deferral-oriented smoke
+- `scripts/e2e-pages-dev-book-once.mjs` — unauth→OTP→autoBook create-once (abort prod POST)
 - `docs/home-filters-url-regression.md` — URL-first home filters checklist + last results
 - `AppHeader/.../HawkErrorTracking.kt` — Hawk token/env mapping for pages-dev → `development`

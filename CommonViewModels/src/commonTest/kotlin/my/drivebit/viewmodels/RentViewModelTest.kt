@@ -12,12 +12,15 @@ import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CheckBookingAvailabilityResponse
+import my.drivebit.network.services.CreateBookingRequest
 import my.drivebit.network.services.PayBookingResult
 import my.drivebit.network.services.Payment
 import my.drivebit.shared.storage.Storage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 private class FakeStorage(
@@ -62,6 +65,7 @@ private class FakeBooking(
 ) : Booking {
     var calculateCalls = mutableListOf<CheckBookingAvailabilityRequest>()
     var createCalls = 0
+    val createRequests = mutableListOf<CreateBookingRequest>()
 
     override suspend fun calculate(request: CheckBookingAvailabilityRequest): CheckBookingAvailabilityResponse {
         calculateCalls.add(request)
@@ -89,9 +93,10 @@ private class FakeBooking(
         throw NotImplementedError()
 
     override suspend fun createAsRenter(
-        request: my.drivebit.network.services.CreateBookingRequest,
+        request: CreateBookingRequest,
     ): my.drivebit.network.services.BookingDTO {
         createCalls += 1
+        createRequests.add(request)
         createError?.let { throw it }
         return my.drivebit.network.services.BookingDTO(
             id = "booking-$createCalls",
@@ -723,6 +728,51 @@ class RentViewModelTest {
             assertTrue(viewModel.tryConsumeAutoBookAfterLogin())
             assertFalse(viewModel.tryConsumeAutoBookAfterLogin())
             assertFalse(viewModel.tryConsumeAutoBookAfterLogin())
+        }
+
+    @Test
+    fun `autoBook after login creates booking once with selected dates and pending payment`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val booking =
+                FakeBooking(
+                    calculateResult = { CheckBookingAvailabilityResponse(isAvailable = true, estimatedPrice = 2000.0) },
+                )
+            val viewModel =
+                RentViewModelImpl(
+                    booking = booking,
+                    payment = FakePayment(),
+                    storage = FakeStorage(isLoggedIn = true),
+                    carId = "car-otp-return",
+                    coroutineScope = testScope,
+                )
+            val start = "2026-08-01T12:00:00Z"
+            val end = "2026-08-03T12:00:00.000Z"
+            viewModel.setInitialDates(start, end)
+            advanceUntilIdle()
+
+            assertTrue(viewModel.tryConsumeAutoBookAfterLogin())
+            viewModel.onBookClick()
+            advanceUntilIdle()
+
+            assertEquals(1, booking.createCalls)
+            val request = booking.createRequests.single()
+            assertEquals("car-otp-return", request.carId)
+            assertEquals(start, request.startAt)
+            assertEquals(end, request.endAt)
+
+            val book = viewModel.state.value as RentState.Book
+            assertEquals("booking-1", book.pendingPaymentBookingId)
+            assertNotNull(book.pendingBookingPaymentUi)
+            assertNull(book.createError)
+            assertFalse(book.isCreating)
+            assertFalse(book.showStartDateError)
+            assertFalse(book.showEndDateError)
+
+            assertFalse(viewModel.tryConsumeAutoBookAfterLogin())
+            viewModel.onBookClick()
+            advanceUntilIdle()
+            assertEquals(1, booking.createCalls)
         }
 
     @Test
