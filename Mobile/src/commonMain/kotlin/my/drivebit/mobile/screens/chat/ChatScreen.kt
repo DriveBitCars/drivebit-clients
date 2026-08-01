@@ -6,14 +6,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +31,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import my.drivebit.ui.theme.ColorsDriveBit
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -141,7 +145,7 @@ data class ChatScreen(
                         LazyColumn(
                             modifier = Modifier.weight(1f).fillMaxWidth(),
                             reverseLayout = true,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding =
                                 androidx.compose.foundation.layout
                                     .PaddingValues(16.dp),
@@ -246,100 +250,138 @@ private fun MessageBubble(
             isOwnMessage -> "Вы"
             else -> message.sender?.name?.takeIf { it.isNotBlank() }
         }
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        if (!message.isSystemMessage) {
-            displayName?.let { name ->
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+    if (!message.isSystemMessage) {
+        val bubbleShape =
+            if (isOwnMessage) {
+                RoundedCornerShape(18.dp, 18.dp, 6.dp, 18.dp)
+            } else {
+                RoundedCornerShape(18.dp, 18.dp, 18.dp, 6.dp)
             }
-            Text(
-                text = message.text ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = runCatching { mapIso8601ToTimeString(message.createdAt) }.getOrElse { "" },
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            val bookingIdForPay = message.payBookingIdForAction()
-            val bookingIdForContract = message.contractBookingIdForAction()
-            val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
-            val showReviewForCar = message.isLeaveReviewForCarAction()
-            val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
-            val bookingForContract = bookingIdForContract?.let { bookingById[it] }
-            val showSignContract =
-                bookingIdForContract != null &&
-                    participantId != null &&
-                    bookingForContract?.canShowSignContractInChat(participantId) == true
-            val isSigningContract = bookingIdForContract != null && bookingIdForContract in signActionInProgress
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+        val bubbleColor = if (isOwnMessage) ColorsDriveBit.Blue else ColorsDriveBit.Gray300
+        val primaryText = if (isOwnMessage) ColorsDriveBit.White else ColorsDriveBit.Black
+        val secondaryText =
+            if (isOwnMessage) {
+                ColorsDriveBit.White.copy(alpha = 0.8f)
+            } else {
+                ColorsDriveBit.Gray600
+            }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = if (isOwnMessage) Arrangement.End else Arrangement.Start,
+        ) {
+            Surface(
+                modifier = Modifier.widthIn(max = 320.dp),
+                shape = bubbleShape,
+                color = bubbleColor,
             ) {
-                Text(
-                    text = message.text ?: "Системное сообщение",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (bookingIdForPay != null) {
-                    val fullPayLabel =
-                        bookingForPay?.let { booking ->
-                            "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
-                        } ?: if (isPaying) "Загрузка…" else "Оплатить"
-                    if (bookingForPay?.canPayPrepayment == true) {
+                Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                    displayName?.let { name ->
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = secondaryText,
+                        )
+                    }
+                    Text(
+                        text = message.text ?: "",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = primaryText,
+                    )
+                    Text(
+                        text = runCatching { mapIso8601ToTimeString(message.createdAt) }.getOrElse { "" },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = secondaryText,
+                        modifier = Modifier.align(Alignment.End),
+                    )
+                }
+            }
+        }
+    } else {
+        val bookingIdForPay = message.payBookingIdForAction()
+        val bookingIdForContract = message.contractBookingIdForAction()
+        val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
+        val showReviewForCar = message.isLeaveReviewForCarAction()
+        val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
+        val bookingForContract = bookingIdForContract?.let { bookingById[it] }
+        val showSignContract =
+            bookingIdForContract != null &&
+                participantId != null &&
+                bookingForContract?.canShowSignContractInChat(participantId) == true
+        val isSigningContract = bookingIdForContract != null && bookingIdForContract in signActionInProgress
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(0.92f),
+                shape = RoundedCornerShape(12.dp),
+                color = ColorsDriveBit.Gray300,
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp).fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = message.text ?: "Системное сообщение",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = ColorsDriveBit.Gray600,
+                    )
+                    if (bookingIdForPay != null) {
+                        val fullPayLabel =
+                            bookingForPay?.let { booking ->
+                                "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
+                            } ?: if (isPaying) "Загрузка…" else "Оплатить"
+                        if (bookingForPay?.canPayPrepayment == true) {
+                            Button(
+                                onClick = { onPrepayBooking(bookingIdForPay) },
+                                enabled = !isPaying,
+                                modifier = Modifier.padding(top = 8.dp),
+                            ) {
+                                Text(if (isPaying) "Загрузка…" else bookingForPay.prepaymentButtonLabel())
+                            }
+                        }
                         Button(
-                            onClick = { onPrepayBooking(bookingIdForPay) },
+                            onClick = { onPayBooking(bookingIdForPay) },
                             enabled = !isPaying,
                             modifier = Modifier.padding(top = 8.dp),
                         ) {
-                            Text(if (isPaying) "Загрузка…" else bookingForPay.prepaymentButtonLabel())
+                            Text(fullPayLabel)
                         }
                     }
-                    Button(
-                        onClick = { onPayBooking(bookingIdForPay) },
-                        enabled = !isPaying,
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) {
-                        Text(fullPayLabel)
+                    if (bookingIdForContract != null) {
+                        val uriHandler = LocalUriHandler.current
+                        Button(
+                            onClick = { uriHandler.openUri(contractDownloadPageUrl(bookingIdForContract)) },
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) {
+                            Text("Скачать договор")
+                        }
                     }
-                }
-                if (bookingIdForContract != null) {
-                    val uriHandler = LocalUriHandler.current
-                    Button(
-                        onClick = { uriHandler.openUri(contractDownloadPageUrl(bookingIdForContract)) },
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) {
-                        Text("Скачать договор")
+                    if (showSignContract) {
+                        Button(
+                            onClick = { onSignContract(bookingIdForContract!!, participantId!!) },
+                            enabled = !isSigningContract,
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) {
+                            Text(if (isSigningContract) "Подписание..." else "Подписать договор")
+                        }
                     }
-                }
-                if (showSignContract) {
-                    Button(
-                        onClick = { onSignContract(bookingIdForContract!!, participantId!!) },
-                        enabled = !isSigningContract,
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) {
-                        Text(if (isSigningContract) "Подписание..." else "Подписать договор")
+                    if (showReviewForCar) {
+                        Button(
+                            onClick = { reviewCarId?.let(onLeaveReviewForCar) },
+                            enabled = reviewCarId != null,
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) {
+                            Text(if (reviewCarId != null) "Оставить отзыв" else "Загрузка…")
+                        }
                     }
-                }
-                if (showReviewForCar) {
-                    Button(
-                        onClick = { reviewCarId?.let(onLeaveReviewForCar) },
-                        enabled = reviewCarId != null,
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) {
-                        Text(if (reviewCarId != null) "Оставить отзыв" else "Загрузка…")
-                    }
-                }
-                if (showReviewForRenter) {
-                    Button(
-                        onClick = onLeaveReviewForRenter,
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) {
-                        Text("Оставить отзыв об арендаторе")
+                    if (showReviewForRenter) {
+                        Button(
+                            onClick = onLeaveReviewForRenter,
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) {
+                            Text("Оставить отзыв об арендаторе")
+                        }
                     }
                 }
             }

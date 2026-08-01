@@ -188,7 +188,7 @@ fun ChatDetailPage() {
                                 padding(16.px)
                             }
                         }) {
-                            Column(gap = 12.px, modifier = { width(100.percent) }) {
+                            Column(gap = 16.px, modifier = { width(100.percent) }) {
                                 messages.forEach { message ->
                                     val bookingIdForPay = message.payBookingIdForAction()
                                     MessageBubble(
@@ -269,10 +269,11 @@ fun ChatDetailPage() {
                                     minWidth(0.px)
                                     width(100.percent)
                                     property("box-sizing", "border-box")
-                                    padding(12.px)
+                                    padding(14.px, 16.px)
                                     property("border", "1px solid ${CSSColors.Gray300}")
-                                    borderRadius(8.px)
-                                    fontSize(14.px)
+                                    borderRadius(20.px)
+                                    fontSize(16.px)
+                                    lineHeight("1.4")
                                 }
                             }
                             org.jetbrains.compose.web.dom.Button({
@@ -285,13 +286,13 @@ fun ChatDetailPage() {
                                 }
                                 style {
                                     flexShrink(0)
-                                    padding(12.px, 16.px)
+                                    padding(14.px, 20.px)
                                     backgroundColor(CSSColors.Blue)
                                     color(CSSColors.White)
                                     property("border", "none")
-                                    borderRadius(8.px)
+                                    borderRadius(20.px)
                                     cursor("pointer")
-                                    fontSize(14.px)
+                                    fontSize(16.px)
                                     fontWeight("600")
                                     whiteSpace("nowrap")
                                 }
@@ -368,110 +369,123 @@ private fun MessageBubble(
         }
         Div({
             style {
-                padding(8.px)
-                textAlign("center")
-                color(CSSColors.Gray600)
-                fontSize(13.px)
+                display(DisplayStyle.Flex)
+                justifyContent(JustifyContent.Center)
+                width(100.percent)
             }
         }) {
-            Column(
-                gap = 8.px,
-                modifier = {
-                    width(100.percent)
-                    alignItems(AlignItems.Center)
-                },
-            ) {
-                MessageTextWithDealsLink(text = text.ifBlank { "Системное сообщение" })
-                if (bookingIdForPay != null) {
-                    val fullPayLabel =
-                        bookingForPay?.let { booking ->
-                            "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
-                        } ?: "Оплатить"
-                    Column(gap = 8.px, modifier = { width(100.percent); maxWidth(280.px) }) {
-                        if (bookingForPay?.canPayPrepayment == true) {
+            Div({
+                style {
+                    padding(12.px, 16.px)
+                    backgroundColor(CSSColors.Gray300)
+                    borderRadius(12.px)
+                    textAlign("center")
+                    color(CSSColors.Gray600)
+                    fontSize(15.px)
+                    lineHeight("1.45")
+                    maxWidth(90.percent)
+                    property("box-sizing", "border-box")
+                }
+            }) {
+                Column(
+                    gap = 10.px,
+                    modifier = {
+                        width(100.percent)
+                        alignItems(AlignItems.Center)
+                    },
+                ) {
+                    MessageTextWithDealsLink(text = text.ifBlank { "Системное сообщение" })
+                    if (bookingIdForPay != null) {
+                        val fullPayLabel =
+                            bookingForPay?.let { booking ->
+                                "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
+                            } ?: "Оплатить"
+                        Column(gap = 8.px, modifier = { width(100.percent); maxWidth(280.px) }) {
+                            if (bookingForPay?.canPayPrepayment == true) {
+                                ActionButton(
+                                    text = bookingForPay.prepaymentButtonLabel(),
+                                    enabledColor = CSSColors.Blue,
+                                    viewModel = payButtonVm,
+                                    onClick = { onPrepayBooking(bookingIdForPay) },
+                                )
+                            }
                             ActionButton(
-                                text = bookingForPay.prepaymentButtonLabel(),
+                                text = fullPayLabel,
                                 enabledColor = CSSColors.Blue,
                                 viewModel = payButtonVm,
-                                onClick = { onPrepayBooking(bookingIdForPay) },
+                                onClick = { onPayBooking(bookingIdForPay) },
                             )
                         }
-                        ActionButton(
-                            text = fullPayLabel,
-                            enabledColor = CSSColors.Blue,
-                            viewModel = payButtonVm,
-                            onClick = { onPayBooking(bookingIdForPay) },
-                        )
                     }
-                }
-                if (bookingIdForContract != null) {
-                    Div({
-                        style {
-                            width(100.percent)
-                            maxWidth(280.px)
+                    if (bookingIdForContract != null) {
+                        Div({
+                            style {
+                                width(100.percent)
+                                maxWidth(280.px)
+                            }
+                        }) {
+                            ActionButton(
+                                text = "Скачать договор",
+                                enabledColor = CSSColors.Blue,
+                                viewModel = contractButtonVm,
+                                onClick = {
+                                    window.location.href = contractDownloadPagePath(bookingIdForContract)
+                                },
+                            )
                         }
-                    }) {
-                        ActionButton(
-                            text = "Скачать договор",
-                            enabledColor = CSSColors.Blue,
-                            viewModel = contractButtonVm,
-                            onClick = {
-                                window.location.href = contractDownloadPagePath(bookingIdForContract)
-                            },
-                        )
                     }
-                }
-                if (showSignContract) {
-                    Div({
-                        style {
-                            width(100.percent)
-                            maxWidth(280.px)
+                    if (showSignContract) {
+                        Div({
+                            style {
+                                width(100.percent)
+                                maxWidth(280.px)
+                            }
+                        }) {
+                            ActionButton(
+                                text = if (isSigningContract) "Подписание..." else "Подписать договор",
+                                enabledColor = CSSColors.Blue,
+                                viewModel = signContractButtonVm,
+                                onClick = {
+                                    onSignContract(bookingIdForContract!!, participantId!!)
+                                },
+                            )
                         }
-                    }) {
-                        ActionButton(
-                            text = if (isSigningContract) "Подписание..." else "Подписать договор",
-                            enabledColor = CSSColors.Blue,
-                            viewModel = signContractButtonVm,
-                            onClick = {
-                                onSignContract(bookingIdForContract!!, participantId!!)
-                            },
-                        )
                     }
-                }
-                if (showReviewForCar) {
-                    Div({
-                        style {
-                            width(100.percent)
-                            maxWidth(280.px)
+                    if (showReviewForCar) {
+                        Div({
+                            style {
+                                width(100.percent)
+                                maxWidth(280.px)
+                            }
+                        }) {
+                            ActionButton(
+                                text = if (reviewCarId != null) "Оставить отзыв" else "Загрузка…",
+                                enabledColor = CSSColors.Blue,
+                                viewModel = reviewCarButtonVm,
+                                onClick = {
+                                    reviewCarId?.let { carId ->
+                                        window.location.href = leaveReviewPagePath(carId)
+                                    }
+                                },
+                            )
                         }
-                    }) {
-                        ActionButton(
-                            text = if (reviewCarId != null) "Оставить отзыв" else "Загрузка…",
-                            enabledColor = CSSColors.Blue,
-                            viewModel = reviewCarButtonVm,
-                            onClick = {
-                                reviewCarId?.let { carId ->
-                                    window.location.href = leaveReviewPagePath(carId)
-                                }
-                            },
-                        )
                     }
-                }
-                if (showReviewForRenter) {
-                    Div({
-                        style {
-                            width(100.percent)
-                            maxWidth(280.px)
+                    if (showReviewForRenter) {
+                        Div({
+                            style {
+                                width(100.percent)
+                                maxWidth(280.px)
+                            }
+                        }) {
+                            ActionButton(
+                                text = "Оставить отзыв об арендаторе",
+                                enabledColor = CSSColors.Blue,
+                                viewModel = reviewRenterButtonVm,
+                                onClick = {
+                                    window.location.href = "/my-deals"
+                                },
+                            )
                         }
-                    }) {
-                        ActionButton(
-                            text = "Оставить отзыв об арендаторе",
-                            enabledColor = CSSColors.Blue,
-                            viewModel = reviewRenterButtonVm,
-                            onClick = {
-                                window.location.href = "/my-deals"
-                            },
-                        )
                     }
                 }
             }
@@ -480,14 +494,18 @@ private fun MessageBubble(
     }
 
     val showOpponentAvatar = !isOwnMessage && participantId != null
+    val bubbleBg = if (isOwnMessage) CSSColors.Blue else CSSColors.Gray300
+    val primaryText = if (isOwnMessage) CSSColors.White else CSSColors.Black
+    val secondaryText = if (isOwnMessage) rgba(255, 255, 255, 0.8) else CSSColors.Gray600
 
     Div({
         style {
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Row)
-            alignItems(AlignItems.FlexStart)
-            gap(12.px)
-            property("max-width", "100%")
+            alignItems(AlignItems.FlexEnd)
+            justifyContent(if (isOwnMessage) JustifyContent.FlexEnd else JustifyContent.FlexStart)
+            gap(10.px)
+            width(100.percent)
         }
     }) {
         if (showOpponentAvatar) {
@@ -495,22 +513,28 @@ private fun MessageBubble(
                 userId = participantId,
                 name = participantName?.takeIf { it.isNotBlank() } ?: "Собеседник",
                 initialAvatarUrl = participantAvatarUrl,
-                size = 40.px,
+                size = 36.px,
             )
         }
         Div({
             style {
-                padding(12.px)
-                borderRadius(12.px)
-                property("max-width", "80%")
+                padding(12.px, 16.px)
+                backgroundColor(bubbleBg)
+                if (isOwnMessage) {
+                    borderRadius(18.px, 18.px, 6.px, 18.px)
+                } else {
+                    borderRadius(18.px, 18.px, 18.px, 6.px)
+                }
+                property("max-width", "78%")
+                property("box-sizing", "border-box")
             }
         }) {
             Column(gap = 4.px) {
                 if (senderName.isNotBlank()) {
                     Span({
                         style {
-                            fontSize(12.px)
-                            color(CSSColors.Gray600)
+                            fontSize(13.px)
+                            color(secondaryText)
                             fontWeight("600")
                         }
                     }) {
@@ -519,16 +543,19 @@ private fun MessageBubble(
                 }
                 Span({
                     style {
-                        fontSize(14.px)
-                        color(CSSColors.Black)
+                        fontSize(16.px)
+                        lineHeight("1.4")
+                        color(primaryText)
+                        property("word-break", "break-word")
                     }
                 }) {
                     MessageTextWithDealsLink(text = text)
                 }
                 Span({
                     style {
-                        fontSize(11.px)
-                        color(CSSColors.Gray600)
+                        fontSize(12.px)
+                        color(secondaryText)
+                        alignSelf(AlignSelf.FlexEnd)
                     }
                 }) {
                     Text(timeStr)
