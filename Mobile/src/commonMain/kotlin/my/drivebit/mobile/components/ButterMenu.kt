@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -18,6 +19,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import my.drivebit.mobile.screens.chat.ChatListScreen
 import my.drivebit.mobile.screens.profile.ProfileScreen
 import my.drivebit.shared.storage.Storage
+import my.drivebit.viewmodels.ButterEffect
 import my.drivebit.viewmodels.ButterState
 import my.drivebit.viewmodels.ButterViewModel
 import org.koin.compose.koinInject
@@ -28,6 +30,16 @@ fun ButterMenu() {
     val state by butterViewModel.state.collectAsState()
     val navigator = LocalNavigator.currentOrThrow
     val storage: Storage = koinInject()
+
+    LaunchedEffect(Unit) {
+        butterViewModel.effects.collect { effect ->
+            when (effect) {
+                ButterEffect.NavigateToHome -> {
+                    navigator.popUntilRoot()
+                }
+            }
+        }
+    }
 
     when (val currentState = state) {
         is ButterState.Idle -> {}

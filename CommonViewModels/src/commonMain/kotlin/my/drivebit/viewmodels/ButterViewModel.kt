@@ -3,8 +3,11 @@ package my.drivebit.viewmodels
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -20,6 +23,10 @@ sealed interface ButterState {
     ) : ButterState
 }
 
+sealed interface ButterEffect {
+    data object NavigateToHome : ButterEffect
+}
+
 data class ButterModel(
     val iconUrl: String? = null,
     val text: String,
@@ -28,6 +35,8 @@ data class ButterModel(
 
 interface ButterViewModel {
     val state: StateFlow<ButterState>
+
+    val effects: SharedFlow<ButterEffect>
 
     fun open()
 
@@ -112,10 +121,14 @@ class ButterViewModelImpl(
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : ButterViewModel {
     private val _state = MutableStateFlow<ButterState>(ButterState.Idle)
+    private val _effects = MutableSharedFlow<ButterEffect>(extraBufferCapacity = 1)
     private var isMenuOpened = false
 
     override val state: StateFlow<ButterState>
         get() = _state.asStateFlow()
+
+    override val effects: SharedFlow<ButterEffect>
+        get() = _effects.asSharedFlow()
 
     init {
         carMenuViewModel.load()
@@ -181,6 +194,7 @@ class ButterViewModelImpl(
             avatarRepository.refresh()
         }
         profileViewModel?.refresh()
+        _effects.tryEmit(ButterEffect.NavigateToHome)
     }
 
     override fun close() {
