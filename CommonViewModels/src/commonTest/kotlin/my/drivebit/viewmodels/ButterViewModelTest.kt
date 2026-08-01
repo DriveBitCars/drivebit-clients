@@ -1,10 +1,13 @@
 package my.drivebit.viewmodels
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import my.drivebit.repositories.AvatarRepository
 import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.CarMenuOption
@@ -364,5 +367,25 @@ class ButterViewModelTest {
         logoutItem?.onClick()
 
         assertIs<ButterState.Idle>(viewModel.state.value, "Menu should be closed after logout")
+    }
+
+    @Test
+    fun `logout should request navigate to home`() {
+        mockStorage.setLoggedIn(true)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
+        val received = mutableListOf<ButterEffect>()
+        val collectJob =
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                viewModel.effects.collect { received.add(it) }
+            }
+
+        viewModel.open()
+        val openedState = viewModel.state.value as ButterState.Opened
+        val logoutItem = openedState.model.first { it.text == "Выйти" }
+
+        logoutItem.onClick()
+
+        assertEquals(listOf<ButterEffect>(ButterEffect.NavigateToHome), received)
+        collectJob.cancel()
     }
 }

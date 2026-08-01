@@ -7,10 +7,13 @@ import androidx.compose.ui.Modifier
 import kotlinx.browser.window
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.shared.storage.Storage
+import my.drivebit.viewmodels.ButterEffect
 import my.drivebit.viewmodels.ButterModel
 import my.drivebit.viewmodels.ButterState
 import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.CarMenuViewModel
+import my.drivebit.web.homePathHref
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
@@ -33,11 +36,22 @@ import org.koin.compose.koinInject
 fun ButterMenu() {
     val butterViewModel: ButterViewModel = koinInject()
     val carMenuViewModel: CarMenuViewModel = koinInject()
+    val storage: Storage = koinInject()
     val state = butterViewModel.state.collectAsState()
     val navigationController = LocalNavigationController.current
 
     LaunchedEffect(Unit) {
         carMenuViewModel.load()
+    }
+
+    LaunchedEffect(Unit) {
+        butterViewModel.effects.collect { effect ->
+            when (effect) {
+                ButterEffect.NavigateToHome -> {
+                    window.location.href = homePathHref(storage)
+                }
+            }
+        }
     }
 
     when (val currentState = state.value) {
