@@ -204,7 +204,8 @@ data class ChatScreen(
                             OutlinedTextField(
                                 value = messageText,
                                 onValueChange = { messageText = it },
-                                placeholder = { Text("Введите сообщение...") },
+                                placeholder = { Text("Введите сообщение...", fontSize = 19.sp) },
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 19.sp),
                                 modifier = Modifier.weight(1f),
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                                 keyboardActions =
@@ -291,7 +292,7 @@ private fun MessageBubble(
                     }
                     Text(
                         text = message.text ?: "",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                         color = ColorsDriveBit.Black,
                     )
                     Text(
@@ -331,7 +332,7 @@ private fun MessageBubble(
                 ) {
                     Text(
                         text = message.text ?: "Системное сообщение",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                         color = ColorsDriveBit.Gray600,
                     )
                     if (bookingIdForPay != null) {
