@@ -337,7 +337,7 @@ fun ChatDetailPage() {
                                     padding(12.px, 16.px)
                                     property("border", "1px solid ${CSSColors.Gray300}")
                                     borderRadius(22.px)
-                                    fontSize(17.px)
+                                    fontSize(19.px)
                                     lineHeight("1.4")
                                     backgroundColor(CSSColors.White)
                                     property("outline", "none")
@@ -359,7 +359,7 @@ fun ChatDetailPage() {
                                     property("border", "none")
                                     borderRadius(22.px)
                                     cursor("pointer")
-                                    fontSize(16.px)
+                                    fontSize(17.px)
                                     fontWeight("600")
                                     whiteSpace("nowrap")
                                 }
@@ -452,7 +452,7 @@ private fun MessageBubble(
                     borderRadius(14.px)
                     textAlign("center")
                     color(CSSColors.Gray600)
-                    fontSize(16.px)
+                    fontSize(18.px)
                     lineHeight("1.45")
                     width(100.percent)
                     maxWidth(100.percent)
@@ -620,7 +620,7 @@ private fun MessageBubble(
                 if (nameLabel.isNotBlank()) {
                     Span({
                         style {
-                            fontSize(13.px)
+                            fontSize(14.px)
                             color(CSSColors.Blue)
                             fontWeight("600")
                             marginBottom(2.px)
@@ -631,7 +631,7 @@ private fun MessageBubble(
                 }
                 Span({
                     style {
-                        fontSize(18.px)
+                        fontSize(20.px)
                         lineHeight("1.4")
                         color(CSSColors.Black)
                         property("word-break", "break-word")
@@ -642,7 +642,7 @@ private fun MessageBubble(
                 }
                 Span({
                     style {
-                        fontSize(12.px)
+                        fontSize(13.px)
                         color(CSSColors.Gray600)
                         alignSelf(AlignSelf.FlexEnd)
                         marginTop(2.px)
