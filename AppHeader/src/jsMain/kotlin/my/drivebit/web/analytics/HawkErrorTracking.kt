@@ -24,7 +24,13 @@ internal fun hawkEnvironment(hostname: String): String? =
 internal fun shouldSendHawkEvent(title: String?): Boolean {
     val normalized = title?.trim()?.lowercase().orEmpty()
     if (normalized.isEmpty()) return true
-    return normalized != "script error" && normalized != "script error."
+    if (normalized == "script error" || normalized == "script error.") return false
+    if (normalized == "aborterror") return false
+    if (normalized.contains("bodystreambuffer was aborted")) return false
+    if (normalized.contains("the user aborted a request")) return false
+    if (normalized.contains("fetch is aborted")) return false
+    if (normalized.startsWith("aborterror:")) return false
+    return true
 }
 
 fun initializeHawkErrorTracking() {

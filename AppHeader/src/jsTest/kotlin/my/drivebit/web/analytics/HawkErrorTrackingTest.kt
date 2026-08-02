@@ -30,9 +30,19 @@ class HawkErrorTrackingTest {
     }
 
     @Test
+    fun abortedBodyStreamBufferIsNotSentToHawk() {
+        assertFalse(shouldSendHawkEvent("BodyStreamBuffer was aborted"))
+        assertFalse(shouldSendHawkEvent("AbortError"))
+        assertFalse(shouldSendHawkEvent("AbortError: BodyStreamBuffer was aborted"))
+        assertFalse(shouldSendHawkEvent("  The user aborted a request.  "))
+        assertFalse(shouldSendHawkEvent("Fetch is aborted"))
+    }
+
+    @Test
     fun realErrorsAreStillSentToHawk() {
         assertTrue(shouldSendHawkEvent("TypeError: Cannot read properties of null"))
         assertTrue(shouldSendHawkEvent(null))
         assertTrue(shouldSendHawkEvent(""))
+        assertTrue(shouldSendHawkEvent("Cannot read properties of undefined (reading '_leaflet_pos')"))
     }
 }
