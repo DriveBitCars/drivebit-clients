@@ -1,5 +1,6 @@
 package my.drivebit.mobile.screens.chat
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
@@ -143,12 +145,16 @@ data class ChatScreen(
                             )
                         }
                         LazyColumn(
-                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .background(Color(0xFFF4F6FA)),
                             reverseLayout = true,
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
                             contentPadding =
                                 androidx.compose.foundation.layout
-                                    .PaddingValues(16.dp),
+                                    .PaddingValues(12.dp),
                         ) {
                             items(messages.reversed()) { message ->
                                 val bookingIdForPay = message.payBookingIdForAction()
@@ -247,24 +253,17 @@ private fun MessageBubble(
     val displayName =
         when {
             message.isSystemMessage -> null
-            isOwnMessage -> "Вы"
+            isOwnMessage -> null
             else -> message.sender?.name?.takeIf { it.isNotBlank() }
         }
     if (!message.isSystemMessage) {
         val bubbleShape =
             if (isOwnMessage) {
-                RoundedCornerShape(18.dp, 18.dp, 6.dp, 18.dp)
+                RoundedCornerShape(18.dp, 18.dp, 4.dp, 18.dp)
             } else {
-                RoundedCornerShape(18.dp, 18.dp, 18.dp, 6.dp)
+                RoundedCornerShape(18.dp, 18.dp, 18.dp, 4.dp)
             }
-        val bubbleColor = if (isOwnMessage) ColorsDriveBit.Blue else ColorsDriveBit.Gray300
-        val primaryText = if (isOwnMessage) ColorsDriveBit.White else ColorsDriveBit.Black
-        val secondaryText =
-            if (isOwnMessage) {
-                ColorsDriveBit.White.copy(alpha = 0.8f)
-            } else {
-                ColorsDriveBit.Gray600
-            }
+        val bubbleColor = if (isOwnMessage) Color(0xFFE8F0FF) else ColorsDriveBit.White
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = if (isOwnMessage) Arrangement.End else Arrangement.Start,
@@ -273,25 +272,32 @@ private fun MessageBubble(
                 modifier = Modifier.widthIn(max = 320.dp),
                 shape = bubbleShape,
                 color = bubbleColor,
+                shadowElevation = 1.dp,
+                border =
+                    if (isOwnMessage) {
+                        null
+                    } else {
+                        androidx.compose.foundation.BorderStroke(1.dp, ColorsDriveBit.Gray300)
+                    },
             ) {
                 Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
                     displayName?.let { name ->
                         Text(
                             text = name,
                             style = MaterialTheme.typography.labelMedium,
-                            color = secondaryText,
+                            color = ColorsDriveBit.Blue,
                         )
                     }
                     Text(
                         text = message.text ?: "",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = primaryText,
+                        color = ColorsDriveBit.Black,
                     )
                     Text(
                         text = runCatching { mapIso8601ToTimeString(message.createdAt) }.getOrElse { "" },
-                        style = MaterialTheme.typography.labelMedium,
-                        color = secondaryText,
-                        modifier = Modifier.align(Alignment.End),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = ColorsDriveBit.Gray600,
+                        modifier = Modifier.align(Alignment.End).padding(top = 2.dp),
                     )
                 }
             }
@@ -309,13 +315,14 @@ private fun MessageBubble(
                 bookingForContract?.canShowSignContractInChat(participantId) == true
         val isSigningContract = bookingIdForContract != null && bookingIdForContract in signActionInProgress
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Surface(
-                modifier = Modifier.fillMaxWidth(0.92f),
-                shape = RoundedCornerShape(12.dp),
-                color = ColorsDriveBit.Gray300,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                color = ColorsDriveBit.White,
+                shadowElevation = 1.dp,
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp).fillMaxWidth(),

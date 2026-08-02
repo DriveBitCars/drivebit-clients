@@ -178,6 +178,8 @@ fun ChatDetailPage() {
                             flex(1)
                             maxHeight(70.vh)
                             property("overflow", "hidden")
+                            backgroundColor(rgb(244, 246, 250))
+                            borderRadius(12.px)
                         }
                     }) {
                         Div({
@@ -185,10 +187,10 @@ fun ChatDetailPage() {
                             style {
                                 flex(1)
                                 property("overflow-y", "auto")
-                                padding(16.px)
+                                padding(16.px, 12.px)
                             }
                         }) {
-                            Column(gap = 16.px, modifier = { width(100.percent) }) {
+                            Column(gap = 10.px, modifier = { width(100.percent) }) {
                                 messages.forEach { message ->
                                     val bookingIdForPay = message.payBookingIdForAction()
                                     MessageBubble(
@@ -244,11 +246,13 @@ fun ChatDetailPage() {
                                 display(DisplayStyle.Flex)
                                 flexDirection(FlexDirection.Row)
                                 alignItems(AlignItems.Center)
-                                gap(8.px)
-                                padding(16.px)
+                                gap(10.px)
+                                padding(12.px, 14.px)
                                 width(100.percent)
                                 maxWidth(100.percent)
                                 property("box-sizing", "border-box")
+                                backgroundColor(CSSColors.White)
+                                property("border-top", "1px solid ${CSSColors.Gray300}")
                             }
                         }) {
                             Input(InputType.Text) {
@@ -263,17 +267,19 @@ fun ChatDetailPage() {
                                         }
                                     }
                                 }
-                                placeholder("Введите сообщение...")
+                                placeholder("Сообщение")
                                 style {
                                     flex(1)
                                     minWidth(0.px)
                                     width(100.percent)
                                     property("box-sizing", "border-box")
-                                    padding(14.px, 16.px)
+                                    padding(12.px, 16.px)
                                     property("border", "1px solid ${CSSColors.Gray300}")
-                                    borderRadius(20.px)
+                                    borderRadius(22.px)
                                     fontSize(16.px)
                                     lineHeight("1.4")
+                                    backgroundColor(rgb(244, 246, 250))
+                                    property("outline", "none")
                                 }
                             }
                             org.jetbrains.compose.web.dom.Button({
@@ -286,13 +292,13 @@ fun ChatDetailPage() {
                                 }
                                 style {
                                     flexShrink(0)
-                                    padding(14.px, 20.px)
+                                    padding(12.px, 18.px)
                                     backgroundColor(CSSColors.Blue)
                                     color(CSSColors.White)
                                     property("border", "none")
-                                    borderRadius(20.px)
+                                    borderRadius(22.px)
                                     cursor("pointer")
-                                    fontSize(16.px)
+                                    fontSize(15.px)
                                     fontWeight("600")
                                     whiteSpace("nowrap")
                                 }
@@ -372,19 +378,21 @@ private fun MessageBubble(
                 display(DisplayStyle.Flex)
                 justifyContent(JustifyContent.Center)
                 width(100.percent)
+                padding(4.px, 24.px)
             }
         }) {
             Div({
                 style {
-                    padding(12.px, 16.px)
-                    backgroundColor(CSSColors.Gray300)
-                    borderRadius(12.px)
+                    padding(10.px, 14.px)
+                    backgroundColor(CSSColors.White)
+                    borderRadius(14.px)
                     textAlign("center")
                     color(CSSColors.Gray600)
-                    fontSize(15.px)
+                    fontSize(14.px)
                     lineHeight("1.45")
-                    maxWidth(90.percent)
+                    maxWidth(85.percent)
                     property("box-sizing", "border-box")
+                    property("box-shadow", "0 1px 2px rgba(9, 5, 43, 0.06)")
                 }
             }) {
                 Column(
@@ -494,9 +502,8 @@ private fun MessageBubble(
     }
 
     val showOpponentAvatar = !isOwnMessage && participantId != null
-    val bubbleBg = if (isOwnMessage) CSSColors.Blue else CSSColors.Gray300
-    val primaryText = if (isOwnMessage) CSSColors.White else CSSColors.Black
-    val secondaryText = if (isOwnMessage) rgba(255, 255, 255, 0.8) else CSSColors.Gray600
+    val bubbleBg = if (isOwnMessage) rgb(232, 240, 255) else CSSColors.White
+    val nameLabel = if (isOwnMessage) "" else senderName
 
     Div({
         style {
@@ -504,7 +511,7 @@ private fun MessageBubble(
             flexDirection(FlexDirection.Row)
             alignItems(AlignItems.FlexEnd)
             justifyContent(if (isOwnMessage) JustifyContent.FlexEnd else JustifyContent.FlexStart)
-            gap(10.px)
+            gap(8.px)
             width(100.percent)
         }
     }) {
@@ -513,39 +520,42 @@ private fun MessageBubble(
                 userId = participantId,
                 name = participantName?.takeIf { it.isNotBlank() } ?: "Собеседник",
                 initialAvatarUrl = participantAvatarUrl,
-                size = 36.px,
+                size = 34.px,
             )
         }
         Div({
             style {
-                padding(12.px, 16.px)
+                padding(10.px, 14.px)
                 backgroundColor(bubbleBg)
                 if (isOwnMessage) {
-                    borderRadius(18.px, 18.px, 6.px, 18.px)
+                    borderRadius(18.px, 18.px, 4.px, 18.px)
                 } else {
-                    borderRadius(18.px, 18.px, 18.px, 6.px)
+                    borderRadius(18.px, 18.px, 18.px, 4.px)
+                    property("border", "1px solid ${CSSColors.Gray300}")
                 }
                 property("max-width", "78%")
                 property("box-sizing", "border-box")
+                property("box-shadow", "0 1px 2px rgba(9, 5, 43, 0.06)")
             }
         }) {
-            Column(gap = 4.px) {
-                if (senderName.isNotBlank()) {
+            Column(gap = 2.px) {
+                if (nameLabel.isNotBlank()) {
                     Span({
                         style {
-                            fontSize(13.px)
-                            color(secondaryText)
+                            fontSize(12.px)
+                            color(CSSColors.Blue)
                             fontWeight("600")
+                            marginBottom(2.px)
                         }
                     }) {
-                        Text(senderName)
+                        Text(nameLabel)
                     }
                 }
                 Span({
                     style {
                         fontSize(16.px)
                         lineHeight("1.4")
-                        color(primaryText)
+                        color(CSSColors.Black)
                         property("word-break", "break-word")
                     }
                 }) {
@@ -553,9 +563,10 @@ private fun MessageBubble(
                 }
                 Span({
                     style {
-                        fontSize(12.px)
-                        color(secondaryText)
+                        fontSize(11.px)
+                        color(CSSColors.Gray600)
                         alignSelf(AlignSelf.FlexEnd)
+                        marginTop(2.px)
                     }
                 }) {
                     Text(timeStr)
