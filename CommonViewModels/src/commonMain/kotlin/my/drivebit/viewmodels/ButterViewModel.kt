@@ -59,7 +59,7 @@ private val registr =
 
 private val profile =
     ButterModel(
-        iconUrl = ImagePaths.MENU_USER_SVG, // TODO profile.userIconUrl
+        iconUrl = ImagePaths.BUTTER_USER_SVG,
         text = "Мой профиль",
         onClick = {},
     )
