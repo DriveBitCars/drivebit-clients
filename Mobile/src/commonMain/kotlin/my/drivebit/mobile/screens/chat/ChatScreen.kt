@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import my.drivebit.ui.theme.ColorsDriveBit
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -149,7 +150,7 @@ data class ChatScreen(
                                 Modifier
                                     .weight(1f)
                                     .fillMaxWidth()
-                                    .background(Color(0xFFF4F6FA)),
+                                    .background(ColorsDriveBit.White),
                             reverseLayout = true,
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                             contentPadding =
@@ -290,12 +291,12 @@ private fun MessageBubble(
                     }
                     Text(
                         text = message.text ?: "",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                         color = ColorsDriveBit.Black,
                     )
                     Text(
                         text = runCatching { mapIso8601ToTimeString(message.createdAt) }.getOrElse { "" },
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelMedium,
                         color = ColorsDriveBit.Gray600,
                         modifier = Modifier.align(Alignment.End).padding(top = 2.dp),
                     )
@@ -330,7 +331,7 @@ private fun MessageBubble(
                 ) {
                     Text(
                         text = message.text ?: "Системное сообщение",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
                         color = ColorsDriveBit.Gray600,
                     )
                     if (bookingIdForPay != null) {
