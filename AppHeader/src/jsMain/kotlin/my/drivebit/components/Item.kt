@@ -6,12 +6,14 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.Img
+import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
@@ -24,18 +26,25 @@ fun Item(
 ) {
     Row(alignItems = AlignItems.Center) {
         if (icon != null) {
-            Img(
-                src = icon,
-                alt = text,
-                attrs = {
-                    style {
-                        width(24.px)
-                        height(24.px)
-                        property("object-fit", "contain")
-                        marginRight(12.px)
-                    }
-                },
-            )
+            Div({
+                attr("role", "img")
+                attr("aria-label", text)
+                style {
+                    width(24.px)
+                    height(24.px)
+                    marginRight(12.px)
+                    flex("0 0 auto")
+                    backgroundColor(CSSColors.Blue)
+                    property("mask-image", "url($icon)")
+                    property("mask-size", "contain")
+                    property("mask-repeat", "no-repeat")
+                    property("mask-position", "center")
+                    property("-webkit-mask-image", "url($icon)")
+                    property("-webkit-mask-size", "contain")
+                    property("-webkit-mask-repeat", "no-repeat")
+                    property("-webkit-mask-position", "center")
+                }
+            })
         }
 
         Span({

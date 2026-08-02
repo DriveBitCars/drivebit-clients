@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import my.drivebit.repositories.AvatarRepository
+import my.drivebit.resources.ImagePaths
 import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.CarMenuOption
 import my.drivebit.viewmodels.CarMenuViewModel
@@ -167,6 +168,29 @@ class ButterViewModelTest {
         val openedState = viewModel.state.value as ButterState.Opened
         val itemWithIcon = openedState.model.find { it.iconUrl != null }
         assertTrue(itemWithIcon != null, "State should always contain item with icon")
+    }
+
+    @Test
+    fun `logged in menu icons should use butter outline set`() {
+        mockStorage.setLoggedIn(true)
+        mockCarMenuViewModel.setMenuOption(CarMenuOption.MyCars)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
+
+        viewModel.open()
+
+        val openedState = viewModel.state.value as ButterState.Opened
+        val iconsByText = openedState.model.associate { it.text to it.iconUrl }
+        assertEquals(ImagePaths.BUTTER_USER_SVG, iconsByText["Мой профиль"])
+        assertEquals(ImagePaths.BUTTER_MAIL_SVG, iconsByText["Входящие"])
+        assertEquals(ImagePaths.BUTTER_DOCS_SVG, iconsByText["Мои документы"])
+        assertEquals(ImagePaths.BUTTER_BOOKING_SVG, iconsByText["Мои бронирования"])
+        assertEquals(ImagePaths.BUTTER_DEALS_SVG, iconsByText["Мои сделки"])
+        assertEquals(ImagePaths.BUTTER_CAR_ICON_SVG, iconsByText["Мои авто"])
+        assertEquals(ImagePaths.BUTTER_LOGOUT_SVG, iconsByText["Выйти"])
+        assertTrue(
+            openedState.model.filter { it.iconUrl != null }.all { it.iconUrl!!.startsWith("/images/butter/") },
+            "Menu icons should come from the butter outline set",
+        )
     }
 
     @Test
