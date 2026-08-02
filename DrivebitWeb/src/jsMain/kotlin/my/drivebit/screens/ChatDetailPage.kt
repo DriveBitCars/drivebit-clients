@@ -154,29 +154,46 @@ fun ChatDetailPage() {
     }
 
     LaunchedEffect(Unit) {
-        if (document.getElementById("chat-messages-scroll-hide-bar") == null) {
+        val styleId = "chat-panel-overflow-fix"
+        val css =
+            """
+            #chat-panel,
+            #chat-messages-scroll {
+              overflow-x: hidden !important;
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            #chat-panel::-webkit-scrollbar,
+            #chat-messages-scroll::-webkit-scrollbar {
+              display: none !important;
+              width: 0 !important;
+              height: 0 !important;
+            }
+            """.trimIndent()
+        val existing = document.getElementById(styleId)
+        if (existing != null) {
+            existing.textContent = css
+        } else {
             val style = document.createElement("style")
-            style.id = "chat-messages-scroll-hide-bar"
-            style.textContent =
-                """
-                #chat-messages-scroll {
-                  scrollbar-width: none;
-                  -ms-overflow-style: none;
-                }
-                #chat-messages-scroll::-webkit-scrollbar {
-                  display: none;
-                  width: 0;
-                  height: 0;
-                }
-                """.trimIndent()
+            style.id = styleId
+            style.textContent = css
             document.head?.appendChild(style)
         }
+        document.getElementById("chat-messages-scroll-hide-bar")?.remove()
     }
 
     var messageText by remember { mutableStateOf("") }
 
     AppWithHeader {
-        Column(modifier = { width(100.percent) }) {
+        Column(
+            modifier = {
+                width(100.percent)
+                maxWidth(100.percent)
+                minWidth(0.px)
+                property("box-sizing", "border-box")
+                property("overflow-x", "hidden")
+            },
+        ) {
             ToolbarBackArrow(
                 title = chatDetail?.participant?.name?.takeIf { it.isNotBlank() } ?: "Чат",
                 onBackClick = { window.location.href = "/chats" },
@@ -192,12 +209,18 @@ fun ChatDetailPage() {
                 error != null -> TextError(error ?: "Ошибка")
                 else -> {
                     Div({
+                        attr("id", "chat-panel")
                         style {
                             display(DisplayStyle.Flex)
                             flexDirection(FlexDirection.Column)
-                            flex(1)
-                            maxHeight(70.vh)
-                            property("overflow", "hidden")
+                            width(100.percent)
+                            maxWidth(100.percent)
+                            minWidth(0.px)
+                            property("box-sizing", "border-box")
+                            property("height", "calc(100dvh - 160px)")
+                            property("min-height", "420px")
+                            property("overflow-x", "hidden")
+                            property("overflow-y", "hidden")
                             backgroundColor(CSSColors.White)
                         }
                     }) {
@@ -205,13 +228,27 @@ fun ChatDetailPage() {
                             attr("id", "chat-messages-scroll")
                             style {
                                 flex(1)
+                                minHeight(0.px)
+                                minWidth(0.px)
+                                width(100.percent)
+                                maxWidth(100.percent)
+                                property("box-sizing", "border-box")
+                                property("overflow-x", "hidden")
                                 property("overflow-y", "auto")
                                 padding(16.px, 12.px)
                                 property("scrollbar-width", "none")
                                 property("-ms-overflow-style", "none")
                             }
                         }) {
-                            Column(gap = 10.px, modifier = { width(100.percent) }) {
+                            Column(
+                                gap = 10.px,
+                                modifier = {
+                                    width(100.percent)
+                                    maxWidth(100.percent)
+                                    minWidth(0.px)
+                                    property("box-sizing", "border-box")
+                                },
+                            ) {
                                 messages.forEach { message ->
                                     val bookingIdForPay = message.payBookingIdForAction()
                                     MessageBubble(
@@ -271,7 +308,10 @@ fun ChatDetailPage() {
                                 padding(12.px, 14.px)
                                 width(100.percent)
                                 maxWidth(100.percent)
+                                minWidth(0.px)
+                                flexShrink(0)
                                 property("box-sizing", "border-box")
+                                property("overflow-x", "hidden")
                                 backgroundColor(CSSColors.White)
                                 property("border-top", "1px solid ${CSSColors.Gray300}")
                             }
@@ -399,7 +439,10 @@ private fun MessageBubble(
                 display(DisplayStyle.Flex)
                 justifyContent(JustifyContent.Center)
                 width(100.percent)
-                padding(4.px, 24.px)
+                maxWidth(100.percent)
+                minWidth(0.px)
+                property("box-sizing", "border-box")
+                padding(4.px, 8.px)
             }
         }) {
             Div({
@@ -411,8 +454,10 @@ private fun MessageBubble(
                     color(CSSColors.Gray600)
                     fontSize(16.px)
                     lineHeight("1.45")
-                    maxWidth(85.percent)
+                    width(100.percent)
+                    maxWidth(100.percent)
                     property("box-sizing", "border-box")
+                    property("overflow-wrap", "anywhere")
                     property("box-shadow", "0 1px 2px rgba(9, 5, 43, 0.06)")
                 }
             }) {
@@ -534,6 +579,9 @@ private fun MessageBubble(
             justifyContent(if (isOwnMessage) JustifyContent.FlexEnd else JustifyContent.FlexStart)
             gap(8.px)
             width(100.percent)
+            maxWidth(100.percent)
+            minWidth(0.px)
+            property("box-sizing", "border-box")
         }
     }) {
         if (showOpponentAvatar) {
@@ -554,12 +602,21 @@ private fun MessageBubble(
                     borderRadius(18.px, 18.px, 18.px, 4.px)
                     property("border", "1px solid ${CSSColors.Gray300}")
                 }
-                property("max-width", "78%")
+                minWidth(0.px)
+                property("max-width", if (showOpponentAvatar) "calc(100% - 42px)" else "85%")
                 property("box-sizing", "border-box")
+                property("overflow-wrap", "anywhere")
                 property("box-shadow", "0 1px 2px rgba(9, 5, 43, 0.06)")
             }
         }) {
-            Column(gap = 2.px) {
+            Column(
+                gap = 2.px,
+                modifier = {
+                    minWidth(0.px)
+                    maxWidth(100.percent)
+                    property("box-sizing", "border-box")
+                },
+            ) {
                 if (nameLabel.isNotBlank()) {
                     Span({
                         style {
@@ -578,6 +635,7 @@ private fun MessageBubble(
                         lineHeight("1.4")
                         color(CSSColors.Black)
                         property("word-break", "break-word")
+                        property("overflow-wrap", "anywhere")
                     }
                 }) {
                     MessageTextWithDealsLink(text = text)
