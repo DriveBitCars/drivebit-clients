@@ -103,4 +103,40 @@ class CarUpdateRequestTest {
         assertTrue(createJson.contains("\"allowedTravelDestinations\""))
         assertTrue(createJson.contains("Belarus"))
     }
+
+    @Test
+    fun `toUpdateCarRequest maps seasonalPriceAdjustmentPercent`() {
+        val carId = "d5edee76-d7d7-42bd-be61-bfc3a73786c8"
+        val createRequest =
+            CarCreateRequest(
+                year = 2015,
+                dailyRate = 1599,
+                seasonalPriceAdjustmentPercent = 15,
+            )
+
+        val updateRequest = createRequest.toUpdateCarRequest(carId)
+
+        assertEquals(15.0, updateRequest.seasonalPriceAdjustmentPercent)
+        val json = defaultJson.encodeToString(UpdateCarRequest.serializer(), updateRequest)
+        assertTrue(json.contains("\"seasonalPriceAdjustmentPercent\":15"))
+
+        val createJson = defaultJson.encodeToString(CarCreateRequest.serializer(), createRequest)
+        assertTrue(createJson.contains("\"seasonalPriceAdjustmentPercent\":15"))
+    }
+
+    @Test
+    fun `toUpdateCarRequest omits seasonalPriceAdjustmentPercent when not set`() {
+        val carId = "d5edee76-d7d7-42bd-be61-bfc3a73786c8"
+        val createRequest =
+            CarCreateRequest(
+                year = 2015,
+                dailyRate = 1599,
+            )
+
+        val updateRequest = createRequest.toUpdateCarRequest(carId)
+
+        assertEquals(null, updateRequest.seasonalPriceAdjustmentPercent)
+        val json = defaultJson.encodeToString(UpdateCarRequest.serializer(), updateRequest)
+        assertFalse(json.contains("seasonalPriceAdjustmentPercent"))
+    }
 }

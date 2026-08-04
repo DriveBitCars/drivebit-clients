@@ -43,6 +43,10 @@ interface CarDataRepository {
 
     fun getDailyRate21Days(): Int?
 
+    fun saveSeasonalPriceAdjustmentPercent(percent: Int?)
+
+    fun getSeasonalPriceAdjustmentPercent(): Int?
+
     fun savePrepaymentPercent(percent: Int?)
 
     fun getPrepaymentPercent(): Int?
@@ -72,6 +76,7 @@ internal class CarDataRepositoryImpl(
         private const val DAILY_RATE_7_DAYS_KEY = "car_daily_rate_7_days"
         private const val DAILY_RATE_14_DAYS_KEY = "car_daily_rate_14_days"
         private const val DAILY_RATE_21_DAYS_KEY = "car_daily_rate_21_days"
+        private const val SEASONAL_PRICE_ADJUSTMENT_PERCENT_KEY = "car_seasonal_price_adjustment_percent"
         private const val PREPAYMENT_PERCENT_KEY = "car_prepayment_percent"
         private const val MONTHLY_RATE_KEY = "car_monthly_rate"
         private const val DESCRIPTION_KEY = "car_description"
@@ -180,6 +185,19 @@ internal class CarDataRepositoryImpl(
         return if (rate < 0) null else rate
     }
 
+    override fun saveSeasonalPriceAdjustmentPercent(percent: Int?) {
+        if (percent != null && percent in -90..1000) {
+            settings.putInt(SEASONAL_PRICE_ADJUSTMENT_PERCENT_KEY, percent)
+        } else {
+            settings.remove(SEASONAL_PRICE_ADJUSTMENT_PERCENT_KEY)
+        }
+    }
+
+    override fun getSeasonalPriceAdjustmentPercent(): Int? {
+        if (!settings.hasKey(SEASONAL_PRICE_ADJUSTMENT_PERCENT_KEY)) return null
+        return settings.getInt(SEASONAL_PRICE_ADJUSTMENT_PERCENT_KEY, 0)
+    }
+
     override fun savePrepaymentPercent(percent: Int?) {
         if (percent != null && percent in 0..100) {
             settings.putInt(PREPAYMENT_PERCENT_KEY, percent)
@@ -219,6 +237,7 @@ internal class CarDataRepositoryImpl(
         settings.remove(DAILY_RATE_7_DAYS_KEY)
         settings.remove(DAILY_RATE_14_DAYS_KEY)
         settings.remove(DAILY_RATE_21_DAYS_KEY)
+        settings.remove(SEASONAL_PRICE_ADJUSTMENT_PERCENT_KEY)
         settings.remove(PREPAYMENT_PERCENT_KEY)
         settings.remove(MONTHLY_RATE_KEY)
         settings.remove(DESCRIPTION_KEY)

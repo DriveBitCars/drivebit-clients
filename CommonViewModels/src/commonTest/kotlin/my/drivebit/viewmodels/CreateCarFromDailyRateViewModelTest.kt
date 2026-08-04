@@ -59,6 +59,10 @@ private class FakeCarDataRepository : CarDataRepository {
 
     override fun getDailyRate21Days(): Int? = null
 
+    override fun saveSeasonalPriceAdjustmentPercent(percent: Int?) {}
+
+    override fun getSeasonalPriceAdjustmentPercent(): Int? = null
+
     override fun savePrepaymentPercent(percent: Int?) {}
 
     override fun getPrepaymentPercent(): Int? = null
