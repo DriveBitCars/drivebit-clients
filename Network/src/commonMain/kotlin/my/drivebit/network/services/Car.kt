@@ -186,6 +186,8 @@ data class CarDetailResponse(
     val insuranceTranslate: String? = null,
     val deposit: Double? = null,
     @JsonNames("prepaymentPercent", "prepayment_percent") val prepaymentPercent: Double? = null,
+    @JsonNames("seasonalPriceAdjustmentPercent", "seasonal_price_adjustment_percent")
+    val seasonalPriceAdjustmentPercent: Double? = null,
     val owner: String = "",
     val carBookings: List<CarBookingItem> = emptyList(),
 ) {
@@ -403,6 +405,8 @@ data class CarCreateRequest(
     val dailyRate21Days: Int? = null,
     val deposit: Int? = null,
     @JsonNames("prepaymentPercent", "prepayment_percent") val prepaymentPercent: Int? = null,
+    @JsonNames("seasonalPriceAdjustmentPercent", "seasonal_price_adjustment_percent")
+    val seasonalPriceAdjustmentPercent: Int? = null,
     val availableMileagePerDayKm: Int? = null,
     val insurance: String? = null,
     @SerialName("parkingAssistances") val ParkingAssistances: List<Int> = emptyList(),
@@ -424,6 +428,8 @@ data class UpdateCarRequest(
     val dailyRate21Days: Double? = null,
     val deposit: Double? = null,
     @JsonNames("prepaymentPercent", "prepayment_percent") val prepaymentPercent: Double? = null,
+    @JsonNames("seasonalPriceAdjustmentPercent", "seasonal_price_adjustment_percent")
+    val seasonalPriceAdjustmentPercent: Double? = null,
     val availableMileagePerDayKm: Int? = null,
     val description: String? = null,
     val mileage: Int? = null,
@@ -464,6 +470,7 @@ fun CarCreateRequest.toUpdateCarRequest(resolvedCarId: String): UpdateCarRequest
         dailyRate21Days = dailyRate21Days?.toDouble(),
         deposit = deposit?.toDouble(),
         prepaymentPercent = prepaymentPercent?.toDouble(),
+        seasonalPriceAdjustmentPercent = seasonalPriceAdjustmentPercent?.toDouble(),
         availableMileagePerDayKm = availableMileagePerDayKm,
         description = description,
         engineVolume = engineVolume,

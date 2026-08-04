@@ -11,6 +11,18 @@ import kotlinx.coroutines.launch
 import my.drivebit.network.services.Car
 import my.drivebit.network.services.CarCreateRequest
 import my.drivebit.network.services.CarDetailResponse
+import my.drivebit.utils.removeSeasonalAdjustment
+import kotlin.math.round
+
+internal fun formatBaseRateForEdit(
+    adjustedRate: Double?,
+    seasonalPercent: Double,
+): String {
+    val adjusted = adjustedRate?.takeIf { it > 0 } ?: return ""
+    val base = removeSeasonalAdjustment(adjusted, seasonalPercent)
+    val asInt = round(base).toInt()
+    return if (asInt > 0) NumberFormatter.formatInt(asInt) else ""
+}
 
 sealed interface CarEditState {
     data object Loading : CarEditState
@@ -58,6 +70,7 @@ data class CarEditFormData(
     val dailyRate7Days: String = "",
     val dailyRate14Days: String = "",
     val dailyRate21Days: String = "",
+    val seasonalPriceAdjustmentPercent: String = "0",
     val deposit: String = "",
     val availableMileagePerDayKm: String = "",
     val insurance: String? = null,
@@ -178,6 +191,7 @@ class CarEditViewModelImpl(
         val resolvedSeatsCount = car.resolvedSeatsCount()
         val resolvedTrunkSize = car.resolvedTrunkSize()
         val resolvedTrunkSizeTranslate = car.resolvedTrunkSizeTranslate().orEmpty()
+        val seasonalPercent = car.seasonalPriceAdjustmentPercent ?: 0.0
 
         return CarEditFormData(
             carId = car.id,
@@ -205,38 +219,13 @@ class CarEditViewModelImpl(
             trunkSizeSearch = resolvedTrunkSizeTranslate,
             address = car.resolvedAddressDisplay() ?: "",
             description = car.general.description ?: "",
-            hourlyRate =
-                car.hourlyRate
-                    ?.toInt()
-                    ?.takeIf { it > 0 }
-                    ?.let { NumberFormatter.formatInt(it) } ?: "",
-            dailyRate =
-                car.dailyRate
-                    ?.toInt()
-                    ?.takeIf { it > 0 }
-                    ?.let { NumberFormatter.formatInt(it) } ?: "",
-            dailyRate4Days =
-                car.dailyRate4Days?.toInt()?.takeIf { it > 0 }?.let {
-                    NumberFormatter.formatInt(
-                        it,
-                    )
-                } ?: "",
-            dailyRate7Days =
-                car.dailyRate7Days?.toInt()?.takeIf { it > 0 }?.let {
-                    NumberFormatter.formatInt(
-                        it,
-                    )
-                } ?: "",
-            dailyRate14Days =
-                car.dailyRate14Days
-                    ?.toInt()
-                    ?.takeIf { it > 0 }
-                    ?.let { NumberFormatter.formatInt(it) } ?: "",
-            dailyRate21Days =
-                car.dailyRate21Days
-                    ?.toInt()
-                    ?.takeIf { it > 0 }
-                    ?.let { NumberFormatter.formatInt(it) } ?: "",
+            hourlyRate = formatBaseRateForEdit(car.hourlyRate, seasonalPercent),
+            dailyRate = formatBaseRateForEdit(car.dailyRate, seasonalPercent),
+            dailyRate4Days = formatBaseRateForEdit(car.dailyRate4Days, seasonalPercent),
+            dailyRate7Days = formatBaseRateForEdit(car.dailyRate7Days, seasonalPercent),
+            dailyRate14Days = formatBaseRateForEdit(car.dailyRate14Days, seasonalPercent),
+            dailyRate21Days = formatBaseRateForEdit(car.dailyRate21Days, seasonalPercent),
+            seasonalPriceAdjustmentPercent = NumberFormatter.formatInt(round(seasonalPercent).toInt()),
             deposit =
                 car.deposit
                     ?.toInt()

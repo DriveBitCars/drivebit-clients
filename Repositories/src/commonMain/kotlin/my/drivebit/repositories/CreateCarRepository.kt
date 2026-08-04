@@ -61,6 +61,8 @@ internal class CreateCarRepositoryImpl(
                     dailyRate7Days = carDataRepository.getDailyRate7Days(),
                     dailyRate14Days = carDataRepository.getDailyRate14Days(),
                     dailyRate21Days = carDataRepository.getDailyRate21Days(),
+                    seasonalPriceAdjustmentPercent =
+                        carDataRepository.getSeasonalPriceAdjustmentPercent() ?: 0,
                     prepaymentPercent = DEFAULT_CAR_PREPAYMENT_PERCENT,
                     ParkingAssistances = emptyList(),
                     MultimediaSystemOptions = emptyList(),

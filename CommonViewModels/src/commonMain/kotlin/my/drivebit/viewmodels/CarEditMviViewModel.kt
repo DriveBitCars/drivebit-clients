@@ -121,6 +121,10 @@ sealed interface CarEditIntent {
         val value: String,
     ) : CarEditIntent
 
+    data class UpdateSeasonalPriceAdjustmentPercent(
+        val value: String,
+    ) : CarEditIntent
+
     data class UpdateDeposit(
         val value: String,
     ) : CarEditIntent
@@ -440,6 +444,9 @@ class CarEditMviViewModelImpl(
             is CarEditIntent.UpdateDailyRate21Days -> {
                 updateFormData { it.copy(dailyRate21Days = intent.value) }
             }
+            is CarEditIntent.UpdateSeasonalPriceAdjustmentPercent -> {
+                updateFormData { it.copy(seasonalPriceAdjustmentPercent = intent.value) }
+            }
             is CarEditIntent.UpdateDeposit -> {
                 updateFormData { it.copy(deposit = intent.value) }
             }
@@ -598,6 +605,12 @@ class CarEditMviViewModelImpl(
                 val dailyRate7DaysValue = formData.dailyRate7Days.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val dailyRate14DaysValue = formData.dailyRate14Days.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val dailyRate21DaysValue = formData.dailyRate21Days.takeIf { it.isNotBlank() }?.toIntOrNull()
+                val seasonalPriceAdjustmentPercentValue =
+                    formData.seasonalPriceAdjustmentPercent
+                        .takeIf { it.isNotBlank() && it != "-" }
+                        ?.toIntOrNull()
+                        ?.coerceIn(-90, 1000)
+                        ?: 0
                 val depositValue = formData.deposit.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val availableMileagePerDayKmValue =
                     formData.availableMileagePerDayKm.takeIf { it.isNotBlank() }?.toIntOrNull()
@@ -625,6 +638,7 @@ class CarEditMviViewModelImpl(
                         dailyRate7Days = dailyRate7DaysValue,
                         dailyRate14Days = dailyRate14DaysValue,
                         dailyRate21Days = dailyRate21DaysValue,
+                        seasonalPriceAdjustmentPercent = seasonalPriceAdjustmentPercentValue,
                         deposit = depositValue,
                         availableMileagePerDayKm = availableMileagePerDayKmValue,
                         insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },
@@ -795,8 +809,9 @@ class CarEditMviViewModelImpl(
         }
     }
 
-    private fun mapToFormData(car: CarDetailResponse): CarEditFormData =
-        CarEditFormData(
+    private fun mapToFormData(car: CarDetailResponse): CarEditFormData {
+        val seasonalPercent = car.seasonalPriceAdjustmentPercent ?: 0.0
+        return CarEditFormData(
             carId = car.id,
             licensePlate = car.resolvedLicensePlate() ?: "",
             brandId = car.resolvedBrandId(),
@@ -822,14 +837,14 @@ class CarEditMviViewModelImpl(
             trunkSizeSearch = car.resolvedTrunkSizeTranslate() ?: "",
             address = car.resolvedAddressDisplay() ?: "",
             description = car.general?.description ?: "",
-            hourlyRate = NumberFormatter.formatInt(car.resolvedHourlyRate().takeIf { it > 0 }),
-            dailyRate = NumberFormatter.formatInt(car.resolvedDailyRate().takeIf { it > 0 }),
-            dailyRate4Days = car.dailyRate4Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
-            dailyRate7Days = car.dailyRate7Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
-            dailyRate14Days =
-                car.dailyRate14Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
-            dailyRate21Days =
-                car.dailyRate21Days?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
+            hourlyRate = formatBaseRateForEdit(car.hourlyRate, seasonalPercent),
+            dailyRate = formatBaseRateForEdit(car.dailyRate, seasonalPercent),
+            dailyRate4Days = formatBaseRateForEdit(car.dailyRate4Days, seasonalPercent),
+            dailyRate7Days = formatBaseRateForEdit(car.dailyRate7Days, seasonalPercent),
+            dailyRate14Days = formatBaseRateForEdit(car.dailyRate14Days, seasonalPercent),
+            dailyRate21Days = formatBaseRateForEdit(car.dailyRate21Days, seasonalPercent),
+            seasonalPriceAdjustmentPercent =
+                NumberFormatter.formatInt(kotlin.math.round(seasonalPercent).toInt()),
             deposit = car.deposit?.takeIf { it > 0 }?.let { NumberFormatter.formatInt(it.toInt()) } ?: "",
             availableMileagePerDayKm = car.availableMileagePerDayKm?.let { NumberFormatter.formatInt(it) } ?: "",
             insurance = car.insurance?.trim()?.takeIf { it.isNotEmpty() },
@@ -838,4 +853,5 @@ class CarEditMviViewModelImpl(
             allowedTravelDestinationsTranslate = car.resolvedAllowedTravelDestinationsTranslate(),
             photos = car.photos,
         )
+    }
 }

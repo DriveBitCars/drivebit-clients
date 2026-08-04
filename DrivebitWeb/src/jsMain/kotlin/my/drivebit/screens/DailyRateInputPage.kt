@@ -15,6 +15,7 @@ import my.drivebit.components.TextInputField
 import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.repositories.CarDataRepository
+import my.drivebit.utils.parseSeasonalPercentInput
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.*
@@ -49,11 +50,20 @@ fun DailyRateInputPage(
         val saved = carDataRepository.getDailyRate21Days()
         mutableStateOf(saved?.toString() ?: "")
     }
+    var seasonalPriceAdjustmentPercent by remember {
+        val saved = carDataRepository.getSeasonalPriceAdjustmentPercent()
+        mutableStateOf(saved?.toString() ?: "0")
+    }
     var localError by remember { mutableStateOf<String?>(null) }
 
     val error = localError
 
-    val isValid = dailyRate.toIntOrNull()?.let { it >= 0 } == true
+    val isValid =
+        dailyRate.toIntOrNull()?.let { it >= 0 } == true &&
+            (
+                seasonalPriceAdjustmentPercent.trim().isEmpty() ||
+                    parseSeasonalPercentInput(seasonalPriceAdjustmentPercent) != null
+            )
 
     buttonViewModel.setState(
         if (isValid) ButtonState.Enabled else ButtonState.Disabled,
@@ -129,6 +139,22 @@ fun DailyRateInputPage(
                     numeric = true,
                 )
 
+                TextInputField(
+                    label = "Сезонная наценка, %",
+                    value = seasonalPriceAdjustmentPercent,
+                    onValueChange = { newValue ->
+                        val cleaned =
+                            newValue.filterIndexed { index, c ->
+                                c.isDigit() || (index == 0 && c == '-')
+                            }
+                        if (cleaned.isEmpty() || cleaned == "-" || cleaned.toIntOrNull() != null) {
+                            seasonalPriceAdjustmentPercent = cleaned
+                            localError = null
+                        }
+                    },
+                    numeric = true,
+                )
+
                 if (error != null) {
                     TextError(error ?: "Произошла ошибка")
                 }
@@ -149,12 +175,15 @@ fun DailyRateInputPage(
                             text = "Далее",
                             onClick = {
                                 val rateValue = dailyRate.toIntOrNull()
+                                val seasonalPercent =
+                                    parseSeasonalPercentInput(seasonalPriceAdjustmentPercent) ?: 0
                                 if (rateValue != null && rateValue >= 0) {
                                     carDataRepository.saveDailyRate(rateValue)
                                     carDataRepository.saveDailyRate4Days(parseRate(dailyRate4Days))
                                     carDataRepository.saveDailyRate7Days(parseRate(dailyRate7Days))
                                     carDataRepository.saveDailyRate14Days(parseRate(dailyRate14Days))
                                     carDataRepository.saveDailyRate21Days(parseRate(dailyRate21Days))
+                                    carDataRepository.saveSeasonalPriceAdjustmentPercent(seasonalPercent)
                                     onNavigateToLicensePlate()
                                 } else {
                                     localError = "Введите корректное значение"

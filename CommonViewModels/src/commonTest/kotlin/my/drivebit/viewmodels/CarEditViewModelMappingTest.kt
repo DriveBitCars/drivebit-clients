@@ -229,6 +229,44 @@ class CarEditViewModelMappingTest {
         }
 
     @Test
+    fun `toFormData strips seasonal markup from rates into base fields`() =
+        runTest(StandardTestDispatcher()) {
+            val carResponse =
+                CarDetailResponse(
+                    id = "car-seasonal",
+                    dailyRate = 1100.0,
+                    dailyRate4Days = 880.0,
+                    hourlyRate = 220.0,
+                    seasonalPriceAdjustmentPercent = 10.0,
+                )
+
+            val viewModel = CarEditViewModelImpl(MockCarServiceForEdit())
+            val formData = viewModel.mapToFormData(carResponse)
+
+            assertEquals("10", formData.seasonalPriceAdjustmentPercent)
+            assertEquals("1000", formData.dailyRate)
+            assertEquals("800", formData.dailyRate4Days)
+            assertEquals("200", formData.hourlyRate)
+        }
+
+    @Test
+    fun `toFormData keeps rates when seasonal percent is zero`() =
+        runTest(StandardTestDispatcher()) {
+            val carResponse =
+                CarDetailResponse(
+                    id = "car-no-seasonal",
+                    dailyRate = 1500.0,
+                    seasonalPriceAdjustmentPercent = 0.0,
+                )
+
+            val viewModel = CarEditViewModelImpl(MockCarServiceForEdit())
+            val formData = viewModel.mapToFormData(carResponse)
+
+            assertEquals("0", formData.seasonalPriceAdjustmentPercent)
+            assertEquals("1500", formData.dailyRate)
+        }
+
+    @Test
     fun `toFormData should handle partial data correctly`() =
         runTest(StandardTestDispatcher()) {
             val carResponse =
