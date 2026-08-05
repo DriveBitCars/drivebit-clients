@@ -379,7 +379,20 @@ data class CarPhotoItem(
     val url: String,
     val uploadDate: String,
     val carId: String? = null,
-)
+    val thumbnailUrl: String? = null,
+) {
+    fun previewUrl(): String = thumbnailUrl?.trim()?.takeIf { it.isNotEmpty() } ?: url
+
+    fun withSanitizedUrls(): CarPhotoItem =
+        copy(
+            url = extractPathFromApiUrl(url),
+            thumbnailUrl =
+                thumbnailUrl
+                    ?.let { extractPathFromApiUrl(it) }
+                    ?.trim()
+                    ?.takeIf { it.isNotEmpty() },
+        )
+}
 
 @Serializable
 data class CarCreateRequest(
@@ -497,32 +510,20 @@ class CarImpl(
             val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
 
             car.copy(
-                photos =
-                    allPhotos.map { photo ->
-                        photo.copy(url = extractPathFromApiUrl(photo.url))
-                    },
+                photos = allPhotos.map { it.withSanitizedUrls() },
                 general =
                     car.general.copy(
-                        photos =
-                            photosFromGeneral.map { photo ->
-                                photo.copy(url = extractPathFromApiUrl(photo.url))
-                            },
+                        photos = photosFromGeneral.map { it.withSanitizedUrls() },
                     ),
             )
         }
 
     private fun sanitizeCarDetail(result: CarDetailResponse): CarDetailResponse =
         result.copy(
-            photos =
-                result.photos.map { photo ->
-                    photo.copy(url = extractPathFromApiUrl(photo.url))
-                },
+            photos = result.photos.map { it.withSanitizedUrls() },
             general =
                 result.general.copy(
-                    photos =
-                        result.general.photos.map { photo ->
-                            photo.copy(url = extractPathFromApiUrl(photo.url))
-                        },
+                    photos = result.general.photos.map { it.withSanitizedUrls() },
                 ),
         )
 

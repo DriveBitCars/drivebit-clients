@@ -90,7 +90,7 @@ fun CarPhotosPage() {
                                             }
                                         }) {
                                             Img(
-                                                src = photo.url,
+                                                src = photo.previewUrl(),
                                                 attrs = {
                                                     style {
                                                         width(100.percent)

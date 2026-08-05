@@ -1,7 +1,6 @@
 package my.drivebit.search
 
 import my.drivebit.network.services.CarItem
-import my.drivebit.utils.extractPathFromApiUrl
 
 /** Rewrite direct MinIO host:9000 URLs to same-origin `/publicbct/...` paths for HTTPS pages. */
 fun sanitizeSearchCarPhotoUrls(items: List<CarItem>): List<CarItem> =
@@ -11,16 +10,10 @@ fun sanitizeSearchCarPhotoUrls(items: List<CarItem>): List<CarItem> =
         val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
 
         car.copy(
-            photos =
-                allPhotos.map { photo ->
-                    photo.copy(url = extractPathFromApiUrl(photo.url))
-                },
+            photos = allPhotos.map { it.withSanitizedUrls() },
             general =
                 car.general.copy(
-                    photos =
-                        photosFromGeneral.map { photo ->
-                            photo.copy(url = extractPathFromApiUrl(photo.url))
-                        },
+                    photos = photosFromGeneral.map { it.withSanitizedUrls() },
                 ),
         )
     }
