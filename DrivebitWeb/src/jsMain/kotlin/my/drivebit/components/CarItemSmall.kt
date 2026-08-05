@@ -41,12 +41,15 @@ fun CarItemSmall(
         ) {
             val photosFromGeneral = car.general.photos
             val photosFromTopLevel = car.photos
-            val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }.filter { it.url.isNotBlank() }
+            val allPhotos =
+                (photosFromGeneral + photosFromTopLevel)
+                    .distinctBy { it.id }
+                    .filter { it.previewUrl().isNotBlank() }
             val safePhotoIndex = currentPhotoIndex.coerceIn(0, (allPhotos.size - 1).coerceAtLeast(0))
             if (safePhotoIndex != currentPhotoIndex) {
                 currentPhotoIndex = safePhotoIndex
             }
-            val currentPhotoUrl = allPhotos.getOrNull(safePhotoIndex)?.url
+            val currentPhotoUrl = allPhotos.getOrNull(safePhotoIndex)?.previewUrl()
 
             if (!currentPhotoUrl.isNullOrEmpty()) {
                 Div({

@@ -48,7 +48,20 @@ data class CarPhotoResponse(
     val id: Int,
     val url: String,
     val uploadDate: String,
-)
+    val thumbnailUrl: String? = null,
+) {
+    fun previewUrl(): String = thumbnailUrl?.trim()?.takeIf { it.isNotEmpty() } ?: url
+
+    fun withSanitizedUrls(sanitize: (String) -> String): CarPhotoResponse =
+        copy(
+            url = sanitize(url),
+            thumbnailUrl =
+                thumbnailUrl
+                    ?.let(sanitize)
+                    ?.trim()
+                    ?.takeIf { it.isNotEmpty() },
+        )
+}
 
 class PhotoImpl(
     private val httpClient: HttpClient,
@@ -107,9 +120,7 @@ class PhotoImpl(
             val url = "${DEFAULT_BASE_URL}Photo/car/$carId"
             val response = httpClient.get(url)
             val photos: List<CarPhotoResponse> = response.parseResponse()
-            photos.map { photo ->
-                photo.copy(url = ensureHttpsUrl(photo.url))
-            }
+            photos.map { photo -> photo.withSanitizedUrls(::ensureHttpsUrl) }
         }.getOrElse { e ->
             if (carService != null) {
                 val car = carService.getCar(carId)
@@ -118,6 +129,7 @@ class PhotoImpl(
                         id = photo.id,
                         url = ensureHttpsUrl(photo.url),
                         uploadDate = photo.uploadDate,
+                        thumbnailUrl = photo.thumbnailUrl?.let { ensureHttpsUrl(it) },
                     )
                 }
             } else {
@@ -157,9 +169,7 @@ class PhotoImpl(
                 )
             }
         val photos: List<CarPhotoResponse> = response.parseResponse()
-        return photos.map { photo ->
-            photo.copy(url = ensureHttpsUrl(photo.url))
-        }
+        return photos.map { photo -> photo.withSanitizedUrls(::ensureHttpsUrl) }
     }
 
     override suspend fun deleteCarPhoto(photoId: Int) {
