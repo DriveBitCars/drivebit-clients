@@ -30,6 +30,7 @@ import my.drivebit.utils.reencodeToJpeg
 import my.drivebit.utils.reencodeToWebp
 import my.drivebit.viewmodels.CarPhotosState
 import my.drivebit.viewmodels.CarPhotosViewModel
+import my.drivebit.viewmodels.PhotoMoveDirection
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
@@ -82,8 +83,11 @@ fun CarPhotosPage() {
                                         marginBottom(12.px)
                                     }
                                 }) {
-                                    currentState.photos.forEach { photo ->
+                                    currentState.photos.forEachIndexed { index, photo ->
                                         var showMenu by remember { mutableStateOf(false) }
+                                        val canMoveUp = index > 0 && !currentState.isReordering
+                                        val canMoveDown =
+                                            index < currentState.photos.lastIndex && !currentState.isReordering
                                         Div({
                                             style {
                                                 position(Position.Relative)
@@ -100,6 +104,91 @@ fun CarPhotosPage() {
                                                     }
                                                 },
                                             )
+                                            if (index == 0) {
+                                                Div({
+                                                    style {
+                                                        position(Position.Absolute)
+                                                        top(8.px)
+                                                        left(8.px)
+                                                        backgroundColor(rgba(0, 0, 0, 0.65))
+                                                        color(CSSColors.White)
+                                                        fontSize(12.px)
+                                                        padding(4.px, 8.px)
+                                                        borderRadius(6.px)
+                                                    }
+                                                }) {
+                                                    Text("Главное")
+                                                }
+                                            }
+                                            Div({
+                                                style {
+                                                    position(Position.Absolute)
+                                                    bottom(8.px)
+                                                    left(8.px)
+                                                    display(DisplayStyle.Flex)
+                                                    flexDirection(FlexDirection.Column)
+                                                    gap(6.px)
+                                                }
+                                            }) {
+                                                Button({
+                                                    if (!canMoveUp) {
+                                                        attr("disabled", "true")
+                                                    }
+                                                    onClick {
+                                                        if (canMoveUp) {
+                                                            viewModel.movePhoto(
+                                                                carIdParam,
+                                                                photo.id,
+                                                                PhotoMoveDirection.Up,
+                                                            )
+                                                        }
+                                                    }
+                                                    style {
+                                                        width(32.px)
+                                                        height(32.px)
+                                                        borderRadius(50.percent)
+                                                        backgroundColor(CSSColors.White)
+                                                        border(1.px, LineStyle.Solid, rgb(128, 128, 128))
+                                                        cursor(if (canMoveUp) "pointer" else "default")
+                                                        opacity(if (canMoveUp) 1.0 else 0.4)
+                                                        display(DisplayStyle.Flex)
+                                                        property("align-items", "center")
+                                                        property("justify-content", "center")
+                                                        property("box-shadow", "0 2px 4px rgba(0,0,0,0.2)")
+                                                    }
+                                                }) {
+                                                    Text("↑")
+                                                }
+                                                Button({
+                                                    if (!canMoveDown) {
+                                                        attr("disabled", "true")
+                                                    }
+                                                    onClick {
+                                                        if (canMoveDown) {
+                                                            viewModel.movePhoto(
+                                                                carIdParam,
+                                                                photo.id,
+                                                                PhotoMoveDirection.Down,
+                                                            )
+                                                        }
+                                                    }
+                                                    style {
+                                                        width(32.px)
+                                                        height(32.px)
+                                                        borderRadius(50.percent)
+                                                        backgroundColor(CSSColors.White)
+                                                        border(1.px, LineStyle.Solid, rgb(128, 128, 128))
+                                                        cursor(if (canMoveDown) "pointer" else "default")
+                                                        opacity(if (canMoveDown) 1.0 else 0.4)
+                                                        display(DisplayStyle.Flex)
+                                                        property("align-items", "center")
+                                                        property("justify-content", "center")
+                                                        property("box-shadow", "0 2px 4px rgba(0,0,0,0.2)")
+                                                    }
+                                                }) {
+                                                    Text("↓")
+                                                }
+                                            }
                                             Button({
                                                 onClick { showMenu = !showMenu }
                                                 style {
