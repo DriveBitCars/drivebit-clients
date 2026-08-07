@@ -513,20 +513,20 @@ class CarImpl(
             val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
 
             car.copy(
-                photos = allPhotos.map { it.withSanitizedUrls() },
+                photos = allPhotos.map { it.withSanitizedUrls() }.sortedBySortOrder(),
                 general =
                     car.general.copy(
-                        photos = photosFromGeneral.map { it.withSanitizedUrls() },
+                        photos = photosFromGeneral.map { it.withSanitizedUrls() }.sortedBySortOrder(),
                     ),
             )
         }
 
     private fun sanitizeCarDetail(result: CarDetailResponse): CarDetailResponse =
         result.copy(
-            photos = result.photos.map { it.withSanitizedUrls() },
+            photos = result.photos.map { it.withSanitizedUrls() }.sortedBySortOrder(),
             general =
                 result.general.copy(
-                    photos = result.general.photos.map { it.withSanitizedUrls() },
+                    photos = result.general.photos.map { it.withSanitizedUrls() }.sortedBySortOrder(),
                 ),
         )
 
