@@ -49,6 +49,7 @@ data class CarPhotoResponse(
     val url: String,
     val uploadDate: String,
     val thumbnailUrl: String? = null,
+    val sortOrder: Int = 0,
 ) {
     fun previewUrl(): String = thumbnailUrl?.trim()?.takeIf { it.isNotEmpty() } ?: url
 
@@ -62,6 +63,8 @@ data class CarPhotoResponse(
                     ?.takeIf { it.isNotEmpty() },
         )
 }
+
+fun List<CarPhotoResponse>.sortedBySortOrder(): List<CarPhotoResponse> = sortedBy { it.sortOrder }
 
 class PhotoImpl(
     private val httpClient: HttpClient,
@@ -120,18 +123,20 @@ class PhotoImpl(
             val url = "${DEFAULT_BASE_URL}Photo/car/$carId"
             val response = httpClient.get(url)
             val photos: List<CarPhotoResponse> = response.parseResponse()
-            photos.map { photo -> photo.withSanitizedUrls(::ensureHttpsUrl) }
+            photos.map { photo -> photo.withSanitizedUrls(::ensureHttpsUrl) }.sortedBySortOrder()
         }.getOrElse { e ->
             if (carService != null) {
                 val car = carService.getCar(carId)
-                car.photos.map { photo ->
-                    CarPhotoResponse(
-                        id = photo.id,
-                        url = ensureHttpsUrl(photo.url),
-                        uploadDate = photo.uploadDate,
-                        thumbnailUrl = photo.thumbnailUrl?.let { ensureHttpsUrl(it) },
-                    )
-                }
+                car.photos
+                    .map { photo ->
+                        CarPhotoResponse(
+                            id = photo.id,
+                            url = ensureHttpsUrl(photo.url),
+                            uploadDate = photo.uploadDate,
+                            thumbnailUrl = photo.thumbnailUrl?.let { ensureHttpsUrl(it) },
+                            sortOrder = photo.sortOrder,
+                        )
+                    }.sortedBySortOrder()
             } else {
                 throw e
             }
@@ -169,7 +174,7 @@ class PhotoImpl(
                 )
             }
         val photos: List<CarPhotoResponse> = response.parseResponse()
-        return photos.map { photo -> photo.withSanitizedUrls(::ensureHttpsUrl) }
+        return photos.map { photo -> photo.withSanitizedUrls(::ensureHttpsUrl) }.sortedBySortOrder()
     }
 
     override suspend fun deleteCarPhoto(photoId: Int) {

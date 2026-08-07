@@ -380,6 +380,7 @@ data class CarPhotoItem(
     val uploadDate: String,
     val carId: String? = null,
     val thumbnailUrl: String? = null,
+    val sortOrder: Int = 0,
 ) {
     fun previewUrl(): String = thumbnailUrl?.trim()?.takeIf { it.isNotEmpty() } ?: url
 
@@ -393,6 +394,8 @@ data class CarPhotoItem(
                     ?.takeIf { it.isNotEmpty() },
         )
 }
+
+fun List<CarPhotoItem>.sortedBySortOrder(): List<CarPhotoItem> = sortedBy { it.sortOrder }
 
 @Serializable
 data class CarCreateRequest(
