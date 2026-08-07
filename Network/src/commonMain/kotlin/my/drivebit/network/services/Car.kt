@@ -395,8 +395,6 @@ data class CarPhotoItem(
         )
 }
 
-fun List<CarPhotoItem>.sortedBySortOrder(): List<CarPhotoItem> = sortedBy { it.sortOrder }
-
 @Serializable
 data class CarCreateRequest(
     val id: String = "",

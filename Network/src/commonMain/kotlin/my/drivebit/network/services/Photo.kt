@@ -77,8 +77,6 @@ data class CarPhotoResponse(
         )
 }
 
-fun List<CarPhotoResponse>.sortedBySortOrder(): List<CarPhotoResponse> = sortedBy { it.sortOrder }
-
 class PhotoImpl(
     private val httpClient: HttpClient,
     private val carService: Car? = null,
