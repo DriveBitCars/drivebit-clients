@@ -1,6 +1,7 @@
 package my.drivebit.search
 
 import my.drivebit.network.services.CarItem
+import my.drivebit.network.services.sortedItemsBySortOrder
 
 /** Rewrite direct MinIO host:9000 URLs to same-origin `/publicbct/...` paths for HTTPS pages. */
 fun sanitizeSearchCarPhotoUrls(items: List<CarItem>): List<CarItem> =
@@ -10,10 +11,10 @@ fun sanitizeSearchCarPhotoUrls(items: List<CarItem>): List<CarItem> =
         val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
 
         car.copy(
-            photos = allPhotos.map { it.withSanitizedUrls() },
+            photos = allPhotos.map { it.withSanitizedUrls() }.sortedItemsBySortOrder(),
             general =
                 car.general.copy(
-                    photos = photosFromGeneral.map { it.withSanitizedUrls() },
+                    photos = photosFromGeneral.map { it.withSanitizedUrls() }.sortedItemsBySortOrder(),
                 ),
         )
     }

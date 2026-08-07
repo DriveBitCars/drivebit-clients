@@ -10,6 +10,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.CarPhotoResponse
 import my.drivebit.network.services.Photo
+import my.drivebit.network.services.sortedResponsesBySortOrder
+
+enum class PhotoMoveDirection {
+    Up,
+    Down,
+}
 
 sealed interface CarPhotosState {
     data object Loading : CarPhotosState
@@ -22,6 +28,7 @@ sealed interface CarPhotosState {
         val photos: List<CarPhotoResponse>,
         val isUploading: Boolean = false,
         val uploadError: String? = null,
+        val isReordering: Boolean = false,
     ) : CarPhotosState
 }
 
@@ -40,6 +47,12 @@ interface CarPhotosViewModel {
     fun deletePhoto(
         carId: String,
         photoId: Int,
+    )
+
+    fun movePhoto(
+        carId: String,
+        photoId: Int,
+        direction: PhotoMoveDirection,
     )
 }
 
@@ -136,6 +149,75 @@ class CarPhotosViewModelImpl(
                 _state.update {
                     when (it) {
                         is CarPhotosState.Success -> it.copy(uploadError = errorMessage)
+                        else -> it
+                    }
+                }
+            }
+        }
+    }
+
+    override fun movePhoto(
+        carId: String,
+        photoId: Int,
+        direction: PhotoMoveDirection,
+    ) {
+        val current = _state.value
+        if (current !is CarPhotosState.Success || current.isReordering) return
+        val index = current.photos.indexOfFirst { it.id == photoId }
+        if (index < 0) return
+        val swapWith =
+            when (direction) {
+                PhotoMoveDirection.Up -> index - 1
+                PhotoMoveDirection.Down -> index + 1
+            }
+        if (swapWith !in current.photos.indices) return
+
+        val previous = current.photos
+        val reordered =
+            previous
+                .toMutableList()
+                .apply {
+                    val tmp = this[index]
+                    this[index] = this[swapWith]
+                    this[swapWith] = tmp
+                }.mapIndexed { i, photo -> photo.copy(sortOrder = i + 1) }
+
+        coroutineScope.launch {
+            _state.value =
+                current.copy(
+                    photos = reordered,
+                    isReordering = true,
+                    uploadError = null,
+                )
+            runCatching {
+                photoService.reorderCarPhotos(carId, reordered.map { it.id })
+            }.onSuccess { serverPhotos ->
+                _state.update {
+                    when (it) {
+                        is CarPhotosState.Success ->
+                            it.copy(
+                                photos = serverPhotos.sortedResponsesBySortOrder(),
+                                isReordering = false,
+                                uploadError = null,
+                            )
+                        else -> it
+                    }
+                }
+            }.onFailure { e ->
+                val message =
+                    ErrorHandler.extractErrorMessage(
+                        exception = e,
+                        defaultNetworkError = "Ошибка сети",
+                        defaultGenericError = "Не удалось изменить порядок фотографий",
+                    )
+                _state.update {
+                    when (it) {
+                        is CarPhotosState.Success ->
+                            it.copy(
+                                photos = previous,
+                                isReordering = false,
+                                uploadError = message,
+                            )
                         else -> it
                     }
                 }

@@ -16,11 +16,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-class MockPhotoServiceForCarPhotos : Photo {
+open class MockPhotoServiceForCarPhotos : Photo {
     var shouldThrowError = false
     var shouldThrowNetworkException = false
     var errorMessage = "Network error"
     var networkExceptionStatusCode: HttpStatusCode = HttpStatusCode.InternalServerError
+
+    var reorderShouldFail = false
+    var lastReorderPhotoIds: List<Int>? = null
+    var reorderGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
 
     var photos: List<CarPhotoResponse> =
         listOf(
@@ -28,11 +32,13 @@ class MockPhotoServiceForCarPhotos : Photo {
                 id = 1,
                 url = "https://example.com/photo1.jpg",
                 uploadDate = "2024-01-01",
+                sortOrder = 1,
             ),
             CarPhotoResponse(
                 id = 2,
                 url = "https://example.com/photo2.jpg",
                 uploadDate = "2024-01-02",
+                sortOrder = 2,
             ),
         )
 
@@ -82,6 +88,26 @@ class MockPhotoServiceForCarPhotos : Photo {
 
     override suspend fun deleteCarPhoto(photoId: Int) {
         photos = photos.filter { it.id != photoId }
+    }
+
+    override suspend fun reorderCarPhotos(
+        carId: String,
+        photoIds: List<Int>,
+    ): List<CarPhotoResponse> {
+        lastReorderPhotoIds = photoIds
+        reorderGate?.await()
+        if (shouldThrowNetworkException) {
+            throw NetworkException(networkExceptionStatusCode, errorMessage)
+        }
+        if (shouldThrowError || reorderShouldFail) {
+            throw Exception(errorMessage)
+        }
+        photos =
+            photoIds.mapIndexed { index, id ->
+                val existing = photos.first { it.id == id }
+                existing.copy(sortOrder = index + 1)
+            }
+        return photos
     }
 }
 
@@ -295,5 +321,94 @@ class CarPhotosViewModelTest {
             val finalState = viewModel.state.value
             assertIs<CarPhotosState.Success>(finalState)
             assertEquals(4, finalState.photos.size, "Should have 2 original + 2 new photos")
+        }
+
+    @Test
+    fun `movePhoto Down swaps with next and calls reorder with full ids`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val mock = MockPhotoServiceForCarPhotos()
+            val vm = CarPhotosViewModelImpl(mock, testScope)
+
+            vm.loadPhotos("car-1")
+            advanceUntilIdle()
+
+            vm.movePhoto("car-1", photoId = 1, direction = PhotoMoveDirection.Down)
+            advanceUntilIdle()
+
+            val state = assertIs<CarPhotosState.Success>(vm.state.value)
+            assertEquals(listOf(2, 1), state.photos.map { it.id })
+            assertEquals(listOf(2, 1), mock.lastReorderPhotoIds)
+            assertFalse(state.isReordering)
+            assertEquals(null, state.uploadError)
+        }
+
+    @Test
+    fun `movePhoto Up on first photo is no-op`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val mock = MockPhotoServiceForCarPhotos()
+            val vm = CarPhotosViewModelImpl(mock, testScope)
+
+            vm.loadPhotos("car-1")
+            advanceUntilIdle()
+
+            vm.movePhoto("car-1", photoId = 1, direction = PhotoMoveDirection.Up)
+            advanceUntilIdle()
+
+            assertEquals(null, mock.lastReorderPhotoIds)
+            val state = assertIs<CarPhotosState.Success>(vm.state.value)
+            assertEquals(listOf(1, 2), state.photos.map { it.id })
+        }
+
+    @Test
+    fun `movePhoto rolls back and sets uploadError when reorder fails`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val mock =
+                MockPhotoServiceForCarPhotos().apply {
+                    errorMessage = ""
+                }
+            val vm = CarPhotosViewModelImpl(mock, testScope)
+
+            vm.loadPhotos("car-1")
+            advanceUntilIdle()
+            mock.shouldThrowError = true
+
+            vm.movePhoto("car-1", photoId = 1, direction = PhotoMoveDirection.Down)
+            advanceUntilIdle()
+
+            val state = assertIs<CarPhotosState.Success>(vm.state.value)
+            assertEquals(listOf(1, 2), state.photos.map { it.id })
+            assertEquals("Не удалось изменить порядок фотографий", state.uploadError)
+            assertFalse(state.isReordering)
+        }
+
+    @Test
+    fun `movePhoto ignored while isReordering`() =
+        runTest(StandardTestDispatcher()) {
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+            val mock =
+                MockPhotoServiceForCarPhotos().apply {
+                    reorderGate = gate
+                }
+            val vm = CarPhotosViewModelImpl(mock, testScope)
+
+            vm.loadPhotos("car-1")
+            advanceUntilIdle()
+
+            vm.movePhoto("car-1", photoId = 1, direction = PhotoMoveDirection.Down)
+            testScheduler.runCurrent()
+            val mid = assertIs<CarPhotosState.Success>(vm.state.value)
+            assertTrue(mid.isReordering)
+
+            vm.movePhoto("car-1", photoId = 2, direction = PhotoMoveDirection.Down)
+            testScheduler.runCurrent()
+            assertEquals(listOf(2, 1), mock.lastReorderPhotoIds)
+
+            gate.complete(Unit)
+            advanceUntilIdle()
+            assertFalse(assertIs<CarPhotosState.Success>(vm.state.value).isReordering)
         }
 }

@@ -380,6 +380,7 @@ data class CarPhotoItem(
     val uploadDate: String,
     val carId: String? = null,
     val thumbnailUrl: String? = null,
+    val sortOrder: Int = 0,
 ) {
     fun previewUrl(): String = thumbnailUrl?.trim()?.takeIf { it.isNotEmpty() } ?: url
 
@@ -510,20 +511,20 @@ class CarImpl(
             val allPhotos = (photosFromGeneral + photosFromTopLevel).distinctBy { it.id }
 
             car.copy(
-                photos = allPhotos.map { it.withSanitizedUrls() },
+                photos = allPhotos.map { it.withSanitizedUrls() }.sortedItemsBySortOrder(),
                 general =
                     car.general.copy(
-                        photos = photosFromGeneral.map { it.withSanitizedUrls() },
+                        photos = photosFromGeneral.map { it.withSanitizedUrls() }.sortedItemsBySortOrder(),
                     ),
             )
         }
 
     private fun sanitizeCarDetail(result: CarDetailResponse): CarDetailResponse =
         result.copy(
-            photos = result.photos.map { it.withSanitizedUrls() },
+            photos = result.photos.map { it.withSanitizedUrls() }.sortedItemsBySortOrder(),
             general =
                 result.general.copy(
-                    photos = result.general.photos.map { it.withSanitizedUrls() },
+                    photos = result.general.photos.map { it.withSanitizedUrls() }.sortedItemsBySortOrder(),
                 ),
         )
 

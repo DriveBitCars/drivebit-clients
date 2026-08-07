@@ -54,6 +54,11 @@ private class FakePhoto : Photo {
     override suspend fun deleteCarPhoto(photoId: Int) {
         // No-op for testing
     }
+
+    override suspend fun reorderCarPhotos(
+        carId: String,
+        photoIds: List<Int>,
+    ): List<CarPhotoResponse> = emptyList()
 }
 
 private class FakeStorage : Storage {

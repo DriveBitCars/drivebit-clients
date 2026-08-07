@@ -100,4 +100,33 @@ class SanitizeSearchCarPhotoUrlsTest {
         )
         assertFalse(sanitized.photos.single().thumbnailUrl!!.startsWith("http"))
     }
+
+    @Test
+    fun sanitizeSearchCarPhotoUrls_sortsPhotosBySortOrder() {
+        val photosOutOfOrder =
+            listOf(
+                CarPhotoItem(id = 10, url = "/publicbct/a.jpg", uploadDate = "2026-01-01", sortOrder = 2),
+                CarPhotoItem(id = 11, url = "/publicbct/b.jpg", uploadDate = "2026-01-01", sortOrder = 1),
+            )
+        val car =
+            CarItem(
+                id = "1",
+                year = 2020,
+                price = 5000.0,
+                photos = photosOutOfOrder,
+                general =
+                    CarGeneral(
+                        brandName = "BMW",
+                        modelName = "X5",
+                        seats = 5,
+                        address = CarAddress(),
+                        photos = photosOutOfOrder,
+                    ),
+            )
+
+        val sanitized = sanitizeSearchCarPhotoUrls(listOf(car)).single()
+
+        assertEquals(listOf(11, 10), sanitized.photos.map { it.id })
+        assertEquals(listOf(11, 10), sanitized.general.photos.map { it.id })
+    }
 }
