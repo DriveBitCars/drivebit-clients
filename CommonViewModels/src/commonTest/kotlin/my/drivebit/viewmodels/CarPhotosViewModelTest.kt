@@ -22,17 +22,22 @@ class MockPhotoServiceForCarPhotos : Photo {
     var errorMessage = "Network error"
     var networkExceptionStatusCode: HttpStatusCode = HttpStatusCode.InternalServerError
 
+    var reorderShouldFail = false
+    var lastReorderPhotoIds: List<Int>? = null
+
     var photos: List<CarPhotoResponse> =
         listOf(
             CarPhotoResponse(
                 id = 1,
                 url = "https://example.com/photo1.jpg",
                 uploadDate = "2024-01-01",
+                sortOrder = 1,
             ),
             CarPhotoResponse(
                 id = 2,
                 url = "https://example.com/photo2.jpg",
                 uploadDate = "2024-01-02",
+                sortOrder = 2,
             ),
         )
 
@@ -82,6 +87,25 @@ class MockPhotoServiceForCarPhotos : Photo {
 
     override suspend fun deleteCarPhoto(photoId: Int) {
         photos = photos.filter { it.id != photoId }
+    }
+
+    override suspend fun reorderCarPhotos(
+        carId: String,
+        photoIds: List<Int>,
+    ): List<CarPhotoResponse> {
+        lastReorderPhotoIds = photoIds
+        if (shouldThrowNetworkException) {
+            throw NetworkException(networkExceptionStatusCode, errorMessage)
+        }
+        if (shouldThrowError || reorderShouldFail) {
+            throw Exception(errorMessage)
+        }
+        photos =
+            photoIds.mapIndexed { index, id ->
+                val existing = photos.first { it.id == id }
+                existing.copy(sortOrder = index + 1)
+            }
+        return photos
     }
 }
 

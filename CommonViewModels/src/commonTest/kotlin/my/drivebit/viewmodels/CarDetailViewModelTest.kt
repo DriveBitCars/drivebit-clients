@@ -212,6 +212,11 @@ class MockPhotoServiceForDetail : Photo {
     ): List<my.drivebit.network.services.CarPhotoResponse> = throw NotImplementedError()
 
     override suspend fun deleteCarPhoto(photoId: Int): Unit = throw NotImplementedError()
+
+    override suspend fun reorderCarPhotos(
+        carId: String,
+        photoIds: List<Int>,
+    ): List<my.drivebit.network.services.CarPhotoResponse> = emptyList()
 }
 
 class MockCarAvailabilityForDetail : CarAvailability {

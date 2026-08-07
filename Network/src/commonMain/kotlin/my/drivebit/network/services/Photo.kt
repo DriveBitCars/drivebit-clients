@@ -6,9 +6,12 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.consumeResponse
@@ -36,7 +39,17 @@ interface Photo {
     ): List<CarPhotoResponse>
 
     suspend fun deleteCarPhoto(photoId: Int)
+
+    suspend fun reorderCarPhotos(
+        carId: String,
+        photoIds: List<Int>,
+    ): List<CarPhotoResponse>
 }
+
+@Serializable
+data class ReorderCarPhotosRequest(
+    val photoIds: List<Int>,
+)
 
 @Serializable
 data class AvatarResponse(
@@ -181,5 +194,22 @@ class PhotoImpl(
         val url = "${DEFAULT_BASE_URL}Photo/$photoId"
         val response = httpClient.delete(url)
         response.consumeResponse()
+    }
+
+    override suspend fun reorderCarPhotos(
+        carId: String,
+        photoIds: List<Int>,
+    ): List<CarPhotoResponse> {
+        if (carId.isBlank()) {
+            throw IllegalArgumentException("Car ID cannot be empty")
+        }
+        val url = "${DEFAULT_BASE_URL}Photo/car/my/$carId/order"
+        val response =
+            httpClient.put(url) {
+                contentType(ContentType.Application.Json)
+                setBody(ReorderCarPhotosRequest(photoIds = photoIds))
+            }
+        val photos: List<CarPhotoResponse> = response.parseResponse()
+        return photos.map { it.withSanitizedUrls(::ensureHttpsUrl) }.sortedBySortOrder()
     }
 }

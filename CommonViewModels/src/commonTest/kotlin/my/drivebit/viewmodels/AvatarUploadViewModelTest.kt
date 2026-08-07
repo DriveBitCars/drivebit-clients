@@ -68,6 +68,11 @@ private class MockPhoto : Photo {
     override suspend fun deleteCarPhoto(photoId: Int) {
         // Mock implementation
     }
+
+    override suspend fun reorderCarPhotos(
+        carId: String,
+        photoIds: List<Int>,
+    ): List<CarPhotoResponse> = emptyList()
 }
 
 private class MockAvatarRepository : AvatarRepository {
