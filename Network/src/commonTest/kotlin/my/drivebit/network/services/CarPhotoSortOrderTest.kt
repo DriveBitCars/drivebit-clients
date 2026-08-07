@@ -32,23 +32,23 @@ class CarPhotoSortOrderTest {
     }
 
     @Test
-    fun `sortedBySortOrder orders CarPhotoResponse ascending`() {
+    fun `sortedResponsesBySortOrder orders CarPhotoResponse ascending`() {
         val photos =
             listOf(
                 CarPhotoResponse(id = 1, url = "a", uploadDate = "d", sortOrder = 3),
                 CarPhotoResponse(id = 2, url = "b", uploadDate = "d", sortOrder = 1),
                 CarPhotoResponse(id = 3, url = "c", uploadDate = "d", sortOrder = 2),
             )
-        assertEquals(listOf(2, 3, 1), photos.sortedBySortOrder().map { it.id })
+        assertEquals(listOf(2, 3, 1), photos.sortedResponsesBySortOrder().map { it.id })
     }
 
     @Test
-    fun `sortedBySortOrder orders CarPhotoItem ascending`() {
+    fun `sortedItemsBySortOrder orders CarPhotoItem ascending`() {
         val photos =
             listOf(
                 CarPhotoItem(id = 1, url = "a", uploadDate = "d", sortOrder = 2),
                 CarPhotoItem(id = 2, url = "b", uploadDate = "d", sortOrder = 1),
             )
-        assertEquals(listOf(2, 1), photos.sortedBySortOrder().map { it.id })
+        assertEquals(listOf(2, 1), photos.sortedItemsBySortOrder().map { it.id })
     }
 }

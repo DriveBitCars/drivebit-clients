@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.drivebit.network.services.CarPhotoResponse
 import my.drivebit.network.services.Photo
-import my.drivebit.network.services.sortedBySortOrder
+import my.drivebit.network.services.sortedResponsesBySortOrder
 
 enum class PhotoMoveDirection {
     Up,
@@ -196,7 +196,7 @@ class CarPhotosViewModelImpl(
                     when (it) {
                         is CarPhotosState.Success ->
                             it.copy(
-                                photos = serverPhotos.sortedBySortOrder(),
+                                photos = serverPhotos.sortedResponsesBySortOrder(),
                                 isReordering = false,
                                 uploadError = null,
                             )
