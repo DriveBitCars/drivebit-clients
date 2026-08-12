@@ -69,7 +69,7 @@ async function main() {
             hasEagerCallibri: scripts.some((s) => /callibri\.js/.test(s)),
             hasHero: !!document.getElementById("drivebit-hero-static") || !!document.querySelector(".drivebit-hero"),
             hasFilters: document.querySelectorAll("button.drivebit-filter-btn").length,
-            webvisorOff: !/webvisor:\s*true/.test(
+            webvisorOn: /webvisor:\s*true/.test(
               Array.from(document.scripts)
                 .map((s) => s.textContent || "")
                 .join("\n"),

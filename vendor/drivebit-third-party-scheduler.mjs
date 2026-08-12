@@ -120,7 +120,7 @@ export function loadMetrika(env, onTagReady) {
 
     window.ym(METRIKA_COUNTER_ID, "init", {
         ssr: true,
-        webvisor: false,
+        webvisor: true,
         clickmap: true,
         ecommerce: "dataLayer",
         accurateTrackBounce: true,
