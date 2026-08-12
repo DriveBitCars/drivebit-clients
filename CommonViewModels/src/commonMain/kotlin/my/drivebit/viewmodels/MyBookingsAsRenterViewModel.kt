@@ -27,6 +27,7 @@ interface MyBookingsAsRenterViewModel {
     val isPaying: StateFlow<Boolean>
     val actionInProgress: StateFlow<Set<String>>
     val payEffects: SharedFlow<ChatPayEffect>
+    val signEffects: SharedFlow<ContractSignEffect>
 
     fun loadBookings()
 
@@ -69,6 +70,9 @@ class MyBookingsAsRenterViewModelImpl(
 
     private val _payEffects = MutableSharedFlow<ChatPayEffect>(extraBufferCapacity = 1)
     override val payEffects: SharedFlow<ChatPayEffect> = _payEffects.asSharedFlow()
+
+    private val _signEffects = MutableSharedFlow<ContractSignEffect>(extraBufferCapacity = 1)
+    override val signEffects: SharedFlow<ContractSignEffect> = _signEffects.asSharedFlow()
 
     override fun loadBookings() {
         if (_isLoading.value) return
@@ -173,7 +177,17 @@ class MyBookingsAsRenterViewModelImpl(
         coroutineScope.safeLaunchWithErrorHandler(
             isLoading = { false },
             setLoading = { },
-            setError = { _error.value = it },
+            setError = { message ->
+                coroutineScope.launch {
+                    _signEffects.emit(
+                        ContractSignEffect.Fail(
+                            bookingId = bookingId,
+                            message = message ?: "Не удалось подписать договор",
+                        ),
+                    )
+                }
+                _error.value = message
+            },
             errorHandler = { e ->
                 logRenterBookingActionError(
                     action = "signContractAsRenter",
@@ -197,6 +211,7 @@ class MyBookingsAsRenterViewModelImpl(
                 _bookings.update { list ->
                     list.map { if (it.id == bookingId) updated else it }
                 }
+                _signEffects.emit(ContractSignEffect.Ok(bookingId))
             } finally {
                 _actionInProgress.update { it - bookingId }
             }

@@ -10,8 +10,15 @@ import androidx.compose.runtime.setValue
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
+import my.drivebit.analytics.reachYandexGoalContractDownloadClick
+import my.drivebit.analytics.reachYandexGoalContractSignClick
+import my.drivebit.analytics.reachYandexGoalContractSignFail
+import my.drivebit.analytics.reachYandexGoalContractSignOk
+import my.drivebit.analytics.reachYandexGoalPayAlreadyPaid
+import my.drivebit.analytics.reachYandexGoalPayClick
+import my.drivebit.analytics.reachYandexGoalPayFail
+import my.drivebit.analytics.reachYandexGoalPayRedirect
 import my.drivebit.components.ActionButton
-import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
 import my.drivebit.components.MessageTextWithDealsLink
@@ -22,6 +29,7 @@ import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.MessageDto
+import my.drivebit.network.services.SignContractChatRole
 import my.drivebit.network.services.canShowSignContractInChat
 import my.drivebit.network.services.contractBookingIdForAction
 import my.drivebit.network.services.contractDownloadPagePath
@@ -33,10 +41,10 @@ import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.shouldShowLeaveReviewForRenter
-import my.drivebit.analytics.reachYandexGoalPayAlreadyPaid
-import my.drivebit.analytics.reachYandexGoalPayClick
-import my.drivebit.analytics.reachYandexGoalPayFail
-import my.drivebit.analytics.reachYandexGoalPayRedirect
+import my.drivebit.network.services.signContractChatRole
+import my.drivebit.shell.AppWithHeader
+import my.drivebit.utils.ContractFunnelRole
+import my.drivebit.utils.ContractFunnelSource
 import my.drivebit.utils.PaymentFunnelKind
 import my.drivebit.utils.PaymentFunnelSource
 import my.drivebit.utils.getUrlParameter
@@ -44,6 +52,7 @@ import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.ChatDetailViewModel
 import my.drivebit.viewmodels.ChatPayEffect
+import my.drivebit.viewmodels.ContractSignEffect
 import my.drivebit.viewmodels.UnreadMessagesViewModel
 import my.drivebit.viewmodels.VerificationLabels
 import my.drivebit.viewmodels.createButtonViewModel
@@ -58,6 +67,12 @@ import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.currentKoinScope
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
+
+private fun SignContractChatRole.toFunnelRole(): ContractFunnelRole =
+    when (this) {
+        SignContractChatRole.Owner -> ContractFunnelRole.Owner
+        SignContractChatRole.Renter -> ContractFunnelRole.Renter
+    }
 
 @Composable
 fun ChatDetailPage() {
@@ -93,6 +108,7 @@ fun ChatDetailPage() {
     val signActionInProgress by viewModel.signActionInProgress.collectAsState()
     val bookingPaymentById by viewModel.bookingPaymentById.collectAsState()
     var lastChatPayKind by remember { mutableStateOf(PaymentFunnelKind.Full) }
+    var lastChatSignRole by remember { mutableStateOf(ContractFunnelRole.Renter) }
 
     LaunchedEffect(chatId) {
         viewModel.payEffects.collect { effect ->
@@ -121,6 +137,28 @@ fun ChatDetailPage() {
                         )
                     }
                     window.alert(effect.text)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(chatId) {
+        viewModel.signEffects.collect { effect ->
+            when (effect) {
+                is ContractSignEffect.Ok ->
+                    reachYandexGoalContractSignOk(
+                        source = ContractFunnelSource.Chat,
+                        role = lastChatSignRole,
+                        bookingId = effect.bookingId,
+                    )
+                is ContractSignEffect.Fail -> {
+                    reachYandexGoalContractSignFail(
+                        source = ContractFunnelSource.Chat,
+                        role = lastChatSignRole,
+                        bookingId = effect.bookingId,
+                        message = effect.message,
+                    )
+                    window.alert(effect.message)
                 }
             }
         }
@@ -289,6 +327,18 @@ fun ChatDetailPage() {
                                             )
                                         },
                                         onSignContract = { bookingId, counterpartyUserId ->
+                                            val role =
+                                                bookingPaymentById[bookingId]
+                                                    ?.signContractChatRole(counterpartyUserId)
+                                                    ?.toFunnelRole()
+                                            if (role != null) {
+                                                lastChatSignRole = role
+                                                reachYandexGoalContractSignClick(
+                                                    source = ContractFunnelSource.Chat,
+                                                    role = role,
+                                                    bookingId = bookingId,
+                                                )
+                                            }
                                             viewModel.signContract(
                                                 bookingId = bookingId,
                                                 counterpartyUserId = counterpartyUserId,
@@ -503,6 +553,10 @@ private fun MessageBubble(
                                 enabledColor = CSSColors.Blue,
                                 viewModel = contractButtonVm,
                                 onClick = {
+                                    reachYandexGoalContractDownloadClick(
+                                        source = ContractFunnelSource.Chat,
+                                        bookingId = bookingIdForContract,
+                                    )
                                     window.location.href = contractDownloadPagePath(bookingIdForContract)
                                 },
                             )

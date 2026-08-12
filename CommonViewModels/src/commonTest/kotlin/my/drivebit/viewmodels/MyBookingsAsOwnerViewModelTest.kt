@@ -14,9 +14,12 @@ import my.drivebit.network.services.CheckBookingAvailabilityRequest
 import my.drivebit.network.services.CheckBookingAvailabilityResponse
 import my.drivebit.network.services.CreateBookingRequest
 import my.drivebit.network.services.GetBookingContractResult
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -107,6 +110,35 @@ class MyBookingsAsOwnerViewModelTest {
             assertTrue(updatedBooking.contractSignedByOwner)
             assertFalse(updatedBooking.canSignContractAsOwner)
             assertEquals("ContractSignedByOwner", updatedBooking.status)
+        }
+
+    @Test
+    fun `signContractAsOwner emits Ok effect on success`() =
+        runTest(StandardTestDispatcher()) {
+            val bookingId = "booking-1"
+            val initial = sampleBooking(bookingId)
+            val signed = initial.copy(contractSignedByOwner = true, canSignContractAsOwner = false)
+            val fakeBooking =
+                MyBookingsFakeBooking(
+                    ownerBookings = listOf(initial),
+                    signResult = signed,
+                )
+            val testScope = CoroutineScope(SupervisorJob() + coroutineContext)
+            val viewModel = MyBookingsAsOwnerViewModelImpl(fakeBooking, testScope)
+            var effect: ContractSignEffect? = null
+            val collectJob =
+                launch {
+                    effect = viewModel.signEffects.first()
+                }
+
+            viewModel.loadBookings()
+            advanceUntilIdle()
+            viewModel.signContractAsOwner(bookingId)
+            advanceUntilIdle()
+            collectJob.join()
+
+            val ok = assertIs<ContractSignEffect.Ok>(effect)
+            assertEquals(bookingId, ok.bookingId)
         }
 
     @Test

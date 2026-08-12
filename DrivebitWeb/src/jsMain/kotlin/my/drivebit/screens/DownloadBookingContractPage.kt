@@ -6,8 +6,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.browser.window
+import my.drivebit.analytics.reachYandexGoalContractDownloadFail
+import my.drivebit.analytics.reachYandexGoalContractDownloadIncomplete
+import my.drivebit.analytics.reachYandexGoalContractDownloadReady
 import my.drivebit.components.ActionButton
-import my.drivebit.shell.AppWithHeader
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
 import my.drivebit.components.TextError
@@ -17,6 +19,7 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.shared.storage.Storage
+import my.drivebit.shell.AppWithHeader
 import my.drivebit.utils.REDIRECT_PATH
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.getUrlParameter
@@ -94,6 +97,23 @@ fun DownloadBookingContractPage() {
 
     LaunchedEffect(bookingId) {
         viewModel.loadContract()
+    }
+
+    LaunchedEffect(uiState) {
+        when (val state = uiState) {
+            is BookingContractUiState.Ready ->
+                reachYandexGoalContractDownloadReady(bookingId)
+            is BookingContractUiState.Error -> {
+                if (state.reasons.isNotEmpty()) {
+                    reachYandexGoalContractDownloadIncomplete(bookingId, state.message)
+                } else {
+                    reachYandexGoalContractDownloadFail(bookingId, state.message)
+                }
+            }
+            BookingContractUiState.Idle,
+            BookingContractUiState.Loading,
+            -> Unit
+        }
     }
 
     AppWithHeader {

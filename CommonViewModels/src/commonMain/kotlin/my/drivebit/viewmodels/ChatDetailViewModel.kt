@@ -56,6 +56,8 @@ interface ChatDetailViewModel {
 
     val payEffects: SharedFlow<ChatPayEffect>
 
+    val signEffects: SharedFlow<ContractSignEffect>
+
     fun loadChat()
 
     fun loadMessages()
@@ -117,6 +119,9 @@ class ChatDetailViewModelImpl(
     private val _payEffects = MutableSharedFlow<ChatPayEffect>(extraBufferCapacity = 1)
     override val payEffects: SharedFlow<ChatPayEffect> = _payEffects.asSharedFlow()
 
+    private val _signEffects = MutableSharedFlow<ContractSignEffect>(extraBufferCapacity = 1)
+    override val signEffects: SharedFlow<ContractSignEffect> = _signEffects.asSharedFlow()
+
     override fun loadChat() {
         coroutineScope.safeLaunchWithErrorHandler(
             isLoading = { _isLoading.value },
@@ -173,7 +178,12 @@ class ChatDetailViewModelImpl(
             setLoading = { },
             setError = { message ->
                 coroutineScope.launch {
-                    _payEffects.emit(ChatPayEffect.ShowInfo(message ?: "Не удалось подписать договор"))
+                    _signEffects.emit(
+                        ContractSignEffect.Fail(
+                            bookingId = bookingId,
+                            message = message ?: "Не удалось подписать договор",
+                        ),
+                    )
                 }
             },
             errorHandler = { e ->
@@ -192,6 +202,7 @@ class ChatDetailViewModelImpl(
                         SignContractChatRole.Renter -> booking.signContractAsRenter(bookingId)
                     }
                 _bookingPaymentById.update { current -> current + (bookingId to updated) }
+                _signEffects.emit(ContractSignEffect.Ok(bookingId))
             } finally {
                 _signActionInProgress.update { it - bookingId }
             }

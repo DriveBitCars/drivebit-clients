@@ -6,12 +6,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
+import my.drivebit.analytics.reachYandexGoalContractDownloadClick
+import my.drivebit.analytics.reachYandexGoalContractSignClick
+import my.drivebit.analytics.reachYandexGoalContractSignFail
+import my.drivebit.analytics.reachYandexGoalContractSignOk
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
 import my.drivebit.components.FormSection
 import my.drivebit.components.Loader
 import my.drivebit.components.PageHeader
-import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyGray
@@ -22,9 +25,13 @@ import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.canShowSignContractAsOwner
 import my.drivebit.network.services.statusAllowsContractDownload
+import my.drivebit.shell.PageWithLogo
+import my.drivebit.utils.ContractFunnelRole
+import my.drivebit.utils.ContractFunnelSource
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
+import my.drivebit.viewmodels.ContractSignEffect
 import my.drivebit.viewmodels.MyBookingsAsOwnerViewModel
 import my.drivebit.viewmodels.VerificationLabels
 import org.jetbrains.compose.web.css.*
@@ -48,6 +55,26 @@ fun MyDealsPage() {
         while (true) {
             delay(30_000)
             viewModel.refreshBookings()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.signEffects.collect { effect ->
+            when (effect) {
+                is ContractSignEffect.Ok ->
+                    reachYandexGoalContractSignOk(
+                        source = ContractFunnelSource.MyDeals,
+                        role = ContractFunnelRole.Owner,
+                        bookingId = effect.bookingId,
+                    )
+                is ContractSignEffect.Fail ->
+                    reachYandexGoalContractSignFail(
+                        source = ContractFunnelSource.MyDeals,
+                        role = ContractFunnelRole.Owner,
+                        bookingId = effect.bookingId,
+                        message = effect.message,
+                    )
+            }
         }
     }
 
@@ -83,8 +110,20 @@ fun MyDealsPage() {
                                     isActionInProgress = booking.id in actionInProgress,
                                     onConfirm = { viewModel.confirmBooking(booking.id) },
                                     onDecline = { viewModel.declineBooking(booking.id) },
-                                    onSignContract = { viewModel.signContractAsOwner(booking.id) },
+                                    onSignContract = {
+                                        reachYandexGoalContractSignClick(
+                                            source = ContractFunnelSource.MyDeals,
+                                            role = ContractFunnelRole.Owner,
+                                            bookingId = booking.id,
+                                        )
+                                        viewModel.signContractAsOwner(booking.id)
+                                    },
                                     onDownloadContract = {
+                                        reachYandexGoalContractDownloadClick(
+                                            source = ContractFunnelSource.MyDeals,
+                                            bookingId = booking.id,
+                                            role = ContractFunnelRole.Owner,
+                                        )
                                         navigationController?.navigateTo(
                                             "/download-booking-contract?bookingId=${booking.id}",
                                         )

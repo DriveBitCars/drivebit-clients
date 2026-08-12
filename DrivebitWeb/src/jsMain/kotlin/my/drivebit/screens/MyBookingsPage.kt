@@ -6,13 +6,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
+import my.drivebit.analytics.reachYandexGoalContractDownloadClick
+import my.drivebit.analytics.reachYandexGoalContractSignClick
+import my.drivebit.analytics.reachYandexGoalContractSignFail
+import my.drivebit.analytics.reachYandexGoalContractSignOk
 import my.drivebit.analytics.reachYandexGoalPayClick
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
 import my.drivebit.components.FormSection
 import my.drivebit.components.Loader
 import my.drivebit.components.PageHeader
-import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.TextSmallBodyGray
@@ -22,16 +25,20 @@ import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.canShowSignContractAsRenter
+import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
-import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.statusAllowsContractDownload
 import my.drivebit.network.services.statusAllowsRenterPayment
+import my.drivebit.shell.PageWithLogo
+import my.drivebit.utils.ContractFunnelRole
+import my.drivebit.utils.ContractFunnelSource
 import my.drivebit.utils.PaymentFunnelKind
 import my.drivebit.utils.PaymentFunnelSource
 import my.drivebit.utils.formatRelativeTime
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
+import my.drivebit.viewmodels.ContractSignEffect
 import my.drivebit.viewmodels.MyBookingsAsRenterViewModel
 import my.drivebit.viewmodels.VerificationLabels
 import org.jetbrains.compose.web.css.*
@@ -55,6 +62,26 @@ fun MyBookingsPage() {
         while (true) {
             delay(30_000)
             viewModel.refreshBookings()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.signEffects.collect { effect ->
+            when (effect) {
+                is ContractSignEffect.Ok ->
+                    reachYandexGoalContractSignOk(
+                        source = ContractFunnelSource.MyBookings,
+                        role = ContractFunnelRole.Renter,
+                        bookingId = effect.bookingId,
+                    )
+                is ContractSignEffect.Fail ->
+                    reachYandexGoalContractSignFail(
+                        source = ContractFunnelSource.MyBookings,
+                        role = ContractFunnelRole.Renter,
+                        bookingId = effect.bookingId,
+                        message = effect.message,
+                    )
+            }
         }
     }
 
@@ -109,8 +136,20 @@ fun MyBookingsPage() {
                                             "/payment?bookingId=${booking.id}&mode=prepay",
                                         )
                                     },
-                                    onSignContract = { viewModel.signContractAsRenter(booking.id) },
+                                    onSignContract = {
+                                        reachYandexGoalContractSignClick(
+                                            source = ContractFunnelSource.MyBookings,
+                                            role = ContractFunnelRole.Renter,
+                                            bookingId = booking.id,
+                                        )
+                                        viewModel.signContractAsRenter(booking.id)
+                                    },
                                     onDownloadContract = {
+                                        reachYandexGoalContractDownloadClick(
+                                            source = ContractFunnelSource.MyBookings,
+                                            bookingId = booking.id,
+                                            role = ContractFunnelRole.Renter,
+                                        )
                                         navigationController?.navigateTo(
                                             "/download-booking-contract?bookingId=${booking.id}",
                                         )
