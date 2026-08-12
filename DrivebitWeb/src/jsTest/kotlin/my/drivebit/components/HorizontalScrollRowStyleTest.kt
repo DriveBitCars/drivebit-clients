@@ -25,4 +25,13 @@ class HorizontalScrollRowStyleTest {
         assertEquals("none", style.msOverflowStyle)
         assertEquals("drivebit-horizontal-scroll", style.cssClass)
     }
+
+    @Test
+    fun `filter chips horizontal scroll matches home filters touch behavior`() {
+        val style = horizontalScrollRowStyle()
+        assertEquals("pan-x", style.touchAction)
+        assertEquals("contain", style.overscrollBehaviorX)
+        assertEquals("0", style.minWidth)
+        assertEquals("drivebit-horizontal-scroll-track", style.trackCssClass)
+    }
 }
