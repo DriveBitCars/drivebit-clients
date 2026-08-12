@@ -25,6 +25,8 @@ fun FilterChip(
             border(1.px, LineStyle.Solid, CSSColors.Gray300)
             cursor("pointer")
             property("transition", "all 0.2s ease")
+            property("flex-shrink", horizontalScrollRowStyle().childFlexShrink)
+            property("white-space", "nowrap")
         },
         attrs = {
             onClick { onClick() }
@@ -69,6 +71,8 @@ fun FiltersResetChip(onClick: () -> Unit) {
             cursor("pointer")
             property("transition", "all 0.2s ease")
             property("box-shadow", "0 1px 2px rgba(41, 98, 255, 0.15)")
+            property("flex-shrink", horizontalScrollRowStyle().childFlexShrink)
+            property("white-space", "nowrap")
         },
         attrs = {
             onClick { onClick() }

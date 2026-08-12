@@ -19,7 +19,7 @@ import my.drivebit.components.Column
 import my.drivebit.components.DriveTypeFilter
 import my.drivebit.components.FilterChip
 import my.drivebit.components.FiltersResetChip
-import my.drivebit.components.FlowRow
+import my.drivebit.components.HorizontalScrollRow
 import my.drivebit.components.MileageFilter
 import my.drivebit.components.PaginationBar
 import my.drivebit.components.PriceFilter
@@ -308,7 +308,7 @@ private fun SearchResultsContent(
             if (errorMessage != null) {
                 TextError(errorMessage)
             }
-            FlowRow(gap = 8.px) {
+            HorizontalScrollRow(gap = 8.px) {
             FilterChip(
                 name = "Марка",
                 onClick = {
