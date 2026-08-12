@@ -25,6 +25,7 @@ fun CarItemSmall(
     var isImageHovered by remember { mutableStateOf(false) }
     var currentPhotoIndex by remember { mutableStateOf(0) }
     var touchStartX by remember { mutableStateOf<Double?>(null) }
+    var suppressClickAfterSwipe by remember { mutableStateOf(false) }
     val isMobileViewport = window.innerWidth <= 768
     val imageLoadsEagerly = carGridImageLoadsEagerly(gridIndex, isMobileViewport)
 
@@ -55,11 +56,57 @@ fun CarItemSmall(
                 Div({
                     onMouseEnter { isImageHovered = true }
                     onMouseLeave { isImageHovered = false }
+                    if (isMobileViewport && allPhotos.size > 1) {
+                        onTouchStart { event ->
+                            suppressClickAfterSwipe = false
+                            touchStartX =
+                                event.touches
+                                    .item(0)
+                                    ?.clientX
+                                    ?.toDouble()
+                        }
+                        onTouchEnd { event ->
+                            val startX = touchStartX
+                            val endX =
+                                event.changedTouches
+                                    .item(0)
+                                    ?.clientX
+                                    ?.toDouble()
+                            if (startX != null && endX != null) {
+                                val nextIndex =
+                                    resolveCarPhotoSwipeIndex(
+                                        currentIndex = safePhotoIndex,
+                                        photoCount = allPhotos.size,
+                                        startX = startX,
+                                        endX = endX,
+                                    )
+                                if (nextIndex != safePhotoIndex) {
+                                    currentPhotoIndex = nextIndex
+                                    suppressClickAfterSwipe = true
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                } else if (isCarPhotoSwipeSignificant(startX, endX)) {
+                                    suppressClickAfterSwipe = true
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                }
+                            }
+                            touchStartX = null
+                        }
+                    }
+                    onClick { event ->
+                        if (suppressClickAfterSwipe) {
+                            suppressClickAfterSwipe = false
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                    }
                     style {
                         width(100.percent)
                         height(150.px)
                         position(Position.Relative)
                         overflow("hidden")
+                        property("touch-action", "pan-y")
                     }
                 }) {
                     Img(
@@ -69,37 +116,6 @@ fun CarItemSmall(
                             attr("decoding", "async")
                             if (!imageLoadsEagerly) {
                                 attr("fetchpriority", "low")
-                            }
-                            if (isMobileViewport) {
-                                onTouchStart { event ->
-                                    touchStartX =
-                                        event.touches
-                                            .item(0)
-                                            ?.clientX
-                                            ?.toDouble()
-                                }
-                                onTouchEnd { event ->
-                                    val startX = touchStartX
-                                    val endX =
-                                        event.changedTouches
-                                            .item(0)
-                                            ?.clientX
-                                            ?.toDouble()
-                                    if (startX != null && endX != null) {
-                                        val swipeDelta = startX - endX
-                                        val swipeThreshold = 40.0
-                                        when {
-                                            swipeDelta > swipeThreshold && safePhotoIndex < allPhotos.lastIndex -> {
-                                                currentPhotoIndex = safePhotoIndex + 1
-                                            }
-
-                                            swipeDelta < -swipeThreshold && safePhotoIndex > 0 -> {
-                                                currentPhotoIndex = safePhotoIndex - 1
-                                            }
-                                        }
-                                    }
-                                    touchStartX = null
-                                }
                             }
                             style {
                                 width(100.percent)

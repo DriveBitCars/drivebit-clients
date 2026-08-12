@@ -151,6 +151,7 @@ private fun CarMobileMainPhotoCarousel(
     var isMobileViewport by remember { mutableStateOf(window.innerWidth <= 768) }
     var currentPhotoIndex by remember(galleryPhotoUrls) { mutableStateOf(0) }
     var touchStartX by remember { mutableStateOf<Double?>(null) }
+    var suppressClickAfterSwipe by remember { mutableStateOf(false) }
 
     DisposableEffect(Unit) {
         val listener: (Event) -> Unit = {
@@ -176,57 +177,70 @@ private fun CarMobileMainPhotoCarousel(
     Div({
         onMouseEnter { isImageHovered = true }
         onMouseLeave { isImageHovered = false }
+        if (photos.size > 1 && isMobileViewport) {
+            onTouchStart { event ->
+                suppressClickAfterSwipe = false
+                touchStartX =
+                    event.touches
+                        .item(0)
+                        ?.clientX
+                        ?.toDouble()
+            }
+            onTouchEnd { event ->
+                val startX = touchStartX
+                val endX =
+                    event.changedTouches
+                        .item(0)
+                        ?.clientX
+                        ?.toDouble()
+                if (startX != null && endX != null) {
+                    val nextIndex =
+                        resolveCarPhotoSwipeIndex(
+                            currentIndex = safePhotoIndex,
+                            photoCount = photos.size,
+                            startX = startX,
+                            endX = endX,
+                        )
+                    if (nextIndex != safePhotoIndex) {
+                        currentPhotoIndex = nextIndex
+                        suppressClickAfterSwipe = true
+                        event.preventDefault()
+                        event.stopPropagation()
+                    } else if (isCarPhotoSwipeSignificant(startX, endX)) {
+                        suppressClickAfterSwipe = true
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                }
+                touchStartX = null
+            }
+        }
+        if (galleryClickEnabled) {
+            onClick {
+                if (suppressClickAfterSwipe) {
+                    suppressClickAfterSwipe = false
+                    return@onClick
+                }
+                window.location.href = buildCarPhotosGalleryUrl(galleryPhotoUrls)
+            }
+        }
         style {
             position(Position.Relative)
             width(100.percent)
             display(DisplayStyle.Block)
             overflow("hidden")
+            property("touch-action", "pan-y")
+            if (galleryClickEnabled) {
+                cursor("pointer")
+            }
         }
     }) {
         Img(
             src = currentPhotoUrl,
             attrs = {
-                if (photos.size > 1 && isMobileViewport) {
-                    onTouchStart { event ->
-                        touchStartX =
-                            event.touches
-                                .item(0)
-                                ?.clientX
-                                ?.toDouble()
-                    }
-                    onTouchEnd { event ->
-                        val startX = touchStartX
-                        val endX =
-                            event.changedTouches
-                                .item(0)
-                                ?.clientX
-                                ?.toDouble()
-                        if (startX != null && endX != null) {
-                            val swipeDelta = startX - endX
-                            val swipeThreshold = 40.0
-                            when {
-                                swipeDelta > swipeThreshold && safePhotoIndex < photos.lastIndex -> {
-                                    currentPhotoIndex = safePhotoIndex + 1
-                                }
-
-                                swipeDelta < -swipeThreshold && safePhotoIndex > 0 -> {
-                                    currentPhotoIndex = safePhotoIndex - 1
-                                }
-                            }
-                        }
-                        touchStartX = null
-                    }
-                }
-                if (galleryClickEnabled) {
-                    onClick {
-                        window.location.href = buildCarPhotosGalleryUrl(galleryPhotoUrls)
-                    }
-                }
                 style {
                     carMainPhotoImgStyle()
-                    if (galleryClickEnabled) {
-                        cursor("pointer")
-                    }
+                    property("pointer-events", "none")
                 }
             },
         )
