@@ -3,8 +3,11 @@ package my.drivebit.viewmodels
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -18,6 +21,7 @@ interface MyBookingsAsOwnerViewModel {
     val isLoading: StateFlow<Boolean>
     val error: StateFlow<String?>
     val actionInProgress: StateFlow<Set<String>>
+    val signEffects: SharedFlow<ContractSignEffect>
 
     fun loadBookings()
 
@@ -45,6 +49,9 @@ class MyBookingsAsOwnerViewModelImpl(
 
     private val _actionInProgress = MutableStateFlow<Set<String>>(emptySet())
     override val actionInProgress: StateFlow<Set<String>> = _actionInProgress.asStateFlow()
+
+    private val _signEffects = MutableSharedFlow<ContractSignEffect>(extraBufferCapacity = 1)
+    override val signEffects: SharedFlow<ContractSignEffect> = _signEffects.asSharedFlow()
 
     override fun loadBookings() {
         if (_isLoading.value) return
@@ -144,7 +151,17 @@ class MyBookingsAsOwnerViewModelImpl(
         coroutineScope.safeLaunchWithErrorHandler(
             isLoading = { false },
             setLoading = { },
-            setError = { _error.value = it },
+            setError = { message ->
+                coroutineScope.launch {
+                    _signEffects.emit(
+                        ContractSignEffect.Fail(
+                            bookingId = bookingId,
+                            message = message ?: "Не удалось подписать договор",
+                        ),
+                    )
+                }
+                _error.value = message
+            },
             errorHandler = { e ->
                 logBookingActionError(
                     action = "signContractAsOwner",
@@ -168,6 +185,7 @@ class MyBookingsAsOwnerViewModelImpl(
                 _bookings.update { list ->
                     list.map { if (it.id == bookingId) updated else it }
                 }
+                _signEffects.emit(ContractSignEffect.Ok(bookingId))
             } finally {
                 _actionInProgress.update { it - bookingId }
             }

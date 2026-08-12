@@ -4,11 +4,15 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.utils.BookingFunnelGoals
 import my.drivebit.utils.BookingFunnelSource
+import my.drivebit.utils.ContractFunnelGoals
+import my.drivebit.utils.ContractFunnelRole
+import my.drivebit.utils.ContractFunnelSource
 import my.drivebit.utils.PaymentFunnelGoals
 import my.drivebit.utils.PaymentFunnelKind
 import my.drivebit.utils.PaymentFunnelSource
 import my.drivebit.utils.bookingFunnelCreateParams
 import my.drivebit.utils.bookingFunnelIntentParams
+import my.drivebit.utils.contractFunnelParams
 import my.drivebit.utils.paymentFunnelParams
 import org.w3c.dom.HTMLScriptElement
 import kotlin.js.js
@@ -146,4 +150,86 @@ fun reachYandexGoalPaymentSuccessPage() {
 
 fun reachYandexGoalPaymentFailurePage() {
     reachYandexGoal(PaymentFunnelGoals.FAILURE_PAGE)
+}
+
+fun reachYandexGoalContractSignClick(
+    source: ContractFunnelSource,
+    role: ContractFunnelRole,
+    bookingId: String,
+) {
+    reachYandexGoal(
+        ContractFunnelGoals.SIGN_CLICK,
+        contractFunnelParams(source, role, bookingId),
+    )
+}
+
+fun reachYandexGoalContractSignOk(
+    source: ContractFunnelSource,
+    role: ContractFunnelRole,
+    bookingId: String,
+) {
+    reachYandexGoal(
+        ContractFunnelGoals.SIGN_OK,
+        contractFunnelParams(source, role, bookingId),
+    )
+}
+
+fun reachYandexGoalContractSignFail(
+    source: ContractFunnelSource,
+    role: ContractFunnelRole,
+    bookingId: String,
+    message: String,
+) {
+    reachYandexGoal(
+        ContractFunnelGoals.SIGN_FAIL,
+        contractFunnelParams(source, role, bookingId, message),
+    )
+}
+
+fun reachYandexGoalContractDownloadClick(
+    source: ContractFunnelSource,
+    bookingId: String,
+    role: ContractFunnelRole? = null,
+) {
+    reachYandexGoal(
+        ContractFunnelGoals.DOWNLOAD_CLICK,
+        contractFunnelParams(source, role, bookingId),
+    )
+}
+
+fun reachYandexGoalContractDownloadReady(bookingId: String) {
+    reachYandexGoal(
+        ContractFunnelGoals.DOWNLOAD_READY,
+        contractFunnelParams(ContractFunnelSource.DownloadPage, role = null, bookingId = bookingId),
+    )
+}
+
+fun reachYandexGoalContractDownloadIncomplete(
+    bookingId: String,
+    message: String,
+) {
+    reachYandexGoal(
+        ContractFunnelGoals.DOWNLOAD_INCOMPLETE,
+        contractFunnelParams(
+            ContractFunnelSource.DownloadPage,
+            role = null,
+            bookingId = bookingId,
+            message = message,
+        ),
+    )
+}
+
+fun reachYandexGoalContractDownloadFail(
+    bookingId: String,
+    message: String,
+) {
+    reachYandexGoal(
+        ContractFunnelGoals.DOWNLOAD_FAIL,
+        contractFunnelParams(
+            ContractFunnelSource.DownloadPage,
+            role = null,
+            bookingId = bookingId,
+            message = message,
+        ),
+    )
 }
