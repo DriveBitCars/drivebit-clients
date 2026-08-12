@@ -17,24 +17,40 @@ import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 
-/**
- * Horizontal layout that wraps to the next line when space runs out (flex row + wrap).
- */
+data class HorizontalScrollRowStyle(
+    val flexWrap: String,
+    val overflowX: String,
+    val childFlexShrink: String,
+) {
+    val wraps: Boolean get() = flexWrap != "nowrap"
+}
+
+fun horizontalScrollRowStyle(): HorizontalScrollRowStyle =
+    HorizontalScrollRowStyle(
+        flexWrap = "nowrap",
+        overflowX = "auto",
+        childFlexShrink = "0",
+    )
+
 @Composable
-fun FlowRow(
+fun HorizontalScrollRow(
     gap: CSSSizeValue<out CSSUnit.px>,
     alignItems: AlignItems = AlignItems.Center,
     modifier: (StyleScope.() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
+    val styleSpec = horizontalScrollRowStyle()
     Div({
         style {
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Row)
-            flexWrap(FlexWrap.Wrap)
+            flexWrap(FlexWrap.Nowrap)
             gap(gap)
             alignItems(alignItems)
             width(100.percent)
+            property("overflow-x", styleSpec.overflowX)
+            property("overflow-y", "hidden")
+            property("-webkit-overflow-scrolling", "touch")
             modifier?.invoke(this)
         }
     }) {
