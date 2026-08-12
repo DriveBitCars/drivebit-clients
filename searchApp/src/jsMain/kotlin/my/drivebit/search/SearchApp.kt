@@ -309,117 +309,127 @@ private fun SearchResultsContent(
                 TextError(errorMessage)
             }
             HorizontalScrollRow(gap = 8.px) {
-            FilterChip(
-                name = "Марка",
-                onClick = {
-                    showBrandFilter = !showBrandFilter
-                    showPriceFilter = false
-                    showDriveTypeFilter = false
-                    showBodyTypeFilter = false
-                    showSeatsFilter = false
-                    showYearFilter = false
-                    showMileageFilter = false
-                },
-                isSelected = isBrandSelected,
-                selectedText = brandChipText,
-            )
-            FilterChip(
-                name = "Привод",
-                onClick = {
-                    showDriveTypeFilter = !showDriveTypeFilter
-                    showPriceFilter = false
-                    showBrandFilter = false
-                    showBodyTypeFilter = false
-                    showSeatsFilter = false
-                    showYearFilter = false
-                    showMileageFilter = false
-                },
-                isSelected = isDriveTypeSelected,
-                selectedText = filters.driveTypeLabel,
-            )
-            FilterChip(
-                name = "Кузов",
-                onClick = {
-                    showBodyTypeFilter = !showBodyTypeFilter
-                    showPriceFilter = false
-                    showBrandFilter = false
-                    showDriveTypeFilter = false
-                    showSeatsFilter = false
-                    showYearFilter = false
-                    showMileageFilter = false
-                },
-                isSelected = isBodyTypeSelected,
-                selectedText = filters.bodyTypeLabel,
-            )
-            FilterChip(
-                name = "Количество мест",
-                onClick = {
-                    showSeatsFilter = !showSeatsFilter
-                    showPriceFilter = false
-                    showBrandFilter = false
-                    showDriveTypeFilter = false
-                    showBodyTypeFilter = false
-                    showYearFilter = false
-                    showMileageFilter = false
-                },
-                isSelected = isSeatsSelected,
-                selectedText = seatsChipText,
-            )
-            FilterChip(
-                name = "Год выпуска",
-                onClick = {
-                    showYearFilter = !showYearFilter
-                    showPriceFilter = false
-                    showBrandFilter = false
-                    showDriveTypeFilter = false
-                    showBodyTypeFilter = false
-                    showSeatsFilter = false
-                    showMileageFilter = false
-                },
-                isSelected = isYearSelected,
-                selectedText = yearChipText,
-            )
-            FilterChip(
-                name = "Километраж",
-                onClick = {
-                    showMileageFilter = !showMileageFilter
-                    showPriceFilter = false
-                    showBrandFilter = false
-                    showDriveTypeFilter = false
-                    showBodyTypeFilter = false
-                    showSeatsFilter = false
-                    showYearFilter = false
-                },
-                isSelected = isMileageSelected,
-                selectedText = mileageChipText,
-            )
-            FilterChip(
-                name = "Цена",
-                onClick = {
-                    showPriceFilter = !showPriceFilter
-                    showBrandFilter = false
-                    showDriveTypeFilter = false
-                    showBodyTypeFilter = false
-                    showSeatsFilter = false
-                    showYearFilter = false
-                    showMileageFilter = false
-                },
-                isSelected = isPriceSelected,
-                selectedText = priceText,
-            )
-            if (hasAnyFilter) {
-                FiltersResetChip(
-                    onClick = {
-                        closeOverlays()
-                        minPrice.value = 0
-                        maxPrice.value = 50000
-                        minYear.value = YEAR_FILTER_MIN
-                        maxYear.value = currentCalendarYear()
-                        navigateSearchFilters(resetSearchFilters(filters, selectedCitySlug))
-                        onLocationChanged()
-                    },
-                )
-            }
+                searchFilterChipOrder(includeReset = hasAnyFilter).forEach { chipName ->
+                    when (chipName) {
+                        "Сбросить" ->
+                            FiltersResetChip(
+                                onClick = {
+                                    closeOverlays()
+                                    minPrice.value = 0
+                                    maxPrice.value = 50000
+                                    minYear.value = YEAR_FILTER_MIN
+                                    maxYear.value = currentCalendarYear()
+                                    navigateSearchFilters(resetSearchFilters(filters, selectedCitySlug))
+                                    onLocationChanged()
+                                },
+                            )
+                        "Марка" ->
+                            FilterChip(
+                                name = "Марка",
+                                onClick = {
+                                    showBrandFilter = !showBrandFilter
+                                    showPriceFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
+                                },
+                                isSelected = isBrandSelected,
+                                selectedText = brandChipText,
+                            )
+                        "Привод" ->
+                            FilterChip(
+                                name = "Привод",
+                                onClick = {
+                                    showDriveTypeFilter = !showDriveTypeFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
+                                },
+                                isSelected = isDriveTypeSelected,
+                                selectedText = filters.driveTypeLabel,
+                            )
+                        "Кузов" ->
+                            FilterChip(
+                                name = "Кузов",
+                                onClick = {
+                                    showBodyTypeFilter = !showBodyTypeFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showSeatsFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
+                                },
+                                isSelected = isBodyTypeSelected,
+                                selectedText = filters.bodyTypeLabel,
+                            )
+                        "Количество мест" ->
+                            FilterChip(
+                                name = "Количество мест",
+                                onClick = {
+                                    showSeatsFilter = !showSeatsFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
+                                },
+                                isSelected = isSeatsSelected,
+                                selectedText = seatsChipText,
+                            )
+                        "Год выпуска" ->
+                            FilterChip(
+                                name = "Год выпуска",
+                                onClick = {
+                                    showYearFilter = !showYearFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                    showMileageFilter = false
+                                },
+                                isSelected = isYearSelected,
+                                selectedText = yearChipText,
+                            )
+                        "Километраж" ->
+                            FilterChip(
+                                name = "Километраж",
+                                onClick = {
+                                    showMileageFilter = !showMileageFilter
+                                    showPriceFilter = false
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                    showYearFilter = false
+                                },
+                                isSelected = isMileageSelected,
+                                selectedText = mileageChipText,
+                            )
+                        "Цена" ->
+                            FilterChip(
+                                name = "Цена",
+                                onClick = {
+                                    showPriceFilter = !showPriceFilter
+                                    showBrandFilter = false
+                                    showDriveTypeFilter = false
+                                    showBodyTypeFilter = false
+                                    showSeatsFilter = false
+                                    showYearFilter = false
+                                    showMileageFilter = false
+                                },
+                                isSelected = isPriceSelected,
+                                selectedText = priceText,
+                            )
+                    }
+                }
             }
         }
         Box(
