@@ -17,4 +17,12 @@ class HorizontalScrollRowStyleTest {
     fun `filter chips do not shrink inside scroll row`() {
         assertEquals("0", horizontalScrollRowStyle().childFlexShrink)
     }
+
+    @Test
+    fun `filter chips scrollbar is hidden while remaining scrollable`() {
+        val style = horizontalScrollRowStyle()
+        assertEquals("none", style.scrollbarWidth)
+        assertEquals("none", style.msOverflowStyle)
+        assertEquals("drivebit-horizontal-scroll", style.cssClass)
+    }
 }
