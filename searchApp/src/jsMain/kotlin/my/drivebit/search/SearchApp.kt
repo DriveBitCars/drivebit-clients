@@ -296,18 +296,19 @@ private fun SearchResultsContent(
 
     Column(gap = 24.px) {
         SearchPageHeadline(pageHeadline)
-        SearchDateRangeSelector(
-            startDate = filters.startDate,
-            endDate = filters.endDate,
-            applyOnlyCompleteRange = true,
-            onDateRangeChanged = { start, end ->
-                navigateFilter { it.copy(startDate = start, endDate = end) }
-            },
-        )
-        if (errorMessage != null) {
-            TextError(errorMessage)
-        }
-        HorizontalScrollRow(gap = 8.px) {
+        Column(gap = 8.px) {
+            SearchDateRangeSelector(
+                startDate = filters.startDate,
+                endDate = filters.endDate,
+                applyOnlyCompleteRange = true,
+                onDateRangeChanged = { start, end ->
+                    navigateFilter { it.copy(startDate = start, endDate = end) }
+                },
+            )
+            if (errorMessage != null) {
+                TextError(errorMessage)
+            }
+            HorizontalScrollRow(gap = 8.px) {
             FilterChip(
                 name = "Марка",
                 onClick = {
@@ -418,6 +419,7 @@ private fun SearchResultsContent(
                         onLocationChanged()
                     },
                 )
+            }
             }
         }
         Box(

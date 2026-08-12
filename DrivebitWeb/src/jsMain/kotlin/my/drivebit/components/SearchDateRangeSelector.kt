@@ -27,7 +27,6 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.justifyContent
-import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.minWidth
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -124,7 +123,6 @@ private fun SearchDateFieldItem(
             flex(1)
             minWidth(0.px)
             cursor("pointer")
-            marginBottom(12.px)
             border(1.px, LineStyle.Solid, CSSColors.Gray300)
             borderRadius(8.px)
             padding(12.px, 14.px)
