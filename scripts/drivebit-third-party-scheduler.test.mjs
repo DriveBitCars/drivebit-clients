@@ -173,14 +173,14 @@ test("bootThirdPartyScripts injects Metrika immediately without idle/setTimeout 
     );
 });
 
-test("Metrika init disables webvisor and keeps clickmap", () => {
+test("Metrika init enables webvisor and keeps clickmap", () => {
     const env = createMockEnv();
     bootThirdPartyScripts(env);
 
     assert.ok(Array.isArray(env.window.ym.a), "ym uses call queue");
     const initArgs = env.window.ym.a.find((a) => a[1] === "init");
     assert.ok(initArgs, "ym init must be queued");
-    assert.equal(initArgs[2].webvisor, false);
+    assert.equal(initArgs[2].webvisor, true);
     assert.equal(initArgs[2].clickmap, true);
 });
 

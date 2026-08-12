@@ -139,14 +139,14 @@
                 };
             }
             firstScript.parentNode.insertBefore(tagScript, firstScript);
-            log("Metrika: start tag.js immediately (webvisor off for INP)");
+            log("Metrika: start tag.js immediately");
         } else if (onTagReady) {
             onTagReady();
         }
 
         window.ym(METRIKA_COUNTER_ID, "init", {
             ssr: true,
-            webvisor: false,
+            webvisor: true,
             clickmap: true,
             ecommerce: "dataLayer",
             accurateTrackBounce: true,
@@ -254,7 +254,7 @@
         window.addEventListener("load", fn, { once: true });
     }
 
-    log("boot: Metrika first (webvisor off), Callibri deferred to idle/interaction");
+    log("boot: Metrika first (webvisor on), Callibri deferred to idle/interaction");
     loadMetrika(function () {
         scheduleDeferredCallibri();
     });
