@@ -19,6 +19,9 @@ data class FilterChipStyle(
 
     val isFilled: Boolean
         get() = background == "blue" && text == "white"
+
+    val hasLighterBorder: Boolean
+        get() = border == "gray"
 }
 
 fun filterChipStyle(isSelected: Boolean): FilterChipStyle =
@@ -32,7 +35,7 @@ fun filterChipStyle(isSelected: Boolean): FilterChipStyle =
     } else {
         FilterChipStyle(
             background = "white",
-            border = "blue",
+            border = "gray",
             text = "blue",
             arrow = "blue",
         )
@@ -112,37 +115,64 @@ private fun FilterChipArrow(color: String) {
     })
 }
 
-private const val RESET_CHIP_BG = "rgba(41, 98, 255, 0.12)"
-private const val RESET_CHIP_BG_HOVER = "rgba(41, 98, 255, 0.22)"
+data class FiltersResetChipStyle(
+    val background: String,
+    val border: String,
+    val text: String,
+    val hoverBackground: String,
+) {
+    val isFilled: Boolean
+        get() = background == "blue" && text == "white"
+
+    val isBrighterThanOutline: Boolean
+        get() = isFilled
+}
+
+fun filtersResetChipStyle(): FiltersResetChipStyle =
+    FiltersResetChipStyle(
+        background = "blue",
+        border = "blue",
+        text = "white",
+        hoverBackground = "blue-strong",
+    )
 
 @Composable
 fun FiltersResetChip(onClick: () -> Unit) {
+    val style = filtersResetChipStyle()
     Row(
         gap = 8.px,
         alignItems = AlignItems.Center,
         modifier = {
             padding(8.px, 14.px)
-            property("background-color", RESET_CHIP_BG)
+            backgroundColor(CSSColors.Blue)
             borderRadius(8.px)
             border(1.px, LineStyle.Solid, CSSColors.Blue)
             cursor("pointer")
             property("transition", "all 0.2s ease")
-            property("box-shadow", "0 1px 2px rgba(41, 98, 255, 0.15)")
+            property("box-shadow", "0 2px 6px rgba(41, 98, 255, 0.35)")
             property("flex-shrink", horizontalScrollRowStyle().childFlexShrink)
             property("white-space", "nowrap")
         },
         attrs = {
             onClick { onClick() }
             onMouseEnter {
-                (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
                     "background-color",
-                    RESET_CHIP_BG_HOVER,
+                    CSSColors.BlueRedString,
+                )
+                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                    "border-color",
+                    CSSColors.BlueRedString,
                 )
             }
             onMouseLeave {
-                (it.target as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
                     "background-color",
-                    RESET_CHIP_BG,
+                    CSSColors.BlueString,
+                )
+                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.setProperty(
+                    "border-color",
+                    CSSColors.BlueString,
                 )
             }
         },
@@ -150,7 +180,7 @@ fun FiltersResetChip(onClick: () -> Unit) {
         Span({
             style {
                 fontSize(14.px)
-                color(CSSColors.Blue)
+                color(if (style.text == "white") CSSColors.White else CSSColors.Blue)
                 fontWeight(CSSTypography.FontWeight.semibold)
             }
         }) {
