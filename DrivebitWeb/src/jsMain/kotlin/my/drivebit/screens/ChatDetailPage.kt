@@ -27,6 +27,7 @@ import my.drivebit.components.Row
 import my.drivebit.components.TextError
 import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
+import my.drivebit.network.services.AWAITING_OWNER_CONFIRMATION_PHRASE
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.MessageDto
 import my.drivebit.network.services.SignContractChatRole
@@ -41,7 +42,9 @@ import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.shouldShowLeaveReviewForRenter
+import my.drivebit.network.services.shouldShowOpenDealsAction
 import my.drivebit.network.services.signContractChatRole
+import my.drivebit.network.services.textWithoutOpenDealsPhrase
 import my.drivebit.shell.AppWithHeader
 import my.drivebit.utils.ContractFunnelRole
 import my.drivebit.utils.ContractFunnelSource
@@ -456,11 +459,19 @@ private fun MessageBubble(
         val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
         val showReviewForCar = message.isLeaveReviewForCarAction()
         val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
+        val showOpenDeals = message.shouldShowOpenDealsAction()
+        val systemMessageText =
+            if (showOpenDeals) {
+                message.textWithoutOpenDealsPhrase()
+            } else {
+                text.ifBlank { "Системное сообщение" }
+            }
         val payButtonVm = createButtonViewModel()
         val contractButtonVm = createButtonViewModel()
         val signContractButtonVm = createButtonViewModel()
         val reviewCarButtonVm = createButtonViewModel()
         val reviewRenterButtonVm = createButtonViewModel()
+        val openDealsButtonVm = createButtonViewModel()
         val bookingForContract = bookingIdForContract?.let { bookingById[it] }
         val showSignContract =
             bookingIdForContract != null &&
@@ -518,7 +529,24 @@ private fun MessageBubble(
                         alignItems(AlignItems.Center)
                     },
                 ) {
-                    MessageTextWithDealsLink(text = text.ifBlank { "Системное сообщение" })
+                    MessageTextWithDealsLink(text = systemMessageText)
+                    if (showOpenDeals) {
+                        Div({
+                            style {
+                                width(100.percent)
+                                maxWidth(280.px)
+                            }
+                        }) {
+                            ActionButton(
+                                text = AWAITING_OWNER_CONFIRMATION_PHRASE.trimEnd('.'),
+                                enabledColor = CSSColors.Blue,
+                                viewModel = openDealsButtonVm,
+                                onClick = {
+                                    window.location.href = "/my-deals"
+                                },
+                            )
+                        }
+                    }
                     if (bookingIdForPay != null) {
                         val fullPayLabel =
                             bookingForPay?.let { booking ->

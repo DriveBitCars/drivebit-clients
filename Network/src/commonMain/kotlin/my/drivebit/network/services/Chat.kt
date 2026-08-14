@@ -354,6 +354,16 @@ fun MessageDto.leaveReviewBookingIdForAction(): String? {
     return null
 }
 
+const val AWAITING_OWNER_CONFIRMATION_PHRASE = "Ожидается ваше подтверждение."
+
+fun MessageDto.shouldShowOpenDealsAction(): Boolean =
+    isSystemMessage && text.orEmpty().contains(AWAITING_OWNER_CONFIRMATION_PHRASE)
+
+fun MessageDto.textWithoutOpenDealsPhrase(): String =
+    text.orEmpty()
+        .replace(AWAITING_OWNER_CONFIRMATION_PHRASE, "")
+        .trim()
+
 class ChatImpl(
     private val httpClient: HttpClient,
 ) : Chat {
