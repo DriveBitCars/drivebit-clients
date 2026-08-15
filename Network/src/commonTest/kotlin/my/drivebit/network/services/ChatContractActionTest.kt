@@ -231,4 +231,47 @@ class ChatContractActionTest {
             ),
         )
     }
+
+    @Test
+    fun shouldShowOpenDealsAction_trueWhenSystemTextAsksForConfirmation() {
+        val message =
+            MessageDto(
+                id = "11",
+                chatId = "c1",
+                createdAt = "2026-08-14T12:00:00Z",
+                isSystemMessage = true,
+                text = "Ожидается ваше подтверждение.",
+            )
+
+        assertTrue(message.shouldShowOpenDealsAction())
+        assertEquals("", message.textWithoutOpenDealsPhrase())
+    }
+
+    @Test
+    fun shouldShowOpenDealsAction_stripsPhraseFromSurroundingText() {
+        val message =
+            MessageDto(
+                id = "12",
+                chatId = "c1",
+                createdAt = "2026-08-14T12:00:00Z",
+                isSystemMessage = true,
+                text = "Новая заявка на бронирование. Ожидается ваше подтверждение.",
+            )
+
+        assertTrue(message.shouldShowOpenDealsAction())
+        assertEquals("Новая заявка на бронирование.", message.textWithoutOpenDealsPhrase())
+    }
+
+    @Test
+    fun shouldShowOpenDealsAction_falseForRegularChatMessage() {
+        val message =
+            MessageDto(
+                id = "13",
+                chatId = "c1",
+                createdAt = "2026-08-14T12:00:00Z",
+                text = "Ожидается ваше подтверждение.",
+            )
+
+        assertFalse(message.shouldShowOpenDealsAction())
+    }
 }

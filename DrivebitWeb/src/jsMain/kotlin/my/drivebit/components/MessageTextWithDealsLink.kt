@@ -3,13 +3,13 @@ package my.drivebit.components
 import androidx.compose.runtime.Composable
 import kotlinx.browser.window
 import my.drivebit.design.CSSColors
+import my.drivebit.network.services.AWAITING_OWNER_CONFIRMATION_PHRASE
 import my.drivebit.network.services.contractDownloadPagePath
 import my.drivebit.network.services.extractBookingIdFromContractDownloadUrl
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Text
 
-private const val DEALS_LINK_PHRASE = "Ожидается ваше подтверждение."
 private const val CONTRACT_LINK_LABEL = "Скачать договор аренды"
 private const val CONTRACT_LINK_PREFIX = "$CONTRACT_LINK_LABEL: "
 
@@ -22,16 +22,16 @@ fun MessageTextWithDealsLink(
 
     val contractBookingId = extractBookingIdFromContractDownloadUrl(text)
     when {
-        text.contains(DEALS_LINK_PHRASE) -> {
-            val before = text.substringBefore(DEALS_LINK_PHRASE)
-            val after = text.substringAfter(DEALS_LINK_PHRASE)
+        text.contains(AWAITING_OWNER_CONFIRMATION_PHRASE) -> {
+            val before = text.substringBefore(AWAITING_OWNER_CONFIRMATION_PHRASE)
+            val after = text.substringAfter(AWAITING_OWNER_CONFIRMATION_PHRASE)
 
             if (before.isNotBlank()) {
                 MessageTextWithDealsLink(before.trimEnd(), stopPropagation)
             }
             InlineLink(
                 href = "/my-deals",
-                label = DEALS_LINK_PHRASE,
+                label = AWAITING_OWNER_CONFIRMATION_PHRASE,
                 stopPropagation = stopPropagation,
             )
             if (after.isNotBlank()) {

@@ -40,6 +40,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import my.drivebit.mobile.screens.main.LeaveReviewScreen
+import my.drivebit.network.services.AWAITING_OWNER_CONFIRMATION_PHRASE
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.MessageDto
 import my.drivebit.network.services.canShowSignContractInChat
@@ -52,6 +53,8 @@ import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.shouldShowLeaveReviewForRenter
+import my.drivebit.network.services.shouldShowOpenDealsAction
+import my.drivebit.network.services.textWithoutOpenDealsPhrase
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.ui.components.Loader
 import my.drivebit.utils.mapIso8601ToTimeString
@@ -310,6 +313,13 @@ private fun MessageBubble(
         val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
         val showReviewForCar = message.isLeaveReviewForCarAction()
         val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
+        val showOpenDeals = message.shouldShowOpenDealsAction()
+        val systemMessageText =
+            if (showOpenDeals) {
+                message.textWithoutOpenDealsPhrase()
+            } else {
+                message.text ?: "Системное сообщение"
+            }
         val bookingForContract = bookingIdForContract?.let { bookingById[it] }
         val showSignContract =
             bookingIdForContract != null &&
@@ -330,11 +340,22 @@ private fun MessageBubble(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp).fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(
-                        text = message.text ?: "Системное сообщение",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                        color = ColorsDriveBit.Gray600,
-                    )
+                    if (systemMessageText.isNotBlank()) {
+                        Text(
+                            text = systemMessageText,
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                            color = ColorsDriveBit.Gray600,
+                        )
+                    }
+                    if (showOpenDeals) {
+                        val uriHandler = LocalUriHandler.current
+                        Button(
+                            onClick = { uriHandler.openUri("https://drivebit.ru/my-deals") },
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) {
+                            Text(AWAITING_OWNER_CONFIRMATION_PHRASE.trimEnd('.'))
+                        }
+                    }
                     if (bookingIdForPay != null) {
                         val fullPayLabel =
                             bookingForPay?.let { booking ->
