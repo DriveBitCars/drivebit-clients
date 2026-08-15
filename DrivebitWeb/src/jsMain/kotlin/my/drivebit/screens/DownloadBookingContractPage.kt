@@ -101,12 +101,20 @@ fun DownloadBookingContractPage() {
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
-            is BookingContractUiState.Ready ->
+            is BookingContractUiState.Ready -> {
+                println("📄 [DownloadContractPage] analytics ready bookingId=$bookingId")
                 reachYandexGoalContractDownloadReady(bookingId)
+            }
             is BookingContractUiState.Error -> {
                 if (state.reasons.isNotEmpty()) {
+                    println(
+                        "📄 [DownloadContractPage] analytics incomplete bookingId=$bookingId message=${state.message}",
+                    )
                     reachYandexGoalContractDownloadIncomplete(bookingId, state.message)
                 } else {
+                    println(
+                        "📄 [DownloadContractPage] analytics fail bookingId=$bookingId message=${state.message}",
+                    )
                     reachYandexGoalContractDownloadFail(bookingId, state.message)
                 }
             }
@@ -152,7 +160,8 @@ fun DownloadBookingContractPage() {
                             "${mapIso8601ToDateString(contract.urlExpiresAt)} ${mapIso8601ToTimeString(contract.urlExpiresAt)}"
                         }.getOrElse { contract.urlExpiresAt }
                     LaunchedEffect(downloadUrl) {
-                        window.location.href = downloadUrl
+                        println("📄 [DownloadContractPage] auto-open downloadUrl=$downloadUrl bookingId=$bookingId")
+                        window.open(downloadUrl, "_blank", "noopener,noreferrer")
                     }
                     Div({
                         style {
@@ -193,7 +202,8 @@ fun DownloadBookingContractPage() {
                                 property("align-self", "flex-start")
                             }
                             onClick {
-                                window.location.href = downloadUrl
+                                println("📄 [DownloadContractPage] manual download click url=$downloadUrl")
+                                window.open(downloadUrl, "_blank", "noopener,noreferrer")
                             }
                         }) {
                             Text("Скачать договор")

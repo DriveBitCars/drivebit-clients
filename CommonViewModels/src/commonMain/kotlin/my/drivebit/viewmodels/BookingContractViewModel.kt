@@ -52,10 +52,14 @@ class BookingContractViewModelImpl(
             setLoading = { loading ->
                 if (loading) {
                     _uiState.value = BookingContractUiState.Loading
+                    println("📄 [BookingContractVM] state=Loading bookingId=$bookingId")
                 }
             },
             setError = { message ->
-                _uiState.value = BookingContractUiState.Error(message ?: "Не удалось загрузить договор")
+                if (message != null) {
+                    _uiState.value = BookingContractUiState.Error(message)
+                    println("📄 [BookingContractVM] state=Error message=$message bookingId=$bookingId")
+                }
             },
             errorHandler = { e ->
                 ErrorHandler.extractErrorMessage(
@@ -66,16 +70,30 @@ class BookingContractViewModelImpl(
             },
         ) {
             when (val result = booking.getContract(bookingId)) {
-                is GetBookingContractResult.Success ->
+                is GetBookingContractResult.Success -> {
                     _uiState.value = BookingContractUiState.Ready(result.contract)
-                is GetBookingContractResult.DataIncomplete ->
+                    println(
+                        "📄 [BookingContractVM] state=Ready bookingId=$bookingId " +
+                            "contractNumber=${result.contract.contractNumber} file=${result.contract.fileName}",
+                    )
+                }
+                is GetBookingContractResult.DataIncomplete -> {
                     _uiState.value =
                         BookingContractUiState.Error(
                             message = result.message,
                             reasons = result.reasons,
                         )
-                is GetBookingContractResult.Failed ->
+                    println(
+                        "📄 [BookingContractVM] state=DataIncomplete bookingId=$bookingId " +
+                            "message=${result.message} reasons=${result.reasons}",
+                    )
+                }
+                is GetBookingContractResult.Failed -> {
                     _uiState.value = BookingContractUiState.Error(message = result.message)
+                    println(
+                        "📄 [BookingContractVM] state=Failed bookingId=$bookingId message=${result.message}",
+                    )
+                }
             }
         }
     }
