@@ -49,7 +49,7 @@ private data class DocumentSlotConfig(
 private val DOCUMENT_SLOTS =
     listOf(
         DocumentSlotConfig(DocumentUploadType.PassportMainPageRus, "Первая страница паспорта"),
-        DocumentSlotConfig(DocumentUploadType.PassportSecondaryPageRus, "Вторая страница паспорта"),
+        DocumentSlotConfig(DocumentUploadType.PassportSecondaryPageRus, "Прописка"),
         DocumentSlotConfig(DocumentUploadType.DriverLicense, "Водительское удостоверение (лицевая сторона)"),
         DocumentSlotConfig(DocumentUploadType.DriverLicenseBack, "Водительское удостоверение (обратная сторона)"),
     )
