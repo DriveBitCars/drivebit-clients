@@ -448,26 +448,6 @@ fun CarEditPage() {
                             )
 
                             TextInputField(
-                                label = "Сезонная наценка, %",
-                                value = formData.seasonalPriceAdjustmentPercent,
-                                onValueChange = { newValue ->
-                                    val cleaned =
-                                        newValue.filterIndexed { index, c ->
-                                            c.isDigit() || (index == 0 && c == '-')
-                                        }
-                                    if (cleaned.isEmpty() ||
-                                        cleaned == "-" ||
-                                        cleaned.toIntOrNull() != null
-                                    ) {
-                                        viewModel.handleIntent(
-                                            CarEditIntent.UpdateSeasonalPriceAdjustmentPercent(cleaned),
-                                        )
-                                    }
-                                },
-                                numeric = true,
-                            )
-
-                            TextInputField(
                                 label = "Залог (₽)",
                                 value = formData.deposit,
                                 onValueChange = { newValue ->
@@ -528,6 +508,13 @@ fun CarEditPage() {
                                     text = "Календарь доступности",
                                     onClick = {
                                         window.location.href = "/car-availability?carId=${currentState.carId}"
+                                    },
+                                )
+                                ActionButton(
+                                    enabledColor = CSSColors.Blue,
+                                    text = "Сезонные наценки",
+                                    onClick = {
+                                        window.location.href = "/car-seasonal-pricing?carId=${currentState.carId}"
                                     },
                                 )
                                 ActionButton(

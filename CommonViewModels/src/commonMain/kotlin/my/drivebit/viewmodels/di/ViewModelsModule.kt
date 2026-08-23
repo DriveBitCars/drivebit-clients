@@ -22,6 +22,8 @@ import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
 import my.drivebit.viewmodels.CarAvailabilityViewModel
 import my.drivebit.viewmodels.CarAvailabilityViewModelImpl
+import my.drivebit.viewmodels.CarSeasonalPricingViewModel
+import my.drivebit.viewmodels.CarSeasonalPricingViewModelImpl
 import my.drivebit.viewmodels.CarBrandViewModel
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarDetailViewModelImpl
@@ -407,6 +409,13 @@ val commonViewModelsModule: Module =
             CarAvailabilityViewModelImpl(
                 carId = carId,
                 carAvailability = get(),
+            )
+        }
+
+        factory<CarSeasonalPricingViewModel> { (carId: String) ->
+            CarSeasonalPricingViewModelImpl(
+                carId = carId,
+                carService = get(),
             )
         }
 

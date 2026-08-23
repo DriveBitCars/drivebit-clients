@@ -139,4 +139,66 @@ class CarUpdateRequestTest {
         val json = defaultJson.encodeToString(UpdateCarRequest.serializer(), updateRequest)
         assertFalse(json.contains("seasonalPriceAdjustmentPercent"))
     }
+
+    @Test
+    fun `CarDetailResponse deserializes seasonalPriceAdjustments`() {
+        val json =
+            """
+            {
+              "id": "d5edee76-d7d7-42bd-be61-bfc3a73786c8",
+              "seasonalPriceAdjustmentPercent": 15,
+              "seasonalPriceAdjustments": [
+                {
+                  "id": "period-1",
+                  "startsAt": "2026-12-01T00:00:00Z",
+                  "endsAt": "2026-12-31T00:00:00Z",
+                  "percent": 15
+                }
+              ]
+            }
+            """.trimIndent()
+
+        val car = defaultJson.decodeFromString(CarDetailResponse.serializer(), json)
+
+        assertEquals(15.0, car.seasonalPriceAdjustmentPercent)
+        assertEquals(1, car.seasonalPriceAdjustments.size)
+        assertEquals("period-1", car.seasonalPriceAdjustments[0].id)
+        assertEquals("2026-12-01T00:00:00Z", car.seasonalPriceAdjustments[0].startsAt)
+        assertEquals("2026-12-31T00:00:00Z", car.seasonalPriceAdjustments[0].endsAt)
+        assertEquals(15.0, car.seasonalPriceAdjustments[0].percent)
+    }
+
+    @Test
+    fun `UpdateCarRequest encodes seasonalPriceAdjustments and omits scalar percent`() {
+        val request =
+            UpdateCarRequest(
+                carId = "d5edee76-d7d7-42bd-be61-bfc3a73786c8",
+                seasonalPriceAdjustments =
+                    listOf(
+                        SeasonalPriceAdjustmentDto(
+                            startsAt = "2026-12-01T00:00:00.000Z",
+                            endsAt = "2026-12-31T00:00:00.000Z",
+                            percent = 20.0,
+                        ),
+                    ),
+            )
+
+        val json = defaultJson.encodeToString(UpdateCarRequest.serializer(), request)
+        assertTrue(json.contains("\"seasonalPriceAdjustments\""))
+        assertTrue(json.contains("\"startsAt\":\"2026-12-01T00:00:00.000Z\""))
+        assertTrue(json.contains("\"percent\":20"))
+        assertFalse(json.contains("seasonalPriceAdjustmentPercent"))
+    }
+
+    @Test
+    fun `UpdateCarRequest encodes empty seasonalPriceAdjustments to clear periods`() {
+        val request =
+            UpdateCarRequest(
+                carId = "d5edee76-d7d7-42bd-be61-bfc3a73786c8",
+                seasonalPriceAdjustments = emptyList(),
+            )
+
+        val json = defaultJson.encodeToString(UpdateCarRequest.serializer(), request)
+        assertTrue(json.contains("\"seasonalPriceAdjustments\":[]"))
+    }
 }

@@ -60,4 +60,63 @@ class SeasonalPriceAdjustmentTest {
         assertNull(parseSeasonalPercentInput("-91"))
         assertNull(parseSeasonalPercentInput("1001"))
     }
+
+    @Test
+    fun `isoDateTimeToLocalDate keeps calendar date`() {
+        assertEquals("2026-12-01", isoDateTimeToLocalDate("2026-12-01T00:00:00Z"))
+        assertEquals("2026-07-15", isoDateTimeToLocalDate("2026-07-15T23:59:59.000Z"))
+        assertEquals("2026-01-02", isoDateTimeToLocalDate("2026-01-02"))
+    }
+
+    @Test
+    fun `localDateToIsoDateTime sends midnight UTC`() {
+        assertEquals("2026-12-01T00:00:00.000Z", localDateToIsoDateTime("2026-12-01"))
+    }
+
+    @Test
+    fun `validateSeasonalPriceAdjustmentPeriod requires dates`() {
+        assertEquals(
+            "Укажите даты периода",
+            validateSeasonalPriceAdjustmentPeriod(startsAt = "", endsAt = "2026-12-10", percent = "10"),
+        )
+        assertEquals(
+            "Укажите даты периода",
+            validateSeasonalPriceAdjustmentPeriod(startsAt = "2026-12-01", endsAt = "", percent = "10"),
+        )
+    }
+
+    @Test
+    fun `validateSeasonalPriceAdjustmentPeriod rejects end before start`() {
+        assertEquals(
+            "Дата окончания не может быть раньше даты начала",
+            validateSeasonalPriceAdjustmentPeriod(
+                startsAt = "2026-12-10",
+                endsAt = "2026-12-01",
+                percent = "10",
+            ),
+        )
+    }
+
+    @Test
+    fun `validateSeasonalPriceAdjustmentPeriod rejects invalid percent`() {
+        assertEquals(
+            "Процент от -90 до 1000",
+            validateSeasonalPriceAdjustmentPeriod(
+                startsAt = "2026-12-01",
+                endsAt = "2026-12-10",
+                percent = "abc",
+            ),
+        )
+    }
+
+    @Test
+    fun `validateSeasonalPriceAdjustmentPeriod accepts valid period`() {
+        assertNull(
+            validateSeasonalPriceAdjustmentPeriod(
+                startsAt = "2026-12-01",
+                endsAt = "2026-12-10",
+                percent = "-15",
+            ),
+        )
+    }
 }

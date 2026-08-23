@@ -58,8 +58,20 @@ interface Car {
         carId: String? = null,
     ): CarResponse
 
+    suspend fun updateCar(request: UpdateCarRequest): CarResponse {
+        throw NotImplementedError("updateCar")
+    }
+
     suspend fun deleteCar(carId: String)
 }
+
+@Serializable
+data class SeasonalPriceAdjustmentDto(
+    val id: String? = null,
+    @JsonNames("startsAt", "starts_at") val startsAt: String,
+    @JsonNames("endsAt", "ends_at") val endsAt: String,
+    val percent: Double,
+)
 
 @Serializable
 data class CarSearchResponse(
@@ -188,6 +200,8 @@ data class CarDetailResponse(
     @JsonNames("prepaymentPercent", "prepayment_percent") val prepaymentPercent: Double? = null,
     @JsonNames("seasonalPriceAdjustmentPercent", "seasonal_price_adjustment_percent")
     val seasonalPriceAdjustmentPercent: Double? = null,
+    @JsonNames("seasonalPriceAdjustments", "seasonal_price_adjustments")
+    val seasonalPriceAdjustments: List<SeasonalPriceAdjustmentDto> = emptyList(),
     val owner: String = "",
     val carBookings: List<CarBookingItem> = emptyList(),
 ) {
@@ -444,6 +458,8 @@ data class UpdateCarRequest(
     @JsonNames("prepaymentPercent", "prepayment_percent") val prepaymentPercent: Double? = null,
     @JsonNames("seasonalPriceAdjustmentPercent", "seasonal_price_adjustment_percent")
     val seasonalPriceAdjustmentPercent: Double? = null,
+    @JsonNames("seasonalPriceAdjustments", "seasonal_price_adjustments")
+    val seasonalPriceAdjustments: List<SeasonalPriceAdjustmentDto>? = null,
     val availableMileagePerDayKm: Int? = null,
     val description: String? = null,
     val mileage: Int? = null,
@@ -651,6 +667,28 @@ class CarImpl(
         val bodyString = response.bodyAsText()
         return if (bodyString.isBlank()) {
             CarResponse(id = carId ?: request.id)
+        } else {
+            defaultJson.decodeFromString<CarResponse>(bodyString)
+        }
+    }
+
+    override suspend fun updateCar(request: UpdateCarRequest): CarResponse {
+        val url = "${DEFAULT_BASE_URL}Car/my"
+        val response =
+            httpClient.put(url) {
+                parameter("carId", request.carId)
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+        if (!response.status.isSuccess()) {
+            throw my.drivebit.network.NetworkException(
+                response.status,
+                response.bodyAsText().takeIf { it.isNotBlank() } ?: "Ошибка сохранения автомобиля",
+            )
+        }
+        val bodyString = response.bodyAsText()
+        return if (bodyString.isBlank()) {
+            CarResponse(id = request.carId)
         } else {
             defaultJson.decodeFromString<CarResponse>(bodyString)
         }

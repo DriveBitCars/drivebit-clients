@@ -35,6 +35,27 @@ fun parseSeasonalPercentInput(raw: String): Int? {
     return value
 }
 
+fun isoDateTimeToLocalDate(iso: String): String = iso.trim().take(10)
+
+fun localDateToIsoDateTime(date: String): String = "${date.trim()}T00:00:00.000Z"
+
+fun validateSeasonalPriceAdjustmentPeriod(
+    startsAt: String,
+    endsAt: String,
+    percent: String,
+): String? {
+    if (startsAt.isBlank() || endsAt.isBlank()) {
+        return "Укажите даты периода"
+    }
+    if (endsAt < startsAt) {
+        return "Дата окончания не может быть раньше даты начала"
+    }
+    if (parseSeasonalPercentInput(percent) == null) {
+        return "Процент от -90 до 1000"
+    }
+    return null
+}
+
 private fun roundAwayFromZero(
     value: Double,
     decimals: Int,

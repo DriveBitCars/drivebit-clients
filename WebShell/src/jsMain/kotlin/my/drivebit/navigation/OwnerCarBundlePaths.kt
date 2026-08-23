@@ -7,6 +7,7 @@ fun isOwnerCarBundlePath(path: String): Boolean =
         path.startsWith("/car-photos-upload") ||
         (path.startsWith("/car-photos") && !path.startsWith("/car-photos-gallery")) ||
         path.startsWith("/car-availability") ||
+        path.startsWith("/car-seasonal-pricing") ||
         path.startsWith("/city-selection") ||
         path.startsWith("/address-input") ||
         path.startsWith("/car-sts-upload") ||
@@ -33,6 +34,7 @@ val ownerCarBundleShellRoutes: List<String> =
         "car-photos-upload",
         "car-photos",
         "car-availability",
+        "car-seasonal-pricing",
         "city-selection",
         "address-input",
         "car-sts-upload",

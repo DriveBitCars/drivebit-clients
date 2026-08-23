@@ -61,7 +61,7 @@ jobs:
         test -f "$DIST/myCars.js"
         # Owner create/edit shell routes live in myCarsApp dist; keep Pages in sync.
         for route in \
-          create-car car-edit car-photos-upload car-photos car-availability \
+          create-car car-edit car-photos-upload car-photos car-availability car-seasonal-pricing \
           city-selection address-input car-sts-upload license-plate-input \
           car-brand-selection car-model-selection body-type-selection \
           drive-type-selection engine-type-selection engine-volume-input \

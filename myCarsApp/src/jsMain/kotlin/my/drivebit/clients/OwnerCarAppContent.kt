@@ -8,6 +8,7 @@ import my.drivebit.screens.BodyTypeSelectionPage
 import my.drivebit.screens.CarAvailabilityPage
 import my.drivebit.screens.CarBrandSelectionPage
 import my.drivebit.screens.CarEditPage
+import my.drivebit.screens.CarSeasonalPricingPage
 import my.drivebit.screens.CarModelSelectionPage
 import my.drivebit.screens.CarPhotosPage
 import my.drivebit.screens.CarPhotosUploadPage
@@ -66,6 +67,9 @@ internal fun OwnerCarAppContent(
         }
         currentPath.startsWith("/car-availability") -> {
             CarAvailabilityPage()
+        }
+        currentPath.startsWith("/car-seasonal-pricing") -> {
+            CarSeasonalPricingPage()
         }
         currentPath.startsWith("/address-input") -> {
             AddressInputPage(
