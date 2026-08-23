@@ -605,12 +605,6 @@ class CarEditMviViewModelImpl(
                 val dailyRate7DaysValue = formData.dailyRate7Days.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val dailyRate14DaysValue = formData.dailyRate14Days.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val dailyRate21DaysValue = formData.dailyRate21Days.takeIf { it.isNotBlank() }?.toIntOrNull()
-                val seasonalPriceAdjustmentPercentValue =
-                    formData.seasonalPriceAdjustmentPercent
-                        .takeIf { it.isNotBlank() && it != "-" }
-                        ?.toIntOrNull()
-                        ?.coerceIn(-90, 1000)
-                        ?: 0
                 val depositValue = formData.deposit.takeIf { it.isNotBlank() }?.toIntOrNull()
                 val availableMileagePerDayKmValue =
                     formData.availableMileagePerDayKm.takeIf { it.isNotBlank() }?.toIntOrNull()
@@ -638,7 +632,7 @@ class CarEditMviViewModelImpl(
                         dailyRate7Days = dailyRate7DaysValue,
                         dailyRate14Days = dailyRate14DaysValue,
                         dailyRate21Days = dailyRate21DaysValue,
-                        seasonalPriceAdjustmentPercent = seasonalPriceAdjustmentPercentValue,
+                        seasonalPriceAdjustmentPercent = null,
                         deposit = depositValue,
                         availableMileagePerDayKm = availableMileagePerDayKmValue,
                         insurance = formData.insurance?.trim()?.takeIf { it.isNotEmpty() },

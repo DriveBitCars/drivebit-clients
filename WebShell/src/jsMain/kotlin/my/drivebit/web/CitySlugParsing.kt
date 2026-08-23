@@ -43,6 +43,7 @@ val RESERVED_FIRST_SEGMENTS: Set<String> =
         "car-photos-upload",
         "car-photos",
         "car-availability",
+        "car-seasonal-pricing",
         "edit-name",
         "change-email",
         "change-phone",

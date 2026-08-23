@@ -237,6 +237,7 @@ val ownerCarShellRoutes =
         "car-photos-upload",
         "car-photos",
         "car-availability",
+        "car-seasonal-pricing",
         "city-selection",
         "address-input",
         "car-sts-upload",

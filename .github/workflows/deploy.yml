@@ -86,7 +86,7 @@ jobs:
         cp "$MYCARS/myCars.js" "$DIST/"
         cp "$MYCARS/myCars.js.map" "$DIST/" 2>/dev/null || true
         for route in \
-          create-car my-cars car-edit car-photos-upload car-photos car-availability \
+          create-car my-cars car-edit car-photos-upload car-photos car-availability car-seasonal-pricing \
           city-selection address-input car-sts-upload license-plate-input \
           car-brand-selection car-model-selection body-type-selection \
           drive-type-selection engine-type-selection engine-volume-input \
