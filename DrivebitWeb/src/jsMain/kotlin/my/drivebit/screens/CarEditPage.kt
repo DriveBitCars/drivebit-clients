@@ -403,6 +403,8 @@ fun CarEditPage() {
                                 numeric = true,
                             )
 
+                            SeasonalPricingButton(carId = currentState.carId)
+
                             TextInputField(
                                 label = "Оплата за 4 дня (₽)",
                                 value = formData.dailyRate4Days,
@@ -510,13 +512,7 @@ fun CarEditPage() {
                                         window.location.href = "/car-availability?carId=${currentState.carId}"
                                     },
                                 )
-                                ActionButton(
-                                    enabledColor = CSSColors.Blue,
-                                    text = "Сезонные наценки",
-                                    onClick = {
-                                        window.location.href = "/car-seasonal-pricing?carId=${currentState.carId}"
-                                    },
-                                )
+                                SeasonalPricingButton(carId = currentState.carId)
                                 ActionButton(
                                     enabledColor = CSSColors.Red,
                                     text = "Удалить",
@@ -556,4 +552,15 @@ fun CarEditPage() {
             }
         }
     }
+}
+
+@Composable
+private fun SeasonalPricingButton(carId: String) {
+    ActionButton(
+        enabledColor = CSSColors.Blue,
+        text = "Сезонные наценки",
+        onClick = {
+            window.location.href = "/car-seasonal-pricing?carId=$carId"
+        },
+    )
 }
