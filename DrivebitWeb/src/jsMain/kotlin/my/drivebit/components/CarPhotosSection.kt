@@ -152,6 +152,8 @@ private fun CarMobileMainPhotoCarousel(
     var currentPhotoIndex by remember(galleryPhotoUrls) { mutableStateOf(0) }
     var touchStartX by remember { mutableStateOf<Double?>(null) }
     var suppressClickAfterSwipe by remember { mutableStateOf(false) }
+    var photoAreaHeightPx by remember { mutableStateOf(0) }
+    var isPhotoLoading by remember { mutableStateOf(false) }
 
     DisposableEffect(Unit) {
         val listener: (Event) -> Unit = {
@@ -173,6 +175,12 @@ private fun CarMobileMainPhotoCarousel(
         currentPhotoIndex = safePhotoIndex
     }
     val currentPhotoUrl = photos[safePhotoIndex].url
+
+    LaunchedEffect(safePhotoIndex) {
+        if (photoAreaHeightPx > 0) {
+            isPhotoLoading = true
+        }
+    }
 
     Div({
         onMouseEnter { isImageHovered = true }
@@ -230,17 +238,48 @@ private fun CarMobileMainPhotoCarousel(
             display(DisplayStyle.Block)
             overflow("hidden")
             property("touch-action", "pan-y")
+            if (photoAreaHeightPx > 0) {
+                height(photoAreaHeightPx.px)
+            }
             if (galleryClickEnabled) {
                 cursor("pointer")
             }
         }
     }) {
+        if (isPhotoLoading && photoAreaHeightPx > 0) {
+            CarPhotoSwipePlaceholder(photoAreaHeightPx)
+        }
+
         Img(
             src = currentPhotoUrl,
             attrs = {
+                ref { element ->
+                    fun onLoad() {
+                        val height = element.offsetHeight
+                        if (height > 0 && photoAreaHeightPx == 0) {
+                            photoAreaHeightPx = height
+                        }
+                        isPhotoLoading = false
+                    }
+                    val loadListener: (Event) -> Unit = { onLoad() }
+                    element.addEventListener("load", loadListener)
+                    if (element.complete && element.naturalHeight > 0) {
+                        onLoad()
+                    }
+                    onDispose {
+                        element.removeEventListener("load", loadListener)
+                    }
+                }
                 style {
                     carMainPhotoImgStyle()
                     property("pointer-events", "none")
+                    if (photoAreaHeightPx > 0) {
+                        height(photoAreaHeightPx.px)
+                        property("object-fit", "cover")
+                    }
+                    if (isPhotoLoading && photoAreaHeightPx > 0) {
+                        opacity(0)
+                    }
                 }
             },
         )
@@ -335,6 +374,22 @@ private fun CarMobileMainPhotoCarousel(
             }
         }
     }
+}
+
+@Composable
+private fun CarPhotoSwipePlaceholder(heightPx: Int) {
+    Div({
+        style {
+            position(Position.Absolute)
+            top(0.px)
+            left(0.px)
+            width(100.percent)
+            height(heightPx.px)
+            backgroundColor(CSSColors.Gray300)
+            borderRadius(8.px)
+            property("z-index", "0")
+        }
+    })
 }
 
 @Composable
