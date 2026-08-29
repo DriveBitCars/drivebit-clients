@@ -24,10 +24,14 @@ import my.drivebit.components.VerificationBadgeRow
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.canShowSignContractAsRenter
+import my.drivebit.network.services.inspectionActPagePath
+import my.drivebit.network.services.inspectionActTitle
 import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
+import my.drivebit.network.services.supportedInspectionActTypes
 import my.drivebit.network.services.statusAllowsContractDownload
 import my.drivebit.network.services.statusAllowsRenterPayment
 import my.drivebit.shell.PageWithLogo
@@ -154,6 +158,11 @@ fun MyBookingsPage() {
                                             "/download-booking-contract?bookingId=${booking.id}",
                                         )
                                     },
+                                    onOpenInspectionAct = { type ->
+                                        navigationController?.navigateTo(
+                                            inspectionActPagePath(booking.id, type),
+                                        )
+                                    },
                                 )
                             }
                         }
@@ -173,6 +182,7 @@ private fun BookingItemCard(
     onPrepay: () -> Unit,
     onSignContract: () -> Unit,
     onDownloadContract: () -> Unit,
+    onOpenInspectionAct: (InspectionActType) -> Unit,
 ) {
     val ownerName = booking.ownerName?.takeIf { it.isNotBlank() } ?: "Владелец"
     val carName =
@@ -376,6 +386,30 @@ private fun BookingItemCard(
                     }) {
                         Text("Оставить отзыв")
                     }
+                }
+            }
+        }
+
+        Row(
+            justifyContent = JustifyContent.FlexStart,
+            gap = 8.px,
+            modifier = { width(100.percent) },
+        ) {
+            supportedInspectionActTypes.forEach { type ->
+                Button({
+                    style {
+                        padding(8.px, 16.px)
+                        backgroundColor(CSSColors.White)
+                        color(CSSColors.Blue)
+                        border(1.px, LineStyle.Solid, CSSColors.Blue)
+                        borderRadius(8.px)
+                        fontSize(14.px)
+                        fontWeight("600")
+                        cursor("pointer")
+                    }
+                    onClick { onOpenInspectionAct(type) }
+                }) {
+                    Text(inspectionActTitle(type))
                 }
             }
         }

@@ -23,7 +23,9 @@ fun isAccountBundlePath(pathname: String): Boolean {
         path == "/change-phone" ||
         path.startsWith("/change-phone/") ||
         path == "/change-password" ||
-        path.startsWith("/change-password/")
+        path.startsWith("/change-password/") ||
+        path == "/inspection-act" ||
+        path.startsWith("/inspection-act/")
 }
 
 val accountBundleShellRoutes: List<String> =
@@ -39,4 +41,5 @@ val accountBundleShellRoutes: List<String> =
         "change-email",
         "change-phone",
         "change-password",
+        "inspection-act",
     )

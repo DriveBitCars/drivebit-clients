@@ -59,6 +59,8 @@ import my.drivebit.viewmodels.EmailLoginViewModel
 import my.drivebit.viewmodels.EngineTypeViewModel
 import my.drivebit.viewmodels.FiltersViewModel
 import my.drivebit.viewmodels.IconUserViewModel
+import my.drivebit.viewmodels.InspectionActViewModel
+import my.drivebit.viewmodels.InspectionActViewModelImpl
 import my.drivebit.viewmodels.MainContentViewModel
 import my.drivebit.viewmodels.MainContentViewModelImpl
 import my.drivebit.viewmodels.MapViewModel
@@ -88,6 +90,7 @@ import my.drivebit.viewmodels.UnreadMessagesViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModelImpl
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.WinCodeInputViewModel
+import my.drivebit.network.services.InspectionActType
 import org.koin.core.module.Module
 import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
@@ -242,6 +245,14 @@ val commonViewModelsModule: Module =
             BookingContractViewModelImpl(
                 booking = get(),
                 bookingId = bookingId,
+            )
+        }
+
+        factory<InspectionActViewModel> { (bookingId: String, type: InspectionActType) ->
+            InspectionActViewModelImpl(
+                inspectionAct = get(),
+                bookingId = bookingId,
+                type = type,
             )
         }
 

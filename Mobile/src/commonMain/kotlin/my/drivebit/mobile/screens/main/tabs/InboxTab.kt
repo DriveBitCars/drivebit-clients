@@ -24,11 +24,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import kotlinx.coroutines.delay
+import my.drivebit.mobile.screens.main.InspectionActScreen
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.canShowSignContractAsOwner
+import my.drivebit.network.services.inspectionActTitle
+import my.drivebit.network.services.supportedInspectionActTypes
 import my.drivebit.ui.components.VerificationBadgeRow
 import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.DrivebitTheme
@@ -50,6 +56,7 @@ object InboxTab : Tab {
 
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
         val viewModel: MyBookingsAsOwnerViewModel = koinInject()
         val bookings by viewModel.bookings.collectAsState()
         val isLoading by viewModel.isLoading.collectAsState()
@@ -119,6 +126,9 @@ object InboxTab : Tab {
                                 onConfirm = { viewModel.confirmBooking(booking.id) },
                                 onDecline = { viewModel.declineBooking(booking.id) },
                                 onSignContract = { viewModel.signContractAsOwner(booking.id) },
+                                onOpenInspectionAct = { type ->
+                                    navigator.push(InspectionActScreen(booking.id, type))
+                                },
                             )
                         }
                     }
@@ -135,6 +145,7 @@ internal fun DealItemCard(
     onConfirm: () -> Unit,
     onDecline: () -> Unit,
     onSignContract: () -> Unit = {},
+    onOpenInspectionAct: (InspectionActType) -> Unit = {},
 ) {
     val renterName = booking.renterName?.takeIf { it.isNotBlank() } ?: "Арендатор"
     val carName =
@@ -222,6 +233,16 @@ internal fun DealItemCard(
                         }
                     }
                 }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            supportedInspectionActTypes.forEach { type ->
+                OutlinedButton(
+                    onClick = { onOpenInspectionAct(type) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(inspectionActTitle(type))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }

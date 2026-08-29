@@ -16,6 +16,7 @@ config.devServer.historyApiFallback = {
         { from: /^\/change-email\/?$/, to: '/change-email/index.html' },
         { from: /^\/change-phone\/?$/, to: '/change-phone/index.html' },
         { from: /^\/change-password\/?$/, to: '/change-password/index.html' },
+        { from: /^\/inspection-act\/?$/, to: '/inspection-act/index.html' },
     ],
 };
 
