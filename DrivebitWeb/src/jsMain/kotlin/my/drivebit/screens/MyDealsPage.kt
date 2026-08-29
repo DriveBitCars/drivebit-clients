@@ -23,8 +23,12 @@ import my.drivebit.components.VerificationBadgeRow
 import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.canShowSignContractAsOwner
+import my.drivebit.network.services.inspectionActPagePath
+import my.drivebit.network.services.inspectionActTitle
 import my.drivebit.network.services.statusAllowsContractDownload
+import my.drivebit.network.services.supportedInspectionActTypes
 import my.drivebit.shell.PageWithLogo
 import my.drivebit.utils.ContractFunnelRole
 import my.drivebit.utils.ContractFunnelSource
@@ -128,6 +132,11 @@ fun MyDealsPage() {
                                             "/download-booking-contract?bookingId=${booking.id}",
                                         )
                                     },
+                                    onOpenInspectionAct = { type ->
+                                        navigationController?.navigateTo(
+                                            inspectionActPagePath(booking.id, type),
+                                        )
+                                    },
                                 )
                             }
                         }
@@ -146,6 +155,7 @@ private fun DealItemCard(
     onDecline: () -> Unit,
     onSignContract: () -> Unit,
     onDownloadContract: () -> Unit,
+    onOpenInspectionAct: (InspectionActType) -> Unit,
 ) {
     val renterName = booking.renterName?.takeIf { it.isNotBlank() } ?: "Арендатор"
     val carName =
@@ -296,6 +306,29 @@ private fun DealItemCard(
                     }) {
                         Text(if (isActionInProgress) "Подписание..." else "Подписать договор")
                     }
+                }
+            }
+        }
+
+        Row(
+            gap = 8.px,
+            modifier = { width(100.percent) },
+        ) {
+            supportedInspectionActTypes.forEach { type ->
+                Button({
+                    style {
+                        padding(8.px, 16.px)
+                        backgroundColor(CSSColors.White)
+                        color(CSSColors.Blue)
+                        border(1.px, LineStyle.Solid, CSSColors.Blue)
+                        borderRadius(8.px)
+                        fontSize(14.px)
+                        fontWeight("600")
+                        cursor("pointer")
+                    }
+                    onClick { onOpenInspectionAct(type) }
+                }) {
+                    Text(inspectionActTitle(type))
                 }
             }
         }

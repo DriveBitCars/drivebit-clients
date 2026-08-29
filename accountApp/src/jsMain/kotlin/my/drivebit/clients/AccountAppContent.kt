@@ -10,6 +10,7 @@ import my.drivebit.screens.ChangePhonePage
 import my.drivebit.screens.DocumentsPage
 import my.drivebit.screens.DownloadBookingContractPage
 import my.drivebit.screens.EditNamePage
+import my.drivebit.screens.InspectionActPage
 import my.drivebit.screens.LeaveReviewPage
 import my.drivebit.screens.MyBookingsPage
 import my.drivebit.screens.MyCitySelectionPage
@@ -53,6 +54,13 @@ internal fun AccountAppContent(
         }
         currentPath.startsWith("/download-booking-contract") -> {
             DownloadBookingContractPage()
+        }
+        currentPath.startsWith("/inspection-act") -> {
+            if (storage.isLogined()) {
+                InspectionActPage()
+            } else {
+                RedirectToLogin()
+            }
         }
         currentPath.startsWith("/payment") -> {
             BookingPaymentLinkPage()

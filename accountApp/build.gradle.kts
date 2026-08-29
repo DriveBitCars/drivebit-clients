@@ -61,6 +61,7 @@ val accountShellRoutes =
         "change-email",
         "change-phone",
         "change-password",
+        "inspection-act",
     )
 
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {

@@ -14,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,15 +33,19 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import kotlinx.coroutines.delay
+import my.drivebit.mobile.screens.main.InspectionActScreen
 import my.drivebit.mobile.screens.main.LeaveReviewScreen
 import my.drivebit.network.services.BookingDTO
+import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.canShowSignContractAsRenter
 import my.drivebit.network.services.contractDownloadPageUrl
+import my.drivebit.network.services.inspectionActTitle
 import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.statusAllowsContractDownload
 import my.drivebit.network.services.statusAllowsRenterPayment
+import my.drivebit.network.services.supportedInspectionActTypes
 import my.drivebit.ui.components.VerificationBadgeRow
 import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.DrivebitTheme
@@ -184,6 +189,9 @@ object TripsTab : Tab {
                                 onDownloadContract = {
                                     uriHandler.openUri(contractDownloadPageUrl(booking.id))
                                 },
+                                onOpenInspectionAct = { type ->
+                                    navigator.push(InspectionActScreen(booking.id, type))
+                                },
                             )
                         }
                     }
@@ -203,6 +211,7 @@ internal fun BookingItemCard(
     onPrepay: () -> Unit = {},
     onSignContract: () -> Unit = {},
     onDownloadContract: () -> Unit = {},
+    onOpenInspectionAct: (InspectionActType) -> Unit = {},
 ) {
     val carName =
         listOfNotNull(booking.carBrandName, booking.carModelName)
@@ -306,6 +315,16 @@ internal fun BookingItemCard(
                         Text("Оставить отзыв")
                     }
                 }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            supportedInspectionActTypes.forEach { type ->
+                OutlinedButton(
+                    onClick = { onOpenInspectionAct(type) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(inspectionActTitle(type))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
