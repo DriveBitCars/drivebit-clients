@@ -92,6 +92,34 @@ class BookingPrepaymentTest {
     }
 
     @Test
+    fun statusAllowsInspectionAct_requiresPayment() {
+        assertFalse(booking(status = "Confirmed").statusAllowsInspectionAct())
+        assertFalse(booking(status = "ContractSignedByBoth").statusAllowsInspectionAct())
+    }
+
+    @Test
+    fun statusAllowsInspectionAct_hidesPrepaidBooking() {
+        assertFalse(
+            booking(
+                status = "PrePaid",
+                prepaymentPaidAt = "2026-05-28T12:00:00Z",
+                balanceDueAmount = 9000.0,
+            ).statusAllowsInspectionAct(),
+        )
+    }
+
+    @Test
+    fun statusAllowsInspectionAct_allowsPaidBooking() {
+        assertTrue(
+            booking(
+                status = "Paid",
+                prepaymentPaidAt = "2026-05-28T12:00:00Z",
+                balanceDueAmount = 0.0,
+            ).statusAllowsInspectionAct(),
+        )
+    }
+
+    @Test
     fun canShowSignContract_visibleAfterConfirmedEvenWhenApiFlagFalse() {
         val ownerView =
             booking(

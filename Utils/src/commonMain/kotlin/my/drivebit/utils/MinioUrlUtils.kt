@@ -6,6 +6,19 @@ private val directMinioUrlPattern =
         options = setOf(RegexOption.IGNORE_CASE),
     )
 
+private const val PAGES_DEV_HOST = "dev.drivebit.my"
+private const val PRODUCTION_PROXY_ORIGIN = "https://drivebit.ru"
+
+fun minioProxyOrigin(
+    currentOrigin: String,
+    currentHost: String,
+): String =
+    if (currentHost.equals(PAGES_DEV_HOST, ignoreCase = true)) {
+        PRODUCTION_PROXY_ORIGIN
+    } else {
+        currentOrigin.trimEnd('/')
+    }
+
 fun isDirectMinioUrl(url: String): Boolean = directMinioUrlPattern.containsMatchIn(url)
 
 fun extractPathFromApiUrl(apiUrl: String): String {

@@ -33,6 +33,7 @@ import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.supportedInspectionActTypes
 import my.drivebit.network.services.statusAllowsContractDownload
+import my.drivebit.network.services.statusAllowsInspectionAct
 import my.drivebit.network.services.statusAllowsRenterPayment
 import my.drivebit.shell.PageWithLogo
 import my.drivebit.utils.ContractFunnelRole
@@ -208,6 +209,7 @@ private fun BookingItemCard(
     val canPay = booking.statusAllowsRenterPayment()
     val canDownloadContract = booking.statusAllowsContractDownload()
     val canSignContract = booking.canShowSignContractAsRenter()
+    val canShowInspectionActs = booking.statusAllowsInspectionAct()
     val fullPaymentLabel =
         "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
 
@@ -390,26 +392,28 @@ private fun BookingItemCard(
             }
         }
 
-        Row(
-            justifyContent = JustifyContent.FlexStart,
-            gap = 8.px,
-            modifier = { width(100.percent) },
-        ) {
-            supportedInspectionActTypes.forEach { type ->
-                Button({
-                    style {
-                        padding(8.px, 16.px)
-                        backgroundColor(CSSColors.White)
-                        color(CSSColors.Blue)
-                        border(1.px, LineStyle.Solid, CSSColors.Blue)
-                        borderRadius(8.px)
-                        fontSize(14.px)
-                        fontWeight("600")
-                        cursor("pointer")
+        if (canShowInspectionActs) {
+            Row(
+                justifyContent = JustifyContent.FlexStart,
+                gap = 8.px,
+                modifier = { width(100.percent) },
+            ) {
+                supportedInspectionActTypes.forEach { type ->
+                    Button({
+                        style {
+                            padding(8.px, 16.px)
+                            backgroundColor(CSSColors.White)
+                            color(CSSColors.Blue)
+                            border(1.px, LineStyle.Solid, CSSColors.Blue)
+                            borderRadius(8.px)
+                            fontSize(14.px)
+                            fontWeight("600")
+                            cursor("pointer")
+                        }
+                        onClick { onOpenInspectionAct(type) }
+                    }) {
+                        Text(inspectionActTitle(type))
                     }
-                    onClick { onOpenInspectionAct(type) }
-                }) {
-                    Text(inspectionActTitle(type))
                 }
             }
         }

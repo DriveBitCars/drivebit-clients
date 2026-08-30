@@ -34,6 +34,7 @@ import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.canShowSignContractAsOwner
 import my.drivebit.network.services.inspectionActTitle
+import my.drivebit.network.services.statusAllowsInspectionAct
 import my.drivebit.network.services.supportedInspectionActTypes
 import my.drivebit.ui.components.VerificationBadgeRow
 import my.drivebit.ui.icons.Icons
@@ -158,6 +159,7 @@ internal fun DealItemCard(
         booking.status.equals("Pending", ignoreCase = true) ||
             booking.status.equals("AwaitingOwnerConfirmation", ignoreCase = true)
     val canSignContract = booking.canShowSignContractAsOwner()
+    val canShowInspectionActs = booking.statusAllowsInspectionAct()
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -234,15 +236,17 @@ internal fun DealItemCard(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            supportedInspectionActTypes.forEach { type ->
-                OutlinedButton(
-                    onClick = { onOpenInspectionAct(type) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(inspectionActTitle(type))
+            if (canShowInspectionActs) {
+                Spacer(modifier = Modifier.height(12.dp))
+                supportedInspectionActTypes.forEach { type ->
+                    OutlinedButton(
+                        onClick = { onOpenInspectionAct(type) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(inspectionActTitle(type))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }

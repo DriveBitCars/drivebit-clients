@@ -22,5 +22,5 @@ fun minioProxiedAbsoluteUrl(rawUrl: String): String {
             else -> return trimmed
         }
 
-    return "${window.location.origin.trimEnd('/')}$pathWithQuery"
+    return "${minioProxyOrigin(window.location.origin, window.location.hostname)}$pathWithQuery"
 }

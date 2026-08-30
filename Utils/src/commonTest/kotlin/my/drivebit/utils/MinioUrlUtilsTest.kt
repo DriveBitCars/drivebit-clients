@@ -51,4 +51,12 @@ class MinioUrlUtilsTest {
             resolveMinioImageUrlForBrowser(u),
         )
     }
+
+    @Test
+    fun minioProxyOrigin_usesProductionProxyForPagesDev() {
+        assertEquals(
+            "https://drivebit.ru",
+            minioProxyOrigin("https://dev.drivebit.my", "dev.drivebit.my"),
+        )
+    }
 }
