@@ -44,6 +44,7 @@ import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.statusAllowsContractDownload
+import my.drivebit.network.services.statusAllowsInspectionAct
 import my.drivebit.network.services.statusAllowsRenterPayment
 import my.drivebit.network.services.supportedInspectionActTypes
 import my.drivebit.ui.components.VerificationBadgeRow
@@ -224,6 +225,7 @@ internal fun BookingItemCard(
     val canPay = booking.statusAllowsRenterPayment()
     val canDownloadContract = booking.statusAllowsContractDownload()
     val canSignContract = booking.canShowSignContractAsRenter()
+    val canShowInspectionActs = booking.statusAllowsInspectionAct()
     val fullPaymentLabel =
         "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
     val showActions = canPay || booking.canPayPrepayment || canLeaveReview || canDownloadContract || canSignContract
@@ -316,15 +318,17 @@ internal fun BookingItemCard(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            supportedInspectionActTypes.forEach { type ->
-                OutlinedButton(
-                    onClick = { onOpenInspectionAct(type) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(inspectionActTitle(type))
+            if (canShowInspectionActs) {
+                Spacer(modifier = Modifier.height(12.dp))
+                supportedInspectionActTypes.forEach { type ->
+                    OutlinedButton(
+                        onClick = { onOpenInspectionAct(type) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(inspectionActTitle(type))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }

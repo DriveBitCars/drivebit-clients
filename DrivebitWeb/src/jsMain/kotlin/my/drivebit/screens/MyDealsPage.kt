@@ -28,6 +28,7 @@ import my.drivebit.network.services.canShowSignContractAsOwner
 import my.drivebit.network.services.inspectionActPagePath
 import my.drivebit.network.services.inspectionActTitle
 import my.drivebit.network.services.statusAllowsContractDownload
+import my.drivebit.network.services.statusAllowsInspectionAct
 import my.drivebit.network.services.supportedInspectionActTypes
 import my.drivebit.shell.PageWithLogo
 import my.drivebit.utils.ContractFunnelRole
@@ -182,6 +183,7 @@ private fun DealItemCard(
             booking.status.equals("AwaitingOwnerConfirmation", ignoreCase = true)
     val canDownloadContract = booking.statusAllowsContractDownload()
     val canSignContract = booking.canShowSignContractAsOwner()
+    val canShowInspectionActs = booking.statusAllowsInspectionAct()
 
     Column(
         gap = 16.px,
@@ -310,25 +312,27 @@ private fun DealItemCard(
             }
         }
 
-        Row(
-            gap = 8.px,
-            modifier = { width(100.percent) },
-        ) {
-            supportedInspectionActTypes.forEach { type ->
-                Button({
-                    style {
-                        padding(8.px, 16.px)
-                        backgroundColor(CSSColors.White)
-                        color(CSSColors.Blue)
-                        border(1.px, LineStyle.Solid, CSSColors.Blue)
-                        borderRadius(8.px)
-                        fontSize(14.px)
-                        fontWeight("600")
-                        cursor("pointer")
+        if (canShowInspectionActs) {
+            Row(
+                gap = 8.px,
+                modifier = { width(100.percent) },
+            ) {
+                supportedInspectionActTypes.forEach { type ->
+                    Button({
+                        style {
+                            padding(8.px, 16.px)
+                            backgroundColor(CSSColors.White)
+                            color(CSSColors.Blue)
+                            border(1.px, LineStyle.Solid, CSSColors.Blue)
+                            borderRadius(8.px)
+                            fontSize(14.px)
+                            fontWeight("600")
+                            cursor("pointer")
+                        }
+                        onClick { onOpenInspectionAct(type) }
+                    }) {
+                        Text(inspectionActTitle(type))
                     }
-                    onClick { onOpenInspectionAct(type) }
-                }) {
-                    Text(inspectionActTitle(type))
                 }
             }
         }

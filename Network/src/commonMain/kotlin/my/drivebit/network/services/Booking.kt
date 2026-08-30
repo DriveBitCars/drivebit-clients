@@ -189,6 +189,11 @@ fun BookingDTO.statusAllowsContractDownload(): Boolean =
         status.equals("Active", ignoreCase = true) ||
         status.equals("Completed", ignoreCase = true)
 
+fun BookingDTO.statusAllowsInspectionAct(): Boolean =
+    status.equals("Paid", ignoreCase = true) ||
+        status.equals("Active", ignoreCase = true) ||
+        status.equals("Completed", ignoreCase = true)
+
 fun BookingDTO.canShowSignContractAsOwner(): Boolean =
     canSignContractAsOwner ||
         (statusAllowsContractSignUi() && !contractSignedByOwner)
