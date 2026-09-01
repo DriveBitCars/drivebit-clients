@@ -44,9 +44,8 @@ import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
 import my.drivebit.network.services.statusAllowsContractDownload
-import my.drivebit.network.services.statusAllowsInspectionAct
 import my.drivebit.network.services.statusAllowsRenterPayment
-import my.drivebit.network.services.supportedInspectionActTypes
+import my.drivebit.network.services.visibleInspectionActTypes
 import my.drivebit.ui.components.VerificationBadgeRow
 import my.drivebit.ui.icons.Icons
 import my.drivebit.ui.theme.DrivebitTheme
@@ -225,7 +224,8 @@ internal fun BookingItemCard(
     val canPay = booking.statusAllowsRenterPayment()
     val canDownloadContract = booking.statusAllowsContractDownload()
     val canSignContract = booking.canShowSignContractAsRenter()
-    val canShowInspectionActs = booking.statusAllowsInspectionAct()
+    val visibleInspectionActs = booking.visibleInspectionActTypes()
+    val canShowInspectionActs = visibleInspectionActs.isNotEmpty()
     val fullPaymentLabel =
         "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
     val showActions = canPay || booking.canPayPrepayment || canLeaveReview || canDownloadContract || canSignContract
@@ -320,7 +320,7 @@ internal fun BookingItemCard(
             }
             if (canShowInspectionActs) {
                 Spacer(modifier = Modifier.height(12.dp))
-                supportedInspectionActTypes.forEach { type ->
+                visibleInspectionActs.forEach { type ->
                     OutlinedButton(
                         onClick = { onOpenInspectionAct(type) },
                         modifier = Modifier.fillMaxWidth(),

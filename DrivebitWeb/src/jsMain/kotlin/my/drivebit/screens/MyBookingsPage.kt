@@ -31,10 +31,9 @@ import my.drivebit.network.services.inspectionActTitle
 import my.drivebit.network.services.prepaymentButtonLabel
 import my.drivebit.network.services.renterFullOrBalanceAmountRub
 import my.drivebit.network.services.renterFullOrBalancePaymentLabel
-import my.drivebit.network.services.supportedInspectionActTypes
 import my.drivebit.network.services.statusAllowsContractDownload
-import my.drivebit.network.services.statusAllowsInspectionAct
 import my.drivebit.network.services.statusAllowsRenterPayment
+import my.drivebit.network.services.visibleInspectionActTypes
 import my.drivebit.shell.PageWithLogo
 import my.drivebit.utils.ContractFunnelRole
 import my.drivebit.utils.ContractFunnelSource
@@ -209,7 +208,8 @@ private fun BookingItemCard(
     val canPay = booking.statusAllowsRenterPayment()
     val canDownloadContract = booking.statusAllowsContractDownload()
     val canSignContract = booking.canShowSignContractAsRenter()
-    val canShowInspectionActs = booking.statusAllowsInspectionAct()
+    val visibleInspectionActs = booking.visibleInspectionActTypes()
+    val canShowInspectionActs = visibleInspectionActs.isNotEmpty()
     val fullPaymentLabel =
         "${booking.renterFullOrBalancePaymentLabel()} (${booking.renterFullOrBalanceAmountRub()} ₽)"
 
@@ -398,7 +398,7 @@ private fun BookingItemCard(
                 gap = 8.px,
                 modifier = { width(100.percent) },
             ) {
-                supportedInspectionActTypes.forEach { type ->
+                visibleInspectionActs.forEach { type ->
                     Button({
                         style {
                             padding(8.px, 16.px)

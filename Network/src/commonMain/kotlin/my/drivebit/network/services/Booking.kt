@@ -194,6 +194,20 @@ fun BookingDTO.statusAllowsInspectionAct(): Boolean =
         status.equals("Active", ignoreCase = true) ||
         status.equals("Completed", ignoreCase = true)
 
+fun BookingDTO.statusAllowsReturnInspectionAct(): Boolean =
+    status.equals("Active", ignoreCase = true) ||
+        status.equals("Completed", ignoreCase = true)
+
+fun BookingDTO.visibleInspectionActTypes(): List<InspectionActType> {
+    if (!statusAllowsInspectionAct()) return emptyList()
+    return buildList {
+        add(InspectionActType.Handover)
+        if (statusAllowsReturnInspectionAct()) {
+            add(InspectionActType.Return)
+        }
+    }
+}
+
 fun BookingDTO.canShowSignContractAsOwner(): Boolean =
     canSignContractAsOwner ||
         (statusAllowsContractSignUi() && !contractSignedByOwner)
