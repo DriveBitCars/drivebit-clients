@@ -120,6 +120,38 @@ class BookingPrepaymentTest {
     }
 
     @Test
+    fun visibleInspectionActTypes_paidShowsOnlyHandover() {
+        assertEquals(
+            listOf(InspectionActType.Handover),
+            booking(status = "Paid").visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
+    fun visibleInspectionActTypes_activeShowsHandoverAndReturn() {
+        assertEquals(
+            listOf(InspectionActType.Handover, InspectionActType.Return),
+            booking(status = "Active").visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
+    fun visibleInspectionActTypes_completedShowsHandoverAndReturn() {
+        assertEquals(
+            listOf(InspectionActType.Handover, InspectionActType.Return),
+            booking(status = "Completed").visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
+    fun visibleInspectionActTypes_confirmedShowsNone() {
+        assertEquals(
+            emptyList(),
+            booking(status = "Confirmed").visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
     fun canShowSignContract_visibleAfterConfirmedEvenWhenApiFlagFalse() {
         val ownerView =
             booking(
