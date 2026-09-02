@@ -1,5 +1,6 @@
 package my.drivebit.viewmodels.di
 
+import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.TelegramNotifications
 import my.drivebit.repositories.HomeSearchRequest
 import my.drivebit.utils.EmailInputValidator
@@ -22,8 +23,6 @@ import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.ButterViewModelImpl
 import my.drivebit.viewmodels.CarAvailabilityViewModel
 import my.drivebit.viewmodels.CarAvailabilityViewModelImpl
-import my.drivebit.viewmodels.CarSeasonalPricingViewModel
-import my.drivebit.viewmodels.CarSeasonalPricingViewModelImpl
 import my.drivebit.viewmodels.CarBrandViewModel
 import my.drivebit.viewmodels.CarDetailViewModel
 import my.drivebit.viewmodels.CarDetailViewModelImpl
@@ -36,6 +35,8 @@ import my.drivebit.viewmodels.CarMenuViewModelImpl
 import my.drivebit.viewmodels.CarModelViewModel
 import my.drivebit.viewmodels.CarPhotosViewModel
 import my.drivebit.viewmodels.CarPhotosViewModelImpl
+import my.drivebit.viewmodels.CarSeasonalPricingViewModel
+import my.drivebit.viewmodels.CarSeasonalPricingViewModelImpl
 import my.drivebit.viewmodels.CarStsDocumentsViewModel
 import my.drivebit.viewmodels.CarStsDocumentsViewModelImpl
 import my.drivebit.viewmodels.ChatDetailViewModel
@@ -90,7 +91,6 @@ import my.drivebit.viewmodels.UnreadMessagesViewModel
 import my.drivebit.viewmodels.UnreadMessagesViewModelImpl
 import my.drivebit.viewmodels.ValidatorViewModel
 import my.drivebit.viewmodels.WinCodeInputViewModel
-import my.drivebit.network.services.InspectionActType
 import org.koin.core.module.Module
 import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
@@ -251,6 +251,8 @@ val commonViewModelsModule: Module =
         factory<InspectionActViewModel> { (bookingId: String, type: InspectionActType) ->
             InspectionActViewModelImpl(
                 inspectionAct = get(),
+                booking = get(),
+                user = get(),
                 bookingId = bookingId,
                 type = type,
             )

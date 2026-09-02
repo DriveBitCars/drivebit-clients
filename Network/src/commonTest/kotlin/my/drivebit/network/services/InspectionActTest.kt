@@ -1,6 +1,5 @@
 package my.drivebit.network.services
 
-import kotlinx.serialization.json.Json
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -13,6 +12,7 @@ import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -116,10 +116,11 @@ class InspectionActTest {
     @Test
     fun `get uses inspection act path`() =
         runTest {
-            val request = assertRequest(
-                method = HttpMethod.Get,
-                path = "/Booking/booking-1/inspection-acts/Handover",
-            )
+            val request =
+                assertRequest(
+                    method = HttpMethod.Get,
+                    path = "/Booking/booking-1/inspection-acts/Handover",
+                )
 
             InspectionActImpl(request.client).get("booking-1", InspectionActType.Handover)
             request.verify()
@@ -128,10 +129,11 @@ class InspectionActTest {
     @Test
     fun `openOrCreate uses post and return path`() =
         runTest {
-            val request = assertRequest(
-                method = HttpMethod.Post,
-                path = "/Booking/booking-1/inspection-acts/Return",
-            )
+            val request =
+                assertRequest(
+                    method = HttpMethod.Post,
+                    path = "/Booking/booking-1/inspection-acts/Return",
+                )
 
             InspectionActImpl(request.client).openOrCreate("booking-1", InspectionActType.Return)
             request.verify()
@@ -140,11 +142,12 @@ class InspectionActTest {
     @Test
     fun `update metrics sends JSON body`() =
         runTest {
-            val request = assertRequest(
-                method = HttpMethod.Put,
-                path = "/Booking/booking-1/inspection-acts/Handover/metrics",
-                responseBody = sampleActJson,
-            )
+            val request =
+                assertRequest(
+                    method = HttpMethod.Put,
+                    path = "/Booking/booking-1/inspection-acts/Handover/metrics",
+                    responseBody = sampleActJson,
+                )
 
             InspectionActImpl(request.client).updateMetrics(
                 bookingId = "booking-1",
@@ -162,11 +165,12 @@ class InspectionActTest {
     @Test
     fun `update comment sends JSON body`() =
         runTest {
-            val request = assertRequest(
-                method = HttpMethod.Put,
-                path = "/Booking/booking-1/inspection-acts/Return/comment",
-                responseBody = sampleActJson,
-            )
+            val request =
+                assertRequest(
+                    method = HttpMethod.Put,
+                    path = "/Booking/booking-1/inspection-acts/Return/comment",
+                    responseBody = sampleActJson,
+                )
 
             InspectionActImpl(request.client).updateComment(
                 bookingId = "booking-1",
@@ -181,19 +185,20 @@ class InspectionActTest {
     @Test
     fun `upload photo sends multipart body`() =
         runTest {
-            val request = assertRequest(
-                method = HttpMethod.Post,
-                path = "/Booking/booking-1/inspection-acts/Return/photos",
-                responseBody =
-                    """
-                    {
-                      "id":"33333333-3333-3333-3333-333333333333",
-                      "authorId":"44444444-4444-4444-4444-444444444444",
-                      "kind":"Car",
-                      "uploadedAt":"2026-08-29T08:30:00Z"
-                    }
-                    """.trimIndent(),
-            )
+            val request =
+                assertRequest(
+                    method = HttpMethod.Post,
+                    path = "/Booking/booking-1/inspection-acts/Return/photos",
+                    responseBody =
+                        """
+                        {
+                          "id":"33333333-3333-3333-3333-333333333333",
+                          "authorId":"44444444-4444-4444-4444-444444444444",
+                          "kind":"Car",
+                          "uploadedAt":"2026-08-29T08:30:00Z"
+                        }
+                        """.trimIndent(),
+                )
 
             InspectionActImpl(request.client).uploadPhoto(
                 bookingId = "booking-1",
@@ -211,11 +216,12 @@ class InspectionActTest {
     @Test
     fun `delete photo uses photo path`() =
         runTest {
-            val request = assertRequest(
-                method = HttpMethod.Delete,
-                path = "/Booking/booking-1/inspection-acts/Return/photos/photo-1",
-                responseBody = """{"success":true}""",
-            )
+            val request =
+                assertRequest(
+                    method = HttpMethod.Delete,
+                    path = "/Booking/booking-1/inspection-acts/Return/photos/photo-1",
+                    responseBody = """{"success":true}""",
+                )
 
             InspectionActImpl(request.client).deletePhoto(
                 "booking-1",
@@ -228,19 +234,21 @@ class InspectionActTest {
     @Test
     fun `sign endpoints use matching party paths`() =
         runTest {
-            val ownerRequest = assertRequest(
-                method = HttpMethod.Post,
-                path = "/Booking/booking-1/inspection-acts/Handover/sign-as-owner",
-                responseBody = sampleActJson,
-            )
+            val ownerRequest =
+                assertRequest(
+                    method = HttpMethod.Post,
+                    path = "/Booking/booking-1/inspection-acts/Handover/sign-as-owner",
+                    responseBody = sampleActJson,
+                )
             InspectionActImpl(ownerRequest.client).signAsOwner("booking-1", InspectionActType.Handover)
             ownerRequest.verify()
 
-            val renterRequest = assertRequest(
-                method = HttpMethod.Post,
-                path = "/Booking/booking-1/inspection-acts/Return/sign-as-renter",
-                responseBody = sampleActJson,
-            )
+            val renterRequest =
+                assertRequest(
+                    method = HttpMethod.Post,
+                    path = "/Booking/booking-1/inspection-acts/Return/sign-as-renter",
+                    responseBody = sampleActJson,
+                )
             InspectionActImpl(renterRequest.client).signAsRenter("booking-1", InspectionActType.Return)
             renterRequest.verify()
         }
@@ -248,21 +256,22 @@ class InspectionActTest {
     @Test
     fun `download uses download path`() =
         runTest {
-            val request = assertRequest(
-                method = HttpMethod.Get,
-                path = "/Booking/booking-1/inspection-acts/Handover/download",
-                responseBody =
-                    """
-                    {
-                      "actId":"11111111-1111-1111-1111-111111111111",
-                      "actNumber":42,
-                      "type":"Handover",
-                      "fileName":"act.pdf",
-                      "downloadUrl":"https://example.com/act.pdf",
-                      "urlExpiresAt":"2026-08-29T10:00:00Z"
-                    }
-                    """.trimIndent(),
-            )
+            val request =
+                assertRequest(
+                    method = HttpMethod.Get,
+                    path = "/Booking/booking-1/inspection-acts/Handover/download",
+                    responseBody =
+                        """
+                        {
+                          "actId":"11111111-1111-1111-1111-111111111111",
+                          "actNumber":42,
+                          "type":"Handover",
+                          "fileName":"act.pdf",
+                          "downloadUrl":"https://example.com/act.pdf",
+                          "urlExpiresAt":"2026-08-29T10:00:00Z"
+                        }
+                        """.trimIndent(),
+                )
 
             val result = InspectionActImpl(request.client).download("booking-1", InspectionActType.Handover)
 
@@ -335,6 +344,85 @@ class InspectionActTest {
             assertEquals(expectedMethod, method)
             assertTrue(path?.endsWith(expectedPath) == true)
         }
+    }
+
+    @Test
+    fun `resolveInspectionActViewerRole maps owner and renter ids`() {
+        assertEquals(
+            InspectionActViewerRole.Owner,
+            resolveInspectionActViewerRole("owner-1", "owner-1", "renter-1"),
+        )
+        assertEquals(
+            InspectionActViewerRole.Renter,
+            resolveInspectionActViewerRole("renter-1", "owner-1", "renter-1"),
+        )
+        assertEquals(
+            null,
+            resolveInspectionActViewerRole("stranger", "owner-1", "renter-1"),
+        )
+    }
+
+    @Test
+    fun `canCurrentUserSign respects viewer role`() {
+        val act =
+            BookingInspectionActDto(
+                id = "act-1",
+                bookingId = "booking-1",
+                type = InspectionActType.Handover,
+                actNumber = 1,
+                status = InspectionActStatus.Draft,
+                canSignAsOwner = true,
+                canSignAsRenter = true,
+                createdAt = "2026-08-29T08:00:00Z",
+                updatedAt = "2026-08-29T08:00:00Z",
+            )
+
+        assertTrue(act.canCurrentUserSign(InspectionActViewerRole.Owner))
+        assertTrue(act.canCurrentUserSign(InspectionActViewerRole.Renter))
+        assertFalse(
+            act.copy(canSignAsOwner = false).canCurrentUserSign(InspectionActViewerRole.Owner),
+        )
+    }
+
+    @Test
+    fun `sign status helpers show button or signed state for current user`() {
+        val draft =
+            BookingInspectionActDto(
+                id = "act-1",
+                bookingId = "booking-1",
+                type = InspectionActType.Handover,
+                actNumber = 1,
+                status = InspectionActStatus.Draft,
+                canSignAsOwner = true,
+                isSignedByOwner = false,
+                createdAt = "2026-08-29T08:00:00Z",
+                updatedAt = "2026-08-29T08:00:00Z",
+            )
+        assertTrue(draft.canCurrentUserSign(InspectionActViewerRole.Owner))
+        assertEquals(null, draft.currentUserSignStatusMessage(InspectionActViewerRole.Owner))
+
+        val ownerSigned =
+            draft.copy(
+                isSignedByOwner = true,
+                canSignAsOwner = false,
+                status = InspectionActStatus.AwaitingRenter,
+            )
+        assertFalse(ownerSigned.canCurrentUserSign(InspectionActViewerRole.Owner))
+        assertEquals("Вы подписали акт", ownerSigned.currentUserSignStatusMessage(InspectionActViewerRole.Owner))
+        assertEquals(
+            "Ожидаем подпись арендатора",
+            ownerSigned.counterpartySignStatusMessage(InspectionActViewerRole.Owner),
+        )
+
+        val fullySigned =
+            ownerSigned.copy(
+                isSignedByRenter = true,
+                isFullySigned = true,
+                hasPdf = true,
+                status = InspectionActStatus.SignedByBoth,
+            )
+        assertEquals(null, fullySigned.currentUserSignStatusMessage(InspectionActViewerRole.Owner))
+        assertEquals(null, fullySigned.counterpartySignStatusMessage(InspectionActViewerRole.Owner))
     }
 
     private companion object {
