@@ -329,13 +329,13 @@ private fun InspectionActReadyBody(
         )
     } else {
         viewerRole?.let { currentRole ->
-            currentUserSignStatusMessage(currentRole)?.let { message ->
+            act.currentUserSignStatusMessage(currentRole)?.let { message ->
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            counterpartySignStatusMessage(currentRole)?.let { message ->
+            act.counterpartySignStatusMessage(currentRole)?.let { message ->
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodySmall,

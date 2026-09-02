@@ -320,10 +320,10 @@ private fun InspectionActReadyContent(
                 }
             } else {
                 role?.let { currentRole ->
-                    currentUserSignStatusMessage(currentRole)?.let { message ->
+                    act.currentUserSignStatusMessage(currentRole)?.let { message ->
                         Span({ style { fontSize(14.px); color(CSSColors.Gray600) } }) { Text(message) }
                     }
-                    counterpartySignStatusMessage(currentRole)?.let { message ->
+                    act.counterpartySignStatusMessage(currentRole)?.let { message ->
                         Span({ style { fontSize(13.px); color(CSSColors.Gray600) } }) { Text(message) }
                     }
                 }
