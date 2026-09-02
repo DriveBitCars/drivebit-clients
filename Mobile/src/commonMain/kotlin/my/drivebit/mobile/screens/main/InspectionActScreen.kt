@@ -37,11 +37,19 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import my.drivebit.mobile.documents.rememberDocumentImagePicker
 import my.drivebit.network.services.BookingInspectionActDto
+import my.drivebit.network.services.INSPECTION_ACT_FUEL_LABEL
+import my.drivebit.network.services.INSPECTION_ACT_MILEAGE_LABEL
 import my.drivebit.network.services.InspectionActType
-import my.drivebit.network.services.InspectionPhotoKind
+import my.drivebit.network.services.InspectionActViewerRole
+import my.drivebit.network.services.canCurrentUserDelete
+import my.drivebit.network.services.canCurrentUserEditComment
+import my.drivebit.network.services.canCurrentUserEditMetrics
+import my.drivebit.network.services.canCurrentUserSign
+import my.drivebit.network.services.canCurrentUserUploadPhotos
+import my.drivebit.network.services.counterpartySignStatusMessage
+import my.drivebit.network.services.currentUserSignStatusMessage
 import my.drivebit.network.services.inspectionActStatusLabel
 import my.drivebit.network.services.inspectionActTitle
-import my.drivebit.network.services.inspectionPhotoKindLabel
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.viewmodels.InspectionActAction
 import my.drivebit.viewmodels.InspectionActEffect
@@ -116,15 +124,18 @@ data class InspectionActScreen(
                         current.previousAct?.let { act ->
                             InspectionActReadyBody(
                                 act = act,
+                                viewerRole = current.viewerRole,
+                                ownerId = current.ownerId,
+                                renterId = current.renterId,
                                 fuelInput = act.fuelRemaining?.toString().orEmpty(),
                                 mileageInput = act.mileage?.toString().orEmpty(),
                                 commentInput =
-                                    if (act.canEditOwnerFields) {
-                                        act.ownerComment.orEmpty()
-                                    } else {
-                                        act.renterComment.orEmpty()
-                                    },
-                                selectedPhotoKind = InspectionPhotoKind.Car,
+                                    current.viewerRole?.let { role ->
+                                        when (role) {
+                                            InspectionActViewerRole.Owner -> act.ownerComment.orEmpty()
+                                            InspectionActViewerRole.Renter -> act.renterComment.orEmpty()
+                                        }
+                                            }.orEmpty(),
                                 error = error,
                                 actionsInProgress = actionsInProgress,
                                 viewModel = viewModel,
@@ -134,10 +145,12 @@ data class InspectionActScreen(
                     is InspectionActUiState.Ready ->
                         InspectionActReadyBody(
                             act = current.act,
+                            viewerRole = current.viewerRole,
+                            ownerId = current.ownerId,
+                            renterId = current.renterId,
                             fuelInput = current.fuelInput,
                             mileageInput = current.mileageInput,
                             commentInput = current.commentInput,
-                            selectedPhotoKind = current.selectedPhotoKind,
                             error = error,
                             actionsInProgress = actionsInProgress,
                             viewModel = viewModel,
@@ -151,23 +164,26 @@ data class InspectionActScreen(
 @Composable
 private fun InspectionActReadyBody(
     act: BookingInspectionActDto,
+    viewerRole: InspectionActViewerRole?,
+    ownerId: String,
+    renterId: String,
     fuelInput: String,
     mileageInput: String,
     commentInput: String,
-    selectedPhotoKind: InspectionPhotoKind,
     error: String?,
     actionsInProgress: Set<InspectionActAction>,
     viewModel: InspectionActViewModel,
 ) {
-    val canEditMetrics = act.canEditOwnerFields
-    val canEditComment = act.canEditOwnerFields || act.canEditRenterFields
+    val canEditMetrics = viewerRole != null && act.canCurrentUserEditMetrics(viewerRole)
+    val canEditComment = viewerRole != null && act.canCurrentUserEditComment(viewerRole)
+    val canUploadPhotos = viewerRole != null && act.canCurrentUserUploadPhotos(viewerRole)
+    val canSign = viewerRole != null && act.canCurrentUserSign(viewerRole)
     val pickPhotos =
         rememberDocumentImagePicker { bytes, fileName, contentType ->
             viewModel.uploadPhoto(
                 bytes = bytes,
                 fileName = fileName,
                 contentType = contentType,
-                kind = selectedPhotoKind,
             )
         }
 
@@ -193,7 +209,8 @@ private fun InspectionActReadyBody(
         value = fuelInput,
         onValueChange = viewModel::setFuelInput,
         modifier = Modifier.fillMaxWidth(),
-        label = { Text("Топливо, %") },
+        label = { Text(INSPECTION_ACT_FUEL_LABEL) },
+        placeholder = { Text("100") },
         enabled = canEditMetrics,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -202,20 +219,12 @@ private fun InspectionActReadyBody(
         value = mileageInput,
         onValueChange = viewModel::setMileageInput,
         modifier = Modifier.fillMaxWidth(),
-        label = { Text("Пробег") },
+        label = { Text(INSPECTION_ACT_MILEAGE_LABEL) },
+        placeholder = { Text("120500") },
         enabled = canEditMetrics,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
-    if (canEditMetrics) {
-        Button(
-            onClick = viewModel::saveMetrics,
-            enabled = InspectionActAction.UpdateMetrics !in actionsInProgress,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Сохранить")
-        }
-    }
 
     Text(
         text = "Комментарий",
@@ -230,15 +239,6 @@ private fun InspectionActReadyBody(
         minLines = 3,
         maxLines = 6,
     )
-    if (canEditComment) {
-        Button(
-            onClick = viewModel::saveComment,
-            enabled = InspectionActAction.UpdateComment !in actionsInProgress,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Сохранить комментарий")
-        }
-    }
     act.ownerComment?.takeIf { it.isNotBlank() }?.let { comment ->
         Text(
             text = "Владелец: $comment",
@@ -255,31 +255,10 @@ private fun InspectionActReadyBody(
     }
 
     Text(
-        text = "Фотографии",
+        text = "Фотографии автомобиля",
         style = MaterialTheme.typography.titleSmall,
     )
-    if (canEditComment) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            InspectionPhotoKind.entries.forEach { kind ->
-                TextButton(
-                    onClick = { viewModel.setPhotoKind(kind) },
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(
-                        text = inspectionPhotoKindLabel(kind),
-                        color =
-                            if (kind == selectedPhotoKind) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                    )
-                }
-            }
-        }
+    if (canUploadPhotos) {
         OutlinedButton(
             onClick = pickPhotos,
             enabled = InspectionActAction.UploadPhoto !in actionsInProgress,
@@ -311,17 +290,22 @@ private fun InspectionActReadyBody(
                 photo.url?.takeIf { it.isNotBlank() }?.let { url ->
                     AsyncImage(
                         model = url,
-                        contentDescription = inspectionPhotoKindLabel(photo.kind),
+                        contentDescription = "Фото автомобиля",
                         modifier = Modifier.size(72.dp),
                         contentScale = ContentScale.Crop,
                     )
                 }
-                Text(
-                    text = inspectionPhotoKindLabel(photo.kind),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                if (canEditComment) {
+                Spacer(modifier = Modifier.weight(1f))
+                if (
+                    viewerRole != null &&
+                    photo.canCurrentUserDelete(
+                        role = viewerRole,
+                        ownerId = ownerId,
+                        renterId = renterId,
+                        canEditOwnerFields = act.canEditOwnerFields,
+                        canEditRenterFields = act.canEditRenterFields,
+                    )
+                ) {
                     TextButton(
                         onClick = { viewModel.deletePhoto(photo.id) },
                         enabled = InspectionActAction.DeletePhoto !in actionsInProgress,
@@ -334,33 +318,39 @@ private fun InspectionActReadyBody(
     }
 
     Text(
-        text = "Подписи",
+        text = "Подпись",
         style = MaterialTheme.typography.titleSmall,
     )
-    Text(
-        text = if (act.isSignedByOwner) "Владелец: подписан" else "Владелец: не подписан",
-        style = MaterialTheme.typography.bodyMedium,
-    )
-    Text(
-        text = if (act.isSignedByRenter) "Арендатор: подписан" else "Арендатор: не подписан",
-        style = MaterialTheme.typography.bodyMedium,
-    )
-    if (act.canSignAsOwner) {
-        Button(
-            onClick = viewModel::signAsOwner,
-            enabled = InspectionActAction.SignAsOwner !in actionsInProgress,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Подписать как владелец")
+    if (act.isFullySigned) {
+        Text(
+            text = inspectionActStatusLabel(act.status),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    } else {
+        viewerRole?.let { currentRole ->
+            act.currentUserSignStatusMessage(currentRole)?.let { message ->
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            act.counterpartySignStatusMessage(currentRole)?.let { message ->
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
-    if (act.canSignAsRenter) {
+    if (canSign) {
         Button(
-            onClick = viewModel::signAsRenter,
-            enabled = InspectionActAction.SignAsRenter !in actionsInProgress,
+            onClick = viewModel::sign,
+            enabled = InspectionActAction.Sign !in actionsInProgress,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text("Подписать как арендатор")
+            Text("Подписать")
         }
     }
     if (act.hasPdf) {

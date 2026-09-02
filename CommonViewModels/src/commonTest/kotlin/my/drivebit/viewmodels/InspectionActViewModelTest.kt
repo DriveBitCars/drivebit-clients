@@ -6,15 +6,24 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import my.drivebit.network.services.Booking
+import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.BookingInspectionActDownloadDto
 import my.drivebit.network.services.BookingInspectionActDto
 import my.drivebit.network.services.BookingInspectionActPhotoDto
+import my.drivebit.network.services.CheckBookingAvailabilityRequest
+import my.drivebit.network.services.CheckBookingAvailabilityResponse
+import my.drivebit.network.services.CreateBookingRequest
+import my.drivebit.network.services.GetBookingContractResult
 import my.drivebit.network.services.InspectionAct
 import my.drivebit.network.services.InspectionActStatus
 import my.drivebit.network.services.InspectionActType
+import my.drivebit.network.services.InspectionActViewerRole
 import my.drivebit.network.services.InspectionPhotoKind
 import my.drivebit.network.services.UpdateInspectionCommentRequest
 import my.drivebit.network.services.UpdateInspectionMetricsRequest
+import my.drivebit.network.services.User
+import my.drivebit.network.services.UserGetResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -33,6 +42,7 @@ private class InspectionActFake : InspectionAct {
     var signedAsOwnerCalls = 0
     var signedAsRenterCalls = 0
     var failMutations = false
+    val callOrder = mutableListOf<String>()
 
     override suspend fun get(
         bookingId: String,
@@ -56,8 +66,10 @@ private class InspectionActFake : InspectionAct {
         request: UpdateInspectionMetricsRequest,
     ): BookingInspectionActDto {
         if (failMutations) error("metrics failed")
+        callOrder += "metrics"
         metricsRequest = request
-        return act.copy(fuelRemaining = request.fuelRemaining, mileage = request.mileage)
+        act = act.copy(fuelRemaining = request.fuelRemaining, mileage = request.mileage)
+        return act
     }
 
     override suspend fun updateComment(
@@ -66,8 +78,10 @@ private class InspectionActFake : InspectionAct {
         request: UpdateInspectionCommentRequest,
     ): BookingInspectionActDto {
         if (failMutations) error("comment failed")
+        callOrder += "comment"
         commentRequest = request
-        return act.copy(renterComment = request.comment)
+        act = act.copy(ownerComment = request.comment)
+        return act
     }
 
     override suspend fun uploadPhoto(
@@ -97,8 +111,15 @@ private class InspectionActFake : InspectionAct {
         type: InspectionActType,
     ): BookingInspectionActDto {
         if (failMutations) error("owner sign failed")
+        callOrder += "signOwner"
         signedAsOwnerCalls++
-        return act.copy(isSignedByOwner = true)
+        act =
+            act.copy(
+                isSignedByOwner = true,
+                canEditOwnerFields = false,
+                canSignAsOwner = false,
+            )
+        return act
     }
 
     override suspend fun signAsRenter(
@@ -106,8 +127,15 @@ private class InspectionActFake : InspectionAct {
         type: InspectionActType,
     ): BookingInspectionActDto {
         if (failMutations) error("renter sign failed")
+        callOrder += "signRenter"
         signedAsRenterCalls++
-        return act.copy(isSignedByRenter = true)
+        act =
+            act.copy(
+                isSignedByRenter = true,
+                canEditRenterFields = false,
+                canSignAsRenter = false,
+            )
+        return act
     }
 
     override suspend fun download(
@@ -116,55 +144,154 @@ private class InspectionActFake : InspectionAct {
     ): BookingInspectionActDownloadDto = download
 }
 
+private class BookingFake(
+    private val ownerId: String = "owner-1",
+    private val renterId: String = "renter-1",
+) : Booking {
+    override suspend fun calculate(request: CheckBookingAvailabilityRequest): CheckBookingAvailabilityResponse =
+        error("not used")
+
+    override suspend fun getMyAsRenter(): List<BookingDTO> = error("not used")
+
+    override suspend fun getMyAsOwner(): List<BookingDTO> = error("not used")
+
+    override suspend fun getById(bookingId: String): BookingDTO = sampleBooking(bookingId, ownerId, renterId)
+
+    override suspend fun createAsRenter(request: CreateBookingRequest): BookingDTO = error("not used")
+
+    override suspend fun confirmAsOwner(bookingId: String) = error("not used")
+
+    override suspend fun declineAsOwner(bookingId: String) = error("not used")
+
+    override suspend fun signContractAsOwner(bookingId: String): BookingDTO = error("not used")
+
+    override suspend fun signContractAsRenter(bookingId: String): BookingDTO = error("not used")
+
+    override suspend fun getContract(bookingId: String): GetBookingContractResult = error("not used")
+}
+
+private class UserFake(
+    private val userId: String = "owner-1",
+) : User {
+    override suspend fun userGet(): UserGetResponse =
+        UserGetResponse(
+            id = userId,
+            createdAt = "2026-08-29T08:00:00Z",
+        )
+
+    override suspend fun getUserById(userId: String): UserGetResponse = error("not used")
+
+    override suspend fun updateUser(
+        firstName: String?,
+        lastName: String?,
+        middleName: String?,
+    ): UserGetResponse = error("not used")
+
+    override suspend fun changeEmail(
+        identifier: String,
+        code: String,
+        newLogin: String,
+    ): UserGetResponse = error("not used")
+
+    override suspend fun changePhone(
+        identifier: String,
+        code: String,
+        newLogin: String,
+    ): UserGetResponse = error("not used")
+}
+
 class InspectionActViewModelTest {
     @Test
-    fun `load opens or creates act and exposes form values`() =
+    fun `load opens or creates act and exposes form values for owner`() =
         runTest {
             val api = InspectionActFake()
-            val viewModel = viewModel(api)
+            val viewModel = viewModel(api, userId = "owner-1")
 
             viewModel.load()
             advanceUntilIdle()
 
             val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
             assertEquals(1, api.openOrCreateCalls)
+            assertEquals(InspectionActViewerRole.Owner, ready.viewerRole)
             assertEquals("75", ready.fuelInput)
             assertEquals("120500", ready.mileageInput)
             assertEquals("Есть царапина", ready.commentInput)
         }
 
     @Test
-    fun `save metrics sends form values and updates act`() =
+    fun `sign as owner persists metrics and comment from form before signing`() =
         runTest {
             val api = InspectionActFake()
-            val viewModel = viewModel(api)
+            val viewModel = viewModel(api, userId = "owner-1")
             viewModel.load()
             advanceUntilIdle()
 
             viewModel.setFuelInput("80")
             viewModel.setMileageInput("121000")
-            viewModel.saveMetrics()
+            viewModel.setCommentInput("Новый комментарий")
+            viewModel.sign()
             advanceUntilIdle()
 
             assertEquals(UpdateInspectionMetricsRequest(80, 121000), api.metricsRequest)
-            assertEquals(80, assertIs<InspectionActUiState.Ready>(viewModel.state.value).act.fuelRemaining)
+            assertEquals(UpdateInspectionCommentRequest("Новый комментарий"), api.commentRequest)
+            assertEquals(listOf("metrics", "comment", "signOwner"), api.callOrder)
+            assertEquals(1, api.signedAsOwnerCalls)
+            val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertFalse(ready.act.canEditOwnerFields)
+            assertTrue(ready.act.isSignedByOwner)
         }
 
     @Test
-    fun `save comment sends nullable value and upload forwards kind`() =
+    fun `sign as owner rejects invalid metrics without api calls`() =
         runTest {
             val api = InspectionActFake()
-            val viewModel = viewModel(api)
+            val viewModel = viewModel(api, userId = "owner-1")
             viewModel.load()
             advanceUntilIdle()
 
-            viewModel.setCommentInput("")
-            viewModel.saveComment()
-            viewModel.uploadPhoto(byteArrayOf(1), "dashboard.jpg", "image/jpeg", InspectionPhotoKind.Dashboard)
+            viewModel.setFuelInput("abc")
+            viewModel.setMileageInput("121000")
+            viewModel.sign()
             advanceUntilIdle()
 
-            assertEquals(UpdateInspectionCommentRequest(null), api.commentRequest)
-            assertEquals(InspectionPhotoKind.Dashboard, api.uploadedKind)
+            assertEquals(null, api.metricsRequest)
+            assertEquals(0, api.signedAsOwnerCalls)
+            assertIs<InspectionActUiState.Error>(viewModel.state.value)
+        }
+
+    @Test
+    fun `sign as renter persists comment from form before signing`() =
+        runTest {
+            val api = InspectionActFake()
+            val viewModel = viewModel(api, userId = "renter-1")
+            viewModel.load()
+            advanceUntilIdle()
+
+            viewModel.setCommentInput("Комментарий арендатора")
+            viewModel.sign()
+            advanceUntilIdle()
+
+            assertEquals(null, api.metricsRequest)
+            assertEquals(UpdateInspectionCommentRequest("Комментарий арендатора"), api.commentRequest)
+            assertEquals(listOf("comment", "signRenter"), api.callOrder)
+            assertEquals(1, api.signedAsRenterCalls)
+            val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertFalse(ready.act.canEditRenterFields)
+            assertTrue(ready.act.isSignedByRenter)
+        }
+
+    @Test
+    fun `upload photo always uses car kind`() =
+        runTest {
+            val api = InspectionActFake()
+            val viewModel = viewModel(api, userId = "renter-1")
+            viewModel.load()
+            advanceUntilIdle()
+
+            viewModel.uploadPhoto(byteArrayOf(1), "car.jpg", "image/jpeg")
+            advanceUntilIdle()
+
+            assertEquals(InspectionPhotoKind.Car, api.uploadedKind)
         }
 
     @Test
@@ -183,7 +310,7 @@ class InspectionActViewModelTest {
         }
 
     @Test
-    fun `sign and download expose updated state and PDF effect`() =
+    fun `download exposes PDF effect`() =
         runTest {
             val api = InspectionActFake()
             val viewModel = viewModel(api)
@@ -195,27 +322,22 @@ class InspectionActViewModelTest {
                     viewModel.effects.collect { effects += it }
                 }
 
-            viewModel.signAsOwner()
-            viewModel.signAsRenter()
             viewModel.downloadPdf()
             advanceUntilIdle()
             collectJob.cancel()
 
-            assertEquals(1, api.signedAsOwnerCalls)
-            assertEquals(1, api.signedAsRenterCalls)
-            assertTrue(assertIs<InspectionActUiState.Ready>(viewModel.state.value).act.isSignedByRenter)
             assertTrue(effects.contains(InspectionActEffect.OpenPdf(api.download)))
         }
 
     @Test
-    fun `failed mutation preserves previous act and exposes error`() =
+    fun `failed sign preserves previous act and exposes error`() =
         runTest {
             val api = InspectionActFake().apply { failMutations = true }
-            val viewModel = viewModel(api)
+            val viewModel = viewModel(api, userId = "owner-1")
             viewModel.load()
             advanceUntilIdle()
 
-            viewModel.saveMetrics()
+            viewModel.sign()
             advanceUntilIdle()
 
             val state = assertIs<InspectionActUiState.Error>(viewModel.state.value)
@@ -223,14 +345,34 @@ class InspectionActViewModelTest {
             assertFalse(viewModel.error.value.isNullOrBlank())
         }
 
-    private fun CoroutineScope.viewModel(api: InspectionActFake) =
-        InspectionActViewModelImpl(
-            inspectionAct = api,
-            bookingId = "booking-1",
-            type = InspectionActType.Handover,
-            coroutineScope = CoroutineScope(SupervisorJob() + coroutineContext),
-        )
+    private fun CoroutineScope.viewModel(
+        api: InspectionActFake,
+        userId: String = "owner-1",
+    ) = InspectionActViewModelImpl(
+        inspectionAct = api,
+        booking = BookingFake(ownerId = "owner-1", renterId = "renter-1"),
+        user = UserFake(userId = userId),
+        bookingId = "booking-1",
+        type = InspectionActType.Handover,
+        coroutineScope = CoroutineScope(SupervisorJob() + coroutineContext),
+    )
 }
+
+private fun sampleBooking(
+    bookingId: String,
+    ownerId: String,
+    renterId: String,
+) = BookingDTO(
+    id = bookingId,
+    carId = "car-1",
+    renterId = renterId,
+    ownerId = ownerId,
+    startAt = "2026-09-01T07:00:00Z",
+    endAt = "2026-09-02T07:00:00Z",
+    totalAmount = 30.0,
+    status = "Paid",
+    createdAt = "2026-09-01T05:53:42Z",
+)
 
 private fun sampleAct() =
     BookingInspectionActDto(

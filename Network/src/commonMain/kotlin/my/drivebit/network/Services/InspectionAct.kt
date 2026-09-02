@@ -2,11 +2,11 @@ package my.drivebit.network.services
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
-import io.ktor.client.request.forms.MultiPartFormDataContent
-import io.ktor.client.request.forms.formData
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
@@ -59,6 +59,91 @@ fun inspectionPhotoKindLabel(kind: InspectionPhotoKind): String =
         InspectionPhotoKind.Other -> "Другое"
     }
 
+const val INSPECTION_ACT_FUEL_LABEL = "Топливо, %"
+const val INSPECTION_ACT_MILEAGE_LABEL = "Пробег, км"
+
+enum class InspectionActViewerRole {
+    Owner,
+    Renter,
+}
+
+fun resolveInspectionActViewerRole(
+    currentUserId: String,
+    ownerId: String,
+    renterId: String,
+): InspectionActViewerRole? =
+    when (currentUserId) {
+        ownerId -> InspectionActViewerRole.Owner
+        renterId -> InspectionActViewerRole.Renter
+        else -> null
+    }
+
+fun BookingInspectionActDto.canCurrentUserEditMetrics(role: InspectionActViewerRole): Boolean =
+    role == InspectionActViewerRole.Owner && canEditOwnerFields
+
+fun BookingInspectionActDto.canCurrentUserEditComment(role: InspectionActViewerRole): Boolean =
+    when (role) {
+        InspectionActViewerRole.Owner -> canEditOwnerFields
+        InspectionActViewerRole.Renter -> canEditRenterFields
+    }
+
+fun BookingInspectionActDto.canCurrentUserUploadPhotos(role: InspectionActViewerRole): Boolean =
+    canCurrentUserEditComment(role)
+
+fun BookingInspectionActDto.canCurrentUserSign(role: InspectionActViewerRole): Boolean =
+    when (role) {
+        InspectionActViewerRole.Owner -> canSignAsOwner
+        InspectionActViewerRole.Renter -> canSignAsRenter
+    }
+
+fun BookingInspectionActDto.hasCurrentUserSigned(role: InspectionActViewerRole): Boolean =
+    when (role) {
+        InspectionActViewerRole.Owner -> isSignedByOwner
+        InspectionActViewerRole.Renter -> isSignedByRenter
+    }
+
+fun BookingInspectionActDto.currentUserSignStatusMessage(role: InspectionActViewerRole): String? =
+    when {
+        isFullySigned -> null
+        canCurrentUserSign(role) -> null
+        hasCurrentUserSigned(role) -> "Вы подписали акт"
+        else -> null
+    }
+
+fun BookingInspectionActDto.counterpartySignStatusMessage(role: InspectionActViewerRole): String? =
+    when (role) {
+        InspectionActViewerRole.Owner ->
+            when {
+                isFullySigned -> null
+                isSignedByRenter -> "Арендатор подписал"
+                else -> "Ожидаем подпись арендатора"
+            }
+        InspectionActViewerRole.Renter ->
+            when {
+                isFullySigned -> null
+                isSignedByOwner -> "Владелец подписал"
+                else -> "Ожидаем подпись владельца"
+            }
+    }
+
+fun BookingInspectionActDto.commentInputFor(role: InspectionActViewerRole): String =
+    when (role) {
+        InspectionActViewerRole.Owner -> ownerComment.orEmpty()
+        InspectionActViewerRole.Renter -> renterComment.orEmpty()
+    }
+
+fun BookingInspectionActPhotoDto.canCurrentUserDelete(
+    role: InspectionActViewerRole,
+    ownerId: String,
+    renterId: String,
+    canEditOwnerFields: Boolean,
+    canEditRenterFields: Boolean,
+): Boolean =
+    when (role) {
+        InspectionActViewerRole.Owner -> authorId == ownerId && canEditOwnerFields
+        InspectionActViewerRole.Renter -> authorId == renterId && canEditRenterFields
+    }
+
 @Serializable
 enum class InspectionActStatus {
     None,
@@ -74,6 +159,8 @@ enum class InspectionPhotoKind {
     Dashboard,
     Other,
 }
+
+val inspectionActPhotoKind: InspectionPhotoKind = InspectionPhotoKind.Car
 
 interface InspectionAct {
     suspend fun get(
@@ -193,34 +280,34 @@ class InspectionActImpl(
     override suspend fun get(
         bookingId: String,
         type: InspectionActType,
-    ): BookingInspectionActDto =
-        httpClient.get(actUrl(bookingId, type)).parseResponse()
+    ): BookingInspectionActDto = httpClient.get(actUrl(bookingId, type)).parseResponse()
 
     override suspend fun openOrCreate(
         bookingId: String,
         type: InspectionActType,
-    ): BookingInspectionActDto =
-        httpClient.post(actUrl(bookingId, type)).parseResponse()
+    ): BookingInspectionActDto = httpClient.post(actUrl(bookingId, type)).parseResponse()
 
     override suspend fun updateMetrics(
         bookingId: String,
         type: InspectionActType,
         request: UpdateInspectionMetricsRequest,
     ): BookingInspectionActDto =
-        httpClient.put("${actUrl(bookingId, type)}/metrics") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }.parseResponse()
+        httpClient
+            .put("${actUrl(bookingId, type)}/metrics") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.parseResponse()
 
     override suspend fun updateComment(
         bookingId: String,
         type: InspectionActType,
         request: UpdateInspectionCommentRequest,
     ): BookingInspectionActDto =
-        httpClient.put("${actUrl(bookingId, type)}/comment") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }.parseResponse()
+        httpClient
+            .put("${actUrl(bookingId, type)}/comment") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.parseResponse()
 
     override suspend fun uploadPhoto(
         bookingId: String,
@@ -230,23 +317,24 @@ class InspectionActImpl(
         contentType: String,
         kind: InspectionPhotoKind,
     ): BookingInspectionActPhotoDto =
-        httpClient.post("${actUrl(bookingId, type)}/photos") {
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append(
-                            "File",
-                            fileBytes,
-                            Headers.build {
-                                append(HttpHeaders.ContentType, contentType)
-                                append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
-                            },
-                        )
-                        append("Kind", kind.name)
-                    },
-                ),
-            )
-        }.parseResponse()
+        httpClient
+            .post("${actUrl(bookingId, type)}/photos") {
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append(
+                                "File",
+                                fileBytes,
+                                Headers.build {
+                                    append(HttpHeaders.ContentType, contentType)
+                                    append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                                },
+                            )
+                            append("Kind", kind.name)
+                        },
+                    ),
+                )
+            }.parseResponse()
 
     override suspend fun deletePhoto(
         bookingId: String,
@@ -259,20 +347,17 @@ class InspectionActImpl(
     override suspend fun signAsOwner(
         bookingId: String,
         type: InspectionActType,
-    ): BookingInspectionActDto =
-        httpClient.post("${actUrl(bookingId, type)}/sign-as-owner").parseResponse()
+    ): BookingInspectionActDto = httpClient.post("${actUrl(bookingId, type)}/sign-as-owner").parseResponse()
 
     override suspend fun signAsRenter(
         bookingId: String,
         type: InspectionActType,
-    ): BookingInspectionActDto =
-        httpClient.post("${actUrl(bookingId, type)}/sign-as-renter").parseResponse()
+    ): BookingInspectionActDto = httpClient.post("${actUrl(bookingId, type)}/sign-as-renter").parseResponse()
 
     override suspend fun download(
         bookingId: String,
         type: InspectionActType,
-    ): BookingInspectionActDownloadDto =
-        httpClient.get("${actUrl(bookingId, type)}/download").parseResponse()
+    ): BookingInspectionActDownloadDto = httpClient.get("${actUrl(bookingId, type)}/download").parseResponse()
 
     private fun actUrl(
         bookingId: String,

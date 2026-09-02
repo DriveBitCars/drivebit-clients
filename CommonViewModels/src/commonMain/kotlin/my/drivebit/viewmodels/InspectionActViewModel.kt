@@ -11,13 +11,21 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingInspectionActDownloadDto
 import my.drivebit.network.services.BookingInspectionActDto
 import my.drivebit.network.services.InspectionAct
 import my.drivebit.network.services.InspectionActType
-import my.drivebit.network.services.InspectionPhotoKind
+import my.drivebit.network.services.InspectionActViewerRole
 import my.drivebit.network.services.UpdateInspectionCommentRequest
 import my.drivebit.network.services.UpdateInspectionMetricsRequest
+import my.drivebit.network.services.User
+import my.drivebit.network.services.canCurrentUserEditComment
+import my.drivebit.network.services.canCurrentUserEditMetrics
+import my.drivebit.network.services.canCurrentUserUploadPhotos
+import my.drivebit.network.services.commentInputFor
+import my.drivebit.network.services.inspectionActPhotoKind
+import my.drivebit.network.services.resolveInspectionActViewerRole
 
 sealed interface InspectionActUiState {
     data object Idle : InspectionActUiState
@@ -26,26 +34,28 @@ sealed interface InspectionActUiState {
 
     data class Ready(
         val act: BookingInspectionActDto,
+        val viewerRole: InspectionActViewerRole?,
+        val ownerId: String,
+        val renterId: String,
         val fuelInput: String,
         val mileageInput: String,
         val commentInput: String,
-        val selectedPhotoKind: InspectionPhotoKind = InspectionPhotoKind.Car,
     ) : InspectionActUiState
 
     data class Error(
         val message: String,
         val previousAct: BookingInspectionActDto? = null,
+        val viewerRole: InspectionActViewerRole? = null,
+        val ownerId: String = "",
+        val renterId: String = "",
     ) : InspectionActUiState
 }
 
 enum class InspectionActAction {
     OpenOrCreate,
-    UpdateMetrics,
-    UpdateComment,
     UploadPhoto,
     DeletePhoto,
-    SignAsOwner,
-    SignAsRenter,
+    Sign,
     DownloadPdf,
 }
 
@@ -69,30 +79,23 @@ interface InspectionActViewModel {
 
     fun setCommentInput(value: String)
 
-    fun setPhotoKind(kind: InspectionPhotoKind)
-
-    fun saveMetrics()
-
-    fun saveComment()
-
     fun uploadPhoto(
         bytes: ByteArray,
         fileName: String,
         contentType: String,
-        kind: InspectionPhotoKind,
     )
 
     fun deletePhoto(photoId: String)
 
-    fun signAsOwner()
-
-    fun signAsRenter()
+    fun sign()
 
     fun downloadPdf()
 }
 
 class InspectionActViewModelImpl(
     private val inspectionAct: InspectionAct,
+    private val booking: Booking,
+    private val user: User,
     private val bookingId: String,
     private val type: InspectionActType,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
@@ -110,6 +113,9 @@ class InspectionActViewModelImpl(
     override val effects: SharedFlow<InspectionActEffect> = _effects.asSharedFlow()
 
     private var lastAct: BookingInspectionActDto? = null
+    private var viewerRole: InspectionActViewerRole? = null
+    private var ownerId: String = ""
+    private var renterId: String = ""
 
     override fun load() {
         if (!begin(InspectionActAction.OpenOrCreate)) return
@@ -122,6 +128,16 @@ class InspectionActViewModelImpl(
         _error.value = null
         coroutineScope.launch {
             try {
+                val currentUser = user.userGet()
+                val bookingDto = booking.getById(bookingId)
+                viewerRole =
+                    resolveInspectionActViewerRole(
+                        currentUserId = currentUser.id,
+                        ownerId = bookingDto.ownerId,
+                        renterId = bookingDto.renterId,
+                    )
+                ownerId = bookingDto.ownerId
+                renterId = bookingDto.renterId
                 applyAct(inspectionAct.openOrCreate(bookingId, type))
             } catch (exception: Throwable) {
                 showError(errorMessage(exception, "Не удалось загрузить акт"), lastAct)
@@ -143,46 +159,13 @@ class InspectionActViewModelImpl(
         updateReady { it.copy(commentInput = value) }
     }
 
-    override fun setPhotoKind(kind: InspectionPhotoKind) {
-        updateReady { it.copy(selectedPhotoKind = kind) }
-    }
-
-    override fun saveMetrics() {
-        val ready = state.value as? InspectionActUiState.Ready ?: return
-        val fuel = ready.fuelInput.toIntOrNull()
-        val mileage = ready.mileageInput.toIntOrNull()
-        if (fuel == null || mileage == null) {
-            showError("Введите корректные значения топлива и пробега", ready.act)
-            return
-        }
-        launchMutation(InspectionActAction.UpdateMetrics) {
-            inspectionAct.updateMetrics(
-                bookingId = bookingId,
-                type = type,
-                request = UpdateInspectionMetricsRequest(fuel, mileage),
-            )
-        }
-    }
-
-    override fun saveComment() {
-        val ready = state.value as? InspectionActUiState.Ready ?: return
-        launchMutation(InspectionActAction.UpdateComment) {
-            inspectionAct.updateComment(
-                bookingId = bookingId,
-                type = type,
-                request = UpdateInspectionCommentRequest(
-                    ready.commentInput.trim().takeIf { it.isNotEmpty() },
-                ),
-            )
-        }
-    }
-
     override fun uploadPhoto(
         bytes: ByteArray,
         fileName: String,
         contentType: String,
-        kind: InspectionPhotoKind,
     ) {
+        val ready = state.value as? InspectionActUiState.Ready ?: return
+        if (!ready.act.canCurrentUserUploadPhotos(ready.viewerRole ?: return)) return
         launchMutation(InspectionActAction.UploadPhoto) {
             val photo =
                 inspectionAct.uploadPhoto(
@@ -191,7 +174,7 @@ class InspectionActViewModelImpl(
                     fileBytes = bytes,
                     fileName = fileName,
                     contentType = contentType,
-                    kind = kind,
+                    kind = inspectionActPhotoKind,
                 )
             val current = lastAct ?: return@launchMutation null
             current.copy(photos = (current.photos.orEmpty() + photo))
@@ -205,15 +188,18 @@ class InspectionActViewModelImpl(
         }
     }
 
-    override fun signAsOwner() {
-        launchMutation(InspectionActAction.SignAsOwner) {
-            inspectionAct.signAsOwner(bookingId, type)
-        }
-    }
-
-    override fun signAsRenter() {
-        launchMutation(InspectionActAction.SignAsRenter) {
-            inspectionAct.signAsRenter(bookingId, type)
+    override fun sign() {
+        val ready = state.value as? InspectionActUiState.Ready ?: return
+        val role =
+            ready.viewerRole ?: run {
+                showError("Нет доступа к подписанию акта", lastAct)
+                return
+            }
+        launchMutation(InspectionActAction.Sign) {
+            when (role) {
+                InspectionActViewerRole.Owner -> signAsOwner(ready)
+                InspectionActViewerRole.Renter -> signAsRenter(ready)
+            }
         }
     }
 
@@ -229,6 +215,46 @@ class InspectionActViewModelImpl(
             }
         }
     }
+
+    private suspend fun signAsOwner(ready: InspectionActUiState.Ready): BookingInspectionActDto {
+        if (!ready.act.canCurrentUserEditMetrics(InspectionActViewerRole.Owner)) {
+            return inspectionAct.signAsOwner(bookingId, type)
+        }
+        val fuel = ready.fuelInput.toIntOrNull()
+        val mileage = ready.mileageInput.toIntOrNull()
+        if (fuel == null || mileage == null) {
+            error("Введите корректные значения топлива и пробега")
+        }
+        var act =
+            inspectionAct.updateMetrics(
+                bookingId = bookingId,
+                type = type,
+                request = UpdateInspectionMetricsRequest(fuel, mileage),
+            )
+        if (ready.act.canCurrentUserEditComment(InspectionActViewerRole.Owner)) {
+            act =
+                inspectionAct.updateComment(
+                    bookingId = bookingId,
+                    type = type,
+                    request = commentRequest(ready.commentInput),
+                )
+        }
+        return inspectionAct.signAsOwner(bookingId, type)
+    }
+
+    private suspend fun signAsRenter(ready: InspectionActUiState.Ready): BookingInspectionActDto {
+        if (ready.act.canCurrentUserEditComment(InspectionActViewerRole.Renter)) {
+            inspectionAct.updateComment(
+                bookingId = bookingId,
+                type = type,
+                request = commentRequest(ready.commentInput),
+            )
+        }
+        return inspectionAct.signAsRenter(bookingId, type)
+    }
+
+    private fun commentRequest(input: String): UpdateInspectionCommentRequest =
+        UpdateInspectionCommentRequest(input.trim().takeIf { it.isNotEmpty() })
 
     private fun launchMutation(
         action: InspectionActAction,
@@ -249,17 +275,17 @@ class InspectionActViewModelImpl(
 
     private fun applyAct(act: BookingInspectionActDto) {
         lastAct = act
+        val role = viewerRole
+        val ready = state.value as? InspectionActUiState.Ready
         _state.value =
             InspectionActUiState.Ready(
                 act = act,
+                viewerRole = role,
+                ownerId = ownerId,
+                renterId = renterId,
                 fuelInput = act.fuelRemaining?.toString().orEmpty(),
                 mileageInput = act.mileage?.toString().orEmpty(),
-                commentInput =
-                    if (act.canEditOwnerFields) {
-                        act.ownerComment.orEmpty()
-                    } else {
-                        act.renterComment.orEmpty()
-                    },
+                commentInput = role?.let { act.commentInputFor(it) }.orEmpty(),
             )
     }
 
@@ -290,7 +316,14 @@ class InspectionActViewModelImpl(
         previousAct: BookingInspectionActDto?,
     ) {
         _error.value = message
-        _state.value = InspectionActUiState.Error(message, previousAct)
+        _state.value =
+            InspectionActUiState.Error(
+                message = message,
+                previousAct = previousAct,
+                viewerRole = viewerRole,
+                ownerId = ownerId,
+                renterId = renterId,
+            )
     }
 
     private fun errorMessage(
