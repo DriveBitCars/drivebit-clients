@@ -111,6 +111,10 @@ data class BookingDTO(
     @JsonNames("canSignContractAsRenter", "can_sign_contract_as_renter") val canSignContractAsRenter: Boolean = false,
     @JsonNames("contractSignedByOwnerAt", "contract_signed_by_owner_at") val contractSignedByOwnerAt: String? = null,
     @JsonNames("contractSignedByRenterAt", "contract_signed_by_renter_at") val contractSignedByRenterAt: String? = null,
+    @JsonNames("canOpenHandoverInspection", "can_open_handover_inspection") val canOpenHandoverInspection: Boolean = false,
+    @JsonNames("canOpenReturnInspection", "can_open_return_inspection") val canOpenReturnInspection: Boolean = false,
+    @JsonNames("handoverActStatus", "handover_act_status") val handoverActStatus: InspectionActStatus = InspectionActStatus.None,
+    @JsonNames("returnActStatus", "return_act_status") val returnActStatus: InspectionActStatus = InspectionActStatus.None,
     @JsonNames("isOwnerVerified", "is_owner_verified") val isOwnerVerified: Boolean = false,
     @JsonNames("isRenterVerified", "is_renter_verified") val isRenterVerified: Boolean = false,
     @JsonNames("isCarVerified", "is_car_verified") val isCarVerified: Boolean = false,
@@ -198,11 +202,14 @@ fun BookingDTO.statusAllowsReturnInspectionAct(): Boolean =
     status.equals("Active", ignoreCase = true) ||
         status.equals("Completed", ignoreCase = true)
 
+fun BookingDTO.handoverActFullySigned(): Boolean =
+    handoverActStatus == InspectionActStatus.SignedByBoth
+
 fun BookingDTO.visibleInspectionActTypes(): List<InspectionActType> {
     if (!statusAllowsInspectionAct()) return emptyList()
     return buildList {
         add(InspectionActType.Handover)
-        if (statusAllowsReturnInspectionAct()) {
+        if (statusAllowsReturnInspectionAct() && handoverActFullySigned()) {
             add(InspectionActType.Return)
         }
     }

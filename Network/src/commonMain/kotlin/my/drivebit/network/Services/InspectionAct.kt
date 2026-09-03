@@ -92,7 +92,9 @@ fun BookingInspectionActDto.canCurrentUserUploadPhotos(role: InspectionActViewer
 
 fun BookingInspectionActDto.canCurrentUserSign(role: InspectionActViewerRole): Boolean =
     when (role) {
-        InspectionActViewerRole.Owner -> canSignAsOwner
+        // Backend sets canSignAsOwner only after fuel/mileage are saved; owner still needs the
+        // button so metrics can be persisted on sign.
+        InspectionActViewerRole.Owner -> canEditOwnerFields || canSignAsOwner
         InspectionActViewerRole.Renter -> canSignAsRenter
     }
 

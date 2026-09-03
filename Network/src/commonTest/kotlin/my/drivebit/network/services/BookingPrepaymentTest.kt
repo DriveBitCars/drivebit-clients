@@ -128,18 +128,44 @@ class BookingPrepaymentTest {
     }
 
     @Test
-    fun visibleInspectionActTypes_activeShowsHandoverAndReturn() {
+    fun visibleInspectionActTypes_activeWithoutSignedHandoverShowsOnlyHandover() {
         assertEquals(
-            listOf(InspectionActType.Handover, InspectionActType.Return),
-            booking(status = "Active").visibleInspectionActTypes(),
+            listOf(InspectionActType.Handover),
+            booking(
+                status = "Active",
+                handoverActStatus = InspectionActStatus.Draft,
+            ).visibleInspectionActTypes(),
         )
     }
 
     @Test
-    fun visibleInspectionActTypes_completedShowsHandoverAndReturn() {
+    fun visibleInspectionActTypes_activeWithSignedHandoverShowsHandoverAndReturn() {
         assertEquals(
             listOf(InspectionActType.Handover, InspectionActType.Return),
+            booking(
+                status = "Active",
+                handoverActStatus = InspectionActStatus.SignedByBoth,
+            ).visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
+    fun visibleInspectionActTypes_completedWithoutSignedHandoverShowsOnlyHandover() {
+        assertEquals(
+            listOf(InspectionActType.Handover),
             booking(status = "Completed").visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
+    fun visibleInspectionActTypes_completedWithSignedHandoverShowsHandoverAndReturn() {
+        assertEquals(
+            listOf(InspectionActType.Handover, InspectionActType.Return),
+            booking(
+                status = "Completed",
+                handoverActStatus = InspectionActStatus.SignedByBoth,
+                canOpenReturnInspection = true,
+            ).visibleInspectionActTypes(),
         )
     }
 
@@ -206,6 +232,9 @@ class BookingPrepaymentTest {
         contractSignedByRenter: Boolean = false,
         totalAmountWithDeposit: Double = 0.0,
         balanceDueAmount: Double = 0.0,
+        canOpenReturnInspection: Boolean = false,
+        handoverActStatus: InspectionActStatus = InspectionActStatus.None,
+        returnActStatus: InspectionActStatus = InspectionActStatus.None,
     ): BookingDTO =
         BookingDTO(
             id = "550e8400-e29b-41d4-a716-446655440000",
@@ -227,6 +256,9 @@ class BookingPrepaymentTest {
             canSignContractAsRenter = canSignContractAsRenter,
             contractSignedByOwner = contractSignedByOwner,
             contractSignedByRenter = contractSignedByRenter,
+            canOpenReturnInspection = canOpenReturnInspection,
+            handoverActStatus = handoverActStatus,
+            returnActStatus = returnActStatus,
             status = status,
             createdAt = "2026-05-27T10:00:00Z",
         )

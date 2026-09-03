@@ -37,6 +37,8 @@ sealed interface InspectionActUiState {
         val viewerRole: InspectionActViewerRole?,
         val ownerId: String,
         val renterId: String,
+        val ownerName: String,
+        val renterName: String,
         val fuelInput: String,
         val mileageInput: String,
         val commentInput: String,
@@ -48,6 +50,8 @@ sealed interface InspectionActUiState {
         val viewerRole: InspectionActViewerRole? = null,
         val ownerId: String = "",
         val renterId: String = "",
+        val ownerName: String = "",
+        val renterName: String = "",
     ) : InspectionActUiState
 }
 
@@ -116,6 +120,8 @@ class InspectionActViewModelImpl(
     private var viewerRole: InspectionActViewerRole? = null
     private var ownerId: String = ""
     private var renterId: String = ""
+    private var ownerName: String = ""
+    private var renterName: String = ""
 
     override fun load() {
         if (!begin(InspectionActAction.OpenOrCreate)) return
@@ -138,6 +144,8 @@ class InspectionActViewModelImpl(
                     )
                 ownerId = bookingDto.ownerId
                 renterId = bookingDto.renterId
+                ownerName = bookingDto.ownerName?.takeIf { it.isNotBlank() }.orEmpty()
+                renterName = bookingDto.renterName?.takeIf { it.isNotBlank() }.orEmpty()
                 applyAct(inspectionAct.openOrCreate(bookingId, type))
             } catch (exception: Throwable) {
                 showError(errorMessage(exception, "Не удалось загрузить акт"), lastAct)
@@ -276,13 +284,14 @@ class InspectionActViewModelImpl(
     private fun applyAct(act: BookingInspectionActDto) {
         lastAct = act
         val role = viewerRole
-        val ready = state.value as? InspectionActUiState.Ready
         _state.value =
             InspectionActUiState.Ready(
                 act = act,
                 viewerRole = role,
                 ownerId = ownerId,
                 renterId = renterId,
+                ownerName = ownerName,
+                renterName = renterName,
                 fuelInput = act.fuelRemaining?.toString().orEmpty(),
                 mileageInput = act.mileage?.toString().orEmpty(),
                 commentInput = role?.let { act.commentInputFor(it) }.orEmpty(),
@@ -323,6 +332,8 @@ class InspectionActViewModelImpl(
                 viewerRole = viewerRole,
                 ownerId = ownerId,
                 renterId = renterId,
+                ownerName = ownerName,
+                renterName = renterName,
             )
     }
 

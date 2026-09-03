@@ -371,6 +371,8 @@ class InspectionActTest {
                 type = InspectionActType.Handover,
                 actNumber = 1,
                 status = InspectionActStatus.Draft,
+                canEditOwnerFields = true,
+                canEditRenterFields = true,
                 canSignAsOwner = true,
                 canSignAsRenter = true,
                 createdAt = "2026-08-29T08:00:00Z",
@@ -380,8 +382,34 @@ class InspectionActTest {
         assertTrue(act.canCurrentUserSign(InspectionActViewerRole.Owner))
         assertTrue(act.canCurrentUserSign(InspectionActViewerRole.Renter))
         assertFalse(
-            act.copy(canSignAsOwner = false).canCurrentUserSign(InspectionActViewerRole.Owner),
+            act
+                .copy(
+                    canEditOwnerFields = false,
+                    canSignAsOwner = false,
+                    isSignedByOwner = true,
+                ).canCurrentUserSign(InspectionActViewerRole.Owner),
         )
+    }
+
+    @Test
+    fun `owner can sign when metrics not yet saved on act`() {
+        val act =
+            BookingInspectionActDto(
+                id = "act-1",
+                bookingId = "booking-1",
+                type = InspectionActType.Return,
+                actNumber = 3,
+                status = InspectionActStatus.AwaitingOwner,
+                isSignedByRenter = true,
+                canEditOwnerFields = true,
+                canSignAsOwner = false,
+                canSignAsRenter = false,
+                createdAt = "2026-08-29T08:00:00Z",
+                updatedAt = "2026-08-29T08:00:00Z",
+            )
+
+        assertTrue(act.canCurrentUserSign(InspectionActViewerRole.Owner))
+        assertEquals(null, act.currentUserSignStatusMessage(InspectionActViewerRole.Owner))
     }
 
     @Test
@@ -393,6 +421,7 @@ class InspectionActTest {
                 type = InspectionActType.Handover,
                 actNumber = 1,
                 status = InspectionActStatus.Draft,
+                canEditOwnerFields = true,
                 canSignAsOwner = true,
                 isSignedByOwner = false,
                 createdAt = "2026-08-29T08:00:00Z",
@@ -404,6 +433,7 @@ class InspectionActTest {
         val ownerSigned =
             draft.copy(
                 isSignedByOwner = true,
+                canEditOwnerFields = false,
                 canSignAsOwner = false,
                 status = InspectionActStatus.AwaitingRenter,
             )

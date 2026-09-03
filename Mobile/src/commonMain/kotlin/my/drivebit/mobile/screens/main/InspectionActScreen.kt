@@ -127,6 +127,8 @@ data class InspectionActScreen(
                                 viewerRole = current.viewerRole,
                                 ownerId = current.ownerId,
                                 renterId = current.renterId,
+                                ownerName = current.ownerName,
+                                renterName = current.renterName,
                                 fuelInput = act.fuelRemaining?.toString().orEmpty(),
                                 mileageInput = act.mileage?.toString().orEmpty(),
                                 commentInput =
@@ -148,6 +150,8 @@ data class InspectionActScreen(
                             viewerRole = current.viewerRole,
                             ownerId = current.ownerId,
                             renterId = current.renterId,
+                            ownerName = current.ownerName,
+                            renterName = current.renterName,
                             fuelInput = current.fuelInput,
                             mileageInput = current.mileageInput,
                             commentInput = current.commentInput,
@@ -167,6 +171,8 @@ private fun InspectionActReadyBody(
     viewerRole: InspectionActViewerRole?,
     ownerId: String,
     renterId: String,
+    ownerName: String,
+    renterName: String,
     fuelInput: String,
     mileageInput: String,
     commentInput: String,
@@ -199,6 +205,14 @@ private fun InspectionActReadyBody(
         text = "№${act.actNumber} · ${inspectionActStatusLabel(act.status)}",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Text(
+        text = "Владелец: ${ownerName.ifBlank { "Владелец" }}",
+        style = MaterialTheme.typography.bodyMedium,
+    )
+    Text(
+        text = "Арендатор: ${renterName.ifBlank { "Арендатор" }}",
+        style = MaterialTheme.typography.bodyMedium,
     )
 
     Text(
@@ -241,14 +255,14 @@ private fun InspectionActReadyBody(
     )
     act.ownerComment?.takeIf { it.isNotBlank() }?.let { comment ->
         Text(
-            text = "Владелец: $comment",
+            text = "Комментарий владельца: $comment",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
     act.renterComment?.takeIf { it.isNotBlank() }?.let { comment ->
         Text(
-            text = "Арендатор: $comment",
+            text = "Комментарий арендатора: $comment",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -216,6 +216,22 @@ class InspectionActViewModelTest {
             assertEquals("75", ready.fuelInput)
             assertEquals("120500", ready.mileageInput)
             assertEquals("Есть царапина", ready.commentInput)
+            assertEquals("Иван Владельцев", ready.ownerName)
+            assertEquals("Пётр Арендаторов", ready.renterName)
+        }
+
+    @Test
+    fun `load exposes owner and renter names from booking for party labels`() =
+        runTest {
+            val api = InspectionActFake()
+            val viewModel = viewModel(api, userId = "renter-1")
+
+            viewModel.load()
+            advanceUntilIdle()
+
+            val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertEquals("Иван Владельцев", ready.ownerName)
+            assertEquals("Пётр Арендаторов", ready.renterName)
         }
 
     @Test
@@ -366,7 +382,9 @@ private fun sampleBooking(
     id = bookingId,
     carId = "car-1",
     renterId = renterId,
+    renterName = "Пётр Арендаторов",
     ownerId = ownerId,
+    ownerName = "Иван Владельцев",
     startAt = "2026-09-01T07:00:00Z",
     endAt = "2026-09-02T07:00:00Z",
     totalAmount = 30.0,

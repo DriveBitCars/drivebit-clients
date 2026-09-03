@@ -139,6 +139,8 @@ fun InspectionActPage() {
                                         viewerRole = current.viewerRole,
                                         ownerId = current.ownerId,
                                         renterId = current.renterId,
+                                        ownerName = current.ownerName,
+                                        renterName = current.renterName,
                                         fuelInput = act.fuelRemaining?.toString().orEmpty(),
                                         mileageInput = act.mileage?.toString().orEmpty(),
                                         commentInput =
@@ -216,6 +218,14 @@ private fun InspectionActReadyContent(
         Span({ style { fontSize(14.px); color(CSSColors.Gray600) } }) {
             Text("№${act.actNumber} · ${inspectionActStatusLabel(act.status)}")
         }
+        Column(gap = 4.px) {
+            Span({ style { fontSize(14.px) } }) {
+                Text("Владелец: ${ready.ownerName.ifBlank { "Владелец" }}")
+            }
+            Span({ style { fontSize(14.px) } }) {
+                Text("Арендатор: ${ready.renterName.ifBlank { "Арендатор" }}")
+            }
+        }
 
         Column(gap = 8.px) {
             Span({ style { fontWeight("600") } }) { Text("Топливо и пробег") }
@@ -257,12 +267,12 @@ private fun InspectionActReadyContent(
             }
             if (!act.ownerComment.isNullOrBlank()) {
                 Span({ style { color(CSSColors.Gray600); fontSize(13.px) } }) {
-                    Text("Владелец: ${act.ownerComment}")
+                    Text("Комментарий владельца: ${act.ownerComment}")
                 }
             }
             if (!act.renterComment.isNullOrBlank()) {
                 Span({ style { color(CSSColors.Gray600); fontSize(13.px) } }) {
-                    Text("Арендатор: ${act.renterComment}")
+                    Text("Комментарий арендатора: ${act.renterComment}")
                 }
             }
         }
