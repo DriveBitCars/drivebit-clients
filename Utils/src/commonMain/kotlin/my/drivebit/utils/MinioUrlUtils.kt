@@ -19,6 +19,18 @@ fun minioProxyOrigin(
         currentOrigin.trimEnd('/')
     }
 
+fun resolveMinioUrlForHost(
+    rawUrl: String,
+    currentHost: String,
+): String {
+    val path = extractPathFromApiUrl(rawUrl)
+    return if (currentHost.equals(PAGES_DEV_HOST, ignoreCase = true) && path.startsWith("/")) {
+        "$PRODUCTION_PROXY_ORIGIN$path"
+    } else {
+        path
+    }
+}
+
 fun isDirectMinioUrl(url: String): Boolean = directMinioUrlPattern.containsMatchIn(url)
 
 fun extractPathFromApiUrl(apiUrl: String): String {

@@ -59,4 +59,41 @@ class MinioUrlUtilsTest {
             minioProxyOrigin("https://dev.drivebit.my", "dev.drivebit.my"),
         )
     }
+
+    @Test
+    fun minioProxyOrigin_keepsCurrentOriginOnProduction() {
+        assertEquals(
+            "https://drivebit.ru",
+            minioProxyOrigin("https://drivebit.ru", "drivebit.ru"),
+        )
+    }
+
+    @Test
+    fun resolveMinioUrlForHost_prefixesProductionOnPagesDev() {
+        val raw =
+            "http://157.22.252.70:9000/publicbct/cars/" +
+                "52207ab5-a0a5-483e-ba8b-545d9a9d7dff/thumb.jpg"
+        assertEquals(
+            "https://drivebit.ru/publicbct/cars/" +
+                "52207ab5-a0a5-483e-ba8b-545d9a9d7dff/thumb.jpg",
+            resolveMinioUrlForHost(raw, "dev.drivebit.my"),
+        )
+    }
+
+    @Test
+    fun resolveMinioUrlForHost_prefixesRelativePublicbctOnPagesDev() {
+        assertEquals(
+            "https://drivebit.ru/publicbct/cars/abc/thumb.jpg",
+            resolveMinioUrlForHost("/publicbct/cars/abc/thumb.jpg", "dev.drivebit.my"),
+        )
+    }
+
+    @Test
+    fun resolveMinioUrlForHost_keepsRelativePathOnProduction() {
+        val raw = "http://157.22.252.70:9000/publicbct/cars/abc/thumb.jpg"
+        assertEquals(
+            "/publicbct/cars/abc/thumb.jpg",
+            resolveMinioUrlForHost(raw, "drivebit.ru"),
+        )
+    }
 }

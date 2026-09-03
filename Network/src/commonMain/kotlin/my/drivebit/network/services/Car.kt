@@ -17,7 +17,7 @@ import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
 import my.drivebit.network.defaultJson
 import my.drivebit.network.parseResponse
-import my.drivebit.utils.extractPathFromApiUrl
+import my.drivebit.utils.resolveMinioUrlForHost
 
 internal expect fun getCurrentDomainForCar(): String
 
@@ -398,12 +398,12 @@ data class CarPhotoItem(
 ) {
     fun previewUrl(): String = thumbnailUrl?.trim()?.takeIf { it.isNotEmpty() } ?: url
 
-    fun withSanitizedUrls(): CarPhotoItem =
+    fun withSanitizedUrls(currentHost: String = getCurrentDomainForCar()): CarPhotoItem =
         copy(
-            url = extractPathFromApiUrl(url),
+            url = resolveMinioUrlForHost(url, currentHost),
             thumbnailUrl =
                 thumbnailUrl
-                    ?.let { extractPathFromApiUrl(it) }
+                    ?.let { resolveMinioUrlForHost(it, currentHost) }
                     ?.trim()
                     ?.takeIf { it.isNotEmpty() },
         )
