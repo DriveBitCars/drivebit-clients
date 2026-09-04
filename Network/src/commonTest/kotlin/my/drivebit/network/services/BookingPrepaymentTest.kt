@@ -92,9 +92,10 @@ class BookingPrepaymentTest {
     }
 
     @Test
-    fun statusAllowsInspectionAct_requiresPayment() {
+    fun statusAllowsInspectionAct_requiresPaymentOrActiveFlow() {
         assertFalse(booking(status = "Confirmed").statusAllowsInspectionAct())
-        assertFalse(booking(status = "ContractSignedByBoth").statusAllowsInspectionAct())
+        assertFalse(booking(status = "ContractSignedByOwner").statusAllowsInspectionAct())
+        assertTrue(booking(status = "ContractSignedByBoth").statusAllowsInspectionAct())
     }
 
     @Test
@@ -124,6 +125,14 @@ class BookingPrepaymentTest {
         assertEquals(
             listOf(InspectionActType.Handover),
             booking(status = "Paid").visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
+    fun visibleInspectionActTypes_contractSignedByBothShowsHandover() {
+        assertEquals(
+            listOf(InspectionActType.Handover),
+            booking(status = "ContractSignedByBoth").visibleInspectionActTypes(),
         )
     }
 
