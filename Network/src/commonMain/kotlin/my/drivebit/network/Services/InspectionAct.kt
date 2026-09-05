@@ -79,7 +79,10 @@ fun resolveInspectionActViewerRole(
     }
 
 fun BookingInspectionActDto.canCurrentUserEditMetrics(role: InspectionActViewerRole): Boolean =
-    role == InspectionActViewerRole.Owner && canEditOwnerFields
+    when (role) {
+        InspectionActViewerRole.Owner -> canEditOwnerFields
+        InspectionActViewerRole.Renter -> canEditRenterFields
+    }
 
 fun BookingInspectionActDto.canCurrentUserEditComment(role: InspectionActViewerRole): Boolean =
     when (role) {

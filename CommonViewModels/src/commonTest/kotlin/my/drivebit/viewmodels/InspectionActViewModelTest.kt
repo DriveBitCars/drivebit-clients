@@ -281,20 +281,22 @@ class InspectionActViewModelTest {
         }
 
     @Test
-    fun `sign as renter persists comment from form before signing`() =
+    fun `sign as renter persists metrics and comment from form before signing`() =
         runTest {
             val api = InspectionActFake()
             val viewModel = viewModel(api, userId = "renter-1")
             viewModel.load()
             advanceUntilIdle()
 
+            viewModel.setFuelInput("60")
+            viewModel.setMileageInput("121200")
             viewModel.setCommentInput("Комментарий арендатора")
             viewModel.sign()
             advanceUntilIdle()
 
-            assertEquals(null, api.metricsRequest)
+            assertEquals(UpdateInspectionMetricsRequest(60, 121200), api.metricsRequest)
             assertEquals(UpdateInspectionCommentRequest("Комментарий арендатора"), api.commentRequest)
-            assertEquals(listOf("comment", "signRenter"), api.callOrder)
+            assertEquals(listOf("metrics", "comment", "signRenter"), api.callOrder)
             assertEquals(1, api.signedAsRenterCalls)
             val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
             assertFalse(ready.act.canEditRenterFields)

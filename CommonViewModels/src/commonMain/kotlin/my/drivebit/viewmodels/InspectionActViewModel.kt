@@ -307,6 +307,18 @@ class InspectionActViewModelImpl(
     }
 
     private suspend fun signAsRenter(ready: InspectionActUiState.Ready): BookingInspectionActDto {
+        if (ready.act.canCurrentUserEditMetrics(InspectionActViewerRole.Renter)) {
+            val fuel = ready.fuelInput.toIntOrNull()
+            val mileage = ready.mileageInput.toIntOrNull()
+            if (fuel == null || mileage == null) {
+                error("Введите корректные значения топлива и пробега")
+            }
+            inspectionAct.updateMetrics(
+                bookingId = bookingId,
+                type = type,
+                request = UpdateInspectionMetricsRequest(fuel, mileage),
+            )
+        }
         if (ready.act.canCurrentUserEditComment(InspectionActViewerRole.Renter)) {
             inspectionAct.updateComment(
                 bookingId = bookingId,
