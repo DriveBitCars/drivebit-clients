@@ -1,12 +1,10 @@
 package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -345,47 +343,6 @@ private fun InspectionActReadyContent(
 }
 
 @Composable
-private fun BindInspectionPhotoInput(
-    inputId: String,
-    kind: InspectionPhotoKind,
-    viewModel: InspectionActViewModel,
-) {
-    val uploadScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
-    DisposableEffect(inputId, kind) {
-        val inputElement = document.getElementById(inputId) as? org.w3c.dom.HTMLInputElement
-        val changeHandler: (org.w3c.dom.events.Event) -> Unit = { event ->
-            val input = event.target as? org.w3c.dom.HTMLInputElement
-            val fileList = input?.files
-            if (fileList != null && fileList.length > 0) {
-                uploadScope.launch {
-                    val files =
-                        buildList {
-                            for (index in 0 until fileList.length) {
-                                val file = fileList.item(index) as? org.w3c.files.File ?: continue
-                                add(
-                                    InspectionActPhotoFile(
-                                        bytes = file.readAsBytes(),
-                                        fileName = file.name,
-                                        contentType = file.type.ifBlank { "image/jpeg" },
-                                    ),
-                                )
-                            }
-                        }
-                    if (files.isNotEmpty()) {
-                        viewModel.uploadPhotos(files = files, kind = kind)
-                    }
-                    input.value = ""
-                }
-            }
-        }
-        inputElement?.addEventListener("change", changeHandler)
-        onDispose {
-            inputElement?.removeEventListener("change", changeHandler)
-        }
-    }
-}
-
-@Composable
 private fun InspectionActPhotoSection(
     title: String,
     emptyText: String,
@@ -399,6 +356,7 @@ private fun InspectionActPhotoSection(
 ) {
     val act = ready.act
     val role = ready.viewerRole
+    val uploadScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
     Column(gap = 8.px) {
         Span({ style { fontWeight("600") } }) { Text(title) }
         if (canUploadPhotos && fileInputId != null) {
@@ -409,12 +367,32 @@ private fun InspectionActPhotoSection(
                 if (InspectionActAction.UploadPhoto in actionsInProgress) {
                     attr("disabled", "true")
                 }
+                onChange { event ->
+                    val input = event.target as? org.w3c.dom.HTMLInputElement
+                    val fileList = input?.files
+                    if (fileList == null || fileList.length == 0) return@onChange
+                    val selected =
+                        buildList {
+                            for (index in 0 until fileList.length) {
+                                val file = fileList.item(index) as? org.w3c.files.File ?: continue
+                                add(file)
+                            }
+                        }
+                    input.value = ""
+                    if (selected.isEmpty()) return@onChange
+                    uploadScope.launch {
+                        val files =
+                            selected.map { file ->
+                                InspectionActPhotoFile(
+                                    bytes = file.readAsBytes(),
+                                    fileName = file.name,
+                                    contentType = file.type.ifBlank { "image/jpeg" },
+                                )
+                            }
+                        viewModel.uploadPhotos(files = files, kind = kind)
+                    }
+                }
             }
-            BindInspectionPhotoInput(
-                inputId = fileInputId,
-                kind = kind,
-                viewModel = viewModel,
-            )
         }
         if (photos.isEmpty()) {
             if (emptyText.isNotBlank()) {
