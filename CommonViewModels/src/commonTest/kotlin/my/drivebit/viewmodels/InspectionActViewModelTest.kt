@@ -39,6 +39,9 @@ private class InspectionActFake : InspectionAct {
     var commentRequest: UpdateInspectionCommentRequest? = null
     var deletedPhotoId: String? = null
     var uploadedKind: InspectionPhotoKind? = null
+    val uploadedKinds = mutableListOf<InspectionPhotoKind>()
+    var uploadCallCount = 0
+    var failUploadAtCall: Int? = null
     var signedAsOwnerCalls = 0
     var signedAsRenterCalls = 0
     var failMutations = false
@@ -92,9 +95,11 @@ private class InspectionActFake : InspectionAct {
         contentType: String,
         kind: InspectionPhotoKind,
     ): BookingInspectionActPhotoDto {
-        if (failMutations) error("upload failed")
+        uploadCallCount++
+        if (failMutations || failUploadAtCall == uploadCallCount) error("upload failed")
         uploadedKind = kind
-        return samplePhoto()
+        uploadedKinds += kind
+        return samplePhoto(id = "photo-$uploadCallCount", kind = kind)
     }
 
     override suspend fun deletePhoto(
@@ -297,17 +302,75 @@ class InspectionActViewModelTest {
         }
 
     @Test
-    fun `upload photo always uses car kind`() =
+    fun `upload photo uses provided kind`() =
         runTest {
             val api = InspectionActFake()
             val viewModel = viewModel(api, userId = "renter-1")
             viewModel.load()
             advanceUntilIdle()
 
-            viewModel.uploadPhoto(byteArrayOf(1), "car.jpg", "image/jpeg")
+            viewModel.uploadPhoto(byteArrayOf(1), "car.jpg", "image/jpeg", InspectionPhotoKind.Car)
+            advanceUntilIdle()
+            assertEquals(InspectionPhotoKind.Car, api.uploadedKind)
+
+            viewModel.uploadPhoto(byteArrayOf(2), "dash.jpg", "image/jpeg", InspectionPhotoKind.Dashboard)
+            advanceUntilIdle()
+            assertEquals(InspectionPhotoKind.Dashboard, api.uploadedKind)
+            assertEquals(
+                listOf(InspectionPhotoKind.Car, InspectionPhotoKind.Dashboard),
+                api.uploadedKinds,
+            )
+        }
+
+    @Test
+    fun `upload photos uploads all files and reports status`() =
+        runTest {
+            val api = InspectionActFake()
+            val viewModel = viewModel(api, userId = "renter-1")
+            viewModel.load()
             advanceUntilIdle()
 
-            assertEquals(InspectionPhotoKind.Car, api.uploadedKind)
+            viewModel.uploadPhotos(
+                files =
+                    listOf(
+                        InspectionActPhotoFile(byteArrayOf(1), "a.jpg", "image/jpeg"),
+                        InspectionActPhotoFile(byteArrayOf(2), "b.jpg", "image/jpeg"),
+                        InspectionActPhotoFile(byteArrayOf(3), "c.jpg", "image/jpeg"),
+                    ),
+                kind = InspectionPhotoKind.Car,
+            )
+            advanceUntilIdle()
+
+            assertEquals(3, api.uploadCallCount)
+            assertEquals("Загружено фото: 3", viewModel.photoUploadStatus.value)
+            val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertEquals(3, ready.act.photos?.size)
+        }
+
+    @Test
+    fun `upload photos reports partial status when some files fail`() =
+        runTest {
+            val api = InspectionActFake().apply { failUploadAtCall = 2 }
+            val viewModel = viewModel(api, userId = "renter-1")
+            viewModel.load()
+            advanceUntilIdle()
+
+            viewModel.uploadPhotos(
+                files =
+                    listOf(
+                        InspectionActPhotoFile(byteArrayOf(1), "a.jpg", "image/jpeg"),
+                        InspectionActPhotoFile(byteArrayOf(2), "b.jpg", "image/jpeg"),
+                        InspectionActPhotoFile(byteArrayOf(3), "c.jpg", "image/jpeg"),
+                    ),
+                kind = InspectionPhotoKind.Dashboard,
+            )
+            advanceUntilIdle()
+
+            assertEquals(3, api.uploadCallCount)
+            assertEquals("Загружено 2 из 3", viewModel.photoUploadStatus.value)
+            val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertEquals(2, ready.act.photos?.size)
+            assertTrue(ready.act.photos.orEmpty().all { it.kind == InspectionPhotoKind.Dashboard })
         }
 
     @Test
@@ -411,13 +474,15 @@ private fun sampleAct() =
         updatedAt = "2026-08-29T08:00:00Z",
     )
 
-private fun samplePhoto() =
-    BookingInspectionActPhotoDto(
-        id = "photo-1",
-        authorId = "author-1",
-        kind = InspectionPhotoKind.Car,
-        uploadedAt = "2026-08-29T08:30:00Z",
-    )
+private fun samplePhoto(
+    id: String = "photo-1",
+    kind: InspectionPhotoKind = InspectionPhotoKind.Car,
+) = BookingInspectionActPhotoDto(
+    id = id,
+    authorId = "author-1",
+    kind = kind,
+    uploadedAt = "2026-08-29T08:30:00Z",
+)
 
 private fun sampleDownload() =
     BookingInspectionActDownloadDto(

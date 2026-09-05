@@ -37,10 +37,12 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import my.drivebit.mobile.documents.rememberDocumentImagePicker
 import my.drivebit.network.services.BookingInspectionActDto
+import my.drivebit.network.services.BookingInspectionActPhotoDto
 import my.drivebit.network.services.INSPECTION_ACT_FUEL_LABEL
 import my.drivebit.network.services.INSPECTION_ACT_MILEAGE_LABEL
 import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.InspectionActViewerRole
+import my.drivebit.network.services.InspectionPhotoKind
 import my.drivebit.network.services.canCurrentUserDelete
 import my.drivebit.network.services.canCurrentUserEditComment
 import my.drivebit.network.services.canCurrentUserEditMetrics
@@ -53,6 +55,7 @@ import my.drivebit.network.services.inspectionActTitle
 import my.drivebit.ui.components.ApplicationTopBar
 import my.drivebit.viewmodels.InspectionActAction
 import my.drivebit.viewmodels.InspectionActEffect
+import my.drivebit.viewmodels.InspectionActPhotoFile
 import my.drivebit.viewmodels.InspectionActUiState
 import my.drivebit.viewmodels.InspectionActViewModel
 import org.koin.compose.currentKoinScope
@@ -73,6 +76,7 @@ data class InspectionActScreen(
             }
         val state by viewModel.state.collectAsState()
         val error by viewModel.error.collectAsState()
+        val photoUploadStatus by viewModel.photoUploadStatus.collectAsState()
         val actionsInProgress by viewModel.actionsInProgress.collectAsState()
 
         LaunchedEffect(bookingId, type) {
@@ -139,6 +143,7 @@ data class InspectionActScreen(
                                         }
                                             }.orEmpty(),
                                 error = error,
+                                photoUploadStatus = photoUploadStatus,
                                 actionsInProgress = actionsInProgress,
                                 viewModel = viewModel,
                             )
@@ -156,6 +161,7 @@ data class InspectionActScreen(
                             mileageInput = current.mileageInput,
                             commentInput = current.commentInput,
                             error = error,
+                            photoUploadStatus = photoUploadStatus,
                             actionsInProgress = actionsInProgress,
                             viewModel = viewModel,
                         )
@@ -177,6 +183,7 @@ private fun InspectionActReadyBody(
     mileageInput: String,
     commentInput: String,
     error: String?,
+    photoUploadStatus: String?,
     actionsInProgress: Set<InspectionActAction>,
     viewModel: InspectionActViewModel,
 ) {
@@ -184,12 +191,25 @@ private fun InspectionActReadyBody(
     val canEditComment = viewerRole != null && act.canCurrentUserEditComment(viewerRole)
     val canUploadPhotos = viewerRole != null && act.canCurrentUserUploadPhotos(viewerRole)
     val canSign = viewerRole != null && act.canCurrentUserSign(viewerRole)
-    val pickPhotos =
-        rememberDocumentImagePicker { bytes, fileName, contentType ->
-            viewModel.uploadPhoto(
-                bytes = bytes,
-                fileName = fileName,
-                contentType = contentType,
+    val uploading = InspectionActAction.UploadPhoto in actionsInProgress
+    val pickCarPhotos =
+        rememberDocumentImagePicker(allowMultiple = true) { images ->
+            viewModel.uploadPhotos(
+                files =
+                    images.map {
+                        InspectionActPhotoFile(it.bytes, it.fileName, it.contentType)
+                    },
+                kind = InspectionPhotoKind.Car,
+            )
+        }
+    val pickDashboardPhotos =
+        rememberDocumentImagePicker(allowMultiple = true) { images ->
+            viewModel.uploadPhotos(
+                files =
+                    images.map {
+                        InspectionActPhotoFile(it.bytes, it.fileName, it.contentType)
+                    },
+                kind = InspectionPhotoKind.Dashboard,
             )
         }
 
@@ -268,67 +288,66 @@ private fun InspectionActReadyBody(
         )
     }
 
-    Text(
-        text = "Фотографии автомобиля",
-        style = MaterialTheme.typography.titleSmall,
-    )
-    if (canUploadPhotos) {
-        OutlinedButton(
-            onClick = pickPhotos,
-            enabled = InspectionActAction.UploadPhoto !in actionsInProgress,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                if (InspectionActAction.UploadPhoto in actionsInProgress) {
-                    "Загрузка…"
-                } else {
-                    "Добавить фото"
-                },
-            )
-        }
-    }
-    val photos = act.photos.orEmpty()
-    if (photos.isEmpty()) {
+    photoUploadStatus?.let { status ->
         Text(
-            text = "Фотографий пока нет",
-            style = MaterialTheme.typography.bodyMedium,
+            text = status,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-    } else {
-        photos.forEach { photo ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                photo.url?.takeIf { it.isNotBlank() }?.let { url ->
-                    AsyncImage(
-                        model = url,
-                        contentDescription = "Фото автомобиля",
-                        modifier = Modifier.size(72.dp),
-                        contentScale = ContentScale.Crop,
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                if (
-                    viewerRole != null &&
-                    photo.canCurrentUserDelete(
-                        role = viewerRole,
-                        ownerId = ownerId,
-                        renterId = renterId,
-                        canEditOwnerFields = act.canEditOwnerFields,
-                        canEditRenterFields = act.canEditRenterFields,
-                    )
-                ) {
-                    TextButton(
-                        onClick = { viewModel.deletePhoto(photo.id) },
-                        enabled = InspectionActAction.DeletePhoto !in actionsInProgress,
-                    ) {
-                        Text("Удалить")
-                    }
-                }
-            }
-        }
+    }
+
+    InspectionActPhotoSection(
+        title = "Фотографии автомобиля",
+        emptyText = "Фотографий автомобиля пока нет",
+        photos = act.photos.orEmpty().filter { it.kind == InspectionPhotoKind.Car },
+        canUploadPhotos = canUploadPhotos,
+        uploading = uploading,
+        uploadLabel = if (uploading) "Загрузка…" else "Добавить фото автомобиля",
+        onUploadClick = pickCarPhotos,
+        viewerRole = viewerRole,
+        ownerId = ownerId,
+        renterId = renterId,
+        canEditOwnerFields = act.canEditOwnerFields,
+        canEditRenterFields = act.canEditRenterFields,
+        actionsInProgress = actionsInProgress,
+        onDelete = viewModel::deletePhoto,
+    )
+
+    InspectionActPhotoSection(
+        title = "Приборная панель",
+        emptyText = "Фотографий приборной панели пока нет",
+        photos = act.photos.orEmpty().filter { it.kind == InspectionPhotoKind.Dashboard },
+        canUploadPhotos = canUploadPhotos,
+        uploading = uploading,
+        uploadLabel = if (uploading) "Загрузка…" else "Добавить фото панели",
+        onUploadClick = pickDashboardPhotos,
+        viewerRole = viewerRole,
+        ownerId = ownerId,
+        renterId = renterId,
+        canEditOwnerFields = act.canEditOwnerFields,
+        canEditRenterFields = act.canEditRenterFields,
+        actionsInProgress = actionsInProgress,
+        onDelete = viewModel::deletePhoto,
+    )
+
+    val otherPhotos = act.photos.orEmpty().filter { it.kind == InspectionPhotoKind.Other }
+    if (otherPhotos.isNotEmpty()) {
+        InspectionActPhotoSection(
+            title = "Другие фото",
+            emptyText = "",
+            photos = otherPhotos,
+            canUploadPhotos = false,
+            uploading = false,
+            uploadLabel = "",
+            onUploadClick = {},
+            viewerRole = viewerRole,
+            ownerId = ownerId,
+            renterId = renterId,
+            canEditOwnerFields = act.canEditOwnerFields,
+            canEditRenterFields = act.canEditRenterFields,
+            actionsInProgress = actionsInProgress,
+            onDelete = viewModel::deletePhoto,
+        )
     }
 
     Text(
@@ -378,3 +397,80 @@ private fun InspectionActReadyBody(
     }
     Spacer(modifier = Modifier.height(8.dp))
 }
+
+@Composable
+private fun InspectionActPhotoSection(
+    title: String,
+    emptyText: String,
+    photos: List<BookingInspectionActPhotoDto>,
+    canUploadPhotos: Boolean,
+    uploading: Boolean,
+    uploadLabel: String,
+    onUploadClick: () -> Unit,
+    viewerRole: InspectionActViewerRole?,
+    ownerId: String,
+    renterId: String,
+    canEditOwnerFields: Boolean,
+    canEditRenterFields: Boolean,
+    actionsInProgress: Set<InspectionActAction>,
+    onDelete: (String) -> Unit,
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+    )
+    if (canUploadPhotos) {
+        OutlinedButton(
+            onClick = onUploadClick,
+            enabled = !uploading,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(uploadLabel)
+        }
+    }
+    if (photos.isEmpty()) {
+        if (emptyText.isNotBlank()) {
+            Text(
+                text = emptyText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    } else {
+        photos.forEach { photo ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                photo.url?.takeIf { it.isNotBlank() }?.let { url ->
+                    AsyncImage(
+                        model = url,
+                        contentDescription = title,
+                        modifier = Modifier.size(72.dp),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                if (
+                    viewerRole != null &&
+                    photo.canCurrentUserDelete(
+                        role = viewerRole,
+                        ownerId = ownerId,
+                        renterId = renterId,
+                        canEditOwnerFields = canEditOwnerFields,
+                        canEditRenterFields = canEditRenterFields,
+                    )
+                ) {
+                    TextButton(
+                        onClick = { onDelete(photo.id) },
+                        enabled = InspectionActAction.DeletePhoto !in actionsInProgress,
+                    ) {
+                        Text("Удалить")
+                    }
+                }
+            }
+        }
+    }
+}
+
