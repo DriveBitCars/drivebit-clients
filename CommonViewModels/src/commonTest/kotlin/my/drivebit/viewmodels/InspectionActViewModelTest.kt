@@ -438,6 +438,19 @@ class InspectionActViewModelTest {
         }
 
     @Test
+    fun `sign when not ready exposes error instead of silent no-op`() =
+        runTest {
+            val api = InspectionActFake()
+            val viewModel = viewModel(api, userId = "owner-1")
+
+            viewModel.sign()
+            advanceUntilIdle()
+
+            assertEquals(0, api.signedAsOwnerCalls)
+            assertEquals("Акт ещё не загружен", viewModel.error.value)
+        }
+
+    @Test
     fun `failed sign preserves previous act and exposes error`() =
         runTest {
             val api = InspectionActFake().apply { failMutations = true }

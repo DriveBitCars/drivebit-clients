@@ -319,23 +319,51 @@ private fun InspectionActReadyContent(
                 }
             }
             if (canSign) {
+                val signing = InspectionActAction.Sign in actionsInProgress
                 Button({
-                    onClick { viewModel.sign() }
-                    if (InspectionActAction.Sign in actionsInProgress) {
-                        disabled()
+                    attr("type", "button")
+                    style {
+                        padding(12.px, 24.px)
+                        backgroundColor(CSSColors.Blue)
+                        color(CSSColors.White)
+                        border(0.px)
+                        borderRadius(8.px)
+                        fontSize(14.px)
+                        fontWeight("600")
+                        cursor(if (signing) "default" else "pointer")
+                        property("opacity", if (signing) "0.6" else "1")
+                    }
+                    onClick {
+                        if (!signing) {
+                            viewModel.sign()
+                        }
                     }
                 }) {
-                    Text("Подписать")
+                    Text(if (signing) "Подписание..." else "Подписать")
                 }
             }
             if (act.hasPdf) {
+                val downloading = InspectionActAction.DownloadPdf in actionsInProgress
                 Button({
-                    onClick { viewModel.downloadPdf() }
-                    if (InspectionActAction.DownloadPdf in actionsInProgress) {
-                        disabled()
+                    attr("type", "button")
+                    style {
+                        padding(12.px, 24.px)
+                        backgroundColor(CSSColors.Blue)
+                        color(CSSColors.White)
+                        border(0.px)
+                        borderRadius(8.px)
+                        fontSize(14.px)
+                        fontWeight("600")
+                        cursor(if (downloading) "default" else "pointer")
+                        property("opacity", if (downloading) "0.6" else "1")
+                    }
+                    onClick {
+                        if (!downloading) {
+                            viewModel.downloadPdf()
+                        }
                     }
                 }) {
-                    Text("Скачать PDF")
+                    Text(if (downloading) "Подготовка PDF..." else "Скачать PDF")
                 }
             }
         }

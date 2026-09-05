@@ -253,7 +253,11 @@ class InspectionActViewModelImpl(
     }
 
     override fun sign() {
-        val ready = state.value as? InspectionActUiState.Ready ?: return
+        val ready =
+            state.value as? InspectionActUiState.Ready ?: run {
+                showError("Акт ещё не загружен", lastAct)
+                return
+            }
         val role =
             ready.viewerRole ?: run {
                 showError("Нет доступа к подписанию акта", lastAct)
