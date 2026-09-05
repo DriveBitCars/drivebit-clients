@@ -14,9 +14,11 @@ import kotlinx.coroutines.launch
 import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingInspectionActDownloadDto
 import my.drivebit.network.services.BookingInspectionActDto
+import my.drivebit.network.services.BookingInspectionActPhotoDto
 import my.drivebit.network.services.InspectionAct
 import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.InspectionActViewerRole
+import my.drivebit.network.services.InspectionPhotoKind
 import my.drivebit.network.services.UpdateInspectionCommentRequest
 import my.drivebit.network.services.UpdateInspectionMetricsRequest
 import my.drivebit.network.services.User
@@ -24,8 +26,13 @@ import my.drivebit.network.services.canCurrentUserEditComment
 import my.drivebit.network.services.canCurrentUserEditMetrics
 import my.drivebit.network.services.canCurrentUserUploadPhotos
 import my.drivebit.network.services.commentInputFor
-import my.drivebit.network.services.inspectionActPhotoKind
 import my.drivebit.network.services.resolveInspectionActViewerRole
+
+data class InspectionActPhotoFile(
+    val bytes: ByteArray,
+    val fileName: String,
+    val contentType: String,
+)
 
 sealed interface InspectionActUiState {
     data object Idle : InspectionActUiState
@@ -72,6 +79,7 @@ sealed interface InspectionActEffect {
 interface InspectionActViewModel {
     val state: StateFlow<InspectionActUiState>
     val error: StateFlow<String?>
+    val photoUploadStatus: StateFlow<String?>
     val actionsInProgress: StateFlow<Set<InspectionActAction>>
     val effects: SharedFlow<InspectionActEffect>
 
@@ -87,6 +95,12 @@ interface InspectionActViewModel {
         bytes: ByteArray,
         fileName: String,
         contentType: String,
+        kind: InspectionPhotoKind,
+    )
+
+    fun uploadPhotos(
+        files: List<InspectionActPhotoFile>,
+        kind: InspectionPhotoKind,
     )
 
     fun deletePhoto(photoId: String)
@@ -109,6 +123,9 @@ class InspectionActViewModelImpl(
 
     private val _error = MutableStateFlow<String?>(null)
     override val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _photoUploadStatus = MutableStateFlow<String?>(null)
+    override val photoUploadStatus: StateFlow<String?> = _photoUploadStatus.asStateFlow()
 
     private val _actionsInProgress = MutableStateFlow<Set<InspectionActAction>>(emptySet())
     override val actionsInProgress: StateFlow<Set<InspectionActAction>> = _actionsInProgress.asStateFlow()
@@ -171,21 +188,60 @@ class InspectionActViewModelImpl(
         bytes: ByteArray,
         fileName: String,
         contentType: String,
+        kind: InspectionPhotoKind,
     ) {
+        uploadPhotos(
+            files = listOf(InspectionActPhotoFile(bytes, fileName, contentType)),
+            kind = kind,
+        )
+    }
+
+    override fun uploadPhotos(
+        files: List<InspectionActPhotoFile>,
+        kind: InspectionPhotoKind,
+    ) {
+        if (files.isEmpty()) return
         val ready = state.value as? InspectionActUiState.Ready ?: return
         if (!ready.act.canCurrentUserUploadPhotos(ready.viewerRole ?: return)) return
-        launchMutation(InspectionActAction.UploadPhoto) {
-            val photo =
-                inspectionAct.uploadPhoto(
-                    bookingId = bookingId,
-                    type = type,
-                    fileBytes = bytes,
-                    fileName = fileName,
-                    contentType = contentType,
-                    kind = inspectionActPhotoKind,
-                )
-            val current = lastAct ?: return@launchMutation null
-            current.copy(photos = (current.photos.orEmpty() + photo))
+        if (!begin(InspectionActAction.UploadPhoto)) return
+        _photoUploadStatus.value = "Загрузка 0 из ${files.size}…"
+        coroutineScope.launch {
+            try {
+                val uploaded = mutableListOf<BookingInspectionActPhotoDto>()
+                for ((index, file) in files.withIndex()) {
+                    _photoUploadStatus.value = "Загрузка ${index + 1} из ${files.size}…"
+                    try {
+                        uploaded +=
+                            inspectionAct.uploadPhoto(
+                                bookingId = bookingId,
+                                type = type,
+                                fileBytes = file.bytes,
+                                fileName = file.fileName,
+                                contentType = file.contentType,
+                                kind = kind,
+                            )
+                    } catch (_: Throwable) {
+                        // continue remaining files; status reflects partial success below
+                    }
+                }
+                val current = lastAct
+                if (current != null && uploaded.isNotEmpty()) {
+                    applyAct(current.copy(photos = current.photos.orEmpty() + uploaded))
+                }
+                _photoUploadStatus.value =
+                    when {
+                        uploaded.size == files.size -> "Загружено фото: ${uploaded.size}"
+                        uploaded.isEmpty() -> "Не удалось загрузить фото"
+                        else -> "Загружено ${uploaded.size} из ${files.size}"
+                    }
+                if (uploaded.isEmpty()) {
+                    showError("Не удалось загрузить фото", lastAct)
+                } else {
+                    _error.value = null
+                }
+            } finally {
+                finish(InspectionActAction.UploadPhoto)
+            }
         }
     }
 

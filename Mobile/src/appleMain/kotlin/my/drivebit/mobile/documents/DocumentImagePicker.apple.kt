@@ -5,7 +5,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 
 @Composable
 actual fun rememberDocumentImagePicker(
-    onPicked: (ByteArray, String, String) -> Unit,
+    allowMultiple: Boolean,
+    onPicked: (List<PickedDocumentImage>) -> Unit,
 ): () -> Unit {
     val uriHandler = LocalUriHandler.current
     return { uriHandler.openUri("https://drivebit.ru/documents") }

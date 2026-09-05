@@ -1,5 +1,6 @@
 package my.drivebit.mobile.documents
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -11,25 +12,55 @@ import kotlinx.coroutines.withContext
 
 @Composable
 actual fun rememberDocumentImagePicker(
-    onPicked: (ByteArray, String, String) -> Unit,
+    allowMultiple: Boolean,
+    onPicked: (List<PickedDocumentImage>) -> Unit,
 ): () -> Unit {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val launcher =
+
+    suspend fun readUri(uri: Uri): PickedDocumentImage? {
+        val resolver = context.contentResolver
+        val bytes =
+            withContext(Dispatchers.IO) {
+                resolver.openInputStream(uri)?.use { it.readBytes() }
+            } ?: return null
+        val mime = resolver.getType(uri) ?: "image/jpeg"
+        val name = uri.lastPathSegment ?: "image.jpg"
+        return PickedDocumentImage(bytes, name, mime)
+    }
+
+    val singleLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent(),
         ) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
-            val resolver = context.contentResolver
             scope.launch {
-                val bytes =
-                    withContext(Dispatchers.IO) {
-                        resolver.openInputStream(uri)?.use { it.readBytes() }
-                    } ?: return@launch
-                val mime = resolver.getType(uri) ?: "image/jpeg"
-                val name = uri.lastPathSegment ?: "image.jpg"
-                onPicked(bytes, name, mime)
+                val picked = readUri(uri) ?: return@launch
+                onPicked(listOf(picked))
             }
         }
-    return { launcher.launch("image/*") }
+
+    val multiLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetMultipleContents(),
+        ) { uris ->
+            if (uris.isEmpty()) return@rememberLauncherForActivityResult
+            scope.launch {
+                val picked =
+                    uris.mapNotNull { uri ->
+                        readUri(uri)
+                    }
+                if (picked.isNotEmpty()) {
+                    onPicked(picked)
+                }
+            }
+        }
+
+    return {
+        if (allowMultiple) {
+            multiLauncher.launch("image/*")
+        } else {
+            singleLauncher.launch("image/*")
+        }
+    }
 }

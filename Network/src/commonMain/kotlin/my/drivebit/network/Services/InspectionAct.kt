@@ -162,8 +162,6 @@ enum class InspectionPhotoKind {
     Other,
 }
 
-val inspectionActPhotoKind: InspectionPhotoKind = InspectionPhotoKind.Car
-
 interface InspectionAct {
     suspend fun get(
         bookingId: String,
