@@ -363,6 +363,31 @@ class InspectionActTest {
     }
 
     @Test
+    fun `canCurrentUserEditMetrics follows edit flags for owner and renter`() {
+        val act =
+            BookingInspectionActDto(
+                id = "act-1",
+                bookingId = "booking-1",
+                type = InspectionActType.Handover,
+                actNumber = 1,
+                status = InspectionActStatus.Draft,
+                canEditOwnerFields = true,
+                canEditRenterFields = true,
+                createdAt = "2026-08-29T08:00:00Z",
+                updatedAt = "2026-08-29T08:00:00Z",
+            )
+
+        assertTrue(act.canCurrentUserEditMetrics(InspectionActViewerRole.Owner))
+        assertTrue(act.canCurrentUserEditMetrics(InspectionActViewerRole.Renter))
+        assertFalse(
+            act.copy(canEditOwnerFields = false).canCurrentUserEditMetrics(InspectionActViewerRole.Owner),
+        )
+        assertFalse(
+            act.copy(canEditRenterFields = false).canCurrentUserEditMetrics(InspectionActViewerRole.Renter),
+        )
+    }
+
+    @Test
     fun `canCurrentUserSign respects viewer role`() {
         val act =
             BookingInspectionActDto(
