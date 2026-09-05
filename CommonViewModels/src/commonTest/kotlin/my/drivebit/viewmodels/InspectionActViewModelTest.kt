@@ -277,7 +277,34 @@ class InspectionActViewModelTest {
 
             assertEquals(null, api.metricsRequest)
             assertEquals(0, api.signedAsOwnerCalls)
-            assertIs<InspectionActUiState.Error>(viewModel.state.value)
+            val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertEquals("abc", ready.fuelInput)
+            assertEquals("Введите корректные значения топлива и пробега", viewModel.error.value)
+        }
+
+    @Test
+    fun `after failed sign form stays editable and sign can retry`() =
+        runTest {
+            val api = InspectionActFake()
+            val viewModel = viewModel(api, userId = "owner-1")
+            viewModel.load()
+            advanceUntilIdle()
+
+            viewModel.setFuelInput("abc")
+            viewModel.setMileageInput("121000")
+            viewModel.sign()
+            advanceUntilIdle()
+            assertEquals(0, api.signedAsOwnerCalls)
+
+            viewModel.setFuelInput("80")
+            viewModel.setCommentInput("После ошибки")
+            viewModel.sign()
+            advanceUntilIdle()
+
+            assertEquals(UpdateInspectionMetricsRequest(80, 121000), api.metricsRequest)
+            assertEquals(1, api.signedAsOwnerCalls)
+            assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertEquals(null, viewModel.error.value)
         }
 
     @Test
@@ -421,8 +448,8 @@ class InspectionActViewModelTest {
             viewModel.sign()
             advanceUntilIdle()
 
-            val state = assertIs<InspectionActUiState.Error>(viewModel.state.value)
-            assertEquals(75, state.previousAct?.fuelRemaining)
+            val state = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertEquals(75, state.act.fuelRemaining)
             assertFalse(viewModel.error.value.isNullOrBlank())
         }
 

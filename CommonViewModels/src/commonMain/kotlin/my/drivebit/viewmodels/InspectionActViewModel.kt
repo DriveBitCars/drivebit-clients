@@ -393,6 +393,9 @@ class InspectionActViewModelImpl(
         previousAct: BookingInspectionActDto?,
     ) {
         _error.value = message
+        if (_state.value is InspectionActUiState.Ready) {
+            return
+        }
         _state.value =
             InspectionActUiState.Error(
                 message = message,
