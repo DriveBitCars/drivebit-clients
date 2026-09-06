@@ -199,10 +199,6 @@ fun BookingDTO.statusAllowsInspectionAct(): Boolean =
         status.equals("Active", ignoreCase = true) ||
         status.equals("Completed", ignoreCase = true)
 
-fun BookingDTO.statusAllowsReturnInspectionAct(): Boolean =
-    status.equals("Active", ignoreCase = true) ||
-        status.equals("Completed", ignoreCase = true)
-
 fun BookingDTO.handoverActFullySigned(): Boolean =
     handoverActStatus == InspectionActStatus.SignedByBoth
 
@@ -210,7 +206,7 @@ fun BookingDTO.visibleInspectionActTypes(): List<InspectionActType> {
     if (!statusAllowsInspectionAct()) return emptyList()
     return buildList {
         add(InspectionActType.Handover)
-        if (statusAllowsReturnInspectionAct() && handoverActFullySigned()) {
+        if (handoverActFullySigned()) {
             add(InspectionActType.Return)
         }
     }
