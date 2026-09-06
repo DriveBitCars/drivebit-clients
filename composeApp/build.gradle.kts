@@ -290,6 +290,7 @@ val accountShellRoutes =
         "change-phone",
         "change-password",
         "inspection-act",
+        "inspection-act/photo",
     )
 
 tasks.named<org.gradle.api.tasks.Copy>("jsProcessResources").configure {

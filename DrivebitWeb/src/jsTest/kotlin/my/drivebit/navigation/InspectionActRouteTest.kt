@@ -42,6 +42,7 @@ class InspectionActRouteTest {
         assertTrue(isAccountBundlePath("/inspection-act/photo"))
         assertTrue(isInspectionActPhotoPath("/inspection-act/photo"))
         assertTrue(isInspectionActPhotoPath(inspectionActPhotoPagePath("https://cdn.example/a.jpg")))
+        assertTrue("inspection-act/photo" in accountBundleShellRoutes)
         assertNull(parseCityPath("/inspection-act/photo"))
     }
 }

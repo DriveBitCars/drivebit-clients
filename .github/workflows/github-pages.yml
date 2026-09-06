@@ -89,6 +89,22 @@ jobs:
         ACCOUNT="accountApp/build/dist/js/productionExecutable"
         cp "$ACCOUNT/account.js" "$DIST/"
         test -f "$DIST/account.js"
+        for route in \
+          my-city-selection my-bookings leave-review my-deals documents \
+          download-booking-contract payment edit-name change-email change-phone \
+          change-password inspection-act
+        do
+          if [ -d "$ACCOUNT/$route" ]; then
+            cp -r "$ACCOUNT/$route" "$DIST/"
+          fi
+        done
+        # Nested SPA shell for fullscreen photo viewer (GitHub Pages needs real directory)
+        if [ -d "$ACCOUNT/inspection-act/photo" ]; then
+          mkdir -p "$DIST/inspection-act"
+          cp -r "$ACCOUNT/inspection-act/photo" "$DIST/inspection-act/"
+        fi
+        test -f "$DIST/inspection-act/index.html"
+        test -f "$DIST/inspection-act/photo/index.html"
         PROFILE="profileApp/build/dist/js/productionExecutable"
         cp "$PROFILE/profile.js" "$DIST/"
         cp -r "$PROFILE/profile" "$DIST/"
