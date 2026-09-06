@@ -42,4 +42,5 @@ val accountBundleShellRoutes: List<String> =
         "change-phone",
         "change-password",
         "inspection-act",
+        "inspection-act/photo",
     )
