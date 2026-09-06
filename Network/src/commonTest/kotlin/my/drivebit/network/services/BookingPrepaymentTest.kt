@@ -129,10 +129,32 @@ class BookingPrepaymentTest {
     }
 
     @Test
+    fun visibleInspectionActTypes_paidWithSignedHandoverShowsHandoverAndReturn() {
+        assertEquals(
+            listOf(InspectionActType.Handover, InspectionActType.Return),
+            booking(
+                status = "Paid",
+                handoverActStatus = InspectionActStatus.SignedByBoth,
+            ).visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
     fun visibleInspectionActTypes_contractSignedByBothShowsHandover() {
         assertEquals(
             listOf(InspectionActType.Handover),
             booking(status = "ContractSignedByBoth").visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
+    fun visibleInspectionActTypes_contractSignedByBothWithSignedHandoverShowsReturn() {
+        assertEquals(
+            listOf(InspectionActType.Handover, InspectionActType.Return),
+            booking(
+                status = "ContractSignedByBoth",
+                handoverActStatus = InspectionActStatus.SignedByBoth,
+            ).visibleInspectionActTypes(),
         )
     }
 
