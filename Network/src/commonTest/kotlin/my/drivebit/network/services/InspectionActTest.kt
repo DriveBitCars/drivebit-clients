@@ -114,6 +114,22 @@ class InspectionActTest {
     }
 
     @Test
+    fun `inspection act photo page path encodes reserved query characters`() {
+        val path = inspectionActPhotoPagePath("https://cdn.example/photo.jpg?x=1&y=2")
+        assertTrue(path.startsWith("/inspection-act/photo?url="))
+        assertFalse(path.contains("&y="))
+        assertTrue(path.contains("y"))
+    }
+
+    @Test
+    fun `inspection act photo path is distinct from act page`() {
+        assertTrue(isInspectionActPhotoPath("/inspection-act/photo"))
+        assertTrue(isInspectionActPhotoPath("/inspection-act/photo?url=abc"))
+        assertFalse(isInspectionActPhotoPath("/inspection-act"))
+        assertFalse(isInspectionActPhotoPath("/inspection-act?bookingId=1&type=Handover"))
+    }
+
+    @Test
     fun `get uses inspection act path`() =
         runTest {
             val request =

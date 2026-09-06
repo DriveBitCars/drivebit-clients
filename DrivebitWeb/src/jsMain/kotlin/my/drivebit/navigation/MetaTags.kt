@@ -230,6 +230,7 @@ object MetaTags {
             when {
                 normalizedPath.startsWith("/car-detail") -> "/car-detail"
                 normalizedPath.startsWith("/car-photos-gallery") -> "/car-photos-gallery"
+                normalizedPath.startsWith("/inspection-act") -> "/inspection-act"
                 else -> canonicalizeBrandSearchPath(normalizedPath) ?: normalizedPath
             }
         val seoBlock = SeoLandingBlocks.blockForPath(lookupPath)
