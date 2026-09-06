@@ -1,14 +1,13 @@
 package my.drivebit.mobile.screens.main
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -40,6 +39,7 @@ import my.drivebit.network.services.BookingInspectionActDto
 import my.drivebit.network.services.BookingInspectionActPhotoDto
 import my.drivebit.network.services.INSPECTION_ACT_FUEL_LABEL
 import my.drivebit.network.services.INSPECTION_ACT_MILEAGE_LABEL
+import my.drivebit.network.services.INSPECTION_ACT_PHOTO_THUMBNAIL_PX
 import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.InspectionActViewerRole
 import my.drivebit.network.services.InspectionPhotoKind
@@ -437,21 +437,26 @@ private fun InspectionActPhotoSection(
             )
         }
     } else {
+        val navigator = LocalNavigator.currentOrThrow
         photos.forEach { photo ->
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 photo.url?.takeIf { it.isNotBlank() }?.let { url ->
                     AsyncImage(
                         model = url,
                         contentDescription = title,
-                        modifier = Modifier.size(72.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(INSPECTION_ACT_PHOTO_THUMBNAIL_PX.dp)
+                                .clickable {
+                                    navigator.push(InspectionActPhotoScreen(photoUrl = url, title = title))
+                                },
                         contentScale = ContentScale.Crop,
                     )
                 }
-                Spacer(modifier = Modifier.weight(1f))
                 if (
                     viewerRole != null &&
                     photo.canCurrentUserDelete(

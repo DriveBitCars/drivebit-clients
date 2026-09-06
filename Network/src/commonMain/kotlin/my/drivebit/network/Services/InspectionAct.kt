@@ -12,6 +12,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLQueryComponent
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 import my.drivebit.network.DEFAULT_BASE_URL
@@ -36,6 +37,16 @@ fun inspectionActPageUrl(
     bookingId: String,
     type: InspectionActType,
 ): String = "https://drivebit.ru${inspectionActPagePath(bookingId, type)}"
+
+const val INSPECTION_ACT_PHOTO_THUMBNAIL_PX = 200
+
+fun inspectionActPhotoPagePath(photoUrl: String): String =
+    "/inspection-act/photo?url=${photoUrl.encodeURLQueryComponent(encodeFull = true)}"
+
+fun isInspectionActPhotoPath(path: String): Boolean {
+    val normalized = path.substringBefore("?").removeSuffix("/").ifEmpty { "/" }
+    return normalized == "/inspection-act/photo"
+}
 
 fun inspectionActTitle(type: InspectionActType): String =
     when (type) {

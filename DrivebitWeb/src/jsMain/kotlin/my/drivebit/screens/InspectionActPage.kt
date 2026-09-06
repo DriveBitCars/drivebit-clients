@@ -22,6 +22,7 @@ import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.network.services.INSPECTION_ACT_FUEL_LABEL
 import my.drivebit.network.services.INSPECTION_ACT_MILEAGE_LABEL
+import my.drivebit.network.services.INSPECTION_ACT_PHOTO_THUMBNAIL_PX
 import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.InspectionActViewerRole
 import my.drivebit.network.services.InspectionPhotoKind
@@ -33,6 +34,7 @@ import my.drivebit.network.services.canCurrentUserSign
 import my.drivebit.network.services.canCurrentUserUploadPhotos
 import my.drivebit.network.services.counterpartySignStatusMessage
 import my.drivebit.network.services.currentUserSignStatusMessage
+import my.drivebit.network.services.inspectionActPhotoPagePath
 import my.drivebit.network.services.inspectionActStatusLabel
 import my.drivebit.network.services.inspectionActTitle
 import my.drivebit.shared.storage.Storage
@@ -51,6 +53,7 @@ import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Span
@@ -384,6 +387,7 @@ private fun InspectionActPhotoSection(
 ) {
     val act = ready.act
     val role = ready.viewerRole
+    val navigationController = LocalNavigationController.current
     val uploadScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
     Column(gap = 8.px) {
         Span({ style { fontWeight("600") } }) { Text(title) }
@@ -427,31 +431,49 @@ private fun InspectionActPhotoSection(
                 Span({ style { color(CSSColors.Gray600) } }) { Text(emptyText) }
             }
         } else {
-            photos.forEach { photo ->
-                Row(gap = 8.px, alignItems = AlignItems.Center) {
-                    val photoUrl = photo.url?.takeIf { it.isNotBlank() }?.let(::minioProxiedAbsoluteUrl)
-                    if (photoUrl != null) {
-                        Img(src = photoUrl) {
-                            style { width(72.px); height(72.px); property("object-fit", "cover") }
-                        }
-                    }
-                    if (
-                        role != null &&
-                        photo.canCurrentUserDelete(
-                            role = role,
-                            ownerId = ready.ownerId,
-                            renterId = ready.renterId,
-                            canEditOwnerFields = act.canEditOwnerFields,
-                            canEditRenterFields = act.canEditRenterFields,
-                        )
-                    ) {
-                        Button({
-                            onClick { viewModel.deletePhoto(photo.id) }
-                            if (InspectionActAction.DeletePhoto in actionsInProgress) {
-                                disabled()
+            Div({
+                style {
+                    display(DisplayStyle.Grid)
+                    gridTemplateColumns("repeat(auto-fill, minmax(160px, 1fr))")
+                    property("gap", "12px")
+                    width(100.percent)
+                }
+            }) {
+                photos.forEach { photo ->
+                    Column(gap = 8.px) {
+                        val photoUrl = photo.url?.takeIf { it.isNotBlank() }?.let(::minioProxiedAbsoluteUrl)
+                        if (photoUrl != null) {
+                            Img(src = photoUrl) {
+                                style {
+                                    width(100.percent)
+                                    height(INSPECTION_ACT_PHOTO_THUMBNAIL_PX.px)
+                                    property("object-fit", "cover")
+                                    borderRadius(8.px)
+                                    cursor("pointer")
+                                }
+                                onClick {
+                                    navigationController?.navigateTo(inspectionActPhotoPagePath(photoUrl))
+                                }
                             }
-                        }) {
-                            Text("Удалить")
+                        }
+                        if (
+                            role != null &&
+                            photo.canCurrentUserDelete(
+                                role = role,
+                                ownerId = ready.ownerId,
+                                renterId = ready.renterId,
+                                canEditOwnerFields = act.canEditOwnerFields,
+                                canEditRenterFields = act.canEditRenterFields,
+                            )
+                        ) {
+                            Button({
+                                onClick { viewModel.deletePhoto(photo.id) }
+                                if (InspectionActAction.DeletePhoto in actionsInProgress) {
+                                    disabled()
+                                }
+                            }) {
+                                Text("Удалить")
+                            }
                         }
                     }
                 }

@@ -3,6 +3,8 @@ package my.drivebit.navigation
 import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.inspectionActPagePath
 import my.drivebit.network.services.inspectionActPageUrl
+import my.drivebit.network.services.inspectionActPhotoPagePath
+import my.drivebit.network.services.isInspectionActPhotoPath
 import my.drivebit.web.parseCityPath
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,5 +35,13 @@ class InspectionActRouteTest {
     fun `inspection act path is not a city slug`() {
         assertNull(parseCityPath("/inspection-act"))
         assertNull(parseCityPath("/inspection-act?bookingId=abc&type=Handover"))
+    }
+
+    @Test
+    fun `inspection act photo is an account bundle route`() {
+        assertTrue(isAccountBundlePath("/inspection-act/photo"))
+        assertTrue(isInspectionActPhotoPath("/inspection-act/photo"))
+        assertTrue(isInspectionActPhotoPath(inspectionActPhotoPagePath("https://cdn.example/a.jpg")))
+        assertNull(parseCityPath("/inspection-act/photo"))
     }
 }
