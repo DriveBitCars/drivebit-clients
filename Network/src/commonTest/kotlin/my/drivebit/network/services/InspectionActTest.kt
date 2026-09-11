@@ -433,6 +433,56 @@ class InspectionActTest {
     }
 
     @Test
+    fun `hasRequiredPhotosForCurrentUser needs own car and dashboard`() {
+        val base =
+            BookingInspectionActDto(
+                id = "act-1",
+                bookingId = "booking-1",
+                type = InspectionActType.Handover,
+                actNumber = 1,
+                status = InspectionActStatus.Draft,
+                canEditOwnerFields = true,
+                canEditRenterFields = true,
+                canSignAsOwner = true,
+                canSignAsRenter = true,
+                createdAt = "2026-08-29T08:00:00Z",
+                updatedAt = "2026-08-29T08:00:00Z",
+            )
+        val ownerCar =
+            BookingInspectionActPhotoDto(
+                id = "p1",
+                authorId = "owner-1",
+                kind = InspectionPhotoKind.Car,
+                uploadedAt = "2026-08-29T08:30:00Z",
+            )
+        val ownerDash =
+            ownerCar.copy(id = "p2", kind = InspectionPhotoKind.Dashboard)
+        val renterCar =
+            ownerCar.copy(id = "p3", authorId = "renter-1")
+
+        assertFalse(
+            base
+                .copy(photos = listOf(ownerCar))
+                .hasRequiredPhotosForCurrentUser(InspectionActViewerRole.Owner, "owner-1", "renter-1"),
+        )
+        assertTrue(
+            base
+                .copy(photos = listOf(ownerCar, ownerDash))
+                .hasRequiredPhotosForCurrentUser(InspectionActViewerRole.Owner, "owner-1", "renter-1"),
+        )
+        assertFalse(
+            base
+                .copy(photos = listOf(ownerCar, ownerDash))
+                .hasRequiredPhotosForCurrentUser(InspectionActViewerRole.Renter, "owner-1", "renter-1"),
+        )
+        assertFalse(
+            base
+                .copy(photos = listOf(renterCar, ownerDash))
+                .hasRequiredPhotosForCurrentUser(InspectionActViewerRole.Renter, "owner-1", "renter-1"),
+        )
+    }
+
+    @Test
     fun `owner can sign when metrics not yet saved on act`() {
         val act =
             BookingInspectionActDto(

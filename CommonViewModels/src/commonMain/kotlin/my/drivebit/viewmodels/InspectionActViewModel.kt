@@ -26,6 +26,7 @@ import my.drivebit.network.services.canCurrentUserEditComment
 import my.drivebit.network.services.canCurrentUserEditMetrics
 import my.drivebit.network.services.canCurrentUserUploadPhotos
 import my.drivebit.network.services.commentInputFor
+import my.drivebit.network.services.hasRequiredPhotosForCurrentUser
 import my.drivebit.network.services.resolveInspectionActViewerRole
 
 data class InspectionActPhotoFile(
@@ -263,6 +264,10 @@ class InspectionActViewModelImpl(
                 showError("Нет доступа к подписанию акта", lastAct)
                 return
             }
+        if (!ready.act.hasRequiredPhotosForCurrentUser(role, ready.ownerId, ready.renterId)) {
+            showError("Загрузите фото автомобиля и приборной панели", lastAct)
+            return
+        }
         launchMutation(InspectionActAction.Sign) {
             when (role) {
                 InspectionActViewerRole.Owner -> signAsOwner(ready)
@@ -356,6 +361,10 @@ class InspectionActViewModelImpl(
     private fun applyAct(act: BookingInspectionActDto) {
         lastAct = act
         val role = viewerRole
+        val previous = state.value as? InspectionActUiState.Ready
+        val serverFuel = act.fuelRemaining?.toString().orEmpty()
+        val serverMileage = act.mileage?.toString().orEmpty()
+        val serverComment = role?.let { act.commentInputFor(it) }.orEmpty()
         _state.value =
             InspectionActUiState.Ready(
                 act = act,
@@ -364,9 +373,9 @@ class InspectionActViewModelImpl(
                 renterId = renterId,
                 ownerName = ownerName,
                 renterName = renterName,
-                fuelInput = act.fuelRemaining?.toString().orEmpty(),
-                mileageInput = act.mileage?.toString().orEmpty(),
-                commentInput = role?.let { act.commentInputFor(it) }.orEmpty(),
+                fuelInput = serverFuel.ifBlank { previous?.fuelInput.orEmpty() },
+                mileageInput = serverMileage.ifBlank { previous?.mileageInput.orEmpty() },
+                commentInput = serverComment.ifBlank { previous?.commentInput.orEmpty() },
             )
     }
 
