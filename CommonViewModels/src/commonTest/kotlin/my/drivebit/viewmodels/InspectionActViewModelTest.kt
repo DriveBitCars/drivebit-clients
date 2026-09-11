@@ -45,6 +45,7 @@ private class InspectionActFake : InspectionAct {
     var signedAsOwnerCalls = 0
     var signedAsRenterCalls = 0
     var failMutations = false
+    var uploadAuthorId: String = "owner-1"
     val callOrder = mutableListOf<String>()
 
     override suspend fun get(
@@ -99,7 +100,7 @@ private class InspectionActFake : InspectionAct {
         if (failMutations || failUploadAtCall == uploadCallCount) error("upload failed")
         uploadedKind = kind
         uploadedKinds += kind
-        return samplePhoto(id = "photo-$uploadCallCount", kind = kind)
+        return samplePhoto(id = "photo-$uploadCallCount", kind = kind, authorId = uploadAuthorId)
     }
 
     override suspend fun deletePhoto(
@@ -242,7 +243,7 @@ class InspectionActViewModelTest {
     @Test
     fun `sign as owner persists metrics and comment from form before signing`() =
         runTest {
-            val api = InspectionActFake()
+            val api = InspectionActFake().apply { act = sampleActWithPhotos(authorId = "owner-1") }
             val viewModel = viewModel(api, userId = "owner-1")
             viewModel.load()
             advanceUntilIdle()
@@ -265,7 +266,7 @@ class InspectionActViewModelTest {
     @Test
     fun `sign as owner rejects invalid metrics without api calls`() =
         runTest {
-            val api = InspectionActFake()
+            val api = InspectionActFake().apply { act = sampleActWithPhotos(authorId = "owner-1") }
             val viewModel = viewModel(api, userId = "owner-1")
             viewModel.load()
             advanceUntilIdle()
@@ -285,7 +286,7 @@ class InspectionActViewModelTest {
     @Test
     fun `after failed sign form stays editable and sign can retry`() =
         runTest {
-            val api = InspectionActFake()
+            val api = InspectionActFake().apply { act = sampleActWithPhotos(authorId = "owner-1") }
             val viewModel = viewModel(api, userId = "owner-1")
             viewModel.load()
             advanceUntilIdle()
@@ -310,7 +311,7 @@ class InspectionActViewModelTest {
     @Test
     fun `sign as renter persists metrics and comment from form before signing`() =
         runTest {
-            val api = InspectionActFake()
+            val api = InspectionActFake().apply { act = sampleActWithPhotos(authorId = "renter-1") }
             val viewModel = viewModel(api, userId = "renter-1")
             viewModel.load()
             advanceUntilIdle()
@@ -328,6 +329,60 @@ class InspectionActViewModelTest {
             val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
             assertFalse(ready.act.canEditRenterFields)
             assertTrue(ready.act.isSignedByRenter)
+        }
+
+    @Test
+    fun `upload photos preserves fuel mileage and comment inputs`() =
+        runTest {
+            val api =
+                InspectionActFake().apply {
+                    act =
+                        sampleAct().copy(
+                            fuelRemaining = null,
+                            mileage = null,
+                            ownerComment = null,
+                            photos = emptyList(),
+                        )
+                    uploadAuthorId = "owner-1"
+                }
+            val viewModel = viewModel(api, userId = "owner-1")
+            viewModel.load()
+            advanceUntilIdle()
+
+            viewModel.setFuelInput("80")
+            viewModel.setMileageInput("121000")
+            viewModel.setCommentInput("Не сбрасывать")
+            viewModel.uploadPhotos(
+                files = listOf(InspectionActPhotoFile(byteArrayOf(1), "a.jpg", "image/jpeg")),
+                kind = InspectionPhotoKind.Car,
+            )
+            advanceUntilIdle()
+
+            val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertEquals("80", ready.fuelInput)
+            assertEquals("121000", ready.mileageInput)
+            assertEquals("Не сбрасывать", ready.commentInput)
+            assertEquals(1, ready.act.photos?.size)
+        }
+
+    @Test
+    fun `sign as owner requires own car and dashboard photos`() =
+        runTest {
+            val api = InspectionActFake()
+            val viewModel = viewModel(api, userId = "owner-1")
+            viewModel.load()
+            advanceUntilIdle()
+
+            viewModel.sign()
+            advanceUntilIdle()
+
+            assertEquals(0, api.signedAsOwnerCalls)
+            assertEquals(null, api.metricsRequest)
+            assertEquals(
+                "Загрузите фото автомобиля и приборной панели",
+                viewModel.error.value,
+            )
+            assertIs<InspectionActUiState.Ready>(viewModel.state.value)
         }
 
     @Test
@@ -453,7 +508,11 @@ class InspectionActViewModelTest {
     @Test
     fun `failed sign preserves previous act and exposes error`() =
         runTest {
-            val api = InspectionActFake().apply { failMutations = true }
+            val api =
+                InspectionActFake().apply {
+                    failMutations = true
+                    act = sampleActWithPhotos(authorId = "owner-1")
+                }
             val viewModel = viewModel(api, userId = "owner-1")
             viewModel.load()
             advanceUntilIdle()
@@ -516,12 +575,22 @@ private fun sampleAct() =
         updatedAt = "2026-08-29T08:00:00Z",
     )
 
+private fun sampleActWithPhotos(authorId: String) =
+    sampleAct().copy(
+        photos =
+            listOf(
+                samplePhoto(id = "photo-car", kind = InspectionPhotoKind.Car, authorId = authorId),
+                samplePhoto(id = "photo-dash", kind = InspectionPhotoKind.Dashboard, authorId = authorId),
+            ),
+    )
+
 private fun samplePhoto(
     id: String = "photo-1",
     kind: InspectionPhotoKind = InspectionPhotoKind.Car,
+    authorId: String = "author-1",
 ) = BookingInspectionActPhotoDto(
     id = id,
-    authorId = "author-1",
+    authorId = authorId,
     kind = kind,
     uploadedAt = "2026-08-29T08:30:00Z",
 )

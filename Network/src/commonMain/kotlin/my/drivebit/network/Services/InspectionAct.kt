@@ -160,6 +160,21 @@ fun BookingInspectionActPhotoDto.canCurrentUserDelete(
         InspectionActViewerRole.Renter -> authorId == renterId && canEditRenterFields
     }
 
+fun BookingInspectionActDto.hasRequiredPhotosForCurrentUser(
+    role: InspectionActViewerRole,
+    ownerId: String,
+    renterId: String,
+): Boolean {
+    val authorId =
+        when (role) {
+            InspectionActViewerRole.Owner -> ownerId
+            InspectionActViewerRole.Renter -> renterId
+        }
+    val mine = photos.orEmpty().filter { it.authorId == authorId }
+    return mine.any { it.kind == InspectionPhotoKind.Car } &&
+        mine.any { it.kind == InspectionPhotoKind.Dashboard }
+}
+
 @Serializable
 enum class InspectionActStatus {
     None,
