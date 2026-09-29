@@ -56,7 +56,10 @@ class MinioUrlUtilsTest {
     fun minioProxyOrigin_usesProductionProxyForPagesDev() {
         assertEquals(
             "https://drivebit.ru",
-            minioProxyOrigin("https://dev.drivebit.my", "dev.drivebit.my"),
+            minioProxyOrigin(
+                "https://drivebitcars.github.io",
+                "drivebitcars.github.io",
+            ),
         )
     }
 
@@ -76,7 +79,7 @@ class MinioUrlUtilsTest {
         assertEquals(
             "https://drivebit.ru/publicbct/cars/" +
                 "52207ab5-a0a5-483e-ba8b-545d9a9d7dff/thumb.jpg",
-            resolveMinioUrlForHost(raw, "dev.drivebit.my"),
+            resolveMinioUrlForHost(raw, "drivebitcars.github.io"),
         )
     }
 
@@ -84,7 +87,10 @@ class MinioUrlUtilsTest {
     fun resolveMinioUrlForHost_prefixesRelativePublicbctOnPagesDev() {
         assertEquals(
             "https://drivebit.ru/publicbct/cars/abc/thumb.jpg",
-            resolveMinioUrlForHost("/publicbct/cars/abc/thumb.jpg", "dev.drivebit.my"),
+            resolveMinioUrlForHost(
+                "/publicbct/cars/abc/thumb.jpg",
+                "drivebitcars.github.io",
+            ),
         )
     }
 

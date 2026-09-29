@@ -3,8 +3,28 @@
         return document.getElementById(id);
     }
 
+    function appBase() {
+        return (typeof window !== "undefined" && window.__DRIVEBIT_BASE__) || "";
+    }
+
+    function appPathname(pathname) {
+        var base = appBase();
+        var path = pathname || "/";
+        if (base && (path === base || path === base + "/")) return "/";
+        if (base && path.indexOf(base + "/") === 0) return path.slice(base.length) || "/";
+        return path;
+    }
+
+    function withAppBase(url) {
+        var base = appBase();
+        if (!base || !url || url.charAt(0) !== "/" || url.indexOf(base) === 0) return url;
+        return base + url;
+    }
+
     function citySlugFromPath(pathname) {
-        var trimmed = (pathname || "").replace(/\/+$/, "").replace(/^\//, "");
+        var trimmed = appPathname(pathname || "")
+            .replace(/\/+$/, "")
+            .replace(/^\//, "");
         if (!trimmed) return "moskva";
         var segment = trimmed.split("/")[0];
         if (!segment || segment === "search") return "moskva";
@@ -16,7 +36,7 @@
         if (startDate) params.push("startDate=" + encodeURIComponent(startDate));
         if (endDate) params.push("endDate=" + encodeURIComponent(endDate));
         var base = "/" + citySlugFromPath(window.location.pathname) + "/search";
-        return params.length ? base + "?" + params.join("&") : base;
+        return params.length ? withAppBase(base + "?" + params.join("&")) : withAppBase(base);
     }
 
     function formatDateDisplay(isoDate) {

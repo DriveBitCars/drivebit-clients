@@ -2,12 +2,13 @@
 name: test-end-to-end-dev
 description: >-
   Run commit-push-tests, merge to trunk, wait for GitHub Pages deploy to
-  dev.drivebit.ru, then verify main web flows in the browser (desktop + mobile)
-  with screenshots, console error checks, Hawk Garage (https://garage.hawk.so/),
-  and (when booking/auth/autoBook is in scope) the unauth→OTP→autoBook-once
-  regression. Use when the user says /test-end-to-end-dev,
-  /test-ene-to-end-dev, «проверь на pages-dev», «e2e на деве», «на мобильном»,
-  or asks to commit-push then validate GitHub Pages / pages-dev.
+  https://drivebitcars.github.io/drivebit-clients/, then verify main web flows
+  in the browser (desktop + mobile) with screenshots, console error checks,
+  Hawk Garage (https://garage.hawk.so/), and (when booking/auth/autoBook is in
+  scope) the unauth→OTP→autoBook-once regression. Use when the user says
+  /test-end-to-end-dev, /test-ene-to-end-dev, «проверь на pages-dev»,
+  «e2e на деве», «на мобильном», or asks to commit-push then validate
+  GitHub Pages / pages-dev.
 ---
 
 # Test end-to-end on pages-dev
@@ -18,7 +19,7 @@ Pipeline:
 
 1. **`/commit-push-tests`** (stage new files → commit → push → PR → CI green)
 2. **Merge PR into `trunk`** (Pages deploys only from `trunk`)
-3. **Wait for GitHub Pages deploy** (`Deploy to GitHub Pages` → `dev.drivebit.ru`)
+3. **Wait for GitHub Pages deploy** (`Deploy to GitHub Pages` → `drivebitcars.github.io/drivebit-clients/`)
 4. **Browser e2e** on pages-dev: **desktop + mobile** main flows + screenshots
 5. **Console errors** — capture and fail on unexpected JS/`pageerror` / `console.error`
 6. **Booking autoBook-once** (when in scope — see below) — unauth book → OTP login → exactly **one POST** create
@@ -39,9 +40,8 @@ For prod ship use `drivebit-ship-release`.
 
 | Item | Value |
 |------|-------|
-| Pages-dev site | `https://dev.drivebit.ru` (often **301 →** `https://dev.drivebit.my`) |
-| Canonical live base | `https://dev.drivebit.my` (use for browser e2e after redirect) |
-| Fallback Pages URL | `https://drivebitcars.github.io/drivebit-clients/` |
+| Pages-dev site (canonical) | `https://drivebitcars.github.io/drivebit-clients/` |
+| Path prefix | all routes are under `/drivebit-clients/` (e.g. `/drivebit-clients/moskva`) |
 | Pages workflow | `.github/workflows/github-pages.yml` (`Deploy to GitHub Pages`) |
 | Pages trigger | push to `trunk` or `workflow_dispatch` |
 | Prod site | `https://drivebit.ru` (out of scope here) |
@@ -99,15 +99,15 @@ Exit code **0** required. Typical duration: several minutes after merge.
 Optional HTTP gate before browser work:
 
 ```bash
-curl -sI "https://dev.drivebit.ru/moskva" | head -5
-curl -sI "https://dev.drivebit.my/moskva" | head -5
+curl -sI "https://drivebitcars.github.io/drivebit-clients/" | head -5
+curl -sI "https://drivebitcars.github.io/drivebit-clients/moskva" | head -5
 ```
 
-Expect HTTP 200 on the final host (`.ru` may 301 to `.my`; allow short retry if CDN is still propagating).
+Expect HTTP 200 (allow short retry if GitHub CDN is still propagating).
 
 ## 4. Browser e2e on pages-dev
 
-Base URL: start from **`https://dev.drivebit.ru`**, follow redirects; interact on the live host (usually **`https://dev.drivebit.my`**).
+Base URL: **`https://drivebitcars.github.io/drivebit-clients/`** (no custom domain; do not use `dev.drivebit.my` / `dev.drivebit.ru`).
 
 Prefer **cursor-ide-browser** MCP when available. If missing, use **Playwright** (`devices["iPhone 14"]` / `Pixel 7`) — still required to produce real screenshots. `scripts/verify-prod-smoke.mjs` / `scripts/e2e-pages-dev-inp.mjs` are optional helpers only.
 
@@ -115,19 +115,19 @@ Prefer **cursor-ide-browser** MCP when available. If missing, use **Playwright**
 
 | Path | What must be true |
 |------|-------------------|
-| `/moskva` | HTTP 200; hero / city home visible; `#root` has content or static hero shell present |
-| `/moskva/search` | Search UI loads (results, loading, or error — not blank white); script may be `appCompose.js` or `composeApp.js` |
-| `/bmw` or `/search/toyota` | Brand search shell loads |
-| `/login` or `/login-by-phone` | Auth shell loads |
-| `/contacts` | Contacts page loads |
-| `/profile` (optional) | Redirects to login or shows profile shell |
+| `/drivebit-clients/moskva` | HTTP 200; hero / city home visible; `#root` has content or static hero shell present |
+| `/drivebit-clients/moskva/search` | Search UI loads (results, loading, or error — not blank white); script may be `appCompose.js` or `composeApp.js` |
+| `/drivebit-clients/bmw` or `/drivebit-clients/search/toyota` | Brand search shell loads |
+| `/drivebit-clients/login` or `/drivebit-clients/login-by-phone` | Auth shell loads |
+| `/drivebit-clients/contacts` | Contacts page loads |
+| `/drivebit-clients/profile` (optional) | Redirects to login or shows profile shell |
 
 ### Interactions (main functionality)
 
-1. Open `/moskva` — wait for paint
-2. Click hero CTA **«Найти автомобиль»** (if present) → land on `/{city}/search`
+1. Open `/drivebit-clients/moskva` — wait for paint
+2. Click hero CTA **«Найти автомобиль»** (if present) → land on `/drivebit-clients/{city}/search`
 3. On search: confirm list/loading/error UI visible (not empty document)
-4. Open `/login-by-phone` — confirm form/shell visible
+4. Open `/drivebit-clients/login-by-phone` — confirm form/shell visible
 5. Header nav: **Контакты** / **Сдать авто** if present
 
 ### Mobile viewport (required)
@@ -170,15 +170,15 @@ Save evidence under `tmp/e2e-*-regress/` or `tmp/e2e-mobile-home-filters/` and u
 
 **Desktop** — at least:
 
-1. `/moskva` first viewport
-2. `/moskva/search` (or post-CTA search URL)
-3. One brand search page (`/bmw` or `/search/...`)
-4. Auth shell (`/login-by-phone`)
+1. `/drivebit-clients/moskva` first viewport
+2. `/drivebit-clients/moskva/search` (or post-CTA search URL)
+3. One brand search page (`/drivebit-clients/bmw` or `/drivebit-clients/search/...`)
+4. Auth shell (`/drivebit-clients/login-by-phone`)
 
 **Mobile** — at least:
 
-1. `/moskva` first viewport (iPhone-class)
-2. `/moskva/search` or post-CTA search
+1. `/drivebit-clients/moskva` first viewport (iPhone-class)
+2. `/drivebit-clients/moskva/search` or post-CTA search
 3. One brand or contacts page
 4. If filters/nearby were in scope: one filter selected + nearby map **or** List
 
@@ -275,7 +275,7 @@ Helper flow (already encoded in the script):
 
 After browser e2e (or overlapping it), open **https://garage.hawk.so/** and check the DriveBit project for errors tied to this run:
 
-1. Prefer environment **`development`** (pages-dev: `dev.drivebit.ru` / `dev.drivebit.my` — see `HawkErrorTracking.kt` `hawkEnvironment`)
+1. Prefer environment **`development`** (pages-dev: `drivebitcars.github.io` — see `HawkErrorTracking.kt` `hawkEnvironment`)
 2. Look at events from **now − ~15–30 minutes** (cover the e2e window)
 3. Fail if **new** errors appeared that match the flows you just exercised (home, search, auth, contacts, filters)
 4. Note event titles / counts / links in the report
@@ -303,7 +303,7 @@ Return:
 - Branch + commit SHAs
 - PR URL + merge result
 - Pages workflow run URL + conclusion
-- Pages-dev base URL used (note `.ru` → `.my` if redirected)
+- Pages-dev base URL used (`https://drivebitcars.github.io/drivebit-clients/`)
 - Short pass/fail per checked path (**desktop and mobile**)
 - Screenshot paths / attachments (both viewports)
 - Console / `pageerror` summary (empty = clean)

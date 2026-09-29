@@ -1,29 +1,34 @@
 package my.drivebit.navigation
 
 import kotlinx.browser.window
+import my.drivebit.utils.stripWebBasePath
+import my.drivebit.utils.withWebBasePath
 
 class NavigationController(
     private val navigationState: NavigationState,
 ) {
-    fun getCurrentPath(): String = window.location.pathname
+    fun getCurrentPath(): String =
+        stripWebBasePath(window.location.pathname, window.location.hostname)
 
     fun navigateTo(path: String) {
+        val browserPath = withWebBasePath(path, window.location.hostname)
         if (shouldUseFullPageNavigation(path)) {
-            window.location.href = fullPageNavigationHref(path)
+            window.location.href = fullPageNavigationHref(browserPath)
             return
         }
-        window.history.pushState(null, "", path)
+        window.history.pushState(null, "", browserPath)
         // Query lives in location.search; pathname-only avoids city routing misparsing "/search?..." as a slug.
-        navigationState.updatePath(window.location.pathname)
+        navigationState.updatePath(getCurrentPath())
     }
 
     fun replacePath(path: String) {
+        val browserPath = withWebBasePath(path, window.location.hostname)
         if (shouldUseFullPageNavigation(path)) {
-            window.location.replace(fullPageNavigationHref(path))
+            window.location.replace(fullPageNavigationHref(browserPath))
             return
         }
-        window.history.replaceState(null, "", path)
-        navigationState.updatePath(window.location.pathname)
+        window.history.replaceState(null, "", browserPath)
+        navigationState.updatePath(getCurrentPath())
     }
 
     fun goBack() {
@@ -37,7 +42,7 @@ class NavigationController(
 
 private fun shouldUseFullPageNavigation(targetPath: String): Boolean =
     requiresFullPageNavigation(
-        currentPathname = window.location.pathname,
+        currentPathname = stripWebBasePath(window.location.pathname, window.location.hostname),
         targetPath = targetPath,
     )
 

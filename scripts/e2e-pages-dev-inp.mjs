@@ -12,7 +12,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = path.join(root, "tmp/e2e-inp-pages-dev");
 fs.mkdirSync(outDir, { recursive: true });
 
-const START = "https://dev.drivebit.my";
+const START = "https://drivebitcars.github.io/drivebit-clients";
 const results = [];
 
 async function dismissCookie(page) {

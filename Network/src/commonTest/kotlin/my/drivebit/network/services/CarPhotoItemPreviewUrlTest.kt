@@ -65,7 +65,7 @@ class CarPhotoItemPreviewUrlTest {
                 thumbnailUrl = "http://157.22.252.70:9000/publicbct/cars/abc/thumb.jpg",
             )
 
-        val sanitized = photo.withSanitizedUrls("dev.drivebit.my")
+        val sanitized = photo.withSanitizedUrls("drivebitcars.github.io")
 
         assertEquals("https://drivebit.ru/publicbct/cars/abc/full.jpg", sanitized.url)
         assertEquals("https://drivebit.ru/publicbct/cars/abc/thumb.jpg", sanitized.thumbnailUrl)
