@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Prefix root-absolute href/src/data-src/action URLs with the GitHub Pages
- * project base path and inject window.__DRIVEBIT_BASE__ into HTML heads.
+ * Prefix root-absolute asset/nav URLs with the GitHub Pages project base path,
+ * inject window.__DRIVEBIT_BASE__, and patch Image.src so Compose absolute
+ * /images/... paths resolve under the project site.
  *
  * Usage: node scripts/rewrite-github-pages-base.mjs <distDir> [basePath]
  */
@@ -15,38 +16,98 @@ function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
-    else if (/\.html?$/i.test(entry.name)) out.push(full);
+    else out.push(full);
   }
   return out;
 }
 
+function withBaseUrl(url) {
+  if (
+    !url ||
+    url === base ||
+    url.startsWith(`${base}/`) ||
+    url.startsWith("//") ||
+    url.startsWith("http") ||
+    url.startsWith("data:") ||
+    url.startsWith("blob:") ||
+    url.startsWith("#")
+  ) {
+    return url;
+  }
+  if (url.startsWith("/")) return `${base}${url}`;
+  return url;
+}
+
+function rewriteCssUrls(text) {
+  return text.replace(/url\(\s*(['"]?)(\/[^)'"]+)\1\s*\)/g, (match, quote, url) => {
+    const next = withBaseUrl(url);
+    if (next === url) return match;
+    const q = quote || "";
+    return `url(${q}${next}${q})`;
+  });
+}
+
 function rewriteHtml(text) {
-  const inject = `<script>window.__DRIVEBIT_BASE__="${base}";</script>\n`;
+  const inject = `<script>window.__DRIVEBIT_BASE__="${base}";</script>
+<script>
+(function (base) {
+  if (!base) return;
+  function withBase(u) {
+    if (typeof u !== "string" || !u) return u;
+    if (u.charAt(0) !== "/" || u.indexOf(base) === 0 || u.indexOf("//") === 0) return u;
+    if (u.indexOf("http") === 0 || u.indexOf("data:") === 0 || u.indexOf("blob:") === 0) return u;
+    return base + u;
+  }
+  try {
+    var desc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
+    if (desc && desc.set) {
+      Object.defineProperty(HTMLImageElement.prototype, "src", {
+        configurable: true,
+        enumerable: !!desc.enumerable,
+        get: desc.get,
+        set: function (v) { desc.set.call(this, withBase(v)); }
+      });
+    }
+  } catch (e) {}
+})(window.__DRIVEBIT_BASE__);
+</script>
+`;
   let next = text;
   if (!next.includes("__DRIVEBIT_BASE__")) {
     next = next.replace(/(<head[^>]*>)/i, `$1\n${inject}`);
   }
   next = next.replace(
-    /\b(href|src|data-src|action)=(["'])(\/[^"']*)\2/g,
+    /\b(href|src|data-src|data-hero-bg|action)=(["'])(\/[^"']*)\2/g,
     (match, attr, quote, url) => {
-      if (
-        url === base ||
-        url.startsWith(`${base}/`) ||
-        url.startsWith("//") ||
-        url.startsWith("http")
-      ) {
-        return match;
-      }
-      return `${attr}=${quote}${base}${url}${quote}`;
+      const rewritten = withBaseUrl(url);
+      if (rewritten === url) return match;
+      return `${attr}=${quote}${rewritten}${quote}`;
     },
   );
+  next = rewriteCssUrls(next);
   return next;
 }
 
 const files = walk(distDir);
+let htmlCount = 0;
+let cssCount = 0;
 for (const file of files) {
-  const before = fs.readFileSync(file, "utf8");
-  const after = rewriteHtml(before);
-  if (after !== before) fs.writeFileSync(file, after);
+  if (/\.html?$/i.test(file)) {
+    const before = fs.readFileSync(file, "utf8");
+    const after = rewriteHtml(before);
+    if (after !== before) {
+      fs.writeFileSync(file, after);
+      htmlCount++;
+    }
+  } else if (/\.css$/i.test(file)) {
+    const before = fs.readFileSync(file, "utf8");
+    const after = rewriteCssUrls(before);
+    if (after !== before) {
+      fs.writeFileSync(file, after);
+      cssCount++;
+    }
+  }
 }
-console.log(`Rewrote ${files.length} HTML file(s) for base ${base}`);
+console.log(
+  `Rewrote ${htmlCount} HTML and ${cssCount} CSS file(s) for base ${base}`,
+);
