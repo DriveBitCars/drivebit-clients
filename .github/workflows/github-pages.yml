@@ -156,31 +156,8 @@ jobs:
         fi
 
         # Project Pages live under /drivebit-clients/ — rewrite root-absolute asset/nav URLs
-        # and inject runtime base for vendor JS + history helpers.
-        PAGES_BASE="/drivebit-clients"
-        find dist -type f \( -name '*.html' -o -name '*.htm' \) -print0 | while IFS= read -r -d '' f; do
-          python3 - "$f" "$PAGES_BASE" <<'PY'
-import pathlib, re, sys
-path = pathlib.Path(sys.argv[1])
-base = sys.argv[2]
-text = path.read_text(encoding="utf-8")
-inject = f'<script>window.__DRIVEBIT_BASE__="{base}";</script>\n'
-if "__DRIVEBIT_BASE__" not in text:
-    text = re.sub(r"(?i)<head([^>]*)>", r"<head\1>\n" + inject, text, count=1)
-def rewrite_attr(m):
-    attr, quote, url = m.group(1), m.group(2), m.group(3)
-    if url.startswith(base + "/") or url == base or url.startswith("//") or url.startswith("http"):
-        return m.group(0)
-    return f'{attr}={quote}{base}{url}{quote}'
-text = re.sub(
-    r'\b(href|src|data-src|action)=(["\'])(/[^"\']*)\2',
-    rewrite_attr,
-    text,
-)
-path.write_text(text, encoding="utf-8")
-PY
-        done
-        echo "✅ Rewrote root-absolute URLs for GitHub Pages base $PAGES_BASE"
+        # and inject window.__DRIVEBIT_BASE__ (script keeps YAML indentation valid).
+        node scripts/rewrite-github-pages-base.mjs dist /drivebit-clients
         
         echo "📄 robots.txt and other jsMain/resources/ assets are included in the JS bundle output"
 
