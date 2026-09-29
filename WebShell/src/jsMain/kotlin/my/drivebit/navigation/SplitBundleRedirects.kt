@@ -3,6 +3,8 @@ package my.drivebit.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.browser.window
+import my.drivebit.utils.stripWebBasePath
+import my.drivebit.utils.withWebBasePath
 
 fun isAnySplitBundlePath(pathname: String): Boolean {
     val path = pathWithoutQuery(pathname)
@@ -30,7 +32,11 @@ fun splitBundleHrefFromLocation(
     pathname: String = window.location.pathname,
     search: String = window.location.search,
     hash: String = window.location.hash,
-): String = splitBundleHref(pathname, search, hash)
+): String {
+    val host = window.location.hostname
+    val appPath = stripWebBasePath(pathname, host)
+    return withWebBasePath(splitBundleHref(appPath, search, hash), host)
+}
 
 @Composable
 fun RedirectToSplitBundle() {
@@ -42,13 +48,13 @@ fun RedirectToSplitBundle() {
 @Composable
 fun RedirectToMainApp() {
     LaunchedEffect(Unit) {
-        window.location.href = "/"
+        window.location.href = withWebBasePath("/", window.location.hostname)
     }
 }
 
 @Composable
 fun RedirectToLogin() {
     LaunchedEffect(Unit) {
-        window.location.href = "/login-by-phone"
+        window.location.href = withWebBasePath("/login-by-phone", window.location.hostname)
     }
 }

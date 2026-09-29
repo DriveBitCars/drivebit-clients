@@ -3,8 +3,26 @@
         return document.getElementById(id);
     }
 
-    function normalizePath(pathname) {
+    function appBase() {
+        return (typeof window !== "undefined" && window.__DRIVEBIT_BASE__) || "";
+    }
+
+    function appPathname(pathname) {
+        var base = appBase();
         var path = pathname || "/";
+        if (base && (path === base || path === base + "/")) return "/";
+        if (base && path.indexOf(base + "/") === 0) return path.slice(base.length) || "/";
+        return path;
+    }
+
+    function withAppBase(url) {
+        var base = appBase();
+        if (!base || !url || url.charAt(0) !== "/" || url.indexOf(base) === 0) return url;
+        return base + url;
+    }
+
+    function normalizePath(pathname) {
+        var path = appPathname(pathname || "/");
         if (path.length > 1 && path.endsWith("/")) {
             path = path.slice(0, -1);
         }
@@ -139,7 +157,7 @@
                 return;
             }
 
-            window.location.href = url;
+            window.location.href = withAppBase(url);
         });
 
         window.addEventListener("popstate", syncFromLocation);

@@ -25,7 +25,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const BASE = process.env.BASE_URL || "https://dev.drivebit.my";
+const BASE = process.env.BASE_URL || "https://drivebitcars.github.io/drivebit-clients";
 const EMAIL = process.env.E2E_LOGIN_EMAIL || "mail@antonbutov.com";
 const OUT = path.resolve(ROOT, process.env.OUT_DIR || "tmp/e2e-book-once-pages-dev");
 const CREATE_PATH = /Booking\/my\/as-renter/i;

@@ -14,7 +14,7 @@ class HawkErrorTrackingTest {
 
     @Test
     fun pagesDevHostUsesDevelopmentEnvironment() {
-        assertEquals("development", hawkEnvironment("dev.drivebit.my"))
+        assertEquals("development", hawkEnvironment("drivebitcars.github.io"))
     }
 
     @Test

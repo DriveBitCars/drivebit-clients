@@ -67,7 +67,7 @@ Permanent-логи в `PaymentController.GenerateBookingPaymentAsync`:
 
 - Firetiger в сессии не использовался (auth отклонён) — опирались на SSH + DB + Metrika.
 - Headless e2e на pages-dev не доказывает доставку `reachGoal` в Metrika (скрипты аналитики часто режутся); факт вставки goal на `/payment-success` проверен в HTML.
-- `dev.drivebit.ru` в Playwright давал `ERR_CERT_AUTHORITY_INVALID` — e2e шёл на `https://dev.drivebit.my`.
+- Pages-dev e2e base: `https://drivebitcars.github.io/drivebit-clients/`.
 - Backend PR #9 на момент записи мог быть ещё не смержен — без деплоя бэка permanent-логи в prod не появятся.
 
 ## История правок

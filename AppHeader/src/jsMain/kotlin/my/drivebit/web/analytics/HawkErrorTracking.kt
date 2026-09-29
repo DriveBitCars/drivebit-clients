@@ -17,7 +17,7 @@ private var hawkCatcher: HawkCatcher? = null
 internal fun hawkEnvironment(hostname: String): String? =
     when (hostname.lowercase()) {
         "drivebit.ru", "www.drivebit.ru" -> "production"
-        "dev.drivebit.ru", "dev.drivebit.my", "drivebitcars.github.io" -> "development"
+        "drivebitcars.github.io" -> "development"
         else -> null
     }
 
