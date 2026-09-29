@@ -69,6 +69,26 @@ function rewriteHtml(text) {
       });
     }
   } catch (e) {}
+  try {
+    var origSet = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function (name, value) {
+      var n = String(name || "").toLowerCase();
+      if ((n === "src" || n === "href" || n === "data-src" || n === "data-hero-bg") && typeof value === "string") {
+        return origSet.call(this, name, withBase(value));
+      }
+      return origSet.call(this, name, value);
+    };
+  } catch (e2) {}
+  try {
+    var origPush = history.pushState.bind(history);
+    var origReplace = history.replaceState.bind(history);
+    history.pushState = function (state, title, url) {
+      return origPush(state, title, typeof url === "string" ? withBase(url) : url);
+    };
+    history.replaceState = function (state, title, url) {
+      return origReplace(state, title, typeof url === "string" ? withBase(url) : url);
+    };
+  } catch (e3) {}
 })(window.__DRIVEBIT_BASE__);
 </script>
 `;
