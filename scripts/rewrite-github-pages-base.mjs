@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Prefix root-absolute asset/nav URLs with the GitHub Pages project base path,
- * inject window.__DRIVEBIT_BASE__, and patch Image.src so Compose absolute
- * /images/... paths resolve under the project site.
+ * inject window.__DRIVEBIT_BASE__, and patch Image.src / setAttribute / history /
+ * Location so Compose and static redirects resolve under the project site.
  *
  * Usage: node scripts/rewrite-github-pages-base.mjs <distDir> [basePath]
  */
@@ -89,6 +89,27 @@ function rewriteHtml(text) {
       return origReplace(state, title, typeof url === "string" ? withBase(url) : url);
     };
   } catch (e3) {}
+  try {
+    var locDesc = Object.getOwnPropertyDescriptor(Location.prototype, "href");
+    if (locDesc && locDesc.set) {
+      Object.defineProperty(Location.prototype, "href", {
+        configurable: true,
+        enumerable: !!locDesc.enumerable,
+        get: locDesc.get,
+        set: function (v) { locDesc.set.call(this, withBase(v)); }
+      });
+    }
+  } catch (e4) {}
+  try {
+    var origAssign = Location.prototype.assign;
+    Location.prototype.assign = function (url) {
+      return origAssign.call(this, typeof url === "string" ? withBase(url) : url);
+    };
+    var origLocReplace = Location.prototype.replace;
+    Location.prototype.replace = function (url) {
+      return origLocReplace.call(this, typeof url === "string" ? withBase(url) : url);
+    };
+  } catch (e5) {}
 })(window.__DRIVEBIT_BASE__);
 </script>
 `;
@@ -102,6 +123,22 @@ function rewriteHtml(text) {
       const rewritten = withBaseUrl(url);
       if (rewritten === url) return match;
       return `${attr}=${quote}${rewritten}${quote}`;
+    },
+  );
+  next = next.replace(
+    /(http-equiv=["']refresh["'][^>]*content=["'][^"']*url=)(\/[^"'\s>]+)/gi,
+    (match, prefix, url) => {
+      const rewritten = withBaseUrl(url);
+      if (rewritten === url) return match;
+      return `${prefix}${rewritten}`;
+    },
+  );
+  next = next.replace(
+    /(content=["'][^"']*url=)(\/[^"'\s>]+)([^>]*http-equiv=["']refresh["'])/gi,
+    (match, prefix, url, suffix) => {
+      const rewritten = withBaseUrl(url);
+      if (rewritten === url) return match;
+      return `${prefix}${rewritten}${suffix}`;
     },
   );
   next = rewriteCssUrls(next);

@@ -32,7 +32,7 @@ fun writeHeroDatesToQuery(
     startDate: String?,
     endDate: String?,
 ) {
-    val current = parseHomeUrl(window.location.pathname + window.location.search)
+    val current = parseHomeUrl(currentAppLocationHref())
     val updated =
         current.copy(
             startDate = startDate?.takeIf { it.isNotEmpty() },
@@ -55,7 +55,7 @@ fun replaceHomeUrl(parts: HomeUrlParts) {
     window.dispatchEvent(org.w3c.dom.CustomEvent("drivebit-home-url-changed"))
 }
 
-fun currentHomeUrlParts(): HomeUrlParts = parseHomeUrl(window.location.pathname + window.location.search)
+fun currentHomeUrlParts(): HomeUrlParts = parseHomeUrl(currentAppLocationHref())
 
 fun updateHeroDateDomDisplays(
     startDate: String?,

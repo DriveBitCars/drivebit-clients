@@ -41,6 +41,9 @@ test("rewrites root-absolute assets, data-hero-bg, CSS urls, and injects base", 
   assert.match(out, /HTMLImageElement\.prototype/);
   assert.match(out, /Element\.prototype\.setAttribute/);
   assert.match(out, /history\.pushState/);
+  assert.match(out, /getOwnPropertyDescriptor\(Location\.prototype, "href"\)/);
+  assert.match(out, /Location\.prototype\.assign/);
+  assert.match(out, /Location\.prototype\.replace/);
   assert.match(out, /href="\/drivebit-clients\/vendor\/drivebit-fonts\.css"/);
   assert.match(out, /src="\/drivebit-clients\/images\/searchbackground\/car0\.jpg"/);
   assert.match(out, /data-hero-bg="\/drivebit-clients\/images\/searchbackground\/car1\.jpg"/);
@@ -50,4 +53,24 @@ test("rewrites root-absolute assets, data-hero-bg, CSS urls, and injects base", 
   const css = fs.readFileSync(cssPath, "utf8");
   assert.match(css, /url\(\/drivebit-clients\/images\/backgrounds\/hero-bg\.jpg\)/);
   assert.match(css, /url\("\/drivebit-clients\/images\/searchbackground\/car0\.jpg"\)/);
+});
+
+test("rewrites meta refresh urls under project base", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pages-base-refresh-"));
+  const htmlPath = path.join(dir, "search.html");
+  fs.writeFileSync(
+    htmlPath,
+    `<!DOCTYPE html><html><head>
+<meta http-equiv="refresh" content="0; url=/moskva/search">
+</head><body></body></html>`,
+  );
+
+  const result = spawnSync("node", [script, dir, "/drivebit-clients"], {
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+
+  const out = fs.readFileSync(htmlPath, "utf8");
+  assert.match(out, /url=\/drivebit-clients\/moskva\/search/);
+  assert.match(out, /Location\.prototype\.replace/);
 });

@@ -7,7 +7,14 @@
     <meta name="robots" content="noindex, follow">
     <link rel="canonical" href="https://drivebit.ru/search/audi">
     <meta http-equiv="refresh" content="0; url=/search/audi">
-    <script>location.replace('/search/audi');</script>
+    <script>
+        (function () {
+            var base = (typeof window !== "undefined" && window.__DRIVEBIT_BASE__) || "";
+            var target = "/search/audi";
+            if (base && target.indexOf(base) !== 0) target = base + target;
+            location.replace(target);
+        })();
+    </script>
 </head>
 <body>
     <p>Страница переехала: <a href="/search/audi">drivebit.ru/search/audi</a></p>

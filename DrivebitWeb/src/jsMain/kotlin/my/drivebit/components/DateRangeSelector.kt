@@ -141,8 +141,8 @@ fun DateRangeSelector(
                                 }
                             }
                         val citySlug =
-                            my.drivebit.utils.parseCitySlugFromSearchPath(kotlinx.browser.window.location.pathname)
-                                ?: my.drivebit.web.parseCitySlugFromPath(kotlinx.browser.window.location.pathname)
+                            my.drivebit.utils.parseCitySlugFromSearchPath(my.drivebit.web.currentAppPathname())
+                                ?: my.drivebit.web.parseCitySlugFromPath(my.drivebit.web.currentAppPathname())
                                 ?: "moskva"
                         val url =
                             my.drivebit.utils.buildCitySearchPath(

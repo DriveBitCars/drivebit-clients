@@ -66,7 +66,7 @@ fun HtmlFiltersBridge(
         }
 
         val pathListener: (Event) -> Unit = {
-            val path = window.location.pathname
+            val path = currentAppPathname()
             activeFilterTitleForCityPath(path)?.let { syncStaticFiltersPressedState(it) }
             heroHeadlineForCityPath(path)?.let { syncStaticHeroHeadlineText(it) }
         }

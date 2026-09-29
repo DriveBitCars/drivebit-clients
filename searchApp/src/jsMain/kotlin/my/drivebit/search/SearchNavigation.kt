@@ -41,4 +41,4 @@ fun resetSearchFilters(
     selectedCitySlug: String?,
 ): SearchFilterSet = SearchFilterSet(citySlug = filters.citySlug ?: selectedCitySlug ?: "moskva")
 
-fun currentLocationHref(): String = window.location.pathname + window.location.search
+fun currentLocationHref(): String = my.drivebit.web.currentAppLocationHref()
