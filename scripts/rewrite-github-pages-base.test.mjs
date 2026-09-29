@@ -55,6 +55,29 @@ test("rewrites root-absolute assets, data-hero-bg, CSS urls, and injects base", 
   assert.match(css, /url\("\/drivebit-clients\/images\/searchbackground\/car0\.jpg"\)/);
 });
 
+test("still injects base when HTML only references __DRIVEBIT_BASE__ without assignment", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pages-base-inject-"));
+  const htmlPath = path.join(dir, "search.html");
+  fs.writeFileSync(
+    htmlPath,
+    `<!DOCTYPE html><html><head>
+<script>
+  var base = window.__DRIVEBIT_BASE__ || "";
+  location.replace((base || "") + "/moskva/search");
+</script>
+</head><body></body></html>`,
+  );
+
+  const result = spawnSync("node", [script, dir, "/drivebit-clients"], {
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+
+  const out = fs.readFileSync(htmlPath, "utf8");
+  assert.match(out, /window\.__DRIVEBIT_BASE__="\/drivebit-clients"/);
+  assert.match(out, /Location\.prototype\.assign/);
+});
+
 test("rewrites meta refresh urls under project base", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pages-base-refresh-"));
   const htmlPath = path.join(dir, "search.html");
