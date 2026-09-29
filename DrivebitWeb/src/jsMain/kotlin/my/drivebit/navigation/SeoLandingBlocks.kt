@@ -1,8 +1,10 @@
 package my.drivebit.navigation
 
+import kotlinx.browser.window
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import my.drivebit.utils.canonicalizeBrandSearchPath
+import my.drivebit.utils.withWebBasePath
 
 @Serializable
 data class SeoContentTable(
@@ -130,10 +132,14 @@ object SeoLandingBlocks {
     internal fun parseBlocksJson(raw: String): Map<String, SeoLandingBlock> =
         json.decodeFromString<Map<String, SeoLandingBlock>>(raw)
 
-    private fun loadFromResource(): Map<String, SeoLandingBlock> {
-        val raw = readResourceText(RESOURCE_PATH)
-        return parseBlocksJson(raw)
-    }
+    private fun loadFromResource(): Map<String, SeoLandingBlock> =
+        try {
+            val url = withWebBasePath(RESOURCE_PATH, window.location.hostname)
+            val raw = readResourceText(url)
+            parseBlocksJson(raw)
+        } catch (_: Throwable) {
+            emptyMap()
+        }
 
     private fun readResourceText(url: String): String = readResourceTextBlocking(url)
 

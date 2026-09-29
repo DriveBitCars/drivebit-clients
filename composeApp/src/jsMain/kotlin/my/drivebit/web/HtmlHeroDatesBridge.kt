@@ -12,6 +12,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import my.drivebit.components.DateRangeCalendarDialog
 import my.drivebit.navigation.LocalNavigationController
+import my.drivebit.utils.withWebBasePath
 import my.drivebit.viewmodels.DateFieldViewModel
 import org.w3c.dom.events.Event
 
@@ -43,12 +44,15 @@ fun HtmlHeroDatesBridge(
             val start = startDateViewModel.state.value.date
             val end = endDateViewModel.state.value.date
             writeHeroDatesToQuery(start, end)
+            val appPath = currentAppPathname()
             val citySlug =
-                my.drivebit.utils.parseCitySlugFromSearchPath(window.location.pathname)
-                    ?: parseCitySlugFromPath(window.location.pathname)
+                my.drivebit.utils.parseCitySlugFromSearchPath(appPath)
+                    ?: parseCitySlugFromPath(appPath)
                     ?: "moskva"
             val url = buildHeroSearchUrl(start, end, citySlug = citySlug)
-            navigationController?.navigateTo(url) ?: run { window.location.href = url }
+            navigationController?.navigateTo(url) ?: run {
+                window.location.href = my.drivebit.utils.withWebBasePath(url, window.location.hostname)
+            }
         }
         window.addEventListener("drivebit-hero-dates-changed", datesChangedListener)
         window.addEventListener("drivebit-home-url-changed", datesChangedListener)

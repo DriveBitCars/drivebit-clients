@@ -17,7 +17,12 @@
             if (!/^[a-z0-9-]+$/.test(slug)) {
                 slug = FALLBACK;
             }
-            location.replace("/" + slug + "/search" + location.search + location.hash);
+            var base = (typeof window !== "undefined" && window.__DRIVEBIT_BASE__) || "";
+            var target = "/" + slug + "/search" + location.search + location.hash;
+            if (base && target.indexOf(base) !== 0) {
+                target = base + target;
+            }
+            location.replace(target);
         })();
     </script>
 </head>

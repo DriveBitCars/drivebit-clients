@@ -12,7 +12,8 @@ describe("search/index.html redirect stub", () => {
     const html = fs.readFileSync(searchIndex, "utf8");
     assert.match(html, /my_city_slug/);
     assert.match(html, /moskva\/search/);
-    assert.match(html, /location\.replace\("\/" \+ slug \+ "\/search"/);
+    assert.match(html, /__DRIVEBIT_BASE__/);
+    assert.match(html, /location\.replace\(target\)/);
     assert.doesNotMatch(html, /appCompose\.js/);
     assert.doesNotMatch(html, /id="root"/);
   });
