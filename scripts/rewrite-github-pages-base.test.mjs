@@ -39,6 +39,8 @@ test("rewrites root-absolute assets, data-hero-bg, CSS urls, and injects base", 
   const out = fs.readFileSync(htmlPath, "utf8");
   assert.match(out, /window\.__DRIVEBIT_BASE__="\/drivebit-clients"/);
   assert.match(out, /HTMLImageElement\.prototype/);
+  assert.match(out, /Element\.prototype\.setAttribute/);
+  assert.match(out, /history\.pushState/);
   assert.match(out, /href="\/drivebit-clients\/vendor\/drivebit-fonts\.css"/);
   assert.match(out, /src="\/drivebit-clients\/images\/searchbackground\/car0\.jpg"/);
   assert.match(out, /data-hero-bg="\/drivebit-clients\/images\/searchbackground\/car1\.jpg"/);
