@@ -114,7 +114,7 @@ function rewriteHtml(text) {
 </script>
 `;
   let next = text;
-  if (!next.includes("__DRIVEBIT_BASE__")) {
+  if (!next.includes('window.__DRIVEBIT_BASE__="')) {
     next = next.replace(/(<head[^>]*>)/i, `$1\n${inject}`);
   }
   next = next.replace(
