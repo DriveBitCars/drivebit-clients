@@ -26,6 +26,7 @@ import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.mapIso8601ToDateString
 import my.drivebit.utils.mapIso8601ToTimeString
 import my.drivebit.utils.minioProxiedAbsoluteUrl
+import my.drivebit.utils.withWebBasePath
 import my.drivebit.viewmodels.BookingContractUiState
 import my.drivebit.viewmodels.BookingContractViewModel
 import org.jetbrains.compose.web.css.*
@@ -60,7 +61,11 @@ fun DownloadBookingContractPage() {
     if (!storage.isLogined()) {
         LaunchedEffect(bookingId) {
             val returnTo = window.location.pathname + window.location.search
-            window.location.href = "/login-by-phone?$REDIRECT_PATH=${returnTo.encodeUrlParameter()}"
+            window.location.href =
+                withWebBasePath(
+                    "/login-by-phone?$REDIRECT_PATH=${returnTo.encodeUrlParameter()}",
+                    window.location.hostname,
+                )
         }
         AppWithHeader {
             Div({

@@ -153,6 +153,10 @@ private class InspectionActFake : InspectionAct {
 private class BookingFake(
     private val ownerId: String = "owner-1",
     private val renterId: String = "renter-1",
+    private val canOpenHandoverInspection: Boolean = true,
+    private val canOpenReturnInspection: Boolean = false,
+    private val handoverActStatus: InspectionActStatus = InspectionActStatus.None,
+    private val returnActStatus: InspectionActStatus = InspectionActStatus.None,
 ) : Booking {
     override suspend fun calculate(request: CheckBookingAvailabilityRequest): CheckBookingAvailabilityResponse =
         error("not used")
@@ -161,7 +165,16 @@ private class BookingFake(
 
     override suspend fun getMyAsOwner(): List<BookingDTO> = error("not used")
 
-    override suspend fun getById(bookingId: String): BookingDTO = sampleBooking(bookingId, ownerId, renterId)
+    override suspend fun getById(bookingId: String): BookingDTO =
+        sampleBooking(
+            bookingId = bookingId,
+            ownerId = ownerId,
+            renterId = renterId,
+            canOpenHandoverInspection = canOpenHandoverInspection,
+            canOpenReturnInspection = canOpenReturnInspection,
+            handoverActStatus = handoverActStatus,
+            returnActStatus = returnActStatus,
+        )
 
     override suspend fun createAsRenter(request: CreateBookingRequest): BookingDTO = error("not used")
 
@@ -224,6 +237,46 @@ class InspectionActViewModelTest {
             assertEquals("Есть царапина", ready.commentInput)
             assertEquals("Иван Владельцев", ready.ownerName)
             assertEquals("Пётр Арендаторов", ready.renterName)
+        }
+
+    @Test
+    fun `load when handover not available yet shows russian error without openOrCreate`() =
+        runTest {
+            val api = InspectionActFake()
+            val viewModel =
+                viewModel(
+                    api = api,
+                    userId = "owner-1",
+                    canOpenHandoverInspection = false,
+                )
+
+            viewModel.load()
+            advanceUntilIdle()
+
+            val error = assertIs<InspectionActUiState.Error>(viewModel.state.value)
+            assertEquals(0, api.openOrCreateCalls)
+            assertEquals(0, api.getCalls)
+            assertTrue(error.message.contains("Акт передачи пока недоступен"))
+        }
+
+    @Test
+    fun `load when handover act already exists uses get even if canOpen is false`() =
+        runTest {
+            val api = InspectionActFake()
+            val viewModel =
+                viewModel(
+                    api = api,
+                    userId = "owner-1",
+                    canOpenHandoverInspection = false,
+                    handoverActStatus = InspectionActStatus.Draft,
+                )
+
+            viewModel.load()
+            advanceUntilIdle()
+
+            assertIs<InspectionActUiState.Ready>(viewModel.state.value)
+            assertEquals(0, api.openOrCreateCalls)
+            assertEquals(1, api.getCalls)
         }
 
     @Test
@@ -528,12 +581,25 @@ class InspectionActViewModelTest {
     private fun CoroutineScope.viewModel(
         api: InspectionActFake,
         userId: String = "owner-1",
+        canOpenHandoverInspection: Boolean = true,
+        canOpenReturnInspection: Boolean = false,
+        handoverActStatus: InspectionActStatus = InspectionActStatus.None,
+        returnActStatus: InspectionActStatus = InspectionActStatus.None,
+        type: InspectionActType = InspectionActType.Handover,
     ) = InspectionActViewModelImpl(
         inspectionAct = api,
-        booking = BookingFake(ownerId = "owner-1", renterId = "renter-1"),
+        booking =
+            BookingFake(
+                ownerId = "owner-1",
+                renterId = "renter-1",
+                canOpenHandoverInspection = canOpenHandoverInspection,
+                canOpenReturnInspection = canOpenReturnInspection,
+                handoverActStatus = handoverActStatus,
+                returnActStatus = returnActStatus,
+            ),
         user = UserFake(userId = userId),
         bookingId = "booking-1",
-        type = InspectionActType.Handover,
+        type = type,
         coroutineScope = CoroutineScope(SupervisorJob() + coroutineContext),
     )
 }
@@ -542,6 +608,10 @@ private fun sampleBooking(
     bookingId: String,
     ownerId: String,
     renterId: String,
+    canOpenHandoverInspection: Boolean = true,
+    canOpenReturnInspection: Boolean = false,
+    handoverActStatus: InspectionActStatus = InspectionActStatus.None,
+    returnActStatus: InspectionActStatus = InspectionActStatus.None,
 ) = BookingDTO(
     id = bookingId,
     carId = "car-1",
@@ -552,6 +622,10 @@ private fun sampleBooking(
     startAt = "2026-09-01T07:00:00Z",
     endAt = "2026-09-02T07:00:00Z",
     totalAmount = 30.0,
+    canOpenHandoverInspection = canOpenHandoverInspection,
+    canOpenReturnInspection = canOpenReturnInspection,
+    handoverActStatus = handoverActStatus,
+    returnActStatus = returnActStatus,
     status = "Paid",
     createdAt = "2026-09-01T05:53:42Z",
 )

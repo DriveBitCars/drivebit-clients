@@ -16,6 +16,7 @@ import my.drivebit.network.services.BookingInspectionActDownloadDto
 import my.drivebit.network.services.BookingInspectionActDto
 import my.drivebit.network.services.BookingInspectionActPhotoDto
 import my.drivebit.network.services.InspectionAct
+import my.drivebit.network.services.InspectionActStatus
 import my.drivebit.network.services.InspectionActType
 import my.drivebit.network.services.InspectionActViewerRole
 import my.drivebit.network.services.InspectionPhotoKind
@@ -164,7 +165,32 @@ class InspectionActViewModelImpl(
                 renterId = bookingDto.renterId
                 ownerName = bookingDto.ownerName?.takeIf { it.isNotBlank() }.orEmpty()
                 renterName = bookingDto.renterName?.takeIf { it.isNotBlank() }.orEmpty()
-                applyAct(inspectionAct.openOrCreate(bookingId, type))
+                val actExists =
+                    when (type) {
+                        InspectionActType.Handover ->
+                            bookingDto.handoverActStatus != InspectionActStatus.None
+                        InspectionActType.Return ->
+                            bookingDto.returnActStatus != InspectionActStatus.None
+                    }
+                val canOpen =
+                    when (type) {
+                        InspectionActType.Handover -> bookingDto.canOpenHandoverInspection
+                        InspectionActType.Return -> bookingDto.canOpenReturnInspection
+                    }
+                when {
+                    actExists -> applyAct(inspectionAct.get(bookingId, type))
+                    canOpen -> applyAct(inspectionAct.openOrCreate(bookingId, type))
+                    else ->
+                        showError(
+                            when (type) {
+                                InspectionActType.Handover ->
+                                    "Акт передачи пока недоступен для этой брони. Обновите страницу чуть позже."
+                                InspectionActType.Return ->
+                                    "Акт возврата пока недоступен для этой брони. Обновите страницу чуть позже."
+                            },
+                            lastAct,
+                        )
+                }
             } catch (exception: Throwable) {
                 showError(errorMessage(exception, "Не удалось загрузить акт"), lastAct)
             } finally {

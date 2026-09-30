@@ -44,6 +44,7 @@ import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.utils.minioProxiedAbsoluteUrl
 import my.drivebit.utils.readAsBytes
+import my.drivebit.utils.withWebBasePath
 import my.drivebit.viewmodels.InspectionActAction
 import my.drivebit.viewmodels.InspectionActEffect
 import my.drivebit.viewmodels.InspectionActPhotoFile
@@ -89,7 +90,11 @@ fun InspectionActPage() {
     if (!storage.isLogined()) {
         LaunchedEffect(bookingId, type) {
             val returnTo = window.location.pathname + window.location.search
-            window.location.href = "/login-by-phone?$REDIRECT_PATH=${returnTo.encodeUrlParameter()}"
+            window.location.href =
+                withWebBasePath(
+                    "/login-by-phone?$REDIRECT_PATH=${returnTo.encodeUrlParameter()}",
+                    window.location.hostname,
+                )
         }
         PageWithLogo {
             Loader()
