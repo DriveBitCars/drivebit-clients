@@ -121,17 +121,39 @@ class BookingPrepaymentTest {
     }
 
     @Test
-    fun visibleInspectionActTypes_paidShowsOnlyHandover() {
+    fun visibleInspectionActTypes_paidWithoutCanOpenShowsNone() {
         assertEquals(
-            listOf(InspectionActType.Handover),
+            emptyList(),
             booking(status = "Paid").visibleInspectionActTypes(),
         )
     }
 
     @Test
-    fun visibleInspectionActTypes_paidWithSignedHandoverShowsHandoverAndReturn() {
+    fun visibleInspectionActTypes_canOpenHandoverShowsHandover() {
         assertEquals(
-            listOf(InspectionActType.Handover, InspectionActType.Return),
+            listOf(InspectionActType.Handover),
+            booking(
+                status = "Paid",
+                canOpenHandoverInspection = true,
+            ).visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
+    fun visibleInspectionActTypes_existingHandoverDraftShowsEvenWhenCanOpenFalse() {
+        assertEquals(
+            listOf(InspectionActType.Handover),
+            booking(
+                status = "Paid",
+                handoverActStatus = InspectionActStatus.Draft,
+            ).visibleInspectionActTypes(),
+        )
+    }
+
+    @Test
+    fun visibleInspectionActTypes_signedHandoverWithoutCanOpenReturnShowsOnlyHandover() {
+        assertEquals(
+            listOf(InspectionActType.Handover),
             booking(
                 status = "Paid",
                 handoverActStatus = InspectionActStatus.SignedByBoth,
@@ -140,62 +162,25 @@ class BookingPrepaymentTest {
     }
 
     @Test
-    fun visibleInspectionActTypes_contractSignedByBothShowsHandover() {
-        assertEquals(
-            listOf(InspectionActType.Handover),
-            booking(status = "ContractSignedByBoth").visibleInspectionActTypes(),
-        )
-    }
-
-    @Test
-    fun visibleInspectionActTypes_contractSignedByBothWithSignedHandoverShowsReturn() {
-        assertEquals(
-            listOf(InspectionActType.Handover, InspectionActType.Return),
-            booking(
-                status = "ContractSignedByBoth",
-                handoverActStatus = InspectionActStatus.SignedByBoth,
-            ).visibleInspectionActTypes(),
-        )
-    }
-
-    @Test
-    fun visibleInspectionActTypes_activeWithoutSignedHandoverShowsOnlyHandover() {
-        assertEquals(
-            listOf(InspectionActType.Handover),
-            booking(
-                status = "Active",
-                handoverActStatus = InspectionActStatus.Draft,
-            ).visibleInspectionActTypes(),
-        )
-    }
-
-    @Test
-    fun visibleInspectionActTypes_activeWithSignedHandoverShowsHandoverAndReturn() {
+    fun visibleInspectionActTypes_canOpenReturnShowsReturnWithHandover() {
         assertEquals(
             listOf(InspectionActType.Handover, InspectionActType.Return),
             booking(
                 status = "Active",
                 handoverActStatus = InspectionActStatus.SignedByBoth,
+                canOpenReturnInspection = true,
             ).visibleInspectionActTypes(),
         )
     }
 
     @Test
-    fun visibleInspectionActTypes_completedWithoutSignedHandoverShowsOnlyHandover() {
-        assertEquals(
-            listOf(InspectionActType.Handover),
-            booking(status = "Completed").visibleInspectionActTypes(),
-        )
-    }
-
-    @Test
-    fun visibleInspectionActTypes_completedWithSignedHandoverShowsHandoverAndReturn() {
+    fun visibleInspectionActTypes_existingReturnActShowsEvenWhenCanOpenFalse() {
         assertEquals(
             listOf(InspectionActType.Handover, InspectionActType.Return),
             booking(
                 status = "Completed",
                 handoverActStatus = InspectionActStatus.SignedByBoth,
-                canOpenReturnInspection = true,
+                returnActStatus = InspectionActStatus.Draft,
             ).visibleInspectionActTypes(),
         )
     }
@@ -264,6 +249,7 @@ class BookingPrepaymentTest {
         totalAmountWithDeposit: Double = 0.0,
         balanceDueAmount: Double = 0.0,
         canOpenReturnInspection: Boolean = false,
+        canOpenHandoverInspection: Boolean = false,
         handoverActStatus: InspectionActStatus = InspectionActStatus.None,
         returnActStatus: InspectionActStatus = InspectionActStatus.None,
     ): BookingDTO =
@@ -287,6 +273,7 @@ class BookingPrepaymentTest {
             canSignContractAsRenter = canSignContractAsRenter,
             contractSignedByOwner = contractSignedByOwner,
             contractSignedByRenter = contractSignedByRenter,
+            canOpenHandoverInspection = canOpenHandoverInspection,
             canOpenReturnInspection = canOpenReturnInspection,
             handoverActStatus = handoverActStatus,
             returnActStatus = returnActStatus,

@@ -202,15 +202,15 @@ fun BookingDTO.statusAllowsInspectionAct(): Boolean =
 fun BookingDTO.handoverActFullySigned(): Boolean =
     handoverActStatus == InspectionActStatus.SignedByBoth
 
-fun BookingDTO.visibleInspectionActTypes(): List<InspectionActType> {
-    if (!statusAllowsInspectionAct()) return emptyList()
-    return buildList {
-        add(InspectionActType.Handover)
-        if (handoverActFullySigned()) {
+fun BookingDTO.visibleInspectionActTypes(): List<InspectionActType> =
+    buildList {
+        if (canOpenHandoverInspection || handoverActStatus != InspectionActStatus.None) {
+            add(InspectionActType.Handover)
+        }
+        if (canOpenReturnInspection || returnActStatus != InspectionActStatus.None) {
             add(InspectionActType.Return)
         }
     }
-}
 
 fun BookingDTO.canShowSignContractAsOwner(): Boolean =
     canSignContractAsOwner ||

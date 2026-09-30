@@ -23,6 +23,7 @@ import my.drivebit.utils.REDIRECT_PATH
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.utils.getUrlParameter
+import my.drivebit.utils.withWebBasePath
 import my.drivebit.viewmodels.BookingPaymentLinkUiState
 import my.drivebit.viewmodels.BookingPaymentLinkViewModel
 import org.jetbrains.compose.web.css.*
@@ -56,7 +57,11 @@ fun BookingPaymentLinkPage() {
     if (!storage.isLogined()) {
         LaunchedEffect(bookingId) {
             val returnTo = window.location.pathname + window.location.search
-            window.location.href = "/login-by-phone?$REDIRECT_PATH=${returnTo.encodeUrlParameter()}"
+            window.location.href =
+                withWebBasePath(
+                    "/login-by-phone?$REDIRECT_PATH=${returnTo.encodeUrlParameter()}",
+                    window.location.hostname,
+                )
         }
         AppWithHeader {
             Div({
