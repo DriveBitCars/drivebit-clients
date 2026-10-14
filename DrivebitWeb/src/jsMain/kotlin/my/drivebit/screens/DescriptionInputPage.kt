@@ -12,6 +12,7 @@ import my.drivebit.components.TextAreaField
 import my.drivebit.components.ToolbarBackArrow
 import my.drivebit.design.CSSColors
 import my.drivebit.viewmodels.ButtonState
+import my.drivebit.viewmodels.CarDescriptionLimits
 import my.drivebit.viewmodels.DescriptionInputViewModel
 import my.drivebit.viewmodels.createButtonViewModel
 import org.jetbrains.compose.web.css.JustifyContent
@@ -49,7 +50,7 @@ fun DescriptionInputPage(
                     label = "Описание",
                     value = state.description,
                     onValueChange = { viewModel.updateDescription(it) },
-                    maxLength = 1000,
+                    maxLength = CarDescriptionLimits.MAX_LENGTH,
                     rows = 6,
                 )
 
