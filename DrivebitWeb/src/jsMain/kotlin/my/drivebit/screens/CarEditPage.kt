@@ -27,6 +27,7 @@ import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.utils.getUrlParameter
 import my.drivebit.viewmodels.AddressSuggestViewModel
 import my.drivebit.viewmodels.ButtonState
+import my.drivebit.viewmodels.CarDescriptionLimits
 import my.drivebit.viewmodels.CarEditIntent
 import my.drivebit.viewmodels.CarEditMviState
 import my.drivebit.viewmodels.CarEditMviViewModel
@@ -145,7 +146,7 @@ fun CarEditPage() {
                                 label = "Описание",
                                 value = formData.description,
                                 onValueChange = { viewModel.handleIntent(CarEditIntent.UpdateDescription(it)) },
-                                maxLength = 1000,
+                                maxLength = CarDescriptionLimits.MAX_LENGTH,
                                 rows = 6,
                             )
 
