@@ -27,6 +27,8 @@ import my.drivebit.network.services.canCurrentUserEditComment
 import my.drivebit.network.services.canCurrentUserEditMetrics
 import my.drivebit.network.services.canCurrentUserUploadPhotos
 import my.drivebit.network.services.commentInputFor
+import my.drivebit.network.services.fuelInputFor
+import my.drivebit.network.services.mileageInputFor
 import my.drivebit.network.services.hasRequiredPhotosForCurrentUser
 import my.drivebit.network.services.resolveInspectionActViewerRole
 
@@ -388,8 +390,8 @@ class InspectionActViewModelImpl(
         lastAct = act
         val role = viewerRole
         val previous = state.value as? InspectionActUiState.Ready
-        val serverFuel = act.fuelRemaining?.toString().orEmpty()
-        val serverMileage = act.mileage?.toString().orEmpty()
+        val serverFuel = role?.let { act.fuelInputFor(it) }.orEmpty()
+        val serverMileage = role?.let { act.mileageInputFor(it) }.orEmpty()
         val serverComment = role?.let { act.commentInputFor(it) }.orEmpty()
         _state.value =
             InspectionActUiState.Ready(

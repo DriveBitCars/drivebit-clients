@@ -83,10 +83,9 @@ tasks.register("generateImageConstants") {
                     .filter { it.isFile && it.extension in listOf("svg", "jpg", "png", "webp", "jpeg") }
                     .sortedBy { it.path }
                     .forEach { file ->
-                        val relativePath = file.relativeTo(resourcesDir)
+                        val relativePath = file.relativeTo(resourcesDir).invariantSeparatorsPath
                         val constantName =
                             relativePath
-                                .toString()
                                 .replace("/", "_")
                                 .replace("-", "_")
                                 .replace(".", "_")

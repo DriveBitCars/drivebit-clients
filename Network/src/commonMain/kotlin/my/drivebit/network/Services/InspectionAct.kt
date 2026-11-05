@@ -106,10 +106,10 @@ fun BookingInspectionActDto.canCurrentUserUploadPhotos(role: InspectionActViewer
 
 fun BookingInspectionActDto.canCurrentUserSign(role: InspectionActViewerRole): Boolean =
     when (role) {
-        // Backend sets canSignAsOwner only after fuel/mileage are saved; owner still needs the
-        // button so metrics can be persisted on sign.
+        // Backend sets canSign* only after fuel/mileage are saved. The button stays available
+        // until this party signs, so metrics can be persisted on sign.
         InspectionActViewerRole.Owner -> canEditOwnerFields || canSignAsOwner
-        InspectionActViewerRole.Renter -> canSignAsRenter
+        InspectionActViewerRole.Renter -> canEditRenterFields || canSignAsRenter
     }
 
 fun BookingInspectionActDto.hasCurrentUserSigned(role: InspectionActViewerRole): Boolean =
@@ -146,6 +146,18 @@ fun BookingInspectionActDto.commentInputFor(role: InspectionActViewerRole): Stri
     when (role) {
         InspectionActViewerRole.Owner -> ownerComment.orEmpty()
         InspectionActViewerRole.Renter -> renterComment.orEmpty()
+    }
+
+fun BookingInspectionActDto.fuelInputFor(role: InspectionActViewerRole): String =
+    when (role) {
+        InspectionActViewerRole.Owner -> fuelRemaining?.toString().orEmpty()
+        InspectionActViewerRole.Renter -> renterFuelRemaining?.toString().orEmpty()
+    }
+
+fun BookingInspectionActDto.mileageInputFor(role: InspectionActViewerRole): String =
+    when (role) {
+        InspectionActViewerRole.Owner -> mileage?.toString().orEmpty()
+        InspectionActViewerRole.Renter -> renterMileage?.toString().orEmpty()
     }
 
 fun BookingInspectionActPhotoDto.canCurrentUserDelete(
@@ -253,6 +265,8 @@ data class BookingInspectionActDto(
     @JsonNames("actNumber", "ActNumber") val actNumber: Long,
     @JsonNames("fuelRemaining", "FuelRemaining") val fuelRemaining: Int? = null,
     @JsonNames("mileage", "Mileage") val mileage: Int? = null,
+    @JsonNames("renterFuelRemaining", "RenterFuelRemaining") val renterFuelRemaining: Int? = null,
+    @JsonNames("renterMileage", "RenterMileage") val renterMileage: Int? = null,
     @JsonNames("ownerComment", "OwnerComment") val ownerComment: String? = null,
     @JsonNames("renterComment", "RenterComment") val renterComment: String? = null,
     @JsonNames("signedByOwnerAt", "SignedByOwnerAt") val signedByOwnerAt: String? = null,

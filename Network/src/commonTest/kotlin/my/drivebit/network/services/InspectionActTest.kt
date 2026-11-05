@@ -504,6 +504,29 @@ class InspectionActTest {
     }
 
     @Test
+    fun `renter can sign after owner even when own metrics are not saved yet`() {
+        val act =
+            BookingInspectionActDto(
+                id = "act-1",
+                bookingId = "booking-1",
+                type = InspectionActType.Handover,
+                actNumber = 1,
+                status = InspectionActStatus.AwaitingRenter,
+                isSignedByOwner = true,
+                canEditOwnerFields = false,
+                canEditRenterFields = true,
+                canSignAsOwner = false,
+                canSignAsRenter = false,
+                createdAt = "2026-08-29T08:00:00Z",
+                updatedAt = "2026-08-29T08:00:00Z",
+            )
+
+        assertTrue(act.canCurrentUserSign(InspectionActViewerRole.Renter))
+        assertEquals(null, act.currentUserSignStatusMessage(InspectionActViewerRole.Renter))
+        assertEquals("Владелец подписал", act.counterpartySignStatusMessage(InspectionActViewerRole.Renter))
+    }
+
+    @Test
     fun `sign status helpers show button or signed state for current user`() {
         val draft =
             BookingInspectionActDto(

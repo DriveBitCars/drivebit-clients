@@ -72,7 +72,13 @@ private class InspectionActFake : InspectionAct {
         if (failMutations) error("metrics failed")
         callOrder += "metrics"
         metricsRequest = request
-        act = act.copy(fuelRemaining = request.fuelRemaining, mileage = request.mileage)
+        act =
+            act.copy(
+                fuelRemaining = request.fuelRemaining,
+                mileage = request.mileage,
+                renterFuelRemaining = request.fuelRemaining,
+                renterMileage = request.mileage,
+            )
         return act
     }
 
@@ -84,7 +90,7 @@ private class InspectionActFake : InspectionAct {
         if (failMutations) error("comment failed")
         callOrder += "comment"
         commentRequest = request
-        act = act.copy(ownerComment = request.comment)
+        act = act.copy(ownerComment = request.comment, renterComment = request.comment)
         return act
     }
 
@@ -291,6 +297,9 @@ class InspectionActViewModelTest {
             val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
             assertEquals("Иван Владельцев", ready.ownerName)
             assertEquals("Пётр Арендаторов", ready.renterName)
+            assertEquals("", ready.fuelInput)
+            assertEquals("", ready.mileageInput)
+            assertEquals("Принял", ready.commentInput)
         }
 
     @Test
@@ -382,6 +391,9 @@ class InspectionActViewModelTest {
             val ready = assertIs<InspectionActUiState.Ready>(viewModel.state.value)
             assertFalse(ready.act.canEditRenterFields)
             assertTrue(ready.act.isSignedByRenter)
+            assertEquals("60", ready.fuelInput)
+            assertEquals("121200", ready.mileageInput)
+            assertEquals("Комментарий арендатора", ready.commentInput)
         }
 
     @Test
