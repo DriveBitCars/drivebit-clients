@@ -37,14 +37,15 @@ import org.koin.core.parameter.parametersOf
 
 data class LeaveReviewScreen(
     val carId: String,
+    val bookingId: String? = null,
 ) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val koinScope = currentKoinScope()
         val viewModel: CreateReviewViewModel =
-            remember(carId) {
-                koinScope.get<CreateReviewViewModel>(parameters = { parametersOf(carId) })
+            remember(carId, bookingId) {
+                koinScope.get<CreateReviewViewModel>(parameters = { parametersOf(carId, bookingId) })
             }
         val state by viewModel.state.collectAsState()
 

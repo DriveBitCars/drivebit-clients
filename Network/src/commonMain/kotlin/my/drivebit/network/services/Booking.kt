@@ -67,8 +67,8 @@ data class CheckBookingAvailabilityRequest(
 
 @Serializable
 data class CheckBookingAvailabilityResponse(
-    val isAvailable: Boolean,
-    val conflict: String? = null,
+    @JsonNames("isAvailable", "IsAvailable") val isAvailable: Boolean,
+    @JsonNames("conflict", "Conflict") val conflict: String? = null,
     @JsonNames("estimatedPrice", "estimated_price") val estimatedPrice: Double? = null,
     @JsonNames("pricePerDay", "price_per_day") val pricePerDay: Double? = null,
     @JsonNames("totalPrice", "total_price") val totalPrice: Double? = null,
@@ -105,6 +105,7 @@ data class BookingDTO(
     @JsonNames("prepaymentAvailable", "prepayment_available") val prepaymentAvailable: Boolean = false,
     @JsonNames("canPayPrepayment", "can_pay_prepayment") val canPayPrepayment: Boolean = false,
     @JsonNames("canPayFullAmount", "can_pay_full_amount") val canPayFullAmount: Boolean = false,
+    @JsonNames("canLeaveReview", "can_leave_review") val canLeaveReview: Boolean = false,
     @JsonNames("contractSignedByOwner", "contract_signed_by_owner") val contractSignedByOwner: Boolean = false,
     @JsonNames("contractSignedByRenter", "contract_signed_by_renter") val contractSignedByRenter: Boolean = false,
     @JsonNames("canSignContractAsOwner", "can_sign_contract_as_owner") val canSignContractAsOwner: Boolean = false,

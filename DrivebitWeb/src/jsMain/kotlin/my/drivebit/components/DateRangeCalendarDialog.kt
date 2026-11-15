@@ -17,6 +17,7 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.design.applyTypography
 import my.drivebit.utils.addDays
 import my.drivebit.utils.addMonths
+import my.drivebit.utils.dateRangeContainsDisabledDate
 import my.drivebit.utils.lastDayOfMonth
 import my.drivebit.viewmodels.DateFieldViewModel
 import org.jetbrains.compose.web.css.*
@@ -46,9 +47,11 @@ fun DateRangeCalendarDialog(
         minDate?.take(10)?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: today
 
     var displayMonth by remember { mutableStateOf(today) }
+    var periodUnavailableHint by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(open) {
         if (open) {
+            periodUnavailableHint = null
             displayMonth =
                 parseIsoLocalDate(endState.date)
                     ?: parseIsoLocalDate(startState.date)
@@ -63,40 +66,60 @@ fun DateRangeCalendarDialog(
 
     val onDayClick: (LocalDate) -> Unit = { clicked ->
         val dateStr = clicked.toIsoString()
-        if (clicked >= minParsed && dateStr !in disabledDates) {
-            val start = parseIsoLocalDate(startState.date)
-            val end = parseIsoLocalDate(endState.date)
-            when {
-                start == null -> {
-                    startDateViewModel.setDate(dateStr)
-                    endDateViewModel.setDate(null)
-                }
-                end == null -> {
-                    when {
-                        clicked < start -> {
-                            startDateViewModel.setDate(dateStr)
-                            endDateViewModel.setDate(null)
-                        }
-                        clicked == start -> {
-                            if (endMinOffsetDaysFromStart <= 0) {
+        when {
+            clicked < minParsed -> Unit
+            dateStr in disabledDates -> {
+                periodUnavailableHint = "Выбранный период недоступен"
+            }
+            else -> {
+                val start = parseIsoLocalDate(startState.date)
+                val end = parseIsoLocalDate(endState.date)
+                when {
+                    start == null -> {
+                        periodUnavailableHint = null
+                        startDateViewModel.setDate(dateStr)
+                        endDateViewModel.setDate(null)
+                    }
+                    end == null -> {
+                        when {
+                            clicked < start -> {
+                                periodUnavailableHint = null
+                                startDateViewModel.setDate(dateStr)
                                 endDateViewModel.setDate(null)
                             }
-                        }
-                        else -> {
-                            if (endMinOffsetDaysFromStart > 0) {
-                                val minEnd = addDays(start, endMinOffsetDaysFromStart)
-                                if (clicked >= minEnd) {
-                                    endDateViewModel.setDate(dateStr)
+                            clicked == start -> {
+                                if (endMinOffsetDaysFromStart <= 0) {
+                                    periodUnavailableHint = null
+                                    endDateViewModel.setDate(null)
                                 }
-                            } else {
-                                endDateViewModel.setDate(dateStr)
+                            }
+                            else -> {
+                                val minEnd =
+                                    if (endMinOffsetDaysFromStart > 0) {
+                                        addDays(start, endMinOffsetDaysFromStart)
+                                    } else {
+                                        start
+                                    }
+                                when {
+                                    clicked < minEnd -> {
+                                        periodUnavailableHint = "Выбранный период недоступен"
+                                    }
+                                    dateRangeContainsDisabledDate(start, clicked, disabledDates) -> {
+                                        periodUnavailableHint = "Выбранный период недоступен"
+                                    }
+                                    else -> {
+                                        periodUnavailableHint = null
+                                        endDateViewModel.setDate(dateStr)
+                                    }
+                                }
                             }
                         }
                     }
-                }
-                else -> {
-                    startDateViewModel.setDate(dateStr)
-                    endDateViewModel.setDate(null)
+                    else -> {
+                        periodUnavailableHint = null
+                        startDateViewModel.setDate(dateStr)
+                        endDateViewModel.setDate(null)
+                    }
                 }
             }
         }
@@ -155,6 +178,18 @@ fun DateRangeCalendarDialog(
                 onMonthChange = { displayMonth = it },
                 onDateClick = onDayClick,
             )
+
+            periodUnavailableHint?.let { hint ->
+                Span({
+                    style {
+                        applyTypography(CSSTypography.Styles.body)
+                        fontSize(CSSTypography.FontSize.sm)
+                        color(CSSColors.Red)
+                    }
+                }) {
+                    Text(hint)
+                }
+            }
 
             Div({
                 style {

@@ -48,6 +48,7 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun LeaveReviewPage() {
     val carIdParam = getUrlParameter("carId")
+    val bookingIdParam = getUrlParameter("bookingId").takeIf { it.isNotBlank() }
     val navigationController = LocalNavigationController.current
     val koinScope = currentKoinScope()
 
@@ -66,8 +67,8 @@ fun LeaveReviewPage() {
     }
 
     val viewModel: CreateReviewViewModel =
-        remember(carIdParam) {
-            koinScope.get<CreateReviewViewModel> { parametersOf(carIdParam) }
+        remember(carIdParam, bookingIdParam) {
+            koinScope.get<CreateReviewViewModel> { parametersOf(carIdParam, bookingIdParam) }
         }
     val uiState by viewModel.state.collectAsState()
 

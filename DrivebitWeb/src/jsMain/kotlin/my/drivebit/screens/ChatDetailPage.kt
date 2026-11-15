@@ -35,6 +35,7 @@ import my.drivebit.network.services.canShowSignContractInChat
 import my.drivebit.network.services.contractBookingIdForAction
 import my.drivebit.network.services.contractDownloadPagePath
 import my.drivebit.network.services.isLeaveReviewForCarAction
+import my.drivebit.network.services.leaveReviewBookingIdForAction
 import my.drivebit.network.services.leaveReviewCarIdForAction
 import my.drivebit.network.services.leaveReviewPagePath
 import my.drivebit.network.services.payBookingIdForAction
@@ -457,6 +458,7 @@ private fun MessageBubble(
         val bookingIdForPay = message.payBookingIdForAction()
         val bookingIdForContract = message.contractBookingIdForAction()
         val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
+        val reviewBookingId = message.leaveReviewBookingIdForAction()
         val showReviewForCar = message.isLeaveReviewForCarAction()
         val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
         val showOpenDeals = message.shouldShowOpenDealsAction()
@@ -620,7 +622,7 @@ private fun MessageBubble(
                                 viewModel = reviewCarButtonVm,
                                 onClick = {
                                     reviewCarId?.let { carId ->
-                                        window.location.href = leaveReviewPagePath(carId)
+                                        window.location.href = leaveReviewPagePath(carId, reviewBookingId)
                                     }
                                 },
                             )

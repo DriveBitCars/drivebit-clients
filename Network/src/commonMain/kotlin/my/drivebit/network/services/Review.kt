@@ -32,6 +32,7 @@ data class CreateReviewRequest(
     val carId: String,
     val stars: Int,
     val text: String? = null,
+    val bookingId: String? = null,
 )
 
 @Serializable

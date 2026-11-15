@@ -98,6 +98,7 @@ fun CarDetailPage() {
                         car = currentState.car,
                         owner = currentState.owner,
                         disabledBookingDates = currentState.disabledBookingDates,
+                        bookingOccupancyIntervals = currentState.bookingOccupancyIntervals,
                         reviews = currentState.reviews,
                         reviewsPage = currentState.reviewsPage,
                         reviewsTotalPages = currentState.reviewsTotalPages,
@@ -119,6 +120,7 @@ private fun CarDetailContent(
     car: my.drivebit.network.services.CarDetailResponse,
     owner: CarOwnerUi?,
     disabledBookingDates: Set<String>,
+    bookingOccupancyIntervals: List<Pair<String, String>>,
     reviews: List<CarReviewUi>,
     reviewsPage: Int,
     reviewsTotalPages: Int,
@@ -178,6 +180,7 @@ private fun CarDetailContent(
                         viewModel = rentViewModel,
                         carId = car.id,
                         disabledDates = disabledBookingDates,
+                        occupancyIntervals = bookingOccupancyIntervals,
                         initialStartAt = getUrlParameter(START_AT).takeIf { it.isNotBlank() },
                         initialEndAt = getUrlParameter(END_AT).takeIf { it.isNotBlank() },
                     )
