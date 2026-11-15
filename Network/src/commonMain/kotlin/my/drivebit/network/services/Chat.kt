@@ -250,9 +250,19 @@ fun contractDownloadPagePath(bookingId: String): String = "/download-booking-con
 
 fun contractDownloadPageUrl(bookingId: String): String = "https://drivebit.ru${contractDownloadPagePath(bookingId)}"
 
-fun leaveReviewPagePath(carId: String): String = "/leave-review?carId=$carId"
+fun leaveReviewPagePath(
+    carId: String,
+    bookingId: String? = null,
+): String {
+    val base = "/leave-review?carId=$carId"
+    val id = bookingId?.takeIf { it.isNotBlank() } ?: return base
+    return "$base&bookingId=$id"
+}
 
-fun leaveReviewPageUrl(carId: String): String = "https://drivebit.ru${leaveReviewPagePath(carId)}"
+fun leaveReviewPageUrl(
+    carId: String,
+    bookingId: String? = null,
+): String = "https://drivebit.ru${leaveReviewPagePath(carId, bookingId)}"
 
 fun MessageDto.payBookingIdForAction(): String? {
     if (!isSystemMessage) return null

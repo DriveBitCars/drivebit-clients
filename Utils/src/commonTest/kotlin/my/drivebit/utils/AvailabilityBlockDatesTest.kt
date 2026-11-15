@@ -1,5 +1,6 @@
 package my.drivebit.utils
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -137,6 +138,86 @@ class AvailabilityBlockDatesTest {
             )
 
         assertEquals(setOf("2026-06-10", "2026-06-11"), disabled)
+    }
+
+    @Test
+    fun `parseFullyOccupiedDisabledDates keeps partial first and last day selectable`() {
+        val disabled =
+            parseFullyOccupiedDisabledDatesFromIsoIntervals(
+                listOf("2026-03-10T10:00:00Z" to "2026-03-12T18:00:00Z"),
+                timeZone = TimeZone.UTC,
+            )
+
+        assertEquals(setOf("2026-03-11"), disabled)
+    }
+
+    @Test
+    fun `parseFullyOccupiedDisabledDates disables full local days for exclusive midnight block`() {
+        val disabled =
+            parseFullyOccupiedDisabledDatesFromIsoIntervals(
+                listOf("2026-06-10T00:00:00Z" to "2026-06-13T00:00:00Z"),
+                timeZone = TimeZone.UTC,
+            )
+
+        assertEquals(setOf("2026-06-10", "2026-06-11", "2026-06-12"), disabled)
+    }
+
+    @Test
+    fun `dateRangeContainsDisabledDate detects interior busy days`() {
+        assertTrue(
+            dateRangeContainsDisabledDate(
+                start = LocalDate.parse("2026-06-10"),
+                end = LocalDate.parse("2026-06-25"),
+                disabledDates = setOf("2026-06-15", "2026-06-16"),
+            ),
+        )
+        assertTrue(
+            !dateRangeContainsDisabledDate(
+                start = LocalDate.parse("2026-06-10"),
+                end = LocalDate.parse("2026-06-12"),
+                disabledDates = setOf("2026-06-15"),
+            ),
+        )
+    }
+
+    @Test
+    fun `availableStartHourOptions hides hours inside occupancy`() {
+        val occupancy =
+            parseOccupancyIntervalsEpochMs(
+                listOf("2026-06-10T15:00:00Z" to "2026-06-10T20:00:00Z"),
+            )
+        val hours = (0..23).map { "${it.toString().padStart(2, '0')}:00" }
+        val available =
+            availableStartHourOptions(
+                dateIso = "2026-06-10",
+                allHours = hours,
+                occupancy = occupancy,
+                timeZone = TimeZone.UTC,
+            )
+        assertTrue("14:00" in available)
+        assertTrue("15:00" !in available)
+        assertTrue("19:00" !in available)
+        assertTrue("20:00" in available)
+    }
+
+    @Test
+    fun `availableEndHourOptions hides hours that would overlap occupancy`() {
+        val occupancy =
+            parseOccupancyIntervalsEpochMs(
+                listOf("2026-06-11T18:00:00Z" to "2026-06-18T18:00:00Z"),
+            )
+        val hours = (0..23).map { "${it.toString().padStart(2, '0')}:00" }
+        val available =
+            availableEndHourOptions(
+                dateIso = "2026-06-11",
+                startAtIso = "2026-06-10T12:00:00Z",
+                allHours = hours,
+                occupancy = occupancy,
+                timeZone = TimeZone.UTC,
+            )
+        assertTrue("12:00" in available)
+        assertTrue("18:00" in available)
+        assertTrue("19:00" !in available)
     }
 
     @Test

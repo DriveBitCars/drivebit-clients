@@ -14,7 +14,7 @@ import my.drivebit.network.services.CarDetailResponse
 import my.drivebit.network.services.Photo
 import my.drivebit.network.services.Review
 import my.drivebit.network.services.ReviewListItemDTO
-import my.drivebit.utils.parseDisabledDatesFromIsoIntervals
+import my.drivebit.utils.parseFullyOccupiedDisabledDatesFromIsoIntervals
 import kotlin.runCatching
 
 data class CarReviewUi(
@@ -32,6 +32,8 @@ sealed interface CarDetailState {
         val car: CarDetailResponse,
         val owner: CarOwnerUi? = null,
         val disabledBookingDates: Set<String> = emptySet(),
+        /** ISO start/end интервалы занятости (брони + блоки) для фильтра часов. */
+        val bookingOccupancyIntervals: List<Pair<String, String>> = emptyList(),
         val reviews: List<CarReviewUi> = emptyList(),
         val reviewsPage: Int = 1,
         val reviewsTotalPages: Int = 0,
@@ -112,14 +114,17 @@ class CarDetailViewModelImpl(
             return
         }
         viewModelScope.launch {
-            val disabled =
-                runCatching {
-                    val blocks = carAvailability.getBlocks(carId)
-                    parseDisabledDatesFromIsoIntervals(blocks.map { it.startAt to it.endAt })
-                }.getOrDefault(emptySet())
+            val blocks =
+                runCatching { carAvailability.getBlocks(carId) }
+                    .getOrDefault(emptyList())
+            val intervals = blocks.map { it.startAt to it.endAt }
+            val disabled = parseFullyOccupiedDisabledDatesFromIsoIntervals(intervals)
             _state.update { current ->
                 if (current is CarDetailState.Success) {
-                    current.copy(disabledBookingDates = disabled)
+                    current.copy(
+                        disabledBookingDates = disabled,
+                        bookingOccupancyIntervals = intervals,
+                    )
                 } else {
                     current
                 }

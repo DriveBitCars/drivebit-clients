@@ -384,10 +384,11 @@ val commonViewModelsModule: Module =
             )
         }
 
-        factory<CreateReviewViewModel> { (carId: String) ->
+        factory<CreateReviewViewModel> { (carId: String, bookingId: String?) ->
             CreateReviewViewModelImpl(
                 review = get(),
                 carId = carId,
+                bookingId = bookingId,
             )
         }
 

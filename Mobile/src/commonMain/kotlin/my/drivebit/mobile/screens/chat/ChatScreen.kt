@@ -47,6 +47,7 @@ import my.drivebit.network.services.canShowSignContractInChat
 import my.drivebit.network.services.contractBookingIdForAction
 import my.drivebit.network.services.contractDownloadPageUrl
 import my.drivebit.network.services.isLeaveReviewForCarAction
+import my.drivebit.network.services.leaveReviewBookingIdForAction
 import my.drivebit.network.services.leaveReviewCarIdForAction
 import my.drivebit.network.services.payBookingIdForAction
 import my.drivebit.network.services.prepaymentButtonLabel
@@ -183,8 +184,13 @@ data class ChatScreen(
                                             failUrl = MOBILE_PAYMENT_FAIL_URL,
                                         )
                                     },
-                                    onLeaveReviewForCar = { carId ->
-                                        navigator.push(LeaveReviewScreen(carId = carId))
+                                    onLeaveReviewForCar = { carId, bookingId ->
+                                        navigator.push(
+                                            LeaveReviewScreen(
+                                                carId = carId,
+                                                bookingId = bookingId,
+                                            ),
+                                        )
                                     },
                                     onLeaveReviewForRenter = {
                                         uriHandler.openUri("https://drivebit.ru/my-deals")
@@ -249,7 +255,7 @@ private fun MessageBubble(
     signActionInProgress: Set<String> = emptySet(),
     onPrepayBooking: (String) -> Unit = {},
     onPayBooking: (String) -> Unit = {},
-    onLeaveReviewForCar: (String) -> Unit = {},
+    onLeaveReviewForCar: (carId: String, bookingId: String?) -> Unit = { _, _ -> },
     onLeaveReviewForRenter: () -> Unit = {},
     onSignContract: (bookingId: String, counterpartyUserId: String) -> Unit = { _, _ -> },
 ) {
@@ -311,6 +317,7 @@ private fun MessageBubble(
         val bookingIdForPay = message.payBookingIdForAction()
         val bookingIdForContract = message.contractBookingIdForAction()
         val reviewCarId = message.leaveReviewCarIdForAction(bookingById)
+        val reviewBookingId = message.leaveReviewBookingIdForAction()
         val showReviewForCar = message.isLeaveReviewForCarAction()
         val showReviewForRenter = message.shouldShowLeaveReviewForRenter()
         val showOpenDeals = message.shouldShowOpenDealsAction()
@@ -398,7 +405,11 @@ private fun MessageBubble(
                     }
                     if (showReviewForCar) {
                         Button(
-                            onClick = { reviewCarId?.let(onLeaveReviewForCar) },
+                            onClick = {
+                                reviewCarId?.let { carId ->
+                                    onLeaveReviewForCar(carId, reviewBookingId)
+                                }
+                            },
                             enabled = reviewCarId != null,
                             modifier = Modifier.padding(top = 8.dp),
                         ) {

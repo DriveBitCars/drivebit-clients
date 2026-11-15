@@ -34,6 +34,7 @@ interface CreateReviewViewModel {
 class CreateReviewViewModelImpl(
     private val review: Review,
     private val carId: String,
+    private val bookingId: String? = null,
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : CreateReviewViewModel {
     private val _state = MutableStateFlow(CreateReviewState())
@@ -65,6 +66,7 @@ class CreateReviewViewModelImpl(
                         carId = carId,
                         stars = stars,
                         text = current.text.trim().ifBlank { null },
+                        bookingId = bookingId?.takeIf { it.isNotBlank() },
                     ),
                 )
             }.onSuccess {

@@ -120,7 +120,9 @@ fun MyBookingsPage() {
                                     booking = booking,
                                     isActionInProgress = booking.id in actionInProgress,
                                     onLeaveReview = {
-                                        navigationController?.navigateTo("/leave-review?carId=${booking.carId}")
+                                        navigationController?.navigateTo(
+                                            "/leave-review?carId=${booking.carId}&bookingId=${booking.id}",
+                                        )
                                     },
                                     onPay = {
                                         reachYandexGoalPayClick(
@@ -204,7 +206,7 @@ private fun BookingItemCard(
             "${mapIso8601ToDateString(booking.createdAt)}, в ${mapIso8601ToTimeString(booking.createdAt)}"
         }.getOrElse { booking.createdAt }
     val relativeTime = runCatching { formatRelativeTime(Instant.parse(booking.createdAt)) }.getOrElse { "" }
-    val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
+    val canLeaveReview = booking.canLeaveReview
     val canPay = booking.statusAllowsRenterPayment()
     val canDownloadContract = booking.statusAllowsContractDownload()
     val canSignContract = booking.canShowSignContractAsRenter()

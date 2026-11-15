@@ -18,6 +18,7 @@ import my.drivebit.network.services.Booking
 import my.drivebit.network.services.BookingCheckoutKind
 import my.drivebit.network.services.BookingDTO
 import my.drivebit.network.services.CheckBookingAvailabilityRequest
+import my.drivebit.network.services.CheckBookingAvailabilityResponse
 import my.drivebit.network.services.CreateBookingRequest
 import my.drivebit.network.services.PayBookingResult
 import my.drivebit.network.services.Payment
@@ -341,35 +342,9 @@ class RentViewModelImpl(
                         ),
                     )
                 }.onSuccess { response ->
-                    val total = response.totalPrice ?: response.estimatedPrice ?: 0.0
-                    val days = daysBetween(startAt, endAt).coerceAtLeast(1)
-                    val pricePerDayFromApi = response.pricePerDay
-                    val middle =
-                        when {
-                            pricePerDayFromApi != null && pricePerDayFromApi > 0 -> pricePerDayFromApi
-                            days > 0 -> total / days
-                            else -> 0.0
-                        }
-                    val deposit = response.estimatedDeposit ?: 0.0
-                    _state.update {
-                        if (it is RentState.Book) {
-                            it.copy(
-                                totalAmount = formatPrice(total),
-                                middlePrice = formatPrice(middle),
-                                depositAmount = if (deposit > 0) formatPrice(deposit) else "",
-                            )
-                        } else {
-                            it
-                        }
-                    }
+                    applyCalculateResponse(response, startAt, endAt)
                 }.onFailure {
-                    _state.update { current ->
-                        if (current is RentState.Book) {
-                            current.copy(totalAmount = "", middlePrice = "", depositAmount = "")
-                        } else {
-                            current
-                        }
-                    }
+                    clearCalculateAmounts()
                 }
             }
     }
@@ -382,17 +357,7 @@ class RentViewModelImpl(
                 val start = current.startDate?.takeIf { it.isNotBlank() }
                 val end = current.endDate?.takeIf { it.isNotBlank() }
                 if (start == null || end == null) {
-                    _state.update {
-                        if (it is RentState.Book) {
-                            it.copy(
-                                totalAmount = "",
-                                middlePrice = "",
-                                depositAmount = "",
-                            )
-                        } else {
-                            it
-                        }
-                    }
+                    clearCalculateAmounts()
                     return@launch
                 }
                 runCatching {
@@ -404,37 +369,73 @@ class RentViewModelImpl(
                         ),
                     )
                 }.onSuccess { response ->
-                    val total = response.totalPrice ?: response.estimatedPrice ?: 0.0
-                    val days = daysBetween(start, end).coerceAtLeast(1)
-                    val pricePerDayFromApi = response.pricePerDay
-                    val middle =
-                        when {
-                            pricePerDayFromApi != null && pricePerDayFromApi > 0 -> pricePerDayFromApi
-                            days > 0 -> total / days
-                            else -> 0.0
-                        }
-                    val deposit = response.estimatedDeposit ?: 0.0
-                    _state.update {
-                        if (it is RentState.Book) {
-                            it.copy(
-                                totalAmount = formatPrice(total),
-                                middlePrice = formatPrice(middle),
-                                depositAmount = if (deposit > 0) formatPrice(deposit) else "",
-                            )
-                        } else {
-                            it
-                        }
-                    }
+                    applyCalculateResponse(response, start, end)
                 }.onFailure {
-                    _state.update { current ->
-                        if (current is RentState.Book) {
-                            current.copy(totalAmount = "", middlePrice = "", depositAmount = "")
-                        } else {
-                            current
-                        }
-                    }
+                    clearCalculateAmounts()
                 }
             }
+    }
+
+    private fun applyCalculateResponse(
+        response: CheckBookingAvailabilityResponse,
+        startAt: String,
+        endAt: String,
+    ) {
+        if (!response.isAvailable) {
+            val conflict =
+                response.conflict?.takeIf { it.isNotBlank() }
+                    ?: "Автомобиль недоступен для этого периода"
+            _state.update { current ->
+                if (current is RentState.Book) {
+                    current.copy(
+                        totalAmount = "",
+                        middlePrice = "",
+                        depositAmount = "",
+                        createError = conflict,
+                    )
+                } else {
+                    current
+                }
+            }
+            return
+        }
+        val total = response.totalPrice ?: response.estimatedPrice ?: 0.0
+        val days = daysBetween(startAt, endAt).coerceAtLeast(1)
+        val pricePerDayFromApi = response.pricePerDay
+        val middle =
+            when {
+                pricePerDayFromApi != null && pricePerDayFromApi > 0 -> pricePerDayFromApi
+                days > 0 -> total / days
+                else -> 0.0
+            }
+        val deposit = response.estimatedDeposit ?: 0.0
+        _state.update {
+            if (it is RentState.Book) {
+                it.copy(
+                    totalAmount = formatPrice(total),
+                    middlePrice = formatPrice(middle),
+                    depositAmount = if (deposit > 0) formatPrice(deposit) else "",
+                    createError = null,
+                )
+            } else {
+                it
+            }
+        }
+    }
+
+    private fun clearCalculateAmounts() {
+        _state.update { current ->
+            if (current is RentState.Book) {
+                current.copy(
+                    totalAmount = "",
+                    middlePrice = "",
+                    depositAmount = "",
+                    createError = null,
+                )
+            } else {
+                current
+            }
+        }
     }
 
     private fun isUnauthorizedBookingError(exception: Throwable): Boolean {

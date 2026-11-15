@@ -40,8 +40,11 @@ import my.drivebit.utils.PaymentFunnelSource
 import my.drivebit.utils.RETURN_CAR_ID
 import my.drivebit.utils.START_AT
 import my.drivebit.utils.addDays
+import my.drivebit.utils.availableEndHourOptions
+import my.drivebit.utils.availableStartHourOptions
 import my.drivebit.utils.encodeUrlParameter
 import my.drivebit.utils.getUrlParameter
+import my.drivebit.utils.parseOccupancyIntervalsEpochMs
 import my.drivebit.utils.removeUrlQueryParam
 import my.drivebit.viewmodels.ButtonState
 import my.drivebit.viewmodels.DateFieldViewModel
@@ -70,6 +73,7 @@ fun CarBook(
     viewModel: RentViewModel,
     carId: String,
     disabledDates: Set<String> = emptySet(),
+    occupancyIntervals: List<Pair<String, String>> = emptyList(),
     initialStartAt: String? = null,
     initialEndAt: String? = null,
 ) {
@@ -292,6 +296,70 @@ fun CarBook(
             }
         }
 
+    val occupancyEpochMs =
+        remember(occupancyIntervals) {
+            parseOccupancyIntervalsEpochMs(occupancyIntervals)
+        }
+    val allHourOptions = remember { carBookHourTimeOptionValues() }
+    val tz = remember { TimeZone.currentSystemDefault() }
+    val startHourOptions =
+        remember(startDateTimeState.date, occupancyEpochMs) {
+            val date = startDateTimeState.date ?: return@remember allHourOptions
+            val today = Clock.System.now().toLocalDateTime(tz).date
+            val selected = runCatching { LocalDate.parse(date.take(10)) }.getOrNull()
+            val minExclusiveHour =
+                if (selected == today) {
+                    Clock.System
+                        .now()
+                        .toLocalDateTime(tz)
+                        .hour
+                } else {
+                    null
+                }
+            availableStartHourOptions(
+                dateIso = date,
+                allHours = allHourOptions,
+                occupancy = occupancyEpochMs,
+                timeZone = tz,
+                minExclusiveHour = minExclusiveHour,
+            )
+        }
+    val endHourOptions =
+        remember(endDateTimeState.date, bookState.startDate, occupancyEpochMs) {
+            val date = endDateTimeState.date ?: return@remember emptyList()
+            val startAt = bookState.startDate ?: return@remember emptyList()
+            availableEndHourOptions(
+                dateIso = date,
+                startAtIso = startAt,
+                allHours = allHourOptions,
+                occupancy = occupancyEpochMs,
+                timeZone = tz,
+            )
+        }
+
+    LaunchedEffect(startHourOptions, startDateTimeState.date, startDateTimeState.time) {
+        val date = startDateTimeState.date ?: return@LaunchedEffect
+        if (startHourOptions.isEmpty()) return@LaunchedEffect
+        val next =
+            matchOrFirstHourOption(startDateTimeState.time, startHourOptions)
+                ?: return@LaunchedEffect
+        if (next == startDateTimeState.time) return@LaunchedEffect
+        startDateTimeViewModel.setTime(next)
+        viewModel.setStartDate(formatStartAt(date, next))
+    }
+
+    LaunchedEffect(endHourOptions, endDateTimeState.date, endDateTimeState.time, bookState.startDate) {
+        val date = endDateTimeState.date ?: return@LaunchedEffect
+        if (bookState.startDate == null) return@LaunchedEffect
+        if (endHourOptions.isEmpty()) return@LaunchedEffect
+        val next =
+            matchOrFirstHourOption(endDateTimeState.time, endHourOptions)
+                ?: return@LaunchedEffect
+        if (next == endDateTimeState.time) return@LaunchedEffect
+        endDateTimeViewModel.setTime(next)
+        viewModel.setEndDate(formatEndAt(date, next))
+    }
+
     LaunchedEffect(bookState.startDate) {
         bookState.startDate?.let { iso ->
             runCatching {
@@ -382,6 +450,9 @@ fun CarBook(
                 actionLabel = "c",
                 viewModel = startDateTimeViewModel,
                 showError = bookState.showStartDateError,
+                visibleHourOptions = startHourOptions,
+                noAvailableTimeHint =
+                    startDateTimeState.date != null && startHourOptions.isEmpty(),
                 onOpenDatePicker = openBookRangeCalendar,
                 onDateTimeChanged = { date, time ->
                     viewModel.setStartDate(if (date != null && time != null) formatStartAt(date, time) else null)
@@ -394,6 +465,11 @@ fun CarBook(
                 minDate = endDateMinDate,
                 showError = bookState.showEndDateError,
                 enabled = startDateTimeState.date != null,
+                visibleHourOptions = endHourOptions,
+                noAvailableTimeHint =
+                    endDateTimeState.date != null &&
+                        bookState.startDate != null &&
+                        endHourOptions.isEmpty(),
                 onOpenDatePicker = openBookRangeCalendar,
                 onDateTimeChanged = { date, time ->
                     viewModel.setEndDate(if (date != null && time != null) formatEndAt(date, time) else null)
@@ -601,18 +677,14 @@ private fun CarBookDateTimeField(
     minDate: String? = null,
     showError: Boolean,
     enabled: Boolean = true,
+    visibleHourOptions: List<String>,
+    noAvailableTimeHint: Boolean = false,
     onOpenDatePicker: () -> Unit,
     onDateTimeChanged: (date: String?, time: String?) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     val dateText = state.date?.let { formatDateForDisplay(it) } ?: "дата"
-    val hourOptions = remember { carBookHourTimeOptionValues() }
-    val timeSelectable = enabled && state.date != null
-    val visibleHourOptions =
-        filterCarBookHourOptionsForSelectedDate(
-            selectedDateIso = state.date,
-            allHours = hourOptions,
-        )
+    val timeSelectable = enabled && state.date != null && visibleHourOptions.isNotEmpty()
 
     Div({
         style {
@@ -723,29 +795,37 @@ private fun CarBookDateTimeField(
                     },
                 ) {
                     val current = state.time.orEmpty()
-                    visibleHourOptions.forEach { value ->
-                        Option(
-                            value = value,
-                            attrs = {
-                                if (current == value) selected()
-                            },
-                        ) {
-                            Text(value)
+                    if (visibleHourOptions.isEmpty()) {
+                        Option(value = "", attrs = { selected() }) {
+                            Text("нет времени")
                         }
-                    }
-                    if (current.isNotEmpty() && current !in visibleHourOptions) {
-                        Option(
-                            value = current,
-                            attrs = { selected() },
-                        ) {
-                            Text(current)
+                    } else {
+                        visibleHourOptions.forEach { value ->
+                            Option(
+                                value = value,
+                                attrs = {
+                                    if (current == value) selected()
+                                },
+                            ) {
+                                Text(value)
+                            }
                         }
                     }
                 }
             }
         }
     }
-    if (showError) {
+    if (noAvailableTimeHint) {
+        Span({
+            style {
+                applyTypography(CSSTypography.Styles.body)
+                fontSize(CSSTypography.FontSize.xs)
+                color(CSSColors.Red)
+            }
+        }) {
+            Text("Нет доступного времени на эту дату")
+        }
+    } else if (showError) {
         Span({
             style {
                 applyTypography(CSSTypography.Styles.body)
@@ -806,27 +886,21 @@ private fun carBookHourTimeOptionValues(): List<String> =
         }
     }
 
-private fun carBookOptionHourForFilter(value: String): Int =
-    when (value) {
-        "24:00" -> 24
-        else -> value.substringBefore(':').toIntOrNull() ?: -1
+/** Если текущее время есть в опциях или его час (:00) доступен — берём его, иначе первый доступный. */
+private fun matchOrFirstHourOption(
+    current: String?,
+    options: List<String>,
+): String? {
+    if (options.isEmpty()) return null
+    if (current != null && current in options) return current
+    if (current != null) {
+        val hour = current.substringBefore(':').toIntOrNull()
+        if (hour != null) {
+            val rounded = "${hour.toString().padStart(2, '0')}:00"
+            if (rounded in options) return rounded
+        }
     }
-
-private fun filterCarBookHourOptionsForSelectedDate(
-    selectedDateIso: String?,
-    allHours: List<String>,
-    tz: TimeZone = TimeZone.currentSystemDefault(),
-): List<String> {
-    val now = Clock.System.now()
-    val selected =
-        selectedDateIso
-            ?.take(10)
-            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-            ?: return allHours
-    val today = now.toLocalDateTime(tz).date
-    if (selected != today) return allHours
-    val currentHour = now.toLocalDateTime(tz).hour
-    return allHours.filter { carBookOptionHourForFilter(it) > currentHour }
+    return options.first()
 }
 
 private fun localDateTimeFromDateAndTime(

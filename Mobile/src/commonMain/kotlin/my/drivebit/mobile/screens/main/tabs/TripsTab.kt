@@ -169,7 +169,12 @@ object TripsTab : Tab {
                                 isPaying = isPaying,
                                 isActionInProgress = booking.id in actionInProgress,
                                 onLeaveReview = {
-                                    navigator.push(LeaveReviewScreen(carId = booking.carId))
+                                    navigator.push(
+                                        LeaveReviewScreen(
+                                            carId = booking.carId,
+                                            bookingId = booking.id,
+                                        ),
+                                    )
                                 },
                                 onPay = {
                                     viewModel.payBooking(
@@ -220,7 +225,7 @@ internal fun BookingItemCard(
             .ifBlank { "Автомобиль" }
     val ownerName = booking.ownerName?.takeIf { it.isNotBlank() } ?: "Владелец"
     val dateRange = "${booking.startAt.take(10)} — ${booking.endAt.take(10)}"
-    val canLeaveReview = booking.status.equals("Completed", ignoreCase = true)
+    val canLeaveReview = booking.canLeaveReview
     val canPay = booking.statusAllowsRenterPayment()
     val canDownloadContract = booking.statusAllowsContractDownload()
     val canSignContract = booking.canShowSignContractAsRenter()

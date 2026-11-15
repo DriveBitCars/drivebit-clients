@@ -21,7 +21,6 @@ import my.drivebit.network.services.Review
 import my.drivebit.network.services.ReviewListDTO
 import my.drivebit.network.services.ReviewListItemDTO
 import kotlin.test.Test
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -530,9 +529,9 @@ class CarDetailViewModelTest {
 
             val state = viewModel.state.value
             assertIs<CarDetailState.Success>(state)
-            assertContains(state.disabledBookingDates, "2026-03-10")
-            assertContains(state.disabledBookingDates, "2026-03-11")
-            assertContains(state.disabledBookingDates, "2026-03-12")
+            // 10 и 12 заняты частично — остаются выбираемыми; полностью занят только 11.
+            assertEquals(setOf("2026-03-11"), state.disabledBookingDates)
+            assertEquals(1, state.bookingOccupancyIntervals.size)
         }
 
     @Test
