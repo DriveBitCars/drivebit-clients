@@ -135,6 +135,22 @@ class ButterViewModelTest {
 
         val openedState = viewModel.state.value as ButterState.Opened
         assertTrue(openedState.model.any { it.text == "Мои авто" })
+        assertTrue(openedState.model.any { it.text == "Сообщения" })
+        assertFalse(openedState.model.any { it.text == "Сдать авто" })
+        assertFalse(openedState.model.any { it.text == "Входящие" })
+    }
+
+    @Test
+    fun `open should always show MyCars and never BecomeHost when logged in`() {
+        mockStorage.setLoggedIn(true)
+        mockCarMenuViewModel.setMenuOption(CarMenuOption.ListYourCar)
+        mockCarMenuViewModel.setIsLoading(false)
+        val viewModel = ButterViewModelImpl(mockStorage, mockAvatarRepository, mockCarMenuViewModel)
+
+        viewModel.open()
+
+        val openedState = viewModel.state.value as ButterState.Opened
+        assertTrue(openedState.model.any { it.text == "Мои авто" })
         assertFalse(openedState.model.any { it.text == "Сдать авто" })
     }
 
@@ -181,7 +197,7 @@ class ButterViewModelTest {
         val openedState = viewModel.state.value as ButterState.Opened
         val iconsByText = openedState.model.associate { it.text to it.iconUrl }
         assertEquals(ImagePaths.BUTTER_USER_SVG, iconsByText["Мой профиль"])
-        assertEquals(ImagePaths.BUTTER_MAIL_SVG, iconsByText["Входящие"])
+        assertEquals(ImagePaths.BUTTER_MAIL_SVG, iconsByText["Сообщения"])
         assertEquals(ImagePaths.BUTTER_DOCS_SVG, iconsByText["Мои документы"])
         assertEquals(ImagePaths.BUTTER_BOOKING_SVG, iconsByText["Мои бронирования"])
         assertEquals(ImagePaths.BUTTER_DEALS_SVG, iconsByText["Мои сделки"])

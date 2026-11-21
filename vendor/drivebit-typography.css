@@ -1,0 +1,313 @@
+/**
+ * DriveBit type scale (Figma)
+ *
+ * Body ………… Roboto Regular · color gray-main (#152032)
+ * H1 …………… Inter Tight 52 / SemiBold / LH 109%
+ * H2 …………… Inter Tight 48 / Medium / LH 100%
+ * H3 …………… Inter Tight 36 / Medium / LH 120%
+ * H4 …………… Inter Tight 32 / SemiBold / LH 120%
+ * H5 …………… Inter Tight 24 / Medium / LH 120%
+ *
+ * Car title … Roboto SemiBold 17 / LH 120% / gray-main
+ * Car price … Inter Tight SemiBold / LH 120% / gray-main + gray-5
+ */
+
+:root {
+    --db-font-body: "Roboto", sans-serif;
+    --db-font-display: "Inter Tight", "Roboto", sans-serif;
+    --db-text: var(--db-gray-main, #152032);
+    --db-text-muted: var(--db-gray-5, #a1a6ad);
+
+    --db-h1-size: 52px;
+    --db-h1-weight: 600;
+    --db-h1-lh: 1.09;
+
+    --db-h2-size: 48px;
+    --db-h2-weight: 500;
+    --db-h2-lh: 1;
+
+    --db-h3-size: 36px;
+    --db-h3-weight: 500;
+    --db-h3-lh: 1.2;
+
+    --db-h4-size: 32px;
+    --db-h4-weight: 600;
+    --db-h4-lh: 1.2;
+
+    --db-h5-size: 24px;
+    --db-h5-weight: 500;
+    --db-h5-lh: 1.2;
+}
+
+/* ——— Base ——— */
+html {
+    color: var(--db-text);
+}
+
+body {
+    margin: 0;
+    font-family: var(--db-font-body);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--db-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+p,
+li,
+label,
+input,
+textarea,
+select,
+td,
+th {
+    font-family: var(--db-font-body);
+    color: inherit;
+}
+
+a {
+    color: inherit;
+}
+
+/* ——— Headings ——— */
+h1,
+.db-h1,
+.db-type-h1 {
+    font-family: var(--db-font-display);
+    font-size: var(--db-h1-size);
+    font-weight: var(--db-h1-weight);
+    line-height: var(--db-h1-lh);
+    letter-spacing: 0;
+    color: inherit;
+    margin: 0;
+}
+
+h2,
+.db-h2,
+.db-type-h2 {
+    font-family: var(--db-font-display);
+    font-size: var(--db-h2-size);
+    font-weight: var(--db-h2-weight);
+    line-height: var(--db-h2-lh);
+    letter-spacing: 0;
+    color: inherit;
+    margin: 0;
+}
+
+h3,
+.db-h3,
+.db-type-h3 {
+    font-family: var(--db-font-display);
+    font-size: var(--db-h3-size);
+    font-weight: var(--db-h3-weight);
+    line-height: var(--db-h3-lh);
+    letter-spacing: 0;
+    color: inherit;
+    margin: 0;
+}
+
+h4,
+.db-h4,
+.db-type-h4 {
+    font-family: var(--db-font-display);
+    font-size: var(--db-h4-size);
+    font-weight: var(--db-h4-weight);
+    line-height: var(--db-h4-lh);
+    letter-spacing: 0;
+    color: inherit;
+    margin: 0;
+}
+
+h5,
+.db-h5,
+.db-type-h5 {
+    font-family: var(--db-font-display);
+    font-size: var(--db-h5-size);
+    font-weight: var(--db-h5-weight);
+    line-height: var(--db-h5-lh);
+    letter-spacing: 0;
+    color: inherit;
+    margin: 0;
+}
+
+h6,
+.db-h6 {
+    font-family: var(--db-font-display);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.2;
+    margin: 0;
+    color: inherit;
+}
+
+/* ——— Map existing page titles to scale ——— */
+.drivebit-hero-headline {
+    font-family: var(--db-font-display) !important;
+    font-size: var(--db-h1-size) !important;
+    font-weight: var(--db-h1-weight) !important;
+    line-height: var(--db-h1-lh) !important;
+}
+
+.drivebit-destinations-title,
+.drivebit-cars-section-title,
+.drivebit-advantages-title,
+.drivebit-howto-title,
+.drivebit-blog-title,
+.drivebit-faq-title,
+.drivebit-faq .drivebit-section-title {
+    font-family: var(--db-font-display) !important;
+    font-size: var(--db-h4-size) !important;
+    font-weight: var(--db-h4-weight) !important;
+    line-height: var(--db-h4-lh) !important;
+    color: var(--db-text);
+}
+
+.drivebit-destinations-title {
+    color: #fff !important;
+}
+
+.drivebit-adv-card h3,
+.drivebit-howto-card h3,
+.drivebit-blog-card h3 {
+    font-family: var(--db-font-display) !important;
+    font-size: var(--db-h5-size) !important;
+    font-weight: var(--db-h5-weight) !important;
+    line-height: var(--db-h5-lh) !important;
+    color: var(--db-text);
+}
+
+.drivebit-hero-tagline,
+.drivebit-destinations-sub,
+.drivebit-advantages-sub,
+.drivebit-howto-sub,
+.drivebit-blog-sub,
+.drivebit-faq-sub {
+    font-family: var(--db-font-body) !important;
+    font-weight: 400;
+    color: inherit;
+}
+
+/* ——— Car cards ——— */
+.drivebit-car-card-title {
+    font-family: var(--db-font-body) !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    color: var(--db-text) !important;
+}
+
+.drivebit-car-card-price {
+    font-family: var(--db-font-display) !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    color: var(--db-text) !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+}
+
+.drivebit-car-card-price .drivebit-car-card-price-main,
+.drivebit-car-card-price > span:first-child {
+    font-family: var(--db-font-display) !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    color: var(--db-text) !important;
+    font-size: 24px;
+}
+
+.drivebit-car-card-price .drivebit-car-card-price-unit,
+.drivebit-car-card-price > span:last-child:not(:only-child) {
+    font-family: var(--db-font-display) !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    color: var(--db-text-muted) !important;
+    font-size: 16px;
+}
+
+/* Price + CTA row — never clip the button */
+.drivebit-car-card-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.drivebit-car-card,
+.drivebit-car-card-body {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.drivebit-car-card-cta,
+.drivebit-cars-grid-mounted .drivebit-car-card-cta,
+a.drivebit-car-card-cta {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: auto !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+}
+
+.drivebit-cars-grid-mounted > div,
+.drivebit-cars-grid-mounted > div > a,
+.drivebit-cars-grid-mounted a {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 1200px) {
+    .drivebit-car-card-price .drivebit-car-card-price-main,
+    .drivebit-car-card-price > span:first-child {
+        font-size: 20px !important;
+    }
+
+    .drivebit-car-card-cta,
+    .drivebit-cars-grid-mounted .drivebit-car-card-cta {
+        height: 36px !important;
+        min-height: 36px !important;
+        font-size: 13px !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .drivebit-car-card-footer {
+        flex-wrap: wrap !important;
+    }
+
+    .drivebit-car-card-cta,
+    .drivebit-cars-grid-mounted .drivebit-car-card-cta {
+        margin-left: auto;
+    }
+}
+
+/* ——— Responsive headings ——— */
+@media (max-width: 1100px) {
+    :root {
+        --db-h1-size: 40px;
+        --db-h2-size: 36px;
+        --db-h3-size: 28px;
+        --db-h4-size: 28px;
+        --db-h5-size: 22px;
+    }
+}
+
+@media (max-width: 700px) {
+    :root {
+        --db-h1-size: 32px;
+        --db-h2-size: 28px;
+        --db-h3-size: 24px;
+        --db-h4-size: 24px;
+        --db-h5-size: 20px;
+    }
+}

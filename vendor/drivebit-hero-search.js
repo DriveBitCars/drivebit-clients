@@ -60,7 +60,7 @@
             displayEl.textContent = formatDateDisplay(isoDate);
             displayEl.classList.remove("is-empty");
         } else {
-            displayEl.textContent = "выберите даты";
+            displayEl.textContent = "дд-мм-гггг";
             displayEl.classList.add("is-empty");
         }
     }

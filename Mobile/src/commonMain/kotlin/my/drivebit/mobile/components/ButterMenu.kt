@@ -64,7 +64,7 @@ fun ButterMenu() {
                                         }
                                     }
                                 }
-                                "Входящие" -> {
+                                "Сообщения" -> {
                                     {
                                         item.onClick()
                                         if (storage.isLogined()) {

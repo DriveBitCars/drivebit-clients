@@ -1,9 +1,10 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
-import my.drivebit.design.CSSColors
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.css.rgb
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -16,31 +17,20 @@ fun CarSpecChip(
     Row(
         gap = 8.px,
         alignItems = AlignItems.Center,
-        modifier = {
-            padding(8.px, 12.px)
-            backgroundColor(rgb(245, 245, 247))
-            borderRadius(8.px)
-            border(1.px, LineStyle.Solid, CSSColors.Gray300)
-        },
+        attrs = { classes("db-car-chip") },
     ) {
         Img(
             src = iconPath,
             alt = text,
             attrs = {
                 style {
-                    width(20.px)
-                    height(20.px)
+                    width(18.px)
+                    height(18.px)
                     property("object-fit", "contain")
                 }
             },
         )
-        Span({
-            style {
-                fontSize(14.px)
-                color(CSSColors.Black)
-                fontWeight("500")
-            }
-        }) {
+        Span {
             Text(text)
         }
     }

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -27,12 +27,18 @@
     <link rel="alternate icon" href="/images/logos/turo_logo.svg">
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
     <link rel="stylesheet" href="/vendor/drivebit-fonts.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-design-tokens.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-typography.css"/>
 
-    <link rel="preload" href="/carDetail.js?v=6" as="script">    <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
+    <link rel="preload" href="/carDetail.js?v=7" as="script">
+    <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-header.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-footer.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-buttons.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-car-detail.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-split-app-shell.css"/>
     <script src="/vendor/drivebit-third-party-deferred.js" defer></script>
+    <script src="/vendor/drivebit-chrome.js" defer></script>
 </head>
 <body class="drivebit-split-app-shell">
 <!-- drivebit-app-header-start -->
@@ -40,13 +46,21 @@
         <a id="drivebit-unread-banner" class="drivebit-unread-banner" href="/chats" aria-live="polite">У Вас есть непрочитанные сообщения</a>
         <div class="drivebit-app-header-inner">
             <a class="drivebit-header-logo" href="/moskva">
-                <img src="/images/logos/turo_logo.svg" alt="Drive bit Logo" width="120" height="40" class="turo-logo">
+                <img src="/images/logos/drivebit-logo-white.png" alt="DriveBit" data-db-logo="white" width="120" height="40" class="turo-logo">
             </a>
             <nav id="drivebit-header-nav-desktop" class="drivebit-header-nav" aria-label="Основная навигация">
                 <a href="/search">Аренда авто</a>
                 <a href="/list-your-car.html">Сдать авто</a>
                 <a href="/contacts">Контакты</a>
             </nav>
+            <div class="drivebit-header-desktop-actions" aria-label="Действия">
+                <a class="drivebit-header-city" href="/my-city-selection">
+                    <img src="/images/chrome/icon-location.svg" alt="" width="16" height="16">
+                    <span data-db-city-label>Москва</span>
+                </a>
+                <a class="drivebit-header-phone" href="tel:+74958775051">+7 (495) 877-50-51</a>
+                <div class="drivebit-master-wrap" data-db-master></div>
+            </div>
             <div id="drivebit-header-compose" class="drivebit-header-actions"></div>
         </div>
     </header>
@@ -60,19 +74,28 @@
 <div id="root"></div>
 
     <div class="drivebit-footer-shell">
-        <footer class="drivebit-site-footer">
-            <a class="drivebit-footer-phone" id="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
-            <div class="drivebit-footer-bottom">
-                <span class="drivebit-footer-copy">© DriveBit Аренда автомобилей от собственников</span>
-                <a class="drivebit-footer-link drivebit-footer-link--offer" href="/offer">Оферта</a>
-                <a class="drivebit-footer-link drivebit-footer-link--cookies" href="/cookies">Cookies</a>
-                <a class="drivebit-footer-link drivebit-footer-link--privacy" href="/privacy">Политика конфиденциальности</a>
-            </div>
-        </footer>
+  <footer class="drivebit-site-footer">
+    <div class="drivebit-footer-col drivebit-footer-brand">
+      <img class="drivebit-logo-footer" src="/images/logos/drivebit-logo-footer.png" alt="DriveBit">
+      <p>Платформа, объединяющая арендаторов и собственников автомобилей в Москве. <span class="drivebit-footer-tagline">Безопасно, удобно, прибыльно.</span></p>
+      <small>© 2026 DriveBit. Все права защищены.</small>
     </div>
-
-        <script src="/vendor/drivebit-leaflet-loader.js" defer></script>
-    <script type="application/javascript" src="/carDetail.js?v=6" defer></script>
+    <div class="drivebit-footer-col">
+      <h4>Контактная информация</h4>
+      <a href="tel:+74958775051">+7 (495) 877-50-51</a>
+      <a href="mailto:info@drivebit.ru">info@drivebit.ru</a>
+      <span>117461, г. Москва, ул. Каховка, д. 33-1</span>
+    </div>
+    <div class="drivebit-footer-col">
+      <h4>Документы</h4>
+      <a href="/privacy">Политика конфиденциальности</a>
+      <a href="/offer">Оферта</a>
+      <a href="/cookies">Cookies</a>
+    </div>
+  </footer>
+</div>
+<script src="/vendor/drivebit-leaflet-loader.js" defer></script>
+    <script type="application/javascript" src="/carDetail.js?v=7" defer></script>
     <!-- Callibri: official snippet before </body> -->
 </body>
 </html>

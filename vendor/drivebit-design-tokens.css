@@ -1,0 +1,41 @@
+/* DriveBit redesign tokens from Figma (Drive-Bit--Copy-) */
+:root {
+    --db-blue-1: #001845;
+    --db-blue-3: #0d2551;
+    --db-blue-main: #2080fa;
+    --db-blue-8: #e6eef9;
+    --db-gray-main: #152032;
+    --db-gray-2: #2c3647;
+    --db-gray-3: #444d5b;
+    --db-gray-4: #737984;
+    --db-gray-5: #a1a6ad;
+    --db-gray-6: #d0d2d6;
+    --db-gray-7: #f5f6f9;
+    --db-white: #ffffff;
+    --db-font-body: "Roboto", sans-serif;
+    --db-font-display: "Inter Tight", "Roboto", sans-serif;
+    --db-text: var(--db-gray-main);
+    --db-text-muted: var(--db-gray-5);
+    --db-radius-sm: 12px;
+    --db-radius-md: 16px;
+    --db-radius-lg: 22px;
+    --db-radius-xl: 25px;
+    --db-bottom-nav-height: 79px;
+    --db-header-height-mobile: 55px; /* mobile: 48px +15% */
+
+    /* Master-button — Roboto; variants differ by size + color only */
+    --db-btn-font: "Roboto", sans-serif;
+    --db-btn-radius: 16px;
+    --db-btn-radius-sm: 12px;
+    --db-btn-primary: var(--db-blue-main);
+    --db-btn-primary-hover: #1a6de0;
+    --db-btn-secondary: var(--db-blue-3);
+    --db-btn-secondary-hover: #001845;
+    --db-btn-disabled-bg: #e8eaef;
+    --db-btn-disabled-fg: #a1a6ad;
+
+    /* Compat aliases used by existing chrome */
+    --drivebit-font: var(--db-font-body);
+    --drivebit-city-color: var(--db-blue-main);
+    --drivebit-nav-color: var(--db-white);
+}

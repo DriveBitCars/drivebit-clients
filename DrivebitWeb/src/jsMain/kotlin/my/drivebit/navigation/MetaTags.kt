@@ -144,7 +144,7 @@ object MetaTags {
                 ),
             "/chats" to
                 PageMeta(
-                    title = "Входящие - DriveBit",
+                    title = "Сообщения - DriveBit",
                     description = "Сообщения и чаты в DriveBit. Общайтесь с арендаторами и владельцами автомобилей.",
                     path = "/chats",
                     noindex = true,

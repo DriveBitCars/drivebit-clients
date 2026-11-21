@@ -23,7 +23,7 @@ fun TermsConsentCheckbox(
             display(DisplayStyle.Flex)
             alignItems(AlignItems.FlexStart)
             gap(12.px)
-            marginTop(8.px)
+            marginTop(4.px)
         }
     }) {
         Input(
@@ -42,6 +42,8 @@ fun TermsConsentCheckbox(
                     marginTop(2.px)
                     cursor("pointer")
                     flexShrink(0)
+                    property("accent-color", CSSColors.BlueString)
+                    borderRadius(6.px)
                 }
             },
         )
@@ -54,7 +56,7 @@ fun TermsConsentCheckbox(
                     applyTypography(CSSTypography.Styles.body)
                     fontSize(CSSTypography.FontSize.sm)
                     color(CSSColors.Black)
-                    lineHeight("1.45")
+                    lineHeight("1.5")
                 }
             },
         ) {
@@ -79,7 +81,8 @@ private fun TermsConsentLink(
         }
         style {
             color(CSSColors.Blue)
-            property("text-decoration", "none")
+            property("text-decoration", "underline")
+            property("text-underline-offset", "2px")
             cursor("pointer")
         }
     }) {

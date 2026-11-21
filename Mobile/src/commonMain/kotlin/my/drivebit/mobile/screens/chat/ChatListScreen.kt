@@ -60,7 +60,7 @@ class ChatListScreen : Screen {
         Scaffold(
             topBar = {
                 ApplicationTopBar(
-                    title = "Входящие",
+                    title = "Сообщения",
                     onBackClick = { navigator.pop() },
                 )
             },

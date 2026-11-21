@@ -6,11 +6,8 @@ import my.drivebit.design.CSSTypography
 import my.drivebit.network.services.CarDetailResponse
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Table
-import org.jetbrains.compose.web.dom.Tbody
-import org.jetbrains.compose.web.dom.Td
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
-import org.jetbrains.compose.web.dom.Tr
 
 @Composable
 fun DailyRateLabel(dailyRate: Int) {
@@ -19,9 +16,10 @@ fun DailyRateLabel(dailyRate: Int) {
     Div({
         style {
             fontSize(24.px)
-            fontWeight("600")
-            color(CSSColors.Black)
-            marginTop(16.px)
+            fontWeight("700")
+            color(CSSColors.Blue)
+            marginTop(8.px)
+            property("letter-spacing", "-0.02em")
         }
     }) {
         Text("от $dailyRate ₽ / сутки")
@@ -48,42 +46,24 @@ fun CarRatesSection(car: CarDetailResponse) {
         )
 
     Div({
-        style {
-            marginTop(16.px)
-            padding(24.px)
-            property("background-color", CSSColors.WhiteString)
-            property("border-radius", "12px")
-            property("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.1)")
-        }
+        classes("db-car-section")
     }) {
-        Table({
-            style {
-                property("width", "100%")
-                property("border-collapse", "collapse")
-                property("border-spacing", "0")
-                fontSize(CSSTypography.FontSize.lg)
-                fontWeight(CSSTypography.FontWeight.medium)
-                color(CSSColors.Black)
-            }
+        Div({
+            classes("db-car-rates")
         }) {
-            Tbody {
-                rates.forEach { (label, rate) ->
-                    Tr {
-                        Td({
-                            style {
-                                padding(12.px, 16.px)
-                            }
-                        }) {
-                            Text(label)
-                        }
-                        Td({
-                            style {
-                                padding(12.px, 16.px)
-                                property("text-align", "right")
-                            }
-                        }) {
-                            Text("от $rate ₽ / сутки")
-                        }
+            rates.forEach { (label, rate) ->
+                Div({
+                    classes("db-car-rate")
+                }) {
+                    Span({
+                        classes("db-car-rate__label")
+                    }) {
+                        Text(label)
+                    }
+                    Span({
+                        classes("db-car-rate__value")
+                    }) {
+                        Text("от $rate ₽ / сутки")
                     }
                 }
             }
@@ -96,22 +76,10 @@ fun CarInsuranceSection(car: CarDetailResponse) {
     val text = car.resolvedInsuranceDisplay() ?: return
 
     Div({
-        style {
-            marginTop(16.px)
-            padding(16.px, 20.px)
-            property("background-color", CSSColors.WhiteString)
-            property("border-radius", "12px")
-            property("border", "1px solid ${CSSColors.Gray300String}")
-            property("box-sizing", "border-box")
-        }
+        classes("db-car-section")
     }) {
         Div({
-            style {
-                fontSize(CSSTypography.FontSize.sm)
-                fontWeight(CSSTypography.FontWeight.medium)
-                color(CSSColors.Black)
-                marginBottom(8.px)
-            }
+            classes("db-car-section__title")
         }) {
             Text("Страховка")
         }
@@ -119,8 +87,8 @@ fun CarInsuranceSection(car: CarDetailResponse) {
             style {
                 fontSize(CSSTypography.FontSize.lg)
                 fontWeight(CSSTypography.FontWeight.normal)
-                color(CSSColors.Black)
-                property("line-height", "1.4")
+                color(CSSColors.Gray4)
+                property("line-height", "1.5")
             }
         }) {
             Text(text)
@@ -133,22 +101,10 @@ fun CarTravelDestinationsSection(car: CarDetailResponse) {
     val text = car.resolvedTravelDestinationsDisplay() ?: return
 
     Div({
-        style {
-            marginTop(16.px)
-            padding(16.px, 20.px)
-            property("background-color", CSSColors.WhiteString)
-            property("border-radius", "12px")
-            property("border", "1px solid ${CSSColors.Gray300String}")
-            property("box-sizing", "border-box")
-        }
+        classes("db-car-section")
     }) {
         Div({
-            style {
-                fontSize(CSSTypography.FontSize.sm)
-                fontWeight(CSSTypography.FontWeight.medium)
-                color(CSSColors.Black)
-                marginBottom(8.px)
-            }
+            classes("db-car-section__title")
         }) {
             Text("Направления путешествий")
         }
@@ -156,8 +112,8 @@ fun CarTravelDestinationsSection(car: CarDetailResponse) {
             style {
                 fontSize(CSSTypography.FontSize.lg)
                 fontWeight(CSSTypography.FontWeight.normal)
-                color(CSSColors.Black)
-                property("line-height", "1.4")
+                color(CSSColors.Gray4)
+                property("line-height", "1.5")
             }
         }) {
             Text(text)
@@ -170,20 +126,14 @@ fun CarDepositSection(car: CarDetailResponse) {
     val deposit = car.deposit?.takeIf { it > 0 }?.toInt() ?: return
 
     Div({
-        style {
-            marginTop(16.px)
-            padding(16.px, 20.px)
-            property("background-color", CSSColors.WhiteString)
-            property("border-radius", "12px")
-            property("border", "1px solid ${CSSColors.Gray300String}")
-            property("box-sizing", "border-box")
-        }
+        classes("db-car-section")
     }) {
         Div({
             style {
                 display(DisplayStyle.Flex)
                 property("justify-content", "space-between")
                 property("align-items", "center")
+                gap(12.px)
             }
         }) {
             Div({

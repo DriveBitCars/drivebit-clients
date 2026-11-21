@@ -64,13 +64,6 @@ private val profile =
         onClick = {},
     )
 
-private val beCameAHost =
-    ButterModel(
-        iconUrl = ImagePaths.BUTTER_CAR_ICON_SVG,
-        text = "Сдать авто",
-        onClick = {},
-    )
-
 private val myCars =
     ButterModel(
         iconUrl = ImagePaths.BUTTER_CAR_ICON_SVG,
@@ -102,7 +95,7 @@ private val myDeals =
 private val inbox =
     ButterModel(
         iconUrl = ImagePaths.BUTTER_MAIL_SVG,
-        text = "Входящие",
+        text = "Сообщения",
         onClick = {},
     )
 
@@ -136,9 +129,9 @@ class ButterViewModelImpl(
             combine(
                 carMenuViewModel.menuOption,
                 carMenuViewModel.isLoading,
-            ) { menuOption, isLoading ->
+            ) { _, _ ->
                 if (isMenuOpened) {
-                    updateMenu(menuOption, isLoading)
+                    updateMenu()
                 }
             }.collect {}
         }
@@ -147,42 +140,30 @@ class ButterViewModelImpl(
     override fun open() {
         isMenuOpened = true
         carMenuViewModel.load()
-        updateMenu(carMenuViewModel.menuOption.value, carMenuViewModel.isLoading.value)
+        updateMenu()
     }
 
-    private fun updateMenu(
-        menuOption: CarMenuOption,
-        isLoading: Boolean,
-    ) {
+    private fun updateMenu() {
         _state.value =
             ButterState.Opened(
                 buildList {
                     if (storage.isLogined()) {
+                        // Order: Профиль → Сообщения → Документы → Бронирования → Сделки → Авто → Выйти
                         add(profile.copy(onClick = { close() }))
                         add(inbox.copy(onClick = { close() }))
                         add(myDocuments.copy(onClick = { close() }))
                         add(myBookings.copy(onClick = { close() }))
                         add(myDeals.copy(onClick = { close() }))
-                    } else {
-                        add(login.copy(onClick = { close() }))
-                        add(registr.copy(onClick = { close() }))
-                    }
-
-                    if (storage.isLogined() && !isLoading) {
-                        if (menuOption == CarMenuOption.MyCars) {
-                            add(myCars.copy(onClick = { close() }))
-                        } else {
-                            add(beCameAHost.copy(onClick = { close() }))
-                        }
-                    }
-
-                    if (storage.isLogined()) {
+                        add(myCars.copy(onClick = { close() }))
                         add(
                             logout.copy(onClick = {
                                 logout()
                                 close()
                             }),
                         )
+                    } else {
+                        add(login.copy(onClick = { close() }))
+                        add(registr.copy(onClick = { close() }))
                     }
                 },
             )

@@ -7,20 +7,11 @@ import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexWrap
-import org.jetbrains.compose.web.css.LineStyle
-import org.jetbrains.compose.web.css.alignItems
-import org.jetbrains.compose.web.css.backgroundColor
-import org.jetbrains.compose.web.css.border
-import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
-import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
-import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.marginTop
-import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -39,13 +30,10 @@ fun CarReviewsSection(
 ) {
     Column(
         gap = 12.px,
-        modifier = {
-            padding(16.px)
-            borderRadius(12.px)
-            border(1.px, LineStyle.Solid, CSSColors.Gray300)
-        },
+        attrs = { classes("db-car-section") },
     ) {
         Span({
+            classes("db-car-section__title")
             style {
                 fontSize(16.px)
                 fontWeight("600")
@@ -68,7 +56,7 @@ fun CarReviewsSection(
                 Span({
                     style {
                         fontSize(14.px)
-                        color(CSSColors.Gray600)
+                        color(CSSColors.Gray4)
                     }
                 }) {
                     Text("Пока нет отзывов об этом автомобиле")
@@ -80,7 +68,7 @@ fun CarReviewsSection(
             Span({
                 style {
                     fontSize(13.px)
-                    color(CSSColors.Gray600)
+                    color(CSSColors.Gray4)
                 }
             }) {
                 Text(message)
@@ -99,7 +87,7 @@ fun CarReviewsSection(
             Span({
                 style {
                     fontSize(13.px)
-                    color(CSSColors.Gray600)
+                    color(CSSColors.Gray4)
                 }
             }) {
                 Text("Загрузка…")
@@ -118,7 +106,7 @@ fun CarReviewsSection(
                 Span({
                     style {
                         fontSize(14.px)
-                        color(CSSColors.Gray600)
+                        color(CSSColors.Gray4)
                     }
                 }) {
                     Text("Страница $page из $totalPages · Всего: $totalCount")
@@ -128,41 +116,19 @@ fun CarReviewsSection(
                     alignItems = AlignItems.Center,
                 ) {
                     Button({
+                        classes("db-car-pager-btn")
                         onClick { onLoadPage(page - 1) }
                         if (page <= 1 || loading) {
                             disabled()
-                        }
-                        style {
-                            padding(8.px, 14.px)
-                            borderRadius(8.px)
-                            border(1.px, LineStyle.Solid, CSSColors.Gray300)
-                            backgroundColor(CSSColors.White)
-                            color(CSSColors.Black)
-                            cursor("pointer")
-                            fontSize(14.px)
-                            if (page <= 1 || loading) {
-                                opacity(0.5)
-                            }
                         }
                     }) {
                         Text("Назад")
                     }
                     Button({
+                        classes("db-car-pager-btn")
                         onClick { onLoadPage(page + 1) }
                         if (page >= totalPages || loading) {
                             disabled()
-                        }
-                        style {
-                            padding(8.px, 14.px)
-                            borderRadius(8.px)
-                            border(1.px, LineStyle.Solid, CSSColors.Gray300)
-                            backgroundColor(CSSColors.White)
-                            color(CSSColors.Black)
-                            cursor("pointer")
-                            fontSize(14.px)
-                            if (page >= totalPages || loading) {
-                                opacity(0.5)
-                            }
                         }
                     }) {
                         Text("Вперёд")
@@ -176,12 +142,7 @@ fun CarReviewsSection(
 @Composable
 private fun ReviewCard(review: CarReviewUi) {
     Div({
-        style {
-            padding(12.px)
-            borderRadius(8.px)
-            border(1.px, LineStyle.Solid, CSSColors.Gray300)
-            backgroundColor(CSSColors.White)
-        }
+        classes("db-car-review")
     }) {
         Row(
             gap = 8.px,
@@ -200,7 +161,7 @@ private fun ReviewCard(review: CarReviewUi) {
                 Span({
                     style {
                         fontSize(13.px)
-                        color(CSSColors.Gray600)
+                        color(CSSColors.Gray4)
                     }
                 }) {
                     Text("· $date")
@@ -213,13 +174,14 @@ private fun ReviewCard(review: CarReviewUi) {
             modifier = {
                 marginTop(6.px)
             },
+            attrs = { classes("db-car-review__stars") },
         ) {
             repeat(5) { index ->
                 val filled = index < review.stars.coerceIn(0, 5)
                 Span({
                     style {
                         fontSize(16.px)
-                        color(if (filled) CSSColors.Black else CSSColors.Gray300)
+                        color(if (filled) CSSColors.Blue else CSSColors.Gray6)
                     }
                 }) {
                     Text("★")
@@ -234,6 +196,7 @@ private fun ReviewCard(review: CarReviewUi) {
                     fontSize(14.px)
                     color(CSSColors.Black)
                     property("white-space", "pre-wrap")
+                    property("line-height", "1.5")
                 }
             }) {
                 Text(body)

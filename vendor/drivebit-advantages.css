@@ -1,0 +1,170 @@
+/* DriveBit advantages — shared with home ("Зачем вот это все?") */
+.drivebit-advantages {
+    background: #fff;
+    padding: 100px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.drivebit-advantages-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.drivebit-advantages-title {
+    margin: 0 0 8px;
+    text-align: center;
+    font-family: var(--db-font-display, "Inter Tight", Inter, sans-serif);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--db-gray-main, #152032);
+    line-height: 1.2;
+}
+
+.drivebit-advantages-sub {
+    margin: 0 0 40px;
+    text-align: center;
+    font-family: var(--db-font-body, "Roboto", sans-serif);
+    font-size: 18px;
+    color: var(--db-gray-4, #737984);
+    line-height: 1.4;
+}
+
+.drivebit-advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.drivebit-adv-card {
+    background: #f5f6f9;
+    border-radius: 30px;
+    padding: 32px;
+    box-sizing: border-box;
+    min-height: 220px;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.35s ease;
+    will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .drivebit-adv-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(0, 24, 69, 0.12);
+        background: #eef1f6;
+    }
+}
+
+.drivebit-adv-card.is-scroll-active {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0, 24, 69, 0.12);
+    background: #eef1f6;
+}
+
+.drivebit-adv-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--db-blue-main, #2080fa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.drivebit-adv-icon img {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+
+.drivebit-adv-card h3 {
+    margin: 0 0 12px;
+    font-family: var(--db-font-body, "Roboto", sans-serif);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--db-gray-main, #152032);
+    line-height: 1.25;
+}
+
+.drivebit-adv-card p {
+    margin: 0;
+    font-family: var(--db-font-body, "Roboto", sans-serif);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--db-gray-4, #737984);
+}
+
+/* Search page: keep earn CTA card below advantages */
+.drivebit-main-promo {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.drivebit-main-promo > .drivebit-advantages {
+    order: 0;
+}
+
+.drivebit-promo-card--earn {
+    max-width: 1240px;
+    width: 100%;
+    margin: 0 auto 40px;
+    padding: 40px 32px;
+    border-radius: 30px;
+    background: var(--db-gray-7, #f5f6f9);
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1100px) {
+    .drivebit-advantages {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .drivebit-advantages-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .drivebit-promo-card--earn {
+        margin-left: 40px;
+        margin-right: 40px;
+        width: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .drivebit-advantages {
+        padding: 40px 20px;
+    }
+
+    .drivebit-advantages-title {
+        font-size: 28px;
+    }
+
+    .drivebit-advantages-sub {
+        font-size: 16px;
+        margin-bottom: 28px;
+    }
+
+    .drivebit-advantages-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .drivebit-adv-card {
+        min-height: 0;
+        padding: 24px;
+    }
+
+    .drivebit-promo-card--earn {
+        margin: 0 16px 32px;
+        padding: 28px 20px;
+        width: auto;
+    }
+}

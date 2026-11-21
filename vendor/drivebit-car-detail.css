@@ -1,0 +1,223 @@
+/* DriveBit — car detail page redesign */
+body.drivebit-split-app-shell:has(.db-car-detail) #root,
+#root:has(.db-car-detail) {
+    background: var(--db-gray-7, #f5f6f9);
+}
+
+.db-car-detail {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 20px 48px;
+    font-family: var(--db-font-body, "Roboto", sans-serif);
+    color: var(--db-gray-main, #152032);
+}
+
+.db-car-detail *,
+.db-car-detail *::before,
+.db-car-detail *::after {
+    box-sizing: border-box;
+}
+
+.db-car-section {
+    background: var(--db-white, #fff);
+    border: 1px solid var(--db-gray-6, #d0d2d6);
+    border-radius: var(--db-radius-md, 16px);
+    padding: 20px;
+}
+
+.db-car-section--flush {
+    padding: 0;
+    overflow: hidden;
+    border: none;
+    background: transparent;
+}
+
+.db-car-section__title {
+    margin: 0 0 12px;
+    font-family: var(--db-font-body, "Roboto", sans-serif);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 140%;
+    color: var(--db-gray-main, #152032);
+}
+
+.db-car-title {
+    font-family: var(--db-font-display, "Inter Tight", "Roboto", sans-serif);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 120%;
+    letter-spacing: -0.02em;
+    color: var(--db-gray-main, #152032);
+}
+
+.db-car-year {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--db-gray-7, #f5f6f9);
+    color: var(--db-gray-3, #444d5b);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.db-car-rates {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.db-car-rate {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--db-gray-6, #d0d2d6);
+    background: transparent;
+    border-radius: 0;
+}
+
+.db-car-rate:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.db-car-rate:first-child {
+    padding-top: 0;
+}
+
+.db-car-rate__label {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--db-gray-main, #152032);
+}
+
+.db-car-rate__value {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--db-gray-main, #152032);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.db-car-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: var(--db-gray-7, #f5f6f9);
+    border: 1px solid var(--db-gray-6, #d0d2d6);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--db-gray-main, #152032);
+}
+
+.db-car-chip img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.db-car-book {
+    position: sticky;
+    top: 16px;
+    background: var(--db-white, #fff);
+    border: 1px solid var(--db-gray-6, #d0d2d6);
+    border-radius: var(--db-radius-md, 16px);
+    padding: 20px;
+    box-shadow: 0 8px 28px rgba(21, 32, 50, 0.08);
+}
+
+.db-car-book__total {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--db-gray-main, #152032);
+}
+
+.db-car-photos-btn {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: var(--db-radius-sm, 12px);
+    border: 1px solid var(--db-gray-6, #d0d2d6);
+    background: var(--db-white, #fff);
+    color: var(--db-gray-main, #152032);
+    font-family: var(--db-font-body, "Roboto", sans-serif);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.db-car-photos-btn:hover {
+    background: var(--db-gray-7, #f5f6f9);
+    border-color: var(--db-gray-5, #a1a6ad);
+}
+
+.db-car-map {
+    overflow: hidden;
+    border-radius: var(--db-radius-md, 16px);
+    border: 1px solid var(--db-gray-6, #d0d2d6);
+}
+
+.db-car-address {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 15px;
+    line-height: 150%;
+    color: var(--db-gray-3, #444d5b);
+}
+
+.db-car-review {
+    padding: 14px 16px;
+    border-radius: var(--db-radius-sm, 12px);
+    background: var(--db-gray-7, #f5f6f9);
+    border: none;
+}
+
+.db-car-review__stars {
+    color: var(--db-blue-main, #2080fa);
+}
+
+.db-car-pager-btn {
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--db-gray-6, #d0d2d6);
+    background: var(--db-white, #fff);
+    color: var(--db-gray-main, #152032);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.db-car-pager-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+@media (max-width: 768px) {
+    .db-car-detail {
+        padding: 8px 16px 32px;
+    }
+
+    .db-car-title {
+        font-size: 24px;
+    }
+
+    .db-car-book {
+        position: static;
+        box-shadow: 0 4px 16px rgba(21, 32, 50, 0.06);
+    }
+
+    .db-car-section {
+        padding: 16px;
+    }
+}

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -27,6 +27,8 @@
     <link rel="alternate icon" href="/images/logos/turo_logo.svg">
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
     <link rel="stylesheet" href="/vendor/drivebit-fonts.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-design-tokens.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-typography.css"/>
 
     <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-header.css"/>
@@ -35,7 +37,10 @@
     <link rel="stylesheet" href="/vendor/drivebit-main-promo.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-cars-grid-skeleton.css"/>
     <link rel="stylesheet" href="/vendor/drivebit-search-page.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-advantages.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-buttons.css"/>
     <script src="/vendor/drivebit-third-party-deferred.js" defer></script>
+    <script src="/vendor/drivebit-chrome.js" defer></script>
 </head>
 <body>
     <!-- drivebit-app-header-start -->
@@ -43,13 +48,21 @@
         <a id="drivebit-unread-banner" class="drivebit-unread-banner" href="/chats" aria-live="polite">У Вас есть непрочитанные сообщения</a>
         <div class="drivebit-app-header-inner">
             <a class="drivebit-header-logo" href="/moskva">
-                <img src="/images/logos/turo_logo.svg" alt="Drive bit Logo" width="120" height="40" class="turo-logo">
+                <img src="/images/logos/drivebit-logo-header.svg" alt="DriveBit" data-db-logo="white" width="120" height="40" class="turo-logo">
             </a>
             <nav id="drivebit-header-nav-desktop" class="drivebit-header-nav" aria-label="Основная навигация">
                 <a href="/moskva/search">Аренда авто</a>
                 <a href="/list-your-car.html">Сдать авто</a>
                 <a href="/contacts">Контакты</a>
             </nav>
+            <div class="drivebit-header-desktop-actions" aria-label="Действия">
+                <a class="drivebit-header-city" href="/my-city-selection">
+                    <img src="/images/chrome/icon-location.svg" alt="" width="16" height="16">
+                    <span data-db-city-label>Москва</span>
+                </a>
+                <a class="drivebit-header-phone" href="tel:+74958775051">+7 (495) 877-50-51</a>
+                <div class="drivebit-master-wrap" data-db-master></div>
+            </div>
             <div id="drivebit-header-compose" class="drivebit-header-actions"></div>
         </div>
     </header>
@@ -90,54 +103,49 @@
 
 <!-- drivebit-main-promo-start -->
     <div class="drivebit-main-promo" aria-label="Преимущества DriveBit">
-        <section class="drivebit-promo-card drivebit-promo-card--why">
-            <div class="drivebit-promo-why-layout">
-                <div class="drivebit-promo-why-left">
-                    <div>
-                        <span class="drivebit-promo-heading-title">Зачем вот это все?</span>
-                        <span class="drivebit-promo-heading-subtitle">Преимущества аренды авто от частных владельцев</span>
-                    </div>
-                    <a class="drivebit-promo-btn" href="/moskva/search">Арендовать автомобиль</a>
-                </div>
-                <div class="drivebit-promo-advantages">
-                    <div class="drivebit-promo-chip" tabindex="0">
-                        <div class="drivebit-promo-chip-inner">
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--front">Стоит дешевле</div>
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--back">Стоимость аренды от частного владельца при длительных сроках значительно дешевле. Экономия может составлять 30–40%.</div>
-                        </div>
-                    </div>
-                    <div class="drivebit-promo-chip" tabindex="0">
-                        <div class="drivebit-promo-chip-inner">
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--front">Машины чище</div>
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--back">Авто сдаются от случая к случаю, а не постоянно. Собственник значительно лучше следит за состоянием своей машины.</div>
-                        </div>
-                    </div>
-                    <div class="drivebit-promo-chip" tabindex="0">
-                        <div class="drivebit-promo-chip-inner">
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--front">Пробег меньше</div>
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--back">Автомобили не используются в коммерческих целях на постоянной основе, дальние поездки на таких машинах организуются нечасто.</div>
-                        </div>
-                    </div>
-                    <div class="drivebit-promo-chip" tabindex="0">
-                        <div class="drivebit-promo-chip-inner">
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--front">Выбор больше</div>
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--back">Так как сервис объединяет разных собственников, выбор машин значительно расширяется.</div>
-                        </div>
-                    </div>
-                    <div class="drivebit-promo-chip" tabindex="0">
-                        <div class="drivebit-promo-chip-inner">
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--front">Оформить проще</div>
-                            <div class="drivebit-promo-chip-face drivebit-promo-chip-face--back">Максимально простое оформление аренды — регистрируетесь в сервисе, выбираете автомобиль, подаёте заявку на аренду.</div>
-                        </div>
-                    </div>
-                </div>
+        <section class="drivebit-advantages" aria-label="Преимущества DriveBit" data-db-adv-upgraded="1">
+          <div class="drivebit-advantages-inner">
+            <h2 class="drivebit-advantages-title">Зачем вот это все?</h2>
+            <p class="drivebit-advantages-sub">Преимущества аренды авто от частных владельцев</p>
+            <div class="drivebit-advantages-grid">
+              <article class="drivebit-adv-card">
+                <div class="drivebit-adv-icon"><img src="/images/chrome/advantages/cheaper.svg" alt=""></div>
+                <h3>Стоит дешевле</h3>
+                <p>Стоимость аренды от частного владельца при длительных сроках значительно дешевле. Экономия может составлять 30–40%.</p>
+              </article>
+              <article class="drivebit-adv-card">
+                <div class="drivebit-adv-icon"><img src="/images/chrome/advantages/cleaner.svg" alt=""></div>
+                <h3>Машины чище</h3>
+                <p>Авто сдаются от случая к случаю, а не постоянно. Собственник значительно лучше следит за состоянием своей машины.</p>
+              </article>
+              <article class="drivebit-adv-card">
+                <div class="drivebit-adv-icon"><img src="/images/chrome/advantages/mileage.svg" alt=""></div>
+                <h3>Пробег меньше</h3>
+                <p>Автомобили не используются в коммерческих целях на постоянной основе, дальние поездки на таких машинах организуются нечасто.</p>
+              </article>
+              <article class="drivebit-adv-card">
+                <div class="drivebit-adv-icon"><img src="/images/chrome/advantages/choice.svg" alt=""></div>
+                <h3>Выбор больше</h3>
+                <p>Так как сервис объединяет разных собственников, выбор машин значительно расширяется.</p>
+              </article>
+              <article class="drivebit-adv-card">
+                <div class="drivebit-adv-icon"><img src="/images/chrome/advantages/docs.svg" alt=""></div>
+                <h3>Оформить проще</h3>
+                <p>Максимально простое оформление аренды — регистрируетесь в сервисе, выбираете автомобиль, подаёте заявку на аренду.</p>
+              </article>
+              <article class="drivebit-adv-card">
+                <div class="drivebit-adv-icon"><img src="/images/chrome/advantages/shield.svg" alt=""></div>
+                <h3>Ответственность меньше</h3>
+                <p>Мы не зарабатываем на штрафах арендаторов. Нет ущерба — нет ответственности.</p>
+              </article>
             </div>
+          </div>
         </section>
         <section class="drivebit-promo-card drivebit-promo-card--earn">
             <div class="drivebit-promo-earn">
                 <h2 class="drivebit-promo-earn-title">Получайте доход от автомобиля с DriveBit</h2>
                 <p class="drivebit-promo-earn-text">Подайте заявку на регистрацию в сервисе и сдавайте свой автомобиль на время пока им не пользуетесь.</p>
-                <a class="drivebit-promo-btn" href="/list-your-car.html">Сдать автомобиль</a>
+                <a class="drivebit-promo-btn db-btn db-btn--lg db-btn--primary" href="/list-your-car.html">Сдать автомобиль</a>
             </div>
         </section>
     </div>
@@ -152,17 +160,27 @@
     </div>
 
 <div class="drivebit-footer-shell">
-        <footer class="drivebit-site-footer">
-            <a class="drivebit-footer-phone" id="drivebit-footer-phone" href="tel:+74958775051">+7(495) 877-50-51</a>
-            <div class="drivebit-footer-bottom">
-                <span class="drivebit-footer-copy">© DriveBit Аренда автомобилей от собственников</span>
-                <a class="drivebit-footer-link drivebit-footer-link--offer" href="/offer">Оферта</a>
-                <a class="drivebit-footer-link drivebit-footer-link--cookies" href="/cookies">Cookies</a>
-                <a class="drivebit-footer-link drivebit-footer-link--privacy" href="/privacy">Политика конфиденциальности</a>
-            </div>
-        </footer>
+  <footer class="drivebit-site-footer">
+    <div class="drivebit-footer-col drivebit-footer-brand">
+      <img class="drivebit-logo-footer" src="/images/logos/drivebit-logo-footer.svg" alt="DriveBit">
+      <p>Платформа, объединяющая арендаторов и собственников автомобилей в Москве. Безопасно, удобно, прибыльно.</p>
+      <small>© 2026 DriveBit. Все права защищены.</small>
     </div>
-        <script type="application/javascript" src="/appCompose.js?v=4" defer></script>
+    <div class="drivebit-footer-col">
+      <h4>Контактная информация</h4>
+      <a href="tel:+74958775051">+7 (495) 877-50-51</a>
+      <a href="mailto:info@drivebit.ru">info@drivebit.ru</a>
+      <span>117461, г. Москва, ул. Каховка, д. 33-1</span>
+    </div>
+    <div class="drivebit-footer-col">
+      <h4>Документы</h4>
+      <a href="/privacy">Политика конфиденциальности</a>
+      <a href="/offer">Оферта</a>
+      <a href="/cookies">Cookies</a>
+    </div>
+  </footer>
+</div>
+<script type="application/javascript" src="/appCompose.js?v=4" defer></script>
     <!-- Callibri: official snippet before </body> -->
 </body>
 </html>

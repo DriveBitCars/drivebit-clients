@@ -102,30 +102,12 @@ fun CarPhotosSection(car: CarDetailResponse) {
 
             if (allPhotos.isNotEmpty()) {
                 Button({
-                    style {
-                        width(100.percent)
-                        padding(12.px)
-                        borderRadius(8.px)
-                        border(1.px, LineStyle.Solid, CSSColors.Gray300)
-                        backgroundColor(CSSColors.White)
-                        cursor("pointer")
-                        display(DisplayStyle.Flex)
-                        alignItems(AlignItems.Center)
-                        justifyContent(JustifyContent.Center)
-                        gap(8.px)
-                    }
+                    classes("db-car-photos-btn")
                     onClick {
                         window.location.href = buildCarPhotosGalleryUrl(galleryPhotoUrls)
                     }
                 }) {
-                    Span({
-                        style {
-                            fontSize(14.px)
-                            color(CSSColors.Gray600)
-                        }
-                    }) {
-                        Text("Показать ${allPhotos.size} фотографий")
-                    }
+                    Text("Показать ${allPhotos.size} фотографий")
                 }
             }
         }
@@ -138,7 +120,7 @@ private fun StyleScope.carMainPhotoImgStyle() {
     property("max-width", "100%")
     property("flex-shrink", "0")
     display(DisplayStyle.Block)
-    borderRadius(8.px)
+    borderRadius(16.px)
 }
 
 @Composable

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -87,6 +87,8 @@
     <link rel="alternate icon" href="/images/logos/turo_logo.svg">
     <link rel="apple-touch-icon" href="/images/logos/turo_logo.svg">
     <link rel="stylesheet" href="/vendor/drivebit-fonts.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-design-tokens.css"/>
+    <link rel="stylesheet" href="/vendor/drivebit-typography.css"/>
 
     <link rel="preload" href="/images/searchbackground/car0.jpg" as="image"/>
     <link rel="stylesheet" href="/vendor/drivebit-static-layout.css"/>
@@ -573,6 +575,7 @@
     </style>
     <noscript><style>.fallback-content{display:block!important}</style></noscript>
     <script src="/vendor/drivebit-third-party-deferred.js" defer></script>
+    <script src="/vendor/drivebit-chrome.js" defer></script>
 </head>
 <body>
     <!-- drivebit-app-header-start -->
@@ -580,18 +583,18 @@
         <a id="drivebit-unread-banner" class="drivebit-unread-banner" href="/chats" aria-live="polite">У Вас есть непрочитанные сообщения</a>
         <div class="drivebit-app-header-inner">
             <a class="drivebit-header-logo" href="/moskva">
-                <img src="/images/logos/turo_logo.svg" alt="Drive bit Logo" width="120" height="40" class="turo-logo">
+                <img src="/images/logos/drivebit-logo-white.png" alt="DriveBit" data-db-logo="white" width="160" height="28" class="turo-logo">
             </a>
             <nav id="drivebit-header-nav-desktop" class="drivebit-header-nav" aria-label="Основная навигация">
-                <a href="/moskva/search">Аренда авто</a>
+                <a href="/moskva/search">Арендовать авто</a>
                 <a href="/list-your-car.html">Сдать авто</a>
-                <a href="/contacts">Контакты</a>
+                <a href="/contacts">Контакты</a>`n                <a href="/blog">Блог</a>
             </nav>
             <div id="drivebit-header-compose" class="drivebit-header-actions"></div>
         </div>
     </header>
     <nav id="drivebit-header-nav-mobile" class="drivebit-header-nav-mobile" aria-label="Основная навигация">
-        <a href="/moskva/search">Аренда авто</a>
+        <a href="/moskva/search">Арендовать авто</a>
         <a href="/list-your-car.html">Сдать авто</a>
         <a href="/contacts">Контакты</a>
     </nav>

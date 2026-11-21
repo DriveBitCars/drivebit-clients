@@ -1,6 +1,7 @@
 package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,7 +47,7 @@ import my.drivebit.network.services.shouldShowLeaveReviewForRenter
 import my.drivebit.network.services.shouldShowOpenDealsAction
 import my.drivebit.network.services.signContractChatRole
 import my.drivebit.network.services.textWithoutOpenDealsPhrase
-import my.drivebit.shell.AppWithHeader
+import my.drivebit.shell.PageWithLogo
 import my.drivebit.utils.ContractFunnelRole
 import my.drivebit.utils.ContractFunnelSource
 import my.drivebit.utils.PaymentFunnelKind
@@ -84,14 +85,21 @@ fun ChatDetailPage() {
     val unreadMessagesViewModel: UnreadMessagesViewModel = koinInject()
     val hasUnread by unreadMessagesViewModel.hasUnread.collectAsState()
 
+    DisposableEffect(Unit) {
+        document.body?.classList?.add("drivebit-chats-scope")
+        document.body?.classList?.add("drivebit-chat-thread")
+        onDispose {
+            document.body?.classList?.remove("drivebit-chat-thread")
+            val path = window.location.pathname
+            if (!path.startsWith("/chat")) {
+                document.body?.classList?.remove("drivebit-chats-scope")
+            }
+        }
+    }
+
     if (chatId.isBlank()) {
-        AppWithHeader {
-            Div({
-                style {
-                    width(100.percent)
-                    padding(20.px)
-                }
-            }) {
+        PageWithLogo(fullBleed = true) {
+            ChatPageShell {
                 TextError("Не указан ID чата")
             }
         }
@@ -226,64 +234,104 @@ fun ChatDetailPage() {
 
     var messageText by remember { mutableStateOf("") }
 
-    AppWithHeader {
-        Column(
-            modifier = {
-                width(100.percent)
-                maxWidth(100.percent)
-                minWidth(0.px)
-                property("box-sizing", "border-box")
-                property("overflow-x", "hidden")
-            },
-        ) {
-            ToolbarBackArrow(
-                title = chatDetail?.participant?.name?.takeIf { it.isNotBlank() } ?: "Чат",
-                onBackClick = { window.location.href = "/chats" },
-                badges =
-                    VerificationLabels.forUser(
-                        isPassportVerified = chatDetail?.participant?.isPassportVerified == true,
-                        isDriverLicenseVerified = chatDetail?.participant?.isDriverLicenseVerified == true,
-                    ),
-            )
+    PageWithLogo(fullBleed = true) {
+        ChatPageShell {
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    width(100.percent)
+                    minWidth(0.px)
+                    property("box-sizing", "border-box")
+                    property("border-bottom", "1px solid ${CSSColors.Gray6String}")
+                    paddingBottom(16.px)
+                    marginBottom(4.px)
+                }
+            }) {
+                ToolbarBackArrow(
+                    title = chatDetail?.participant?.name?.takeIf { it.isNotBlank() } ?: "Чат",
+                    onBackClick = { window.location.href = "/chats" },
+                    badges =
+                        VerificationLabels.forUser(
+                            isPassportVerified = chatDetail?.participant?.isPassportVerified == true,
+                            isDriverLicenseVerified = chatDetail?.participant?.isDriverLicenseVerified == true,
+                        ),
+                )
+            }
 
-            when {
-                isLoading && messages.isEmpty() -> Loader()
-                error != null -> TextError(error ?: "Ошибка")
-                else -> {
-                    Div({
-                        attr("id", "chat-panel")
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                            width(100.percent)
-                            maxWidth(100.percent)
-                            minWidth(0.px)
-                            property("box-sizing", "border-box")
-                            property("height", "calc(100dvh - 160px)")
-                            property("min-height", "420px")
-                            property("overflow-x", "hidden")
-                            property("overflow-y", "hidden")
-                            backgroundColor(CSSColors.White)
-                        }
-                    }) {
-                        Div({
-                            attr("id", "chat-messages-scroll")
-                            style {
-                                flex(1)
-                                minHeight(0.px)
-                                minWidth(0.px)
-                                width(100.percent)
-                                maxWidth(100.percent)
-                                property("box-sizing", "border-box")
-                                property("overflow-x", "hidden")
-                                property("overflow-y", "auto")
-                                padding(16.px, 12.px)
-                                property("scrollbar-width", "none")
-                                property("-ms-overflow-style", "none")
+            Div({
+                attr("id", "chat-panel")
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    flex(1)
+                    width(100.percent)
+                    maxWidth(100.percent)
+                    minWidth(0.px)
+                    minHeight(0.px)
+                    property("box-sizing", "border-box")
+                    property("overflow", "hidden")
+                    borderRadius(16.px)
+                    backgroundColor(CSSColors.Gray7)
+                }
+            }) {
+                Div({
+                    attr("id", "chat-messages-scroll")
+                    style {
+                        flex(1)
+                        minHeight(0.px)
+                        minWidth(0.px)
+                        width(100.percent)
+                        maxWidth(100.percent)
+                        property("box-sizing", "border-box")
+                        property("overflow-x", "hidden")
+                        property("overflow-y", "auto")
+                        padding(16.px, 14.px)
+                        property("scrollbar-width", "none")
+                        property("-ms-overflow-style", "none")
+                    }
+                }) {
+                    when {
+                        isLoading && messages.isEmpty() -> {
+                            Div({
+                                style {
+                                    height(100.percent)
+                                    minHeight(120.px)
+                                    display(DisplayStyle.Flex)
+                                    alignItems(AlignItems.Center)
+                                    justifyContent(JustifyContent.Center)
+                                    padding(32.px)
+                                }
+                            }) {
+                                Loader()
                             }
-                        }) {
+                        }
+                        error != null && messages.isEmpty() -> {
+                            Div({
+                                style {
+                                    height(100.percent)
+                                    minHeight(120.px)
+                                    display(DisplayStyle.Flex)
+                                    alignItems(AlignItems.Center)
+                                    justifyContent(JustifyContent.Center)
+                                    padding(24.px)
+                                }
+                            }) {
+                                TextError(error ?: "Ошибка")
+                            }
+                        }
+                        else -> {
+                            if (error != null) {
+                                Div({
+                                    style {
+                                        marginBottom(12.px)
+                                    }
+                                }) {
+                                    TextError(error ?: "Ошибка")
+                                }
+                            }
                             Column(
-                                gap = 10.px,
+                                gap = 12.px,
                                 modifier = {
                                     width(100.percent)
                                     maxWidth(100.percent)
@@ -352,78 +400,130 @@ fun ChatDetailPage() {
                                 }
                             }
                         }
+                    }
+                }
 
-                        Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Row)
-                                alignItems(AlignItems.Center)
-                                gap(10.px)
-                                padding(12.px, 14.px)
-                                width(100.percent)
-                                maxWidth(100.percent)
-                                minWidth(0.px)
-                                flexShrink(0)
-                                property("box-sizing", "border-box")
-                                property("overflow-x", "hidden")
-                                backgroundColor(CSSColors.White)
-                                property("border-top", "1px solid ${CSSColors.Gray300}")
-                            }
-                        }) {
-                            Input(InputType.Text) {
-                                value(messageText)
-                                onInput { messageText = it.target.value }
-                                onKeyDown { event ->
-                                    if (event.key == "Enter") {
-                                        event.preventDefault()
-                                        if (messageText.isNotBlank()) {
-                                            viewModel.sendMessage(messageText.trim())
-                                            messageText = ""
-                                        }
-                                    }
+                Div({
+                    attr("id", "chat-composer")
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Row)
+                        alignItems(AlignItems.Center)
+                        gap(10.px)
+                        padding(12.px, 12.px)
+                        width(100.percent)
+                        maxWidth(100.percent)
+                        minWidth(0.px)
+                        flexShrink(0)
+                        property("box-sizing", "border-box")
+                        property("overflow-x", "hidden")
+                        backgroundColor(CSSColors.White)
+                        property("border-top", "1px solid ${CSSColors.Gray6String}")
+                        borderRadius(0.px, 0.px, 16.px, 16.px)
+                    }
+                }) {
+                    Input(InputType.Text) {
+                        value(messageText)
+                        onInput { messageText = it.target.value }
+                        onKeyDown { event ->
+                            if (event.key == "Enter") {
+                                event.preventDefault()
+                                if (messageText.isNotBlank()) {
+                                    viewModel.sendMessage(messageText.trim())
+                                    messageText = ""
                                 }
-                                placeholder("Сообщение")
-                                style {
-                                    flex(1)
-                                    minWidth(0.px)
-                                    width(100.percent)
-                                    property("box-sizing", "border-box")
-                                    padding(12.px, 16.px)
-                                    property("border", "1px solid ${CSSColors.Gray300}")
-                                    borderRadius(22.px)
-                                    fontSize(19.px)
-                                    lineHeight("1.4")
-                                    backgroundColor(CSSColors.White)
-                                    property("outline", "none")
-                                }
-                            }
-                            org.jetbrains.compose.web.dom.Button({
-                                if (isSending) disabled()
-                                onClick {
-                                    if (messageText.isNotBlank()) {
-                                        viewModel.sendMessage(messageText.trim())
-                                        messageText = ""
-                                    }
-                                }
-                                style {
-                                    flexShrink(0)
-                                    padding(12.px, 18.px)
-                                    backgroundColor(CSSColors.Blue)
-                                    color(CSSColors.White)
-                                    property("border", "none")
-                                    borderRadius(22.px)
-                                    cursor("pointer")
-                                    fontSize(17.px)
-                                    fontWeight("600")
-                                    whiteSpace("nowrap")
-                                }
-                            }) {
-                                Text(if (isSending) "..." else "Отправить")
                             }
                         }
+                        placeholder("Написать сообщение…")
+                        style {
+                            flex(1)
+                            minWidth(0.px)
+                            width(100.percent)
+                            property("box-sizing", "border-box")
+                            padding(12.px, 16.px)
+                            property("border", "1px solid ${CSSColors.Gray6String}")
+                            borderRadius(16.px)
+                            fontSize(15.px)
+                            lineHeight("1.4")
+                            fontFamily("Roboto, sans-serif")
+                            backgroundColor(CSSColors.Gray7)
+                            color(CSSColors.Black)
+                            property("outline", "none")
+                        }
+                    }
+                    org.jetbrains.compose.web.dom.Button({
+                        if (isSending || messageText.isBlank()) disabled()
+                        onClick {
+                            if (messageText.isNotBlank()) {
+                                viewModel.sendMessage(messageText.trim())
+                                messageText = ""
+                            }
+                        }
+                        style {
+                            flexShrink(0)
+                            height(44.px)
+                            padding(0.px, 18.px)
+                            backgroundColor(CSSColors.Blue)
+                            color(CSSColors.White)
+                            property("border", "none")
+                            borderRadius(16.px)
+                            cursor(if (isSending || messageText.isBlank()) "default" else "pointer")
+                            fontSize(15.px)
+                            fontWeight("500")
+                            fontFamily("Roboto, sans-serif")
+                            whiteSpace("nowrap")
+                            property("opacity", if (isSending || messageText.isBlank()) "0.55" else "1")
+                            property("transition", "opacity 0.15s ease, background-color 0.15s ease")
+                        }
+                    }) {
+                        Text(if (isSending) "…" else "Отправить")
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ChatPageShell(content: @Composable () -> Unit) {
+    Div({
+        classes("drivebit-chat-shell")
+        style {
+            width(100.percent)
+            minHeight(100.percent)
+            property("min-height", "calc(100vh - 150px)")
+            backgroundColor(CSSColors.Gray7)
+            paddingTop(24.px)
+            paddingBottom(32.px)
+            paddingLeft(16.px)
+            paddingRight(16.px)
+            property("box-sizing", "border-box")
+            display(DisplayStyle.Flex)
+            justifyContent(JustifyContent.Center)
+            fontFamily("Roboto, sans-serif")
+        }
+    }) {
+        Div({
+            classes("drivebit-chat-card")
+            style {
+                width(100.percent)
+                maxWidth(800.px)
+                minWidth(0.px)
+                property("height", "calc(100vh - 198px)")
+                property("min-height", "480px")
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
+                backgroundColor(CSSColors.White)
+                borderRadius(24.px)
+                padding(20.px, 20.px, 16.px)
+                property("box-sizing", "border-box")
+                property("overflow", "hidden")
+                property("box-shadow", "0 8px 32px rgba(21, 32, 50, 0.06)")
+                property("border", "1px solid ${CSSColors.Gray6String}")
+                fontFamily("Roboto, sans-serif")
+            }
+        }) {
+            content()
         }
     }
 }
@@ -505,23 +605,25 @@ private fun MessageBubble(
                 maxWidth(100.percent)
                 minWidth(0.px)
                 property("box-sizing", "border-box")
-                padding(4.px, 8.px)
+                padding(2.px, 4.px)
             }
         }) {
             Div({
                 style {
-                    padding(10.px, 14.px)
+                    padding(12.px, 16.px)
                     backgroundColor(CSSColors.White)
-                    borderRadius(14.px)
+                    borderRadius(16.px)
                     textAlign("center")
                     color(CSSColors.Gray600)
-                    fontSize(18.px)
+                    fontSize(14.px)
                     lineHeight("1.45")
+                    fontFamily("Roboto, sans-serif")
                     width(100.percent)
                     maxWidth(100.percent)
                     property("box-sizing", "border-box")
                     property("overflow-wrap", "anywhere")
-                    property("box-shadow", "0 1px 2px rgba(9, 5, 43, 0.06)")
+                    property("border", "1px solid ${CSSColors.Gray6String}")
+                    property("box-shadow", "0 2px 8px rgba(21, 32, 50, 0.04)")
                 }
             }) {
                 Column(
@@ -652,7 +754,7 @@ private fun MessageBubble(
     }
 
     val showOpponentAvatar = !isOwnMessage && participantId != null
-    val bubbleBg = if (isOwnMessage) rgb(232, 240, 255) else CSSColors.White
+    val bubbleBg = if (isOwnMessage) Color("#E8F0FF") else CSSColors.White
     val nameLabel = if (isOwnMessage) "" else senderName
 
     Div({
@@ -673,7 +775,7 @@ private fun MessageBubble(
                 userId = participantId,
                 name = participantName?.takeIf { it.isNotBlank() } ?: "Собеседник",
                 initialAvatarUrl = participantAvatarUrl,
-                size = 34.px,
+                size = 32.px,
             )
         }
         Div({
@@ -681,20 +783,20 @@ private fun MessageBubble(
                 padding(10.px, 14.px)
                 backgroundColor(bubbleBg)
                 if (isOwnMessage) {
-                    borderRadius(18.px, 18.px, 4.px, 18.px)
+                    borderRadius(16.px, 16.px, 4.px, 16.px)
                 } else {
-                    borderRadius(18.px, 18.px, 18.px, 4.px)
-                    property("border", "1px solid ${CSSColors.Gray300}")
+                    borderRadius(16.px, 16.px, 16.px, 4.px)
+                    property("border", "1px solid ${CSSColors.Gray6String}")
                 }
                 minWidth(0.px)
-                property("max-width", if (showOpponentAvatar) "calc(100% - 42px)" else "85%")
+                property("max-width", if (showOpponentAvatar) "calc(100% - 40px)" else "78%")
                 property("box-sizing", "border-box")
                 property("overflow-wrap", "anywhere")
-                property("box-shadow", "0 1px 2px rgba(9, 5, 43, 0.06)")
+                property("box-shadow", "0 2px 8px rgba(21, 32, 50, 0.05)")
             }
         }) {
             Column(
-                gap = 2.px,
+                gap = 4.px,
                 modifier = {
                     minWidth(0.px)
                     maxWidth(100.percent)
@@ -704,10 +806,10 @@ private fun MessageBubble(
                 if (nameLabel.isNotBlank()) {
                     Span({
                         style {
-                            fontSize(14.px)
+                            fontSize(12.px)
                             color(CSSColors.Blue)
                             fontWeight("600")
-                            marginBottom(2.px)
+                            fontFamily("Roboto, sans-serif")
                         }
                     }) {
                         Text(nameLabel)
@@ -715,9 +817,10 @@ private fun MessageBubble(
                 }
                 Span({
                     style {
-                        fontSize(20.px)
-                        lineHeight("1.4")
+                        fontSize(15.px)
+                        lineHeight("1.45")
                         color(CSSColors.Black)
+                        fontFamily("Roboto, sans-serif")
                         property("word-break", "break-word")
                         property("overflow-wrap", "anywhere")
                     }
@@ -726,10 +829,10 @@ private fun MessageBubble(
                 }
                 Span({
                     style {
-                        fontSize(13.px)
+                        fontSize(11.px)
                         color(CSSColors.Gray600)
                         alignSelf(AlignSelf.FlexEnd)
-                        marginTop(2.px)
+                        fontFamily("Roboto, sans-serif")
                     }
                 }) {
                     Text(timeStr)

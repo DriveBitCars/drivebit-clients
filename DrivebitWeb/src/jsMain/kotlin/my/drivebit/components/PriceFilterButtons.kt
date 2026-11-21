@@ -72,7 +72,7 @@ fun PriceFilterButtons(
                 cursor("pointer")
                 applyTypography(CSSTypography.Styles.button)
                 fontSize(CSSTypography.FontSize.base)
-                fontWeight(CSSTypography.FontWeight.semibold)
+                property("font-weight", "500")
                 property("transition", "background-color 0.2s ease")
             }
             onMouseEnter {

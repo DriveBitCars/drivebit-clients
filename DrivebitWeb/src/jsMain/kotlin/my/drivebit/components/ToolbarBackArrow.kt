@@ -1,13 +1,18 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.browser.window
 import my.drivebit.design.CSSColors
-import my.drivebit.design.CSSTypography
-import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.events.Event
 
 @Composable
 fun ToolbarBackArrow(
@@ -15,39 +20,52 @@ fun ToolbarBackArrow(
     onBackClick: () -> Unit,
     badges: List<String> = emptyList(),
 ) {
+    var isMobile by remember { mutableStateOf(window.innerWidth <= 768) }
+    DisposableEffect(Unit) {
+        val onResize: (Event) -> Unit = {
+            isMobile = window.innerWidth <= 768
+        }
+        window.addEventListener("resize", onResize)
+        onDispose { window.removeEventListener("resize", onResize) }
+    }
+
     Div({
         style {
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Row)
             alignItems(AlignItems.Center)
             gap(12.px)
-            paddingTop(16.px)
-            paddingBottom(16.px)
+            width(100.percent)
+            minWidth(0.px)
+            property("box-sizing", "border-box")
         }
     }) {
         Div({
             onClick { onBackClick() }
+            attr("aria-label", "Назад")
             style {
                 display(DisplayStyle.Flex)
                 alignItems(AlignItems.Center)
                 justifyContent(JustifyContent.Center)
-                width(36.px)
-                height(36.px)
-                borderRadius(50.percent)
+                width(40.px)
+                height(40.px)
+                borderRadius(12.px)
                 cursor("pointer")
-                property("transition", "background-color 0.2s ease")
+                backgroundColor(CSSColors.Gray7)
+                property("flex-shrink", "0")
+                property("transition", "background-color 0.15s ease")
                 property("user-select", "none")
             }
             onMouseOver {
-                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.backgroundColor = "#f0f0f0"
+                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.backgroundColor = "#e8eaef"
             }
             onMouseOut {
-                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.backgroundColor = "transparent"
+                (it.currentTarget as? org.w3c.dom.HTMLElement)?.style?.backgroundColor = CSSColors.Gray7String
             }
         }) {
             Span({
                 style {
-                    fontSize(20.px)
+                    fontSize(18.px)
                     fontWeight(600)
                     color(CSSColors.Black)
                     lineHeight("1")
@@ -63,22 +81,31 @@ fun ToolbarBackArrow(
                 flexDirection(FlexDirection.Row)
                 alignItems(AlignItems.Center)
                 gap(8.px)
-                flexWrap(FlexWrap.Wrap)
+                minWidth(0.px)
+                flex(1)
+                property("overflow", "hidden")
             }
         }) {
             Span({
                 style {
-                    applyTypography(CSSTypography.Styles.body)
-                    fontSize(CSSTypography.FontSize.xxxl)
-                    fontWeight(CSSTypography.FontWeight.bold)
+                    fontSize(18.px)
+                    fontWeight(600)
                     color(CSSColors.Black)
-                    letterSpacing(0.5.px)
-                    lineHeight("1.2")
+                    lineHeight("1.25")
+                    property("overflow", "hidden")
+                    property("text-overflow", "ellipsis")
+                    property("white-space", "nowrap")
+                    property("min-width", "0")
                 }
             }) {
                 Text(title)
             }
-            VerificationBadgeRow(badges)
+            if (badges.isNotEmpty()) {
+                VerificationBadgeRow(
+                    labels = badges,
+                    compact = isMobile,
+                )
+            }
         }
     }
 }

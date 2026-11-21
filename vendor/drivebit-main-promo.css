@@ -19,7 +19,7 @@
 }
 
 .drivebit-promo-card--why {
-    background: #e3f2fd;
+    background: var(--db-gray-7, #f5f6f9);
 }
 
 .drivebit-promo-card--earn {
@@ -65,16 +65,16 @@
     justify-content: center;
     box-sizing: border-box;
     border: 0;
-    border-radius: 20px;
-    background: #2962ff;
+    border-radius: 16px;
+    background: var(--db-blue-main, #2080fa);
     color: #fff;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.5;
     text-decoration: none;
     cursor: pointer;
     width: 292px;
-    height: 90px;
+    height: 56px;
     max-width: 100%;
 }
 

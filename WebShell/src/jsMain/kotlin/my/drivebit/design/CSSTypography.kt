@@ -3,12 +3,12 @@ package my.drivebit.design
 import org.jetbrains.compose.web.css.*
 
 /**
- * CSS типографика для Compose Web
- * Использует Inter шрифт из Google Fonts
+ * CSS типографика для Compose Web (Figma DriveBit)
+ * Body: Roboto Regular · Headings: Inter Tight
  */
 object CSSTypography {
-    // Основной шрифт
-    val FontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif"
+    val FontFamily = "\"Roboto\", sans-serif"
+    val FontFamilyDisplay = "\"Inter Tight\", \"Roboto\", sans-serif"
 
     object FontSize {
         val xs: CSSSizeValue<CSSUnit.px> get() = 12.px
@@ -19,9 +19,13 @@ object CSSTypography {
         val xxl: CSSSizeValue<CSSUnit.px> get() = 24.px
         val xxxl: CSSSizeValue<CSSUnit.px> get() = 32.px
         val xxxxl: CSSSizeValue<CSSUnit.px> get() = 42.px
+        val h1: CSSSizeValue<CSSUnit.px> get() = 52.px
+        val h2: CSSSizeValue<CSSUnit.px> get() = 48.px
+        val h3: CSSSizeValue<CSSUnit.px> get() = 36.px
+        val h4: CSSSizeValue<CSSUnit.px> get() = 32.px
+        val h5: CSSSizeValue<CSSUnit.px> get() = 24.px
     }
 
-    // Веса шрифтов
     object FontWeight {
         val light = 300
         val normal = 400
@@ -30,13 +34,12 @@ object CSSTypography {
         val bold = 700
     }
 
-    // Стили текста для CSS
     object Styles {
         val button: StyleScope.() -> Unit = {
             fontFamily(FontFamily)
             fontSize(FontSize.sm)
-            fontWeight(FontWeight.medium)
-            lineHeight("1.5")
+            property("font-weight", "500")
+            lineHeight("1")
         }
 
         val body: StyleScope.() -> Unit = {
@@ -51,6 +54,27 @@ object CSSTypography {
             fontSize(FontSize.xs)
             fontWeight(FontWeight.normal)
             lineHeight("1.5")
+        }
+
+        val h1: StyleScope.() -> Unit = {
+            fontFamily(FontFamilyDisplay)
+            fontSize(FontSize.h1)
+            fontWeight(FontWeight.semibold)
+            lineHeight("1.09")
+        }
+
+        val h3: StyleScope.() -> Unit = {
+            fontFamily(FontFamilyDisplay)
+            fontSize(FontSize.h3)
+            fontWeight(FontWeight.medium)
+            lineHeight("1.2")
+        }
+
+        val h4: StyleScope.() -> Unit = {
+            fontFamily(FontFamilyDisplay)
+            fontSize(FontSize.h4)
+            fontWeight(FontWeight.semibold)
+            lineHeight("1.2")
         }
     }
 }

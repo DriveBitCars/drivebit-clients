@@ -201,7 +201,13 @@ private fun DealItemCard(
             modifier = { width(100.percent) },
         ) {
             DealAvatar(name = renterName)
-            Column(gap = 4.px) {
+            Column(
+                gap = 4.px,
+                modifier = {
+                    minWidth(0.px)
+                    property("flex", "1 1 0%")
+                },
+            ) {
                 Row(
                     gap = 8.px,
                     alignItems = AlignItems.Center,
@@ -405,6 +411,9 @@ private fun DealAvatar(name: String) {
         style {
             width(48.px)
             height(48.px)
+            minWidth(48.px)
+            flexShrink(0)
+            property("aspect-ratio", "1")
             borderRadius(50.percent)
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Column)

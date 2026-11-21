@@ -3,12 +3,13 @@ package my.drivebit.components
 import androidx.compose.runtime.Composable
 import my.drivebit.design.CSSColors
 import my.drivebit.design.CSSTypography
-import my.drivebit.design.applyTypography
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.fontFamily
+import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.px
@@ -49,7 +50,12 @@ fun Item(
 
         Span({
             style {
-                applyTypography(CSSTypography.Styles.body)
+                // Match Figma profile menu: Inter Tight 14 / Medium
+                fontFamily(CSSTypography.FontFamilyDisplay)
+                fontSize(14.px)
+                property("font-weight", "500")
+                property("line-height", "1.3")
+                property("letter-spacing", "0")
                 color(CSSColors.Gray600)
             }
         }) {

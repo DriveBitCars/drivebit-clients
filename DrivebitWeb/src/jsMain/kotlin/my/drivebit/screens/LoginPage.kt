@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import my.drivebit.components.ActionButton
+import my.drivebit.components.ActionButtonVariant
 import my.drivebit.components.ButtonContainer
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.FormSection
@@ -16,9 +17,10 @@ import my.drivebit.components.InputField
 import my.drivebit.components.PageHeader
 import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.TermsConsentCheckbox
-import my.drivebit.components.TextSmallBodyBlack
 import my.drivebit.components.TextSmartHeader
 import my.drivebit.design.CSSColors
+import my.drivebit.design.CSSTypography
+import my.drivebit.design.applyTypography
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.navigation.NavigationState
 import my.drivebit.resources.ImagePaths
@@ -40,6 +42,8 @@ import my.drivebit.viewmodels.login.LoginIntent
 import my.drivebit.viewmodels.login.LoginMviViewModel
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.Qualifier
 
@@ -143,13 +147,22 @@ private fun LoginPageContent(mvi: LoginMviViewModel) {
         )
     }
 
-    PageWithLogo {
+    fun appendReturnParams(basePath: String): String {
+        val params = mutableListOf<String>()
+        if (returnCarId.isNotBlank()) params.add("$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}")
+        if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
+        if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
+        if (redirectPath.isNotBlank()) params.add("$REDIRECT_PATH=${redirectPath.encodeUrlParameter()}")
+        return if (params.isNotEmpty()) "$basePath?${params.joinToString("&")}" else basePath
+    }
+
+    PageWithLogo(fullBleed = true) {
         CenteredFormContainer {
             PageHeader {
                 TextSmartHeader(uiState.pageTitle)
             }
 
-            FormSection {
+            FormSection(marginTop = 28.px, gap = 20.px) {
                 InputField(
                     authFormViewModel = authForm,
                     validatorViewModel = validatorViewModel,
@@ -158,75 +171,90 @@ private fun LoginPageContent(mvi: LoginMviViewModel) {
                         mvi.handleIntent(LoginIntent.InputChanged(formatted))
                     },
                 )
-            }
 
-            if (uiState.requiresTermsConsent) {
-                TermsConsentCheckbox(
-                    accepted = termsConsentAccepted,
-                    onAcceptedChange = { mvi.handleIntent(LoginIntent.TermsChanged(it)) },
-                )
-            }
-
-            ButtonContainer(id = "primary-login-button") {
-                ActionButton(
-                    viewModel = primaryButtonViewModel,
-                    enabledColor = CSSColors.Blue,
-                    text = uiState.primaryButtonText,
-                    onClick = {
-                        mvi.handleIntent(LoginIntent.Submit)
-                    },
-                )
-            }
-
-            Div({
-                style {
-                    marginTop(16.px)
-                    textAlign("center")
+                if (uiState.requiresTermsConsent) {
+                    TermsConsentCheckbox(
+                        accepted = termsConsentAccepted,
+                        onAcceptedChange = { mvi.handleIntent(LoginIntent.TermsChanged(it)) },
+                    )
                 }
-            }) {
-                TextSmallBodyBlack("Или")
-            }
 
-            ButtonContainer(marginTop = 16.px) {
-                ActionButton(
-                    image = if (authForm.inputType == InputFieldType.Phone) ImagePaths.LOGIN_LETTER_SVG else null,
-                    enabledColor = CSSColors.Gray300,
-                    text = uiState.secondaryButtonText,
-                    onClick = {
-                        val basePath = uiState.secondaryButtonNavigationPath
-                        val params = mutableListOf<String>()
-                        if (returnCarId.isNotBlank()) params.add("$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}")
-                        if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
-                        if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
-                        if (redirectPath.isNotBlank()) params.add("$REDIRECT_PATH=${redirectPath.encodeUrlParameter()}")
-                        val path = if (params.isNotEmpty()) "$basePath?${params.joinToString("&")}" else basePath
-                        navigationController.navigateTo(path)
-                    },
-                )
-            }
+                ButtonContainer(id = "primary-login-button", marginTop = 8.px) {
+                    ActionButton(
+                        viewModel = primaryButtonViewModel,
+                        enabledColor = CSSColors.Blue,
+                        text = uiState.primaryButtonText,
+                        onClick = {
+                            mvi.handleIntent(LoginIntent.Submit)
+                        },
+                    )
+                }
 
-            ButtonContainer(marginTop = 12.px) {
-                ActionButton(
-                    enabledColor = CSSColors.Gray300,
-                    text = "Логин по паролю",
-                    onClick = {
-                        val params = mutableListOf<String>()
-                        if (returnCarId.isNotBlank()) params.add("$RETURN_CAR_ID=${returnCarId.encodeUrlParameter()}")
-                        if (startAt.isNotBlank()) params.add("$START_AT=${startAt.encodeUrlParameter()}")
-                        if (endAt.isNotBlank()) params.add("$END_AT=${endAt.encodeUrlParameter()}")
-                        if (redirectPath.isNotBlank()) params.add("$REDIRECT_PATH=${redirectPath.encodeUrlParameter()}")
-                        val path =
-                            if (params.isNotEmpty()) {
-                                "/login-by-password?${params.joinToString(
-                                    "&",
-                                )}"
-                            } else {
-                                "/login-by-password"
-                            }
-                        navigationController.navigateTo(path)
-                    },
-                )
+                AuthOrDivider()
+
+                ButtonContainer(marginTop = 0.px) {
+                    ActionButton(
+                        image = if (authForm.inputType == InputFieldType.Phone) ImagePaths.LOGIN_LETTER_SVG else null,
+                        enabledColor = CSSColors.Blue,
+                        text = uiState.secondaryButtonText,
+                        variant = ActionButtonVariant.Ghost,
+                        onClick = {
+                            navigationController.navigateTo(appendReturnParams(uiState.secondaryButtonNavigationPath))
+                        },
+                    )
+                }
+
+                ButtonContainer(marginTop = 12.px) {
+                    ActionButton(
+                        enabledColor = CSSColors.Blue,
+                        text = "Логин по паролю",
+                        variant = ActionButtonVariant.Ghost,
+                        onClick = {
+                            navigationController.navigateTo(appendReturnParams("/login-by-password"))
+                        },
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun AuthOrDivider() {
+    Div({
+        style {
+            display(DisplayStyle.Flex)
+            alignItems(AlignItems.Center)
+            gap(12.px)
+            marginTop(8.px)
+            marginBottom(4.px)
+            width(100.percent)
+        }
+    }) {
+        Div({
+            style {
+                flexGrow(1)
+                height(1.px)
+                backgroundColor(CSSColors.Gray6)
+            }
+        })
+        Span({
+            style {
+                applyTypography(CSSTypography.Styles.body)
+                fontSize(CSSTypography.FontSize.sm)
+                fontWeight(CSSTypography.FontWeight.medium)
+                color(CSSColors.Gray5)
+                property("white-space", "nowrap")
+            }
+        }) {
+            Text("Или")
+        }
+        Div({
+            style {
+                flexGrow(1)
+                height(1.px)
+                backgroundColor(CSSColors.Gray6)
+            }
+        })
     }
 }

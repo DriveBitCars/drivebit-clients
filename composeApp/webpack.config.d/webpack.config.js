@@ -39,6 +39,13 @@ config.devServer.liveReload = true;
 // Proxy для аватаров и фотографий автомобилей - проксируем запросы на внешний сервер
 config.devServer.proxy = [
     {
+        context: ['/api'],
+        target: 'https://drivebit.ru',
+        changeOrigin: true,
+        secure: false,
+        logLevel: 'debug',
+    },
+    {
         context: ['/avatar'],
         target: 'http://157.22.252.70:9000',
         pathRewrite: {
