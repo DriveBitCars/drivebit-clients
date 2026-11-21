@@ -1,10 +1,10 @@
 package my.drivebit.components
 
 import androidx.compose.runtime.Composable
-import my.drivebit.components.Column
 import my.drivebit.components.Row
 import my.drivebit.design.CSSColors
 import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
@@ -20,25 +20,27 @@ fun CarTitleSection(
 ) {
     if (carName.isEmpty() && carYear <= 0) return
 
-    Column(gap = 16.px) {
+    Row(
+        gap = 10.px,
+        flexWrap = FlexWrap.Wrap,
+        alignItems = AlignItems.Center,
+    ) {
         if (carName.isNotEmpty()) {
-            Row(
-                gap = 8.px,
-                alignItems = AlignItems.Center,
-            ) {
-                Div({
-                    style {
-                        fontSize(32.px)
-                        fontWeight("700")
-                        color(CSSColors.Black)
-                    }
-                }) {
-                    Text(carName)
+            Div({
+                classes("db-car-title")
+                style {
+                    color(CSSColors.Black)
+                    fontWeight("700")
+                    fontSize(28.px)
+                    property("font-family", "var(--db-font-display, Inter Tight, Roboto, sans-serif)")
+                    property("letter-spacing", "-0.02em")
+                    property("line-height", "120%")
                 }
-                VerificationBadgeRow(verificationLabels)
+            }) {
+                Text(carName)
             }
         }
-
         CarYearLabel(carYear)
+        VerificationBadgeRow(verificationLabels)
     }
 }

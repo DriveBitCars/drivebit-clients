@@ -32,30 +32,34 @@ fun CookieConsentBanner() {
     Div({
         style {
             position(Position.Fixed)
-            property("left", "12px")
-            property("bottom", "12px")
-            property("z-index", "900")
-            property("max-width", "min(340px, calc(100vw - 24px))")
-            padding(10.px, 14.px)
-            backgroundColor(Color("rgba(255, 255, 255, 0.96)"))
-            property("border", "1px solid rgba(9, 5, 43, 0.08)")
-            property("border-radius", "12px")
-            property("box-shadow", "0 4px 20px rgba(9, 5, 43, 0.08)")
+            property("left", "50%")
+            property("transform", "translateX(-50%)")
+            property("bottom", "24px")
+            property("z-index", "1400")
+            property("max-width", "min(480px, calc(100vw - 32px))")
+            width(100.percent)
+            padding(12.px, 16.px)
+            backgroundColor(CSSColors.White)
+            property("border", "1px solid rgba(21, 32, 50, 0.12)")
+            property("border-radius", "16px")
+            property("box-shadow", "0 8px 32px rgba(0, 24, 69, 0.18)")
             display(DisplayStyle.Flex)
             alignItems(AlignItems.Center)
-            gap(10.px)
+            gap(12.px)
             property("pointer-events", "auto")
+            property("box-sizing", "border-box")
         }
         attr("role", "note")
         attr("aria-label", "Уведомление о cookies")
+        classes("drivebit-cookie-banner")
     }) {
         Span({
             style {
                 flex(1)
                 applyTypography(CSSTypography.Styles.body)
-                fontSize(12.px)
+                fontSize(13.px)
                 lineHeight("1.4")
-                color(CSSColors.Gray600)
+                color(Color("#152032"))
             }
         }) {
             Text("Мы используем cookies. ")
@@ -67,13 +71,14 @@ fun CookieConsentBanner() {
                 }
                 style {
                     color(CSSColors.Blue)
-                    textDecoration("none")
+                    textDecoration("underline")
                 }
             }) {
                 Text("Подробнее")
             }
         }
         Button(attrs = {
+            classes("db-btn", "db-btn--sm", "db-btn--primary", "drivebit-cookie-btn")
             onClick {
                 storage.putString(COOKIE_NOTICE_KEY, "1")
                 visible = false
@@ -81,15 +86,22 @@ fun CookieConsentBanner() {
             style {
                 flexShrink(0)
                 border(0.px)
-                property("border-radius", "8px")
-                padding(6.px, 12.px)
+                property("border-radius", "12px")
+                height(32.px)
+                padding(0.px, 14.px)
                 backgroundColor(CSSColors.Blue)
                 color(CSSColors.White)
-                applyTypography(CSSTypography.Styles.body)
-                fontSize(12.px)
+                fontFamily("\"Roboto\", sans-serif")
+                fontSize(13.px)
                 fontWeight(CSSTypography.FontWeight.medium)
+                property("line-height", "1")
+                property("display", "inline-flex")
+                property("align-items", "center")
+                property("justify-content", "center")
                 property("cursor", "pointer")
                 property("white-space", "nowrap")
+                property("box-sizing", "border-box")
+                property("vertical-align", "middle")
             }
         }) {
             Text("Понятно")

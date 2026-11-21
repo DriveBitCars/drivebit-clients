@@ -16,18 +16,51 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 
+enum class ActionButtonVariant {
+    /** Solid fill, white label — Master primary/secondary */
+    Primary,
+
+    /** White fill, gray-main label, subtle border — Master ghost */
+    Ghost,
+}
+
 @Composable
 fun ActionButton(
     image: String? = null,
-    enabledColor: CSSColorValue,
+    enabledColor: CSSColorValue = CSSColors.Blue,
     text: String,
     onClick: () -> Unit,
     viewModel: ButtonViewModel = createButtonViewModel(),
+    variant: ActionButtonVariant = ActionButtonVariant.Primary,
 ) {
     val buttonState by viewModel.state.collectAsState()
     val isEnabled = buttonState is ButtonState.Enabled
     val isLoading = buttonState is ButtonState.Loading
-    val isDisabled = buttonState is ButtonState.Disabled
+    val isDisabled = buttonState is ButtonState.Disabled || isLoading
+
+    val bgColor =
+        when {
+            isDisabled -> CSSColors.DisabledBg
+            variant == ActionButtonVariant.Ghost -> CSSColors.White
+            else -> enabledColor
+        }
+    val fgColor =
+        when {
+            isDisabled -> CSSColors.Gray5
+            variant == ActionButtonVariant.Ghost -> CSSColors.Black
+            else -> CSSColors.White
+        }
+    val hoverBg =
+        when (variant) {
+            ActionButtonVariant.Ghost -> CSSColors.Gray7String
+            ActionButtonVariant.Primary -> CSSColors.BlueHoverString
+        }
+    val idleBg =
+        when {
+            isDisabled -> CSSColors.DisabledBgString
+            variant == ActionButtonVariant.Ghost -> CSSColors.WhiteString
+            else -> enabledColor.toString()
+        }
 
     Button({
         onClick {
@@ -35,29 +68,30 @@ fun ActionButton(
                 onClick()
             }
         }
-        if (isDisabled || isLoading) {
+        if (isDisabled) {
             disabled()
         }
+        attr("aria-disabled", if (isDisabled) "true" else "false")
         style {
             width(100.percent)
-            padding(14.px, 24.px)
-            borderRadius(8.px)
+            height(52.px)
+            minHeight(52.px)
+            padding(0.px, 24.px)
+            borderRadius(16.px)
             property("box-sizing", "border-box")
-            backgroundColor(
-                if (isEnabled) {
-                    enabledColor
-                } else {
-                    CSSColors.Gray300
-                },
-            )
-            color(CSSColors.White)
-            border(0.px)
+            backgroundColor(bgColor)
+            color(fgColor)
+            if (variant == ActionButtonVariant.Ghost && !isDisabled) {
+                border(1.px, LineStyle.Solid, CSSColors.BorderSubtle)
+            } else {
+                border(0.px)
+            }
             cursor(if (isEnabled) "pointer" else "not-allowed")
             applyTypography(CSSTypography.Styles.button)
             fontSize(CSSTypography.FontSize.base)
-            fontWeight(CSSTypography.FontWeight.semibold)
-            property("transition", "background-color 0.2s ease")
-            property("opacity", if (isEnabled) "1" else "0.5")
+            property("font-weight", "500")
+            property("font-family", "Roboto, sans-serif")
+            property("transition", "background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease")
             display(DisplayStyle.Flex)
             alignItems(AlignItems.Center)
             justifyContent(JustifyContent.Center)
@@ -67,7 +101,7 @@ fun ActionButton(
             if (isEnabled) {
                 (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
                     "background-color",
-                    CSSColors.BlueRedString,
+                    hoverBg,
                 )
             }
         }
@@ -75,7 +109,7 @@ fun ActionButton(
             if (isEnabled) {
                 (it.target as org.w3c.dom.HTMLButtonElement).style.setProperty(
                     "background-color",
-                    enabledColor.toString(),
+                    idleBg,
                 )
             }
         }
@@ -85,7 +119,7 @@ fun ActionButton(
                 style {
                     width(16.px)
                     height(16.px)
-                    border(2.px, LineStyle.Solid, CSSColors.White)
+                    border(2.px, LineStyle.Solid, fgColor)
                     property("border-top-color", "transparent")
                     borderRadius(50.percent)
                     property("animation", "spin 1s linear infinite")
@@ -102,7 +136,7 @@ fun ActionButton(
                         width(20.px)
                         height(20.px)
                         property("object-fit", "contain")
-                        if (text.isEmpty()) {
+                        if (variant == ActionButtonVariant.Primary && !isDisabled) {
                             property("filter", "brightness(0) invert(1)")
                         }
                     }

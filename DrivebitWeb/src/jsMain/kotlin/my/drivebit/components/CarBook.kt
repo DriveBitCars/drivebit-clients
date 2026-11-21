@@ -433,15 +433,13 @@ fun CarBook(
     }
 
     Div({
+        classes("db-car-book")
         style {
             flex(1)
             minWidth(280.px)
             property("max-width", "400px")
-            padding(20.px)
-            borderRadius(12.px)
-            border(1.px, LineStyle.Solid, CSSColors.Gray300)
-            backgroundColor(CSSColors.White)
-            property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.08)")
+            property("width", "100%")
+            property("box-sizing", "border-box")
         }
     }) {
         Column(gap = 16.px) {
@@ -480,7 +478,7 @@ fun CarBook(
                     style {
                         paddingTop(8.px)
                         paddingBottom(4.px)
-                        property("border-top", "1px solid ${CSSColors.Gray300String}")
+                        property("border-top", "1px solid ${CSSColors.Gray6String}")
                     }
                 }) {
                     Span({
@@ -506,12 +504,9 @@ fun CarBook(
                         }
                     }
                     Span({
+                        classes("db-car-book__total")
                         style {
                             display(DisplayStyle.Block)
-                            applyTypography(CSSTypography.Styles.body)
-                            fontSize(CSSTypography.FontSize.xl)
-                            fontWeight(CSSTypography.FontWeight.semibold)
-                            color(CSSColors.Black)
                             marginTop(4.px)
                         }
                     }) {

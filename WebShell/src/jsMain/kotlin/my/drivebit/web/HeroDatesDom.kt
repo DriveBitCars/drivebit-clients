@@ -71,7 +71,7 @@ private fun updateHeroDateDisplayElement(
 ) {
     val element = document.getElementById(elementId) ?: return
     if (isoDate.isNullOrEmpty()) {
-        element.textContent = "выберите даты"
+        element.textContent = "дд-мм-гггг"
         element.classList.add("is-empty")
     } else {
         element.textContent = formatHeroDateDisplay(isoDate)

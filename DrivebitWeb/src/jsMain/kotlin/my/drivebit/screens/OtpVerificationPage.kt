@@ -113,7 +113,7 @@ fun OtpVerificationPage() {
         }
     }
 
-    PageWithLogo {
+    PageWithLogo(fullBleed = true) {
         CenteredFormContainer {
             PageHeader {
                 TextSmartHeader("Введите код")
@@ -131,45 +131,46 @@ fun OtpVerificationPage() {
                         }
                         style {
                             width(100.percent)
-                            padding(12.px, 16.px)
-                            borderRadius(8.px)
+                            height(56.px)
+                            minHeight(56.px)
+                            padding(0.px, 16.px)
+                            borderRadius(16.px)
+                            backgroundColor(CSSColors.White)
+                            color(CSSColors.Black)
                             val borderColor =
                                 if (state is OtpVerificationState.Error) {
                                     CSSColors.RedString
                                 } else {
-                                    CSSColors.Gray300String
+                                    CSSColors.Gray6String
                                 }
-                            property("border", "1px solid $borderColor")
-                            property("font-size", "20px")
-                            property("letter-spacing", "8px")
+                            property("border", "1.5px solid $borderColor")
+                            property("font-size", "22px")
+                            property("letter-spacing", "10px")
                             property("text-align", "center")
                             property("outline", "none")
-                            property("transition", "border-color 0.2s ease")
+                            property("transition", "border-color 0.15s ease, box-shadow 0.15s ease")
                             property("box-sizing", "border-box")
                         }
                         onFocus {
-                            val borderColor =
-                                if (state is OtpVerificationState.Error) {
-                                    CSSColors.RedString
-                                } else {
-                                    CSSColors.BlueString
-                                }
-                            (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
-                                "border-color",
-                                borderColor,
-                            )
+                            val el = it.target as org.w3c.dom.HTMLInputElement
+                            if (state is OtpVerificationState.Error) {
+                                el.style.setProperty("border-color", CSSColors.RedString)
+                                el.style.setProperty("box-shadow", "0 0 0 3px rgba(236, 72, 153, 0.15)")
+                            } else {
+                                el.style.setProperty("border-color", CSSColors.BlueString)
+                                el.style.setProperty("box-shadow", "0 0 0 3px rgba(32, 128, 250, 0.18)")
+                            }
                         }
                         onBlur {
+                            val el = it.target as HTMLInputElement
                             val borderColor =
                                 if (state is OtpVerificationState.Error) {
                                     CSSColors.RedString
                                 } else {
-                                    CSSColors.Gray300String
+                                    CSSColors.Gray6String
                                 }
-                            (it.target as HTMLInputElement).style.setProperty(
-                                "border-color",
-                                borderColor,
-                            )
+                            el.style.setProperty("border-color", borderColor)
+                            el.style.setProperty("box-shadow", "none")
                         }
                     }
                     if (state is OtpVerificationState.Error) {

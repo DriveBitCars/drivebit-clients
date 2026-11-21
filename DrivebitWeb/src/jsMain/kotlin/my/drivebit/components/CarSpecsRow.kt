@@ -10,16 +10,14 @@ import my.drivebit.resources.ImagePaths.MENU_USER_SVG
 import my.drivebit.resources.ImagePaths.PATH_DISTANCE_SVG
 import my.drivebit.viewmodels.NumberFormatter
 import org.jetbrains.compose.web.css.FlexWrap
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.px
 
 @Composable
 @Suppress("FunctionName")
 fun CarSpecsRow(car: CarDetailResponse) {
     Row(
-        gap = 12.px,
+        gap = 10.px,
         flexWrap = FlexWrap.Wrap,
-        modifier = { marginTop(16.px) },
     ) {
         val seatsCount = car.resolvedSeatsCount()
         if (seatsCount > 0) {

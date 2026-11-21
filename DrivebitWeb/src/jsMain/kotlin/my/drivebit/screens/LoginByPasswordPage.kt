@@ -32,6 +32,7 @@ import my.drivebit.viewmodels.createButtonViewModel
 import my.drivebit.web.homePathHref
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
@@ -81,13 +82,13 @@ fun LoginByPasswordPage() {
         }
     }
 
-    PageWithLogo {
+    PageWithLogo(fullBleed = true) {
         CenteredFormContainer {
             PageHeader {
                 TextSmartHeader("Вход по логину и паролю")
             }
 
-            FormSection {
+            FormSection(marginTop = 28.px, gap = 20.px) {
                 TextInputField(
                     label = "Логин",
                     value = uiState.login,
@@ -110,7 +111,7 @@ fun LoginByPasswordPage() {
                     TextError((uiState.authState as AuthFormState.Error).message)
                 }
 
-                ButtonContainer(id = "primary-password-login-button") {
+                ButtonContainer(id = "primary-password-login-button", marginTop = 8.px) {
                     Div({
                         style { width(100.percent) }
                     }) {

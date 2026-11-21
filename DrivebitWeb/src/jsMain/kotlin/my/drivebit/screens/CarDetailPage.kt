@@ -135,11 +135,15 @@ private fun CarDetailContent(
             koinScope.get<RentViewModel>(parameters = { parametersOf(car.id) })
         }
 
-    Column(gap = 24.px) {
+    Column(
+        gap = 24.px,
+        attrs = { classes("db-car-detail") },
+    ) {
         CarPhotosSection(car)
 
         ResponsiveContainer { isMobile ->
             Div({
+                classes("db-car-detail__layout")
                 style {
                     display(DisplayStyle.Flex)
                     flexDirection(if (isMobile) FlexDirection.Column else FlexDirection.Row)

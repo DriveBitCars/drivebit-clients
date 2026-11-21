@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Roboto:wght@300;400;500;600;700&display=swap");
+
 @font-face {
     font-family: "Inter";
     font-style: normal;
@@ -36,4 +38,10 @@
     font-weight: 800;
     font-display: swap;
     src: url("/vendor/fonts/inter-latin-800.woff2") format("woff2");
+}
+
+body {
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    color: #152032;
 }

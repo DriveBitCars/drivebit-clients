@@ -1,0 +1,305 @@
+/**
+ * DriveBit Master-button (Figma)
+ * Font: Roboto Medium — variants differ by size + color only
+ * Colors: primary #2080fa / secondary #0d2551 / disabled #e8eaef
+ * Sizes: lg 52 / md 40 / sm 32
+ */
+
+:root {
+    --db-btn-font: "Roboto", sans-serif;
+    --db-btn-radius: 16px;
+    --db-btn-radius-sm: 12px;
+    --db-btn-primary: var(--db-blue-main, #2080fa);
+    --db-btn-primary-hover: #1a6de0;
+    --db-btn-secondary: var(--db-blue-3, #0d2551);
+    --db-btn-secondary-hover: #001845;
+    --db-btn-disabled-bg: #e8eaef;
+    --db-btn-disabled-fg: #a1a6ad;
+}
+
+.db-btn,
+button.db-btn,
+a.db-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    border: none;
+    box-sizing: border-box;
+    font-family: var(--db-btn-font) !important;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.db-btn--lg {
+    height: 52px;
+    min-height: 52px;
+    padding: 0 24px;
+    font-size: 16px;
+    border-radius: var(--db-btn-radius);
+}
+
+.db-btn--md {
+    height: 40px;
+    min-height: 40px;
+    padding: 0 18px;
+    font-size: 14px;
+    border-radius: var(--db-btn-radius);
+}
+
+.db-btn--sm {
+    height: 32px;
+    min-height: 32px;
+    padding: 0 14px;
+    font-size: 13px;
+    border-radius: var(--db-btn-radius-sm);
+}
+
+.db-btn--primary {
+    background: var(--db-btn-primary);
+    color: #fff !important;
+}
+
+.db-btn--primary:hover:not(:disabled):not(.db-btn--disabled) {
+    background: var(--db-btn-primary-hover);
+}
+
+.db-btn--secondary {
+    background: var(--db-btn-secondary);
+    color: #fff !important;
+}
+
+.db-btn--secondary:hover:not(:disabled):not(.db-btn--disabled) {
+    background: var(--db-btn-secondary-hover);
+}
+
+.db-btn--ghost {
+    background: #fff;
+    color: var(--db-gray-main, #152032) !important;
+    border: 1px solid #d8dde6;
+}
+
+.db-btn--ghost:hover:not(:disabled):not(.db-btn--disabled) {
+    background: var(--db-gray-7, #f5f6f9);
+}
+
+.db-btn--disabled,
+.db-btn:disabled,
+.db-btn[aria-disabled="true"] {
+    background: var(--db-btn-disabled-bg) !important;
+    color: var(--db-btn-disabled-fg) !important;
+    border-color: transparent !important;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ——— Map existing controls to Master-button ——— */
+
+/* Hero search CTA — large primary */
+.drivebit-hero-search-btn,
+.drivebit-hero-search button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    padding: 0 24px !important;
+    border: none !important;
+    border-radius: var(--db-btn-radius) !important;
+    background: var(--db-btn-primary) !important;
+    color: #fff !important;
+    font-family: var(--db-btn-font) !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    cursor: pointer;
+    box-sizing: border-box !important;
+    transition: background-color 0.15s ease;
+}
+
+.drivebit-hero-search-btn:hover,
+.drivebit-hero-search button:hover {
+    background: var(--db-btn-primary-hover) !important;
+}
+
+/* Header Master-button — medium secondary */
+.drivebit-header-login,
+.drivebit-master-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 18px !important;
+    border: none !important;
+    border-radius: var(--db-btn-radius) !important;
+    background: var(--db-btn-secondary) !important;
+    color: #fff !important;
+    font-family: var(--db-font-display, "Inter Tight", "Roboto", sans-serif) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    text-decoration: none !important;
+    cursor: pointer;
+    box-sizing: border-box !important;
+    transition: background-color 0.15s ease;
+}
+
+.drivebit-header-login:hover,
+.drivebit-master-btn:hover {
+    background: var(--db-btn-secondary-hover) !important;
+}
+
+.drivebit-master-btn--user {
+    border-radius: 999px !important;
+}
+
+/* Car card CTA — medium primary (no fixed min-width: avoids clip on narrow cards) */
+.drivebit-car-card-cta,
+.drivebit-cars-grid-mounted a .drivebit-car-card-cta,
+a.drivebit-car-card-cta {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    min-width: 0 !important;
+    padding: 0 14px !important;
+    border-radius: var(--db-btn-radius) !important;
+    background: var(--db-btn-primary) !important;
+    color: #fff !important;
+    font-family: var(--db-btn-font) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+}
+
+/* Cookie "Понятно" — small primary */
+.drivebit-cookie-banner button,
+.drivebit-cookie-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 14px !important;
+    border: none !important;
+    border-radius: var(--db-btn-radius-sm) !important;
+    background: var(--db-btn-primary) !important;
+    color: #fff !important;
+    font-family: var(--db-btn-font) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    cursor: pointer;
+    box-sizing: border-box !important;
+}
+
+/* Pagination chips — ghost / primary active */
+.drivebit-pagination-bar .drivebit-pagination-chip,
+.drivebit-pagination-bar > div > div {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    min-width: 40px !important;
+    padding: 0 14px !important;
+    border-radius: 10px !important;
+    border: 1px solid #d8dde6 !important;
+    background: #fff !important;
+    color: var(--db-gray-main, #152032) !important;
+    font-family: var(--db-btn-font) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    box-sizing: border-box !important;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.drivebit-pagination-bar .drivebit-pagination-chip.is-active,
+.drivebit-pagination-bar .drivebit-pagination-chip.is-active span {
+    background: var(--db-btn-primary) !important;
+    border-color: var(--db-btn-primary) !important;
+    color: #fff !important;
+}
+
+.drivebit-pagination-bar .drivebit-pagination-chip:hover:not(.is-active) {
+    background: var(--db-gray-7, #f5f6f9) !important;
+}
+
+/* Blog nav arrows / secondary actions */
+.drivebit-blog-nav button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 40px !important;
+    width: 40px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: var(--db-btn-radius) !important;
+    background: var(--db-btn-secondary) !important;
+    color: #fff !important;
+    font-family: var(--db-btn-font) !important;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.drivebit-blog-nav button:hover {
+    background: var(--db-btn-secondary-hover) !important;
+}
+
+.drivebit-blog-nav button:disabled {
+    background: var(--db-btn-disabled-bg) !important;
+    color: var(--db-btn-disabled-fg) !important;
+    cursor: not-allowed;
+}
+
+/* Compose Web buttons — always Roboto Medium */
+#root button,
+#root .db-btn {
+    font-family: var(--db-btn-font, "Roboto", sans-serif) !important;
+    font-weight: 500 !important;
+}
+
+/* Generic Compose/HTML buttons that look like CTAs */
+button.drivebit-primary-btn,
+a.drivebit-primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 18px;
+    border: none;
+    border-radius: var(--db-btn-radius);
+    background: var(--db-btn-primary);
+    color: #fff;
+    font-family: var(--db-btn-font) !important;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+button.drivebit-primary-btn:hover,
+a.drivebit-primary-btn:hover {
+    background: var(--db-btn-primary-hover);
+}

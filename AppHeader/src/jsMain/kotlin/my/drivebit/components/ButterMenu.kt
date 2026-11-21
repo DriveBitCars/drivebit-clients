@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import kotlinx.browser.window
-import my.drivebit.design.CSSColors
 import my.drivebit.navigation.LocalNavigationController
 import my.drivebit.shared.storage.Storage
 import my.drivebit.viewmodels.ButterEffect
@@ -15,19 +14,15 @@ import my.drivebit.viewmodels.ButterViewModel
 import my.drivebit.viewmodels.CarMenuViewModel
 import my.drivebit.web.homePathHref
 import org.jetbrains.compose.web.css.Position
-import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.left
-import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.top
-import org.jetbrains.compose.web.css.vh
-import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.koin.compose.koinInject
 
@@ -60,21 +55,33 @@ fun ButterMenu() {
         is ButterState.Opened -> {
             Div({
                 style {
-                    position(Position.Absolute)
+                    position(Position.Fixed)
                     top(0.px)
                     left(0.px)
                     right(0.px)
                     bottom(0.px)
-                    property("z-index", "999")
+                    property("z-index", "10050")
                 }
                 onClick {
                     butterViewModel.close()
                 }
             }) {
+                val isMobile = window.innerWidth <= 768
+                // Mobile: omit Сообщения / Мои авто (already in bottom nav)
+                val visibleItems =
+                    if (isMobile) {
+                        currentState.model.filter {
+                            it.text != "Сообщения" &&
+                                it.text != "Входящие" &&
+                                it.text != "Мои авто"
+                        }
+                    } else {
+                        currentState.model
+                    }
                 ButterItems(
                     modifier = Modifier,
                     items =
-                        currentState.model.map { item ->
+                        visibleItems.map { item ->
                             when (item.text) {
                                 "Логин" ->
                                     item.copy(onClick = {
@@ -91,17 +98,12 @@ fun ButterMenu() {
                                         butterViewModel.close()
                                         navigationController?.navigateTo("/profile")
                                     })
-                                "Сдать авто" ->
-                                    item.copy(onClick = {
-                                        butterViewModel.close()
-                                        window.location.href = "/list-your-car.html"
-                                    })
                                 "Мои авто" ->
                                     item.copy(onClick = {
                                         butterViewModel.close()
                                         navigationController?.navigateTo("/my-cars")
                                     })
-                                "Входящие" ->
+                                "Сообщения", "Входящие" ->
                                     item.copy(onClick = {
                                         butterViewModel.close()
                                         navigationController?.navigateTo("/chats")
@@ -137,21 +139,7 @@ fun ButterItems(
     items: List<ButterModel>,
 ) {
     Div({
-        style {
-            position(Position.Absolute)
-            top(72.px)
-            right(36.px)
-            width(280.px)
-            backgroundColor(CSSColors.White)
-            borderRadius(8.px)
-            property("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.15)")
-            property("z-index", "1000")
-            maxHeight(80.vh)
-            property("overflow-y", "auto")
-            property("overflow-x", "hidden")
-            padding(8.px)
-        }
-        classes("butter-menu-container")
+        classes("butter-menu-container", "drivebit-butter-menu")
         onClick { event ->
             event.stopPropagation()
         }

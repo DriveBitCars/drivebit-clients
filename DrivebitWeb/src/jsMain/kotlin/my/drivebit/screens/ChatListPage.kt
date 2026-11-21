@@ -1,16 +1,20 @@
 package my.drivebit.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
 import my.drivebit.components.CenteredFormContainer
 import my.drivebit.components.Column
 import my.drivebit.components.Loader
-import my.drivebit.components.MessageTextWithDealsLink
 import my.drivebit.components.PageHeader
 import my.drivebit.shell.PageWithLogo
 import my.drivebit.components.ParticipantAvatar
@@ -28,6 +32,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.koin.compose.koinInject
+import org.w3c.dom.events.Event
 
 @Composable
 fun ChatListPage() {
@@ -47,10 +52,21 @@ fun ChatListPage() {
         }
     }
 
-    PageWithLogo {
-        CenteredFormContainer(maxWidth = 1200.px) {
+    DisposableEffect(Unit) {
+        document.body?.classList?.add("drivebit-chats-scope")
+        document.body?.classList?.remove("drivebit-chat-thread")
+        onDispose {
+            val path = window.location.pathname
+            if (!path.startsWith("/chat")) {
+                document.body?.classList?.remove("drivebit-chats-scope")
+            }
+        }
+    }
+
+    PageWithLogo(fullBleed = true) {
+        CenteredFormContainer(maxWidth = 720.px) {
             PageHeader {
-                TextSmartHeader("Входящие")
+                TextSmartHeader("Сообщения")
             }
 
             when {
@@ -67,7 +83,14 @@ fun ChatListPage() {
                     }
                 }
                 else -> {
-                    Column(gap = 8.px, modifier = { width(100.percent) }) {
+                    Column(
+                        gap = 4.px,
+                        modifier = {
+                            width(100.percent)
+                            minWidth(0.px)
+                            property("box-sizing", "border-box")
+                        },
+                    ) {
                         chats.forEach { chat ->
                             ChatListItem(
                                 chat = chat,
@@ -101,8 +124,12 @@ private fun ChatListItem(
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Row)
             alignItems(AlignItems.Center)
-            padding(16.px)
-            borderRadius(12.px)
+            width(100.percent)
+            minWidth(0.px)
+            padding(14.px, 12.px)
+            borderRadius(16.px)
+            property("box-sizing", "border-box")
+            property("overflow", "hidden")
             property("transition", "background-color 0.2s ease")
         }
         onClick { onClick() }
@@ -110,53 +137,44 @@ private fun ChatListItem(
         Row(
             gap = 12.px,
             alignItems = AlignItems.Center,
-            modifier = { width(100.percent) },
+            modifier = {
+                width(100.percent)
+                minWidth(0.px)
+                property("box-sizing", "border-box")
+            },
         ) {
             ParticipantAvatar(
                 userId = chat.participant.id,
                 name = participantName,
                 initialAvatarUrl = chat.participant.avatar,
             )
-            Column(gap = 4.px, modifier = { width(100.percent) }) {
-                Row(
-                    gap = 8.px,
-                    alignItems = AlignItems.Center,
-                    modifier = { width(100.percent) },
-                ) {
-                    Span({
-                        style {
-                            fontSize(16.px)
-                            fontWeight("600")
-                            color(CSSColors.Black)
-                        }
-                    }) {
-                        Text(participantName)
-                    }
-                    VerificationBadgeRow(
-                        VerificationLabels.forUser(
-                            isPassportVerified = chat.participant.isPassportVerified,
-                            isDriverLicenseVerified = chat.participant.isDriverLicenseVerified,
-                        ),
+            Column(
+                gap = 4.px,
+                modifier = {
+                    flex(1)
+                    minWidth(0.px)
+                    property("overflow", "hidden")
+                    property("box-sizing", "border-box")
+                },
+            ) {
+                val verificationLabels =
+                    VerificationLabels.forUser(
+                        isPassportVerified = chat.participant.isPassportVerified,
+                        isDriverLicenseVerified = chat.participant.isDriverLicenseVerified,
                     )
-                    if (chat.unreadCount > 0) {
-                        Span({
-                            style {
-                                padding(4.px, 8.px)
-                                borderRadius(50.percent)
-                                backgroundColor(CSSColors.Blue)
-                                color(CSSColors.White)
-                                fontSize(12.px)
-                                fontWeight("600")
-                            }
-                        }) {
-                            Text("${chat.unreadCount}")
-                        }
-                    }
-                }
+                ChatListNameRow(
+                    name = participantName,
+                    verificationLabels = verificationLabels,
+                    unreadCount = chat.unreadCount,
+                )
                 Row(
                     gap = 8.px,
                     alignItems = AlignItems.Center,
-                    modifier = { width(100.percent) },
+                    modifier = {
+                        width(100.percent)
+                        minWidth(0.px)
+                        property("overflow", "hidden")
+                    },
                 ) {
                     Span({
                         style {
@@ -165,25 +183,93 @@ private fun ChatListItem(
                             property("overflow", "hidden")
                             property("text-overflow", "ellipsis")
                             property("white-space", "nowrap")
+                            property("min-width", "0")
                             flex(1)
                         }
                     }) {
-                        MessageTextWithDealsLink(
-                            text = lastMessageText.ifBlank { "Нет сообщений" },
-                            stopPropagation = true,
-                        )
+                        // Plain text preview — links/wrapping in MessageTextWithDealsLink break ellipsis
+                        Text(lastMessageText.ifBlank { "Нет сообщений" })
                     }
-                    Span({
-                        style {
-                            fontSize(12.px)
-                            color(CSSColors.Gray600)
-                            property("flex-shrink", "0")
+                    if (relativeTime.isNotBlank()) {
+                        Span({
+                            style {
+                                fontSize(12.px)
+                                color(CSSColors.Gray600)
+                                property("flex-shrink", "0")
+                                property("white-space", "nowrap")
+                            }
+                        }) {
+                            Text(relativeTime)
                         }
-                    }) {
-                        Text(relativeTime)
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+private fun ChatListNameRow(
+    name: String,
+    verificationLabels: List<String>,
+    unreadCount: Int,
+) {
+    var isMobile by remember { mutableStateOf(window.innerWidth <= 768) }
+    DisposableEffect(Unit) {
+        val onResize: (Event) -> Unit = {
+            isMobile = window.innerWidth <= 768
+        }
+        window.addEventListener("resize", onResize)
+        onDispose { window.removeEventListener("resize", onResize) }
+    }
+
+    Div({
+        style {
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Row)
+            alignItems(AlignItems.Center)
+            gap(8.px)
+            width(100.percent)
+            minWidth(0.px)
+            property("overflow", "hidden")
+            property("box-sizing", "border-box")
+        }
+    }) {
+        Span({
+            style {
+                fontSize(16.px)
+                fontWeight("600")
+                color(CSSColors.Black)
+                property("overflow", "hidden")
+                property("text-overflow", "ellipsis")
+                property("white-space", "nowrap")
+                property("min-width", "0")
+                flex(1)
+            }
+        }) {
+            Text(name)
+        }
+        if (verificationLabels.isNotEmpty()) {
+            VerificationBadgeRow(
+                labels = verificationLabels,
+                compact = isMobile,
+            )
+        }
+        if (unreadCount > 0) {
+            Span({
+                style {
+                    padding(4.px, 8.px)
+                    borderRadius(50.percent)
+                    backgroundColor(CSSColors.Blue)
+                    color(CSSColors.White)
+                    fontSize(12.px)
+                    fontWeight("600")
+                    property("flex-shrink", "0")
+                }
+            }) {
+                Text("$unreadCount")
+            }
+        }
+    }
+}
+

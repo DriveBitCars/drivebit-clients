@@ -74,10 +74,11 @@ fun CarLocationMap(car: CarDetailResponse) {
     Div(
         attrs = {
             id(mapContainerId)
+            classes("db-car-map")
             style {
                 width(100.percent)
                 height(400.px)
-                borderRadius(8.px)
+                borderRadius(16.px)
                 property("overflow", "hidden")
                 position(Position.Relative)
             }

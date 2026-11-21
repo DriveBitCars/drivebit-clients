@@ -21,13 +21,18 @@ fun CarsGrid(
         classes("drivebit-cars-grid-mounted")
         style {
             display(DisplayStyle.Grid)
-            gridTemplateColumns("repeat(auto-fill, minmax(280px, 1fr))")
-            gap(24.px)
+            // Columns: CSS breakpoints 3 → 2 → 1 (search/home/skeleton)
             width(100.percent)
+            property("align-items", "stretch")
         }
     }) {
         cars.forEachIndexed { index, car ->
-            Column {
+            Div({
+                style {
+                    width(100.percent)
+                    property("min-width", "0")
+                }
+            }) {
                 CarItemSmall(
                     car = car,
                     href = carHref(car),

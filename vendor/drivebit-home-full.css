@@ -1,0 +1,846 @@
+/* Full desktop home — эталон Главная 1440 */
+
+body.drivebit-home-1440 {
+    background: #fff;
+    font-family: var(--db-font-body, Roboto, Inter, sans-serif);
+}
+
+body.drivebit-home-1440 #drivebit-app-header {
+    background: var(--db-blue-1, #001845);
+}
+
+/* Compose slot stays in DOM for ButterMenu; chrome desktop-actions owns the visible right side.
+ * Do not display:none the whole #drivebit-header-compose — that raced with actions mount and
+ * could leave the desktop header empty when Master button was still injecting. */
+@media (min-width: 769px) {
+    body.drivebit-home-1440:has(.drivebit-header-desktop-actions .drivebit-master-btn) #drivebit-header-compose .drivebit-header-compose-inner {
+        display: none !important;
+    }
+}
+
+/* Header logo fixed 116×20; footer still scales */
+body.drivebit-home-1440 .drivebit-logo-header,
+body.drivebit-home-1440 .drivebit-header-logo .turo-logo {
+    width: 116px;
+    height: 20px;
+    max-width: none;
+    min-width: 116px;
+}
+
+body.drivebit-home-1440 .drivebit-logo-footer,
+body.drivebit-home-1440 .drivebit-footer-brand img {
+    width: calc(178 / 1440 * 100vw);
+    height: auto;
+    aspect-ratio: 178 / 31;
+    max-width: min(220px, 100%);
+    margin: 0 0 20px;
+}
+
+@media (max-width: 768px) {
+    /* Don't let desktop vw formula shrink the footer logo on phones */
+    body.drivebit-home-1440 .drivebit-logo-footer,
+    body.drivebit-home-1440 .drivebit-footer-brand img {
+        width: min(220px, 68vw);
+        max-width: min(220px, 68vw);
+    }
+}
+
+/* Hero Search Container — Figma 2004:5964 */
+body.drivebit-home-1440 .drivebit-hero-toolbar {
+    max-width: 1012px;
+    width: 100%;
+    background: #fff;
+    border-radius: 32px;
+    padding: 18px 16px;
+    gap: 16px;
+    box-sizing: border-box;
+    align-items: center;
+    height: calc(88 / 1440 * 100vw);
+    max-height: 110px;
+}
+
+body.drivebit-home-1440 .drivebit-hero-dates {
+    flex: 1 1 auto;
+    gap: 16px;
+    min-width: 0;
+    align-items: center;
+}
+
+body.drivebit-home-1440 .drivebit-hero-date-trigger {
+    flex: 1 1 0;
+    min-width: 0;
+    background: var(--db-gray-7, #f5f6f9) !important;
+    border-radius: 16px !important;
+    padding: 6px 18px !important;
+    height: 52px;
+    min-height: 52px;
+    max-height: 52px;
+    box-sizing: border-box;
+}
+
+body.drivebit-home-1440 .drivebit-hero-date-label {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--db-gray-4, #737984);
+    line-height: 1.3;
+}
+
+body.drivebit-home-1440 .drivebit-hero-date-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--db-gray-main, #152032);
+    line-height: 1.3;
+    text-transform: none;
+}
+
+body.drivebit-home-1440 .drivebit-hero-date-value.is-empty {
+    font-weight: 600;
+    color: var(--db-gray-main, #152032);
+    text-transform: none;
+}
+
+body.drivebit-home-1440 .drivebit-hero-date-icon {
+    width: 22px;
+    height: 22px;
+    background-color: var(--db-gray-5, #a1a6ad);
+}
+
+body.drivebit-home-1440 .drivebit-hero-search-btn {
+    flex: 0 0 calc(320 / 1440 * 100vw);
+    width: calc(320 / 1440 * 100vw);
+    max-width: 320px;
+    min-width: 200px;
+    height: 52px;
+    min-height: 52px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 500;
+    align-self: center;
+}
+
+/* Column toolbar: don't let vw flex-basis become button height */
+@media (max-width: 900px) {
+    body.drivebit-home-1440 .drivebit-hero-toolbar {
+        height: auto;
+        max-height: none;
+        align-items: stretch;
+    }
+
+    body.drivebit-home-1440 .drivebit-hero-search-btn {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        height: 52px;
+        min-height: 52px;
+        max-height: 52px;
+        align-self: stretch;
+    }
+}
+
+body.drivebit-home-1440 #drivebit-unread-banner {
+    display: none !important;
+}
+
+/* Hide ratings on car cards (no API data) */
+body.drivebit-home-1440 [class*="rating"],
+body.drivebit-home-1440 [class*="Rating"],
+body.drivebit-home-1440 [data-rating],
+body.drivebit-home-1440 .car-rating,
+body.drivebit-home-1440 .drivebit-car-rating {
+    display: none !important;
+}
+
+/* Advantages — эталон Главная 1440 */
+.drivebit-advantages {
+    background: #fff;
+    padding: 100px;
+    box-sizing: border-box;
+}
+
+.drivebit-advantages-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.drivebit-advantages-title {
+    margin: 0 0 8px;
+    text-align: center;
+    font-family: var(--db-font-display, "Inter Tight", Inter, sans-serif);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--db-gray-main, #152032);
+    line-height: 1.2;
+}
+
+.drivebit-advantages-sub {
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 18px;
+    color: var(--db-gray-4, #737984);
+    line-height: 1.4;
+}
+
+.drivebit-advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.drivebit-adv-card {
+    background: #f5f6f9;
+    border-radius: 30px;
+    padding: 32px;
+    box-sizing: border-box;
+    min-height: 220px;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.35s ease;
+    will-change: transform;
+}
+
+/* Desktop hover + mobile scroll-focus (.is-scroll-active) share the same lift */
+@media (hover: hover) and (pointer: fine) {
+    .drivebit-adv-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(0, 24, 69, 0.12);
+        background: #eef1f6;
+    }
+}
+
+.drivebit-adv-card.is-scroll-active {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0, 24, 69, 0.12);
+    background: #eef1f6;
+}
+
+.drivebit-adv-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--db-blue-main, #2080fa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.drivebit-adv-icon img {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+
+.drivebit-adv-card h3 {
+    margin: 0 0 12px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--db-gray-main, #152032);
+    line-height: 1.25;
+}
+
+.drivebit-adv-card p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--db-gray-4, #737984);
+}
+
+body.drivebit-home-1440 #drivebit-hero-static .drivebit-filters-static {
+    padding: 0;
+    margin: 0 0 24px;
+    background: transparent;
+    max-width: 1012px;
+    width: 100%;
+}
+
+body.drivebit-home-1440 #drivebit-hero-static .drivebit-filters-track {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: max-content;
+}
+
+/* Separate pills — Figma selected = white + dark; idle = translucent navy + white */
+body.drivebit-home-1440 #drivebit-hero-static .drivebit-filter-btn {
+    border: none !important;
+    border-radius: 16px !important;
+    background: rgba(13, 37, 81, 0.72) !important;
+    color: #fff !important;
+    font-family: var(--db-btn-font, "Roboto", sans-serif) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 120px !important;
+    min-height: 68px !important;
+    padding: 12px 16px !important;
+    gap: 8px !important;
+    flex-direction: column !important;
+    box-shadow: none !important;
+}
+
+body.drivebit-home-1440 #drivebit-hero-static .drivebit-filter-btn .drivebit-filter-icon {
+    width: auto !important;
+    height: 18px !important;
+    max-width: 48px !important;
+    object-fit: contain !important;
+    display: block !important;
+    /* idle: white glyph on transparent */
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+body.drivebit-home-1440 #drivebit-hero-static .drivebit-filter-btn.is-selected,
+body.drivebit-home-1440 #drivebit-hero-static .drivebit-filter-btn[aria-pressed="true"] {
+    background: #fff !important;
+    color: var(--db-blue-1, #001845) !important;
+}
+
+body.drivebit-home-1440 #drivebit-hero-static .drivebit-filter-btn.is-selected .drivebit-filter-icon,
+body.drivebit-home-1440 #drivebit-hero-static .drivebit-filter-btn[aria-pressed="true"] .drivebit-filter-icon {
+    /* selected: dark navy glyph */
+    filter: brightness(0) !important;
+}
+
+body.drivebit-home-1440 #drivebit-hero-static .drivebit-filter-btn:hover:not(.is-selected):not([aria-pressed="true"]) {
+    background: rgba(13, 37, 81, 0.9) !important;
+}
+
+/* Cars section background — full bleed (title is outside #root) */
+body.drivebit-home-1440 #drivebit-cars-grid-static,
+body.drivebit-home-1440 #root {
+    background: #f8f9fb;
+}
+
+body.drivebit-home-1440 .drivebit-cars-section-title {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 64px 100px 28px !important;
+    background: #f8f9fb;
+    box-sizing: border-box;
+}
+
+/* Unlock Compose shell so cars match destinations (1240 @ 100px gutters) */
+body.drivebit-home-1440 #root .app-container {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding-left: 100px !important;
+    padding-right: 100px !important;
+    box-sizing: border-box !important;
+}
+
+body.drivebit-home-1440 #drivebit-cars-grid-static,
+body.drivebit-home-1440 #root .drivebit-app-main,
+body.drivebit-home-1440 #root .app-container {
+    padding-bottom: 64px;
+}
+
+/* Cars grid = destinations track (3 cols, 24px gap, full 1240 content width) */
+body.drivebit-home-1440 .drivebit-cars-grid-mounted,
+body.drivebit-home-1440 #drivebit-cars-grid-static .drivebit-cars-grid-static__grid,
+.drivebit-cars-grid-mounted {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 30px 24px !important;
+    width: 100% !important;
+    max-width: 1240px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Keep titles/prices on one line once cards match destination width */
+body.drivebit-home-1440 .drivebit-cars-grid-mounted .drivebit-car-card-title,
+.drivebit-cars-grid-mounted .drivebit-car-card-title {
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.drivebit-home-1440 .drivebit-cars-grid-mounted .drivebit-car-card-price,
+.drivebit-cars-grid-mounted .drivebit-car-card-price {
+    white-space: nowrap !important;
+    min-width: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.drivebit-home-1440 .drivebit-cars-grid-mounted [style*="aspect-ratio"],
+.drivebit-cars-grid-mounted [style*="aspect-ratio"] {
+    aspect-ratio: 16 / 9 !important;
+}
+
+@media (max-width: 1100px) {
+    body.drivebit-home-1440 #root .app-container {
+        padding-left: 40px !important;
+        padding-right: 40px !important;
+    }
+
+    body.drivebit-home-1440 .drivebit-cars-section-title {
+        padding: 48px 40px 24px !important;
+    }
+
+    body.drivebit-home-1440 .drivebit-cars-grid-mounted,
+    body.drivebit-home-1440 #drivebit-cars-grid-static .drivebit-cars-grid-static__grid,
+    .drivebit-cars-grid-mounted {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 700px) {
+    body.drivebit-home-1440 #root .app-container {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    body.drivebit-home-1440 .drivebit-cars-section-title {
+        padding: 40px 16px 20px !important;
+    }
+
+    body.drivebit-home-1440 .drivebit-cars-grid-mounted,
+    body.drivebit-home-1440 #drivebit-cars-grid-static .drivebit-cars-grid-static__grid,
+    .drivebit-cars-grid-mounted {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
+
+/* Pagination — Figma mock */
+body.drivebit-home-1440 .drivebit-pagination-bar,
+.drivebit-pagination-bar {
+    gap: 16px !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+body.drivebit-home-1440 .drivebit-pagination-bar > div,
+.drivebit-pagination-bar > div {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+.drivebit-pagination-bar .drivebit-pagination-chip,
+.drivebit-pagination-bar > div > div {
+    height: 40px !important;
+    min-width: 40px !important;
+    padding: 0 14px !important;
+    border-radius: 10px !important;
+    border: 1px solid #d8dde6 !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+}
+
+.drivebit-pagination-bar .drivebit-pagination-chip.is-active {
+    background: var(--db-blue-main, #2080fa) !important;
+    border-color: var(--db-blue-main, #2080fa) !important;
+    color: #fff !important;
+}
+
+.drivebit-pagination-bar > span {
+    font-family: var(--db-font-body, Roboto, Inter, sans-serif) !important;
+    font-size: 14px !important;
+    color: #737984 !important;
+}
+
+/* How-to */
+.drivebit-howto {
+    background: #f8f9fb;
+    padding: 100px;
+    box-sizing: border-box;
+}
+
+.drivebit-howto-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.drivebit-howto-title {
+    margin: 0 0 8px;
+    text-align: center;
+    font-family: var(--db-font-display, "Inter Tight", Inter, sans-serif);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--db-gray-main, #152032);
+    line-height: 1.2;
+}
+
+.drivebit-howto-sub {
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 18px;
+    color: var(--db-gray-main, #152032);
+    line-height: 1.4;
+}
+
+.drivebit-howto-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.drivebit-howto-card {
+    background: #fff;
+    border-radius: 50px;
+    padding: 32px;
+    min-height: 194px;
+    box-sizing: border-box;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .drivebit-howto-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(0, 24, 69, 0.12);
+    }
+}
+
+.drivebit-howto-card.is-scroll-active {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0, 24, 69, 0.12);
+}
+
+.drivebit-howto-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e6eef9;
+    color: var(--db-blue-main, #2080fa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 16px;
+}
+
+.drivebit-howto-card p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--db-gray-main, #152032);
+}
+
+.drivebit-howto-note {
+    margin: 40px 0 0;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--db-gray-3, #444d5b);
+}
+
+/* Blog */
+.drivebit-blog {
+    background: var(--db-blue-1, #001845);
+    padding: 100px;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.drivebit-blog-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.drivebit-blog-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.drivebit-blog-title {
+    margin: 0 0 8px;
+    font-family: var(--db-font-display, "Inter Tight", Inter, sans-serif);
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.drivebit-blog-sub {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.4;
+    opacity: 0.95;
+}
+
+.drivebit-blog-nav {
+    display: flex;
+    gap: 12px;
+}
+
+.drivebit-blog-nav button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.drivebit-blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.drivebit-blog-card {
+    background: #fff;
+    border-radius: 30px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--db-gray-main, #152032);
+    display: flex;
+    flex-direction: column;
+    isolation: isolate;
+    transform: translateZ(0);
+    /* Hide subpixel AA fringe on navy section background */
+    box-shadow: 0 0 0 1px var(--db-blue-1, #001845);
+    border: 0;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+}
+
+.drivebit-blog-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    border: 0;
+    outline: 0;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    border-radius: 0;
+    vertical-align: top;
+}
+
+.drivebit-blog-card h3 {
+    margin: 0;
+    padding: 20px 24px 28px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    background: #fff;
+}
+
+/* FAQ */
+.drivebit-faq {
+    background: #f8f9fb;
+    padding: 100px;
+    box-sizing: border-box;
+}
+
+.drivebit-faq-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.drivebit-faq-title {
+    margin: 0 0 8px;
+    text-align: center;
+    font-family: var(--db-font-display, "Inter Tight", Inter, sans-serif);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--db-gray-main, #152032);
+}
+
+.drivebit-faq-sub {
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 18px;
+    color: var(--db-gray-main, #152032);
+}
+
+.drivebit-faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.drivebit-faq-item {
+    background: #fff;
+    border-radius: 30px;
+    padding: 28px 32px;
+    box-sizing: border-box;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.35s ease;
+    will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .drivebit-faq-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 36px rgba(0, 24, 69, 0.1);
+        background: #fbfcfe;
+    }
+}
+
+.drivebit-faq-item.is-scroll-active {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 36px rgba(0, 24, 69, 0.1);
+    background: #fbfcfe;
+}
+
+.drivebit-faq-q {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--db-gray-main, #152032);
+    font-family: inherit;
+}
+
+.drivebit-faq-toggle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #e6eef9;
+    color: var(--db-blue-main, #2080fa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 28px;
+    line-height: 1;
+    transition: transform 0.45s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.drivebit-faq-a {
+    display: grid;
+    grid-template-rows: 0fr;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--db-gray-4, #737984);
+    transition: grid-template-rows 0.55s cubic-bezier(0.7, 0, 0.3, 1),
+        margin 0.55s cubic-bezier(0.7, 0, 0.3, 1),
+        opacity 0.45s cubic-bezier(0.7, 0, 0.3, 1);
+    opacity: 0;
+}
+
+.drivebit-faq-a > span {
+    overflow: hidden;
+    min-height: 0;
+    display: block;
+}
+
+.drivebit-faq-a a {
+    color: var(--db-blue-main, #2080fa);
+    text-decoration: underline;
+    font: inherit;
+}
+
+.drivebit-faq-item.is-open .drivebit-faq-a {
+    grid-template-rows: 1fr;
+    margin: 16px 56px 0 0;
+    opacity: 1;
+}
+
+.drivebit-faq-item.is-open .drivebit-faq-toggle {
+    transform: rotate(45deg);
+}
+
+/* Footer styles live in drivebit-footer.css (all pages) */
+
+@media (max-width: 1100px) {
+    .drivebit-howto,
+    .drivebit-advantages,
+    .drivebit-blog,
+    .drivebit-faq {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .drivebit-howto-grid,
+    .drivebit-advantages-grid,
+    .drivebit-blog-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .drivebit-howto,
+    .drivebit-advantages,
+    .drivebit-faq {
+        padding: 40px 20px;
+    }
+
+    .drivebit-howto-grid,
+    .drivebit-advantages-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Blog — horizontal swipe like destinations */
+    .drivebit-blog {
+        padding: 40px 0 56px;
+        overflow: visible;
+    }
+
+    .drivebit-blog-inner {
+        max-width: none;
+    }
+
+    .drivebit-blog-head {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 20px;
+        box-sizing: border-box;
+        margin-bottom: 28px;
+    }
+
+    .drivebit-blog-nav {
+        display: none;
+    }
+
+    .drivebit-blog-grid {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 16px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        scroll-padding-left: 20px;
+        padding: 0 20px 4px;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        touch-action: pan-x;
+    }
+
+    .drivebit-blog-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .drivebit-blog-card {
+        flex: 0 0 min(280px, 78vw);
+        width: min(280px, 78vw);
+        max-width: 280px;
+        scroll-snap-align: start;
+        border-radius: 24px;
+    }
+
+    .drivebit-blog-card img {
+        height: 160px;
+    }
+
+    .drivebit-blog-card h3 {
+        padding: 16px 18px 22px;
+        font-size: 16px;
+    }
+}

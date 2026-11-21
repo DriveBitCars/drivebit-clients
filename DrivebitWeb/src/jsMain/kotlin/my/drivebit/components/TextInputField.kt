@@ -53,7 +53,7 @@ fun TextInputField(
                 applyTypography(CSSTypography.Styles.body)
                 fontSize(CSSTypography.FontSize.sm)
                 fontWeight(CSSTypography.FontWeight.medium)
-                color(CSSColors.Black)
+                color(CSSColors.Gray4)
             }
         }) {
             Text(label)
@@ -96,14 +96,19 @@ fun TextInputField(
                             applyTypography(CSSTypography.Styles.body)
                             fontSize(CSSTypography.FontSize.base)
                             color(CSSColors.Black)
-                            val borderColor = if (errorMessage != null) CSSColors.Red else CSSColors.Gray600
-                            border(1.px, LineStyle.Solid, borderColor)
-                            borderRadius(8.px)
-                            padding(12.px, 16.px)
+                            val borderColor =
+                                if (errorMessage != null) CSSColors.RedString else CSSColors.Gray6String
+                            property("border", "1.5px solid $borderColor")
+                            borderRadius(16.px)
+                            height(52.px)
+                            minHeight(52.px)
+                            padding(0.px, 16.px)
                             paddingRight(48.px)
                             width(100.percent)
+                            backgroundColor(CSSColors.White)
                             property("box-sizing", "border-box")
                             property("max-width", "100%")
+                            property("outline", "none")
                         }
                     },
                 )
@@ -168,13 +173,18 @@ fun TextInputField(
                         applyTypography(CSSTypography.Styles.body)
                         fontSize(CSSTypography.FontSize.base)
                         color(CSSColors.Black)
-                        val borderColor = if (errorMessage != null) CSSColors.Red else CSSColors.Gray600
-                        border(1.px, LineStyle.Solid, borderColor)
-                        borderRadius(8.px)
-                        padding(12.px, 16.px)
+                        val borderColor =
+                            if (errorMessage != null) CSSColors.RedString else CSSColors.Gray6String
+                        property("border", "1.5px solid $borderColor")
+                        borderRadius(16.px)
+                        height(52.px)
+                        minHeight(52.px)
+                        padding(0.px, 16.px)
                         width(100.percent)
+                        backgroundColor(CSSColors.White)
                         property("box-sizing", "border-box")
                         property("max-width", "100%")
+                        property("outline", "none")
                     }
                 },
             )

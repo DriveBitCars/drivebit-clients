@@ -56,6 +56,7 @@ private fun inputFieldInternal(
             is my.drivebit.viewmodels.ValidationState.Error -> state.message
             else -> null
         }
+    val hasError = validationError != null
 
     Column(gap = 8.px) {
         Span({
@@ -63,7 +64,7 @@ private fun inputFieldInternal(
                 applyTypography(CSSTypography.Styles.body)
                 fontSize(CSSTypography.FontSize.sm)
                 fontWeight(CSSTypography.FontWeight.medium)
-                color(CSSColors.Gray600)
+                color(CSSColors.Gray4)
             }
         }) {
             Text(label)
@@ -86,33 +87,35 @@ private fun inputFieldInternal(
                 }
                 style {
                     width(100.percent)
-                    padding(12.px, 16.px)
-                    borderRadius(8.px)
+                    height(52.px)
+                    minHeight(52.px)
+                    padding(0.px, 16.px)
+                    borderRadius(16.px)
                     property("box-sizing", "border-box")
-                    val hasError = validationError != null
+                    backgroundColor(CSSColors.White)
+                    color(CSSColors.Black)
+                    applyTypography(CSSTypography.Styles.body)
+                    fontSize(CSSTypography.FontSize.base)
                     val borderColor =
                         if (hasError) {
                             CSSColors.RedString
                         } else {
-                            CSSColors.Gray300String
+                            CSSColors.Gray6String
                         }
-                    property("border", "1px solid $borderColor")
-                    property("font-size", "16px")
+                    property("border", "1.5px solid $borderColor")
                     property("outline", "none")
-                    property("transition", "border-color 0.2s ease")
+                    property("transition", "border-color 0.15s ease, box-shadow 0.15s ease")
+                    property("box-shadow", "none")
                 }
                 onFocus {
-                    val hasError = validationError != null
-                    val borderColor =
-                        if (hasError) {
-                            CSSColors.RedString
-                        } else {
-                            CSSColors.BlueString
-                        }
-                    (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
-                        "border-color",
-                        borderColor,
-                    )
+                    val el = it.target as org.w3c.dom.HTMLInputElement
+                    if (hasError) {
+                        el.style.setProperty("border-color", CSSColors.RedString)
+                        el.style.setProperty("box-shadow", "0 0 0 3px rgba(236, 72, 153, 0.15)")
+                    } else {
+                        el.style.setProperty("border-color", CSSColors.BlueString)
+                        el.style.setProperty("box-shadow", "0 0 0 3px rgba(32, 128, 250, 0.18)")
+                    }
                 }
                 onBlur {
                     if (onFormattedValueCommitted != null) {
@@ -120,17 +123,15 @@ private fun inputFieldInternal(
                     } else {
                         viewModel.validateInput(value)
                     }
-                    val hasError = validationError != null
+                    val el = it.target as org.w3c.dom.HTMLInputElement
                     val borderColor =
-                        if (hasError) {
+                        if (validationError != null) {
                             CSSColors.RedString
                         } else {
-                            CSSColors.Gray300String
+                            CSSColors.Gray6String
                         }
-                    (it.target as org.w3c.dom.HTMLInputElement).style.setProperty(
-                        "border-color",
-                        borderColor,
-                    )
+                    el.style.setProperty("border-color", borderColor)
+                    el.style.setProperty("box-shadow", "none")
                 }
                 onKeyDown { event ->
                     val inputElement = event.target as org.w3c.dom.HTMLInputElement
@@ -149,6 +150,7 @@ private fun inputFieldInternal(
                     applyTypography(CSSTypography.Styles.body)
                     fontSize(CSSTypography.FontSize.sm)
                     color(CSSColors.Red)
+                    lineHeight("1.4")
                 }
             }) {
                 Text(validationError)

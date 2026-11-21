@@ -1,0 +1,362 @@
+/* Mobile bottom navigation — Figma Главная-mob / menu-mob */
+.drivebit-bottom-nav {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .drivebit-bottom-nav {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1100;
+        height: var(--db-bottom-nav-height, 79px);
+        pointer-events: none;
+        font-family: var(--db-font-body, Roboto, sans-serif);
+    }
+
+    /*
+     * Default over navy sections: solid rounded toolbar (no cutout).
+     * Cutout (nav-union) only when body.drivebit-nav-cutout — light sections + FAB.
+     */
+    .drivebit-bottom-nav-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 79px;
+        background: var(--db-white, #fff);
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -4px 24px rgba(0, 24, 69, 0.12);
+        filter: none;
+        -webkit-mask-image: none;
+        mask-image: none;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 17px 20px 0;
+        box-sizing: border-box;
+        pointer-events: auto;
+        transition: border-radius 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    body.drivebit-nav-cutout .drivebit-bottom-nav-bar {
+        border-radius: 0;
+        box-shadow: none;
+        filter: drop-shadow(0 -4px 24px rgba(0, 24, 69, 0.12));
+        -webkit-mask-image: url("/images/chrome/nav-union.svg");
+        mask-image: url("/images/chrome/nav-union.svg");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center bottom;
+        mask-position: center bottom;
+    }
+
+    /* Guest: only search FAB in the bottom toolbar */
+    body.drivebit-guest .drivebit-bottom-nav-group {
+        display: none !important;
+    }
+
+    body.drivebit-guest .drivebit-bottom-nav-fab {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    .drivebit-bottom-nav-group {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .drivebit-bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        min-width: 56px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--db-gray-4, #737984);
+        font-family: var(--db-font-body, Roboto, sans-serif);
+        font-size: 10px;
+        font-weight: 400;
+        line-height: 150%;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .drivebit-bottom-nav-item span {
+        font-family: var(--db-font-body, Roboto, sans-serif);
+        font-size: 10px;
+        font-weight: 400;
+        line-height: 150%;
+        color: var(--db-gray-4, #737984);
+    }
+
+    .drivebit-bottom-nav-item img {
+        width: 24px;
+        height: 24px;
+        display: block;
+        object-fit: contain;
+        /* SVGs ship with stroke/fill #2C3647 (gray-2) */
+        color: var(--db-gray-2, #2c3647);
+    }
+
+    .drivebit-bottom-nav-item.is-active {
+        color: var(--db-blue-main, #2080fa);
+    }
+
+    .drivebit-bottom-nav-item.is-active span {
+        color: var(--db-blue-main, #2080fa);
+    }
+
+    /* Keep tab icons gray-2 even when label is active blue */
+    .drivebit-bottom-nav-item.is-active img {
+        color: var(--db-gray-2, #2c3647);
+    }
+
+    .drivebit-bottom-nav-fab {
+        position: absolute;
+        left: 50%;
+        top: -20px;
+        transform: translateX(-50%);
+        z-index: 2;
+        width: 58px;
+        height: 58px;
+        border-radius: 22px;
+        border: 3px solid var(--db-blue-1, #001845);
+        background: var(--db-gray-7, #f5f6f9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+        box-shadow: 0 8px 20px rgba(0, 24, 69, 0.2);
+        pointer-events: auto;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    }
+
+    .drivebit-bottom-nav-fab.is-visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    body.drivebit-has-hero .drivebit-bottom-nav-fab:not(.is-visible) {
+        pointer-events: none;
+    }
+
+    body:not(.drivebit-has-hero) .drivebit-bottom-nav-fab {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .drivebit-bottom-nav-fab img {
+        width: 24px;
+        height: 24px;
+        display: block;
+    }
+
+    body.drivebit-bottom-nav-active {
+        padding-bottom: calc(var(--db-bottom-nav-height, 79px) + 12px);
+    }
+
+    body.drivebit-bottom-nav-active .drivebit-footer-shell,
+    body.drivebit-bottom-nav-active .drivebit-site-footer {
+        margin-bottom: var(--db-bottom-nav-height, 79px);
+    }
+}
+
+/* Fullscreen site menu (hamburger) */
+.drivebit-site-menu {
+    display: none;
+}
+
+.drivebit-site-menu.is-open {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    /* Above .drivebit-app-header (10050) so menu close (X) is visible, not the burger under it */
+    z-index: 10100;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--db-blue-1, #001845);
+    font-family: var(--db-font-body, Roboto, sans-serif);
+    padding: 0 0 calc(var(--db-bottom-nav-height, 79px) + 16px);
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+/* Match .drivebit-app-header-inner so logo/X sit where logo/burger were */
+.drivebit-site-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: var(--drivebit-header-max, 1240px);
+    margin: 0 auto;
+    height: var(--db-header-height-mobile, 55px);
+    min-height: var(--db-header-height-mobile, 55px);
+    padding: 0 var(--drivebit-header-pad-x, 20px);
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.drivebit-site-menu-header .drivebit-header-logo {
+    display: flex;
+    align-items: center;
+    line-height: 0;
+}
+
+.drivebit-site-menu-header img.turo-logo,
+.drivebit-site-menu-header .drivebit-logo-header {
+    width: 116px;
+    height: 20px;
+    min-width: 116px;
+    object-fit: contain;
+    object-position: left center;
+    display: block;
+}
+
+.drivebit-site-menu-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.drivebit-site-menu-close img {
+    width: 32px;
+    height: 32px;
+    display: block;
+}
+
+.drivebit-site-menu-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 31px 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.drivebit-site-menu-links a {
+    color: var(--db-white, #fff);
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.drivebit-site-menu-city {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--db-blue-main, #2080fa) !important;
+}
+
+.drivebit-site-menu-city img {
+    width: 16px;
+    height: 16px;
+}
+
+.drivebit-site-menu-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    height: 50px;
+    padding: 0 20px;
+    border-radius: 16px;
+    background: var(--db-blue-3, #0d2551);
+    color: var(--db-white, #fff) !important;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+/* Profile submenu sheet */
+.drivebit-profile-sheet-overlay {
+    display: none;
+}
+
+.drivebit-profile-sheet-overlay.is-open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    background: rgba(0, 24, 69, 0.45);
+}
+
+.drivebit-profile-sheet {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: calc(var(--db-bottom-nav-height, 79px) + 8px);
+    max-height: min(70vh, 480px);
+    overflow-y: auto;
+    background: var(--db-white, #fff);
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 8px 32px rgba(0, 24, 69, 0.25);
+    font-family: var(--db-font-display, "Inter Tight", "Roboto", sans-serif);
+}
+
+.drivebit-profile-sheet a,
+.drivebit-profile-sheet button,
+.drivebit-profile-sheet .drivebit-master-logout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin: 0;
+    padding: 14px 12px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--db-gray-main, #152032) !important;
+    font-family: var(--db-font-display, "Inter Tight", "Roboto", sans-serif) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0 !important;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: left;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.drivebit-profile-sheet a:hover,
+.drivebit-profile-sheet button:hover,
+.drivebit-profile-sheet .drivebit-master-logout:hover {
+    background: var(--db-gray-7, #f5f6f9);
+}
+
+@media (min-width: 769px) {
+    .drivebit-site-menu.is-open {
+        display: none;
+    }
+
+    .drivebit-profile-sheet-overlay {
+        display: none !important;
+    }
+}
