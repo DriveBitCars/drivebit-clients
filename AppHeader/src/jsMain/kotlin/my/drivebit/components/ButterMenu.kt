@@ -67,13 +67,11 @@ fun ButterMenu() {
                 }
             }) {
                 val isMobile = window.innerWidth <= 768
-                // Mobile: omit Сообщения / Мои авто (already in bottom nav)
+                // Mobile: omit Сообщения (bottom nav); keep Мои авто before Выйти
                 val visibleItems =
                     if (isMobile) {
                         currentState.model.filter {
-                            it.text != "Сообщения" &&
-                                it.text != "Входящие" &&
-                                it.text != "Мои авто"
+                            it.text != "Сообщения" && it.text != "Входящие"
                         }
                     } else {
                         currentState.model

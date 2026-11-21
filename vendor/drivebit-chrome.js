@@ -655,13 +655,14 @@
   }
 
   function profileSheetHtml() {
-    // Mobile compact sheet: Сообщения / Мои авто live in bottom nav — omit here
+    // Mobile compact sheet: no «Сообщения» (bottom nav); keep «Мои авто» before logout
     return (
       '<div class="drivebit-profile-sheet" role="menu">' +
       '<a href="/profile">Мой профиль</a>' +
       '<a href="/documents">Мои документы</a>' +
       '<a href="/my-bookings">Мои бронирования</a>' +
       '<a href="/my-deals">Мои сделки</a>' +
+      '<a href="/my-cars">Мои авто</a>' +
       '<button type="button" class="drivebit-master-logout">Выйти</button>' +
       "</div>"
     );
